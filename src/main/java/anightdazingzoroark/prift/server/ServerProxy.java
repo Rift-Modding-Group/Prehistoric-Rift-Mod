@@ -18,9 +18,6 @@ import anightdazingzoroark.prift.server.capabilities.creatureBoxData.ICreatureBo
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.INonPotionEffects;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffects;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsStorage;
-import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
-import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgress;
-import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressStorage;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesStorage;
@@ -62,7 +59,6 @@ public class ServerProxy {
 
 
         CapabilityManager.INSTANCE.register(IPlayerTamedCreatures.class, new PlayerTamedCreaturesStorage(), PlayerTamedCreatures::new);
-        CapabilityManager.INSTANCE.register(IPlayerJournalProgress.class, new PlayerJournalProgressStorage(), PlayerJournalProgress::new);
         CapabilityManager.INSTANCE.register(INonPotionEffects.class, new NonPotionEffectsStorage(), NonPotionEffects::new);
         CapabilityManager.INSTANCE.register(ICreatureBoxData.class, new CreatureBoxDataStorage(), CreatureBoxData::new);
         MinecraftForge.EVENT_BUS.register(new CapabilityHandler());

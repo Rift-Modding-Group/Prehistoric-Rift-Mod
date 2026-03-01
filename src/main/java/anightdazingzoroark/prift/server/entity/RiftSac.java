@@ -3,11 +3,14 @@ package anightdazingzoroark.prift.server.entity;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.widget.EntityWidget;
-import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
+import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressHelper;
+import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressProperties;
+import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
+import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.factory.EntityGuiData;
@@ -77,17 +80,21 @@ public class RiftSac extends EntityTameable implements IAnimatable, IGuiHolder<E
             creature.setLocationAndAngles(Math.floor(this.posX), Math.floor(this.posY) + 1, Math.floor(this.posZ), this.world.rand.nextFloat() * 360.0F, 0.0F);
             if (!this.world.isRemote) {
                 EntityPlayer owner = (EntityPlayer) this.getOwner();
+                if (owner == null) return;
 
                 //update journal
-                if (PlayerJournalProgressHelper.getUnlockedCreatures(owner).containsKey(this.getCreatureType()) && !PlayerJournalProgressHelper.getUnlockedCreatures(owner).get(this.getCreatureType())) {
-                    PlayerJournalProgressHelper.unlockCreature(owner, this.getCreatureType());
+                JournalProgressProperties journalProgress = JournalProgressHelper.getJournalProgress(owner);
+                if (journalProgress.getEncounteredCreatures().containsKey(this.getCreatureType())
+                        && !journalProgress.getEncounteredCreatures().get(this.getCreatureType())) {
+                    journalProgress.unlockCreature(this.getCreatureType());
                     owner.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", this.getCreatureType().getTranslatedName(), RiftControls.openParty.getDisplayName()), false);
                 }
 
                 //update party of owner
-                if (PlayerTamedCreaturesHelper.canAddToParty(owner)) {
+                PlayerPartyProperties playerParty = PlayerPartyHelper.getPlayerParty(owner);
+                if (playerParty.canAddToParty()) {
                     creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
-                    PlayerTamedCreaturesHelper.addCreatureToParty(owner, creature);
+                    playerParty.addPartyMember(creature);
                     owner.sendStatusMessage(new TextComponentTranslation("prift.notify.sac_hatched_to_party", new TextComponentString(this.getName())), false);
                 }
                 //update box of owner
@@ -208,7 +215,7 @@ public class RiftSac extends EntityTameable implements IAnimatable, IGuiHolder<E
 
     @Override
     public ModularPanel buildUI(EntityGuiData data, PanelSyncManager syncManager, UISettings settings) {
-        settings.getRecipeViewerSettings().disableRecipeViewer();
+        settings.getRecipeViewerSettings().disable();
         RiftSac sacData = (RiftSac) data.getGuiHolder();
 
         return ModularPanel.defaultPanel(UIPanelNames.SAC_SCREEN).size(176, 166)

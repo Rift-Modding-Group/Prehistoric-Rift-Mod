@@ -7,10 +7,9 @@ import anightdazingzoroark.prift.client.newui.panel.ModularPanelExitAffectable;
 import anightdazingzoroark.prift.client.newui.value.NullableEnumValue;
 import anightdazingzoroark.prift.client.newui.widget.JournalLeftPageWidget;
 import anightdazingzoroark.prift.client.newui.widget.JournalRightPageWidget;
-import anightdazingzoroark.prift.server.capabilities.CapabilitySyncDirection;
-import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
-import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.NewPlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressHelper;
+import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressProperties;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.screen.CustomModularScreen;
@@ -31,8 +30,7 @@ public class NewRiftJournalScreen extends CustomModularScreen {
     @Override
     public @NotNull ModularPanel buildUI(ModularGuiContext context) {
         EntityPlayer player = Minecraft.getMinecraft().player;
-        NewPlayerJournalProgressHelper.syncJournalProgress(player, CapabilitySyncDirection.SERVER_TO_CLIENT);
-        IPlayerJournalProgress journalProgress = NewPlayerJournalProgressHelper.getPlayerJournalProgress(player);
+        JournalProgressProperties journalProgress = JournalProgressHelper.getJournalProgress(player);
 
         NullableEnumValue.Dynamic<RiftCreatureType> currentCreatureDynamic = new NullableEnumValue.Dynamic<>(
                 RiftCreatureType.class,

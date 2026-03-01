@@ -1,11 +1,9 @@
 package anightdazingzoroark.prift.client.newui.widget;
 
 import anightdazingzoroark.prift.client.newui.RiftUIIcons;
-import anightdazingzoroark.prift.client.newui.value.NullableEnumSyncValue;
 import anightdazingzoroark.prift.client.newui.value.NullableEnumValue;
-import anightdazingzoroark.prift.client.newui.value.PlayerJournalProgressSyncValue;
-import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressProperties;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.GuiTextures;
@@ -22,13 +20,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
-    private final IPlayerJournalProgress journalProgress;
+    private final JournalProgressProperties journalProgress;
     private final NullableEnumValue.Dynamic<RiftCreatureType> currentCreature;
 
     private RiftCreatureType.CreatureCategory currentCategory;
     private boolean markForWidgetUpdate = true;
 
-    public JournalLeftPageWidget(IPlayerJournalProgress journalProgress, NullableEnumValue.Dynamic<RiftCreatureType> currentCreature) {
+    public JournalLeftPageWidget(JournalProgressProperties journalProgress, NullableEnumValue.Dynamic<RiftCreatureType> currentCreature) {
         this.journalProgress = journalProgress;
         this.currentCreature = currentCreature;
     }

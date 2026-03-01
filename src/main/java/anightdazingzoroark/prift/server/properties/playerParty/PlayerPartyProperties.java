@@ -1,13 +1,11 @@
 package anightdazingzoroark.prift.server.properties.playerParty;
 
 import anightdazingzoroark.prift.helper.FixedSizeList;
-import anightdazingzoroark.prift.propertySystem.networking.PropertiesNetworking;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.AbstractEntityProperties;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.IntPropertyValue;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.properties.RiftPropertyRegistry;
 import anightdazingzoroark.prift.server.properties.propertyValues.FixedSizeListCreaturePropertyValue;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -16,8 +14,8 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
 public class PlayerPartyProperties extends AbstractEntityProperties {
-    public PlayerPartyProperties(@NotNull String propertyName, @NotNull Entity entityHolder) {
-        super(propertyName, entityHolder);
+    public PlayerPartyProperties(@NotNull String key, @NotNull Entity entityHolder) {
+        super(key, entityHolder);
     }
 
     @Override
@@ -26,7 +24,7 @@ public class PlayerPartyProperties extends AbstractEntityProperties {
         this.put(new IntPropertyValue("QuickSelectedPos", 0));
     }
 
-    //-----direct party member editing and getting and sycncing-----
+    //-----direct party member editing and getting-----
     public FixedSizeList<CreatureNBT> getPlayerParty() {
         return (FixedSizeList<CreatureNBT>) this.getProperty("PlayerParty").getValue();
     }
@@ -36,8 +34,8 @@ public class PlayerPartyProperties extends AbstractEntityProperties {
     }
 
     //-----indirect party member editing and getting-----
-    public void addPartyMember(EntityPlayer player, RiftCreature creature) {
-        if (player.world.isRemote) return;
+    public void addPartyMember(RiftCreature creature) {
+        if (this.getEntityHolder().world.isRemote) return;
         if (!this.canAddToParty()) return;
 
         FixedSizeList<CreatureNBT> playerPartyList = this.getPlayerParty();

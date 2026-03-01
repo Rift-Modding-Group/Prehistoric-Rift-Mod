@@ -35,7 +35,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftUpdatePlayerTamedCreatures.class, RiftLibMessageSide.CLIENT);
         WRAPPER.registerMessage(RiftSetTurretMode.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftChangeTurretTargetingFromMenu.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftUpdatePlayerJournalProgress.class, RiftLibMessageSide.CLIENT);
         WRAPPER.registerMessage(RiftUpdateNonPotionEffects.class, RiftLibMessageSide.CLIENT);
         WRAPPER.registerMessage(RiftSetBleeding.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftStopBleeding.class, RiftLibMessageSide.BOTH);
@@ -51,9 +50,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftManageBlockBreakControl.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftUpdatePartyDeployed.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftAddToParty.class, RiftLibMessageSide.BOTH);
-        WRAPPER.registerMessage(RiftSyncJournal.class, RiftLibMessageSide.BOTH);
-        WRAPPER.registerMessage(RiftJournalEditOne.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftJournalEditAll.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftForceSyncSelectedPartyPosFromOverlay.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftSetSelectedPartyPosFromOverlay.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureClient.class, RiftLibMessageSide.BOTH);
@@ -81,7 +77,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftOpenCreatureScreen.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftSetCreatureNBT.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftSetCreatureNBTParam.class, RiftLibMessageSide.BOTH);
-        WRAPPER.registerMessage(RiftSyncPlayerJournalProgress.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftApplyCreatureSwap.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftChangeQuickSelectPos.class, RiftLibMessageSide.SERVER);
     }

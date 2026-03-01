@@ -1,14 +1,11 @@
 package anightdazingzoroark.prift.server.capabilities;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.RiftDamage;
 import anightdazingzoroark.prift.server.capabilities.creatureBoxData.CreatureBoxDataProvider;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.INonPotionEffects;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsProvider;
-import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.IPlayerJournalProgress;
-import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressProvider;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -28,7 +25,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class CapabilityHandler {
     public static final ResourceLocation PLAYER_TAMED_CREATURES_CAPABILITY = new ResourceLocation(RiftInitialize.MODID, "playertamedcreatures");
-    public static final ResourceLocation PLAYER_JOURNAL_PROGRESS_CAPABILITY = new ResourceLocation(RiftInitialize.MODID, "playerjournalprogress");
     public static final ResourceLocation NON_POTION_EFFECTS = new ResourceLocation(RiftInitialize.MODID, "nonpotioneffects");
     public static final ResourceLocation CREATURE_BOX_DATA = new ResourceLocation(RiftInitialize.MODID, "creatureboxdata");
 
@@ -40,7 +36,6 @@ public class CapabilityHandler {
     public void attachCapabilityToEntity(AttachCapabilitiesEvent<Entity> event) {
         if (event.getObject() instanceof EntityPlayer player) {
             event.addCapability(PLAYER_TAMED_CREATURES_CAPABILITY, new PlayerTamedCreaturesProvider());
-            event.addCapability(PLAYER_JOURNAL_PROGRESS_CAPABILITY, new PlayerJournalProgressProvider());
         }
         else if (event.getObject() instanceof EntityLivingBase) {
             event.addCapability(NON_POTION_EFFECTS, new NonPotionEffectsProvider());
@@ -51,36 +46,6 @@ public class CapabilityHandler {
     public void attachCapabilityToWorld(AttachCapabilitiesEvent<World> event) {
         event.addCapability(CREATURE_BOX_DATA, new CreatureBoxDataProvider());
     }
-
-    /*
-    @SubscribeEvent
-    public void onEntityJoinWorldPlayerTamedCreatures(EntityJoinWorldEvent event) {
-        if (!event.getEntity().world.isRemote && event.getEntity() instanceof EntityPlayer player) {
-            IPlayerTamedCreatures tamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-            if (tamedCreatures == null) return;
-            RiftMessages.WRAPPER.sendToAll(new RiftUpdatePlayerTamedCreatures(PlayerTamedCreaturesProvider.writeNBT(tamedCreatures, null), player));
-        }
-    }
-
-    @SubscribeEvent
-    public void onEntityJoinWorldPlayerJournalProgress(EntityJoinWorldEvent event) {
-        if (!event.getEntity().world.isRemote && event.getEntity() instanceof EntityPlayer) {
-            EntityPlayer player = (EntityPlayer) event.getEntity();
-            IPlayerJournalProgress journalProgress = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
-            if (journalProgress == null) return;
-            RiftMessages.WRAPPER.sendToAll(new RiftUpdatePlayerJournalProgress(PlayerJournalProgressProvider.writeNBT(journalProgress, null), player));
-        }
-    }
-
-    @SubscribeEvent
-    public void onEntityJoinWorldNonPotionEffects(EntityJoinWorldEvent event) {
-        if (!event.getEntity().world.isRemote && event.getEntity() instanceof EntityLivingBase) {
-            INonPotionEffects nonPotionEffects = event.getEntity().getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
-            if (nonPotionEffects == null) return;
-            RiftMessages.WRAPPER.sendToAll(new RiftUpdateNonPotionEffects(NonPotionEffectsProvider.writeNBT(nonPotionEffects, null), (EntityLivingBase) event.getEntity()));
-        }
-    }
-     */
 
     @SubscribeEvent
     public void onPlayerClone(PlayerEvent.Clone event) {
@@ -95,12 +60,6 @@ public class CapabilityHandler {
         tamedCreatures.setLastSelected(oldTamedCreatures.getLastSelected());
         tamedCreatures.setPartyLastOpenedTime(oldTamedCreatures.getPartyLastOpenedTime());
         tamedCreatures.setBoxLastOpenedTime(oldTamedCreatures.getBoxLastOpenedTime());
-
-        //replicate journal progress
-        IPlayerJournalProgress journalProgress = player.getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
-        IPlayerJournalProgress oldJournalProgress = event.getOriginal().getCapability(PlayerJournalProgressProvider.PLAYER_JOURNAL_PROGRESS_CAPABILITY, null);
-
-        journalProgress.setEncounteredCreatures(oldJournalProgress.getEncounteredCreatures());
 
         //replicate effects
         INonPotionEffects nonPotionEffects = player.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);

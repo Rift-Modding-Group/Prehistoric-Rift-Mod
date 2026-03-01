@@ -7,7 +7,6 @@ import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBaseTop;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
-import anightdazingzoroark.prift.server.capabilities.playerJournalProgress.PlayerJournalProgressHelper;
 import anightdazingzoroark.prift.server.effect.RiftEffects;
 import anightdazingzoroark.prift.server.entity.creature.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
@@ -21,6 +20,8 @@ import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectile
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftCanUseMoveTriggerButton;
 import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressHelper;
+import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressProperties;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
@@ -162,11 +163,10 @@ public class ServerEvents {
         }
 
         //add entry upon being killed
-        if (event.getSource().getTrueSource() instanceof EntityPlayer && event.getEntityLiving() instanceof RiftCreature) {
-            EntityPlayer player = (EntityPlayer)event.getSource().getTrueSource();
-            RiftCreature creature = (RiftCreature)event.getEntityLiving();
-            if (!PlayerJournalProgressHelper.getUnlockedCreatures(player).containsKey(creature.creatureType)) {
-                PlayerJournalProgressHelper.unlockCreature(player, creature.creatureType);
+        if (event.getSource().getTrueSource() instanceof EntityPlayer player && event.getEntityLiving() instanceof RiftCreature creature) {
+            JournalProgressProperties journalProgress = JournalProgressHelper.getJournalProgress(player);
+            if (!journalProgress.getEncounteredCreatures().containsKey(creature.creatureType)) {
+                journalProgress.unlockCreature(creature.creatureType);
                 player.sendStatusMessage(new TextComponentTranslation("reminder.unlocked_journal_entry", creature.creatureType.getTranslatedName(), RiftControls.openParty.getDisplayName()), false);
             }
         }
