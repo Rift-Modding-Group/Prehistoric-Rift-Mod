@@ -2,10 +2,7 @@ package anightdazingzoroark.prift.server.properties.playerParty;
 
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.propertySystem.Property;
-import anightdazingzoroark.prift.server.message.RiftApplyCreatureSwap;
-import anightdazingzoroark.prift.server.message.RiftDeployPartyMem;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftTeleportPartyMemToPlayer;
+import anightdazingzoroark.prift.server.message.*;
 import anightdazingzoroark.prift.server.properties.RiftPropertyRegistry;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -29,5 +26,11 @@ public class PlayerPartyHelper {
     public static void teleportCreatureClient(EntityPlayer player, int index) {
         if (!player.world.isRemote) return;
         RiftMessages.WRAPPER.sendToServer(new RiftTeleportPartyMemToPlayer(player, index));
+    }
+
+    //true is up or prev, false is down or forwards
+    public static void changeQuickSelectPosClient(EntityPlayer player, boolean upOrDown) {
+        if (!player.world.isRemote) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftChangeQuickSelectPos(player, upOrDown));
     }
 }

@@ -18,8 +18,7 @@ public class PropertiesRoot {
         Class<? extends AbstractEntityProperties> clazz = PropertyRegistry.resolve(key, entity);
         if (clazz == null) return null;
 
-        AbstractEntityProperties created = newInstance(clazz);
-        created.init(entity);
+        AbstractEntityProperties created = newInstance(clazz, key, entity);
         sets.put(key, created);
         return (T) created;
     }
@@ -40,9 +39,9 @@ public class PropertiesRoot {
         }
     }
 
-    private static AbstractEntityProperties newInstance(Class<? extends AbstractEntityProperties> clazz) {
+    private static AbstractEntityProperties newInstance(Class<? extends AbstractEntityProperties> clazz, String key, Entity entity) {
         try {
-            return clazz.newInstance();
+            return clazz.getDeclaredConstructor(String.class, Entity.class).newInstance(key, entity);
         }
         catch (Exception ex) {
             throw new RuntimeException("Properties class must have a public no-arg ctor: " + clazz.getName(), ex);

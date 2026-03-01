@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -27,18 +28,14 @@ import static net.minecraft.client.gui.Gui.drawRect;
 
 public class RiftPartyMembersOverlay {
     private static final ResourceLocation hud = new ResourceLocation(RiftInitialize.MODID, "textures/ui/hud_icons.png");
-    private boolean partyLoaded = true;
     private PlayerPartyProperties playerParty;
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPreRenderGameOverlay(RenderGameOverlayEvent.Pre event) {
         EntityPlayer player = Minecraft.getMinecraft().player;
 
-        //sync
-        if (this.partyLoaded) {
-            this.playerParty = PlayerPartyHelper.getPlayerParty(player);
-            this.partyLoaded = false;
-        }
+        //define
+        this.playerParty = PlayerPartyHelper.getPlayerParty(player);
 
         //block if the player party isn't defined yet
         if (this.playerParty == null) return;
@@ -232,21 +229,20 @@ public class RiftPartyMembersOverlay {
     public void changeSelectedPartyPos(InputEvent.KeyInputEvent event) {
         EntityPlayer player = Minecraft.getMinecraft().player;
         if (RiftControls.switchUpwards.isKeyDown()) {
-            this.playerParty.prevQuickSelectPos();
+            PlayerPartyHelper.changeQuickSelectPosClient(player, true);
             Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
         if (RiftControls.switchDownwards.isKeyDown()) {
-            this.playerParty.nextQuickSelectPos();
+            PlayerPartyHelper.changeQuickSelectPosClient(player, false);
             Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
-        /*
         if (RiftControls.quickSummonAndDismiss.isKeyDown()) {
-            CreatureNBT partyMemNBT = this.playerParty.getParty().get(this.playerParty.getQuickSelectPos());
+            CreatureNBT partyMemNBT = this.playerParty.getPlayerParty().get(this.playerParty.getQuickSelectPos());
             PlayerTamedCreatures.DeploymentType deploymentType = partyMemNBT.getDeploymentType();
 
             //for dismissing, when creature is deployed
             if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY) {
-                PlayerTamedCreaturesHelper.deployCreatureFromParty(player, this.selectedPos, false);
+                PlayerPartyHelper.deployCreatureClient(player, this.playerParty.getQuickSelectPos(), false);
                 player.sendStatusMessage(new TextComponentTranslation("party.warning.dismiss_success"), false);
             }
             //for summoning, when creature is dismissed
@@ -257,17 +253,16 @@ public class RiftPartyMembersOverlay {
                     player.sendStatusMessage(new TextComponentTranslation("party.warning.cannot_summon_dead"), false);
                 }
                 //dont summon when player not in apt position
-                else if (!PlayerTamedCreaturesHelper.canBeDeployed(player, this.selectedPos)) {
+                else if (!this.playerParty.canDeployPartyMember(this.playerParty.getQuickSelectPos(), player)) {
                     player.sendStatusMessage(new TextComponentTranslation("party.warning.cannot_summon"), false);
                 }
                 else {
-                    PlayerTamedCreaturesHelper.deployCreatureFromParty(player, this.selectedPos, true);
+                    PlayerPartyHelper.deployCreatureClient(player, this.playerParty.getQuickSelectPos(), true);
                     player.sendStatusMessage(new TextComponentTranslation("party.warning.summon_success"), false);
                 }
             }
 
             Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
-         */
     }
 }

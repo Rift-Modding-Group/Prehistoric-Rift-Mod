@@ -1,27 +1,46 @@
 package anightdazingzoroark.prift.propertySystem.propertyStorage;
 
+import anightdazingzoroark.prift.propertySystem.networking.PropertiesNetworking;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.PropertyValue;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 
 public abstract class AbstractEntityProperties {
     protected final HashMap<String, PropertyValue<?>> propertyValueMap = new HashMap<>();
-    private boolean initialized;
+    @NotNull
+    private final String propertyName;
+    private final Entity entityHolder;
 
-    //subclasses register the properties they want available
-    protected abstract void registerDefaults(Entity entity);
-
-    public final void init(Entity entity) {
-        if (!this.initialized) {
-            this.initialized = true;
-            this.registerDefaults(entity);
-        }
+    public AbstractEntityProperties() {
+        this.propertyName = "";
+        this.entityHolder = null;
     }
 
+    public AbstractEntityProperties(@NotNull String propertyName, @NotNull Entity entityHolder) {
+        this.registerDefaults(entityHolder);
+        this.propertyName = propertyName;
+        this.entityHolder = entityHolder;
+    }
+
+    //-----initialization-----
+    protected abstract void registerDefaults(Entity entity);
+
+    //-----setting and getting values-----
     public void put(PropertyValue<?> value) {
         this.propertyValueMap.put(value.getKey(), value);
+
+        //sync to client afterwards from server
+        if (this.entityHolder != null && !this.entityHolder.world.isRemote) {
+            PropertiesNetworking.sendDelta(
+                    this.entityHolder,
+                    this.propertyName,
+                    value.getKey(),
+                    this.writeOneToNBT(value.getKey())
+            );
+        }
     }
 
     public boolean has(String key) {
@@ -31,6 +50,15 @@ public abstract class AbstractEntityProperties {
     @SuppressWarnings("unchecked")
     public final <T> PropertyValue<T> getProperty(String key) {
         return (PropertyValue<T>) this.propertyValueMap.get(key);
+    }
+
+    //-----holder related-----
+    public @NotNull String getPropertyName() {
+        return this.propertyName;
+    }
+
+    public @NotNull Entity getEntityHolder() {
+        return this.entityHolder;
     }
 
     //-----save all properties-----

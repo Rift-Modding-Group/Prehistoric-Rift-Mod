@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.client.newui.holder;
 
+import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
@@ -10,9 +11,10 @@ public class HolderHelper {
         if (player == null || player.world.isRemote) return;
 
         if (selectedCreature.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
-            PlayerPartyProperties playerParty = PlayerPartyHelper.getPlayerParty(player);
-            playerParty.setPartyMember(selectedCreature.pos[0], creatureNBT);
-            playerParty.syncPlayerParty(player);
+            PlayerPartyProperties playerPartyProperties = PlayerPartyHelper.getPlayerParty(player);
+            FixedSizeList<CreatureNBT> playerParty = playerPartyProperties.getPlayerParty();
+            playerParty.set(selectedCreature.pos[0], creatureNBT);
+            playerPartyProperties.setPlayerParty(playerParty);
         }
     }
 

@@ -51,7 +51,6 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
     private final SelectedCreatureInfo selectedCreatureInfo;
     private final PlayerPartyProperties playerParty;
 
-    private boolean changeCreatureNBTFlag = true;
     private boolean isSelected;
     private boolean isSwitching;
     @NotNull
@@ -81,12 +80,8 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
         super.onUpdate();
         if (!this.isValid()) return;
 
-        //-----syncing operations-----
-        //change creature nbt without syncing from server
-        if (this.changeCreatureNBTFlag) {
-            this.creatureNBT = this.playerParty.getPartyMember(this.index);
-            this.changeCreatureNBTFlag = false;
-        }
+        //update creature
+        this.creatureNBT = this.playerParty.getPartyMember(this.index);
 
         //-----changes based on activation of switching mode-----
         if (this.creatureSwitchingDynamic.getBoolValue() != this.isSwitching) {
@@ -137,7 +132,6 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
             //apply change to all buttons
             for (IWidget child : gridParent.getChildren()) {
                 if (!(child instanceof PartyMemberButtonWidget partyMemButton)) continue;
-                partyMemButton.changeCreatureNBTFlag = true;
                 partyMemButton.isSelected = false;
             }
         }
@@ -499,7 +493,6 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
             if (!this.option.canBeClicked(this.parent.index, this.parent.playerParty)) return Result.ACCEPT;
             if (this.option.click(this.parent.index, this.parent.playerParty)) {
                 Interactable.playButtonClickSound();
-                this.parent.changeCreatureNBTFlag = true;
                 this.markAllTooltipsDirty();
                 return Result.SUCCESS;
             }

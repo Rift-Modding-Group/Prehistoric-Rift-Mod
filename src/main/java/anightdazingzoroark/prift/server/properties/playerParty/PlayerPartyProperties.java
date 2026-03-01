@@ -13,9 +13,12 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.NotNull;
 
 public class PlayerPartyProperties extends AbstractEntityProperties {
-    public PlayerPartyProperties() {}
+    public PlayerPartyProperties(@NotNull String propertyName, @NotNull Entity entityHolder) {
+        super(propertyName, entityHolder);
+    }
 
     @Override
     protected void registerDefaults(Entity entity) {
@@ -23,23 +26,13 @@ public class PlayerPartyProperties extends AbstractEntityProperties {
         this.put(new IntPropertyValue("QuickSelectedPos", 0));
     }
 
-    //-----direct party member editing and getting-----
+    //-----direct party member editing and getting and sycncing-----
     public FixedSizeList<CreatureNBT> getPlayerParty() {
         return (FixedSizeList<CreatureNBT>) this.getProperty("PlayerParty").getValue();
     }
 
-    private void setPlayerParty(FixedSizeList<CreatureNBT> playerParty) {
+    public void setPlayerParty(FixedSizeList<CreatureNBT> playerParty) {
         this.put(new FixedSizeListCreaturePropertyValue("PlayerParty", playerParty));
-    }
-
-    public void syncPlayerParty(EntityPlayer player) {
-        if (player.world.isRemote) return;
-        PropertiesNetworking.sendDelta(
-                player,
-                RiftPropertyRegistry.PLAYER_PARTY,
-                "PlayerParty",
-                this.writeOneToNBT("PlayerParty")
-        );
     }
 
     //-----indirect party member editing and getting-----
@@ -56,7 +49,6 @@ public class PlayerPartyProperties extends AbstractEntityProperties {
             }
         }
         this.setPlayerParty(playerPartyList);
-        this.syncPlayerParty(player);
     }
 
     public void updatePartyMember(EntityPlayer player, RiftCreature creature) {
@@ -72,17 +64,10 @@ public class PlayerPartyProperties extends AbstractEntityProperties {
             }
         }
         this.setPlayerParty(playerPartyList);
-        this.syncPlayerParty(player);
     }
 
     public CreatureNBT getPartyMember(int index) {
         return this.getPlayerParty().get(index);
-    }
-
-    public void setPartyMember(int index, CreatureNBT creatureNBT) {
-        FixedSizeList<CreatureNBT> playerPartyList = this.getPlayerParty();
-        playerPartyList.set(index, creatureNBT);
-        this.setPlayerParty(playerPartyList);
     }
 
     public boolean canAddToParty() {
@@ -125,7 +110,6 @@ public class PlayerPartyProperties extends AbstractEntityProperties {
             FixedSizeList<CreatureNBT> playerPartyList = this.getPlayerParty();
             playerPartyList.set(index, creatureNBT);
             this.setPlayerParty(playerPartyList);
-            this.syncPlayerParty(player);
 
             //if the corresponding creature doesn't exist (expected), spawn it
             if (corresponded == null) {
@@ -140,7 +124,6 @@ public class PlayerPartyProperties extends AbstractEntityProperties {
             FixedSizeList<CreatureNBT> playerPartyList = this.getPlayerParty();
             playerPartyList.set(index, creatureNBT);
             this.setPlayerParty(playerPartyList);
-            this.syncPlayerParty(player);
 
             //if the corresponding creature exists (expected), despawn it
             if (corresponded != null) corresponded.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
@@ -155,7 +138,7 @@ public class PlayerPartyProperties extends AbstractEntityProperties {
         corresponded.setPosition(player.posX, player.posY, player.posZ);
     }
 
-    //-----direct selected pos editing and getting-----
+    //-----direct selected pos editing and getting and syncing-----
     public int getQuickSelectPos() {
         return (Integer) this.getProperty("QuickSelectedPos").getValue();
     }
@@ -166,11 +149,11 @@ public class PlayerPartyProperties extends AbstractEntityProperties {
 
     //indirect selected pos editing and getting
     public int getNextQuickSelectPos() {
-        return this.getQuickSelectPos() + 1 < anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper.maxSize ? this.getQuickSelectPos() + 1 : 0;
+        return this.getQuickSelectPos() + 1 < PlayerPartyHelper.maxSize ? this.getQuickSelectPos() + 1 : 0;
     }
 
     public int getPrevQuickSelectPos() {
-        return this.getQuickSelectPos() - 1 >= 0 ? this.getQuickSelectPos() - 1 : anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper.maxSize - 1;
+        return this.getQuickSelectPos() - 1 >= 0 ? this.getQuickSelectPos() - 1 : PlayerPartyHelper.maxSize - 1;
     }
 
     public void nextQuickSelectPos() {

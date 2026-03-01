@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
+import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
@@ -42,17 +43,19 @@ public class RiftApplyCreatureSwap extends RiftLibMessage<RiftApplyCreatureSwap>
         SelectedCreatureInfo.SwapInfo swapInfo = new SelectedCreatureInfo.SwapInfo(message.swapInfoNBT);
         if (player == null || !swapInfo.canSwap()) return;
 
-        PlayerPartyProperties playerParty = PlayerPartyHelper.getPlayerParty(player);
-        if (playerParty == null) return;
+        PlayerPartyProperties playerPartyProperties = PlayerPartyHelper.getPlayerParty(player);
+        if (playerPartyProperties == null) return;
+        FixedSizeList<CreatureNBT> playerParty = playerPartyProperties.getPlayerParty();
 
         if (swapInfo.getCreatureOne().selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY && swapInfo.getCreatureTwo().selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
-            CreatureNBT nbtOne = playerParty.getPartyMember(swapInfo.getCreatureOne().pos[0]);
-            CreatureNBT nbtTwo = playerParty.getPartyMember(swapInfo.getCreatureTwo().pos[0]);
+            CreatureNBT nbtOne = playerParty.get(swapInfo.getCreatureOne().pos[0]);
+            CreatureNBT nbtTwo = playerParty.get(swapInfo.getCreatureTwo().pos[0]);
 
-            playerParty.setPartyMember(swapInfo.getCreatureOne().pos[0], nbtTwo);
-            playerParty.setPartyMember(swapInfo.getCreatureTwo().pos[0], nbtOne);
+            playerParty.set(swapInfo.getCreatureOne().pos[0], nbtTwo);
+            playerParty.set(swapInfo.getCreatureTwo().pos[0], nbtOne);
         }
-        playerParty.syncPlayerParty(player);
+
+        playerPartyProperties.setPlayerParty(playerParty);
     }
 
     @Override
