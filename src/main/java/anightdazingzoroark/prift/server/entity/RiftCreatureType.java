@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public enum RiftCreatureType {
     TYRANNOSAURUS(
@@ -530,6 +531,24 @@ public enum RiftCreatureType {
         return Arrays.asList(this.behaviors);
     }
 
+    //"aggressive" is too broad, so it tends to be filtered
+    public String listBehaviorsAsString() {
+        List<String> behaviorStringList = this.getBehaviors().stream()
+                .filter(behavior -> behavior != RiftCreatureType.Behavior.AGGRESSIVE)
+                .map(RiftCreatureType.Behavior::getTranslatedName)
+                .collect(Collectors.toList());
+
+        String toReturn = "";
+
+        for (int index = 0; index < behaviorStringList.size(); index++) {
+            String behaviorString = behaviorStringList.get(index);
+            String endOfString = index == behaviorStringList.size() - 1 ? "" : ", ";
+            toReturn = toReturn.concat(behaviorString.concat(endOfString));
+        }
+
+        return toReturn;
+    }
+
     public int getEggPrimary() {
         return this.eggPrimary;
     }
@@ -575,6 +594,10 @@ public enum RiftCreatureType {
 
     public String getIdentifier() {
         return "prift:"+this.name().toLowerCase();
+    }
+
+    public String getJournalEntry() {
+        return I18n.format("journal.entry."+this.name().toLowerCase());
     }
 
     public boolean isFavoriteFood(ItemStack stack) {
@@ -750,6 +773,10 @@ public enum RiftCreatureType {
         AGGRESSIVE, //will attack targets
         AGGRESSIVE_TO_HUMANS, //will attack humans
         BLOCK_BREAKER, //will break blocks in front when pursuing a target
-        NOCTURNAL //will be active at night and sleep at day
+        NOCTURNAL; //will be active at night and sleep at day
+
+        public String getTranslatedName() {
+            return I18n.format("behavior."+this.name().toLowerCase());
+        }
     }
 }

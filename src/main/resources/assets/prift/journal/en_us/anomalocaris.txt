@@ -1,3 +1,0 @@
-Behavior: Hostile
-
-Anomalocarises cloak themselves to the point of near invisibility. Only when it attacks does the cloaking wear off, leaving it exposed.

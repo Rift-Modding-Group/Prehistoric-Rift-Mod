@@ -119,7 +119,7 @@ public class CreatureNBT {
     public String getCreatureName(boolean includeLevel) {
         if (this.creatureNBT.isEmpty()) return "";
         String partyMemName = (!this.getCustomName().isEmpty()) ? this.getCustomName() : this.getCreatureType().getTranslatedName();
-        return includeLevel ? I18n.format("journal.party_member.name", partyMemName, this.getCreatureLevel()) : partyMemName;
+        return includeLevel ? I18n.format("party.party_member_name", partyMemName, this.getCreatureLevel()) : partyMemName;
     }
 
     public void setCreatureHealth(float value) {

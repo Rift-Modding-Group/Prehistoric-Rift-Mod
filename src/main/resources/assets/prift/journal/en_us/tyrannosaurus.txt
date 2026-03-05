@@ -1,3 +1,0 @@
-Behavior: Hostile
-
-The hunger of a Tyrannosaurus is never-ending. No matter how much it eats, it always remains hungry.

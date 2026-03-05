@@ -1,3 +1,0 @@
-Behavior: Neutral
-
-Herds of Parasaurolophi watch out for each other. When threat is imminent, one signals the entire herd to take the next course of action.

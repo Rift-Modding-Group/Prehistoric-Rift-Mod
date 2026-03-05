@@ -1,3 +1,0 @@
-Behavior: Hostile
-
-The skin of a Baryonyx secretes a poison which spreads when in water. Riders are advised not to touch it without protective gear.

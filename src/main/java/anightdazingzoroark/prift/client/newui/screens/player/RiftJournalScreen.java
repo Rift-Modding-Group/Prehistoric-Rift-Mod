@@ -73,7 +73,7 @@ public class RiftJournalScreen extends CustomModularScreen {
                         .name("leftPage").size(189, 225).left(8).top(8)
                 )
                 //-----right page-----
-                .child(new JournalRightPageWidget(currentCreatureDynamic)
+                .child(new JournalRightPageWidget(journalProgress, currentCreatureDynamic)
                         .name("rightPage").size(189, 225).right(8).top(8)
                 );
     }

@@ -4,10 +4,8 @@ import anightdazingzoroark.prift.client.newui.RiftUIIcons;
 import anightdazingzoroark.prift.client.newui.value.NullableEnumValue;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressProperties;
-import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
 import com.cleanroommc.modularui.api.ITheme;
 import com.cleanroommc.modularui.api.drawable.IKey;
-import com.cleanroommc.modularui.api.widget.IGuiAction;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.GuiTextures;
 import com.cleanroommc.modularui.drawable.Rectangle;
@@ -15,12 +13,12 @@ import com.cleanroommc.modularui.screen.viewport.ModularGuiContext;
 import com.cleanroommc.modularui.theme.WidgetTheme;
 import com.cleanroommc.modularui.theme.WidgetThemeEntry;
 import com.cleanroommc.modularui.widget.ParentWidget;
-import com.cleanroommc.modularui.widget.sizer.Area;
 import com.cleanroommc.modularui.widgets.ButtonWidget;
 import com.cleanroommc.modularui.widgets.layout.Column;
 import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.cleanroommc.modularui.widgets.layout.Grid;
 import com.cleanroommc.modularui.widgets.layout.Row;
+import net.minecraft.client.resources.I18n;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -30,13 +28,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
+    @NotNull
     private final JournalProgressProperties journalProgress;
     private final NullableEnumValue.Dynamic<RiftCreatureType.CreatureCategory> currentCategory;
     private final NullableEnumValue.Dynamic<RiftCreatureType> currentCreature;
 
     private boolean markForWidgetUpdate = true;
 
-    public JournalLeftPageWidget(JournalProgressProperties journalProgress, NullableEnumValue.Dynamic<RiftCreatureType.CreatureCategory> currentCategory, NullableEnumValue.Dynamic<RiftCreatureType> currentCreature) {
+    public JournalLeftPageWidget(@NotNull JournalProgressProperties journalProgress, NullableEnumValue.Dynamic<RiftCreatureType.CreatureCategory> currentCategory, NullableEnumValue.Dynamic<RiftCreatureType> currentCreature) {
         this.journalProgress = journalProgress;
         this.currentCategory = currentCategory;
         this.currentCreature = currentCreature;
@@ -66,12 +65,13 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
     private ParentWidget<?> headerSection() {
         return new ParentWidget<>().widthRel(1f)
                 .child(IKey.dynamic(() -> {
-                    if (currentCategory.getValue() == null) return "Index";
+                    if (currentCategory.getValue() == null) return I18n.format("journal.index");
                     return currentCategory.getValue().getTranslatedName(true);
                 }).asWidget().left(0))
                 .child(new Row().coverChildren().childPadding(2)
                         .childIf(this.currentCategory.getValue() != null,
                                 () -> new ButtonWidget<>().overlay(RiftUIIcons.BACK).size(12)
+                                        .addTooltipElement(IKey.lang("journal.back_to_index_tooltip"))
                                         .onMousePressed(button -> {
                                             this.currentCategory.setValue(null);;
                                             this.currentCreature.setValue(null);
@@ -79,7 +79,9 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
                                             return true;
                                         })
                         )
-                        .child(new ButtonWidget<>().overlay(GuiTextures.SEARCH).size(12))
+                        .child(new ButtonWidget<>().overlay(GuiTextures.SEARCH).size(12)
+                                .addTooltipElement(IKey.lang("journal.search_tooltip"))
+                        )
                         .right(0)
                 );
     }
@@ -196,6 +198,7 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
 
         @Override
         public @NotNull Result onMousePressed(int mouseButton) {
+            if (this.pageParent.currentCreature.getValue() == this.creatureType) return Result.ACCEPT;
             this.pageParent.currentCreature.setValue(this.creatureType);
             this.pageParent.updatePages();
             this.pageParent.unselectAllCreatureButtons();

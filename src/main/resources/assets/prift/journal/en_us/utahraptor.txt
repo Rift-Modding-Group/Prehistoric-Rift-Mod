@@ -1,3 +1,0 @@
-Behavior: Hostile
-
-Though Utahraptors may form packs, these are not permanent, and the members will go their own ways after a few hunts.

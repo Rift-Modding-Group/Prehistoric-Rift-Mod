@@ -1,3 +1,0 @@
-Behavior: Neutral
-
-The plates of a Stegosaurus constantly fall off and regrow. One set of plates on one day may not be the same as after a week passes.

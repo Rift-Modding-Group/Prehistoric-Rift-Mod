@@ -1,3 +1,0 @@
-Behavior: Neutral
-
-The sail of the Dimetrodon inverts the temperature of the environment, and in effect, causes a small area surrounding it to be of an opposing temperature of its surroundings.
