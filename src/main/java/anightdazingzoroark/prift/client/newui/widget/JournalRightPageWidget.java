@@ -2,21 +2,32 @@ package anightdazingzoroark.prift.client.newui.widget;
 
 import anightdazingzoroark.prift.client.newui.RiftUIIcons;
 import anightdazingzoroark.prift.client.newui.value.NullableEnumValue;
+import anightdazingzoroark.prift.config.RiftConfigHandler;
+import anightdazingzoroark.prift.config.RiftCreatureConfig;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressProperties;
+import com.cleanroommc.modularui.api.GuiAxis;
+import com.cleanroommc.modularui.api.ITheme;
 import com.cleanroommc.modularui.api.drawable.IDrawable;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.drawable.Rectangle;
-import com.cleanroommc.modularui.drawable.TabTexture;
 import com.cleanroommc.modularui.drawable.text.LangKey;
-import com.cleanroommc.modularui.drawable.text.StringKey;
+import com.cleanroommc.modularui.theme.WidgetThemeEntry;
 import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.widget.ParentWidget;
+import com.cleanroommc.modularui.widget.scroll.ScrollData;
+import com.cleanroommc.modularui.widgets.ListValueWidget;
+import com.cleanroommc.modularui.widgets.ListWidget;
 import com.cleanroommc.modularui.widgets.PageButton;
 import com.cleanroommc.modularui.widgets.PagedWidget;
 import com.cleanroommc.modularui.widgets.layout.Column;
 import com.cleanroommc.modularui.widgets.layout.Flow;
+import com.cleanroommc.modularui.widgets.layout.Grid;
 import com.cleanroommc.modularui.widgets.layout.Row;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -75,27 +86,118 @@ public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget>
                         //creature description
                         .addPage(this.creatureDescriptionTab())
                         //creature info
-                        .addPage(IKey.str("The favorite foods of the creature!").scale(0.75f).asWidget().margin(3))
+                        .addPage(this.creatureInfoTab())
                 );
     }
 
-    private Flow creatureDescriptionTab() {
-        if (this.currentCreature.getValue() == null) return new Column();
-        if (!this.journalProgress.getEncounteredCreatures().get(this.currentCreature.getValue())) {
-            return new Column().sizeRel(1f).margin(3).childPadding(3)
-                    .child(IKey.lang("journal.entry.locked")
-                            .scale(0.75f).alignment(Alignment.CenterLeft).asWidget().left(0)
-                    );
-        }
-        return new Column().sizeRel(1f).margin(3).childPadding(3)
-                .child(IKey.lang("journal.description.behaviors", this.currentCreature.getValue().listBehaviorsAsString())
-                        .scale(0.75f).alignment(Alignment.CenterLeft).asWidget().left(0)
-                )
-                .child(IKey.lang("journal.description.diet", this.currentCreature.getValue().getCreatureDiet().getTranslatedName())
-                        .scale(0.75f).alignment(Alignment.CenterLeft).asWidget().left(0)
-                )
-                .child(IKey.str(this.currentCreature.getValue().getJournalEntry())
-                        .scale(0.75f).alignment(Alignment.CenterLeft).asWidget().left(0)
+    private ListWidget<?, ?> creatureDescriptionTab() {
+        if (this.currentCreature.getValue() == null) return new ListWidget<>().size(181, 85).align(Alignment.CENTER);
+
+        return new ListWidget<>().size(181, 85).align(Alignment.CENTER)
+                .child(new Column().widthRel(1f).coverChildrenHeight().childPadding(3)
+                        .childIf(!this.journalProgress.getEncounteredCreatures().get(this.currentCreature.getValue()),
+                                () -> IKey.lang("journal.entry.locked").scale(0.75f)
+                                        .alignment(Alignment.CenterLeft).asWidget().left(0)
+                        )
+                        .childIf(this.journalProgress.getEncounteredCreatures().get(this.currentCreature.getValue()),
+                                () -> IKey.lang("journal.description.behaviors", this.currentCreature.getValue().listBehaviorsAsString())
+                                .scale(0.75f).alignment(Alignment.CenterLeft).asWidget().left(0)
+                        )
+                        .childIf(this.journalProgress.getEncounteredCreatures().get(this.currentCreature.getValue()),
+                                () -> IKey.lang("journal.description.diet", this.currentCreature.getValue().getCreatureDiet().getTranslatedName())
+                                .scale(0.75f).alignment(Alignment.CenterLeft).asWidget().left(0)
+                        )
+                        .childIf(this.journalProgress.getEncounteredCreatures().get(this.currentCreature.getValue()),
+                                () -> IKey.str(this.currentCreature.getValue().getJournalEntry())
+                                .scale(0.75f).alignment(Alignment.CenterLeft).asWidget().left(0)
+                        )
+                );
+    }
+
+    private ListWidget<?, ?> creatureInfoTab() {
+        if (this.currentCreature.getValue() == null) return new ListWidget<>().size(181, 85).align(Alignment.CENTER);
+
+        //list down block break rates
+        List<String> listBlockBreakLevels = RiftConfigHandler.getConfig(this.currentCreature.getValue()).general.blockBreakLevels;
+        List<ImmutablePair<String, Integer>> listBlockBreak = listBlockBreakLevels.stream().map(
+                blockBreakLevel -> {
+                    //separate by colon
+                    String[] splitString = blockBreakLevel.split(":");
+                    String toolNameString = splitString[0];
+                    String toolLevelString = splitString[1];
+
+                    //get tool level
+                    int toolLevel = 1;
+                    try {
+                        toolLevel = Integer.parseInt(toolLevelString);
+                    }
+                    catch (Exception e) {}
+
+                    return new ImmutablePair<>(toolNameString, toolLevel);
+                }
+        ).collect(Collectors.toList());
+
+        //list down taming foods
+        List<RiftCreatureConfig.Meal> listMeals = RiftConfigHandler.getConfig(this.currentCreature.getValue()).general.favoriteMeals;
+        List<ItemStack> listMealsItemStack = listMeals.stream().map(
+                meal -> RiftUtil.getItemStackFromString(meal.itemId)
+        ).collect(Collectors.toList());
+
+        //list down favorite foods
+        List<RiftCreatureConfig.Food> listFoods = RiftConfigHandler.getConfig(this.currentCreature.getValue()).general.favoriteFood;
+        List<ItemStack> listFoodsItemStack = listFoods.stream().map(
+                food -> RiftUtil.getItemStackFromString(food.itemId)
+        ).collect(Collectors.toList());
+
+        return new ListWidget<>().size(181, 85).align(Alignment.CENTER)
+                .child(new Column().widthRel(1f).coverChildrenHeight().childPadding(3)
+                        //message for if the creature must be tamed by killing and hoping an egg drops
+                        .childIf(!this.journalProgress.getEncounteredCreatures().get(this.currentCreature.getValue())
+                                        && this.currentCreature.getValue().isTameable
+                                        && !this.currentCreature.getValue().isTameableByFeeding,
+                                () -> IKey.lang("journal.must_kill_for_egg").scale(0.75f).color(0xFFFF0000).asWidget()
+                                        .alignment(Alignment.CenterLeft).left(0)
+                        )
+                        //block break rates
+                        .childIf(!listBlockBreak.isEmpty(), () -> new Column().coverChildrenHeight().widthRel(1f)
+                                .child(IKey.lang("journal.mining_levels").scale(0.75f).asWidget().alignment(Alignment.CenterLeft).left(0))
+                                .child(new PaddedGrid().coverChildren()
+                                        .matrix(Grid.mapToMatrix(
+                                                8, listBlockBreak.size(),
+                                                index -> new ItemDisplayOpenToJEIWidget().setForMiningLevel(listBlockBreak.get(index).left, listBlockBreak.get(index).right)
+                                        ))
+                                        .padding(3).alignment(Alignment.CenterLeft).left(0)
+                                )
+                        )
+                        //list of foods it must consume to be tamed or bred
+                        .childIf(!listMealsItemStack.isEmpty(), () -> new Column().coverChildrenHeight().widthRel(1f)
+                                //for if the creature can be tamed by being fed
+                                .childIf(this.currentCreature.getValue().isTameableByFeeding,
+                                        () -> IKey.lang("journal.taming_or_breeding_foods").scale(0.75f).asWidget().alignment(Alignment.CenterLeft).left(0)
+                                )
+                                //for otherwise
+                                .childIf(!this.currentCreature.getValue().isTameableByFeeding,
+                                        () -> IKey.lang("journal.breeding_foods").scale(0.75f).asWidget().alignment(Alignment.CenterLeft).left(0)
+                                )
+                                .child(new PaddedGrid().coverChildren()
+                                        .matrix(Grid.mapToMatrix(
+                                                8, listMealsItemStack.size(),
+                                                index -> new ItemDisplayOpenToJEIWidget().item(listMealsItemStack.get(index))
+                                        ))
+                                        .padding(3).alignment(Alignment.CenterLeft).left(0)
+                                )
+                        )
+                        //list of foods that it can be fed to be healed
+                        .childIf(!listFoodsItemStack.isEmpty(), () -> new Column().coverChildrenHeight().widthRel(1f)
+                                .child(IKey.lang("journal.favorite_foods").scale(0.75f).asWidget().alignment(Alignment.CenterLeft).left(0))
+                                .child(new PaddedGrid().coverChildren()
+                                        .matrix(Grid.mapToMatrix(
+                                                8, listFoodsItemStack.size(),
+                                                index -> new ItemDisplayOpenToJEIWidget().item(listFoodsItemStack.get(index))
+                                        ))
+                                        .padding(3).alignment(Alignment.CenterLeft).left(0)
+                                )
+                        )
                 );
     }
 

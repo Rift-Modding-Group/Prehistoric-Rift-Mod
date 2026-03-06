@@ -125,8 +125,6 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
     }
 
     private List<RiftCreatureType> orderedCreatureTypes() {
-        if (this.journalProgress == null) return new ArrayList<>();
-
         //get map
         Map<RiftCreatureType, Boolean> creatureTypeMap = this.journalProgress.getEncounteredCreatures();
 
@@ -175,7 +173,14 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
             this.creatureType = creatureType;
             this.pageParent = pageParent;
             this.size(32);
-            this.addTooltipElement(this.creatureType.getTranslatedName());
+
+            //for the tooltip, put in parenthesis the name of the parent
+            //when its not discovered
+            String creatureName = this.creatureType.getTranslatedName();
+            if (!pageParent.journalProgress.getEncounteredCreatures().get(this.creatureType)) {
+                creatureName = "("+creatureName+")";
+            }
+            this.addTooltipElement(creatureName);
         }
 
         @Override
@@ -194,6 +199,11 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
 
             //add icon
             RiftUIIcons.creatureIcon(this.creatureType).draw(context, 4, 4, 24, 24, theme);
+
+            //lock icon for if the creature is encountered only and not yet truly unlocked
+            if (!this.pageParent.journalProgress.getEncounteredCreatures().get(this.creatureType)) {
+                GuiTextures.LOCKED.draw(context, 8, 8, 16, 16, theme);
+            }
         }
 
         @Override
