@@ -3,12 +3,13 @@ package anightdazingzoroark.prift.server.entity;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.widget.EntityWidget;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressHelper;
 import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressProperties;
+import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxHelper;
+import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
 import com.cleanroommc.modularui.api.IGuiHolder;
@@ -92,15 +93,17 @@ public class RiftSac extends EntityTameable implements IAnimatable, IGuiHolder<E
 
                 //update party of owner
                 PlayerPartyProperties playerParty = PlayerPartyHelper.getPlayerParty(owner);
+                PlayerCreatureBoxProperties playerCreatureBox = PlayerCreatureBoxHelper.getPlayerCreatureBox(owner);
+
                 if (playerParty.canAddToParty()) {
                     creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
                     playerParty.addPartyMember(creature);
                     owner.sendStatusMessage(new TextComponentTranslation("prift.notify.sac_hatched_to_party", new TextComponentString(this.getName())), false);
                 }
                 //update box of owner
-                else if (PlayerTamedCreaturesHelper.canAddCreatureToBox(owner)) {
+                else if (playerCreatureBox.canAddCreatureToBox()) {
                     creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-                    PlayerTamedCreaturesHelper.addCreatureToBox(owner, creature);
+                    playerCreatureBox.addCreatureToBox(creature);
                     owner.sendStatusMessage(new TextComponentTranslation("prift.notify.sac_hatched_to_box", new TextComponentString(this.getName())), false);
                 }
             }

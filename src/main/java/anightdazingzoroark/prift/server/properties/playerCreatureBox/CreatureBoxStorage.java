@@ -1,6 +1,7 @@
-package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
+package anightdazingzoroark.prift.server.properties.playerCreatureBox;
 
 import anightdazingzoroark.prift.helper.FixedSizeList;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
@@ -27,6 +28,7 @@ public class CreatureBoxStorage {
 
     //this is for making a new CreatureBoxStorage instance
     //from saved NBT
+    @Deprecated
     public CreatureBoxStorage(NBTTagList savedNBT) {
         for (int x = 0; x < savedNBT.tagCount(); x++) {
             NBTTagCompound nbtFromList = savedNBT.getCompoundTagAt(x);
@@ -131,5 +133,25 @@ public class CreatureBoxStorage {
         }
 
         return toReturn;
+    }
+
+    public void parseNBTList(NBTTagList nbtTagList) {
+        this.creatureBoxContents.clear();
+        this.creatureBoxNames.clear();
+
+        for (int x = 0; x < nbtTagList.tagCount(); x++) {
+            NBTTagCompound nbtFromList = nbtTagList.getCompoundTagAt(x);
+            //initialize names
+            this.creatureBoxNames.add(nbtFromList.getString("BoxName"));
+
+            //initialize creatures
+            NBTTagList storedCreaturesNBT = nbtFromList.getTagList("BoxCreatures", 10);
+            FixedSizeList<CreatureNBT> storedCreaturesToAdd = new FixedSizeList<>(storedCreaturesNBT.tagCount(), new CreatureNBT());
+            for (int y = 0; y < storedCreaturesNBT.tagCount(); y++) {
+                CreatureNBT storedCreature = new CreatureNBT(storedCreaturesNBT.getCompoundTagAt(y));
+                storedCreaturesToAdd.set(y, storedCreature);
+            }
+            this.creatureBoxContents.add(storedCreaturesToAdd);
+        }
     }
 }

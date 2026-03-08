@@ -7,7 +7,6 @@ import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.Dimetrodon;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -15,6 +14,8 @@ import anightdazingzoroark.prift.server.enums.EggTemperature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressHelper;
 import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressProperties;
+import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxHelper;
+import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
 import com.charles445.simpledifficulty.api.config.JsonConfig;
@@ -126,6 +127,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable, IGuiHolder<E
 
                 if (this.getCreatureType() != RiftCreatureType.DODO) {
                     PlayerPartyProperties playerParty = PlayerPartyHelper.getPlayerParty(owner);
+                    PlayerCreatureBoxProperties playerCreatureBox = PlayerCreatureBoxHelper.getPlayerCreatureBox(owner);
 
                     //update party of owner
                     if (playerParty.canAddToParty()) {
@@ -134,9 +136,9 @@ public class RiftEgg extends EntityTameable implements IAnimatable, IGuiHolder<E
                         owner.sendStatusMessage(new TextComponentTranslation("prift.notify.egg_hatched_to_party", new TextComponentString(this.getName())), false);
                     }
                     //update box of owner
-                    else if (PlayerTamedCreaturesHelper.canAddCreatureToBox(owner)) {
+                    else if (playerCreatureBox.canAddCreatureToBox()) {
                         creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-                        PlayerTamedCreaturesHelper.addCreatureToBox(owner, creature);
+                        playerCreatureBox.addCreatureToBox(creature);
                         owner.sendStatusMessage(new TextComponentTranslation("prift.notify.egg_hatched_to_box", new TextComponentString(this.getName())), false);
                     }
                 }

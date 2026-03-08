@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
 import anightdazingzoroark.prift.helper.FixedSizeList;
+import anightdazingzoroark.prift.server.properties.playerCreatureBox.CreatureBoxStorage;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
