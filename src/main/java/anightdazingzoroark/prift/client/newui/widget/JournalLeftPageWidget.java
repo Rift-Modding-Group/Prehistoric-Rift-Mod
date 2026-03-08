@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.newui.widget;
 
 import anightdazingzoroark.prift.client.newui.RiftUIIcons;
+import anightdazingzoroark.prift.client.newui.value.ListValue;
 import anightdazingzoroark.prift.client.newui.value.NullableEnumValue;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressProperties;
@@ -12,12 +13,15 @@ import com.cleanroommc.modularui.drawable.Rectangle;
 import com.cleanroommc.modularui.screen.viewport.ModularGuiContext;
 import com.cleanroommc.modularui.theme.WidgetTheme;
 import com.cleanroommc.modularui.theme.WidgetThemeEntry;
+import com.cleanroommc.modularui.value.ObjectValue;
+import com.cleanroommc.modularui.value.StringValue;
 import com.cleanroommc.modularui.widget.ParentWidget;
 import com.cleanroommc.modularui.widgets.ButtonWidget;
 import com.cleanroommc.modularui.widgets.layout.Column;
 import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.cleanroommc.modularui.widgets.layout.Grid;
 import com.cleanroommc.modularui.widgets.layout.Row;
+import com.cleanroommc.modularui.widgets.textfield.TextFieldWidget;
 import net.minecraft.client.resources.I18n;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,6 +38,10 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
     private final NullableEnumValue.Dynamic<RiftCreatureType> currentCreature;
 
     private boolean markForWidgetUpdate = true;
+    private boolean searching;
+    private final StringValue searchTerm = new StringValue("");
+    private String oldSearchTerm;
+    private final List<RiftCreatureType> searchResults = new ArrayList<>();
 
     public JournalLeftPageWidget(@NotNull JournalProgressProperties journalProgress, NullableEnumValue.Dynamic<RiftCreatureType.CreatureCategory> currentCategory, NullableEnumValue.Dynamic<RiftCreatureType> currentCreature) {
         this.journalProgress = journalProgress;
@@ -44,20 +52,38 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
     @Override
     public void onUpdate() {
         super.onUpdate();
+        //updating search related stuff
+        if (this.searching && !this.searchTerm.getStringValue().equals(this.oldSearchTerm)) {
+            this.searchResults.clear();
+            this.searchResults.addAll(this.createSearchResults());
+            this.removeAll();
+            this.child(this.searchPage());
+            this.oldSearchTerm = this.searchTerm.getStringValue();
+        }
+
+        //updating widget in general
         if (!this.markForWidgetUpdate) return;
 
-        //main index
-        if (this.currentCreature.getValue() == null && this.currentCategory.getValue() == null) {
+        //search mode
+        if (this.searching) {
             this.removeAll();
-            this.child(this.indexPage());
+            this.child(this.searchPage());
         }
-        else if (this.currentCreature.getValue() == null && this.currentCategory.getValue() != null) {
-            this.removeAll();
-            this.child(this.categoryPage());
-        }
-        else if (this.currentCreature.getValue() != null && this.currentCategory.getValue() == null) {
-            this.removeAll();
-            this.child(this.indexPage());
+        //normal mode
+        else {
+            //main index
+            if (this.currentCreature.getValue() == null && this.currentCategory.getValue() == null) {
+                this.removeAll();
+                this.child(this.indexPage());
+            }
+            else if (this.currentCreature.getValue() == null && this.currentCategory.getValue() != null) {
+                this.removeAll();
+                this.child(this.categoryPage());
+            }
+            else if (this.currentCreature.getValue() != null && this.currentCategory.getValue() == null) {
+                this.removeAll();
+                this.child(this.indexPage());
+            }
         }
         this.markForWidgetUpdate = false;
     }
@@ -69,18 +95,37 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
                     return currentCategory.getValue().getTranslatedName(true);
                 }).asWidget().left(0))
                 .child(new Row().coverChildren().childPadding(2)
-                        .childIf(this.currentCategory.getValue() != null,
+                        .childIf(this.currentCategory.getValue() != null || this.searching,
                                 () -> new ButtonWidget<>().overlay(RiftUIIcons.BACK).size(12)
-                                        .addTooltipElement(IKey.lang("journal.back_to_index_tooltip"))
+                                        .addTooltipElement(IKey.dynamic(
+                                                () -> {
+                                                    if (this.searching) return I18n.format("journal.exit_search_tooltip");
+                                                    return I18n.format("journal.back_to_index_tooltip");
+                                                }
+                                        ))
                                         .onMousePressed(button -> {
-                                            this.currentCategory.setValue(null);;
+                                            //reset search related stuff
+                                            if (this.searching) {
+                                                this.resetSearching();
+                                                this.currentCreature.setValue(null);
+                                                this.updatePages();
+                                                return true;
+                                            }
+
+                                            //reset current category and creature stuff
+                                            this.currentCategory.setValue(null);
                                             this.currentCreature.setValue(null);
                                             this.updatePages();
                                             return true;
                                         })
                         )
-                        .child(new ButtonWidget<>().overlay(GuiTextures.SEARCH).size(12)
+                        .childIf(!this.searching, () -> new ButtonWidget<>().overlay(GuiTextures.SEARCH).size(12)
                                 .addTooltipElement(IKey.lang("journal.search_tooltip"))
+                                .onMousePressed(button -> {
+                                    this.searching = !this.searching;
+                                    this.updatePages();
+                                    return true;
+                                })
                         )
                         .right(0)
                 );
@@ -124,6 +169,37 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
                 );
     }
 
+    private Flow searchPage() {
+        return new Column().sizeRel(1f).top(0).childPadding(5)
+                .child(this.headerSection())
+                .child(new TextFieldWidget().widthRel(0.8f).hintText(I18n.format("journal.search_hint"))
+                        .value(this.searchTerm)
+                )
+                .child(new PaddedGrid().coverChildren()
+                        .matrix(Grid.mapToMatrix(
+                                5, this.searchResults.size(),
+                                index -> new CreatureButton(this.searchResults.get(index), this)
+                        ))
+                        .padding(4)
+                );
+    }
+
+    private List<RiftCreatureType> createSearchResults() {
+        return this.orderedCreatureTypes()
+                .stream().filter(creatureType -> {
+                    String creatureTypeString = creatureType.getTranslatedName().toLowerCase();
+
+                    boolean toReturn = this.searchTerm.getStringValue().isEmpty()
+                            || creatureTypeString.contains(this.searchTerm.getStringValue());
+
+                    if (this.currentCategory.getValue() == null
+                            || this.currentCategory.getValue() == RiftCreatureType.CreatureCategory.ALL) {
+                        return toReturn;
+                    }
+                    else return creatureType.getCreatureCategory() == this.currentCategory.getValue() && toReturn;
+                }).collect(Collectors.toList());
+    }
+
     private List<RiftCreatureType> orderedCreatureTypes() {
         //get map
         Map<RiftCreatureType, Boolean> creatureTypeMap = this.journalProgress.getEncounteredCreatures();
@@ -156,10 +232,19 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
 
                 for (IWidget paddedGridChild : paddedGrid.getChildren()) {
                     if (!(paddedGridChild instanceof CreatureButton creatureButton)) continue;
-                    creatureButton.isSelected = false;
                 }
             }
         }
+    }
+
+    public boolean getIsSearching() {
+        return this.searching;
+    }
+
+    public void resetSearching() {
+        this.searching = false;
+        this.searchTerm.setStringValue("");
+        this.oldSearchTerm = null;
     }
 
     private static class CreatureButton extends ButtonWidget<CreatureButton> {
@@ -167,7 +252,6 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
         private final RiftCreatureType creatureType;
         @NotNull
         private final JournalLeftPageWidget pageParent;
-        private boolean isSelected;
 
         public CreatureButton(@NotNull RiftCreatureType creatureType, JournalLeftPageWidget pageParent) {
             this.creatureType = creatureType;
@@ -188,8 +272,7 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
             WidgetTheme theme = this.getActiveWidgetTheme(widgetTheme, this.isHovering());
 
             //outer outline
-            int outerOutlineColor = this.isHovering() ? 0xFFFFFFFF : this.isSelected ? 0xFFFFFF00 :  0xFF000000;
-            new Rectangle().color(outerOutlineColor).cornerRadius(5).drawAtZero(context, this.getArea(), theme);
+            new Rectangle().color(this.outerOutlineColor()).cornerRadius(5).drawAtZero(context, this.getArea(), theme);
 
             //inner outline
             new Rectangle().color(0xFF484848).cornerRadius(5).draw(context, 1, 1, this.getArea().w() - 2, this.getArea().h() - 2, theme);
@@ -206,13 +289,18 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
             }
         }
 
+        private int outerOutlineColor() {
+            if (this.isHovering()) return 0xFFFFFFFF;
+            else if (this.pageParent.currentCreature.getValue() == this.creatureType) return 0xFFFFFF00;
+            return 0xFF000000;
+        }
+
         @Override
         public @NotNull Result onMousePressed(int mouseButton) {
             if (this.pageParent.currentCreature.getValue() == this.creatureType) return Result.ACCEPT;
             this.pageParent.currentCreature.setValue(this.creatureType);
             this.pageParent.updatePages();
             this.pageParent.unselectAllCreatureButtons();
-            this.isSelected = true;
             this.playClickSound();
             return Result.SUCCESS;
         }

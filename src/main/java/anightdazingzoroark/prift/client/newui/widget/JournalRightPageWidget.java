@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.client.newui.widget;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.RiftUIIcons;
 import anightdazingzoroark.prift.client.newui.value.NullableEnumValue;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
@@ -11,25 +12,27 @@ import com.cleanroommc.modularui.api.GuiAxis;
 import com.cleanroommc.modularui.api.ITheme;
 import com.cleanroommc.modularui.api.drawable.IDrawable;
 import com.cleanroommc.modularui.api.drawable.IKey;
+import com.cleanroommc.modularui.drawable.GuiDraw;
 import com.cleanroommc.modularui.drawable.Rectangle;
 import com.cleanroommc.modularui.drawable.text.LangKey;
+import com.cleanroommc.modularui.screen.viewport.ModularGuiContext;
 import com.cleanroommc.modularui.theme.WidgetThemeEntry;
 import com.cleanroommc.modularui.utils.Alignment;
+import com.cleanroommc.modularui.utils.Platform;
 import com.cleanroommc.modularui.widget.ParentWidget;
 import com.cleanroommc.modularui.widget.scroll.ScrollData;
-import com.cleanroommc.modularui.widgets.ListValueWidget;
-import com.cleanroommc.modularui.widgets.ListWidget;
-import com.cleanroommc.modularui.widgets.PageButton;
-import com.cleanroommc.modularui.widgets.PagedWidget;
+import com.cleanroommc.modularui.widgets.*;
 import com.cleanroommc.modularui.widgets.layout.Column;
 import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.cleanroommc.modularui.widgets.layout.Grid;
 import com.cleanroommc.modularui.widgets.layout.Row;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.common.Loader;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,6 +69,13 @@ public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget>
     private Flow creaturePageContents() {
         PagedWidget.Controller tabController = new PagedWidget.Controller();
 
+        PagedWidget<?> pagedWidget = new PagedWidget<>().controller(tabController).widthRel(1f).height(93)
+                .background(new Rectangle().hollow().color(0xFF000000))
+                //creature description
+                .addPage(this.creatureDescriptionTab());
+        //creature info, only if the creature can have it
+        if (this.canHaveInfoTab()) pagedWidget.addPage(this.creatureInfoTab());
+
         return new Column().sizeRel(1f).childPadding(5)
                 .child(IKey.str(this.currentCreature.getValue().getTranslatedName()).asWidget().left(0))
                 .child(RiftUIIcons.creatureIllustration(this.currentCreature.getValue()).asWidget().size(120, 90))
@@ -75,19 +85,13 @@ public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget>
                                 .background(false, new Rectangle().hollow().color(0xFF000000))
                                 .background(true, new Rectangle().hollow().color(0xFFFFFFFF))
                         )
-                        .child(new JournalTabButton(1, tabController)
+                        .childIf(this.canHaveInfoTab(), () -> new JournalTabButton(1, tabController)
                                 .overlay(IKey.lang("journal.tab.info"))
                                 .background(false, new Rectangle().hollow().color(0xFF000000))
                                 .background(true, new Rectangle().hollow().color(0xFFFFFFFF))
                         )
                 )
-                .child(new PagedWidget<>().controller(tabController).widthRel(1f).height(93)
-                        .background(new Rectangle().hollow().color(0xFF000000))
-                        //creature description
-                        .addPage(this.creatureDescriptionTab())
-                        //creature info
-                        .addPage(this.creatureInfoTab())
-                );
+                .child(pagedWidget);
     }
 
     private ListWidget<?, ?> creatureDescriptionTab() {
@@ -99,7 +103,8 @@ public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget>
                                 () -> IKey.lang("journal.entry.locked").scale(0.75f)
                                         .alignment(Alignment.CenterLeft).asWidget().left(0)
                         )
-                        .childIf(this.journalProgress.getEncounteredCreatures().get(this.currentCreature.getValue()),
+                        .childIf(this.journalProgress.getEncounteredCreatures().get(this.currentCreature.getValue())
+                                && !this.currentCreature.getValue().listBehaviorsAsString().isEmpty(),
                                 () -> IKey.lang("journal.description.behaviors", this.currentCreature.getValue().listBehaviorsAsString())
                                 .scale(0.75f).alignment(Alignment.CenterLeft).asWidget().left(0)
                         )
@@ -139,15 +144,15 @@ public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget>
 
         //list down taming foods
         List<RiftCreatureConfig.Meal> listMeals = RiftConfigHandler.getConfig(this.currentCreature.getValue()).general.favoriteMeals;
-        List<ItemStack> listMealsItemStack = listMeals.stream().map(
+        List<ItemStack> listMealsItemStack = listMeals != null ? listMeals.stream().map(
                 meal -> RiftUtil.getItemStackFromString(meal.itemId)
-        ).collect(Collectors.toList());
+        ).collect(Collectors.toList()) : Collections.emptyList();
 
         //list down favorite foods
         List<RiftCreatureConfig.Food> listFoods = RiftConfigHandler.getConfig(this.currentCreature.getValue()).general.favoriteFood;
-        List<ItemStack> listFoodsItemStack = listFoods.stream().map(
+        List<ItemStack> listFoodsItemStack = listFoods != null ? listFoods.stream().map(
                 food -> RiftUtil.getItemStackFromString(food.itemId)
-        ).collect(Collectors.toList());
+        ).collect(Collectors.toList()) : Collections.emptyList();
 
         return new ListWidget<>().size(181, 85).align(Alignment.CENTER)
                 .child(new Column().widthRel(1f).coverChildrenHeight().childPadding(3)
@@ -164,7 +169,7 @@ public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget>
                                 .child(new PaddedGrid().coverChildren()
                                         .matrix(Grid.mapToMatrix(
                                                 8, listBlockBreak.size(),
-                                                index -> new ItemDisplayOpenToJEIWidget().setForMiningLevel(listBlockBreak.get(index).left, listBlockBreak.get(index).right)
+                                                index -> new ToolDisplay().setForMiningLevel(listBlockBreak.get(index).left, listBlockBreak.get(index).right)
                                         ))
                                         .padding(3).alignment(Alignment.CenterLeft).left(0)
                                 )
@@ -201,6 +206,18 @@ public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget>
                 );
     }
 
+    private boolean canHaveInfoTab() {
+        if (this.currentCreature.getValue() == null) return false;
+
+        List<String> listBlockBreakLevels = RiftConfigHandler.getConfig(this.currentCreature.getValue()).general.blockBreakLevels;
+        List<RiftCreatureConfig.Meal> listMeals = RiftConfigHandler.getConfig(this.currentCreature.getValue()).general.favoriteMeals;
+        List<RiftCreatureConfig.Food> listFoods = RiftConfigHandler.getConfig(this.currentCreature.getValue()).general.favoriteFood;
+
+        return (listBlockBreakLevels != null && !listBlockBreakLevels.isEmpty())
+                || (listMeals != null && !listMeals.isEmpty())
+                || (listFoods != null && !listFoods.isEmpty());
+    }
+
     public void updatePage() {
         this.markForWidgetUpdate = true;
     }
@@ -222,6 +239,58 @@ public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget>
             this.width(longestWidth + 6);
 
             return super.overlay(drawable);
+        }
+    }
+
+    private static class ToolDisplay extends ItemDisplayWidget {
+        private int miningLevel = -1;
+
+        @Override
+        protected WidgetThemeEntry<?> getWidgetThemeInternal(ITheme theme) {
+            return theme.getFallback();
+        }
+
+        @Override
+        public void draw(ModularGuiContext context, WidgetThemeEntry<?> widgetTheme) {
+            if (this.getIngredient() == null || !(this.getIngredient() instanceof ItemStack itemStack)) return;
+            if (!Platform.isStackEmpty(itemStack)) {
+                GuiDraw.drawItem(itemStack, 1, 1, 16, 16, context.getCurrentDrawingZ());
+                IKey.str(String.valueOf(this.miningLevel)).color(0xFFFFFFFF)
+                        .drawAligned(
+                                context,
+                                0, 0,
+                                this.getArea().width, this.getArea().height,
+                                widgetTheme.getTheme(), Alignment.BottomRight
+                        );
+            }
+        }
+
+        public ToolDisplay setForMiningLevel(String toolName, int miningLevel) {
+            //set tool
+            ItemStack tool = ItemStack.EMPTY;
+            switch (toolName) {
+                case "pickaxe": {
+                    tool = new ItemStack(Items.STONE_PICKAXE);
+                    break;
+                }
+                case "axe": {
+                    tool = new ItemStack(Items.STONE_AXE);
+                    break;
+                }
+                case "shovel": {
+                    tool = new ItemStack(Items.STONE_SHOVEL);
+                    break;
+                }
+            }
+            this.item(tool);
+
+            //set mining level
+            this.miningLevel = miningLevel;
+
+            //set hover text
+            this.addTooltipLine(IKey.lang("journal.mining_info", toolName, String.valueOf(miningLevel)));
+
+            return this;
         }
     }
 }

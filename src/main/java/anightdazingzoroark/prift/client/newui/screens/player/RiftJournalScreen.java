@@ -50,11 +50,22 @@ public class RiftJournalScreen extends CustomModularScreen {
                 .onEscPressed(new Function<ModularPanelExitAffectable, Boolean>() {
                     @Override
                     public Boolean apply(ModularPanelExitAffectable panel) {
+                        JournalLeftPageWidget leftPageWidget = this.getLeftPageWidget(panel);
+                        if (leftPageWidget == null) return false;
+
+                        //reset search related stuff
+                        if (leftPageWidget.getIsSearching()) {
+                            leftPageWidget.resetSearching();
+                            currentCreatureDynamic.setValue(null);
+                            leftPageWidget.updatePages();
+                            return true;
+                        }
+
+                        //reset current creature category
                         if (currentCategoryDynamic.getValue() != null) {
                             currentCategoryDynamic.setValue(null);
                             currentCreatureDynamic.setValue(null);
-                            JournalLeftPageWidget leftPageWidget = this.getLeftPageWidget(panel);
-                            if (leftPageWidget != null) leftPageWidget.updatePages();
+                            leftPageWidget.updatePages();
                         }
                         else PlayerUIHelper.openUI(player, UIPanelNames.PARTY_SCREEN);
                         return true;
