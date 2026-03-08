@@ -44,7 +44,7 @@ public class RiftDeployPartyMem extends RiftLibMessage<RiftDeployPartyMem> {
         PlayerPartyProperties playerParty = PlayerPartyHelper.getPlayerParty(player);
         if (playerParty == null) return;
 
-        playerParty.deployPartyMember(message.position, player, message.deploy);
+        playerParty.deployPartyMember(message.position, message.deploy);
     }
 
     @Override

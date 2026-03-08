@@ -3,29 +3,30 @@ package anightdazingzoroark.prift.propertySystem.registry;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.AbstractEntityProperties;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class PropertiesRoot {
-    private final Map<String, AbstractEntityProperties> sets = new HashMap<>();
+    private final Map<String, AbstractEntityProperties<?>> sets = new HashMap<>();
 
     @SuppressWarnings("unchecked")
-    public <T extends AbstractEntityProperties> T getOrCreate(String key, Entity entity) {
-        AbstractEntityProperties existing = sets.get(key);
+    public <E extends Entity, T extends AbstractEntityProperties<?>> T getOrCreate(String key, E entity) {
+        AbstractEntityProperties<?> existing = sets.get(key);
         if (existing != null) return (T) existing;
 
-        Class<? extends AbstractEntityProperties> clazz = PropertyRegistry.resolve(key, entity);
-        if (clazz == null) return null;
+        ImmutablePair<Class<? extends Entity>, Class<? extends AbstractEntityProperties<?>>> propertyClassPair = PropertyRegistry.getPropertyClassPair(key, entity);
+        if (propertyClassPair == null || propertyClassPair.getLeft() == null || propertyClassPair.getRight() == null) return null;
 
-        AbstractEntityProperties created = newInstance(clazz, key, entity);
+        AbstractEntityProperties<?> created = newInstance(propertyClassPair, key, entity);
         sets.put(key, created);
         return (T) created;
     }
 
     public NBTTagCompound writeToNBT() {
         NBTTagCompound toReturn = new NBTTagCompound();
-        for (Map.Entry<String, AbstractEntityProperties> entry : sets.entrySet()) {
+        for (Map.Entry<String, AbstractEntityProperties<?>> entry : sets.entrySet()) {
             toReturn.setTag(entry.getKey(), entry.getValue().writeAllToNBT());
         }
         return toReturn;
@@ -34,17 +35,17 @@ public class PropertiesRoot {
     public void readFromNBT(NBTTagCompound nbtTagCompound, Entity entity) {
         for (String key : nbtTagCompound.getKeySet()) {
             NBTTagCompound setTag = nbtTagCompound.getCompoundTag(key);
-            AbstractEntityProperties set = this.getOrCreate(key, entity);
+            AbstractEntityProperties<?> set = this.getOrCreate(key, entity);
             if (set != null) set.readAllFromNBT(setTag);
         }
     }
 
-    private static AbstractEntityProperties newInstance(Class<? extends AbstractEntityProperties> clazz, String key, Entity entity) {
+    private static AbstractEntityProperties<?> newInstance(ImmutablePair<Class<? extends Entity>, Class<? extends AbstractEntityProperties<?>>> propertyClassPair, String key, Entity entity) {
         try {
-            return clazz.getDeclaredConstructor(String.class, Entity.class).newInstance(key, entity);
+            return propertyClassPair.getRight().getDeclaredConstructor(String.class, propertyClassPair.getLeft()).newInstance(key, entity);
         }
-        catch (Exception ex) {
-            throw new RuntimeException("Properties class must have a public no-arg ctor: " + clazz.getName(), ex);
+        catch (Exception e) {
+            throw new RuntimeException("Properties class must have a public no-arg ctor: " + propertyClassPair.getRight().getName(), e);
         }
     }
 }

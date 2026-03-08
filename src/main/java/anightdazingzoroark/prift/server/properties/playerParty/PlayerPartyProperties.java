@@ -13,13 +13,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
-public class PlayerPartyProperties extends AbstractEntityProperties {
-    public PlayerPartyProperties(@NotNull String key, @NotNull Entity entityHolder) {
+public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer> {
+    public PlayerPartyProperties(@NotNull String key, @NotNull EntityPlayer entityHolder) {
         super(key, entityHolder);
     }
 
     @Override
-    protected void registerDefaults(Entity entity) {
+    protected void registerDefaults(EntityPlayer entity) {
         this.put(new FixedSizeListCreaturePropertyValue("PlayerParty", new FixedSizeList<>(6, new CreatureNBT())));
         this.put(new IntPropertyValue("QuickSelectedPos", 0));
     }
@@ -49,8 +49,8 @@ public class PlayerPartyProperties extends AbstractEntityProperties {
         this.setPlayerParty(playerPartyList);
     }
 
-    public void updatePartyMember(EntityPlayer player, RiftCreature creature) {
-        if (player.world.isRemote) return;
+    public void updatePartyMember(RiftCreature creature) {
+        if (this.getEntityHolder().world.isRemote) return;
 
         FixedSizeList<CreatureNBT> playerPartyList = this.getPlayerParty();
         for (int index = 0; index < playerPartyList.size(); index++) {
@@ -77,30 +77,30 @@ public class PlayerPartyProperties extends AbstractEntityProperties {
     }
 
     //---for deployment and teleportation---
-    public boolean canDeployPartyMember(int index, EntityPlayer player) {
-        if (player == null) return false;
+    public boolean canDeployPartyMember(int index) {
+        if (this.getEntityHolder().world.isRemote) return false;
         CreatureNBT creatureNBT = this.getPartyMember(index);
         if (creatureNBT.nbtIsEmpty()) return false;
 
-        BlockPos posBelowPlayer = player.getPosition().down();
+        BlockPos posBelowPlayer = this.getEntityHolder().getPosition().down();
         if (creatureNBT.getCreatureType().isAquatic) {
-            if (player.world.getBlockState(posBelowPlayer).getMaterial() == Material.WATER) return true;
-            else if (player.world.getBlockState(posBelowPlayer).getMaterial() != Material.AIR
+            if (this.getEntityHolder().world.getBlockState(posBelowPlayer).getMaterial() == Material.WATER) return true;
+            else if (this.getEntityHolder().world.getBlockState(posBelowPlayer).getMaterial() != Material.AIR
                     && creatureNBT.getCreatureType().isAmphibious) return true;
         }
         else {
-            if (player.world.getBlockState(posBelowPlayer).getMaterial() == Material.AIR && player.isRiding()) return true;
-            else if (player.world.getBlockState(posBelowPlayer).getMaterial() != Material.AIR) return true;
+            if (this.getEntityHolder().world.getBlockState(posBelowPlayer).getMaterial() == Material.AIR && this.getEntityHolder().isRiding()) return true;
+            else if (this.getEntityHolder().world.getBlockState(posBelowPlayer).getMaterial() != Material.AIR) return true;
         }
         return false;
     }
 
-    public void deployPartyMember(int index, EntityPlayer player, boolean deploy) {
-        if (player.world.isRemote) return;
+    public void deployPartyMember(int index, boolean deploy) {
+        if (this.getEntityHolder().world.isRemote) return;
 
         CreatureNBT creatureNBT = this.getPartyMember(index);
         //find corresponding creature first
-        RiftCreature corresponded = creatureNBT.findCorrespondingCreature(player.world);
+        RiftCreature corresponded = creatureNBT.findCorrespondingCreature(this.getEntityHolder().world);
 
         //if true, deploy in the world
         if (deploy) {
@@ -111,9 +111,9 @@ public class PlayerPartyProperties extends AbstractEntityProperties {
 
             //if the corresponding creature doesn't exist (expected), spawn it
             if (corresponded == null) {
-                RiftCreature creatureToCreate = creatureNBT.getCreatureAsNBT(player.world);
-                creatureToCreate.setPosition(player.posX, player.posY, player.posZ);
-                player.world.spawnEntity(creatureToCreate);
+                RiftCreature creatureToCreate = creatureNBT.getCreatureAsNBT(this.getEntityHolder().world);
+                creatureToCreate.setPosition(this.getEntityHolder().posX, this.getEntityHolder().posY, this.getEntityHolder().posZ);
+                this.getEntityHolder().world.spawnEntity(creatureToCreate);
             }
         }
         //else, dismiss it
@@ -128,12 +128,12 @@ public class PlayerPartyProperties extends AbstractEntityProperties {
         }
     }
 
-    public void teleportPartyMember(int index, EntityPlayer player) {
-        if (player.world.isRemote) return;
+    public void teleportPartyMember(int index) {
+        if (this.getEntityHolder().world.isRemote) return;
         CreatureNBT creatureNBT = this.getPartyMember(index);
-        RiftCreature corresponded = creatureNBT.findCorrespondingCreature(player.world);
+        RiftCreature corresponded = creatureNBT.findCorrespondingCreature(this.getEntityHolder().world);
         if (corresponded == null) return;
-        corresponded.setPosition(player.posX, player.posY, player.posZ);
+        corresponded.setPosition(this.getEntityHolder().posX, this.getEntityHolder().posY, this.getEntityHolder().posZ);
     }
 
     //-----direct selected pos editing and getting and syncing-----

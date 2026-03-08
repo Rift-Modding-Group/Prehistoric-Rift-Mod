@@ -40,7 +40,7 @@ public class RiftTeleportPartyMemToPlayer extends RiftLibMessage<RiftTeleportPar
         PlayerPartyProperties playerParty = PlayerPartyHelper.getPlayerParty(player);
         if (playerParty == null) return;
 
-        playerParty.teleportPartyMember(message.partyMemPos, player);
+        playerParty.teleportPartyMember(message.partyMemPos);
     }
 
     @Override

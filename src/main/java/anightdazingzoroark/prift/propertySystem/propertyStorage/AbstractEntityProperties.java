@@ -8,25 +8,25 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 
-public abstract class AbstractEntityProperties {
+public abstract class AbstractEntityProperties<E extends Entity> {
     protected final HashMap<String, PropertyValue<?>> propertyValueMap = new HashMap<>();
     @NotNull
     private final String propertyName;
-    private final Entity entityHolder;
+    private final E entityHolder;
 
     public AbstractEntityProperties() {
         this.propertyName = "";
         this.entityHolder = null;
     }
 
-    public AbstractEntityProperties(@NotNull String propertyName, @NotNull Entity entityHolder) {
+    public AbstractEntityProperties(@NotNull String propertyName, @NotNull E entityHolder) {
         this.registerDefaults(entityHolder);
         this.propertyName = propertyName;
         this.entityHolder = entityHolder;
     }
 
     //-----initialization-----
-    protected abstract void registerDefaults(Entity entity);
+    protected abstract void registerDefaults(E entity);
 
     //-----setting and getting values-----
     public void put(PropertyValue<?> value) {
@@ -57,7 +57,7 @@ public abstract class AbstractEntityProperties {
         return this.propertyName;
     }
 
-    public @NotNull Entity getEntityHolder() {
+    public @NotNull E getEntityHolder() {
         return this.entityHolder;
     }
 

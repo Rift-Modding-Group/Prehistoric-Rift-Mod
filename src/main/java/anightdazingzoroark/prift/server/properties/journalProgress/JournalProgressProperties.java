@@ -4,19 +4,20 @@ import anightdazingzoroark.prift.propertySystem.propertyStorage.AbstractEntityPr
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.properties.propertyValues.JournalEncounteredCreaturesValue;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class JournalProgressProperties extends AbstractEntityProperties {
-    public JournalProgressProperties(@NotNull String key, @NotNull Entity entityHolder) {
+public class JournalProgressProperties extends AbstractEntityProperties<EntityPlayer> {
+    public JournalProgressProperties(@NotNull String key, @NotNull EntityPlayer entityHolder) {
         super(key, entityHolder);
     }
 
     @Override
-    protected void registerDefaults(Entity entity) {
+    protected void registerDefaults(EntityPlayer entity) {
         this.put(new JournalEncounteredCreaturesValue("EncounteredCreatures", new HashMap<>()));
     }
 

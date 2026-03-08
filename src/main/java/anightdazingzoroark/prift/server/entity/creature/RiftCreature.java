@@ -3128,7 +3128,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         PlayerPartyProperties playerPartyProperties = anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper.getPlayerParty((EntityPlayer) this.getOwner());
         if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
             this.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
-            playerPartyProperties.updatePartyMember((EntityPlayer) this.getOwner(), this);
+            playerPartyProperties.updatePartyMember(this);
             PlayerTamedCreaturesHelper.updateIndividualPartyMemClient((EntityPlayer) this.getOwner(), this);
         }
         if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) {

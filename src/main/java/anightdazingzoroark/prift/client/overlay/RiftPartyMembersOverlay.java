@@ -253,7 +253,7 @@ public class RiftPartyMembersOverlay {
                     player.sendStatusMessage(new TextComponentTranslation("party.warning.cannot_summon_dead"), false);
                 }
                 //dont summon when player not in apt position
-                else if (!this.playerParty.canDeployPartyMember(this.playerParty.getQuickSelectPos(), player)) {
+                else if (!this.playerParty.canDeployPartyMember(this.playerParty.getQuickSelectPos())) {
                     player.sendStatusMessage(new TextComponentTranslation("party.warning.cannot_summon"), false);
                 }
                 else {

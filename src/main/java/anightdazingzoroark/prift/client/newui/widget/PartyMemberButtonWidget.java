@@ -372,7 +372,7 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
                         //dont summon when creature is dead
                         if (creatureNBT.getCreatureHealth()[0] <= 0) return false;
                             //dont summon when player not in apt position
-                        else if (!playerParty.canDeployPartyMember(index, player)) return false;
+                        else if (!playerParty.canDeployPartyMember(index)) return false;
                             //final return value
                         else return true;
                     }
@@ -389,7 +389,7 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
                     CreatureNBT creatureNBT = playerParty.getPartyMember(index);
 
                     if (creatureNBT.getCreatureHealth()[0] <= 0) return I18n.format("party.warning.cannot_summon_dead");
-                    else if (!playerParty.canDeployPartyMember(index, player)) return I18n.format("party.warning.cannot_summon");
+                    else if (!playerParty.canDeployPartyMember(index)) return I18n.format("party.warning.cannot_summon");
                     return "";
                 }
         ),
@@ -409,7 +409,7 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
 
                     if (creature != null) {
                         //check first if the creature can be teleported to that spot first
-                        if (playerParty.canDeployPartyMember(index, player)) {
+                        if (playerParty.canDeployPartyMember(index)) {
                             PlayerPartyHelper.teleportCreatureClient(player, index);
                             return true;
                         }
