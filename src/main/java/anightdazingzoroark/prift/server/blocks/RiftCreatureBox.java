@@ -1,12 +1,12 @@
 package anightdazingzoroark.prift.server.blocks;
 
-import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScreen;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.creatureBoxData.CreatureBoxDataHelper;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
+import com.cleanroommc.modularui.factory.GuiFactories;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.ITileEntityProvider;
@@ -25,6 +25,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -39,7 +40,7 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
     }
 
     @Override
-    public BlockStateContainer createBlockState(){
+    public @NotNull BlockStateContainer createBlockState(){
         return new BlockStateContainer(this, FACING);
     }
 
@@ -49,7 +50,7 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
     }
 
     @Override
-    public IBlockState getStateFromMeta(int meta) {
+    public @NotNull IBlockState getStateFromMeta(int meta) {
         EnumFacing enumfacing = EnumFacing.byIndex(meta);
 
         if (enumfacing.getAxis() == EnumFacing.Axis.Y) enumfacing = EnumFacing.NORTH;
@@ -57,28 +58,27 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
     }
 
     @Override
-    public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
+    public @NotNull IBlockState getStateForPlacement(@NotNull World worldIn, @NotNull BlockPos pos, @NotNull EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
         EnumFacing enumfacing = placer.getHorizontalFacing().getOpposite();
         return this.getDefaultState().withProperty(FACING, enumfacing);
     }
 
     @Override
-    public boolean hasTileEntity(IBlockState state) {
+    public boolean hasTileEntity(@NotNull IBlockState state) {
         return true;
     }
 
     @Nullable
     @Override
-    public TileEntity createNewTileEntity(World worldIn, int meta) {
+    public TileEntity createNewTileEntity(@NotNull World worldIn, int meta) {
         return new RiftTileEntityCreatureBox();
     }
 
     @Override
-    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+    public void onBlockPlacedBy(World world, @NotNull BlockPos pos, @NotNull IBlockState state, @NotNull EntityLivingBase placer, @NotNull ItemStack stack) {
         if (!world.isRemote && placer instanceof EntityPlayer) {
             TileEntity tileEntity = world.getTileEntity(pos);
-            if (!(tileEntity instanceof RiftTileEntityCreatureBox)) return;
-            RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
+            if (!(tileEntity instanceof RiftTileEntityCreatureBox teCreatureBox)) return;
             teCreatureBox.setOwner((EntityPlayer) placer);
             teCreatureBox.setUniqueID(UUID.randomUUID());
             CreatureBoxDataHelper.addCreatureBoxPos(pos, (EntityPlayer) placer);
@@ -86,13 +86,13 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
     }
 
     @Override
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
+    public void breakBlock(World worldIn, @NotNull BlockPos pos, @NotNull IBlockState state) {
         if (!worldIn.isRemote) CreatureBoxDataHelper.removeCreatureBoxPos(pos);
         super.breakBlock(worldIn, pos, state);
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+    public boolean onBlockActivated(World worldIn, @NotNull BlockPos pos, @NotNull IBlockState state, @NotNull EntityPlayer playerIn, @NotNull EnumHand hand, @NotNull EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (!worldIn.isRemote) {
             RiftTileEntityCreatureBox tileEntity = (RiftTileEntityCreatureBox) worldIn.getTileEntity(pos);
 
@@ -113,7 +113,7 @@ public class RiftCreatureBox extends Block implements ITileEntityProvider {
                 }
             }
             //just open the ui
-            else RiftLibUIHelper.showUI(playerIn, RiftGui.CREATURE_BOX_SCREEN, pos.getX(), pos.getY(), pos.getZ());
+            else GuiFactories.tileEntity().open(playerIn, pos);
         }
         return true;
     }

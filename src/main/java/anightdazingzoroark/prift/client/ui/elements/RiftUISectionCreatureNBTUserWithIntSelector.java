@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.client.ui.elements;
 
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.prift.helper.CreatureNBT;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 

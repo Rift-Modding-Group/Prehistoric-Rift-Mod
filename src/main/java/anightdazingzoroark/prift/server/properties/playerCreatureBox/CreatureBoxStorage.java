@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.properties.playerCreatureBox;
 
 import anightdazingzoroark.prift.helper.FixedSizeList;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.prift.helper.CreatureNBT;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 

@@ -8,6 +8,7 @@ public class UIPanelNames {
 
     //others
     public static final String INTERACTED_CREATURE_SCREEN = "creatureScreen";
+    public static final String CREATURE_BOX_SCREEN = "creatureBoxScreen";
     public static final String PARTY_DROPDOWN = "partyDropdown";
     public static final String EGG_SCREEN = "eggScreen";
     public static final String SAC_SCREEN = "sacScreen";

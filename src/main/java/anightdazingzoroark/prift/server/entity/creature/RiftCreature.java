@@ -15,7 +15,7 @@ import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBTKeyword;
+import anightdazingzoroark.prift.helper.CreatureNBTKeyword;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;

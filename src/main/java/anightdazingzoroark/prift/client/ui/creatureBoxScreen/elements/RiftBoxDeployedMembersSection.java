@@ -2,14 +2,13 @@ package anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements;
 
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.riftlib.ui.RiftLibUISection;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibUIElement;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class RiftBoxDeployedMembersSection extends RiftLibUISection {

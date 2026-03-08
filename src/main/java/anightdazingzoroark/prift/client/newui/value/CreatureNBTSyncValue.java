@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.client.newui.value;
 
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.prift.helper.CreatureNBT;
 import com.cleanroommc.modularui.value.sync.ValueSyncHandler;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;

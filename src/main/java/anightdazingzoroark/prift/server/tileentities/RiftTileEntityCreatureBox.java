@@ -1,15 +1,21 @@
 package anightdazingzoroark.prift.server.tileentities;
 
+import anightdazingzoroark.prift.client.newui.screens.synced.RiftCreatureBoxScreen;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.helper.ChunkPosWithVerticality;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
+import com.cleanroommc.modularui.api.IGuiHolder;
+import com.cleanroommc.modularui.factory.PosGuiData;
+import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.screen.UISettings;
+import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.google.common.base.Predicate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
@@ -25,13 +31,14 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
+public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, IGuiHolder<PosGuiData> {
     private final FixedSizeList<CreatureNBT> creatureListNBT = new FixedSizeList<>(RiftCreatureBox.maxDeployableCreatures, new CreatureNBT());
     private UUID uniqueID = RiftUtil.nilUUID;
     private UUID ownerID = RiftUtil.nilUUID;
@@ -228,7 +235,7 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound compound) {
+    public void readFromNBT(@NotNull NBTTagCompound compound) {
         super.readFromNBT(compound);
         if (compound.hasKey("BoxDeployedCreatures")) {
             NBTTagList boxDeployedCreaturesList = compound.getTagList("BoxDeployedCreatures", 10);
@@ -245,7 +252,7 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+    public @NotNull NBTTagCompound writeToNBT(@NotNull NBTTagCompound compound) {
         super.writeToNBT(compound);
         NBTTagList boxDeployedCreaturesList = new NBTTagList();
         for (CreatureNBT boxNBT : this.creatureListNBT.getList()) boxDeployedCreaturesList.appendTag(boxNBT.getCreatureNBT());
@@ -268,18 +275,23 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable {
     }
 
     @Override
-    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+    public void onDataPacket(@NotNull NetworkManager net, SPacketUpdateTileEntity pkt) {
         this.readFromNBT(pkt.getNbtCompound());
     }
 
     @Override
-    public NBTTagCompound getUpdateTag() {
+    public @NotNull NBTTagCompound getUpdateTag() {
         return this.writeToNBT(new NBTTagCompound());
     }
 
     @Override
-    public void handleUpdateTag(NBTTagCompound compound) {
+    public void handleUpdateTag(@NotNull NBTTagCompound compound) {
         this.readFromNBT(compound);
     }
     //saving and updating nbt ends here
+
+    @Override
+    public ModularPanel buildUI(PosGuiData data, PanelSyncManager syncManager, UISettings settings) {
+        return RiftCreatureBoxScreen.buildCreatureBoxUI(data, syncManager, settings);
+    }
 }

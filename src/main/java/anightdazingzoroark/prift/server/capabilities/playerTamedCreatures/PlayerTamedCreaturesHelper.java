@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
+import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;

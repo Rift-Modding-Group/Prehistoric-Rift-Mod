@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.riftlib.ui.uiElement.RiftLibClickableSection;

@@ -9,7 +9,7 @@ import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftBoxMem
 import anightdazingzoroark.prift.client.ui.creatureBoxScreen.elements.RiftPartyMembersSection;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.CreatureBoxStorage;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;

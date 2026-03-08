@@ -1,10 +1,9 @@
 package anightdazingzoroark.prift.client.ui.elements;
 
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.riftlib.ui.RiftLibUISection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.nbt.NBTTagCompound;
 
 public abstract class RiftUISectionCreatureNBTUser extends RiftLibUISection {
     protected CreatureNBT nbtTagCompound;

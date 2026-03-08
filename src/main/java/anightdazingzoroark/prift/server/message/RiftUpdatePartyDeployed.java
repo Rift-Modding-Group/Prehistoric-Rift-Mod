@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.message;
 
+import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;

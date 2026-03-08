@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
 
+import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;

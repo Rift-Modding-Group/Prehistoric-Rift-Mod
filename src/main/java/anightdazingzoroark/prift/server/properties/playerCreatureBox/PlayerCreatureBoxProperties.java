@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.properties.playerCreatureBox;
 
 import anightdazingzoroark.prift.propertySystem.propertyStorage.AbstractEntityProperties;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
+import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.properties.propertyValues.CreatureBoxStoragePropertyValue;
 import net.minecraft.entity.player.EntityPlayer;

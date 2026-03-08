@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.server.capabilities.playerTamedCreatures;
+package anightdazingzoroark.prift.helper;
 
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;

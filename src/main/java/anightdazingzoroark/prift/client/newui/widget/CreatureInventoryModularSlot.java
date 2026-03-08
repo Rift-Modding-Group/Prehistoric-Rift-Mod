@@ -1,11 +1,8 @@
 package anightdazingzoroark.prift.client.newui.widget;
 
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
-import anightdazingzoroark.prift.client.newui.holder.HolderHelper;
-import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBT;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.CreatureNBTKeyword;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
+import anightdazingzoroark.prift.helper.CreatureNBT;
+import anightdazingzoroark.prift.helper.CreatureNBTKeyword;
 import anightdazingzoroark.prift.server.entity.CreatureInventoryHandler;
 import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import net.minecraft.entity.player.EntityPlayer;
