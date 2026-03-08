@@ -524,9 +524,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     BlockPos teleportPos = RiftTileEntityCreatureBoxHelper.creatureCreatureSpawnPoint(this.getHomePos(), this.world, this);
                     if (teleportPos != null) this.setPosition(teleportPos.getX(), teleportPos.getY(), teleportPos.getZ());
                 }
-                //when creature is deployed from party and is visible on the quick summon/dismiss widget
-                //update when health, energy, or xp is at a certain percent threshold
-                this.updateForPartyHUD();
             }
         }
         else {
@@ -551,29 +548,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
         this.manageGrabVictim();
-    }
-
-    private void updateForPartyHUD() {
-        //update health
-        int currentHealthBucket = Math.round((this.getHealth() / this.getMaxHealth()) * 10);
-        if (currentHealthBucket != this.cachedHealthBucket) {
-            this.cachedHealthBucket = currentHealthBucket;
-            PlayerTamedCreaturesHelper.updateIndividualPartyMemHealthClient((EntityPlayer) this.getOwner(), this);
-        }
-
-        //energy
-        int energyBucket = Math.round(((float) this.getEnergy() / this.getMaxEnergy()) * 10);
-        if (energyBucket != this.cachedEnergyBucket) {
-            this.cachedEnergyBucket = energyBucket;
-            PlayerTamedCreaturesHelper.updateIndividualPartyMemEnergyClient((EntityPlayer) this.getOwner(), this);
-        }
-
-        //xp
-        int xpBucket = Math.round(((float) this.getXP() / this.getMaxXP()) * 10);
-        if (xpBucket != this.cachedXPBucket) {
-            this.cachedXPBucket = xpBucket;
-            PlayerTamedCreaturesHelper.updateIndividualPartyMemXPClient((EntityPlayer) this.getOwner(), this);
-        }
     }
 
     @SideOnly(Side.CLIENT)

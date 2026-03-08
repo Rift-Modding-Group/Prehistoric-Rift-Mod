@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
 import net.minecraft.client.Minecraft;
@@ -23,22 +24,27 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 
+import java.util.HashMap;
+
 import static net.minecraft.client.gui.Gui.drawModalRectWithCustomSizedTexture;
 import static net.minecraft.client.gui.Gui.drawRect;
 
 public class RiftPartyMembersOverlay {
     private static final ResourceLocation hud = new ResourceLocation(RiftInitialize.MODID, "textures/ui/hud_icons.png");
     private PlayerPartyProperties playerParty;
+    private final HashMap<Integer, RiftCreature> deployedCreatures = new HashMap<>();
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPreRenderGameOverlay(RenderGameOverlayEvent.Pre event) {
         EntityPlayer player = Minecraft.getMinecraft().player;
 
-        //define
+        //define player party
         this.playerParty = PlayerPartyHelper.getPlayerParty(player);
 
         //block if the player party isn't defined yet
         if (this.playerParty == null) return;
+
+        this.updateDeployedCreatures();
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
             ScaledResolution resolution = event.getResolution();
@@ -47,8 +53,35 @@ public class RiftPartyMembersOverlay {
         }
     }
 
+    //this is for linking the deployedCreatures hashmap with deployed creatures in the world
+    private void updateDeployedCreatures() {
+        if (this.playerParty == null) return;
+        for (int index = 0; index < PlayerPartyHelper.maxSize; index++) {
+            CreatureNBT creatureNBT = this.playerParty.getPartyMember(index);
+
+            //check in the party first
+            if (creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
+                //remove from hashmap when creature is no longer deployed
+                this.deployedCreatures.remove(index);
+
+                //skip now
+                continue;
+            }
+
+            //check in the deployedCreatures hashmap too
+            if (this.deployedCreatures.containsKey(index)) continue;
+
+            //get the creature in the world
+            RiftCreature creature = creatureNBT.findCorrespondingCreature(Minecraft.getMinecraft().world);
+            if (creature == null) continue;
+            this.deployedCreatures.put(index, creature);
+        }
+    }
+
     private void renderHUD(FixedSizeList<CreatureNBT> partyNBT, int xSize, int ySize) {
-        CreatureNBT middlePartyMemNBT = partyNBT.get(this.playerParty.getQuickSelectPos());
+        //define middle pos and middle creature nbt
+        int middlePos = this.playerParty.getQuickSelectPos();
+        CreatureNBT middlePartyMemNBT = this.deployedCreatures.containsKey(middlePos) ? new CreatureNBT(this.deployedCreatures.get(middlePos)) : partyNBT.get(middlePos);
 
         //black transparent background and middle creature info
         this.drawSelectedInfo(middlePartyMemNBT, xSize, ySize);
@@ -57,14 +90,16 @@ public class RiftPartyMembersOverlay {
         this.drawArrow(xSize, ySize, true);
 
         //render up
-        CreatureNBT leftPartyMemNBT = partyNBT.get(this.playerParty.getPrevQuickSelectPos());
+        int leftPos = this.playerParty.getPrevQuickSelectPos();
+        CreatureNBT leftPartyMemNBT = this.deployedCreatures.containsKey(leftPos) ? new CreatureNBT(this.deployedCreatures.get(leftPos)) : partyNBT.get(leftPos);
         this.renderPartySlot(leftPartyMemNBT, xSize, ySize, 0.5f, 0.5f, -30);
 
         //render middle
         this.renderPartySlot(middlePartyMemNBT, xSize, ySize, 0.75f, 0.75f, 0);
 
         //render down
-        CreatureNBT rightPartyMemNBT = partyNBT.get(this.playerParty.getNextQuickSelectPos());
+        int rightPos = this.playerParty.getNextQuickSelectPos();
+        CreatureNBT rightPartyMemNBT = this.deployedCreatures.containsKey(rightPos) ? new CreatureNBT(this.deployedCreatures.get(rightPos)) : partyNBT.get(rightPos);
         this.renderPartySlot(rightPartyMemNBT, xSize, ySize, 0.5f, 0.5f, 30);
 
         //down arrow

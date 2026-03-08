@@ -4,9 +4,11 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.newui.panel.ModularPanelExitAffectable;
+import anightdazingzoroark.prift.client.newui.value.HashMapValue;
 import anightdazingzoroark.prift.client.newui.widget.PartyMemberButtonWidget;
 import anightdazingzoroark.prift.client.newui.widget.PaddedGrid;
 import anightdazingzoroark.prift.client.newui.widget.SideButton;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
@@ -27,11 +29,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.function.Function;
 
 public class RiftPartyScreen extends CustomModularScreen {
     private SelectedCreatureInfo.SwapInfo creatureSwapInfo = new SelectedCreatureInfo.SwapInfo();
     private boolean isCreatureSwitching;
+    private HashMap<Integer, RiftCreature> deployedCreatures = new HashMap<>();
 
     public RiftPartyScreen() {
         super(RiftInitialize.MODID);
@@ -49,6 +53,10 @@ public class RiftPartyScreen extends CustomModularScreen {
                 SelectedCreatureInfo.SwapInfo.class,
                 () -> this.creatureSwapInfo,
                 value -> this.creatureSwapInfo = value
+        );
+        HashMapValue.Dynamic<Integer, RiftCreature> deployedCreaturesDynamic = new HashMapValue.Dynamic<>(
+                () -> this.deployedCreatures,
+                value -> this.deployedCreatures = value
         );
 
         return new ModularPanelExitAffectable(UIPanelNames.PARTY_SCREEN)
@@ -133,7 +141,13 @@ public class RiftPartyScreen extends CustomModularScreen {
                                 .child(new PaddedGrid().coverChildren()
                                         .matrix(Grid.mapToMatrix(
                                                 2, PlayerPartyHelper.maxSize,
-                                                index -> new PartyMemberButtonWidget(index, player, creatureSwapInfoDynamic, creatureSwitchingDynamic)
+                                                index -> new PartyMemberButtonWidget(
+                                                        index,
+                                                        player,
+                                                        creatureSwapInfoDynamic,
+                                                        creatureSwitchingDynamic,
+                                                        deployedCreaturesDynamic
+                                                )
                                         ))
                                         .padding(4)
                                 )

@@ -77,7 +77,6 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
 
     //---for deployment and teleportation---
     public boolean canDeployPartyMember(int index) {
-        if (this.getEntityHolder().world.isRemote) return false;
         CreatureNBT creatureNBT = this.getPartyMember(index);
         if (creatureNBT.nbtIsEmpty()) return false;
 
@@ -98,6 +97,7 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
         if (this.getEntityHolder().world.isRemote) return;
 
         CreatureNBT creatureNBT = this.getPartyMember(index);
+
         //find corresponding creature first
         RiftCreature corresponded = creatureNBT.findCorrespondingCreature(this.getEntityHolder().world);
 
@@ -117,6 +117,10 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
         }
         //else, dismiss it
         else {
+            //firstly override the stored nbt with the deployed creature's nbt
+            creatureNBT.overrideCreature(corresponded);
+
+            //continue as usual
             creatureNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
             FixedSizeList<CreatureNBT> playerPartyList = this.getPlayerParty();
             playerPartyList.set(index, creatureNBT);

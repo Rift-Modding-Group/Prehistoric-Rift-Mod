@@ -80,6 +80,13 @@ public class CreatureNBT {
         return creature;
     }
 
+    public void overrideCreature(RiftCreature creature) {
+        if (this.nbtIsEmpty() || creature == null) return;
+        if (!this.getUniqueID().equals(creature.getUniqueID())) return;
+        NBTTagCompound nbtToReplaceWith = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
+        this.creatureNBT.merge(nbtToReplaceWith);
+    }
+
     public NBTTagCompound getCreatureNBT() {
         return this.creatureNBT;
     }

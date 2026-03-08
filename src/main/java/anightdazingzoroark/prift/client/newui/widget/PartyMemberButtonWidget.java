@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.client.newui.UIColors;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.newui.screens.synced.RiftCreatureScreen;
+import anightdazingzoroark.prift.client.newui.value.HashMapValue;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -50,13 +51,20 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
     private final BoolValue.Dynamic creatureSwitchingDynamic;
     private final SelectedCreatureInfo selectedCreatureInfo;
     private final PlayerPartyProperties playerParty;
+    private final HashMapValue.Dynamic<Integer, RiftCreature> deployedCreaturesDynamic;
 
     private boolean isSelected;
     private boolean isSwitching;
     @NotNull
     private CreatureNBT creatureNBT = new CreatureNBT();
 
-    public PartyMemberButtonWidget(int indexIn, EntityPlayer player, ObjectValue.Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic, BoolValue.Dynamic creatureSwitchingDynamic) {
+    public PartyMemberButtonWidget(
+            int indexIn,
+            EntityPlayer player,
+            ObjectValue.Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
+            BoolValue.Dynamic creatureSwitchingDynamic,
+            HashMapValue.Dynamic<Integer, RiftCreature> deployedCreaturesDynamic
+    ) {
         super(UIPanelNames.PARTY_DROPDOWN+indexIn);
         this.index = indexIn;
         this.player = player;
@@ -64,6 +72,7 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
         this.creatureSwitchingDynamic = creatureSwitchingDynamic;
         this.selectedCreatureInfo = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.PARTY, new int[]{indexIn});
         this.playerParty = PlayerPartyHelper.getPlayerParty(player);
+        this.deployedCreaturesDynamic = deployedCreaturesDynamic;
 
         this.requiresClick();
         this.size(80, 48);
@@ -81,7 +90,22 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
         if (!this.isValid()) return;
 
         //update creature
-        this.creatureNBT = this.playerParty.getPartyMember(this.index);
+        this.creatureNBT = this.getCreatureNBT();
+
+        //-----update deployed creature hashmap-----
+        if (this.deployedCreaturesDynamic.getValue().containsKey(this.index)) {
+            //remove from hashmap when creature is no longer deployed
+            if (this.creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
+                this.deployedCreaturesDynamic.getValue().remove(this.index);
+            }
+        }
+        else {
+            //add to hashmap when creature is deployed
+            RiftCreature creature = this.creatureNBT.findCorrespondingCreature(Minecraft.getMinecraft().world);
+            if (creature != null) {
+                this.deployedCreaturesDynamic.getValue().put(this.index, creature);
+            }
+        }
 
         //-----changes based on activation of switching mode-----
         if (this.creatureSwitchingDynamic.getBoolValue() != this.isSwitching) {
@@ -96,6 +120,16 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
             //close dropdowns
             if (this.getMenu().isValid()) this.getMenu().getPanel().closeIfOpen();
         }
+    }
+
+    //get the nbt. its info will be displayed, and if its deployed, should update dynamically
+    private CreatureNBT getCreatureNBT() {
+        //to dynamically update deployed creature info
+        if (this.deployedCreaturesDynamic.getValue().containsKey(this.index)) {
+            return new CreatureNBT(this.deployedCreaturesDynamic.getValue().get(this.index));
+        }
+        //if its not deployed, it remains as is
+        return this.playerParty.getPartyMember(this.index);
     }
 
     @Override
