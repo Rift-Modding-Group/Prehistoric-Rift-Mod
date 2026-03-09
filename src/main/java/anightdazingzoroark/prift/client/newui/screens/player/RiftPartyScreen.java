@@ -5,7 +5,7 @@ import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.newui.panel.ModularPanelExitAffectable;
 import anightdazingzoroark.prift.client.newui.value.HashMapValue;
-import anightdazingzoroark.prift.client.newui.widget.PartyMemberButtonWidget;
+import anightdazingzoroark.prift.client.newui.widget.PartyMemberButtonForPartyWidget;
 import anightdazingzoroark.prift.client.newui.widget.PaddedGrid;
 import anightdazingzoroark.prift.client.newui.widget.SideButton;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -74,7 +74,7 @@ public class RiftPartyScreen extends CustomModularScreen {
                         if (grid == null || !grid.isValid()) return false;
 
                         for (IWidget child : grid.getChildren()) {
-                            if (child instanceof PartyMemberButtonWidget partyMemberButton) {
+                            if (child instanceof PartyMemberButtonForPartyWidget partyMemberButton) {
                                 if (partyMemberButton.getButtonMenu() == null) continue;
                                 if (!partyMemberButton.getButtonMenu().getPanel().isValid()) continue;
 
@@ -90,7 +90,7 @@ public class RiftPartyScreen extends CustomModularScreen {
                         if (grid == null || !grid.isValid()) return;
 
                         for (IWidget child : grid.getChildren()) {
-                            if (child instanceof PartyMemberButtonWidget partyMemberButton) {
+                            if (child instanceof PartyMemberButtonForPartyWidget partyMemberButton) {
                                 if (partyMemberButton.getButtonMenu() == null) continue;
                                 if (!partyMemberButton.getButtonMenu().getPanel().isValid()) continue;
 
@@ -141,7 +141,7 @@ public class RiftPartyScreen extends CustomModularScreen {
                                 .child(new PaddedGrid().coverChildren()
                                         .matrix(Grid.mapToMatrix(
                                                 2, PlayerPartyHelper.maxSize,
-                                                index -> new PartyMemberButtonWidget(
+                                                index -> new PartyMemberButtonForPartyWidget(
                                                         index,
                                                         player,
                                                         creatureSwapInfoDynamic,

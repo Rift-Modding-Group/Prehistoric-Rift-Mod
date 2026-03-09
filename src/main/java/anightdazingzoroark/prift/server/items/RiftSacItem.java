@@ -3,6 +3,10 @@ package anightdazingzoroark.prift.server.items;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftSac;
+import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxHelper;
+import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
+import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
+import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -38,7 +42,10 @@ public class RiftSacItem extends Item {
     }
 
     protected boolean spawnSac(World world, EntityPlayer player, RiftCreatureType creature, double x, double y, double z) {
-        if (PlayerTamedCreaturesHelper.canAddToParty(player) || PlayerTamedCreaturesHelper.canAddCreatureToBox(player)) {
+        PlayerPartyProperties playerParty = PlayerPartyHelper.getPlayerParty(player);
+        PlayerCreatureBoxProperties playerCreatureBox = PlayerCreatureBoxHelper.getPlayerCreatureBox(player);
+
+        if (playerParty.canAddToParty() || playerCreatureBox.canAddCreatureToBox()) {
             RiftSac sac = new RiftSac(world);
             sac.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
             sac.setCreatureType(creature);

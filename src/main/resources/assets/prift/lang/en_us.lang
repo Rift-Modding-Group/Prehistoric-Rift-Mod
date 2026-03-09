@@ -215,15 +215,6 @@ item.gold_plate.name=Gold Plate
 item.iron_rod.name=Iron Rod
 item.gold_rod.name=Gold Rod
 
-item.player_party_upgrade.name=Player Party Upgrade
-item.player_party_upgrade.tooltip=Use this to increase the amount of slots you can have in your party
-item.player_box_upgrade.name=Player Box Upgrade
-item.player_box_upgrade.tooltip=Use this to increase the amount of slots you can have in your box
-item.box_wanderer_upgrade.name=Creature Box Wanderer Upgrade
-item.box_wanderer_upgrade.tooltip=Use this on any creature box to increase the amount of creatures that can wander around it
-item.box_range_upgrade.name=Creature Box Range Upgrade
-item.box_range_upgrade.tooltip=Use this on any creature box to increase the wander range and spawn blocking range of wild creatures of the box
-
 jei.min_power=Minimum Power: %s R
 jei.chance=Chance: %s
 
@@ -526,6 +517,8 @@ party.label=Your Party
 party.party_member_name=%s (Level %s)
 party.swap_creatures=Swap Creatures
 party.open_journal=Journal
+
+box.party_label=Your Party
 
 tametrait.level=Level %s
 tametrait.health=Health: %s/%s

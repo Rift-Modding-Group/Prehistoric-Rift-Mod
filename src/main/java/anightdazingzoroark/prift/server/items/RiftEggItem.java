@@ -3,6 +3,10 @@ package anightdazingzoroark.prift.server.items;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
+import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxHelper;
+import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
+import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
+import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.util.EnumActionResult;
@@ -38,7 +42,10 @@ public class RiftEggItem extends Item {
     }
 
     protected boolean spawnEgg(World world, EntityPlayer player, RiftCreatureType creature, double x, double y, double z) {
-        if (PlayerTamedCreaturesHelper.canAddToParty(player) || PlayerTamedCreaturesHelper.canAddCreatureToBox(player)) {
+        PlayerPartyProperties playerParty = PlayerPartyHelper.getPlayerParty(player);
+        PlayerCreatureBoxProperties playerCreatureBox = PlayerCreatureBoxHelper.getPlayerCreatureBox(player);
+
+        if (playerParty.canAddToParty() || playerCreatureBox.canAddCreatureToBox()) {
             RiftEgg egg = new RiftEgg(world);
             egg.setLocationAndAngles(x, y, z, world.rand.nextFloat() * 360.0F, 0.0F);
             egg.setCreatureType(creature);

@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.tileentities;
 
+import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.newui.screens.synced.RiftCreatureBoxScreen;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.helper.ChunkPosWithVerticality;
@@ -35,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,6 +46,12 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, 
     private UUID ownerID = RiftUtil.nilUUID;
     private String ownerName = "";
     private int deploymentRange = 1;
+
+    //for use in ui
+    private boolean isCreatureSwitching;
+    private SelectedCreatureInfo.SwapInfo creatureSwapInfo = new SelectedCreatureInfo.SwapInfo();
+    private HashMap<Integer, RiftCreature> deployedPartyCreatures = new HashMap<>();
+    private int currentBoxIndex;
 
     @Override
     public void update() {
@@ -167,6 +175,40 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, 
         int maxZ = list.get(list.size() - 1).getZEnd() + 1;
         return new int[]{minZ, maxZ};
     }
+
+    //-----getters and setters for ui start here-----
+    public boolean getIsCreatureSwitching() {
+        return this.isCreatureSwitching;
+    }
+
+    public void setIsCreatureSwitching(boolean value) {
+        this.isCreatureSwitching = value;
+    }
+
+    public SelectedCreatureInfo.SwapInfo getCreatureSwapInfo() {
+        return this.creatureSwapInfo;
+    }
+
+    public void setCreatureSwapInfo(SelectedCreatureInfo.SwapInfo swapInfo) {
+        this.creatureSwapInfo = swapInfo;
+    }
+
+    public HashMap<Integer, RiftCreature> getDeployedPartyCreatures() {
+        return this.deployedPartyCreatures;
+    }
+
+    public void setDeployedPartyCreatures(HashMap<Integer, RiftCreature> value) {
+        this.deployedPartyCreatures = value;
+    }
+
+    public int getCurrentBoxIndex() {
+        return this.currentBoxIndex;
+    }
+
+    public void setCurrentBoxIndex(int value) {
+        this.currentBoxIndex = value;
+    }
+    //-----getters and setters for ui end here-----
 
     //this creates the creatures that wander around the box
     private void createCreaturesForWandering() {

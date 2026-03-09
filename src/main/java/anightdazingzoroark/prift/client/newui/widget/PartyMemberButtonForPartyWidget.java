@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.newui.widget;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.newui.RiftUIIcons;
 import anightdazingzoroark.prift.client.newui.UIColors;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
@@ -44,7 +45,7 @@ import java.util.Arrays;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButtonWidget> implements Interactable {
+public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemberButtonForPartyWidget> implements Interactable {
     private final int index;
     private final EntityPlayer player;
     private final ObjectValue.Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic;
@@ -58,7 +59,7 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
     @NotNull
     private CreatureNBT creatureNBT = new CreatureNBT();
 
-    public PartyMemberButtonWidget(
+    public PartyMemberButtonForPartyWidget(
             int indexIn,
             EntityPlayer player,
             ObjectValue.Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
@@ -146,7 +147,7 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
 
         //clear other already opened dropdowns and their selected flags
         for (IWidget child : gridParent.getChildren()) {
-            if (!(child instanceof PartyMemberButtonWidget partyMemButton)) continue;
+            if (!(child instanceof PartyMemberButtonForPartyWidget partyMemButton)) continue;
             if (!partyMemButton.getMenu().isValid()) continue;
             if (partyMemButton.index != this.index) partyMemButton.isSelected = false;
             partyMemButton.getMenu().getPanel().closeIfOpen();
@@ -165,7 +166,7 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
 
             //apply change to all buttons
             for (IWidget child : gridParent.getChildren()) {
-                if (!(child instanceof PartyMemberButtonWidget partyMemButton)) continue;
+                if (!(child instanceof PartyMemberButtonForPartyWidget partyMemButton)) continue;
                 partyMemButton.isSelected = false;
             }
         }
@@ -202,13 +203,7 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
             new Rectangle().color(this.getIconBGColor()).cornerRadius(5).draw(context, 3, 3, 26, 26, theme);
 
             //draw creature icon
-            Icon creatureIcon = UITexture.fullImage(
-                    new ResourceLocation(
-                            RiftInitialize.MODID,
-                            "textures/icons/"+this.creatureNBT.getCreatureType().toString().toLowerCase()+"_icon.png"
-                    )
-            ).asIcon();
-            creatureIcon.draw(context, 4, 4, 24, 24, theme);
+            RiftUIIcons.creatureIcon(this.creatureNBT.getCreatureType()).draw(context, 4, 4, 24, 24, theme);
 
             //define strings and other values
             IKey creatureNameString = IKey.str(this.creatureNBT.getCreatureName(false)).alignment(Alignment.CenterLeft);
@@ -287,7 +282,7 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
     }
 
     @Override
-    public PartyMemberButtonWidget menuList(Consumer<ListWidget<IWidget, ?>> builder) {
+    public PartyMemberButtonForPartyWidget menuList(Consumer<ListWidget<IWidget, ?>> builder) {
         ListWidget<IWidget, ?> l = new ListWidget<>().widthRel(1f);
         builder.accept(l);
         return this.menu(new Menu<>().width(64).center()
@@ -502,10 +497,10 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
     }
 
     private static class PartyMemberDropdownOptionWidget extends ButtonWidget<PartyMemberDropdownOptionWidget> {
-        private final PartyMemberButtonWidget parent;
-        private final PartyMemberButtonWidget.Option option;
+        private final PartyMemberButtonForPartyWidget parent;
+        private final PartyMemberButtonForPartyWidget.Option option;
 
-        public PartyMemberDropdownOptionWidget(@NotNull PartyMemberButtonWidget parent, PartyMemberButtonWidget.Option optionIn) {
+        public PartyMemberDropdownOptionWidget(@NotNull PartyMemberButtonForPartyWidget parent, PartyMemberButtonForPartyWidget.Option optionIn) {
             this.parent = parent;
             this.option = optionIn;
             this.name("Dropdown");
@@ -536,7 +531,7 @@ public class PartyMemberButtonWidget extends ContextMenuButton<PartyMemberButton
         private void markAllTooltipsDirty() {
             if (!(this.getParent() instanceof ListWidget<?,?> listWidgetParent)) return;
             for (IWidget child : listWidgetParent.getChildren()) {
-                if (!(child instanceof PartyMemberButtonWidget.PartyMemberDropdownOptionWidget optionWidget)) continue;
+                if (!(child instanceof PartyMemberButtonForPartyWidget.PartyMemberDropdownOptionWidget optionWidget)) continue;
                 optionWidget.markTooltipDirty();
             }
         }
