@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "package": "anightdazingzoroark.prift.mixin",
+  "plugin": "anightdazingzoroark.prift.RiftMixinConfigPlugin",
+  "compatibilityLevel": "JAVA_8",
+  "target": "@env(MOD)",
+  "client": [],
+  "mixins": [
+    "pyrotech.RiftMixinPyrotechTileEntityAnvil",
+    "pyrotech.RiftMixinPyrotechTileEntityChoppingBlock",
+    "pyrotech.RiftMixinPyrotechBloomeryRecipeBase",
+    "pyrotech.RiftMixinBloomAnvilRecipeFromAnkylosaurus"
+  ],
+  "server": [],
+  "setSourceFile": true,
+  "minVersion": "0.8.7"
+}

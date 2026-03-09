@@ -12,8 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class RiftMixinSetTargetAfterHitboxHit {
     @Inject(method = "setLastAttackedEntity", at = @At(value = "HEAD"), cancellable = true)
     public void setLastAttackedEntity(Entity entity, CallbackInfo ci) {
-        if (entity instanceof MultiPartEntityPart) {
-            MultiPartEntityPart entityPart = (MultiPartEntityPart) entity;
+        if (entity instanceof MultiPartEntityPart entityPart) {
             if (entityPart.parent instanceof EntityLivingBase) {
                 ((EntityLivingBase) (Object)this).lastAttackedEntity = (EntityLivingBase) entityPart.parent;
             }

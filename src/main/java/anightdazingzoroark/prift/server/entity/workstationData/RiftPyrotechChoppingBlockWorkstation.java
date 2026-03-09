@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity.workstationData;
 
 import anightdazingzoroark.prift.config.GeneralConfig;
-import anightdazingzoroark.prift.mixin.RiftMixinPyrotechTileEntityChoppingBlock;
+import anightdazingzoroark.prift.mixin.pyrotech.RiftMixinPyrotechTileEntityChoppingBlock;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import com.codetaylor.mc.athenaeum.util.ArrayHelper;
 import com.codetaylor.mc.athenaeum.util.BlockHelper;

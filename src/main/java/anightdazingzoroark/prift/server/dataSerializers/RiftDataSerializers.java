@@ -25,7 +25,7 @@ public class RiftDataSerializers {
             ByteBufUtils.writeTag(buf, listNBT);
         }
 
-        public List<CreatureMove> read(PacketBuffer buf) throws IOException {
+        public List<CreatureMove> read(PacketBuffer buf) {
             NBTTagCompound listNBT = ByteBufUtils.readTag(buf);
             if (listNBT == null) return new ArrayList<>();
             return MoveListUtil.getListCreatureMoveFromNBT(listNBT);
@@ -48,7 +48,7 @@ public class RiftDataSerializers {
         }
 
         @Override
-        public FixedSizeList<CreatureMove> read(PacketBuffer buf) throws IOException {
+        public FixedSizeList<CreatureMove> read(PacketBuffer buf) {
             NBTTagCompound fixedSizeListNBT = ByteBufUtils.readTag(buf);
             if (fixedSizeListNBT == null) return new FixedSizeList<>(0);
             return MoveListUtil.getFixedSizeListCreatureMoveFromNBT(fixedSizeListNBT);
@@ -80,7 +80,7 @@ public class RiftDataSerializers {
         }
 
         @Override
-        public CreatureAcquisitionInfo read(PacketBuffer buf) throws IOException {
+        public CreatureAcquisitionInfo read(PacketBuffer buf) {
             byte methodByte = buf.readByte();
             CreatureAcquisitionInfo.AcquisitionMethod method = methodByte >= 0 ? CreatureAcquisitionInfo.AcquisitionMethod.values()[methodByte] : null;
 

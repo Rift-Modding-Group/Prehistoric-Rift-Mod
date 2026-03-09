@@ -30,7 +30,6 @@ import java.util.Map;
         version = RiftInitialize.MODVERSION,
         dependencies = "required-after:forge@[11.16.0.1865,);"
                 +"required-after:riftlib@[1.0.0,);"
-                +"required-after:mixinbooter@[10.2,);"
                 +"required-after:modularui@[3.1.0,);"
                 +"after:harvestcraft@[1.12.2zb,);"
                 +"after:pyrotech@[1.12.2-1.6.11,);"

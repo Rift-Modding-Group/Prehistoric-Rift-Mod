@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "anightdazingzoroark.prift.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "target": "@env(DEFAULT)",
+  "client": [],
+  "mixins": [
+    "RiftMixinHypnotizedTargeting",
+    "RiftMixinPolarBearAIAttackPlayer",
+    "RiftMixinSetTargetAfterHitboxHit"
+  ],
+  "server": [],
+  "setSourceFile": true,
+  "minVersion": "0.8.7"
+}

@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
-import com.github.bsideup.jabel.Desugar;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
@@ -122,7 +121,7 @@ public class CreatureInventoryHandler extends ItemStackHandler {
         return this.stacks.toString();
     }
 
-    public @Desugar record ItemSearchResult(boolean successful, ItemStack foundStack, int slot) {}
+    public record ItemSearchResult(boolean successful, ItemStack foundStack, int slot) {}
 
     public enum ItemSearchDirection {
         FIRST_TO_LAST,

@@ -18,8 +18,7 @@ public class RiftMixinHypnotizedTargeting {
         //perform check involving whether or not the entity has been hypnotized
         //cancel if the hypnotizer has no target
         EntityLiving user = (EntityLiving) ((Object) this);
-        if (user instanceof EntityCreature) {
-            EntityCreature userCreature = (EntityCreature) user;
+        if (user instanceof EntityCreature userCreature) {
             if (NonPotionEffectsHelper.isHypnotized(userCreature) && NonPotionEffectsHelper.targetingBlockableForHypnotized(userCreature)) {
                 userCreature.attackTarget = null;
                 net.minecraftforge.common.ForgeHooks.onLivingSetAttackTarget(userCreature, null);

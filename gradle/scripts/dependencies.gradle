@@ -20,44 +20,33 @@ repositories {
         url "https://mmdmaven.blamejared.com/"
     }
     maven {
-        // location of the maven that hosts JEI files
-        name = "Progwml6 maven"
-        url = "https://dvs1.progwml6.com/files/maven/"
-    }
-    maven {
-        // location of a maven mirror for JEI files, as a fallback
         name = "ModMaven"
         url = "https://modmaven.dev"
     }
     maven {
         url 'https://maven.mcmoddev.com'
     }
-    maven {
-        name 'Cleanroom Maven'
-        url 'https://maven.cleanroommc.com'
-    }
     mavenLocal() // Must be last for caching to work
 }
 
 dependencies {
-    // Include StripLatestForgeRequirements by default for the dev env, saves everyone a hassle
-    runtimeOnly 'com.cleanroommc:strip-latest-forge-requirements:1.0'
-    // Include OSXNarratorBlocker by default for the dev env, for M1+ Macs
-    runtimeOnly 'com.cleanroommc:osxnarratorblocker:1.0'
+    compileOnly "com.cleanroommc:sponge-mixin:0.20.12+mixin.0.8.7"
+    if (propertyBool('enable_lwjglx')) {
+        compileOnly "com.cleanroommc:lwjglx:1.0.0"
+    }
+    modImplementation 'curse.maven:hei-557549:6187146' // Use for mod Mixin example
 
     compileOnly 'curse.maven:shoulder-surfing-reloaded-243190:4757879'
     compileOnly "curse.maven:pyrotech-306676:4956838"
     compileOnly "curse.maven:athenaeum-284350:4633750"
     compileOnly "curse.maven:simpledifficulty-360779:3613814"
     compileOnly "curse.maven:mysticalmechanics-300742:3006392"
-    compileOnly "mezz.jei:jei_${mc_version}:${jei_version}:api"
     compileOnly "curse.maven:crafttweaker-239197:5354089"
     compileOnly "curse.maven:pams-harvestcraft-221857:2904825"
     compileOnly files("libs/Hwyla-1.8.26-B41_1.12.2-api.jar")
     compileOnly files("libs/riftlib-1.1.0-dev.jar")
     compileOnly "curse.maven:serene-seasons-291874:2799213"
     compileOnly "net.darkhax.gamestages:GameStages-1.12.2:2.0.123"
-    api ("com.cleanroommc:modularui:3.1.2") { transitive = false }
-    implementation "mezz.jei:jei_${mc_version}:${jei_version}"
+    modImplementation ("com.cleanroommc:modularui:3.1.4") { transitive = false }
     implementation 'org.jetbrains:annotations:16.0.2'
 }

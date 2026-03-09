@@ -11,7 +11,6 @@ import anightdazingzoroark.prift.client.renderer.BlockRenderer;
 import anightdazingzoroark.prift.client.renderer.EntityRenderer;
 import anightdazingzoroark.prift.client.renderer.FluidRenderer;
 import anightdazingzoroark.prift.client.renderer.ItemRenderer;
-import anightdazingzoroark.prift.client.ui.creatureBoxScreen.RiftCreatureBoxScreen;
 import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSection;
@@ -20,11 +19,9 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureHitboxLinker;
 import anightdazingzoroark.prift.server.entity.RiftCreatureRidePosLinker;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.riftlib.RiftLibLinkerRegistry;
-import anightdazingzoroark.riftlib.ui.RiftLibUIRegistry;
 import com.cleanroommc.modularui.api.IThemeApi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -35,8 +32,6 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.UUID;
 
 @Mod.EventBusSubscriber
 public class ClientProxy extends ServerProxy {

@@ -1,11 +1,11 @@
-package anightdazingzoroark.prift.mixin;
+package anightdazingzoroark.prift.mixin.pyrotech;
 
 import com.codetaylor.mc.pyrotech.modules.tech.basic.recipe.AnvilRecipe;
 import com.codetaylor.mc.pyrotech.modules.tech.basic.tile.spi.TileAnvilBase;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(TileAnvilBase.class)
+@Mixin(value=TileAnvilBase.class, remap = false)
 public interface RiftMixinPyrotechTileEntityAnvil {
     @Invoker(value = "setRecipe", remap = false)
     void invokeAnvilSetRecipe(AnvilRecipe recipe);

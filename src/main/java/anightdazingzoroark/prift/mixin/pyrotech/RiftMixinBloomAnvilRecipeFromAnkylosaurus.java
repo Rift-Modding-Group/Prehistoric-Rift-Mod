@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.mixin;
+package anightdazingzoroark.prift.mixin.pyrotech;
 
 import com.codetaylor.mc.athenaeum.util.RandomHelper;
 import com.codetaylor.mc.pyrotech.modules.tech.basic.tile.spi.TileAnvilBase;
@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mixin(BloomAnvilRecipe.class)
+@Mixin(value=BloomAnvilRecipe.class, remap = false)
 public class RiftMixinBloomAnvilRecipeFromAnkylosaurus {
     @Inject(method = "onRecipeCompleted", at = @At("HEAD"), remap = false, cancellable = true)
     public void onRecipeCompleted(TileAnvilBase tile, World world, ItemStackHandler stackHandler, BloomAnvilRecipe recipe, ItemStack toolItemStack, CallbackInfoReturnable<List<ItemStack>> ci) {
