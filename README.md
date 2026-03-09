@@ -7,11 +7,8 @@ This is a direct port of the since discontinued [Bedrock Version](https://github
 
 Highly recommended that you join the Discord server as well: https://discord.gg/JnjQtkVt8R
 
-The mod is for Minecraft Forge 1.12.2, and requires the following dependencies:
+The mod is for [Cleanroom](https://cleanroommc.com/) for Minecraft 1.12.2, and requires the following dependencies:
 * [RiftLibrary](https://www.curseforge.com/minecraft/mc-mods/riftlibrary)
-* [MixinBooter](https://www.curseforge.com/minecraft/mc-mods/mixin-booter)
-
-All the above dependencies require the latest versions of their 1.12.2 versions to work.
 
 Also has integrations with the following mods:
 * [Shoulder Surfing](https://www.curseforge.com/minecraft/mc-mods/shoulder-surfing-reloaded)
