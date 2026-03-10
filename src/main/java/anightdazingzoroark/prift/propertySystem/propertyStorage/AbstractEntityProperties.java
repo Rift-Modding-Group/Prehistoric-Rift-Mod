@@ -26,15 +26,15 @@ public abstract class AbstractEntityProperties<E extends Entity> {
         this.entityHolder = entityHolder;
     }
 
-    //-----initialization-----
+    //-----initialization and registration-----
     protected abstract void registerDefaults(E entity);
 
-    //-----register related methods-----
-    public void register(AbstractPropertyValue<?> value) {
+    protected void register(AbstractPropertyValue<?> value) {
         this.register(value, true);
     }
 
-    public void register(AbstractPropertyValue<?> value, boolean persist) {
+    //persistence means that the data will be saved when the world is unloaded
+    protected void register(AbstractPropertyValue<?> value, boolean persist) {
         this.propertyValueMap.put(value.getKey(), new ImmutablePair<>(value, persist));
 
         //sync to client afterwards from server
