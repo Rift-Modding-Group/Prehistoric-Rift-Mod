@@ -2,12 +2,18 @@ package anightdazingzoroark.prift.server.properties.playerParty;
 
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.propertySystem.Property;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.*;
 import anightdazingzoroark.prift.server.properties.RiftPropertyRegistry;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.HashMap;
 
 public class PlayerPartyHelper {
     public static final int maxSize = 6;
+    //this is for storing creatures that got deployed
+    public static final HashMap<Integer, RiftCreature> deployedCreatures = new HashMap<>();
 
     public static PlayerPartyProperties getPlayerParty(EntityPlayer player) {
         return Property.getProperty(RiftPropertyRegistry.PLAYER_PARTY, player);

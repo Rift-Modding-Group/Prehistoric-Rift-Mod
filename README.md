@@ -9,6 +9,7 @@ Highly recommended that you join the Discord server as well: https://discord.gg/
 
 The mod is for [Cleanroom](https://cleanroommc.com/) for Minecraft 1.12.2, and requires the following dependencies:
 * [RiftLibrary](https://www.curseforge.com/minecraft/mc-mods/riftlibrary)
+* [ModularUI](https://www.curseforge.com/minecraft/mc-mods/modularui)
 
 Also has integrations with the following mods:
 * [Shoulder Surfing](https://www.curseforge.com/minecraft/mc-mods/shoulder-surfing-reloaded)

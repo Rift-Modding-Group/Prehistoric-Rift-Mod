@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue;
 
 import net.minecraft.nbt.NBTTagCompound;
 
-public class IntPropertyValue extends PropertyValue<Integer> {
+public class IntPropertyValue extends AbstractPropertyValue<Integer> {
     public IntPropertyValue(String key, Integer defaultValue) {
         super(key, defaultValue);
     }
@@ -15,5 +15,10 @@ public class IntPropertyValue extends PropertyValue<Integer> {
     @Override
     public void readFromNBT(NBTTagCompound nbtTagCompound) {
         this.value = nbtTagCompound.getInteger(this.getKey());
+    }
+
+    @Override
+    public Class<Integer> getHeldClass() {
+        return Integer.class;
     }
 }

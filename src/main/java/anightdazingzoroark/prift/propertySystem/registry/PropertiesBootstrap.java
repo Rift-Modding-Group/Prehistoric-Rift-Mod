@@ -33,8 +33,8 @@ public class PropertiesBootstrap {
 
                     @Override
                     public void readNBT(Capability<PropertiesRoot> capability, PropertiesRoot instance, EnumFacing side, NBTBase nbt) {
-                        // entity is needed to resolve/init sets, so actual read happens in Provider.deserializeNBT
-                        // This method can remain empty safely.
+                        //entity is needed to resolve/init sets, so actual read happens in Provider.deserializeNBT
+                        //this method can remain empty safely.
                     }
                 },
                 PropertiesRoot::new

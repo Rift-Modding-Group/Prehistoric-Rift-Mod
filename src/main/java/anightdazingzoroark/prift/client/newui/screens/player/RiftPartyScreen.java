@@ -23,6 +23,7 @@ import com.cleanroommc.modularui.value.ObjectValue;
 import com.cleanroommc.modularui.widget.ParentWidget;
 import com.cleanroommc.modularui.widgets.ToggleButton;
 import com.cleanroommc.modularui.widgets.layout.Column;
+import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.cleanroommc.modularui.widgets.layout.Grid;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -35,7 +36,6 @@ import java.util.function.Function;
 public class RiftPartyScreen extends CustomModularScreen {
     private SelectedCreatureInfo.SwapInfo creatureSwapInfo = new SelectedCreatureInfo.SwapInfo();
     private boolean isCreatureSwitching;
-    private HashMap<Integer, RiftCreature> deployedCreatures = new HashMap<>();
 
     public RiftPartyScreen() {
         super(RiftInitialize.MODID);
@@ -53,10 +53,6 @@ public class RiftPartyScreen extends CustomModularScreen {
                 SelectedCreatureInfo.SwapInfo.class,
                 () -> this.creatureSwapInfo,
                 value -> this.creatureSwapInfo = value
-        );
-        HashMapValue.Dynamic<Integer, RiftCreature> deployedCreaturesDynamic = new HashMapValue.Dynamic<>(
-                () -> this.deployedCreatures,
-                value -> this.deployedCreatures = value
         );
 
         return new ModularPanelExitAffectable(UIPanelNames.PARTY_SCREEN)
@@ -113,7 +109,7 @@ public class RiftPartyScreen extends CustomModularScreen {
                     }
                 })
                 .width(180).coverChildrenHeight()
-                .child(new Column().coverChildren()
+                .child(Flow.column().coverChildren()
                         .leftRel(0f, 4, 1f)
                         .child(new SideButton()
                                 .overlay(new ItemDrawable(Items.BOOK).asIcon())
@@ -127,7 +123,7 @@ public class RiftPartyScreen extends CustomModularScreen {
                 )
                 .child(new ParentWidget<>().padding(7, 7)
                         .coverChildren()
-                        .child(new Column().coverChildren()
+                        .child(Flow.column().coverChildren()
                                 .childPadding(5)
                                 .child(new ParentWidget<>().coverChildrenHeight().widthRel(1f)
                                         .child(IKey.lang("party.label").asWidget().align(Alignment.CenterLeft))
@@ -145,8 +141,7 @@ public class RiftPartyScreen extends CustomModularScreen {
                                                         index,
                                                         player,
                                                         creatureSwapInfoDynamic,
-                                                        creatureSwitchingDynamic,
-                                                        deployedCreaturesDynamic
+                                                        creatureSwitchingDynamic
                                                 )
                                         ))
                                         .padding(4)

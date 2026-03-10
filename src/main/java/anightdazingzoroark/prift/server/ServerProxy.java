@@ -73,7 +73,6 @@ public class ServerProxy {
         RiftBlocks.registerOreDicTags();
         RiftRecipes.registerSmelting();
         RiftEffects.registerEffects();
-        RiftCreatureProjectile.initCreatureProjectileBuilders();
         if (GeneralConfig.canUseMM()) RiftMMRecipes.registerRecipes();
         RiftCrafttweaker.loadCrafttweakerCompat();
         MinecraftForge.EVENT_BUS.register(new RiftItems());

@@ -52,7 +52,6 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
     private final BoolValue.Dynamic creatureSwitchingDynamic;
     private final SelectedCreatureInfo selectedCreatureInfo;
     private final PlayerPartyProperties playerParty;
-    private final HashMapValue.Dynamic<Integer, RiftCreature> deployedCreaturesDynamic;
 
     private boolean isSelected;
     private boolean isSwitching;
@@ -63,8 +62,7 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
             int indexIn,
             EntityPlayer player,
             ObjectValue.Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
-            BoolValue.Dynamic creatureSwitchingDynamic,
-            HashMapValue.Dynamic<Integer, RiftCreature> deployedCreaturesDynamic
+            BoolValue.Dynamic creatureSwitchingDynamic
     ) {
         super(UIPanelNames.PARTY_DROPDOWN+indexIn);
         this.index = indexIn;
@@ -73,7 +71,6 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
         this.creatureSwitchingDynamic = creatureSwitchingDynamic;
         this.selectedCreatureInfo = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.PARTY, new int[]{indexIn});
         this.playerParty = PlayerPartyHelper.getPlayerParty(player);
-        this.deployedCreaturesDynamic = deployedCreaturesDynamic;
 
         this.requiresClick();
         this.size(80, 48);
@@ -93,21 +90,6 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
         //update creature
         this.creatureNBT = this.getCreatureNBT();
 
-        //-----update deployed creature hashmap-----
-        if (this.deployedCreaturesDynamic.getValue().containsKey(this.index)) {
-            //remove from hashmap when creature is no longer deployed
-            if (this.creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
-                this.deployedCreaturesDynamic.getValue().remove(this.index);
-            }
-        }
-        else {
-            //add to hashmap when creature is deployed
-            RiftCreature creature = this.creatureNBT.findCorrespondingCreature(Minecraft.getMinecraft().world);
-            if (creature != null) {
-                this.deployedCreaturesDynamic.getValue().put(this.index, creature);
-            }
-        }
-
         //-----changes based on activation of switching mode-----
         if (this.creatureSwitchingDynamic.getBoolValue() != this.isSwitching) {
             this.isSwitching = this.creatureSwitchingDynamic.getBoolValue();
@@ -126,8 +108,8 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
     //get the nbt. its info will be displayed, and if its deployed, should update dynamically
     private CreatureNBT getCreatureNBT() {
         //to dynamically update deployed creature info
-        if (this.deployedCreaturesDynamic.getValue().containsKey(this.index)) {
-            return new CreatureNBT(this.deployedCreaturesDynamic.getValue().get(this.index));
+        if (PlayerPartyHelper.deployedCreatures.containsKey(this.index)) {
+            return new CreatureNBT(PlayerPartyHelper.deployedCreatures.get(this.index));
         }
         //if its not deployed, it remains as is
         return this.playerParty.getPartyMember(this.index);

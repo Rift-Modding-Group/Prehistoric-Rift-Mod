@@ -79,5 +79,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftSetCreatureNBTParam.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftApplyCreatureSwap.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftChangeQuickSelectPos.class, RiftLibMessageSide.SERVER);
+        WRAPPER.registerMessage(RiftInitDeployedCreatureMap.class, RiftLibMessageSide.CLIENT);
     }
 }

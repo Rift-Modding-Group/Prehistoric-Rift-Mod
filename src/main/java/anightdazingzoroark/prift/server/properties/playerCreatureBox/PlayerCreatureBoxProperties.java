@@ -2,9 +2,10 @@ package anightdazingzoroark.prift.server.properties.playerCreatureBox;
 
 import anightdazingzoroark.prift.propertySystem.propertyStorage.AbstractEntityProperties;
 import anightdazingzoroark.prift.helper.CreatureNBT;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.ObjectPropertyValue;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.properties.propertyValues.CreatureBoxStoragePropertyValue;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagList;
 import org.jetbrains.annotations.NotNull;
 
 public class PlayerCreatureBoxProperties extends AbstractEntityProperties<EntityPlayer> {
@@ -14,16 +15,26 @@ public class PlayerCreatureBoxProperties extends AbstractEntityProperties<Entity
 
     @Override
     protected void registerDefaults(EntityPlayer entity) {
-        this.put(new CreatureBoxStoragePropertyValue("CreatureBoxStorage", new CreatureBoxStorage()));
+        this.register(new ObjectPropertyValue<CreatureBoxStorage>(
+                "CreatureBoxStorage", new CreatureBoxStorage(), CreatureBoxStorage.class,
+                CreatureBoxStorage::writeNBTList,
+                nbtBase -> {
+                        CreatureBoxStorage toReturn = new CreatureBoxStorage();
+                        if (!(nbtBase instanceof NBTTagList nbtTagList)) return toReturn;
+                        toReturn.parseNBTList(nbtTagList);
+                        return toReturn;
+                    }
+                )
+        );
     }
 
     //-----direct creature box contents editing and getting-----
     public CreatureBoxStorage getCreatureBoxStorage() {
-        return (CreatureBoxStorage) this.getProperty("CreatureBoxStorage").getValue();
+        return this.get("CreatureBoxStorage");
     }
 
     private void setCreatureBoxStorage(CreatureBoxStorage creatureBoxStorage) {
-        this.put(new CreatureBoxStoragePropertyValue("CreatureBoxStorage", creatureBoxStorage));
+        this.set("CreatureBoxStorage", creatureBoxStorage);
     }
 
     //-----indirect creature box contents editing and getting-----

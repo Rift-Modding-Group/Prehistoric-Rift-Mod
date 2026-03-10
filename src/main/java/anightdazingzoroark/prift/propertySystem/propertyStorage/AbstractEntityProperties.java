@@ -1,15 +1,16 @@
 package anightdazingzoroark.prift.propertySystem.propertyStorage;
 
 import anightdazingzoroark.prift.propertySystem.networking.PropertiesNetworking;
-import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.PropertyValue;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 
 public abstract class AbstractEntityProperties<E extends Entity> {
-    protected final HashMap<String, PropertyValue<?>> propertyValueMap = new HashMap<>();
+    protected final HashMap<String, ImmutablePair<AbstractPropertyValue<?>, Boolean>> propertyValueMap = new HashMap<>();
     @NotNull
     private final String propertyName;
     private final E entityHolder;
@@ -28,11 +29,51 @@ public abstract class AbstractEntityProperties<E extends Entity> {
     //-----initialization-----
     protected abstract void registerDefaults(E entity);
 
-    //-----setting and getting values-----
-    public void put(PropertyValue<?> value) {
-        this.propertyValueMap.put(value.getKey(), value);
+    //-----register related methods-----
+    public void register(AbstractPropertyValue<?> value) {
+        this.register(value, true);
+    }
+
+    public void register(AbstractPropertyValue<?> value, boolean persist) {
+        this.propertyValueMap.put(value.getKey(), new ImmutablePair<>(value, persist));
 
         //sync to client afterwards from server
+        this.syncToClient(value);
+    }
+
+    //-----methods relating to putting values-----
+    //universal setter and getter
+    private <I extends AbstractPropertyValue<?>> I getExistingProperty(String key) {
+        //check if key exists
+        if (!this.propertyValueMap.containsKey(key)) {
+            throw new UnsupportedOperationException("Key "+key+" does not exist in property "+this.getPropertyName()+"!");
+        }
+
+        return (I) this.propertyValueMap.get(key).left;
+    }
+
+    public <I> void set(String key, I value) {
+        //check if key corresponds to value
+        AbstractPropertyValue<I> propertyValue = this.getExistingProperty(key);
+
+        if (propertyValue.getHeldClass() != value.getClass()) {
+            throw new UnsupportedOperationException("Key "+key+" does not represent given value!");
+        }
+
+        //now set as usual
+        propertyValue.setValue(value);
+        boolean persist = this.propertyValueMap.get(key).right;
+        this.propertyValueMap.put(key, new ImmutablePair<>(propertyValue, persist));
+        this.syncToClient(propertyValue);
+    }
+
+    public <I> I get(String key) {
+        AbstractPropertyValue<I> propertyValue = this.getExistingProperty(key);
+        return propertyValue.getValue();
+    }
+
+    //sync to client from server
+    private void syncToClient(AbstractPropertyValue<?> value) {
         if (this.entityHolder != null && !this.entityHolder.world.isRemote) {
             PropertiesNetworking.sendDelta(
                     this.entityHolder,
@@ -43,13 +84,9 @@ public abstract class AbstractEntityProperties<E extends Entity> {
         }
     }
 
+    //-----general getters-----
     public boolean has(String key) {
         return this.propertyValueMap.containsKey(key);
-    }
-
-    @SuppressWarnings("unchecked")
-    public final <T> PropertyValue<T> getProperty(String key) {
-        return (PropertyValue<T>) this.propertyValueMap.get(key);
     }
 
     //-----holder related-----
@@ -61,28 +98,38 @@ public abstract class AbstractEntityProperties<E extends Entity> {
         return this.entityHolder;
     }
 
-    //-----save all properties-----
+    //-----nbt related stuff-----
+    //save all properties
     public NBTTagCompound writeAllToNBT() {
         NBTTagCompound tag = new NBTTagCompound();
-        for (PropertyValue<?> propertyValue : this.propertyValueMap.values()) propertyValue.writeToNBT(tag);
+        for (ImmutablePair<AbstractPropertyValue<?>, Boolean> propertyValuePair : this.propertyValueMap.values()) {
+            if (propertyValuePair.right) propertyValuePair.left.writeToNBT(tag);
+        }
         return tag;
     }
 
     //load all properties
     public void readAllFromNBT(NBTTagCompound tag) {
-        for (PropertyValue<?> propertyValue : this.propertyValueMap.values()) propertyValue.readFromNBT(tag);
+        for (ImmutablePair<AbstractPropertyValue<?>, Boolean> propertyValuePair : this.propertyValueMap.values()) {
+            if (propertyValuePair.right) propertyValuePair.left.readFromNBT(tag);
+        }
     }
 
     //save one property by key (for delta sync)
     public NBTTagCompound writeOneToNBT(String key) {
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
-        PropertyValue<?> propertyValue = this.propertyValueMap.get(key);
+        ImmutablePair<AbstractPropertyValue<?>, Boolean> propertyValuePair = this.propertyValueMap.get(key);
+        if (propertyValuePair == null) return nbtTagCompound;
+        AbstractPropertyValue<?> propertyValue = propertyValuePair.left;
         if (propertyValue != null) propertyValue.writeToNBT(nbtTagCompound);
         return nbtTagCompound;
     }
 
+    //read one property by key (for delta sync)
     public void readOneFromNBT(NBTTagCompound tag, String key) {
-        PropertyValue<?> propertyValue = this.propertyValueMap.get(key);
+        ImmutablePair<AbstractPropertyValue<?>, Boolean> propertyValuePair = this.propertyValueMap.get(key);
+        if (propertyValuePair == null) return;
+        AbstractPropertyValue<?> propertyValue = propertyValuePair.left;
         if (propertyValue != null) propertyValue.readFromNBT(tag);
     }
 }

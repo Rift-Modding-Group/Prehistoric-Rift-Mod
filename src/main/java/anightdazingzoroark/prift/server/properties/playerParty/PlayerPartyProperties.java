@@ -2,13 +2,15 @@ package anightdazingzoroark.prift.server.properties.playerParty;
 
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.AbstractEntityProperties;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.FixedSizeListPropertyValue;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.IntPropertyValue;
 import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.properties.propertyValues.FixedSizeListCreaturePropertyValue;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,17 +21,42 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
 
     @Override
     protected void registerDefaults(EntityPlayer entity) {
-        this.put(new FixedSizeListCreaturePropertyValue("PlayerParty", new FixedSizeList<>(6, new CreatureNBT())));
-        this.put(new IntPropertyValue("QuickSelectedPos", 0));
+        this.register(new FixedSizeListPropertyValue<CreatureNBT>(
+                "PlayerParty", new CreatureNBT(), PlayerPartyHelper.maxSize,
+                fixedSizeList -> {
+                    NBTTagList partyTagList = new NBTTagList();
+                    for (int index = 0; index < fixedSizeList.size(); index++) {
+                        CreatureNBT creatureNBT = fixedSizeList.get(index);
+                        if (creatureNBT.nbtIsEmpty()) continue;
+                        NBTTagCompound toAppend = new NBTTagCompound();
+                        toAppend.setInteger("Index", index);
+                        toAppend.setTag("Creature", creatureNBT.getCreatureNBT());
+                        partyTagList.appendTag(toAppend);
+                    }
+                    return partyTagList;
+                },
+                nbtBase -> {
+                    FixedSizeList<CreatureNBT> toReturn = new FixedSizeList<>(PlayerPartyHelper.maxSize, new CreatureNBT());
+                    if (!(nbtBase instanceof NBTTagList partyTagList)) return toReturn;
+                    for (int index = 0; index < partyTagList.tagCount(); index++) {
+                        NBTTagCompound tagCompound = partyTagList.getCompoundTagAt(index);
+                        int partyMemIndex = tagCompound.getInteger("Index");
+                        CreatureNBT creatureNBT = new CreatureNBT(tagCompound.getCompoundTag("Creature"));
+                        toReturn.set(partyMemIndex, creatureNBT);
+                    }
+                    return toReturn;
+                }
+        ));
+        this.register(new IntPropertyValue("QuickSelectedPos", 0));
     }
 
     //-----direct party member editing and getting-----
     public FixedSizeList<CreatureNBT> getPlayerParty() {
-        return (FixedSizeList<CreatureNBT>) this.getProperty("PlayerParty").getValue();
+        return this.get("PlayerParty");
     }
 
     public void setPlayerParty(FixedSizeList<CreatureNBT> playerParty) {
-        this.put(new FixedSizeListCreaturePropertyValue("PlayerParty", playerParty));
+        this.set("PlayerParty", playerParty);
     }
 
     //-----indirect party member editing and getting-----
@@ -113,7 +140,10 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
                 RiftCreature creatureToCreate = creatureNBT.getCreatureAsNBT(this.getEntityHolder().world);
                 creatureToCreate.setPosition(this.getEntityHolder().posX, this.getEntityHolder().posY, this.getEntityHolder().posZ);
                 this.getEntityHolder().world.spawnEntity(creatureToCreate);
+                PlayerPartyHelper.deployedCreatures.put(index, creatureToCreate);
             }
+            //if the corresponding creature exists for some reason, just add it to deployed creature map
+            else PlayerPartyHelper.deployedCreatures.put(index, corresponded);
         }
         //else, dismiss it
         else {
@@ -125,6 +155,7 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
             FixedSizeList<CreatureNBT> playerPartyList = this.getPlayerParty();
             playerPartyList.set(index, creatureNBT);
             this.setPlayerParty(playerPartyList);
+            PlayerPartyHelper.deployedCreatures.remove(index);
 
             //if the corresponding creature exists (expected), despawn it
             if (corresponded != null) corresponded.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
@@ -141,11 +172,11 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
 
     //-----direct selected pos editing and getting and syncing-----
     public int getQuickSelectPos() {
-        return (Integer) this.getProperty("QuickSelectedPos").getValue();
+        return this.get("QuickSelectedPos");
     }
 
     private void setQuickSelectPos(int value) {
-        this.put(new IntPropertyValue("QuickSelectedPos", value));
+        this.set("QuickSelectedPos", value);
     }
 
     //indirect selected pos editing and getting

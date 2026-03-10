@@ -15,13 +15,91 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RiftCreatureProjectile {
-    public static List<RiftCreatureProjectileBuilder> CREATURE_PROJECTILE_BUILDERS = new ArrayList<>();
-
     public static final String THROWN_STEGOSAURUS_PLATE = "thrown_stegosaurus_plate";
     public static final String POISON_SPIT = "poison_spit";
     public static final String VENOM_BOMB = "venom_bomb";
     public static final String MUDBALL = "mudball";
     public static final String POWER_BLOW = "power_blow";
+
+    public static List<RiftCreatureProjectileBuilder> CREATURE_PROJECTILE_BUILDERS = List.of(
+            new RiftCreatureProjectileBuilder(THROWN_STEGOSAURUS_PLATE)
+                    .setHasVariants()
+                    .setSelfDestruct()
+                    .setImpactSoundEvent(SoundEvents.ENTITY_ARROW_HIT)
+                    .setDamageCalculator((projectile) -> {
+                        double levelBasedIncrement = 0;
+                        if (projectile.shootingEntity instanceof RiftCreature) {
+                            RiftCreature creature = (RiftCreature) projectile.shootingEntity;
+                            levelBasedIncrement = creature.getLevel() / 10D;
+                        }
+                        return 4D + levelBasedIncrement;
+                    }),
+            new RiftCreatureProjectileBuilder(POISON_SPIT)
+                    .setHasFlatModel()
+                    .setSelfDestruct()
+                    .setNoVerticalRotation()
+                    .setImpactSoundEvent(SoundEvents.BLOCK_SLIME_HIT)
+                    .setOnHitEffect((projectile, hitEntity) -> {
+                        if (hitEntity != null) {
+                            hitEntity.addPotionEffect(new PotionEffect(MobEffects.POISON, 10 * 20));
+                            hitEntity.addPotionEffect(new PotionEffect(MobEffects.BLINDNESS, 10 * 20));
+                        }
+                    })
+                    .setDamageCalculator((projectile) -> {
+                        double levelBasedIncrement = 0;
+                        if (projectile.shootingEntity instanceof RiftCreature) {
+                            RiftCreature creature = (RiftCreature) projectile.shootingEntity;
+                            levelBasedIncrement = creature.getLevel() / 10D;
+                        }
+                        return 2D + levelBasedIncrement;
+                    }),
+            new RiftCreatureProjectileBuilder(VENOM_BOMB)
+                    .setImpactSoundEvent(SoundEvents.BLOCK_SLIME_HIT)
+                    .setDelayedEffectOnImpact(100, (projectile, hitEntity) -> {
+                        projectile.world.createExplosion(projectile, projectile.posX, projectile.posY, projectile.posZ, 2f, false);
+                        projectile.setDead();
+                    })
+                    .setAnimation((projectile) -> {
+                        return new AnimationController(projectile, "default", 0, new AnimationController.IAnimationPredicate() {
+                            @Override
+                            public PlayState test(AnimationEvent event) {
+                                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.venom_bomb.default", LoopType.LOOP));
+                                return PlayState.CONTINUE;
+                            }
+                        });
+                    }),
+            new RiftCreatureProjectileBuilder(MUDBALL)
+                    .setHasFlatModel()
+                    .setSelfDestruct()
+                    .setNoVerticalRotation()
+                    .setImpactSoundEvent(SoundEvents.BLOCK_SLIME_HIT)
+                    .setOnHitEffect((projectile, hitEntity) -> {
+                        if (hitEntity != null) {
+                            hitEntity.addPotionEffect(new PotionEffect(MobEffects.BLINDNESS, 10 * 20));
+                        }
+                    })
+                    .setDamageCalculator((projectile) -> {
+                        double levelBasedIncrement = 0;
+                        if (projectile.shootingEntity instanceof RiftCreature) {
+                            RiftCreature creature = (RiftCreature) projectile.shootingEntity;
+                            levelBasedIncrement = creature.getLevel() / 10D;
+                        }
+                        return 4D + levelBasedIncrement;
+                    }),
+            new RiftCreatureProjectileBuilder(POWER_BLOW)
+                    .setHasNoModel()
+                    .setSelfDestruct()
+                    .setUsePower(2f, 8f)
+                    .setOnHitEffect((projectile, hitEntity) -> {
+                        if (hitEntity != null) {
+                            //knock back the entity
+                            double d0 = projectile.posX - hitEntity.posX;
+                            double d1 = projectile.posZ - hitEntity.posZ;
+                            double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);
+                            hitEntity.knockBack(projectile, projectile.getPower(), d0 / d2 * 8.0D, d1 / d2 * 8.0D);
+                        }
+                    })
+    );
 
     public static RiftCreatureProjectileEntity createCreatureProjectile(String creatureProjectileName, RiftCreature creature) {
         //find name first
@@ -44,90 +122,5 @@ public class RiftCreatureProjectile {
                 .filter(b -> b.projectileName.equals(name))
                 .findFirst().get();
         return null;
-    }
-
-    public static void initCreatureProjectileBuilders() {
-        CREATURE_PROJECTILE_BUILDERS.add(new RiftCreatureProjectileBuilder(THROWN_STEGOSAURUS_PLATE)
-                .setHasVariants()
-                .setSelfDestruct()
-                .setImpactSoundEvent(SoundEvents.ENTITY_ARROW_HIT)
-                .setDamageCalculator((projectile) -> {
-                    double levelBasedIncrement = 0;
-                    if (projectile.shootingEntity instanceof RiftCreature) {
-                        RiftCreature creature = (RiftCreature) projectile.shootingEntity;
-                        levelBasedIncrement = creature.getLevel() / 10D;
-                    }
-                    return 4D + levelBasedIncrement;
-                })
-        );
-        CREATURE_PROJECTILE_BUILDERS.add(new RiftCreatureProjectileBuilder(POISON_SPIT)
-                .setHasFlatModel()
-                .setSelfDestruct()
-                .setNoVerticalRotation()
-                .setImpactSoundEvent(SoundEvents.BLOCK_SLIME_HIT)
-                .setOnHitEffect((projectile, hitEntity) -> {
-                    if (hitEntity != null) {
-                        hitEntity.addPotionEffect(new PotionEffect(MobEffects.POISON, 10 * 20));
-                        hitEntity.addPotionEffect(new PotionEffect(MobEffects.BLINDNESS, 10 * 20));
-                    }
-                })
-                .setDamageCalculator((projectile) -> {
-                    double levelBasedIncrement = 0;
-                    if (projectile.shootingEntity instanceof RiftCreature) {
-                        RiftCreature creature = (RiftCreature) projectile.shootingEntity;
-                        levelBasedIncrement = creature.getLevel() / 10D;
-                    }
-                    return 2D + levelBasedIncrement;
-                })
-        );
-        CREATURE_PROJECTILE_BUILDERS.add(new RiftCreatureProjectileBuilder(VENOM_BOMB)
-                .setImpactSoundEvent(SoundEvents.BLOCK_SLIME_HIT)
-                .setDelayedEffectOnImpact(100, (projectile, hitEntity) -> {
-                    projectile.world.createExplosion(projectile, projectile.posX, projectile.posY, projectile.posZ, 2f, false);
-                    projectile.setDead();
-                })
-                .setAnimation((projectile) -> {
-                    return new AnimationController(projectile, "default", 0, new AnimationController.IAnimationPredicate() {
-                        @Override
-                        public PlayState test(AnimationEvent event) {
-                            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.venom_bomb.default", LoopType.LOOP));
-                            return PlayState.CONTINUE;
-                        }
-                    });
-                })
-        );
-        CREATURE_PROJECTILE_BUILDERS.add(new RiftCreatureProjectileBuilder(MUDBALL)
-                .setHasFlatModel()
-                .setSelfDestruct()
-                .setNoVerticalRotation()
-                .setImpactSoundEvent(SoundEvents.BLOCK_SLIME_HIT)
-                .setOnHitEffect((projectile, hitEntity) -> {
-                    if (hitEntity != null) {
-                        hitEntity.addPotionEffect(new PotionEffect(MobEffects.BLINDNESS, 10 * 20));
-                    }
-                })
-                .setDamageCalculator((projectile) -> {
-                    double levelBasedIncrement = 0;
-                    if (projectile.shootingEntity instanceof RiftCreature) {
-                        RiftCreature creature = (RiftCreature) projectile.shootingEntity;
-                        levelBasedIncrement = creature.getLevel() / 10D;
-                    }
-                    return 4D + levelBasedIncrement;
-                })
-        );
-        CREATURE_PROJECTILE_BUILDERS.add(new RiftCreatureProjectileBuilder(POWER_BLOW)
-                .setHasNoModel()
-                .setSelfDestruct()
-                .setUsePower(2f, 8f)
-                .setOnHitEffect((projectile, hitEntity) -> {
-                    if (hitEntity != null) {
-                        //knock back the entity
-                        double d0 = projectile.posX - hitEntity.posX;
-                        double d1 = projectile.posZ - hitEntity.posZ;
-                        double d2 = Math.max(d0 * d0 + d1 * d1, 0.001D);
-                        hitEntity.knockBack(projectile, projectile.getPower(), d0 / d2 * 8.0D, d1 / d2 * 8.0D);
-                    }
-                })
-        );
     }
 }

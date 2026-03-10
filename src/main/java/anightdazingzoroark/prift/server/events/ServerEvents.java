@@ -19,6 +19,7 @@ import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectile
 import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectileEntity;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftCanUseMoveTriggerButton;
+import anightdazingzoroark.prift.server.message.RiftInitDeployedCreatureMap;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressHelper;
 import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressProperties;
@@ -31,6 +32,7 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -55,9 +57,9 @@ import java.util.*;
 
 @Mod.EventBusSubscriber
 public class ServerEvents {
-    //make people join le discord
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
+        //make people join le discord
         if (GeneralConfig.showDiscordMessage) {
             TextComponentString message = new TextComponentString("Click here to join the Discord server for this mod to hang out and receive updates! We beg you!");
             message.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/JnjQtkVt8R"));

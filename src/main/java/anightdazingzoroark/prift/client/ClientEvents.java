@@ -3,27 +3,62 @@ package anightdazingzoroark.prift.client;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.screens.player.PlayerUIHelper;
+import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.Anomalocaris;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftOpenInventoryFromMenu;
 import anightdazingzoroark.prift.server.message.RiftOpenWeaponInventory;
+import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
+import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.event.ClickEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.opengl.GL11;
 
 public class ClientEvents {
+    private boolean partyMapInitialized = false;
+
+    @SubscribeEvent
+    public void clientTick(TickEvent.PlayerTickEvent event) {
+        if (event.side.isServer()) return;
+
+        //initialize party map when the player enters the world
+        if (!this.partyMapInitialized && !event.player.world.loadedEntityList.isEmpty()) {
+            PlayerPartyProperties playerParty = PlayerPartyHelper.getPlayerParty(event.player);
+            if (playerParty == null) return;
+
+            for (int index = 0; index < PlayerPartyHelper.maxSize; index++) {
+                CreatureNBT creatureNBT = playerParty.getPartyMember(index);
+                if (creatureNBT.nbtIsEmpty()) continue;
+                if (creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
+                    RiftCreature correspondingCreature = creatureNBT.findCorrespondingCreature(event.player.world);
+                    if (correspondingCreature == null) continue;
+                    PlayerPartyHelper.deployedCreatures.put(index, correspondingCreature);
+                }
+            }
+
+            this.partyMapInitialized = true;
+        }
+    }
+
     //set cam to 3rd person when ridin a creature
     @SubscribeEvent
     public void onEntityMount(EntityMountEvent event) {

@@ -2,9 +2,9 @@ package anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue;
 
 import net.minecraft.nbt.NBTTagCompound;
 
-public class BooleanPropertyValue extends PropertyValue<Boolean> {
-    public BooleanPropertyValue(String key, Boolean defaultValue) {
-        super(key, defaultValue);
+public class BooleanPropertyValue extends AbstractPropertyValue<Boolean> {
+    public BooleanPropertyValue(String key) {
+        super(key, false);
     }
 
     @Override
@@ -15,5 +15,10 @@ public class BooleanPropertyValue extends PropertyValue<Boolean> {
     @Override
     public void readFromNBT(NBTTagCompound nbtTagCompound) {
         this.value = nbtTagCompound.getBoolean(this.getKey());
+    }
+
+    @Override
+    public Class<Boolean> getHeldClass() {
+        return Boolean.class;
     }
 }
