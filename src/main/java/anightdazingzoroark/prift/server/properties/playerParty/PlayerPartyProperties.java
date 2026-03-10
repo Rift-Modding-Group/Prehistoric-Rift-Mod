@@ -1,20 +1,32 @@
 package anightdazingzoroark.prift.server.properties.playerParty;
 
 import anightdazingzoroark.prift.helper.FixedSizeList;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.AbstractEntityProperties;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.FixedSizeListPropertyValue;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.HashMapPropertyValue;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.IntPropertyValue;
 import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer> {
+    //this ensures that data for deployed creatures is accurately reflected on UIs
+    private final HashMap<Integer, RiftCreature> convertedPartyHash = new HashMap<>();
+
     public PlayerPartyProperties(@NotNull String key, @NotNull EntityPlayer entityHolder) {
         super(key, entityHolder);
     }
@@ -44,6 +56,34 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
                         CreatureNBT creatureNBT = new CreatureNBT(tagCompound.getCompoundTag("Creature"));
                         toReturn.set(partyMemIndex, creatureNBT);
                     }
+                    return toReturn;
+                }
+        ));
+        this.register(new HashMapPropertyValue<Integer, UUID> (
+                "DeployedPartyMembers",
+                hashMap -> {
+                    NBTTagList toReturn = new NBTTagList();
+                    for (Map.Entry<Integer, UUID> entry : hashMap.entrySet()) {
+                        NBTTagCompound compound = new NBTTagCompound();
+                        compound.setInteger("Index", entry.getKey());
+                        compound.setUniqueId("CreatureUUID", entry.getValue());
+                        toReturn.appendTag(compound);
+                    }
+                    return toReturn;
+                },
+                nbtBase -> {
+                    HashMap<Integer, UUID> toReturn = new HashMap<>();
+                    if (!(nbtBase instanceof NBTTagList nbtTagList)) return toReturn;
+                    for (int listIndex = 0; listIndex < nbtTagList.tagCount(); listIndex++) {
+                        NBTTagCompound compound = nbtTagList.getCompoundTagAt(listIndex);
+                        if (compound.isEmpty()) continue;
+
+                        int index = compound.getInteger("Index");
+                        UUID creatureUUID  = compound.getUniqueId("CreatureUUID");
+
+                        toReturn.put(index, creatureUUID);
+                    }
+
                     return toReturn;
                 }
         ));
@@ -136,14 +176,15 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
             this.setPlayerParty(playerPartyList);
 
             //if the corresponding creature doesn't exist (expected), spawn it
+            //and add to deployed creature map
             if (corresponded == null) {
                 RiftCreature creatureToCreate = creatureNBT.getCreatureAsNBT(this.getEntityHolder().world);
                 creatureToCreate.setPosition(this.getEntityHolder().posX, this.getEntityHolder().posY, this.getEntityHolder().posZ);
                 this.getEntityHolder().world.spawnEntity(creatureToCreate);
-                PlayerPartyHelper.deployedCreatures.put(index, creatureToCreate);
+                this.addCreatureToDeployMap(index, creatureToCreate);
             }
-            //if the corresponding creature exists for some reason, just add it to deployed creature map
-            else PlayerPartyHelper.deployedCreatures.put(index, corresponded);
+            //if it already exists for some reason, just add it to deployed creature map
+            else this.addCreatureToDeployMap(index, corresponded);
         }
         //else, dismiss it
         else {
@@ -155,7 +196,7 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
             FixedSizeList<CreatureNBT> playerPartyList = this.getPlayerParty();
             playerPartyList.set(index, creatureNBT);
             this.setPlayerParty(playerPartyList);
-            PlayerPartyHelper.deployedCreatures.remove(index);
+            this.removeCreatureFromDeployMap(index);
 
             //if the corresponding creature exists (expected), despawn it
             if (corresponded != null) corresponded.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
@@ -194,5 +235,58 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
 
     public void prevQuickSelectPos() {
         this.setQuickSelectPos(this.getPrevQuickSelectPos());
+    }
+
+    //-----direct getting and setting of stuff for deployed party members-----
+    public HashMap<Integer, UUID> getDeployedPartyMemberMap() {
+        return this.get("DeployedPartyMembers");
+    }
+
+    public void setDeployedPartyMemberMap(HashMap<Integer, UUID> value) {
+        this.set("DeployedPartyMembers", value);
+    }
+
+    //-----indirect getting and setting of stuff for deployed party members-----
+    public void addCreatureToDeployMap(int index, RiftCreature creature) {
+        HashMap<Integer, UUID> deployedCreatureMap = this.getDeployedPartyMemberMap();
+        deployedCreatureMap.put(index, creature.getUniqueID());
+        this.setDeployedPartyMemberMap(deployedCreatureMap);
+    }
+
+    public void removeCreatureFromDeployMap(int index) {
+        HashMap<Integer, UUID> deployedCreatureMap = this.getDeployedPartyMemberMap();
+        deployedCreatureMap.remove(index);
+        this.setDeployedPartyMemberMap(deployedCreatureMap);
+    }
+
+    @SideOnly(Side.CLIENT)
+    public RiftCreature getLoadedDeployedCreature(int index) {
+        if (!this.convertedPartyHash.containsKey(index)) return null;
+        return this.convertedPartyHash.get(index);
+    }
+
+    @SideOnly(Side.CLIENT)
+    public boolean deployedCreatureIsLoadedAtIndex(int index) {
+        return this.convertedPartyHash.containsKey(index);
+    }
+
+    //this will be ticked client side only
+    @SideOnly(Side.CLIENT)
+    public void forceReloadPartyMemberMap() {
+        if (this.getEntityHolder().world == null
+                || !this.getEntityHolder().world.isRemote
+                || this.getEntityHolder().world.loadedEntityList.isEmpty()) return;
+
+        //equality will block changes to converted party hash
+        HashMap<Integer, UUID> deployedCreatureMap = this.getDeployedPartyMemberMap();
+        if (this.convertedPartyHash.keySet().equals(deployedCreatureMap.keySet())) return;
+
+        this.convertedPartyHash.clear();
+        for (Map.Entry<Integer, UUID> entry : deployedCreatureMap.entrySet()) {
+            UUID uuid = entry.getValue();
+            Entity correspondingEntity = RiftUtil.getEntityFromUUID(this.getEntityHolder().world, uuid);
+            if (!(correspondingEntity instanceof RiftCreature creature)) continue;
+            this.convertedPartyHash.put(entry.getKey(), creature);
+        }
     }
 }

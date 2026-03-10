@@ -3103,7 +3103,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.grabVictim != null) NonPotionEffectsHelper.setGrabbed(this.grabVictim, false);
         if (this.getAttackTarget() != null) NonPotionEffectsHelper.setGrabbed(this.getAttackTarget(), false);
 
-        //for undeploying a creature
+        //for undeploying a creature (requires having an owner and being tamed)
+        if (!this.isTamed() || this.getOwner() == null) super.onDeath(cause);
         this.setSitting(false);
         this.getActivePotionEffects().clear();
         this.setBoxReviveTime(GeneralConfig.creatureBoxReviveTime);

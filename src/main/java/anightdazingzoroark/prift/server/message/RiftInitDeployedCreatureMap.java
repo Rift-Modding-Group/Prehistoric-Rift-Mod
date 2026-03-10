@@ -52,7 +52,7 @@ public class RiftInitDeployedCreatureMap extends RiftLibMessage<RiftInitDeployed
                     continue;
                 }
                 System.out.println("found corresponding creature at index "+index);
-                PlayerPartyHelper.deployedCreatures.put(index, correspondingCreature);
+                //PlayerPartyHelper.deployedCreatures.put(index, correspondingCreature);
             }
         }
     }

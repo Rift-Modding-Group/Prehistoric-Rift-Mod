@@ -12,8 +12,6 @@ import java.util.HashMap;
 
 public class PlayerPartyHelper {
     public static final int maxSize = 6;
-    //this is for storing creatures that got deployed
-    public static final HashMap<Integer, RiftCreature> deployedCreatures = new HashMap<>();
 
     public static PlayerPartyProperties getPlayerParty(EntityPlayer player) {
         return Property.getProperty(RiftPropertyRegistry.PLAYER_PARTY, player);

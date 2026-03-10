@@ -108,8 +108,8 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
     //get the nbt. its info will be displayed, and if its deployed, should update dynamically
     private CreatureNBT getCreatureNBT() {
         //to dynamically update deployed creature info
-        if (PlayerPartyHelper.deployedCreatures.containsKey(this.index)) {
-            return new CreatureNBT(PlayerPartyHelper.deployedCreatures.get(this.index));
+        if (this.playerParty.deployedCreatureIsLoadedAtIndex(this.index)) {
+            return new CreatureNBT(this.playerParty.getLoadedDeployedCreature(this.index));
         }
         //if its not deployed, it remains as is
         return this.playerParty.getPartyMember(this.index);

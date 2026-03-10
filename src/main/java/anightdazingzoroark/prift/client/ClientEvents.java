@@ -34,36 +34,10 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.opengl.GL11;
 
 public class ClientEvents {
-    private boolean partyMapInitialized = false;
-
-    @SubscribeEvent
-    public void clientTick(TickEvent.PlayerTickEvent event) {
-        if (event.side.isServer()) return;
-
-        //initialize party map when the player enters the world
-        if (!this.partyMapInitialized && !event.player.world.loadedEntityList.isEmpty()) {
-            PlayerPartyProperties playerParty = PlayerPartyHelper.getPlayerParty(event.player);
-            if (playerParty == null) return;
-
-            for (int index = 0; index < PlayerPartyHelper.maxSize; index++) {
-                CreatureNBT creatureNBT = playerParty.getPartyMember(index);
-                if (creatureNBT.nbtIsEmpty()) continue;
-                if (creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
-                    RiftCreature correspondingCreature = creatureNBT.findCorrespondingCreature(event.player.world);
-                    if (correspondingCreature == null) continue;
-                    PlayerPartyHelper.deployedCreatures.put(index, correspondingCreature);
-                }
-            }
-
-            this.partyMapInitialized = true;
-        }
-    }
-
     //set cam to 3rd person when ridin a creature
     @SubscribeEvent
     public void onEntityMount(EntityMountEvent event) {
-        if (event.getEntityBeingMounted() instanceof RiftCreature && event.getWorldObj().isRemote && event.getEntityMounting() == Minecraft.getMinecraft().player) {
-            RiftCreature creature = (RiftCreature)event.getEntityBeingMounted();
+        if (event.getEntityBeingMounted() instanceof RiftCreature creature && event.getWorldObj().isRemote && event.getEntityMounting() == Minecraft.getMinecraft().player) {
             if (creature.isTamed() && creature.isOwner(Minecraft.getMinecraft().player)) {
                 if (event.isDismounting()) {
                     Minecraft.getMinecraft().gameSettings.thirdPersonView = RiftInitialize.PROXY.getPreviousViewType();

@@ -153,6 +153,7 @@ public class PlayerTamedCreaturesHelper {
 
     public static NBTTagCompound createNBTFromCreature(RiftCreature creature) {
         NBTTagCompound compound = new NBTTagCompound();
+        if (creature == null) return compound;
         //get data that doesnt get saved into nbt properly for some reason
         compound.setUniqueId("UniqueID", creature.getUniqueID());
         compound.setString("CustomName", creature.getCustomNameTag());
