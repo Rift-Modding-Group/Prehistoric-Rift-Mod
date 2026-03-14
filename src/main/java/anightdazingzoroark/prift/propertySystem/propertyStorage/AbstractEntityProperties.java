@@ -35,6 +35,12 @@ public abstract class AbstractEntityProperties<E extends Entity> {
 
     //persistence means that the data will be saved when the world is unloaded
     protected void register(AbstractPropertyValue<?> value, boolean persist) {
+        //check if the property already exists, it it already does, skip
+        if (this.propertyValueMap.containsKey(value.getKey())) {
+            throw new UnsupportedOperationException("Key "+value.getKey()+" already exists in property "+this.getPropertyName()+"!");
+        }
+
+        //add the property
         this.propertyValueMap.put(value.getKey(), new ImmutablePair<>(value, persist));
 
         //sync to client afterwards from server

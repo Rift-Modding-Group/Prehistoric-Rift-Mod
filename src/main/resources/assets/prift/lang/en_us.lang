@@ -519,6 +519,11 @@ party.swap_creatures=Swap Creatures
 party.open_journal=Journal
 
 box.party_label=Your Party
+box.deployed_label=Deployed
+box.dropdown.inventory=Inventory
+box.dropdown.options=Options
+box.dropdown.info=Info
+box.dropdown.moves=Moves
 
 tametrait.level=Level %s
 tametrait.health=Health: %s/%s

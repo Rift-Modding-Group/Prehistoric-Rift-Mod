@@ -103,8 +103,7 @@ public class RiftCreatureScreen {
                         };
                     }
                 })
-                .child(new Column()
-                        .name("creatureScreenTabColumn")
+                .child(Flow.column().name("creatureScreenTabColumn")
                         .coverChildren()
                         .leftRel(0f, 4, 1f)
                         .child(new PageButton(inventoryPageNum, tabController)
@@ -150,7 +149,7 @@ public class RiftCreatureScreen {
                         .addPage(creatureInfoPage(data, syncManager, settings))
                         .addPage(creatureMovesPage(data, syncManager, settings))
                 )
-                .childIf(data.getOpenedFromParty(), () -> new Column()
+                .childIf(data.getOpenedFromParty(), () -> Flow.column()
                         .coverChildren()
                         .rightRel(0f, 4, 1f)
                         .child(new SideButton()
@@ -217,9 +216,9 @@ public class RiftCreatureScreen {
         //continue w making the page
         return new ParentWidget<>().name("inventoryPage")
                 .padding(7, 7)
-                .child(new Column().coverChildrenHeight().childPadding(5)
+                .child(Flow.column().coverChildrenHeight().childPadding(5)
                         //creature gear
-                        .childIf(creatureHasGear, () -> new Column()
+                        .childIf(creatureHasGear, () -> Flow.column()
                                 .coverChildren()
                                 //header
                                 .child(new ParentWidget<>().width(162).coverChildrenHeight()
@@ -231,7 +230,7 @@ public class RiftCreatureScreen {
                                 )
                         )
                         //creature inventory
-                        .child(new Column()
+                        .child(Flow.column()
                                 .coverChildren()
                                 //header
                                 .child(new ParentWidget<>().width(162).coverChildrenHeight()
@@ -247,7 +246,7 @@ public class RiftCreatureScreen {
                                 .childIf(matrixHeight <= 3, () -> creatureInvBuilder.build().name("creature_inventory"))
                         )
                         //player inventory
-                        .child(new Column()
+                        .child(Flow.column()
                                 .coverChildren()
                                 .child(new ParentWidget<>().width(162).coverChildrenHeight()
                                         .child(IKey.str(playerName).asWidget().left(0))
@@ -277,15 +276,15 @@ public class RiftCreatureScreen {
         return new ParentWidget<>()
                 .name("settingsPage")
                 .padding(7, 7)
-                .child(new Column()
+                .child(Flow.column()
                         .childPadding(5)
                         .child(new ParentWidget<>()
                                 .name("top")
                                 .widthRel(1f)
                                 .coverChildrenHeight()
-                                .child(new Column().coverChildren()
+                                .child(Flow.column().coverChildren()
                                         .childPadding(2)
-                                        .child(new Row()
+                                        .child(Flow.row()
                                                 .name("sittingRow")
                                                 .coverChildrenHeight()
                                                 .childPadding(2)
@@ -306,7 +305,7 @@ public class RiftCreatureScreen {
                                         //if creature has turret mode and is at base, add option
                                         .childIf(data.canEnterTurretMode()
                                                 && data.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE,
-                                                () -> new Row()
+                                                () -> Flow.row()
                                                 .coverChildrenHeight()
                                                 .childPadding(2)
                                                 .child(new CycleButtonWidget()
@@ -376,7 +375,7 @@ public class RiftCreatureScreen {
         );
         syncManager.syncValue("creatureBehavior", creatureBehaviorValue);
 
-        Flow behaviorOptions = new Column()
+        Flow behaviorOptions = Flow.column()
                 .coverChildrenHeight().width(buttonWidth)
                 .childPadding(3)
                 .child(IKey.lang("creature_menu.header.creature_behavior").asWidget());
@@ -406,7 +405,7 @@ public class RiftCreatureScreen {
         );
         syncManager.syncValue("turretTargeting", turretTargetingValue);
 
-        Flow turretModeOptions = new Column()
+        Flow turretModeOptions = Flow.column()
                 .coverChildrenHeight().width(buttonWidth)
                 .childPadding(3)
                 .child(IKey.lang("creature_menu.header.turret_mode_targeting").asWidget());
@@ -436,7 +435,7 @@ public class RiftCreatureScreen {
         if (data.dataType == CreatureGuiData.DataType.SELECTION) return new ParentWidget<>();
 
         RiftCreature creature = (RiftCreature) data.getGuiHolder();
-        Flow creatureOptions = new Column()
+        Flow creatureOptions = Flow.column()
                 .coverChildrenHeight().width(80)
                 .childPadding(3)
                 .child(IKey.lang("creature_menu.header.base_options").asWidget());
@@ -496,9 +495,9 @@ public class RiftCreatureScreen {
 
     private static ParentWidget<?> creatureInfoPage(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
         return new ParentWidget<>().padding(7, 7).coverChildren()
-                .child(new Row().coverChildren().childPadding(5)
+                .child(Flow.row().coverChildren().childPadding(5)
                         //left side is the entity and the name
-                        .child(new Column().name("leftSide")
+                        .child(Flow.column().name("leftSide")
                                 .childPadding(5).coverChildren()
                                 .child(new ParentWidget<>().size(96, 64)
                                         .child(new Rectangle().color(0xFF000000).cornerRadius(5)
@@ -514,7 +513,7 @@ public class RiftCreatureScreen {
                         //separator line
                         .child(new Rectangle().color(0xFF000000).asWidget().size(1, 108))
                         //right side is info
-                        .child(new Column().name("rightSide")
+                        .child(Flow.column().name("rightSide")
                                 .childPadding(5).coverChildren()
                                 //species name
                                 .child(new ParentWidget<>().width(96).coverChildrenHeight()
@@ -523,7 +522,7 @@ public class RiftCreatureScreen {
                                         )
                                 )
                                 //health
-                                .child(new Column().childPadding(2).coverChildren()
+                                .child(Flow.column().childPadding(2).coverChildren()
                                         .child(new ParentWidget<>().width(96).coverChildrenHeight()
                                                 .child(IKey.lang("tametrait.health", (int) data.getHealth()[0], (int) data.getHealth()[1])
                                                         .scale(0.5f).asWidget().left(0)
@@ -540,7 +539,7 @@ public class RiftCreatureScreen {
                                         )
                                 )
                                 //energy
-                                .child(new Column().childPadding(2).coverChildren()
+                                .child(Flow.column().childPadding(2).coverChildren()
                                         .child(new ParentWidget<>().width(96).coverChildrenHeight()
                                                 .child(IKey.lang("tametrait.energy", data.getEnergy()[0], data.getEnergy()[1])
                                                         .scale(0.5f).asWidget().left(0)
@@ -557,7 +556,7 @@ public class RiftCreatureScreen {
                                         )
                                 )
                                 //experience
-                                .child(new Column().childPadding(2).coverChildren()
+                                .child(Flow.column().childPadding(2).coverChildren()
                                         .child(new ParentWidget<>().width(96).coverChildrenHeight()
                                                 .child(IKey.lang("tametrait.xp", data.getXP()[0], data.getXP()[1])
                                                         .scale(0.5f).asWidget().left(0)
@@ -609,10 +608,10 @@ public class RiftCreatureScreen {
         syncManager.syncValue("moveSwapInfo", moveSwapInfo);
 
         return new ParentWidget<>().padding(7, 7).coverChildrenHeight().width(220)
-                .child(new Row().coverChildren().childPadding(5)
+                .child(Flow.row().coverChildren().childPadding(5)
                         //left side is the creature's current moves
                         .child(new ParentWidget<>().coverChildrenWidth().height(147)
-                                .child(new Column().name("leftSide")
+                                .child(Flow.column().name("leftSide")
                                         .childPadding(5).coverChildren()
                                         //header
                                         .child(new ParentWidget<>().width(96).coverChildrenHeight()
@@ -646,7 +645,7 @@ public class RiftCreatureScreen {
                         .child(new Rectangle().color(0xFF000000).asWidget().size(1, 108))
                         //right side is info
                         .child(new ParentWidget<>().coverChildrenWidth().height(147)
-                                .child(new Column().name("rightSide")
+                                .child(Flow.column().name("rightSide")
                                         .childPadding(5).coverChildren()
                                         .child(new ParentWidget<>().width(96).coverChildrenHeight()
                                                 //header

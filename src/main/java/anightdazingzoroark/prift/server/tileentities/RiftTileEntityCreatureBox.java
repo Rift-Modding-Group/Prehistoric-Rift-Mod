@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, IGuiHolder<PosGuiData> {
-    private final FixedSizeList<CreatureNBT> creatureListNBT = new FixedSizeList<>(RiftCreatureBox.maxDeployableCreatures, new CreatureNBT());
+    private FixedSizeList<CreatureNBT> creatureListNBT = new FixedSizeList<>(RiftCreatureBox.maxDeployableCreatures, new CreatureNBT());
     private UUID uniqueID = RiftUtil.nilUUID;
     private UUID ownerID = RiftUtil.nilUUID;
     private String ownerName = "";
@@ -157,22 +157,22 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, 
 
     public int[] getXBounds() {
         List<ChunkPosWithVerticality> list = this.chunksWithinDeploymentRange();
-        int minX = list.get(0).getXStart();
-        int maxX = list.get(list.size() - 1).getXEnd() + 1;
+        int minX = list.getFirst().getXStart();
+        int maxX = list.getLast().getXEnd() + 1;
         return new int[]{minX, maxX};
     }
 
     public int[] getYBounds() {
         List<ChunkPosWithVerticality> list = this.chunksWithinDeploymentRange();
-        int minY = Math.max(0, list.get(0).getYStart());
-        int maxY = list.get(list.size() - 1).getYEnd() + 1;
+        int minY = Math.max(0, list.getFirst().getYStart());
+        int maxY = list.getLast().getYEnd() + 1;
         return new int[]{minY, maxY};
     }
 
     public int[] getZBounds() {
         List<ChunkPosWithVerticality> list = this.chunksWithinDeploymentRange();
-        int minZ = list.get(0).getZStart();
-        int maxZ = list.get(list.size() - 1).getZEnd() + 1;
+        int minZ = list.getFirst().getZStart();
+        int maxZ = list.getLast().getZEnd() + 1;
         return new int[]{minZ, maxZ};
     }
 
@@ -253,6 +253,10 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, 
         return this.creatureListNBT;
     }
 
+    public void setDeployedCreatures(FixedSizeList<CreatureNBT> creatureListNBT) {
+        this.creatureListNBT = creatureListNBT;
+    }
+
     public void setCreatureInPos(int pos, CreatureNBT creatureNBT) {
         this.creatureListNBT.set(pos, creatureNBT);
         this.updateServerData();
@@ -279,14 +283,7 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, 
     @Override
     public void readFromNBT(@NotNull NBTTagCompound compound) {
         super.readFromNBT(compound);
-        if (compound.hasKey("BoxDeployedCreatures")) {
-            NBTTagList boxDeployedCreaturesList = compound.getTagList("BoxDeployedCreatures", 10);
-            if (!boxDeployedCreaturesList.isEmpty()) {
-                for (int i = 0; i < boxDeployedCreaturesList.tagCount(); i++) {
-                    this.creatureListNBT.set(i, new CreatureNBT(boxDeployedCreaturesList.getCompoundTagAt(i)));
-                }
-            }
-        }
+        this.creatureListNBT = getDeployedListFromNBT(compound);
         if (compound.hasUniqueId("UniqueID")) this.uniqueID = compound.getUniqueId("UniqueID");
         this.deploymentRange = compound.getInteger("DeploymentRange");
         if (compound.hasUniqueId("OwnerID")) this.ownerID = compound.getUniqueId("OwnerID");
@@ -296,10 +293,8 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, 
     @Override
     public @NotNull NBTTagCompound writeToNBT(@NotNull NBTTagCompound compound) {
         super.writeToNBT(compound);
-        NBTTagList boxDeployedCreaturesList = new NBTTagList();
-        for (CreatureNBT boxNBT : this.creatureListNBT.getList()) boxDeployedCreaturesList.appendTag(boxNBT.getCreatureNBT());
-        compound.setTag("BoxDeployedCreatures", boxDeployedCreaturesList);
 
+        getNBTFromDeployedList(compound, this.creatureListNBT);
         compound.setUniqueId("UniqueID", this.uniqueID);
         compound.setInteger("DeploymentRange", this.deploymentRange);
         compound.setUniqueId("OwnerID", this.ownerID);
@@ -335,5 +330,26 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, 
     @Override
     public ModularPanel buildUI(PosGuiData data, PanelSyncManager syncManager, UISettings settings) {
         return RiftCreatureBoxScreen.buildCreatureBoxUI(data, syncManager, settings);
+    }
+
+    //-----static helper functions-----
+    public static FixedSizeList<CreatureNBT> getDeployedListFromNBT(NBTTagCompound nbtTagCompound) {
+        FixedSizeList<CreatureNBT> toReturn = new FixedSizeList<>(RiftCreatureBox.maxDeployableCreatures, new CreatureNBT());
+
+        if (nbtTagCompound.hasKey("BoxDeployedCreatures")) {
+            NBTTagList boxDeployedCreaturesList = nbtTagCompound.getTagList("BoxDeployedCreatures", 10);
+            if (!boxDeployedCreaturesList.isEmpty()) {
+                for (int i = 0; i < boxDeployedCreaturesList.tagCount(); i++) {
+                    toReturn.set(i, new CreatureNBT(boxDeployedCreaturesList.getCompoundTagAt(i)));
+                }
+            }
+        }
+        return toReturn;
+    }
+
+    public static void getNBTFromDeployedList(NBTTagCompound nbtTagCompound, FixedSizeList<CreatureNBT> deployedList) {
+        NBTTagList boxDeployedCreaturesList = new NBTTagList();
+        for (CreatureNBT boxNBT : deployedList.getList()) boxDeployedCreaturesList.appendTag(boxNBT.getCreatureNBT());
+        nbtTagCompound.setTag("BoxDeployedCreatures", boxDeployedCreaturesList);
     }
 }

@@ -2,10 +2,11 @@ package anightdazingzoroark.prift.client.newui.screens.synced;
 
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.newui.value.FixedSizeCreatureListSyncValue;
 import anightdazingzoroark.prift.client.newui.value.HashMapValue;
 import anightdazingzoroark.prift.client.newui.widget.CreatureInBoxButtonWidget;
-import anightdazingzoroark.prift.client.newui.widget.JournalLeftPageWidget;
 import anightdazingzoroark.prift.client.newui.widget.PaddedGrid;
+import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxHelper;
@@ -14,7 +15,7 @@ import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import com.cleanroommc.modularui.api.drawable.IKey;
-import com.cleanroommc.modularui.drawable.InteractableIcon;
+import com.cleanroommc.modularui.drawable.GuiTextures;
 import com.cleanroommc.modularui.factory.PosGuiData;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
@@ -24,9 +25,8 @@ import com.cleanroommc.modularui.value.ObjectValue;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.cleanroommc.modularui.widget.ParentWidget;
 import com.cleanroommc.modularui.widgets.ButtonWidget;
-import com.cleanroommc.modularui.widgets.layout.Column;
+import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.cleanroommc.modularui.widgets.layout.Grid;
-import com.cleanroommc.modularui.widgets.layout.Row;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 
@@ -63,10 +63,19 @@ public class RiftCreatureBoxScreen {
                 teCreatureBox::setDeployedPartyCreatures
         );
 
-        return new ModularPanel(UIPanelNames.CREATURE_BOX_SCREEN).size(400, 240)
+        //synced stuff
+        FixedSizeCreatureListSyncValue creatureBoxDeployed = new FixedSizeCreatureListSyncValue(
+                teCreatureBox::getDeployedCreatures,
+                teCreatureBox::setDeployedCreatures
+        );
+        syncManager.syncValue("creatureBoxDeployed", creatureBoxDeployed);
+
+        return new ModularPanel(UIPanelNames.CREATURE_BOX_SCREEN).size(220, 200)
                 //left side will be player party
-                .child(new ParentWidget<>().coverChildren().left(0)
-                        .child(new Column().margin(5).coverChildren().childPadding(5)
+                .child(new ParentWidget<>().name("partySection").coverChildren()
+                        .background(GuiTextures.MC_BACKGROUND)
+                        .leftRel(0f, 4, 1.1f)
+                        .child(Flow.column().margin(5).coverChildren().childPadding(5)
                                 .child(IKey.lang("box.party_label").asWidget())
                                 .child(new PaddedGrid().coverChildren()
                                         .matrix(Grid.mapToMatrix(
@@ -82,11 +91,11 @@ public class RiftCreatureBoxScreen {
                                 )
                         )
                 )
-                //right side will be box creatures and deployed creatures
-                .child(new ParentWidget<>().coverChildren().right(0)
-                        .child(new Column().margin(5).coverChildren().childPadding(5)
-                                .child(new ParentWidget<>().name("BoxSecHeader").size(168, 18)
-                                        .child(new Row().coverChildren().childPadding(3).center()
+                //middle side will be box creatures
+                .child(new ParentWidget<>().name("boxSection").coverChildren().center()
+                        .child(Flow.column().margin(5).coverChildren().childPadding(5)
+                                .child(new ParentWidget<>().name("BoxSectionHeader").size(168, 18)
+                                        .child(Flow.row().coverChildren().childPadding(3).center()
                                                 .child(new ButtonWidget<>())
                                                 .child(IKey.dynamic(() -> {
                                                     return playerBox.getCreatureBoxStorage().getBoxName(currentBoxIndexDynamic.getIntValue());
@@ -99,6 +108,26 @@ public class RiftCreatureBoxScreen {
                                                 5, CreatureBoxStorage.maxBoxStorableCreatures,
                                                 index -> new CreatureInBoxButtonWidget(
                                                         playerBox, currentBoxIndexDynamic, index,
+                                                        creatureSwitchingDynamic,
+                                                        creatureSwapInfoDynamic,
+                                                        deployedPartyCreaturesDynamic
+                                                ).size(40)
+                                        ))
+                                        .padding(2)
+                                )
+                        )
+                )
+                //right side will be box deployed creatures
+                .child(new ParentWidget<>().name("deployedSection").coverChildren()
+                        .background(GuiTextures.MC_BACKGROUND)
+                        .rightRel(0f, 4, 1.1f)
+                        .child(Flow.column().margin(5).coverChildren().childPadding(5)
+                                .child(IKey.lang("box.deployed_label").asWidget())
+                                .child(new PaddedGrid().coverChildren()
+                                        .matrix(Grid.mapToMatrix(
+                                                2, RiftCreatureBox.maxDeployableCreatures,
+                                                index -> new CreatureInBoxButtonWidget(
+                                                        creatureBoxDeployed, index,
                                                         creatureSwitchingDynamic,
                                                         creatureSwapInfoDynamic,
                                                         deployedPartyCreaturesDynamic
