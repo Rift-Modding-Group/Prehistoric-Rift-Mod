@@ -168,10 +168,21 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
         return super.onMousePressed(mouseButton);
     }
 
-    //this is to ensure that, only when there is creatureNBT, can the menu be opened
+    //this is to ensure that, only when there is creatureNBT and nothing else
+    //is selected, can the hover menu be opened
     @Override
     public void onMouseEnterArea() {
-        if (!this.creatureNBT.nbtIsEmpty()) super.onMouseEnterArea();
+        if (!this.creatureNBT.nbtIsEmpty() && this.selectedCreatureInfoDynamic.getValue() == null) {
+            super.onMouseEnterArea();
+        }
+    }
+
+    //this is to ensure that, only when there is creatureNBT and is not selected, can
+    //making the mouse leave its area close the menu
+    @Override
+    public void onMouseLeaveArea() {
+        super.onMouseLeaveArea();
+        if (!this.creatureNBT.nbtIsEmpty() && !this.isSelected) this.closeMenu(false);
     }
 
     private CreatureNBT getCreatureNBT() {

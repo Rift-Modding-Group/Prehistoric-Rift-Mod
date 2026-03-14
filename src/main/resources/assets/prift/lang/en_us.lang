@@ -524,6 +524,8 @@ box.dropdown.options=Options
 box.dropdown.info=Info
 box.dropdown.moves=Moves
 box.change_box_name=Change Box Name
+box.change_box_name_tooltip=Change Box Name
+box.swap_creatures_tooltip=Swap Creatures
 
 tametrait.level=Level %s
 tametrait.health=Health: %s/%s

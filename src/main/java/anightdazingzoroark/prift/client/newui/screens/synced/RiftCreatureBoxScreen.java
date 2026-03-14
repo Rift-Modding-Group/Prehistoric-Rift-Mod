@@ -26,6 +26,7 @@ import com.cleanroommc.modularui.drawable.Rectangle;
 import com.cleanroommc.modularui.factory.PosGuiData;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
+import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.BoolValue;
 import com.cleanroommc.modularui.value.IntValue;
 import com.cleanroommc.modularui.value.ObjectValue;
@@ -34,6 +35,7 @@ import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.cleanroommc.modularui.widget.ParentWidget;
 import com.cleanroommc.modularui.widgets.ButtonWidget;
 import com.cleanroommc.modularui.widgets.Dialog;
+import com.cleanroommc.modularui.widgets.ToggleButton;
 import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.cleanroommc.modularui.widgets.layout.Grid;
 import com.cleanroommc.modularui.widgets.textfield.TextFieldWidget;
@@ -119,8 +121,13 @@ public class RiftCreatureBoxScreen {
                                 )
                         )
                 )
-                //middle side will be box creatures
+                //middle side will be box creatures and switch button
                 .child(new ParentWidget<>().name("boxSection").coverChildren().center()
+                        .child(new ToggleButton().overlay(GuiTextures.REVERSE.asIcon())
+                                .align(Alignment.TopRight).margin(5)
+                                .addTooltipElement(IKey.lang("box.swap_creatures_tooltip"))
+                                .value(creatureSwitchingDynamic)
+                        )
                         .child(Flow.column().margin(5).coverChildren().childPadding(5)
                                 .child(new ParentWidget<>().name("BoxSectionHeader").size(160, 18)
                                         .child(Flow.row().coverChildren().childPadding(3).center()
@@ -148,13 +155,21 @@ public class RiftCreatureBoxScreen {
                                                                                     .getBoxName(currentBoxIndexDynamic.getIntValue());
                                                                         })
                                                                 ))
+                                                                .hoverOverlay(new DrawableStack(
+                                                                        new Rectangle().color(0xFF434343),
+                                                                        new Rectangle().color(0xFFFFFFFF).hollow(),
+                                                                        IKey.dynamic(() -> {
+                                                                            return playerBox.getCreatureBoxStorage()
+                                                                                    .getBoxName(currentBoxIndexDynamic.getIntValue());
+                                                                        })
+                                                                ))
                                                                 .background(IDrawable.EMPTY)
                                                                 .hoverBackground(IDrawable.EMPTY)
                                                                 .onMousePressed(mouseButton -> {
                                                                     changeNamePanel.openPanel();
                                                                     return true;
                                                                 })
-                                                                .addTooltipLine(IKey.str("Change box name"))
+                                                                .addTooltipLine(IKey.lang("box.change_box_name_tooltip"))
                                                         )
                                                 )
                                                 .child(new ButtonWidget<>()
