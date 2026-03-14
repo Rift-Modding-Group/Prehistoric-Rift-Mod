@@ -37,7 +37,6 @@ creature_menu.header.creature_behavior=Behavior
 creature_menu.header.turret_mode_targeting=Turret Mode Targeting
 creature_menu.header.base_options=Base Options
 
-creature_box.change_name=Change Name
 creature_box.open_inventory=Open Inventory
 creature_box.change_position=Change Position
 creature_box.more_info=More Info
@@ -524,6 +523,7 @@ box.dropdown.inventory=Inventory
 box.dropdown.options=Options
 box.dropdown.info=Info
 box.dropdown.moves=Moves
+box.change_box_name=Change Box Name
 
 tametrait.level=Level %s
 tametrait.health=Health: %s/%s

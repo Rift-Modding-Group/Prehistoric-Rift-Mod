@@ -94,7 +94,7 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
                     if (currentCategory.getValue() == null) return I18n.format("journal.index");
                     return currentCategory.getValue().getTranslatedName(true);
                 }).asWidget().left(0))
-                .child(new Row().coverChildren().childPadding(2)
+                .child(Flow.row().coverChildren().childPadding(2)
                         .childIf(this.currentCategory.getValue() != null || this.searching,
                                 () -> new ButtonWidget<>().overlay(RiftUIIcons.BACK).size(12)
                                         .addTooltipElement(IKey.dynamic(
@@ -132,7 +132,7 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
     }
 
     private Flow indexPage() {
-        Flow toReturn = new Column().sizeRel(1f).top(0).childPadding(5)
+        Flow toReturn = Flow.column().sizeRel(1f).top(0).childPadding(5)
                 .child(this.headerSection());
 
         //children
@@ -156,9 +156,9 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
                 .stream().filter(creatureType -> {
                     if (currentCategory.getValue() == RiftCreatureType.CreatureCategory.ALL) return true;
                     else return creatureType.getCreatureCategory() == currentCategory.getValue();
-                }).collect(Collectors.toList());
+                }).toList();
 
-        return new Column().sizeRel(1f).top(0).childPadding(5)
+        return Flow.column().sizeRel(1f).top(0).childPadding(5)
                 .child(this.headerSection())
                 .child(new PaddedGrid().coverChildren()
                         .matrix(Grid.mapToMatrix(
@@ -170,7 +170,7 @@ public class JournalLeftPageWidget extends ParentWidget<JournalLeftPageWidget> {
     }
 
     private Flow searchPage() {
-        return new Column().sizeRel(1f).top(0).childPadding(5)
+        return Flow.column().sizeRel(1f).top(0).childPadding(5)
                 .child(this.headerSection())
                 .child(new TextFieldWidget().widthRel(0.8f).hintText(I18n.format("journal.search_hint"))
                         .value(this.searchTerm)

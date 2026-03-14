@@ -48,11 +48,11 @@ public class RiftApplyCreatureSwap extends RiftLibMessage<RiftApplyCreatureSwap>
         FixedSizeList<CreatureNBT> playerParty = playerPartyProperties.getPlayerParty();
 
         if (swapInfo.getCreatureOne().selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY && swapInfo.getCreatureTwo().selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
-            CreatureNBT nbtOne = playerParty.get(swapInfo.getCreatureOne().pos[0]);
-            CreatureNBT nbtTwo = playerParty.get(swapInfo.getCreatureTwo().pos[0]);
+            CreatureNBT nbtOne = playerParty.get(swapInfo.getCreatureOne().getIndex());
+            CreatureNBT nbtTwo = playerParty.get(swapInfo.getCreatureTwo().getIndex());
 
-            playerParty.set(swapInfo.getCreatureOne().pos[0], nbtTwo);
-            playerParty.set(swapInfo.getCreatureTwo().pos[0], nbtOne);
+            playerParty.set(swapInfo.getCreatureOne().getIndex(), nbtTwo);
+            playerParty.set(swapInfo.getCreatureTwo().getIndex(), nbtOne);
         }
 
         playerPartyProperties.setPlayerParty(playerParty);

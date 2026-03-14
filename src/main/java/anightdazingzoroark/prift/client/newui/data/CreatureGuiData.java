@@ -66,7 +66,7 @@ public class CreatureGuiData extends GuiData {
             this.creature = (RiftCreature) player.world.getEntityByID(nbtTagCompound.getInteger("CreatureId"));
         }
         else if (this.dataType == DataType.SELECTION) {
-            this.selectedCreatureInfo = new SelectedCreatureInfo(nbtTagCompound.getCompoundTag("SelectionInfo"));
+            this.selectedCreatureInfo = SelectedCreatureInfo.createFromNBT(nbtTagCompound.getCompoundTag("SelectionInfo"));
             this.syncedNBT = new CreatureNBTSyncValue(
                     () -> HolderHelper.getSelectedCreature(player, selectedCreatureInfo),
                     data -> HolderHelper.setSelectedCreature(player, selectedCreatureInfo, data)

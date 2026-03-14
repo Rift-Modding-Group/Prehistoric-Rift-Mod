@@ -33,7 +33,7 @@ public class PlayerCreatureBoxProperties extends AbstractEntityProperties<Entity
         return this.get("CreatureBoxStorage");
     }
 
-    private void setCreatureBoxStorage(CreatureBoxStorage creatureBoxStorage) {
+    public void setCreatureBoxStorage(CreatureBoxStorage creatureBoxStorage) {
         this.set("CreatureBoxStorage", creatureBoxStorage);
     }
 

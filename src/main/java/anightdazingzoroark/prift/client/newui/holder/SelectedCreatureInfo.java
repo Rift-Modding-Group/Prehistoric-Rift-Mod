@@ -11,6 +11,7 @@ import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.ModularScreen;
 import com.cleanroommc.modularui.screen.UISettings;
+import com.cleanroommc.modularui.value.IntValue;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -21,91 +22,104 @@ import java.util.Arrays;
 
 //this helper class is for sending creature information to UIs and no less
 public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
+    //common
     public final SelectedPosType selectedPosType;
-    public final int[] pos;
+    private final int index;
     private MenuOpenedFrom menuOpenedFrom;
-    private BlockPos creatureBoxOpenedFrom = new BlockPos(0, 0, 0);
 
-    public static SelectedCreatureInfo nullableSelectedCreatureInfo(NBTTagCompound nbtTagCompound) {
+    //box only
+    private boolean boxIndexIsDynamic;
+    private int boxIndex;
+    private IntValue.Dynamic boxIndexDynamic;
+
+
+    public static SelectedCreatureInfo createFromNBT(NBTTagCompound nbtTagCompound) {
         if (nbtTagCompound.isEmpty()) return null;
-        return new SelectedCreatureInfo(nbtTagCompound);
-    }
 
-    public SelectedCreatureInfo(SelectedPosType selectedPosType, int[] pos) {
-        this(selectedPosType, pos, null);
-    }
+        //constructor stuff
+        SelectedPosType selectedPosType = SelectedPosType.values()[nbtTagCompound.getByte("SelectedPosType")];
+        int index = nbtTagCompound.getInteger("Index");
+        SelectedCreatureInfo toReturn = new SelectedCreatureInfo(selectedPosType, index);
 
-    public SelectedCreatureInfo(SelectedPosType selectedPosType, int[] pos, MenuOpenedFrom menuOpenedFrom) {
-        this.selectedPosType = selectedPosType;
-        this.pos = pos;
-        this.menuOpenedFrom = menuOpenedFrom;
-    }
-
-    public SelectedCreatureInfo(NBTTagCompound nbtTagCompound) {
-        this.selectedPosType = SelectedPosType.values()[nbtTagCompound.getByte("SelectedPosType")];
-        this.pos = nbtTagCompound.getIntArray("Position");
-        this.creatureBoxOpenedFrom = new BlockPos(
-                nbtTagCompound.getInteger("OpenedFromX"),
-                nbtTagCompound.getInteger("OpenedFromY"),
-                nbtTagCompound.getInteger("OpenedFromZ")
-        );
-        this.menuOpenedFrom = (nbtTagCompound.hasKey("MenuOpenedFrom") && nbtTagCompound.getInteger("MenuOpenedFrom") >= 0) ?
+        //additional stuff
+        toReturn.menuOpenedFrom = (nbtTagCompound.hasKey("MenuOpenedFrom") && nbtTagCompound.getInteger("MenuOpenedFrom") >= 0) ?
                 MenuOpenedFrom.values()[nbtTagCompound.getInteger("MenuOpenedFrom")] : null;
+        toReturn.boxIndex = nbtTagCompound.getInteger("BoxIndex");
+
+        return toReturn;
+    }
+
+    public static SelectedCreatureInfo partySelectedInfo(int pos) {
+        return new SelectedCreatureInfo(SelectedPosType.PARTY, pos);
+    }
+
+    public static SelectedCreatureInfo boxSelectedInfo(int boxIndex, int pos) {
+        SelectedCreatureInfo toReturn = new SelectedCreatureInfo(SelectedPosType.BOX, pos);
+        toReturn.boxIndexIsDynamic = true;
+        toReturn.boxIndex = boxIndex;
+        return toReturn;
+    }
+
+    public static SelectedCreatureInfo boxSelectedInfoDynamic(IntValue.Dynamic boxIndexDynamic, int pos) {
+        SelectedCreatureInfo toReturn = new SelectedCreatureInfo(SelectedPosType.BOX, pos);
+        toReturn.boxIndexIsDynamic = false;
+        toReturn.boxIndexDynamic = boxIndexDynamic;
+        return toReturn;
+    }
+
+    public static SelectedCreatureInfo boxDeployedInfo(int pos) {
+        return new SelectedCreatureInfo(SelectedPosType.BOX_DEPLOYED, pos);
+    }
+
+    private SelectedCreatureInfo(SelectedPosType selectedPosType, int index) {
+        this.selectedPosType = selectedPosType;
+        this.index = index;
     }
 
     public void setMenuOpenedFrom(MenuOpenedFrom value) {
         this.menuOpenedFrom = value;
     }
 
-    public void setCreatureBoxOpenedFrom(BlockPos pos) {
-        this.creatureBoxOpenedFrom = pos;
-    }
-
-    public BlockPos getCreatureBoxOpenedFrom() {
-        return this.creatureBoxOpenedFrom;
-    }
-
-    public boolean cbNotOpenedFromZero() {
-        return !this.creatureBoxOpenedFrom.equals(new BlockPos(0, 0, 0));
-    }
-
-    public MenuOpenedFrom getMenuOpenedFrom() {
-        return this.menuOpenedFrom;
-    }
-
-    @Deprecated
-    public CreatureNBT getCreatureNBT(EntityPlayer player) {
-        if (this.selectedPosType == SelectedPosType.PARTY) return PlayerTamedCreaturesHelper.getPlayerPartyNBT(player).get(this.pos[0]);
-        else if (this.selectedPosType == SelectedPosType.BOX) return PlayerTamedCreaturesHelper.getCreatureBoxStorage(player).getBoxContents(this.pos[0]).get(this.pos[1]);
-        else if (this.selectedPosType == SelectedPosType.BOX_DEPLOYED) {
-            TileEntity tileEntity = player.world.getTileEntity(this.getCreatureBoxOpenedFrom());
-            if (!(tileEntity instanceof RiftTileEntityCreatureBox)) return new CreatureNBT();
-            RiftTileEntityCreatureBox teCreatureBox = (RiftTileEntityCreatureBox) tileEntity;
-            RiftTileEntityCreatureBoxHelper.forceSyncCreatureBoxDeployed(player, this.getCreatureBoxOpenedFrom());
-            return teCreatureBox.getDeployedCreatures().get(this.pos[0]);
-        }
-        return new CreatureNBT();
+    public int getIndex() {
+        return this.index;
     }
 
     //this is mainly for use in packets
     public NBTTagCompound getNBT() {
         NBTTagCompound toReturn = new NBTTagCompound();
         toReturn.setByte("SelectedPosType", (byte) this.selectedPosType.ordinal());
-        toReturn.setIntArray("Position", this.pos);
-        toReturn.setInteger("OpenedFromX", this.creatureBoxOpenedFrom.getX());
-        toReturn.setInteger("OpenedFromY", this.creatureBoxOpenedFrom.getY());
-        toReturn.setInteger("OpenedFromZ", this.creatureBoxOpenedFrom.getZ());
+        toReturn.setInteger("Index", this.index);
         toReturn.setInteger("MenuOpenedFrom", this.menuOpenedFrom != null ? this.menuOpenedFrom.ordinal() : -1);
+        toReturn.setInteger("BoxIndex", this.boxIndexIsDynamic ? this.boxIndexDynamic.getValue() : this.boxIndex);
+
         return toReturn;
     }
 
     @Override
     public boolean equals(Object object) {
         if (object == null) return false;
-        if (!(object instanceof SelectedCreatureInfo infoToTest) || this.creatureBoxOpenedFrom == null) return false;
-        return infoToTest.selectedPosType == this.selectedPosType
-                && Arrays.equals(infoToTest.pos, this.pos)
-                && infoToTest.creatureBoxOpenedFrom.equals(this.creatureBoxOpenedFrom);
+        if (!(object instanceof SelectedCreatureInfo infoToTest)) return false;
+
+        //normal equality check
+        boolean check = infoToTest.index == this.index && infoToTest.selectedPosType == this.selectedPosType;
+
+        //special equality check for box
+        if (this.selectedPosType == SelectedPosType.BOX && infoToTest.selectedPosType == SelectedPosType.BOX) {
+            if (this.boxIndexIsDynamic && infoToTest.boxIndexIsDynamic) {
+                return check && this.boxIndexDynamic.getIntValue() == infoToTest.boxIndexDynamic.getIntValue();
+            }
+            else if (this.boxIndexIsDynamic && !infoToTest.boxIndexIsDynamic) {
+                return check && this.boxIndexDynamic.getIntValue() == infoToTest.boxIndex;
+            }
+            else if (!this.boxIndexIsDynamic && infoToTest.boxIndexIsDynamic) {
+                return check && this.boxIndex == infoToTest.boxIndexDynamic.getIntValue();
+            }
+            else if (!this.boxIndexIsDynamic && !infoToTest.boxIndexIsDynamic) {
+                return check && this.boxIndex == infoToTest.boxIndex;
+            }
+        }
+
+        return check;
     }
 
     @Override
@@ -137,11 +151,11 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
 
         public SwapInfo(NBTTagCompound nbtTagCompound) {
             if (nbtTagCompound.hasKey("CreatureOne")) {
-                this.creatureOne = new SelectedCreatureInfo(nbtTagCompound.getCompoundTag("CreatureOne"));
+                this.creatureOne = SelectedCreatureInfo.createFromNBT(nbtTagCompound.getCompoundTag("CreatureOne"));
             }
 
             if (nbtTagCompound.hasKey("CreatureTwo")) {
-                this.creatureTwo = new SelectedCreatureInfo(nbtTagCompound.getCompoundTag("CreatureTwo"));
+                this.creatureTwo = SelectedCreatureInfo.createFromNBT(nbtTagCompound.getCompoundTag("CreatureTwo"));
             }
         }
 

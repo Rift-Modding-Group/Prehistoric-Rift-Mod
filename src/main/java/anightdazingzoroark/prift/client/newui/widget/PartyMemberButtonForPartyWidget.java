@@ -69,7 +69,7 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
         this.player = player;
         this.creatureSwapInfoDynamic = creatureSwapInfoDynamic;
         this.creatureSwitchingDynamic = creatureSwitchingDynamic;
-        this.selectedCreatureInfo = new SelectedCreatureInfo(SelectedCreatureInfo.SelectedPosType.PARTY, new int[]{indexIn});
+        this.selectedCreatureInfo = SelectedCreatureInfo.partySelectedInfo(indexIn);
         this.playerParty = PlayerPartyHelper.getPlayerParty(player);
 
         this.requiresClick();
@@ -301,11 +301,8 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
                         RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.inventoryPageNum));
                     }
                     else {
-                        SelectedCreatureInfo selectionInfo = new SelectedCreatureInfo(
-                                SelectedCreatureInfo.SelectedPosType.PARTY,
-                                new int[]{index},
-                                SelectedCreatureInfo.MenuOpenedFrom.PARTY
-                        );
+                        SelectedCreatureInfo selectionInfo = SelectedCreatureInfo.partySelectedInfo(index);
+                        selectionInfo.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.PARTY);
                         RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo, RiftCreatureScreen.inventoryPageNum));
                     }
                     return true;
@@ -321,11 +318,8 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
                         RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.optionsPageNum));
                     }
                     else {
-                        SelectedCreatureInfo selectionInfo = new SelectedCreatureInfo(
-                                SelectedCreatureInfo.SelectedPosType.PARTY,
-                                new int[]{index},
-                                SelectedCreatureInfo.MenuOpenedFrom.PARTY
-                        );
+                        SelectedCreatureInfo selectionInfo = SelectedCreatureInfo.partySelectedInfo(index);
+                        selectionInfo.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.PARTY);
                         RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo, RiftCreatureScreen.optionsPageNum));
                     }
                     return true;
@@ -341,11 +335,8 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
                         RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.infoPageNum));
                     }
                     else {
-                        SelectedCreatureInfo selectionInfo = new SelectedCreatureInfo(
-                                SelectedCreatureInfo.SelectedPosType.PARTY,
-                                new int[]{index},
-                                SelectedCreatureInfo.MenuOpenedFrom.PARTY
-                        );
+                        SelectedCreatureInfo selectionInfo = SelectedCreatureInfo.partySelectedInfo(index);
+                        selectionInfo.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.PARTY);
                         RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo, RiftCreatureScreen.infoPageNum));
                     }
                     return true;
@@ -361,11 +352,8 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
                         RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.movesPageNum));
                     }
                     else {
-                        SelectedCreatureInfo selectionInfo = new SelectedCreatureInfo(
-                                SelectedCreatureInfo.SelectedPosType.PARTY,
-                                new int[]{index},
-                                SelectedCreatureInfo.MenuOpenedFrom.PARTY
-                        );
+                        SelectedCreatureInfo selectionInfo = SelectedCreatureInfo.partySelectedInfo(index);
+                        selectionInfo.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.PARTY);
                         RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo, RiftCreatureScreen.movesPageNum));
                     }
                     return true;

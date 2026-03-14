@@ -27,11 +27,6 @@ public class PlayerTamedCreaturesHelper {
         return player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
     }
 
-    public static void setCreatureNBTParam(EntityPlayer player, NBTTagCompound nbtParam, SelectedCreatureInfo selectionInfo) {
-        if (player == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftSetCreatureNBTParam(player, nbtParam, selectionInfo));
-    }
-
 
     public static void updateAllPartyMems(EntityPlayer player) {
         if (player == null) return;
@@ -229,43 +224,6 @@ public class PlayerTamedCreaturesHelper {
         RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureBoxName(player, boxPos, newName));
     }
     //box stuff ends here
-
-    //helper stuff for SelectedCreatureInfo class starts here
-    public static CreatureNBT getCreatureNBTFromSelected(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo) {
-        return getCreatureNBTFromSelected(player, selectedCreatureInfo, true);
-    }
-
-    public static CreatureNBT getCreatureNBTFromSelected(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo, boolean forceSyncFirst) {
-        if (player == null || selectedCreatureInfo == null) return new CreatureNBT();
-        if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
-            return getPlayerPartyNBT(player, forceSyncFirst).get(selectedCreatureInfo.pos[0]);
-        }
-        else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
-            return getCreatureBoxStorage(player, false, forceSyncFirst).getBoxContents(selectedCreatureInfo.pos[0]).get(selectedCreatureInfo.pos[1]);
-        }
-        return new CreatureNBT();
-    }
-
-    public static void setSelectedCreatureName(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo, String newName) {
-        if (player == null || selectedCreatureInfo == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftChangeSelectedCreatureName(player, selectedCreatureInfo, newName));
-    }
-
-    public static void releaseSelectedCreature(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo) {
-        if (player == null || selectedCreatureInfo == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftReleaseSelectedCreature(player, selectedCreatureInfo));
-    }
-
-    public static void swapCreatures(EntityPlayer player, SelectedCreatureInfo selectedPos, SelectedCreatureInfo posToSwap) {
-        if (player == null || selectedPos == null || posToSwap == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftSwapCreaturePositions(player, selectedPos, posToSwap));
-    }
-
-    public static void dropSelectedInventory(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo) {
-        if (player == null || selectedCreatureInfo == null) return;
-        RiftMessages.WRAPPER.sendToServer(new RiftDropSelectedInventory(player, selectedCreatureInfo));
-    }
-    //getter stuff for SelectedCreatureInfo class ends here
 
     public static void setCreatureBoxLastOpenedTime(EntityPlayer player, int time) {
         if (player == null) return;

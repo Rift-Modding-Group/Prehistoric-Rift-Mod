@@ -13,7 +13,7 @@ public class HolderHelper {
         if (selectedCreature.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
             PlayerPartyProperties playerPartyProperties = PlayerPartyHelper.getPlayerParty(player);
             FixedSizeList<CreatureNBT> playerParty = playerPartyProperties.getPlayerParty();
-            playerParty.set(selectedCreature.pos[0], creatureNBT);
+            playerParty.set(selectedCreature.getIndex(), creatureNBT);
             playerPartyProperties.setPlayerParty(playerParty);
         }
     }
@@ -21,7 +21,7 @@ public class HolderHelper {
     public static CreatureNBT getSelectedCreature(EntityPlayer player, SelectedCreatureInfo selectedCreature) {
         if (player == null) return new CreatureNBT();
         if (selectedCreature.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
-            return PlayerPartyHelper.getPlayerParty(player).getPartyMember(selectedCreature.pos[0]);
+            return PlayerPartyHelper.getPlayerParty(player).getPartyMember(selectedCreature.getIndex());
         }
         return new CreatureNBT();
     }

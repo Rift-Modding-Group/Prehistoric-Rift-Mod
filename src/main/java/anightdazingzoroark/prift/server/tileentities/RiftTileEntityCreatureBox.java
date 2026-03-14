@@ -49,6 +49,7 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, 
 
     //for use in ui
     private boolean isCreatureSwitching;
+    private SelectedCreatureInfo selectedCreatureInfo;
     private SelectedCreatureInfo.SwapInfo creatureSwapInfo = new SelectedCreatureInfo.SwapInfo();
     private HashMap<Integer, RiftCreature> deployedPartyCreatures = new HashMap<>();
     private int currentBoxIndex;
@@ -183,6 +184,14 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, 
 
     public void setIsCreatureSwitching(boolean value) {
         this.isCreatureSwitching = value;
+    }
+
+    public SelectedCreatureInfo getSelectedCreatureInfo() {
+        return this.selectedCreatureInfo;
+    }
+
+    public void setSelectedCreatureInfo(SelectedCreatureInfo value) {
+        this.selectedCreatureInfo = value;
     }
 
     public SelectedCreatureInfo.SwapInfo getCreatureSwapInfo() {

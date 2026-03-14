@@ -8,11 +8,15 @@ import net.minecraft.util.ResourceLocation;
 
 public class RiftUIIcons {
     public static final UITexture BACK = icon("back", 0, 0);
+    public static final UITexture LEFT_ARROW = icon("leftArrow", 16, 0);
+    public static final UITexture RIGHT_ARROW = icon("rightArrow", 32, 0);
+    public static final UITexture LEFT_ARROW_SELECTED = icon("leftArrowSelected", 0, 16);
+    public static final UITexture RIGHT_ARROW_SELECTED = icon("rightArrowSelected", 16, 16);
 
     private static UITexture icon(String name, int x, int y) {
         return UITexture.builder()
                 .location(new ResourceLocation(RiftInitialize.MODID, "textures/ui/ui_icons.png"))
-                .imageSize(32, 32)
+                .imageSize(48, 32)
                 .subAreaXYWH(x, y, 16, 16)
                 .iconColorType()
                 .name(name)

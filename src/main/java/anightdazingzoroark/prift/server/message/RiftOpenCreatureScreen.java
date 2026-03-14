@@ -57,7 +57,7 @@ public class RiftOpenCreatureScreen extends RiftLibMessage<RiftOpenCreatureScree
     public void executeOnServer(MinecraftServer minecraftServer, RiftOpenCreatureScreen message, EntityPlayer entityPlayer, MessageContext messageContext) {
         EntityPlayer player = (EntityPlayer) minecraftServer.getEntityWorld().getEntityByID(message.playerId);
         if (message.useSelectedCreature) {
-            SelectedCreatureInfo selectedCreatureInfo = new SelectedCreatureInfo(message.selectedCreatureInfoNBT);
+            SelectedCreatureInfo selectedCreatureInfo = SelectedCreatureInfo.createFromNBT(message.selectedCreatureInfoNBT);
             CreatureGuiFactory.openToPage(message.pageToOpenTo).open(player, selectedCreatureInfo);
         }
         else {

@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.newui.widget;
 
 import anightdazingzoroark.prift.client.newui.RiftUIIcons;
+import anightdazingzoroark.prift.client.newui.UIColors;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.newui.value.FixedSizeCreatureListSyncValue;
@@ -14,6 +15,7 @@ import com.cleanroommc.modularui.api.drawable.IDrawable;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.api.widget.Interactable;
+import com.cleanroommc.modularui.drawable.DrawableStack;
 import com.cleanroommc.modularui.drawable.Rectangle;
 import com.cleanroommc.modularui.screen.viewport.ModularGuiContext;
 import com.cleanroommc.modularui.theme.WidgetTheme;
@@ -21,8 +23,12 @@ import com.cleanroommc.modularui.theme.WidgetThemeEntry;
 import com.cleanroommc.modularui.value.BoolValue;
 import com.cleanroommc.modularui.value.IntValue;
 import com.cleanroommc.modularui.value.ObjectValue;
+import com.cleanroommc.modularui.value.sync.DoubleSyncValue;
+import com.cleanroommc.modularui.widget.ParentWidget;
 import com.cleanroommc.modularui.widgets.ButtonWidget;
 import com.cleanroommc.modularui.widgets.ListWidget;
+import com.cleanroommc.modularui.widgets.layout.Flow;
+import com.cleanroommc.modularui.widgets.menu.AbstractMenuButton;
 import com.cleanroommc.modularui.widgets.menu.ContextMenuButton;
 import com.cleanroommc.modularui.widgets.menu.Menu;
 import net.minecraft.client.resources.I18n;
@@ -36,11 +42,14 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     private final SelectedCreatureInfo.SelectedPosType section;
     private final int index;
     @NotNull
+    private final ObjectValue.Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic;
+    @NotNull
     private final BoolValue.Dynamic creatureSwitchingDynamic;
     @NotNull
     private final ObjectValue.Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic;
     @NotNull
     private final HashMapValue.Dynamic<Integer, RiftCreature> deployedPartyCreaturesDynamic;
+    private final SelectedCreatureInfo selectedCreatureInfo;
 
     //party only stuff
     private PlayerPartyProperties playerParty;
@@ -52,6 +61,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     //deployed from box only stuff
     private FixedSizeCreatureListSyncValue boxDeployedCreatures;
 
+    //other stuff that changes
     @NotNull
     private CreatureNBT creatureNBT = new CreatureNBT();
     private boolean isSelected;
@@ -60,6 +70,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     public CreatureInBoxButtonWidget(
             PlayerPartyProperties playerParty,
             int index,
+            ObjectValue.@NotNull Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic,
             BoolValue.@NotNull Dynamic creatureSwitchingDynamic,
             ObjectValue.@NotNull Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
             HashMapValue.@NotNull Dynamic<Integer, RiftCreature> deployedPartyCreaturesDynamic
@@ -68,9 +79,12 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
         this.section = SelectedCreatureInfo.SelectedPosType.PARTY;
         this.index = index;
         this.playerParty = playerParty;
+        this.selectedCreatureInfoDynamic = selectedCreatureInfoDynamic;
         this.creatureSwitchingDynamic = creatureSwitchingDynamic;
         this.creatureSwapInfoDynamic = creatureSwapInfoDynamic;
         this.deployedPartyCreaturesDynamic = deployedPartyCreaturesDynamic;
+
+        this.selectedCreatureInfo = SelectedCreatureInfo.partySelectedInfo(index);
 
         this.commonSetup();
     }
@@ -79,6 +93,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     public CreatureInBoxButtonWidget(
             PlayerCreatureBoxProperties playerBox,
             IntValue.Dynamic currentBoxIndexDynamic, int index,
+            ObjectValue.@NotNull Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic,
             BoolValue.@NotNull Dynamic creatureSwitchingDynamic,
             ObjectValue.@NotNull Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
             HashMapValue.@NotNull Dynamic<Integer, RiftCreature> deployedPartyCreaturesDynamic
@@ -88,9 +103,12 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
         this.currentBoxIndexDynamic = currentBoxIndexDynamic;
         this.index = index;
         this.playerBox = playerBox;
+        this.selectedCreatureInfoDynamic = selectedCreatureInfoDynamic;
         this.creatureSwitchingDynamic = creatureSwitchingDynamic;
         this.creatureSwapInfoDynamic = creatureSwapInfoDynamic;
         this.deployedPartyCreaturesDynamic = deployedPartyCreaturesDynamic;
+
+        this.selectedCreatureInfo = SelectedCreatureInfo.boxSelectedInfoDynamic(currentBoxIndexDynamic, index);
 
         this.commonSetup();
     }
@@ -100,6 +118,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     public CreatureInBoxButtonWidget(
             FixedSizeCreatureListSyncValue boxDeployedCreatures,
             int index,
+            ObjectValue.@NotNull Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic,
             BoolValue.@NotNull Dynamic creatureSwitchingDynamic,
             ObjectValue.@NotNull Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
             HashMapValue.@NotNull Dynamic<Integer, RiftCreature> deployedPartyCreaturesDynamic
@@ -108,31 +127,20 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
         this.section = SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED;
         this.boxDeployedCreatures = boxDeployedCreatures;
         this.index = index;
+        this.selectedCreatureInfoDynamic = selectedCreatureInfoDynamic;
         this.creatureSwitchingDynamic = creatureSwitchingDynamic;
         this.creatureSwapInfoDynamic = creatureSwapInfoDynamic;
         this.deployedPartyCreaturesDynamic = deployedPartyCreaturesDynamic;
+
+        this.selectedCreatureInfo = SelectedCreatureInfo.boxDeployedInfo(index);
 
         this.commonSetup();
     }
 
     private void commonSetup() {
         this.size(32);
-        this.requiresClick();
-        this.openDown();
-        this.menuList(list -> {
-            list.name("options").width(64).coverChildrenHeight().children(
-                    Arrays.asList(Option.values()), option -> new CreatureDropdownOptionWidget(this, option)
-            );
-        });
-    }
-
-    @Override
-    public CreatureInBoxButtonWidget menuList(Consumer<ListWidget<IWidget, ?>> builder) {
-        ListWidget<IWidget, ?> l = new ListWidget<>().widthRel(1f);
-        builder.accept(l);
-        return this.menu(new Menu<>().width(64).center()
-                .coverChildrenHeight().child(l)
-        );
+        this.menu(new MenuForCreature(this));
+        this.openCustom();
     }
 
     @Override
@@ -140,14 +148,30 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
         super.onUpdate();
         if (!this.isValid()) return;
 
+        this.isSelected = this.getIsSelected();
         this.creatureNBT = this.getCreatureNBT();
     }
 
+    private boolean getIsSelected() {
+        if (this.selectedCreatureInfoDynamic.getValue() == null) return false;
+        return this.selectedCreatureInfoDynamic.getValue().equals(this.selectedCreatureInfo);
+    }
+
+    //this is to make sure that the relationship between selectedCreatureInfoDynamic
+    //and selectedCreatureInfo results in isSelected being true or false
     @Override
     @NotNull
     public Result onMousePressed(int mouseButton) {
         if (this.creatureNBT.nbtIsEmpty()) return Result.ACCEPT;
+        if (this.isSelected) this.selectedCreatureInfoDynamic.setValue(null);
+        else this.selectedCreatureInfoDynamic.setValue(this.selectedCreatureInfo);
         return super.onMousePressed(mouseButton);
+    }
+
+    //this is to ensure that, only when there is creatureNBT, can the menu be opened
+    @Override
+    public void onMouseEnterArea() {
+        if (!this.creatureNBT.nbtIsEmpty()) super.onMouseEnterArea();
     }
 
     private CreatureNBT getCreatureNBT() {
@@ -191,9 +215,118 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     }
 
     private int getOutlineColor() {
-        if (this.isHovering()) return 0xFFFFFFFF;
-        else if (this.isSelected) return 0xFFFFFF00;
+        if (this.isSelected) return 0xFFFFFF00;
+        else if (this.isHovering()) return 0xFFFFFFFF;
         return 0xFF000000;
+    }
+
+    private static class MenuForCreature extends Menu<MenuForCreature> {
+        private final CreatureInBoxButtonWidget parent;
+        private final ObjectValue.Dynamic<CreatureNBT> parentCreatureNBT;
+        private Boolean parentIsSelected;
+
+        public MenuForCreature(CreatureInBoxButtonWidget parent) {
+            super();
+            this.parent = parent;
+            this.parentCreatureNBT = new ObjectValue.Dynamic<>(
+                    CreatureNBT.class,
+                    () -> parent.creatureNBT,
+                    null
+            );
+            this.coverChildrenHeight();
+            this.unselectedFlex();
+        }
+
+        @Override
+        public void onUpdate() {
+            super.onUpdate();
+
+            if (this.parentIsSelected == null || this.parentIsSelected != this.parent.isSelected) {
+                //reset children
+                this.removeAll();
+
+                //selected means its a typical dropdown button
+                if (this.parent.isSelected) {
+                    this.width(64);
+
+                    //set dropdown buttons
+                    ListWidget<IWidget, ?> list = new ListWidget<>().widthRel(1f);
+                    list.name("options").width(64).coverChildrenHeight().children(
+                            Arrays.asList(Option.values()), option -> new CreatureDropdownOptionWidget(this.parent, option)
+                    );
+                    this.child(list);
+
+                    //change flex to under the button
+                    this.selectedFlex();
+                }
+                //otherwise, it just a panel that shows name, level, hp, energy, and health
+                else {
+                    this.width(96);
+
+                    this.child(Flow.column().widthRel(1f).coverChildrenHeight().padding(3)
+                            .childPadding(3)
+                            //name
+                            .child(new ParentWidget<>().widthRel(1f).coverChildrenHeight()
+                                    .child(IKey.dynamic(() -> {
+                                        CreatureNBT cNBT = this.parentCreatureNBT.getValue();
+                                        return cNBT.getCreatureName(false);
+                                    }).scale(0.75f).asWidget())
+                            )
+                            //level
+                            .child(new ParentWidget<>().widthRel(1f).coverChildrenHeight()
+                                    .child(IKey.dynamic(() -> {
+                                        CreatureNBT cNBT = this.parentCreatureNBT.getValue();
+                                        return I18n.format("tametrait.level", cNBT.getCreatureLevel());
+                                    }).scale(0.75f).asWidget())
+                            )
+                            //health
+                            .child(new RectangleProgressWidget().height(3).widthRel(1f)
+                                    .valueColor(UIColors.barHealthColor)
+                                    .setValue(new DoubleSyncValue(
+                                            () -> this.parentCreatureNBT.getValue().getCreatureHealth()[0] / this.parentCreatureNBT.getValue().getCreatureHealth()[1],
+                                            value -> {}
+                                    ))
+                            )
+                            //energy
+                            .child(new RectangleProgressWidget().height(3).widthRel(1f)
+                                    .valueColor(UIColors.barEnergyColor)
+                                    .setValue(new DoubleSyncValue(
+                                            () -> (double) this.parentCreatureNBT.getValue().getCreatureEnergy()[0] / (double) this.parentCreatureNBT.getValue().getCreatureEnergy()[1],
+                                            value -> {}
+                                    ))
+                            )
+                            //xp
+                            .child(new RectangleProgressWidget().height(3).widthRel(1f)
+                                    .valueColor(UIColors.barXpColor)
+                                    .setValue(new DoubleSyncValue(
+                                            () -> (double) this.parentCreatureNBT.getValue().getCreatureXP()[0] / (double) this.parentCreatureNBT.getValue().getCreatureXP()[1],
+                                            value -> {}
+                                    ))
+                            )
+                    );
+
+                    //change flex to the left or right of the button
+                    this.unselectedFlex();
+                }
+
+                //set flag
+                this.parentIsSelected = this.parent.isSelected;
+            }
+        }
+
+        private void unselectedFlex() {
+            //if on party or box, show to the right
+            if (this.parent.section == SelectedCreatureInfo.SelectedPosType.PARTY
+                || this.parent.section == SelectedCreatureInfo.SelectedPosType.BOX) {
+                this.resizer().leftRel(1f).topRel(0.5f);
+            }
+            //otherwise, to the left
+            else this.resizer().rightRel(1f).topRel(0.5f);
+        }
+
+        private void selectedFlex() {
+            this.resizer().center().topRel(1f);
+        }
     }
 
     private enum Option {

@@ -61,13 +61,9 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftSetLastOpenedBox.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftAddToBox.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftChangeCreatureBoxName.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftChangeSelectedCreatureName.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftReleaseSelectedCreature.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftSwapCreaturePositions.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftForceUpdateCreatureBoxDeployed.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftUpdateIndividualBoxDeployedCreatureClient.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftUpdateIndividualBoxDeployedCreatureServer.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftDropSelectedInventory.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftUpdateAllCreatureBoxDeployedMems.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftForceSyncBoxDeployedNBT.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftCreatureBoxSetLastOpenedTime.class, RiftLibMessageSide.SERVER);
@@ -75,8 +71,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftRemoveCreatureBoxData.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftSetHypnotized.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftOpenCreatureScreen.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftSetCreatureNBT.class, RiftLibMessageSide.BOTH);
-        WRAPPER.registerMessage(RiftSetCreatureNBTParam.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftApplyCreatureSwap.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftChangeQuickSelectPos.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftInitDeployedCreatureMap.class, RiftLibMessageSide.CLIENT);

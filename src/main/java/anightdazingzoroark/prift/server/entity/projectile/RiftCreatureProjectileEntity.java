@@ -44,12 +44,11 @@ public class RiftCreatureProjectileEntity extends RiftLibProjectile {
         super.onUpdate();
 
         //count down until, well
-        if (!this.world.isRemote) {
-            if (this.getProjectileBuilder() != null && this.getProjectileBuilder().getHasDelayedEffectOnImpact() && this.countingDown) {
-                this.countdown--;
-                if (this.countdown <= 0) {
-                    this.getProjectileBuilder().getDelayedEffectOnImpact().accept(this, null);
-                }
+        if (this.world.isRemote) return;
+        if (this.getProjectileBuilder() != null && this.getProjectileBuilder().getHasDelayedEffectOnImpact() && this.countingDown) {
+            this.countdown--;
+            if (this.countdown <= 0) {
+                this.getProjectileBuilder().getDelayedEffectOnImpact().accept(this, null);
             }
         }
     }
@@ -87,15 +86,18 @@ public class RiftCreatureProjectileEntity extends RiftLibProjectile {
     }
 
     public boolean hasFlatModel() {
+        if (this.getProjectileBuilder() == null) return false;
         return this.getProjectileBuilder().getHasFlatModel();
     }
 
     public boolean hasNoModel() {
+        if (this.getProjectileBuilder() == null) return true;
         return this.getProjectileBuilder().getHasNoModel();
     }
 
     @Override
     public void projectileEntityEffects(EntityLivingBase entityLivingBase) {
+        if (this.getProjectileBuilder() == null) return;
         if (this.getProjectileBuilder().getHasDelayedEffectOnImpact()) {
             this.countingDown = true;
         }
@@ -114,20 +116,24 @@ public class RiftCreatureProjectileEntity extends RiftLibProjectile {
 
     @Override
     public boolean canSelfDestroyUponHit() {
+        if (this.getProjectileBuilder() == null) return false;
         return this.getProjectileBuilder().getSelfDestruct();
     }
 
     @Override
     public boolean canRotateVertically() {
+        if (this.getProjectileBuilder() == null) return false;
         return !this.getProjectileBuilder().getNoVerticalRotation();
     }
 
     public boolean getHasAnimation() {
+        if (this.getProjectileBuilder() == null) return false;
         return this.getProjectileBuilder().getHasAnimation();
     }
 
     @Override
     public void registerControllers(AnimationData animationData) {
+        if (this.getProjectileBuilder() == null) return;
         if (this.getProjectileBuilder().getHasAnimation()) {
             animationData.addAnimationController(this.getProjectileBuilder().getAnimationController().apply(this));
         }
@@ -135,6 +141,7 @@ public class RiftCreatureProjectileEntity extends RiftLibProjectile {
 
     @Override
     public SoundEvent getOnProjectileHitSound() {
+        if (this.getProjectileBuilder() == null) return null;
         return this.getProjectileBuilder().getImpactSoundEvent();
     }
 }

@@ -1,7 +1,9 @@
 package anightdazingzoroark.prift.client.newui.screens.synced;
 
+import anightdazingzoroark.prift.client.newui.RiftUIIcons;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.newui.panel.ModularPanelExitAffectable;
 import anightdazingzoroark.prift.client.newui.value.FixedSizeCreatureListSyncValue;
 import anightdazingzoroark.prift.client.newui.value.HashMapValue;
 import anightdazingzoroark.prift.client.newui.widget.CreatureInBoxButtonWidget;
@@ -14,19 +16,27 @@ import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreat
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
+import com.cleanroommc.modularui.api.IPanelHandler;
+import com.cleanroommc.modularui.api.drawable.IDrawable;
 import com.cleanroommc.modularui.api.drawable.IKey;
+import com.cleanroommc.modularui.drawable.DrawableStack;
 import com.cleanroommc.modularui.drawable.GuiTextures;
+import com.cleanroommc.modularui.drawable.InteractableIcon;
+import com.cleanroommc.modularui.drawable.Rectangle;
 import com.cleanroommc.modularui.factory.PosGuiData;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.value.BoolValue;
 import com.cleanroommc.modularui.value.IntValue;
 import com.cleanroommc.modularui.value.ObjectValue;
+import com.cleanroommc.modularui.value.StringValue;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.cleanroommc.modularui.widget.ParentWidget;
 import com.cleanroommc.modularui.widgets.ButtonWidget;
+import com.cleanroommc.modularui.widgets.Dialog;
 import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.cleanroommc.modularui.widgets.layout.Grid;
+import com.cleanroommc.modularui.widgets.textfield.TextFieldWidget;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 
@@ -48,7 +58,11 @@ public class RiftCreatureBoxScreen {
                 teCreatureBox::getCurrentBoxIndex,
                 teCreatureBox::setCurrentBoxIndex
         );
-
+        ObjectValue.Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic = new ObjectValue.Dynamic<>(
+                SelectedCreatureInfo.class,
+                teCreatureBox::getSelectedCreatureInfo,
+                teCreatureBox::setSelectedCreatureInfo
+        );
         BoolValue.Dynamic creatureSwitchingDynamic = new BoolValue.Dynamic(
                 teCreatureBox::getIsCreatureSwitching,
                 teCreatureBox::setIsCreatureSwitching
@@ -70,7 +84,20 @@ public class RiftCreatureBoxScreen {
         );
         syncManager.syncValue("creatureBoxDeployed", creatureBoxDeployed);
 
-        return new ModularPanel(UIPanelNames.CREATURE_BOX_SCREEN).size(220, 200)
+        //panel stuff
+        IPanelHandler changeNamePanel = syncManager.syncedPanel(
+                "changeNamePanel", true,
+                (panelSyncMan, panelHandler) -> {
+                    return boxNamePopupPanel(playerBox, currentBoxIndexDynamic);
+                }
+        );
+
+        return new ModularPanelExitAffectable(UIPanelNames.CREATURE_BOX_SCREEN)
+                .onEscPressed(panel -> {
+                    selectedCreatureInfoDynamic.setValue(null);
+                    return false;
+                })
+                .size(220, 200)
                 //left side will be player party
                 .child(new ParentWidget<>().name("partySection").coverChildren()
                         .background(GuiTextures.MC_BACKGROUND)
@@ -82,6 +109,7 @@ public class RiftCreatureBoxScreen {
                                                 2, PlayerPartyHelper.maxSize,
                                                 index -> new CreatureInBoxButtonWidget(
                                                         playerParty, index,
+                                                        selectedCreatureInfoDynamic,
                                                         creatureSwitchingDynamic,
                                                         creatureSwapInfoDynamic,
                                                         deployedPartyCreaturesDynamic
@@ -94,13 +122,54 @@ public class RiftCreatureBoxScreen {
                 //middle side will be box creatures
                 .child(new ParentWidget<>().name("boxSection").coverChildren().center()
                         .child(Flow.column().margin(5).coverChildren().childPadding(5)
-                                .child(new ParentWidget<>().name("BoxSectionHeader").size(168, 18)
+                                .child(new ParentWidget<>().name("BoxSectionHeader").size(160, 18)
                                         .child(Flow.row().coverChildren().childPadding(3).center()
-                                                .child(new ButtonWidget<>())
-                                                .child(IKey.dynamic(() -> {
-                                                    return playerBox.getCreatureBoxStorage().getBoxName(currentBoxIndexDynamic.getIntValue());
-                                                }).asWidget())
-                                                .child(new ButtonWidget<>())
+                                                .child(new ButtonWidget<>()
+                                                        .overlay(RiftUIIcons.LEFT_ARROW.asIcon())
+                                                        .hoverOverlay(RiftUIIcons.LEFT_ARROW_SELECTED.asIcon())
+                                                        .background(IDrawable.EMPTY)
+                                                        .hoverBackground(IDrawable.EMPTY)
+                                                        .onMousePressed(
+                                                        button -> {
+                                                            int currentVal = currentBoxIndexDynamic.getIntValue();
+                                                            int prevValue = currentVal - 1 >= 0 ? currentVal - 1 : CreatureBoxStorage.maxBoxAmnt - 1;
+                                                            currentBoxIndexDynamic.setIntValue(prevValue);
+                                                            return true;
+                                                        })
+                                                )
+                                                .child(new ParentWidget<>().width(120).heightRel(1f)
+                                                        .child(new ButtonWidget<>()
+                                                                .width(120).heightRel(1f).center()
+                                                                .overlay(new DrawableStack(
+                                                                        new Rectangle().color(0xFF434343),
+                                                                        new Rectangle().color(0xFF000000).hollow(),
+                                                                        IKey.dynamic(() -> {
+                                                                            return playerBox.getCreatureBoxStorage()
+                                                                                    .getBoxName(currentBoxIndexDynamic.getIntValue());
+                                                                        })
+                                                                ))
+                                                                .background(IDrawable.EMPTY)
+                                                                .hoverBackground(IDrawable.EMPTY)
+                                                                .onMousePressed(mouseButton -> {
+                                                                    changeNamePanel.openPanel();
+                                                                    return true;
+                                                                })
+                                                                .addTooltipLine(IKey.str("Change box name"))
+                                                        )
+                                                )
+                                                .child(new ButtonWidget<>()
+                                                        .overlay(RiftUIIcons.RIGHT_ARROW.asIcon())
+                                                        .hoverOverlay(RiftUIIcons.RIGHT_ARROW_SELECTED.asIcon())
+                                                        .background(IDrawable.EMPTY)
+                                                        .hoverBackground(IDrawable.EMPTY)
+                                                        .onMousePressed(
+                                                        button -> {
+                                                            int currentVal = currentBoxIndexDynamic.getIntValue();
+                                                            int nextValue = currentVal + 1 < CreatureBoxStorage.maxBoxAmnt ? currentVal + 1 : 0;
+                                                            currentBoxIndexDynamic.setIntValue(nextValue);
+                                                            return true;
+                                                        })
+                                                )
                                         )
                                 )
                                 .child(new PaddedGrid().name("BoxMembersGrid").coverChildren()
@@ -108,6 +177,7 @@ public class RiftCreatureBoxScreen {
                                                 5, CreatureBoxStorage.maxBoxStorableCreatures,
                                                 index -> new CreatureInBoxButtonWidget(
                                                         playerBox, currentBoxIndexDynamic, index,
+                                                        selectedCreatureInfoDynamic,
                                                         creatureSwitchingDynamic,
                                                         creatureSwapInfoDynamic,
                                                         deployedPartyCreaturesDynamic
@@ -128,12 +198,53 @@ public class RiftCreatureBoxScreen {
                                                 2, RiftCreatureBox.maxDeployableCreatures,
                                                 index -> new CreatureInBoxButtonWidget(
                                                         creatureBoxDeployed, index,
+                                                        selectedCreatureInfoDynamic,
                                                         creatureSwitchingDynamic,
                                                         creatureSwapInfoDynamic,
                                                         deployedPartyCreaturesDynamic
                                                 )
                                         ))
                                         .padding(2)
+                                )
+                        )
+                );
+    }
+
+    private static ModularPanel boxNamePopupPanel(PlayerCreatureBoxProperties playerBox, IntValue.Dynamic currentBoxIndexDynamic) {
+        Dialog<?> toReturn = new Dialog<>("boxNamePopup", null);
+        TextFieldWidget nameTextBox = new TextFieldWidget().widthRel(0.75f)
+                .value(new StringValue.Dynamic(
+                        () -> playerBox.getCreatureBoxStorage().getBoxName(currentBoxIndexDynamic.getIntValue()),
+                        value -> {}
+                ));
+
+        return toReturn.setDisablePanelsBelow(true)
+                .setCloseOnOutOfBoundsClick(false)
+                .size(160, 100)
+                .padding(5)
+                .child(ButtonWidget.panelCloseButton())
+                .child(Flow.column().coverChildrenHeight().widthRel(1f).childPadding(15).center()
+                        .child(IKey.lang("box.change_box_name").asWidget())
+                        .child(nameTextBox)
+                        .child(Flow.row().coverChildren().childPadding(5)
+                                .child(new ButtonWidget<>().width(48)
+                                        .overlay(IKey.str("Confirm"))
+                                        .onMousePressed(mouseButton -> {
+                                            PlayerCreatureBoxHelper.changeBoxNameClient(
+                                                    playerBox.getEntityHolder(),
+                                                    currentBoxIndexDynamic.getIntValue(),
+                                                    nameTextBox.getText()
+                                            );
+                                            toReturn.getPanel().closeIfOpen();
+                                            return true;
+                                        })
+                                )
+                                .child(new ButtonWidget<>().width(48)
+                                        .overlay(IKey.str("Cancel"))
+                                        .onMousePressed(mouseButton -> {
+                                            toReturn.getPanel().closeIfOpen();
+                                            return true;
+                                        })
                                 )
                         )
                 );
