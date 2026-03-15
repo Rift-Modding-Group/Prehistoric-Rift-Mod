@@ -47,26 +47,26 @@ import java.util.function.Consumer;
 
 public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemberButtonForPartyWidget> implements Interactable {
     private final int index;
-    private final EntityPlayer player;
+    private final ObjectValue.Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic;
     private final ObjectValue.Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic;
     private final BoolValue.Dynamic creatureSwitchingDynamic;
     private final SelectedCreatureInfo selectedCreatureInfo;
     private final PlayerPartyProperties playerParty;
 
     private boolean isSelected;
-    private boolean isSwitching;
     @NotNull
     private CreatureNBT creatureNBT = new CreatureNBT();
 
     public PartyMemberButtonForPartyWidget(
             int indexIn,
             EntityPlayer player,
+            ObjectValue.Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic,
             ObjectValue.Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
             BoolValue.Dynamic creatureSwitchingDynamic
     ) {
         super(UIPanelNames.PARTY_DROPDOWN+indexIn);
         this.index = indexIn;
-        this.player = player;
+        this.selectedCreatureInfoDynamic = selectedCreatureInfoDynamic;
         this.creatureSwapInfoDynamic = creatureSwapInfoDynamic;
         this.creatureSwitchingDynamic = creatureSwitchingDynamic;
         this.selectedCreatureInfo = SelectedCreatureInfo.partySelectedInfo(indexIn);
@@ -89,20 +89,7 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
 
         //update creature
         this.creatureNBT = this.getCreatureNBT();
-
-        //-----changes based on activation of switching mode-----
-        if (this.creatureSwitchingDynamic.getBoolValue() != this.isSwitching) {
-            this.isSwitching = this.creatureSwitchingDynamic.getBoolValue();
-
-            //reset swap info
-            this.creatureSwapInfoDynamic.getValue().clear();
-
-            //resetting isSelected based on if isCreatureSwitching just got changed
-            this.isSelected = false;
-
-            //close dropdowns
-            if (this.getMenu().isValid()) this.getMenu().getPanel().closeIfOpen();
-        }
+        this.isSelected = this.selectedCreatureInfo.equals(this.selectedCreatureInfoDynamic.getValue());
     }
 
     //get the nbt. its info will be displayed, and if its deployed, should update dynamically
@@ -115,6 +102,11 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
         return this.playerParty.getPartyMember(this.index);
     }
 
+    //wrapper for use in public for closing this button's menu if its ever open
+    public void closeMenu() {
+        if (this.getMenu().isValid()) this.getMenu().getPanel().closeIfOpen();
+    }
+
     @Override
     @NotNull
     public Result onMousePressed(int mouseButton) {
@@ -124,14 +116,13 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
         if (!canUseCondition) return Result.ACCEPT;
 
         Interactable.playButtonClickSound();
-        this.isSelected = !this.isSelected;
+        this.selectedCreatureInfoDynamic.setValue(this.selectedCreatureInfo);
         if (!(this.getParent() instanceof PaddedGrid gridParent)) return super.onMousePressed(mouseButton);
 
-        //clear other already opened dropdowns and their selected flags
+        //clear other already opened dropdowns
         for (IWidget child : gridParent.getChildren()) {
             if (!(child instanceof PartyMemberButtonForPartyWidget partyMemButton)) continue;
             if (!partyMemButton.getMenu().isValid()) continue;
-            if (partyMemButton.index != this.index) partyMemButton.isSelected = false;
             partyMemButton.getMenu().getPanel().closeIfOpen();
         }
 
@@ -142,27 +133,12 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
         if (!this.creatureSwapInfoDynamic.getValue().canSwap()) {
             this.creatureSwapInfoDynamic.getValue().setCreature(this.selectedCreatureInfo);
         }
-        if (this.creatureSwapInfoDynamic.getValue().canSwap()) {
-            PlayerPartyHelper.applyCreatureSwapClient(this.player, this.creatureSwapInfoDynamic.getValue());
-            this.creatureSwapInfoDynamic.getValue().clear();
-
-            //apply change to all buttons
-            for (IWidget child : gridParent.getChildren()) {
-                if (!(child instanceof PartyMemberButtonForPartyWidget partyMemButton)) continue;
-                partyMemButton.isSelected = false;
-            }
-        }
         return Result.SUCCESS;
     }
 
     public Menu<?> getButtonMenu() {
         if (!this.getMenu().isValid()) return null;
         return this.getMenu();
-    }
-
-    public void closeButtonMenu() {
-        this.isSelected = false;
-        this.closeMenu(false);
     }
 
     @Override

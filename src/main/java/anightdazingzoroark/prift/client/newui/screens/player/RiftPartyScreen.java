@@ -35,6 +35,7 @@ import java.util.function.Function;
 
 public class RiftPartyScreen extends CustomModularScreen {
     private SelectedCreatureInfo.SwapInfo creatureSwapInfo = new SelectedCreatureInfo.SwapInfo();
+    private SelectedCreatureInfo selectedCreatureInfo;
     private boolean isCreatureSwitching;
 
     public RiftPartyScreen() {
@@ -54,11 +55,32 @@ public class RiftPartyScreen extends CustomModularScreen {
                 () -> this.creatureSwapInfo,
                 value -> this.creatureSwapInfo = value
         );
+        ObjectValue.Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic = new ObjectValue.Dynamic<>(
+                SelectedCreatureInfo.class,
+                () -> this.selectedCreatureInfo,
+                value -> this.selectedCreatureInfo = value
+        );
+
+        //define grid in which party member buttons are placed
+        PaddedGrid partyMemButtonsGrid = new PaddedGrid().coverChildren()
+                .matrix(Grid.mapToMatrix(
+                        2, PlayerPartyHelper.maxSize,
+                        index -> new PartyMemberButtonForPartyWidget(
+                                index,
+                                player,
+                                selectedCreatureInfoDynamic,
+                                creatureSwapInfoDynamic,
+                                creatureSwitchingDynamic
+                        )
+                ))
+                .padding(4);
+
 
         return new ModularPanelExitAffectable(UIPanelNames.PARTY_SCREEN)
                 .onEscPressed(new Function<ModularPanelExitAffectable, Boolean>() {
                     @Override
                     public Boolean apply(ModularPanelExitAffectable panel) {
+                        selectedCreatureInfoDynamic.setValue(null);
                         if (!this.hasOpenedDropdown(panel)) return false;
                         this.closeAllPartyPanels(panel);
                         return true;
@@ -90,7 +112,7 @@ public class RiftPartyScreen extends CustomModularScreen {
                                 if (partyMemberButton.getButtonMenu() == null) continue;
                                 if (!partyMemberButton.getButtonMenu().getPanel().isValid()) continue;
 
-                                partyMemberButton.closeButtonMenu();
+                                partyMemberButton.closeMenu();
                             }
                         }
                     }
@@ -106,6 +128,13 @@ public class RiftPartyScreen extends CustomModularScreen {
                             if (recursionRes instanceof PaddedGrid recursionResGrid) return recursionResGrid;
                         }
                         return null;
+                    }
+                })
+                //swapping based on info provided to creatureSwapInfoDynamic is managed here
+                .onUpdateListener(panel -> {
+                    if (creatureSwapInfoDynamic.getValue().canSwap()) {
+                        PlayerPartyHelper.applyCreatureSwapClient(player, creatureSwapInfoDynamic.getValue());
+                        creatureSwapInfoDynamic.getValue().clear();
                     }
                 })
                 .width(180).coverChildrenHeight()
@@ -127,25 +156,31 @@ public class RiftPartyScreen extends CustomModularScreen {
                                 .childPadding(5)
                                 .child(new ParentWidget<>().coverChildrenHeight().widthRel(1f)
                                         .child(IKey.lang("party.label").asWidget().align(Alignment.CenterLeft))
-                                        .child(new ToggleButton().overlay()
-                                                .value(creatureSwitchingDynamic)
+                                        .child(new ToggleButton() {
+                                                    @Override
+                                                    public @NotNull Result onMousePressed(int mouseButton) {
+                                                        //reset swap info and selection info
+                                                        selectedCreatureInfoDynamic.setValue(null);
+                                                        creatureSwapInfoDynamic.getValue().clear();
+
+                                                        //close all menu panels
+                                                        if (!partyMemButtonsGrid.isValid()) return super.onMousePressed(mouseButton);
+
+                                                        //close all other party member button menus
+                                                        for (IWidget iWidget : partyMemButtonsGrid.getChildren()) {
+                                                            if (!(iWidget instanceof PartyMemberButtonForPartyWidget partyMemButton)) continue;
+                                                            partyMemButton.closeMenu();
+                                                        }
+
+                                                        return super.onMousePressed(mouseButton);
+                                                    }
+                                                }.value(creatureSwitchingDynamic)
                                                 .addTooltipElement(IKey.lang("party.swap_creatures"))
                                                 .overlay(GuiTextures.REVERSE.asIcon().size(12))
                                                 .size(12).right(0)
                                         )
                                 )
-                                .child(new PaddedGrid().coverChildren()
-                                        .matrix(Grid.mapToMatrix(
-                                                2, PlayerPartyHelper.maxSize,
-                                                index -> new PartyMemberButtonForPartyWidget(
-                                                        index,
-                                                        player,
-                                                        creatureSwapInfoDynamic,
-                                                        creatureSwitchingDynamic
-                                                )
-                                        ))
-                                        .padding(4)
-                                )
+                                .child(partyMemButtonsGrid)
                         )
                 );
     }
