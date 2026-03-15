@@ -135,6 +135,7 @@ public class RiftPartyScreen extends CustomModularScreen {
                     if (creatureSwapInfoDynamic.getValue().canSwap()) {
                         PlayerPartyHelper.applyCreatureSwapClient(player, creatureSwapInfoDynamic.getValue());
                         creatureSwapInfoDynamic.getValue().clear();
+                        selectedCreatureInfoDynamic.setValue(null);
                     }
                 })
                 .width(180).coverChildrenHeight()

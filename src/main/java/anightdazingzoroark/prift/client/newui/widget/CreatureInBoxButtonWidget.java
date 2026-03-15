@@ -49,6 +49,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     private final ObjectValue.Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic;
     @NotNull
     private final HashMapValue.Dynamic<Integer, RiftCreature> deployedPartyCreaturesDynamic;
+    @NotNull
     private final SelectedCreatureInfo selectedCreatureInfo;
 
     //party only stuff
@@ -148,31 +149,47 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
         super.onUpdate();
         if (!this.isValid()) return;
 
-        this.isSelected = this.getIsSelected();
+        this.isSelected = this.selectedCreatureInfo.equals(this.selectedCreatureInfoDynamic.getValue());
         this.creatureNBT = this.getCreatureNBT();
     }
 
-    private boolean getIsSelected() {
-        if (this.selectedCreatureInfoDynamic.getValue() == null) return false;
-        return this.selectedCreatureInfoDynamic.getValue().equals(this.selectedCreatureInfo);
-    }
-
-    //this is to make sure that the relationship between selectedCreatureInfoDynamic
-    //and selectedCreatureInfo results in isSelected being true or false
     @Override
     @NotNull
     public Result onMousePressed(int mouseButton) {
-        if (this.creatureNBT.nbtIsEmpty()) return Result.ACCEPT;
-        if (this.isSelected) this.selectedCreatureInfoDynamic.setValue(null);
-        else this.selectedCreatureInfoDynamic.setValue(this.selectedCreatureInfo);
-        return super.onMousePressed(mouseButton);
+        //only clickable really (but in stricter conditions) when swapping
+        if (this.creatureNBT.nbtIsEmpty()) {
+            if (this.creatureSwitchingDynamic.getBoolValue()
+                    && this.creatureSwapInfoDynamic.getValue().canSwapHalfway()
+            ) {
+                this.creatureSwapInfoDynamic.getValue().setCreature(this.selectedCreatureInfo);
+                return Result.SUCCESS;
+            }
+            else return Result.ACCEPT;
+        }
+        else {
+            //this is to make sure that the relationship between selectedCreatureInfoDynamic
+            //and selectedCreatureInfo results in isSelected being true or false
+            if (this.isSelected) this.selectedCreatureInfoDynamic.setValue(null);
+            else this.selectedCreatureInfoDynamic.setValue(this.selectedCreatureInfo);
+
+            //swapping related operations
+            if (!this.creatureSwitchingDynamic.getBoolValue()) return super.onMousePressed(mouseButton);
+
+            if (!this.creatureSwapInfoDynamic.getValue().canSwap()) {
+                this.creatureSwapInfoDynamic.getValue().setCreature(this.selectedCreatureInfo);
+            }
+            return Result.SUCCESS;
+        }
     }
 
     //this is to ensure that, only when there is creatureNBT and nothing else
-    //is selected, can the hover menu be opened
+    //is selected and when not swapping creatures can the hover menu be opened
     @Override
     public void onMouseEnterArea() {
-        if (!this.creatureNBT.nbtIsEmpty() && this.selectedCreatureInfoDynamic.getValue() == null) {
+        if (!this.creatureNBT.nbtIsEmpty()
+                && this.selectedCreatureInfoDynamic.getValue() == null
+                && !this.creatureSwitchingDynamic.getBoolValue()
+        ) {
             super.onMouseEnterArea();
         }
     }

@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.client.newui.value.FixedSizeCreatureListSyncVal
 import anightdazingzoroark.prift.client.newui.value.HashMapValue;
 import anightdazingzoroark.prift.client.newui.widget.CreatureInBoxButtonWidget;
 import anightdazingzoroark.prift.client.newui.widget.PaddedGrid;
+import anightdazingzoroark.prift.client.newui.widget.PartyMemberButtonForPartyWidget;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.CreatureBoxStorage;
@@ -19,6 +20,7 @@ import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import com.cleanroommc.modularui.api.IPanelHandler;
 import com.cleanroommc.modularui.api.drawable.IDrawable;
 import com.cleanroommc.modularui.api.drawable.IKey;
+import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.DrawableStack;
 import com.cleanroommc.modularui.drawable.GuiTextures;
 import com.cleanroommc.modularui.drawable.InteractableIcon;
@@ -41,6 +43,7 @@ import com.cleanroommc.modularui.widgets.layout.Grid;
 import com.cleanroommc.modularui.widgets.textfield.TextFieldWidget;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import org.jetbrains.annotations.NotNull;
 
 public class RiftCreatureBoxScreen {
     public static ModularPanel buildCreatureBoxUI(PosGuiData data, PanelSyncManager syncManager, UISettings settings) {
@@ -99,6 +102,13 @@ public class RiftCreatureBoxScreen {
                     selectedCreatureInfoDynamic.setValue(null);
                     return false;
                 })
+                .onUpdateListener(panel -> {
+                    if (creatureSwapInfoDynamic.getValue().canSwap()) {
+                        PlayerPartyHelper.applyCreatureSwapClient(player, creatureSwapInfoDynamic.getValue());
+                        creatureSwapInfoDynamic.getValue().clear();
+                        selectedCreatureInfoDynamic.setValue(null);
+                    }
+                })
                 .size(220, 200)
                 //left side will be player party
                 .child(new ParentWidget<>().name("partySection").coverChildren()
@@ -123,7 +133,16 @@ public class RiftCreatureBoxScreen {
                 )
                 //middle side will be box creatures and switch button
                 .child(new ParentWidget<>().name("boxSection").coverChildren().center()
-                        .child(new ToggleButton().overlay(GuiTextures.REVERSE.asIcon())
+                        .child(new ToggleButton() {
+                                    @Override
+                                    public @NotNull Result onMousePressed(int mouseButton) {
+                                        //reset swap info and selection info
+                                        selectedCreatureInfoDynamic.setValue(null);
+                                        creatureSwapInfoDynamic.getValue().clear();
+
+                                        return super.onMousePressed(mouseButton);
+                                    }
+                                }.overlay(GuiTextures.REVERSE.asIcon())
                                 .align(Alignment.TopRight).margin(5)
                                 .addTooltipElement(IKey.lang("box.swap_creatures_tooltip"))
                                 .value(creatureSwitchingDynamic)

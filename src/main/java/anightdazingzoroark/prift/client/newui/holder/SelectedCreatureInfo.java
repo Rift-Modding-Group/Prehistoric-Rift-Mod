@@ -84,6 +84,11 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
         return this.index;
     }
 
+    public int getBoxIndex() {
+        if (this.boxIndexIsDynamic) return this.boxIndexDynamic.getIntValue();
+        return this.boxIndex;
+    }
+
     //this is mainly for use in packets
     public NBTTagCompound getNBT() {
         NBTTagCompound toReturn = new NBTTagCompound();
