@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.newui.value.FixedSizeCreatureListSyncValue;
 import anightdazingzoroark.prift.client.newui.value.HashMapValue;
 import anightdazingzoroark.prift.helper.CreatureNBT;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
@@ -48,8 +49,6 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     @NotNull
     private final ObjectValue.Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic;
     @NotNull
-    private final HashMapValue.Dynamic<Integer, RiftCreature> deployedPartyCreaturesDynamic;
-    @NotNull
     private final SelectedCreatureInfo selectedCreatureInfo;
 
     //party only stuff
@@ -73,8 +72,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
             int index,
             ObjectValue.@NotNull Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic,
             BoolValue.@NotNull Dynamic creatureSwitchingDynamic,
-            ObjectValue.@NotNull Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
-            HashMapValue.@NotNull Dynamic<Integer, RiftCreature> deployedPartyCreaturesDynamic
+            ObjectValue.@NotNull Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic
     ) {
         super(UIPanelNames.BOX_DROPDOWN+":party:"+index);
         this.section = SelectedCreatureInfo.SelectedPosType.PARTY;
@@ -83,7 +81,6 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
         this.selectedCreatureInfoDynamic = selectedCreatureInfoDynamic;
         this.creatureSwitchingDynamic = creatureSwitchingDynamic;
         this.creatureSwapInfoDynamic = creatureSwapInfoDynamic;
-        this.deployedPartyCreaturesDynamic = deployedPartyCreaturesDynamic;
 
         this.selectedCreatureInfo = SelectedCreatureInfo.partySelectedInfo(index);
 
@@ -96,8 +93,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
             IntValue.Dynamic currentBoxIndexDynamic, int index,
             ObjectValue.@NotNull Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic,
             BoolValue.@NotNull Dynamic creatureSwitchingDynamic,
-            ObjectValue.@NotNull Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
-            HashMapValue.@NotNull Dynamic<Integer, RiftCreature> deployedPartyCreaturesDynamic
+            ObjectValue.@NotNull Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic
     ) {
         super(UIPanelNames.BOX_DROPDOWN+":box:"+index);
         this.section = SelectedCreatureInfo.SelectedPosType.BOX;
@@ -107,7 +103,6 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
         this.selectedCreatureInfoDynamic = selectedCreatureInfoDynamic;
         this.creatureSwitchingDynamic = creatureSwitchingDynamic;
         this.creatureSwapInfoDynamic = creatureSwapInfoDynamic;
-        this.deployedPartyCreaturesDynamic = deployedPartyCreaturesDynamic;
 
         this.selectedCreatureInfo = SelectedCreatureInfo.boxSelectedInfoDynamic(currentBoxIndexDynamic, index);
 
@@ -121,8 +116,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
             int index,
             ObjectValue.@NotNull Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic,
             BoolValue.@NotNull Dynamic creatureSwitchingDynamic,
-            ObjectValue.@NotNull Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
-            HashMapValue.@NotNull Dynamic<Integer, RiftCreature> deployedPartyCreaturesDynamic
+            ObjectValue.@NotNull Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic
     ) {
         super(UIPanelNames.BOX_DROPDOWN+":boxdeployed:"+index);
         this.section = SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED;
@@ -131,7 +125,6 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
         this.selectedCreatureInfoDynamic = selectedCreatureInfoDynamic;
         this.creatureSwitchingDynamic = creatureSwitchingDynamic;
         this.creatureSwapInfoDynamic = creatureSwapInfoDynamic;
-        this.deployedPartyCreaturesDynamic = deployedPartyCreaturesDynamic;
 
         this.selectedCreatureInfo = SelectedCreatureInfo.boxDeployedInfo(index);
 
@@ -224,10 +217,10 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
             new Rectangle().color(this.getOutlineColor()).cornerRadius(5).drawAtZero(context, this.getArea(), theme);
 
             //inner outline
-            new Rectangle().color(0xFF484848).cornerRadius(5).draw(context, 1, 1, this.getArea().w() - 2, this.getArea().h() - 2, theme);
+            new Rectangle().color(this.getInnerOutlineColor()).cornerRadius(5).draw(context, 1, 1, this.getArea().w() - 2, this.getArea().h() - 2, theme);
 
             //set background
-            new Rectangle().color(0xFF212121).cornerRadius(5).draw(context, 2, 2, this.getArea().w() - 4, this.getArea().h() - 4, theme);
+            new Rectangle().color(this.getBackgroundColor()).cornerRadius(5).draw(context, 2, 2, this.getArea().w() - 4, this.getArea().h() - 4, theme);
 
             //set icon
             int iconSize = (int) (this.getArea().w() * 0.75);
@@ -246,6 +239,22 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
         if (this.isSelected) return 0xFFFFFF00;
         else if (this.isHovering()) return 0xFFFFFFFF;
         return 0xFF000000;
+    }
+
+    private int getInnerOutlineColor() {
+        if (this.creatureNBT.getCreatureHealth()[0] <= 0) return UIColors.creatureInlineDeadColor;
+        else if (this.creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
+            return UIColors.creatureInlineDeployedColor;
+        }
+        return UIColors.creatureInlineColor;
+    }
+
+    private int getBackgroundColor() {
+        if (this.creatureNBT.getCreatureHealth()[0] <= 0) return UIColors.creatureBGDeadColor;
+        else if (this.creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
+            return UIColors.creatureBGDeployedColor;
+        }
+        return UIColors.creatureBGColor;
     }
 
     private static class MenuForCreature extends Menu<MenuForCreature> {

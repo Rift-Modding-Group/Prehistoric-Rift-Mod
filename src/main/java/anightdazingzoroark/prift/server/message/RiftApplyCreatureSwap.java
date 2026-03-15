@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.CreatureNBT;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxHelper;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
@@ -12,6 +13,7 @@ import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
@@ -75,6 +77,9 @@ public class RiftApplyCreatureSwap extends RiftLibMessage<RiftApplyCreatureSwap>
                 );
                 CreatureNBT nbtTwo = currentPlayerBox.get(swapInfo.getCreatureTwo().getIndex());
 
+                //drop party member inventory
+                this.dropCreatureItems(server, player, playerPartyProperties, nbtOne, swapInfo);
+
                 //set nbts in each position
                 playerParty.set(swapInfo.getCreatureOne().getIndex(), nbtTwo);
                 playerCreatureBox.setBoxCreature(
@@ -104,6 +109,9 @@ public class RiftApplyCreatureSwap extends RiftLibMessage<RiftApplyCreatureSwap>
             if (swapInfo.getCreatureTwo().selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
                 //get nbts for each position
                 CreatureNBT nbtTwo = playerParty.get(swapInfo.getCreatureTwo().getIndex());
+
+                //drop party member inventory
+                this.dropCreatureItems(server, player, playerPartyProperties, nbtTwo, swapInfo);
 
                 //set nbts in each position
                 playerCreatureBox.setBoxCreature(
@@ -141,4 +149,21 @@ public class RiftApplyCreatureSwap extends RiftLibMessage<RiftApplyCreatureSwap>
 
     @Override
     public void executeOnClient(Minecraft minecraft, RiftApplyCreatureSwap message, EntityPlayer messagePlayer, MessageContext messageContext) {}
+
+    private void dropCreatureItems(
+            MinecraftServer server,
+            EntityPlayer player,
+            PlayerPartyProperties playerPartyProperties,
+            CreatureNBT creatureNBT,
+            SelectedCreatureInfo.SwapInfo swapInfo
+    ) {
+        //if creature is deployed, drop all its items and undeploy it
+        RiftCreature nbtCorrespondent = creatureNBT.findCorrespondingCreature(server.getEntityWorld());
+        if (nbtCorrespondent != null) {
+            nbtCorrespondent.creatureInventory.dropAllItems(server.getEntityWorld(), nbtCorrespondent.getPosition());
+            playerPartyProperties.deployPartyMember(swapInfo.getCreatureTwo().getIndex(), false);
+        }
+        //otherwise, drop its items at the players position
+        else creatureNBT.dropInventory(server.getEntityWorld(), player.getPosition());
+    }
 }

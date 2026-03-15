@@ -526,6 +526,10 @@ box.dropdown.moves=Moves
 box.change_box_name=Change Box Name
 box.change_box_name_tooltip=Change Box Name
 box.swap_creatures_tooltip=Swap Creatures
+box.warning.swap_remove_inventory=Moving a creature from your party to your box will make them drop their inventory (except for their gear). Are you sure you want to do this?
+
+choice.confirm=Confirm
+choice.cancel=Cancel
 
 tametrait.level=Level %s
 tametrait.health=Health: %s/%s

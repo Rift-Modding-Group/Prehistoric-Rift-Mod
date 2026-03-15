@@ -1,8 +1,11 @@
 package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
@@ -114,6 +117,32 @@ public class CreatureInventoryHandler extends ItemStackHandler {
             return this.noItemFound;
         }
         return this.noItemFound;
+    }
+
+    public void dropAllItems(World world, BlockPos pos) {
+        if (world.isRemote) return;
+
+        //drop all items in this creatures inventory
+        for (int i = 0; i < this.stacks.size(); i++) {
+            ItemStack itemStack = this.stacks.get(i);
+            if (itemStack.isEmpty()) continue;
+
+            //create itemStack as an entity and spawn it
+            EntityItem droppedItem = new EntityItem(world);
+            droppedItem.setItem(itemStack);
+            droppedItem.setPosition(pos.getX(), pos.getY(), pos.getZ());
+            world.spawnEntity(droppedItem);
+
+            //clear up after dropping
+            this.stacks.set(i, ItemStack.EMPTY);
+        }
+    }
+
+    public boolean isEmpty() {
+        for (ItemStack itemStack : this.stacks) {
+            if (!itemStack.isEmpty()) return false;
+        }
+        return true;
     }
 
     @Override
