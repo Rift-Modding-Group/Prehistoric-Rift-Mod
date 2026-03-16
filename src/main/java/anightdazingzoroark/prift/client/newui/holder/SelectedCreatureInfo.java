@@ -55,14 +55,14 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
 
     public static SelectedCreatureInfo boxSelectedInfo(int boxIndex, int pos) {
         SelectedCreatureInfo toReturn = new SelectedCreatureInfo(SelectedPosType.BOX, pos);
-        toReturn.boxIndexIsDynamic = true;
+        toReturn.boxIndexIsDynamic = false;
         toReturn.boxIndex = boxIndex;
         return toReturn;
     }
 
     public static SelectedCreatureInfo boxSelectedInfoDynamic(IntValue.Dynamic boxIndexDynamic, int pos) {
         SelectedCreatureInfo toReturn = new SelectedCreatureInfo(SelectedPosType.BOX, pos);
-        toReturn.boxIndexIsDynamic = false;
+        toReturn.boxIndexIsDynamic = true;
         toReturn.boxIndexDynamic = boxIndexDynamic;
         return toReturn;
     }

@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.message;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.CreatureNBT;
+import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxHelper;
@@ -77,8 +78,11 @@ public class RiftApplyCreatureSwap extends RiftLibMessage<RiftApplyCreatureSwap>
                 );
                 CreatureNBT nbtTwo = currentPlayerBox.get(swapInfo.getCreatureTwo().getIndex());
 
-                //drop party member inventory
-                this.dropCreatureItems(server, player, playerPartyProperties, nbtOne, swapInfo);
+                //prepare party member for box transfer
+                playerPartyProperties.prepareForBoxMovement(swapInfo.getCreatureOne().getIndex());
+
+                //prepare box member for party transfer
+                nbtTwo.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
 
                 //set nbts in each position
                 playerParty.set(swapInfo.getCreatureOne().getIndex(), nbtTwo);
@@ -110,8 +114,11 @@ public class RiftApplyCreatureSwap extends RiftLibMessage<RiftApplyCreatureSwap>
                 //get nbts for each position
                 CreatureNBT nbtTwo = playerParty.get(swapInfo.getCreatureTwo().getIndex());
 
-                //drop party member inventory
-                this.dropCreatureItems(server, player, playerPartyProperties, nbtTwo, swapInfo);
+                //prepare box member for party transfer
+                nbtOne.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
+
+                //prepare party member for box transfer
+                playerPartyProperties.prepareForBoxMovement(swapInfo.getCreatureTwo().getIndex());
 
                 //set nbts in each position
                 playerCreatureBox.setBoxCreature(

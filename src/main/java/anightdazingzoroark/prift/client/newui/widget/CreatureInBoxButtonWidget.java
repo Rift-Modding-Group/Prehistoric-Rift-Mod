@@ -3,12 +3,11 @@ package anightdazingzoroark.prift.client.newui.widget;
 import anightdazingzoroark.prift.client.newui.RiftUIIcons;
 import anightdazingzoroark.prift.client.newui.UIColors;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
+import anightdazingzoroark.prift.client.newui.UIUtils;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.newui.value.FixedSizeCreatureListSyncValue;
-import anightdazingzoroark.prift.client.newui.value.HashMapValue;
 import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
 import com.cleanroommc.modularui.api.ITheme;
@@ -16,7 +15,6 @@ import com.cleanroommc.modularui.api.drawable.IDrawable;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.api.widget.Interactable;
-import com.cleanroommc.modularui.drawable.DrawableStack;
 import com.cleanroommc.modularui.drawable.Rectangle;
 import com.cleanroommc.modularui.screen.viewport.ModularGuiContext;
 import com.cleanroommc.modularui.theme.WidgetTheme;
@@ -29,14 +27,13 @@ import com.cleanroommc.modularui.widget.ParentWidget;
 import com.cleanroommc.modularui.widgets.ButtonWidget;
 import com.cleanroommc.modularui.widgets.ListWidget;
 import com.cleanroommc.modularui.widgets.layout.Flow;
-import com.cleanroommc.modularui.widgets.menu.AbstractMenuButton;
 import com.cleanroommc.modularui.widgets.menu.ContextMenuButton;
 import com.cleanroommc.modularui.widgets.menu.Menu;
 import net.minecraft.client.resources.I18n;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
-import java.util.function.Consumer;
 
 public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxButtonWidget> implements Interactable {
     @NotNull

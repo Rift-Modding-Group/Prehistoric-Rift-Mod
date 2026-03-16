@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.client.newui.panel;
 
+import anightdazingzoroark.prift.client.newui.UIUtils;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.input.Keyboard;
@@ -21,7 +22,7 @@ public class ModularPanelExitAffectable extends ModularPanel {
 
     @Override
     public boolean onKeyPressed(char typedChar, int keyCode) {
-        if (keyCode == Keyboard.KEY_ESCAPE && this.escEffect.apply(this)) return true;
+        if (UIUtils.canEscape(keyCode) && this.escEffect.apply(this)) return true;
         return super.onKeyPressed(typedChar, keyCode);
     }
 }

@@ -130,7 +130,7 @@ public class CreatureInventoryHandler extends ItemStackHandler {
             //create itemStack as an entity and spawn it
             EntityItem droppedItem = new EntityItem(world);
             droppedItem.setItem(itemStack);
-            droppedItem.setPosition(pos.getX(), pos.getY(), pos.getZ());
+            droppedItem.setPosition(pos.getX(), pos.getY() + 0.5D, pos.getZ());
             world.spawnEntity(droppedItem);
 
             //clear up after dropping

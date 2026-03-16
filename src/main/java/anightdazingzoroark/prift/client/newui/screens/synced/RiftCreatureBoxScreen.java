@@ -131,9 +131,15 @@ public class RiftCreatureBoxScreen {
                             alertToDeployedInventory = !creatureNBT.inventoryIsEmpty();
                         }
 
-                        //final decision
+                        //-----final decision-----
+                        //show the inventory drop confirmation panel
                         if (alertToDeployedInventory) inventoryDropPopupPanel.openPanel();
-                        else confirmCreatureSwap(player, creatureSwapInfoDynamic, selectedCreatureInfoDynamic);
+                        //normal swapping
+                        else {
+                            PlayerPartyHelper.applyCreatureSwapClient(player, creatureSwapInfoDynamic.getValue());
+                            creatureSwapInfoDynamic.getValue().clear();
+                            selectedCreatureInfoDynamic.setValue(null);
+                        }
                     }
                 })
                 .size(220, 200)
@@ -313,10 +319,15 @@ public class RiftCreatureBoxScreen {
             ObjectValue.Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
             ObjectValue.Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic
     ) {
-        Dialog<?> toReturn = new Dialog<>("inventoryDropPopupPopup", null);
+        Dialog<?> toReturn = new Dialog<>("inventoryDropPopupPopup", null) {
+            @Override
+            public void closeIfOpen() {
+                creatureSwapInfoDynamic.getValue().clear();
+                selectedCreatureInfoDynamic.setValue(null);
+                super.closeIfOpen();
+            }
+        };
         IGuiAction.MousePressed panelCloseEffect = mouseButton -> {
-            creatureSwapInfoDynamic.getValue().clear();
-            selectedCreatureInfoDynamic.setValue(null);
             toReturn.getPanel().closeIfOpen();
             return true;
         };
@@ -334,11 +345,7 @@ public class RiftCreatureBoxScreen {
                                 .child(new ButtonWidget<>().width(48)
                                         .overlay(IKey.lang("choice.confirm"))
                                         .onMousePressed(mouseButton -> {
-                                            confirmCreatureSwap(
-                                                    player,
-                                                    creatureSwapInfoDynamic,
-                                                    selectedCreatureInfoDynamic
-                                            );
+                                            PlayerPartyHelper.applyCreatureSwapClient(player, creatureSwapInfoDynamic.getValue());
                                             toReturn.getPanel().closeIfOpen();
                                             return true;
                                         })
@@ -349,15 +356,5 @@ public class RiftCreatureBoxScreen {
                                 )
                         )
                 );
-    }
-
-    private static void confirmCreatureSwap(
-            EntityPlayer player,
-            ObjectValue.Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
-            ObjectValue.Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic
-    ) {
-        PlayerPartyHelper.applyCreatureSwapClient(player, creatureSwapInfoDynamic.getValue());
-        creatureSwapInfoDynamic.getValue().clear();
-        selectedCreatureInfoDynamic.setValue(null);
     }
 }
