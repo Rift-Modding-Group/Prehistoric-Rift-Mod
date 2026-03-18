@@ -32,7 +32,6 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
     private int boxIndex;
     private IntValue.Dynamic boxIndexDynamic;
 
-
     public static SelectedCreatureInfo createFromNBT(NBTTagCompound nbtTagCompound) {
         if (nbtTagCompound.isEmpty()) return null;
 

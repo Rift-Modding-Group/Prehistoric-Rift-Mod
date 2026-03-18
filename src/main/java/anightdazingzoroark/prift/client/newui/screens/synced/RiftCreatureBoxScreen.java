@@ -40,6 +40,7 @@ import com.cleanroommc.modularui.widgets.layout.Grid;
 import com.cleanroommc.modularui.widgets.textfield.TextFieldWidget;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
 public class RiftCreatureBoxScreen {
@@ -48,6 +49,7 @@ public class RiftCreatureBoxScreen {
 
         //get the creature box
         TileEntity tileEntity = data.getTileEntity();
+        BlockPos tileEntityPos = data.getBlockPos();
         if (!(tileEntity instanceof RiftTileEntityCreatureBox teCreatureBox)) return new ModularPanel(UIPanelNames.CREATURE_BOX_SCREEN);
 
         //get player party and box info

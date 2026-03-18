@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.*;
 import anightdazingzoroark.prift.server.properties.RiftPropertyRegistry;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.HashMap;
@@ -20,6 +21,11 @@ public class PlayerPartyHelper {
     public static void applyCreatureSwapClient(EntityPlayer player, SelectedCreatureInfo.SwapInfo swapInfo) {
         if (!player.world.isRemote) return;
         RiftMessages.WRAPPER.sendToServer(new RiftApplyCreatureSwap(player, swapInfo));
+    }
+
+    public static void applyCreatureSwapClient(EntityPlayer player, SelectedCreatureInfo.SwapInfo swapInfo, BlockPos creatureBoxPos) {
+        if (!player.world.isRemote) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftApplyCreatureSwap(player, swapInfo, creatureBoxPos));
     }
 
     public static void deployCreatureClient(EntityPlayer player, int index, boolean deploy) {
