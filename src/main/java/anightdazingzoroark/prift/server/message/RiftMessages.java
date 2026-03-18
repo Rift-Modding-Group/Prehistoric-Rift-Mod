@@ -61,11 +61,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftSetLastOpenedBox.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftAddToBox.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftChangeCreatureBoxName.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftForceUpdateCreatureBoxDeployed.class, RiftLibMessageSide.BOTH);
-        WRAPPER.registerMessage(RiftUpdateIndividualBoxDeployedCreatureClient.class, RiftLibMessageSide.BOTH);
-        WRAPPER.registerMessage(RiftUpdateIndividualBoxDeployedCreatureServer.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftUpdateAllCreatureBoxDeployedMems.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftForceSyncBoxDeployedNBT.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftCreatureBoxSetLastOpenedTime.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftAddCreatureBoxData.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftRemoveCreatureBoxData.class, RiftLibMessageSide.SERVER);

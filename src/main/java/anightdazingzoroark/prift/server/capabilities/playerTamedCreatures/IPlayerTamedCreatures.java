@@ -33,12 +33,4 @@ public interface IPlayerTamedCreatures {
     //for selected party creature from ui overlay
     int getSelectedPosInOverlay();
     void setSelectedPosInOverlay(int value);
-
-    //swapping related stuff
-    void rearrangePartyCreatures(int posSelected, int posToSwap);
-    void rearrangeBoxCreatures(int selectedBox, int posSelected, int boxToSwapWith, int posToSwap);
-    void rearrangeDeployedBoxCreatures(World world, BlockPos pos, int posSelected, int posToSwap);
-    void boxPartySwap(int selectedBox, int boxPosSelected, int partyPosToSwap);
-    void boxDeployedPartySwap(World world, BlockPos creatureBoxPos, int boxDepPosSelected, int partyPosToSwap);
-    void boxDeployedBoxSwap(World world, BlockPos creatureBoxPos, int boxDepPosSelected, int boxToSwapWith, int boxPosToSwap);
 }

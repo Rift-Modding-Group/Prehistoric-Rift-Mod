@@ -49,7 +49,6 @@ public class RiftCreatureBoxScreen {
 
         //get the creature box
         TileEntity tileEntity = data.getTileEntity();
-        BlockPos tileEntityPos = data.getBlockPos();
         if (!(tileEntity instanceof RiftTileEntityCreatureBox teCreatureBox)) return new ModularPanel(UIPanelNames.CREATURE_BOX_SCREEN);
 
         //get player party and box info
@@ -77,13 +76,6 @@ public class RiftCreatureBoxScreen {
                 teCreatureBox::setCreatureSwapInfo
         );
 
-        //synced stuff
-        FixedSizeCreatureListSyncValue creatureBoxDeployed = new FixedSizeCreatureListSyncValue(
-                teCreatureBox::getDeployedCreatures,
-                teCreatureBox::setDeployedCreatures
-        );
-        syncManager.syncValue("creatureBoxDeployed", creatureBoxDeployed);
-
         //panel stuff
         IPanelHandler changeNamePanel = syncManager.syncedPanel(
                 "changeNamePanel", true,
@@ -94,7 +86,7 @@ public class RiftCreatureBoxScreen {
         IPanelHandler inventoryDropPopupPanel = syncManager.syncedPanel(
                 "inventoryDropPopupPanel", true,
                 (panelSyncMan, panelHandler) -> {
-                    return inventoryDropPopupPanel(player, creatureSwapInfoDynamic, selectedCreatureInfoDynamic);
+                    return inventoryDropPopupPanel(player, data.getBlockPos(), creatureSwapInfoDynamic, selectedCreatureInfoDynamic);
                 }
         );
 
@@ -138,7 +130,7 @@ public class RiftCreatureBoxScreen {
                         if (alertToDeployedInventory) inventoryDropPopupPanel.openPanel();
                         //normal swapping
                         else {
-                            PlayerPartyHelper.applyCreatureSwapClient(player, creatureSwapInfoDynamic.getValue());
+                            PlayerPartyHelper.applyCreatureSwapClient(player, creatureSwapInfoDynamic.getValue(), data.getBlockPos());
                             creatureSwapInfoDynamic.getValue().clear();
                             selectedCreatureInfoDynamic.setValue(null);
                         }
@@ -264,7 +256,7 @@ public class RiftCreatureBoxScreen {
                                         .matrix(Grid.mapToMatrix(
                                                 2, RiftCreatureBox.maxDeployableCreatures,
                                                 index -> new CreatureInBoxButtonWidget(
-                                                        creatureBoxDeployed, index,
+                                                        teCreatureBox, index,
                                                         selectedCreatureInfoDynamic,
                                                         creatureSwitchingDynamic,
                                                         creatureSwapInfoDynamic
@@ -318,6 +310,7 @@ public class RiftCreatureBoxScreen {
 
     private static ModularPanel inventoryDropPopupPanel(
             EntityPlayer player,
+            BlockPos creatureBoxPos,
             ObjectValue.Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
             ObjectValue.Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic
     ) {
@@ -347,7 +340,7 @@ public class RiftCreatureBoxScreen {
                                 .child(new ButtonWidget<>().width(48)
                                         .overlay(IKey.lang("choice.confirm"))
                                         .onMousePressed(mouseButton -> {
-                                            PlayerPartyHelper.applyCreatureSwapClient(player, creatureSwapInfoDynamic.getValue());
+                                            PlayerPartyHelper.applyCreatureSwapClient(player, creatureSwapInfoDynamic.getValue(), creatureBoxPos);
                                             toReturn.getPanel().closeIfOpen();
                                             return true;
                                         })

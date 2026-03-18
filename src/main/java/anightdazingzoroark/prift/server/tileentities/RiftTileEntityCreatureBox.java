@@ -6,6 +6,10 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.helper.ChunkPosWithVerticality;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.RiftUtil;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.FixedSizeListPropertyValue;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.IntPropertyValue;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.StringPropertyValue;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.UUIDPropertyValue;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
@@ -18,41 +22,49 @@ import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.google.common.base.Predicate;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, IGuiHolder<PosGuiData> {
-    private FixedSizeList<CreatureNBT> creatureListNBT = new FixedSizeList<>(RiftCreatureBox.maxDeployableCreatures, new CreatureNBT());
-    private UUID uniqueID = RiftUtil.nilUUID;
-    private UUID ownerID = RiftUtil.nilUUID;
-    private String ownerName = "";
-    private int deploymentRange = 1;
-
+public class RiftTileEntityCreatureBox extends RiftTileEntity implements ITickable, IGuiHolder<PosGuiData> {
     //for use in ui
     private boolean isCreatureSwitching;
     private SelectedCreatureInfo selectedCreatureInfo;
     private SelectedCreatureInfo.SwapInfo creatureSwapInfo = new SelectedCreatureInfo.SwapInfo();
-    private HashMap<Integer, RiftCreature> deployedPartyCreatures = new HashMap<>();
     private int currentBoxIndex;
+
+    @Override
+    public void registerValues() {
+        this.register(new FixedSizeListPropertyValue<CreatureNBT>(
+                "CreatureList", new CreatureNBT(), RiftCreatureBox.maxDeployableCreatures,
+                fixedSizeList -> {
+                    NBTTagCompound toReturn = new NBTTagCompound();
+                    getNBTFromDeployedList(toReturn, fixedSizeList);
+                    return toReturn;
+                },
+                nbtBase -> {
+                    if (!(nbtBase instanceof NBTTagCompound nbtTagCompound)) {
+                        return new FixedSizeList<>(RiftCreatureBox.maxDeployableCreatures, new CreatureNBT());
+                    }
+                    return getDeployedListFromNBT(nbtTagCompound);
+                }
+        ));
+        this.register(new UUIDPropertyValue("UniqueID", RiftUtil.nilUUID));
+        this.register(new UUIDPropertyValue("OwnerID", RiftUtil.nilUUID));
+        this.register(new StringPropertyValue("OwnerName"));
+        this.register(new IntPropertyValue("DeploymentRange", 1));
+    }
 
     @Override
     public void update() {
@@ -62,7 +74,10 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, 
         else creatureBox.setHardness(0f);
 
         //create creatures
-        if (!this.world.isRemote) this.createCreaturesForWandering();
+        //if (!this.world.isRemote) this.createCreaturesForWandering();
+
+        //print creatures
+        //System.out.println("this.getDeployedCreatures(): "+this.getDeployedCreatures());
 
         //remove creatures that are not recently spawned from the wander range of the creature box
         if (GeneralConfig.creatureBoxPreventMobSpawn) {
@@ -83,40 +98,53 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, 
         }
     }
 
+    //-----getters and setters-----
+    public void setDeployedCreatures(FixedSizeList<CreatureNBT> value) {
+        this.set("CreatureList", value);
+    }
+
+    public FixedSizeList<CreatureNBT> getDeployedCreatures() {
+        return this.get("CreatureList");
+    }
+
     public void setOwner(EntityPlayer player) {
-        this.ownerID = player.getUniqueID();
-        this.ownerName = player.getName();
+        this.set("OwnerID", player.getUniqueID(), false);
+        this.set("OwnerName", player.getName(), false);
         this.updateServerData();
     }
 
     public String getOwnerName() {
-        return this.ownerName.isEmpty() ? I18n.format("creature_box.no_owner_name") : this.ownerName;
+        String ownerName = this.get("OwnerName");
+        return ownerName.isEmpty() ? I18n.format("creature_box.no_owner_name") : ownerName;
     }
 
     public UUID getOwnerID() {
-        return this.ownerID;
+        return this.get("OwnerID");
     }
 
     public void setUniqueID(UUID uuid) {
-        this.uniqueID = uuid;
-        this.updateServerData();
+        this.set("UniqueID", uuid);
     }
 
     public UUID getUniqueID() {
-        return this.uniqueID;
+        return this.get("UniqueID");
     }
 
     public void setDeploymentRange(int value) {
-        this.deploymentRange = value;
-        this.updateServerData();
+        this.set("DeploymentRange", value);
     }
 
     public int getDeploymentRange() {
-        return this.deploymentRange;
+        return this.get("DeploymentRange");
+    }
+
+    //-----indirect setters and getters-----
+    public boolean isUnbreakable() {
+        return !this.getDeployedCreatures().isEmpty();
     }
 
     public int getDeploymentRangeWidth() {
-        return 2 * this.deploymentRange + 1;
+        return 2 * this.getDeploymentRange() + 1;
     }
 
     public boolean posWithinDeploymentRange(BlockPos testPos) {
@@ -134,9 +162,10 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, 
         int chunkY = this.pos.getY() >> 4;
         int chunkZ = this.pos.getZ() >> 4;
 
-        for (int x = -this.deploymentRange; x <= this.deploymentRange; x++) {
-            for (int y = -this.deploymentRange; y <= this.deploymentRange; y++) {
-                for (int z = -this.deploymentRange; z <= this.deploymentRange; z++) {
+        int deploymentRange = this.getDeploymentRange();
+        for (int x = -deploymentRange; x <= deploymentRange; x++) {
+            for (int y = -deploymentRange; y <= deploymentRange; y++) {
+                for (int z = -deploymentRange; z <= deploymentRange; z++) {
                     toReturn.add(new ChunkPosWithVerticality(chunkX + x, chunkY + y, chunkZ + z));
                 }
             }
@@ -177,7 +206,7 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, 
         return new int[]{minZ, maxZ};
     }
 
-    //-----getters and setters for ui start here-----
+    //-----getters and setters for ui-----
     public boolean getIsCreatureSwitching() {
         return this.isCreatureSwitching;
     }
@@ -202,14 +231,6 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, 
         this.creatureSwapInfo = swapInfo;
     }
 
-    public HashMap<Integer, RiftCreature> getDeployedPartyCreatures() {
-        return this.deployedPartyCreatures;
-    }
-
-    public void setDeployedPartyCreatures(HashMap<Integer, RiftCreature> value) {
-        this.deployedPartyCreatures = value;
-    }
-
     public int getCurrentBoxIndex() {
         return this.currentBoxIndex;
     }
@@ -217,125 +238,8 @@ public class RiftTileEntityCreatureBox extends TileEntity implements ITickable, 
     public void setCurrentBoxIndex(int value) {
         this.currentBoxIndex = value;
     }
-    //-----getters and setters for ui end here-----
 
-    //this creates the creatures that wander around the box
-    private void createCreaturesForWandering() {
-        for (CreatureNBT tagCompound : this.creatureListNBT.getList()) {
-            if (tagCompound.nbtIsEmpty()) continue;
-
-            UUID uuid = tagCompound.getUniqueID();
-            if (this.creatureWithUUIDExists(uuid)) continue;
-
-            RiftCreature creature = tagCompound.getCreatureAsNBT(this.world);
-
-            //check for validity and if creature already exists, then continue
-            if (creature == null || this.creatureExistsInWorld(creature) || !creature.isEntityAlive()) continue;
-
-            //generate a spawn point for creature
-            BlockPos spawnPoint = RiftTileEntityCreatureBoxHelper.creatureCreatureSpawnPoint(this.pos, this.world, creature);
-            if (spawnPoint != null) {
-                creature.setPosition(spawnPoint.getX(), spawnPoint.getY(), spawnPoint.getZ());
-                creature.setHomePos(this.pos.getX(), this.pos.getY(), this.pos.getZ());
-                this.world.spawnEntity(creature);
-            }
-        }
-    }
-
-    private boolean creatureWithUUIDExists(UUID uuid) {
-        if (uuid == null || uuid.equals(RiftUtil.nilUUID)) return false;
-        if (!(this.world instanceof WorldServer)) return false;
-        return ((WorldServer) this.world).getEntityFromUuid(uuid) != null;
-    }
-
-    private boolean creatureExistsInWorld(RiftCreature creature) {
-        if (creature == null) return false;
-        if (!(this.world instanceof WorldServer)) return false;
-        return ((WorldServer) this.world).getEntityFromUuid(creature.getUniqueID()) != null;
-    }
-
-    public boolean isUnbreakable() {
-        return !this.creatureListNBT.isEmpty();
-    }
-
-    public FixedSizeList<CreatureNBT> getDeployedCreatures() {
-        return this.creatureListNBT;
-    }
-
-    public void setDeployedCreatures(FixedSizeList<CreatureNBT> creatureListNBT) {
-        this.creatureListNBT = creatureListNBT;
-    }
-
-    public void setCreatureInPos(int pos, CreatureNBT creatureNBT) {
-        this.creatureListNBT.set(pos, creatureNBT);
-        this.updateServerData();
-    }
-
-    public void setCreatureListNBT(FixedSizeList<CreatureNBT> value) {
-        int maxSize = Math.min(RiftCreatureBox.maxDeployableCreatures, value.size());
-        for (int i = 0; i < maxSize; i++) {
-            CreatureNBT valueFromInput = value.get(i);
-            this.creatureListNBT.set(i, valueFromInput);
-        }
-        this.updateServerData();
-    }
-
-    //saving and updating nbt starts here
-    private void updateServerData() {
-        if (!this.world.isRemote) {
-            this.markDirty();
-            IBlockState state = this.world.getBlockState(this.pos);
-            this.world.notifyBlockUpdate(this.pos, state, state, 3);
-        }
-    }
-
-    @Override
-    public void readFromNBT(@NotNull NBTTagCompound compound) {
-        super.readFromNBT(compound);
-        this.creatureListNBT = getDeployedListFromNBT(compound);
-        if (compound.hasUniqueId("UniqueID")) this.uniqueID = compound.getUniqueId("UniqueID");
-        this.deploymentRange = compound.getInteger("DeploymentRange");
-        if (compound.hasUniqueId("OwnerID")) this.ownerID = compound.getUniqueId("OwnerID");
-        this.ownerName = compound.getString("OwnerName");
-    }
-
-    @Override
-    public @NotNull NBTTagCompound writeToNBT(@NotNull NBTTagCompound compound) {
-        super.writeToNBT(compound);
-
-        getNBTFromDeployedList(compound, this.creatureListNBT);
-        compound.setUniqueId("UniqueID", this.uniqueID);
-        compound.setInteger("DeploymentRange", this.deploymentRange);
-        compound.setUniqueId("OwnerID", this.ownerID);
-        compound.setString("OwnerName", this.ownerName);
-
-        return compound;
-    }
-
-    @Override
-    @Nullable
-    public SPacketUpdateTileEntity getUpdatePacket() {
-        NBTTagCompound nbtTag = new NBTTagCompound();
-        this.writeToNBT(nbtTag);
-        return new SPacketUpdateTileEntity(this.pos, 1, nbtTag);
-    }
-
-    @Override
-    public void onDataPacket(@NotNull NetworkManager net, SPacketUpdateTileEntity pkt) {
-        this.readFromNBT(pkt.getNbtCompound());
-    }
-
-    @Override
-    public @NotNull NBTTagCompound getUpdateTag() {
-        return this.writeToNBT(new NBTTagCompound());
-    }
-
-    @Override
-    public void handleUpdateTag(@NotNull NBTTagCompound compound) {
-        this.readFromNBT(compound);
-    }
-    //saving and updating nbt ends here
-
+    //-----ui-----
     @Override
     public ModularPanel buildUI(PosGuiData data, PanelSyncManager syncManager, UISettings settings) {
         return RiftCreatureBoxScreen.buildCreatureBoxUI(data, syncManager, settings);

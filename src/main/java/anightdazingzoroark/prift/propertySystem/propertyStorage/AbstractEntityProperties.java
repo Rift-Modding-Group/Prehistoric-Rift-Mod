@@ -73,11 +73,6 @@ public abstract class AbstractEntityProperties<E extends Entity> {
         this.syncToClient(propertyValue);
     }
 
-    public <I> I get(String key) {
-        AbstractPropertyValue<I> propertyValue = this.getExistingProperty(key);
-        return propertyValue.getValue();
-    }
-
     //sync to client from server
     private void syncToClient(AbstractPropertyValue<?> value) {
         if (this.entityHolder != null && !this.entityHolder.world.isRemote) {
@@ -91,6 +86,11 @@ public abstract class AbstractEntityProperties<E extends Entity> {
     }
 
     //-----general getters-----
+    public <I> I get(String key) {
+        AbstractPropertyValue<I> propertyValue = this.getExistingProperty(key);
+        return propertyValue.getValue();
+    }
+
     public boolean has(String key) {
         return this.propertyValueMap.containsKey(key);
     }

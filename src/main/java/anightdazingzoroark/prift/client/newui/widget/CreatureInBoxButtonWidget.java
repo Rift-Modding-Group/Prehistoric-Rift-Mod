@@ -10,6 +10,7 @@ import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import com.cleanroommc.modularui.api.ITheme;
 import com.cleanroommc.modularui.api.drawable.IDrawable;
 import com.cleanroommc.modularui.api.drawable.IKey;
@@ -56,7 +57,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     private IntValue.Dynamic currentBoxIndexDynamic;
 
     //deployed from box only stuff
-    private FixedSizeCreatureListSyncValue boxDeployedCreatures;
+    private RiftTileEntityCreatureBox teCreatureBox;
 
     //other stuff that changes
     @NotNull
@@ -109,7 +110,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     //deployed from box requires a FixedSizeCreatureListSyncValue which has the box's
     //deployed creatures
     public CreatureInBoxButtonWidget(
-            FixedSizeCreatureListSyncValue boxDeployedCreatures,
+            RiftTileEntityCreatureBox teCreatureBox,
             int index,
             ObjectValue.@NotNull Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic,
             BoolValue.@NotNull Dynamic creatureSwitchingDynamic,
@@ -117,7 +118,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     ) {
         super(UIPanelNames.BOX_DROPDOWN+":boxdeployed:"+index);
         this.section = SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED;
-        this.boxDeployedCreatures = boxDeployedCreatures;
+        this.teCreatureBox = teCreatureBox;
         this.index = index;
         this.selectedCreatureInfoDynamic = selectedCreatureInfoDynamic;
         this.creatureSwitchingDynamic = creatureSwitchingDynamic;
@@ -200,7 +201,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
             return this.playerBox.getCreatureBoxStorage().getBoxContents(this.currentBoxIndexDynamic.getIntValue()).get(this.index);
         }
         else if (this.section == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
-            return this.boxDeployedCreatures.getValue().get(this.index);
+            return this.teCreatureBox.getDeployedCreatures().get(this.index);
         }
         return new CreatureNBT();
     }

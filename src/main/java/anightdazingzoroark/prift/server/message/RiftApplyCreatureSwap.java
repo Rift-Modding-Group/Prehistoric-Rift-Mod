@@ -212,7 +212,7 @@ public class RiftApplyCreatureSwap extends RiftLibMessage<RiftApplyCreatureSwap>
         ) {
             FixedSizeList<CreatureNBT> boxDeployedCreatures = teCreatureBox.getDeployedCreatures();
             boxDeployedCreatures.set(posToSwapTo.getIndex(), nbtToSwap);
-            teCreatureBox.setCreatureListNBT(boxDeployedCreatures);
+            teCreatureBox.setDeployedCreatures(boxDeployedCreatures);
         }
     }
 
@@ -255,7 +255,7 @@ public class RiftApplyCreatureSwap extends RiftLibMessage<RiftApplyCreatureSwap>
             FixedSizeList<CreatureNBT> boxDeployedCreatures = teCreatureBox.getDeployedCreatures();
             boxDeployedCreatures.set(swapInfo.getCreatureOne().getIndex(), nbtTwo);
             boxDeployedCreatures.set(swapInfo.getCreatureTwo().getIndex(), nbtOne);
-            teCreatureBox.setCreatureListNBT(boxDeployedCreatures);
+            teCreatureBox.setDeployedCreatures(boxDeployedCreatures);
         }
     }
 
