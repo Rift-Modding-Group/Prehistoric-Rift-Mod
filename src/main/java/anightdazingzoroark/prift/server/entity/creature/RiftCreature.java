@@ -16,8 +16,6 @@ import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.helper.CreatureNBTKeyword;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.ai.*;
@@ -304,7 +302,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.register(SLEEPING, false);
         this.dataManager.register(FORCED_AWAKE, false);
         this.dataManager.register(CLIMBING, false);
-        this.dataManager.register(DEPLOYMENT_TYPE, (byte) PlayerTamedCreatures.DeploymentType.NONE.ordinal());
+        this.dataManager.register(DEPLOYMENT_TYPE, (byte) CreatureDeployment.NONE.ordinal());
         this.dataManager.register(PREGNANT, false);
         this.dataManager.register(PREGNANCY_TIMER, 0);
         this.dataManager.register(TURRET_MODE, false);
@@ -520,7 +518,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     else this.healthRegen = 0;
                 }
                 this.manageXPAndLevel();
-                if (!this.hasTarget() && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE && !this.creatureBoxWithinReach()) {
+                if (!this.hasTarget() && this.getDeploymentType() == CreatureDeployment.BASE && !this.creatureBoxWithinReach()) {
                     BlockPos teleportPos = RiftTileEntityCreatureBoxHelper.creatureCreatureSpawnPoint(this.getHomePos(), this.world, this);
                     if (teleportPos != null) this.setPosition(teleportPos.getX(), teleportPos.getY(), teleportPos.getZ());
                 }
@@ -535,8 +533,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.isBurrowing()) this.manageBurrowingEffects();
 
         //deal with hitbox and creature removal upon being dismissed
-        if (this.getDeploymentType() != PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE
-                && this.getDeploymentType() != PlayerTamedCreatures.DeploymentType.BASE_INACTIVE) {
+        if (this.getDeploymentType() != CreatureDeployment.PARTY_INACTIVE
+                && this.getDeploymentType() != CreatureDeployment.BASE_INACTIVE) {
             this.updateParts();
             this.ticksSinceHitboxRemoval = 0;
         }
@@ -774,10 +772,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     protected void manageSittingFromEnergy() {
         if (this.getEnergy() <= this.getWeaknessEnergy()
             && !this.isSitting()
-            && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) this.setSitting(true);
+            && this.getDeploymentType() == CreatureDeployment.BASE) this.setSitting(true);
         if (this.getEnergy() > this.getWeaknessEnergy()
             && this.isSitting()
-            && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) this.setSitting(false);
+            && this.getDeploymentType() == CreatureDeployment.BASE) this.setSitting(false);
     }
 
     private void informRiderEnergy() {
@@ -945,7 +943,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         }
                         else if (!this.world.isRemote) CreatureGuiFactory.INSTANCE.open(player, this);
                     }
-                    else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && (!this.canEnterTurretMode() || !this.isTurretMode()) && !this.getDeploymentType().equals(PlayerTamedCreatures.DeploymentType.BASE)) {
+                    else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && (!this.canEnterTurretMode() || !this.isTurretMode()) && !this.getDeploymentType().equals(CreatureDeployment.BASE)) {
                         if (this.canBePregnant()) {
                             if (!this.isPregnant()) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                             else RiftLibUIHelper.showUI(
@@ -1044,13 +1042,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             PlayerCreatureBoxProperties playerCreatureBoxProperties = PlayerCreatureBoxHelper.getPlayerCreatureBox(player);
 
             if (playerPartyProperties.canAddToParty()) {
-                this.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
+                this.setDeploymentType(CreatureDeployment.PARTY);
                 playerPartyProperties.addPartyMember(this);
                 player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_party", new TextComponentString(this.getName())), false);
             }
             //update box of player that tamed the creature
             else if (playerCreatureBoxProperties.canAddCreatureToBox()) {
-                this.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                this.setDeploymentType(CreatureDeployment.BASE_INACTIVE);
                 playerCreatureBoxProperties.addCreatureToBox(this);
                 player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished_to_box", new TextComponentString(this.getName())), false);
             }
@@ -1354,7 +1352,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (compound.getBoolean("HasHomePos")) {
             this.setHomePos(compound.getInteger("HomePosX"), compound.getInteger("HomePosY"), compound.getInteger("HomePosZ"));
         }
-        this.setDeploymentType(PlayerTamedCreatures.DeploymentType.values()[CreatureNBTKeyword.DEPLOYMENT_TYPE.parseValue(compound)]);
+        this.setDeploymentType(CreatureDeployment.values()[CreatureNBTKeyword.DEPLOYMENT_TYPE.parseValue(compound)]);
         this.setBoxReviveTime(compound.getInteger("BoxReviveTime"));
 
         //for learned moves
@@ -1907,13 +1905,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                 PlayerCreatureBoxProperties playerCreatureBoxProperties = PlayerCreatureBoxHelper.getPlayerCreatureBox(owner);
 
                 if (playerPartyProperties.canAddToParty()) {
-                    baby.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
+                    baby.setDeploymentType(CreatureDeployment.PARTY);
                     this.world.spawnEntity(baby);
                     playerPartyProperties.addPartyMember(baby);
                     owner.sendStatusMessage(new TextComponentTranslation("prift.notify.baby_birthed_to_party", this.getName()), false);
                 }
                 else if (playerCreatureBoxProperties.canAddCreatureToBox()) {
-                    baby.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                    baby.setDeploymentType(CreatureDeployment.BASE_INACTIVE);
                     playerCreatureBoxProperties.addCreatureToBox(baby);
                     owner.sendStatusMessage(new TextComponentTranslation("prift.notify.baby_birthed_to_box", this.getName()), false);
                 }
@@ -2601,11 +2599,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.dataManager.set(CLIMBING, value);
     }
 
-    public PlayerTamedCreatures.DeploymentType getDeploymentType() {
-        return PlayerTamedCreatures.DeploymentType.values()[(int)this.dataManager.get(DEPLOYMENT_TYPE)];
+    public CreatureDeployment getDeploymentType() {
+        return CreatureDeployment.values()[(int)this.dataManager.get(DEPLOYMENT_TYPE)];
     }
 
-    public void setDeploymentType(PlayerTamedCreatures.DeploymentType value) {
+    public void setDeploymentType(CreatureDeployment value) {
         this.dataManager.set(DEPLOYMENT_TYPE, (byte)value.ordinal());
     }
 
@@ -3113,12 +3111,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setBoxReviveTime(GeneralConfig.creatureBoxReviveTime);
 
         PlayerPartyProperties playerPartyProperties = PlayerPartyHelper.getPlayerParty((EntityPlayer) this.getOwner());
-        if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
-            this.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
+        if (this.getDeploymentType() == CreatureDeployment.PARTY) {
+            this.setDeploymentType(CreatureDeployment.PARTY_INACTIVE);
             playerPartyProperties.updatePartyMember(this);
         }
         /*
-        if (this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) {
+        if (this.getDeploymentType() == CreatureDeployment.BASE) {
             PlayerTamedCreaturesHelper.updateIndividualBoxDeployedCreatureServer((EntityPlayer) this.getOwner(), this);
             PlayerTamedCreaturesHelper.updateIndividualBoxDeployedCreatureClient((EntityPlayer) this.getOwner(), this);
         }

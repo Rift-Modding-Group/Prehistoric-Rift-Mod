@@ -12,7 +12,7 @@ import anightdazingzoroark.prift.client.newui.value.SelectedMoveInfoSyncValue;
 import anightdazingzoroark.prift.client.newui.widget.*;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.helper.CreatureNBT;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.CreatureGearHandler;
 import anightdazingzoroark.prift.server.entity.CreatureInventoryHandler;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -34,9 +34,7 @@ import com.cleanroommc.modularui.value.sync.*;
 import com.cleanroommc.modularui.widget.ParentWidget;
 import com.cleanroommc.modularui.widget.sizer.Unit;
 import com.cleanroommc.modularui.widgets.*;
-import com.cleanroommc.modularui.widgets.layout.Column;
 import com.cleanroommc.modularui.widgets.layout.Flow;
-import com.cleanroommc.modularui.widgets.layout.Row;
 import com.cleanroommc.modularui.widgets.slot.ItemSlot;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -304,7 +302,7 @@ public class RiftCreatureScreen {
                                         )
                                         //if creature has turret mode and is at base, add option
                                         .childIf(data.canEnterTurretMode()
-                                                && data.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE,
+                                                && data.getDeploymentType() == CreatureDeployment.BASE,
                                                 () -> Flow.row()
                                                 .coverChildrenHeight()
                                                 .childPadding(2)
@@ -427,7 +425,7 @@ public class RiftCreatureScreen {
     private static boolean canHaveOptionsButtons(CreatureGuiData data) {
         if (data.dataType == CreatureGuiData.DataType.SELECTION) return false;
         RiftCreature creature = (RiftCreature) data.getGuiHolder();
-        return creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE &&
+        return creature.getDeploymentType() == CreatureDeployment.BASE &&
                 (creature instanceof IWorkstationUser || creature instanceof IHarvestWhenWandering);
     }
 

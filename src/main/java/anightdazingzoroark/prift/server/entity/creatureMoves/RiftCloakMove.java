@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
 
@@ -14,8 +14,8 @@ public class RiftCloakMove extends RiftCreatureMove {
         if (user.isTamed()) {
             return super.canBeExecutedUnmounted(user, target)
                     && ((!user.isCloaked()
-                    && user.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE)
-                    || (user.isCloaked() && user.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY))
+                    && user.getDeploymentType() == CreatureDeployment.BASE)
+                    || (user.isCloaked() && user.getDeploymentType() == CreatureDeployment.PARTY))
                     && user.getGrabVictim() == null;
         }
         else return super.canBeExecutedUnmounted(user, target) && !user.isCloaked() && user.getGrabVictim() == null;

@@ -4,9 +4,8 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.CreatureNBT;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
 import net.minecraft.client.Minecraft;
@@ -23,8 +22,6 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
-
-import java.util.HashMap;
 
 import static net.minecraft.client.gui.Gui.drawModalRectWithCustomSizedTexture;
 import static net.minecraft.client.gui.Gui.drawRect;
@@ -179,7 +176,7 @@ public class RiftPartyMembersOverlay {
         int xPosOnScreen = Math.max(-maxOffsetLeft, -210);
         int yPosOnScreen = -20;
         float health = partyMemNBT.getCreatureHealth()[0];
-        PlayerTamedCreatures.DeploymentType deploymentType = partyMemNBT.getDeploymentType();
+        CreatureDeployment deploymentType = partyMemNBT.getDeploymentType();
 
         //render background
         Minecraft.getMinecraft().getTextureManager().bindTexture(hud);
@@ -190,7 +187,7 @@ public class RiftPartyMembersOverlay {
         int k = (int) (Math.max((1 - bgScale) * 19, unscaledBGX) / bgScale);
         int l = (int) (Math.max(0, unscaledBGY) / bgScale);
         int xUv = (!partyMemNBT.nbtIsEmpty() && health == 0) ? 76 : (
-                    !partyMemNBT.nbtIsEmpty() && deploymentType == PlayerTamedCreatures.DeploymentType.PARTY ? 38 : 0
+                    !partyMemNBT.nbtIsEmpty() && deploymentType == CreatureDeployment.PARTY ? 38 : 0
                 );
         GlStateManager.pushMatrix();
         GlStateManager.scale(bgScale, bgScale, bgScale);
@@ -251,15 +248,15 @@ public class RiftPartyMembersOverlay {
         }
         if (RiftControls.quickSummonAndDismiss.isKeyDown()) {
             CreatureNBT partyMemNBT = this.playerParty.getPlayerParty().get(this.playerParty.getQuickSelectPos());
-            PlayerTamedCreatures.DeploymentType deploymentType = partyMemNBT.getDeploymentType();
+            CreatureDeployment deploymentType = partyMemNBT.getDeploymentType();
 
             //for dismissing, when creature is deployed
-            if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY) {
+            if (deploymentType == CreatureDeployment.PARTY) {
                 PlayerPartyHelper.deployCreatureClient(player, this.playerParty.getQuickSelectPos(), false);
                 player.sendStatusMessage(new TextComponentTranslation("party.warning.dismiss_success"), false);
             }
             //for summoning, when creature is dismissed
-            else if (deploymentType == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
+            else if (deploymentType == CreatureDeployment.PARTY_INACTIVE) {
                 //dont summon when creature is dead
                 float health = partyMemNBT.getCreatureHealth()[0];
                 if (health <= 0) {

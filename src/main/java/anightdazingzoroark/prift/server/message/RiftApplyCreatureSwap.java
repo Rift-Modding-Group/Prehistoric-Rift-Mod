@@ -4,7 +4,7 @@ import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.helper.BlockPosUtil;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.CreatureNBT;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxHelper;
@@ -16,7 +16,6 @@ import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
@@ -166,8 +165,8 @@ public class RiftApplyCreatureSwap extends RiftLibMessage<RiftApplyCreatureSwap>
         if (nbtToSwap.nbtIsEmpty()) return;
 
         //normal operation
-        if (nbtToSwap.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY
-                || nbtToSwap.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE
+        if (nbtToSwap.getDeploymentType() == CreatureDeployment.PARTY
+                || nbtToSwap.getDeploymentType() == CreatureDeployment.PARTY_INACTIVE
         ) {
             this.preparePartyCreatureForSwap(
                     server, playerPartyProperties, nbtToSwap,
@@ -175,10 +174,10 @@ public class RiftApplyCreatureSwap extends RiftLibMessage<RiftApplyCreatureSwap>
                     posToSwapTo.selectedPosType
             );
         }
-        else if (nbtToSwap.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE_INACTIVE) {
+        else if (nbtToSwap.getDeploymentType() == CreatureDeployment.BASE_INACTIVE) {
             this.prepareBoxCreatureForSwap(nbtToSwap, posToSwapTo.selectedPosType);
         }
-        else if (nbtToSwap.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) {
+        else if (nbtToSwap.getDeploymentType() == CreatureDeployment.BASE) {
             this.prepareBoxDeployedCreatureForSwap(server, nbtToSwap, posToSwapTo.selectedPosType);
         }
     }
@@ -285,11 +284,11 @@ public class RiftApplyCreatureSwap extends RiftLibMessage<RiftApplyCreatureSwap>
 
         //change creature nbt based on where to move to
         if (posToSwapTo == SelectedCreatureInfo.SelectedPosType.BOX) {
-            creatureNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+            creatureNBT.setDeploymentType(CreatureDeployment.BASE_INACTIVE);
 
         }
         else if (posToSwapTo == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
-            creatureNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE);
+            creatureNBT.setDeploymentType(CreatureDeployment.BASE);
         }
 
         //remove creature from player party map
@@ -301,10 +300,10 @@ public class RiftApplyCreatureSwap extends RiftLibMessage<RiftApplyCreatureSwap>
         if (corresponded != null) {
             //setting to base inactive despawns it
             if (posToSwapTo == SelectedCreatureInfo.SelectedPosType.BOX) {
-                corresponded.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                corresponded.setDeploymentType(CreatureDeployment.BASE_INACTIVE);
             }
             else if (posToSwapTo == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
-                corresponded.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE);
+                corresponded.setDeploymentType(CreatureDeployment.BASE);
             }
         }
     }
@@ -312,10 +311,10 @@ public class RiftApplyCreatureSwap extends RiftLibMessage<RiftApplyCreatureSwap>
     //very minimalistic, only here for consistency... ye idk :pensive:
     private void prepareBoxCreatureForSwap(CreatureNBT creatureNBT, SelectedCreatureInfo.SelectedPosType posToSwapTo) {
         if (posToSwapTo == SelectedCreatureInfo.SelectedPosType.PARTY) {
-            creatureNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
+            creatureNBT.setDeploymentType(CreatureDeployment.PARTY_INACTIVE);
         }
         else if (posToSwapTo == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
-            creatureNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE);
+            creatureNBT.setDeploymentType(CreatureDeployment.BASE);
         }
     }
 
@@ -333,21 +332,21 @@ public class RiftApplyCreatureSwap extends RiftLibMessage<RiftApplyCreatureSwap>
 
         //change creature nbt based on where to move to
         if (posToSwapTo == SelectedCreatureInfo.SelectedPosType.PARTY) {
-            creatureNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
+            creatureNBT.setDeploymentType(CreatureDeployment.PARTY);
 
         }
         else if (posToSwapTo == SelectedCreatureInfo.SelectedPosType.BOX) {
-            creatureNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+            creatureNBT.setDeploymentType(CreatureDeployment.BASE_INACTIVE);
         }
 
         //change deployment of already existing creature if it exists
         if (corresponded != null) {
             if (posToSwapTo == SelectedCreatureInfo.SelectedPosType.PARTY) {
-                corresponded.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
+                corresponded.setDeploymentType(CreatureDeployment.PARTY);
             }
             //setting it to base inactive despawns it
             else if (posToSwapTo == SelectedCreatureInfo.SelectedPosType.BOX) {
-                corresponded.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                corresponded.setDeploymentType(CreatureDeployment.BASE_INACTIVE);
             }
         }
     }

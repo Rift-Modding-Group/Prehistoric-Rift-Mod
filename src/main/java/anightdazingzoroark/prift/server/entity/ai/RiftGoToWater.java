@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -28,7 +28,7 @@ public class RiftGoToWater extends EntityAIBase {
             this.waterBlockPos = this.nearestWaterBlock();
             if (this.creature.isTamed()) return this.waterBlockPos != null
                     && !this.creature.isSitting()
-                    && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                    && this.creature.getDeploymentType() == CreatureDeployment.BASE
                     && !this.creature.isBeingRidden();
             else return this.waterBlockPos != null;
         }

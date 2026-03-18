@@ -6,7 +6,6 @@ import anightdazingzoroark.prift.client.newui.holder.SelectedMoveInfo;
 import anightdazingzoroark.prift.client.newui.value.CreatureNBTSyncValue;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.CreatureNBT;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
@@ -245,7 +244,7 @@ public class CreatureGuiData extends GuiData {
         }
     }
 
-    public PlayerTamedCreatures.DeploymentType getDeploymentType() {
+    public CreatureDeployment getDeploymentType() {
         if (this.dataType == DataType.CREATURE) return this.creature.getDeploymentType();
         else if (this.dataType == DataType.SELECTION) {
             CreatureNBT creatureNBT = this.getCreatureNBT();

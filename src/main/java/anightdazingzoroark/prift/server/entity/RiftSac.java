@@ -3,7 +3,6 @@ package anightdazingzoroark.prift.server.entity;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.widget.EntityWidget;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressHelper;
@@ -96,13 +95,13 @@ public class RiftSac extends EntityTameable implements IAnimatable, IGuiHolder<E
                 PlayerCreatureBoxProperties playerCreatureBox = PlayerCreatureBoxHelper.getPlayerCreatureBox(owner);
 
                 if (playerParty.canAddToParty()) {
-                    creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
+                    creature.setDeploymentType(CreatureDeployment.PARTY);
                     playerParty.addPartyMember(creature);
                     owner.sendStatusMessage(new TextComponentTranslation("prift.notify.sac_hatched_to_party", new TextComponentString(this.getName())), false);
                 }
                 //update box of owner
                 else if (playerCreatureBox.canAddCreatureToBox()) {
-                    creature.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                    creature.setDeploymentType(CreatureDeployment.BASE_INACTIVE);
                     playerCreatureBox.addCreatureToBox(creature);
                     owner.sendStatusMessage(new TextComponentTranslation("prift.notify.sac_hatched_to_box", new TextComponentString(this.getName())), false);
                 }

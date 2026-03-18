@@ -3,8 +3,6 @@ package anightdazingzoroark.prift.helper;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.RiftCreatureConfig;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
@@ -41,7 +39,7 @@ public class CreatureNBT {
     }
 
     public CreatureNBT(RiftCreature creature) {
-        this.creatureNBT = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
+        this.creatureNBT = createNBTFromCreature(creature);
     }
 
     public boolean nbtIsEmpty() {
@@ -84,7 +82,7 @@ public class CreatureNBT {
     public void overrideCreature(RiftCreature creature) {
         if (this.nbtIsEmpty() || creature == null) return;
         if (!this.getUniqueID().equals(creature.getUniqueID())) return;
-        NBTTagCompound nbtToReplaceWith = PlayerTamedCreaturesHelper.createNBTFromCreature(creature);
+        NBTTagCompound nbtToReplaceWith = createNBTFromCreature(creature);
         this.creatureNBT.merge(nbtToReplaceWith);
     }
 
@@ -247,12 +245,12 @@ public class CreatureNBT {
         return this.creatureNBT.getUniqueId("UniqueID");
     }
 
-    public PlayerTamedCreatures.DeploymentType getDeploymentType() {
+    public CreatureDeployment getDeploymentType() {
         if (this.creatureNBT.isEmpty()) return null;
-        return PlayerTamedCreatures.DeploymentType.values()[CreatureNBTKeyword.DEPLOYMENT_TYPE.parseValue(this.creatureNBT)];
+        return CreatureDeployment.values()[CreatureNBTKeyword.DEPLOYMENT_TYPE.parseValue(this.creatureNBT)];
     }
 
-    public void setDeploymentType(PlayerTamedCreatures.DeploymentType deploymentType) {
+    public void setDeploymentType(CreatureDeployment deploymentType) {
         if (this.creatureNBT.isEmpty()) return;
         CreatureNBTKeyword.mergeResult(this.creatureNBT, CreatureNBTKeyword.DEPLOYMENT_TYPE, (byte) deploymentType.ordinal());
     }
@@ -727,5 +725,15 @@ public class CreatureNBT {
     @Override
     public String toString() {
         return this.creatureNBT.toString();
+    }
+
+    public static NBTTagCompound createNBTFromCreature(RiftCreature creature) {
+        NBTTagCompound compound = new NBTTagCompound();
+        if (creature == null) return compound;
+        //get data that doesnt get saved into nbt properly for some reason
+        compound.setUniqueId("UniqueID", creature.getUniqueID());
+        compound.setString("CustomName", creature.getCustomNameTag());
+        creature.writeEntityToNBT(compound);
+        return compound;
     }
 }

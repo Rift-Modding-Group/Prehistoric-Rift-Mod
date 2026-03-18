@@ -19,7 +19,6 @@ import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectile
 import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectileEntity;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftCanUseMoveTriggerButton;
-import anightdazingzoroark.prift.server.message.RiftInitDeployedCreatureMap;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressHelper;
 import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressProperties;
@@ -32,7 +31,6 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;

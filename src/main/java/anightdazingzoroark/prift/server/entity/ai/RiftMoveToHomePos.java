@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.RandomPositionGenerator;
@@ -25,7 +25,7 @@ public class RiftMoveToHomePos extends EntityAIBase {
         if (this.creature.isTamed() && !this.creature.isSleeping()) {
             if (this.creature.getHasHomePos()
                     && !this.creature.isSitting()
-                    && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                    && this.creature.getDeploymentType() == CreatureDeployment.BASE
                     && !this.creature.busyAtWork()) {
                 if (this.creature.getIdleTime() >= 100) return false;
                 if (this.creature.getRNG().nextInt(120) != 0) return false;

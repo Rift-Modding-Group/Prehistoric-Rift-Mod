@@ -1,15 +1,13 @@
 package anightdazingzoroark.prift.client.newui.widget;
 
-import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.RiftUIIcons;
 import anightdazingzoroark.prift.client.newui.UIColors;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.newui.screens.synced.RiftCreatureScreen;
-import anightdazingzoroark.prift.client.newui.value.HashMapValue;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.helper.CreatureNBT;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftOpenCreatureScreen;
@@ -21,9 +19,7 @@ import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.api.widget.Interactable;
 import com.cleanroommc.modularui.drawable.DrawableStack;
-import com.cleanroommc.modularui.drawable.Icon;
 import com.cleanroommc.modularui.drawable.Rectangle;
-import com.cleanroommc.modularui.drawable.UITexture;
 import com.cleanroommc.modularui.screen.viewport.ModularGuiContext;
 import com.cleanroommc.modularui.theme.WidgetTheme;
 import com.cleanroommc.modularui.theme.WidgetThemeEntry;
@@ -38,7 +34,6 @@ import com.cleanroommc.modularui.widgets.menu.Menu;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -262,7 +257,7 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
     private int getIconBGColor() {
         if (this.creatureNBT.nbtIsEmpty()) return -1;
         else if (this.creatureNBT.getCreatureHealth()[0] <= 0) return 0xFFF33F3F;
-        else if (this.creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) return 0xFF208620;
+        else if (this.creatureNBT.getDeploymentType() == CreatureDeployment.PARTY) return 0xFF208620;
         return 0xFFC6C6C6;
     }
 
@@ -355,7 +350,7 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
                 (index, playerParty) -> {
                     EntityPlayer player = Minecraft.getMinecraft().player;
                     CreatureNBT creatureNBT = playerParty.getPartyMember(index);
-                    boolean deploymentToggle = creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE;
+                    boolean deploymentToggle = creatureNBT.getDeploymentType() == CreatureDeployment.PARTY_INACTIVE;
                     PlayerPartyHelper.deployCreatureClient(player, index, deploymentToggle);
                     return true;
                 },
@@ -432,10 +427,10 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
             String strikethrough = !this.canBeClicked.apply(index, playerParty) ? IKey.STRIKETHROUGH.toString() : "";
             if (this != SUMMON_OR_DISMISS) return strikethrough+I18n.format("party.dropdown."+this.name().toLowerCase());
             if (creatureNBT == null || creatureNBT.nbtIsEmpty()) return "";
-            if (creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
+            if (creatureNBT.getDeploymentType() == CreatureDeployment.PARTY) {
                 return strikethrough+I18n.format("party.dropdown.dismiss");
             }
-            else if (creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE) {
+            else if (creatureNBT.getDeploymentType() == CreatureDeployment.PARTY_INACTIVE) {
                 return strikethrough+I18n.format("party.dropdown.summon");
             }
             return "";

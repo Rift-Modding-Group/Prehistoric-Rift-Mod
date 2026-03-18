@@ -7,10 +7,9 @@ import anightdazingzoroark.prift.config.DimetrodonConfig;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.helper.WeightedList;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
-import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.enums.EggTemperature;
 import com.charles445.simpledifficulty.api.config.JsonConfig;
@@ -22,7 +21,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
@@ -34,7 +32,6 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.*;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.storage.loot.LootTableList;
@@ -107,10 +104,10 @@ public class Dimetrodon extends RiftCreature {
     protected void manageSittingFromEnergy() {
         if (this.getEnergy() <= 6
                 && !this.isSitting()
-                && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE) this.setSitting(true);
+                && this.getDeploymentType() == CreatureDeployment.BASE) this.setSitting(true);
         if (this.getEnergy() > 6
                 && this.isSitting()
-                && this.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                && this.getDeploymentType() == CreatureDeployment.BASE
                 && !this.isTakingCareOfEgg()) this.setSitting(false);
     }
 

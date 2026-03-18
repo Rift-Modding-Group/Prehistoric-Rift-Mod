@@ -7,7 +7,7 @@ import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.Fi
 import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.HashMapPropertyValue;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.IntPropertyValue;
 import anightdazingzoroark.prift.helper.CreatureNBT;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -160,33 +160,6 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
         return false;
     }
 
-    public void prepareForBoxMovement(int index) {
-        if (this.getEntityHolder().world.isRemote) return;
-        CreatureNBT creatureNBT = this.getPartyMember(index);
-
-        //find corresponding creature first
-        RiftCreature corresponded = creatureNBT.findCorrespondingCreature(this.getEntityHolder().world);
-
-        //drop inventory
-        if (corresponded != null) {
-            corresponded.creatureInventory.dropAllItems(this.getEntityHolder().getEntityWorld(), corresponded.getPosition());
-        }
-        else creatureNBT.dropInventory(this.getEntityHolder().getEntityWorld(), this.getEntityHolder().getPosition());
-
-        //override the stored nbt with the deployed creature's nbt
-        creatureNBT.overrideCreature(corresponded);
-
-        //continue as usual
-        creatureNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-        FixedSizeList<CreatureNBT> playerPartyList = this.getPlayerParty();
-        playerPartyList.set(index, creatureNBT);
-        this.setPlayerParty(playerPartyList);
-        this.removeCreatureFromDeployMap(index);
-
-        //if the corresponding creature exists (expected), despawn it
-        if (corresponded != null) corresponded.setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
-    }
-
     public void deployPartyMember(int index, boolean deploy) {
         if (this.getEntityHolder().world.isRemote) return;
 
@@ -197,7 +170,7 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
 
         //if true, deploy in the world
         if (deploy) {
-            creatureNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY);
+            creatureNBT.setDeploymentType(CreatureDeployment.PARTY);
             FixedSizeList<CreatureNBT> playerPartyList = this.getPlayerParty();
             playerPartyList.set(index, creatureNBT);
             this.setPlayerParty(playerPartyList);
@@ -219,14 +192,14 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
             creatureNBT.overrideCreature(corresponded);
 
             //continue as usual
-            creatureNBT.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
+            creatureNBT.setDeploymentType(CreatureDeployment.PARTY_INACTIVE);
             FixedSizeList<CreatureNBT> playerPartyList = this.getPlayerParty();
             playerPartyList.set(index, creatureNBT);
             this.setPlayerParty(playerPartyList);
             this.removeCreatureFromDeployMap(index);
 
             //if the corresponding creature exists (expected), despawn it
-            if (corresponded != null) corresponded.setDeploymentType(PlayerTamedCreatures.DeploymentType.PARTY_INACTIVE);
+            if (corresponded != null) corresponded.setDeploymentType(CreatureDeployment.PARTY_INACTIVE);
         }
     }
 

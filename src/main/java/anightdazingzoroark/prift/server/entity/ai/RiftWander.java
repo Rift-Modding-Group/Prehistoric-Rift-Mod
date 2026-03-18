@@ -1,12 +1,11 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.entity.ai.EntityAIWander;
-import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -32,7 +31,7 @@ public class RiftWander extends EntityAIWander {
                 return super.shouldExecute()
                         && this.creature.creatureBoxWithinReach()
                         && !this.creature.isSitting()
-                        && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                        && this.creature.getDeploymentType() == CreatureDeployment.BASE
                         && !this.creature.busyAtWork()
                         && !this.creature.isBeingRidden()
                         && !this.creature.isInWater();
@@ -41,7 +40,7 @@ public class RiftWander extends EntityAIWander {
                 return super.shouldExecute()
                         && this.creature.creatureBoxWithinReach()
                         && !this.creature.isSitting()
-                        && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                        && this.creature.getDeploymentType() == CreatureDeployment.BASE
                         && !this.creature.busyAtWork()
                         && !this.creature.isBeingRidden();
             }

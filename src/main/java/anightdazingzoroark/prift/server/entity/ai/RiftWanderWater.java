@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.block.material.Material;
@@ -27,7 +27,7 @@ public class RiftWanderWater extends EntityAIWander {
                 return super.shouldExecute()
                         && this.waterCreature.creatureBoxWithinReach()
                         && !this.waterCreature.isSitting()
-                        && this.waterCreature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                        && this.waterCreature.getDeploymentType() == CreatureDeployment.BASE
                         && !this.waterCreature.busyAtWork()
                         && !this.waterCreature.isBeingRidden()
                         && this.waterCreature.isInWater();

@@ -3,11 +3,9 @@ package anightdazingzoroark.prift.client.newui.widget;
 import anightdazingzoroark.prift.client.newui.RiftUIIcons;
 import anightdazingzoroark.prift.client.newui.UIColors;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
-import anightdazingzoroark.prift.client.newui.UIUtils;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
-import anightdazingzoroark.prift.client.newui.value.FixedSizeCreatureListSyncValue;
 import anightdazingzoroark.prift.helper.CreatureNBT;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
@@ -32,7 +30,6 @@ import com.cleanroommc.modularui.widgets.menu.ContextMenuButton;
 import com.cleanroommc.modularui.widgets.menu.Menu;
 import net.minecraft.client.resources.I18n;
 import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
 
@@ -241,7 +238,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
 
     private int getInnerOutlineColor() {
         if (this.creatureNBT.getCreatureHealth()[0] <= 0) return UIColors.creatureInlineDeadColor;
-        else if (this.creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
+        else if (this.creatureNBT.getDeploymentType() == CreatureDeployment.PARTY) {
             return UIColors.creatureInlineDeployedColor;
         }
         return UIColors.creatureInlineColor;
@@ -249,7 +246,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
 
     private int getBackgroundColor() {
         if (this.creatureNBT.getCreatureHealth()[0] <= 0) return UIColors.creatureBGDeadColor;
-        else if (this.creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
+        else if (this.creatureNBT.getDeploymentType() == CreatureDeployment.PARTY) {
             return UIColors.creatureBGDeployedColor;
         }
         return UIColors.creatureBGColor;

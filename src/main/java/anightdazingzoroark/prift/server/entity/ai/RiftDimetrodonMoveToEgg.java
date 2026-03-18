@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.creature.Dimetrodon;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
@@ -24,7 +24,7 @@ public class RiftDimetrodonMoveToEgg extends EntityAIBase {
     public boolean shouldExecute() {
         if (this.dimetrodon.isTamed()
                 && !this.dimetrodon.isBaby()
-                && this.dimetrodon.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                && this.dimetrodon.getDeploymentType() == CreatureDeployment.BASE
                 && !this.dimetrodon.isSitting()
                 && !this.dimetrodon.isTakingCareOfEgg()
                 && this.dimetrodon.getHomePos() != null

@@ -32,7 +32,6 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftStartRiding.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftSetWorkstation.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftTeleportPartyMemToPlayer.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftUpdatePlayerTamedCreatures.class, RiftLibMessageSide.CLIENT);
         WRAPPER.registerMessage(RiftSetTurretMode.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftChangeTurretTargetingFromMenu.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftUpdateNonPotionEffects.class, RiftLibMessageSide.CLIENT);
@@ -41,33 +40,17 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftSetBolaCaptured.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftResetBolaCaptured.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftSetRiding.class, RiftLibMessageSide.BOTH);
-        WRAPPER.registerMessage(RiftForceSyncPartyNBT.class, RiftLibMessageSide.BOTH);
-        WRAPPER.registerMessage(RiftForceSyncBoxNBT.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftManualUseMove.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftManualUseLargeWeapon.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftSetSprinting.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftShowParticlesOnClient.class, RiftLibMessageSide.CLIENT);
         WRAPPER.registerMessage(RiftManageBlockBreakControl.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftUpdatePartyDeployed.class, RiftLibMessageSide.BOTH);
-        WRAPPER.registerMessage(RiftAddToParty.class, RiftLibMessageSide.BOTH);
-        WRAPPER.registerMessage(RiftForceSyncSelectedPartyPosFromOverlay.class, RiftLibMessageSide.BOTH);
-        WRAPPER.registerMessage(RiftSetSelectedPartyPosFromOverlay.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureClient.class, RiftLibMessageSide.BOTH);
-        WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureHealthClient.class, RiftLibMessageSide.BOTH);
-        WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureEnergyClient.class, RiftLibMessageSide.BOTH);
-        WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureXPClient.class, RiftLibMessageSide.BOTH);
-        WRAPPER.registerMessage(RiftUpdateIndividualPartyCreatureServer.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftForceSyncLastOpenedBox.class, RiftLibMessageSide.BOTH);
-        WRAPPER.registerMessage(RiftSetLastOpenedBox.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftAddToBox.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftChangeCreatureBoxName.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftCreatureBoxSetLastOpenedTime.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftAddCreatureBoxData.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftRemoveCreatureBoxData.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftSetHypnotized.class, RiftLibMessageSide.BOTH);
         WRAPPER.registerMessage(RiftOpenCreatureScreen.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftApplyCreatureSwap.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftChangeQuickSelectPos.class, RiftLibMessageSide.SERVER);
-        WRAPPER.registerMessage(RiftInitDeployedCreatureMap.class, RiftLibMessageSide.CLIENT);
     }
 }

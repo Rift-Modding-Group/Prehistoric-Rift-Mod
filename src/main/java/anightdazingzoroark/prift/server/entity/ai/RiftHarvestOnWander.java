@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
@@ -34,7 +34,7 @@ public class RiftHarvestOnWander extends EntityAIBase {
     public boolean shouldExecute() {
         return this.creature.isTamed()
                 && !this.creature.isSitting()
-                && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                && this.creature.getDeploymentType() == CreatureDeployment.BASE
                 && !this.creature.isBeingRidden()
                 && this.creature instanceof IHarvestWhenWandering
                 && ((IHarvestWhenWandering)this.creature).canHarvest()

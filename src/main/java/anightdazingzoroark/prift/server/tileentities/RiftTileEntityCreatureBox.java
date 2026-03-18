@@ -12,7 +12,7 @@ import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.St
 import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.UUIDPropertyValue;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.helper.CreatureNBT;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
@@ -92,7 +92,7 @@ public class RiftTileEntityCreatureBox extends RiftTileEntity implements ITickab
                     else return entityLiving.ticksExisted <= 100;
                 }
             })) {
-                if (creature instanceof RiftCreature) ((RiftCreature) creature).setDeploymentType(PlayerTamedCreatures.DeploymentType.BASE_INACTIVE);
+                if (creature instanceof RiftCreature) ((RiftCreature) creature).setDeploymentType(CreatureDeployment.BASE_INACTIVE);
                 else this.world.removeEntity(creature);
             }
         }

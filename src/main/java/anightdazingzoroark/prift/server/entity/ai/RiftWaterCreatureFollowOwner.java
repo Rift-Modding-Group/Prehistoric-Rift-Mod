@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.creature.RiftWaterCreature;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
@@ -37,7 +37,7 @@ public class RiftWaterCreatureFollowOwner extends EntityAIBase {
         if (entitylivingbase == null) return false;
         else if (entitylivingbase instanceof EntityPlayer && ((EntityPlayer)entitylivingbase).isSpectator()) return false;
         else if (this.creature.isSitting()) return false;
-        else if (this.creature.getDeploymentType() != PlayerTamedCreatures.DeploymentType.PARTY) return false;
+        else if (this.creature.getDeploymentType() != CreatureDeployment.PARTY) return false;
         else if (this.creature.getDistanceSq(entitylivingbase) < (double)(this.minDist * this.minDist)) return false;
         else {
             this.owner = entitylivingbase;
@@ -58,16 +58,16 @@ public class RiftWaterCreatureFollowOwner extends EntityAIBase {
     public boolean shouldContinueExecuting() {
         if (this.creature.isAmphibious()) return this.creature.getDistanceSq(this.owner) > (double)(this.maxDist * this.maxDist)
                 && !this.creature.isSitting()
-                && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY;
+                && this.creature.getDeploymentType() == CreatureDeployment.PARTY;
         else return this.owner.isInWater()
                 && this.creature.getDistanceSq(this.owner) > (double)(this.maxDist * this.maxDist)
                 && !this.creature.isSitting()
-                && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY;
+                && this.creature.getDeploymentType() == CreatureDeployment.PARTY;
     }
 
     public void updateTask() {
         this.creature.getLookHelper().setLookPositionWithEntity(this.owner, 10.0F, (float)this.creature.getVerticalFaceSpeed());
-        if (!this.creature.isSitting() && this.creature.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) {
+        if (!this.creature.isSitting() && this.creature.getDeploymentType() == CreatureDeployment.PARTY) {
             if (--this.timeToRecalcPath <= 0) {
                 this.timeToRecalcPath = 10;
                 if (!this.creature.getNavigator().tryMoveToEntityLiving(this.owner, this.followSpeed)) {

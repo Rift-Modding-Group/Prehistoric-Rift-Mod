@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
+import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
@@ -14,7 +14,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -30,7 +29,7 @@ public class RiftSniffMove extends RiftCreatureMove {
         if (user.isTamed()) {
                 return super.canBeExecutedUnmounted(user, target)
                         && user.getAgeInTicks() % 3000 == 0
-                        && user.getDeploymentType() == PlayerTamedCreatures.DeploymentType.BASE
+                        && user.getDeploymentType() == CreatureDeployment.BASE
                         && !user.busyAtWork()
                         && !user.busyAtTurretMode()
                         && user.getTameBehavior().equals(TameBehaviorType.AGGRESSIVE);

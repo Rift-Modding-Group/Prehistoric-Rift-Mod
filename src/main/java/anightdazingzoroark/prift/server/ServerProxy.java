@@ -5,7 +5,6 @@ import anightdazingzoroark.prift.client.newui.data.CreatureGuiFactory;
 import anightdazingzoroark.prift.propertySystem.networking.PropertiesNetworking;
 import anightdazingzoroark.prift.propertySystem.registry.PropertiesBootstrap;
 import anightdazingzoroark.prift.propertySystem.sync.PropertySyncEvents;
-import anightdazingzoroark.prift.server.entity.projectile.RiftCreatureProjectile;
 import anightdazingzoroark.prift.compat.crafttweaker.RiftCrafttweaker;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
 import anightdazingzoroark.prift.compat.simpledifficulty.ModifierDimetrodon;
@@ -18,9 +17,6 @@ import anightdazingzoroark.prift.server.capabilities.creatureBoxData.ICreatureBo
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.INonPotionEffects;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffects;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsStorage;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesStorage;
 import anightdazingzoroark.prift.server.creatureSpawning.RiftCreatureSpawning;
 import anightdazingzoroark.prift.server.dataSerializers.PrimerEventHandler;
 import anightdazingzoroark.prift.server.effect.RiftEffects;
@@ -58,7 +54,6 @@ public class ServerProxy {
         MinecraftForge.EVENT_BUS.register(new PrimerEventHandler(registryPrimer));
 
 
-        CapabilityManager.INSTANCE.register(IPlayerTamedCreatures.class, new PlayerTamedCreaturesStorage(), PlayerTamedCreatures::new);
         CapabilityManager.INSTANCE.register(INonPotionEffects.class, new NonPotionEffectsStorage(), NonPotionEffects::new);
         CapabilityManager.INSTANCE.register(ICreatureBoxData.class, new CreatureBoxDataStorage(), CreatureBoxData::new);
         MinecraftForge.EVENT_BUS.register(new CapabilityHandler());

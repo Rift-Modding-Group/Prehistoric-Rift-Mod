@@ -6,8 +6,6 @@ import anightdazingzoroark.prift.server.RiftDamage;
 import anightdazingzoroark.prift.server.capabilities.creatureBoxData.CreatureBoxDataProvider;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.INonPotionEffects;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsProvider;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.IPlayerTamedCreatures;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesProvider;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.*;
 import net.minecraft.entity.Entity;
@@ -24,7 +22,6 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class CapabilityHandler {
-    public static final ResourceLocation PLAYER_TAMED_CREATURES_CAPABILITY = new ResourceLocation(RiftInitialize.MODID, "playertamedcreatures");
     public static final ResourceLocation NON_POTION_EFFECTS = new ResourceLocation(RiftInitialize.MODID, "nonpotioneffects");
     public static final ResourceLocation CREATURE_BOX_DATA = new ResourceLocation(RiftInitialize.MODID, "creatureboxdata");
 
@@ -34,10 +31,7 @@ public class CapabilityHandler {
 
     @SubscribeEvent
     public void attachCapabilityToEntity(AttachCapabilitiesEvent<Entity> event) {
-        if (event.getObject() instanceof EntityPlayer player) {
-            event.addCapability(PLAYER_TAMED_CREATURES_CAPABILITY, new PlayerTamedCreaturesProvider());
-        }
-        else if (event.getObject() instanceof EntityLivingBase) {
+        if (event.getObject() instanceof EntityLivingBase) {
             event.addCapability(NON_POTION_EFFECTS, new NonPotionEffectsProvider());
         }
     }
@@ -50,16 +44,6 @@ public class CapabilityHandler {
     @SubscribeEvent
     public void onPlayerClone(PlayerEvent.Clone event) {
         EntityPlayer player = event.getEntityPlayer();
-
-        //replicate tamed creatures
-        IPlayerTamedCreatures tamedCreatures = player.getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-        IPlayerTamedCreatures oldTamedCreatures = event.getOriginal().getCapability(PlayerTamedCreaturesProvider.PLAYER_TAMED_CREATURES_CAPABILITY, null);
-
-        tamedCreatures.setPartyNBT(oldTamedCreatures.getPartyNBT());
-        tamedCreatures.setBoxNBT(oldTamedCreatures.getBoxNBT());
-        tamedCreatures.setLastSelected(oldTamedCreatures.getLastSelected());
-        tamedCreatures.setPartyLastOpenedTime(oldTamedCreatures.getPartyLastOpenedTime());
-        tamedCreatures.setBoxLastOpenedTime(oldTamedCreatures.getBoxLastOpenedTime());
 
         //replicate effects
         INonPotionEffects nonPotionEffects = player.getCapability(NonPotionEffectsProvider.NON_POTION_EFFECTS_CAPABILITY, null);
@@ -208,7 +192,7 @@ public class CapabilityHandler {
                         if (creatureNBT.nbtIsEmpty()) continue;
 
                         //skip those that are already deployed
-                        if (creatureNBT.getDeploymentType() == PlayerTamedCreatures.DeploymentType.PARTY) continue;
+                        if (creatureNBT.getDeploymentType() == CreatureDeployment.PARTY) continue;
 
                         //on the server side, update timer and food related stuff that let it regen
                         //health and energy

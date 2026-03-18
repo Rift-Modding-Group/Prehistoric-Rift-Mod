@@ -3,22 +3,13 @@ package anightdazingzoroark.prift.client.newui.holder;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.screens.synced.RiftCreatureScreen;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
-import anightdazingzoroark.prift.helper.CreatureNBT;
-import anightdazingzoroark.prift.server.capabilities.playerTamedCreatures.PlayerTamedCreaturesHelper;
-import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
-import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBoxHelper;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.ModularScreen;
 import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.value.IntValue;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-
-import java.util.Arrays;
 
 //this helper class is for sending creature information to UIs and no less
 public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
