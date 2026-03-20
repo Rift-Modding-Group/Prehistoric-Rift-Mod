@@ -45,7 +45,7 @@ public class CreatureNBTSyncValue extends ValueSyncHandler<CreatureNBT> {
 
     @Override
     public void notifyUpdate() {
-        this.setValue(this.getter.get(), false, true);
+        this.setValue(this.cache, false, true);
     }
 
     @Override

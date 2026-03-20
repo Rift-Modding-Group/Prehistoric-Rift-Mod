@@ -22,6 +22,9 @@ import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
+import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxHelper;
+import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
+import com.cleanroommc.modularui.api.IPanelHandler;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.GuiTextures;
@@ -33,12 +36,15 @@ import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.BoolValue;
 import com.cleanroommc.modularui.value.DoubleValue;
+import com.cleanroommc.modularui.value.IntValue;
+import com.cleanroommc.modularui.value.StringValue;
 import com.cleanroommc.modularui.value.sync.*;
 import com.cleanroommc.modularui.widget.ParentWidget;
 import com.cleanroommc.modularui.widget.sizer.Unit;
 import com.cleanroommc.modularui.widgets.*;
 import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.cleanroommc.modularui.widgets.slot.ItemSlot;
+import com.cleanroommc.modularui.widgets.textfield.TextFieldWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
@@ -187,8 +193,6 @@ public class RiftCreatureScreen {
 
         //set up strings
         String playerName = player.getName();
-        String creatureGearName = I18n.format("inventory.gear", data.getName(false));
-        String creatureInvName = I18n.format("inventory.inventory", data.getName(false));
 
         //creature inventory syncing stuff
         syncManager.registerSlotGroup("creatureGear", Math.min(data.getCreatureType().gearSlotCount(), 9));
@@ -240,7 +244,9 @@ public class RiftCreatureScreen {
                                 .coverChildren()
                                 //header
                                 .child(new ParentWidget<>().width(162).coverChildrenHeight()
-                                        .child(IKey.str(creatureGearName).asWidget().left(0))
+                                        .child(IKey.dynamic(() -> {
+                                            return I18n.format("inventory.gear", data.getName(false));
+                                        }).asWidget().left(0))
                                 )
                                 //gear contents
                                 .child(new ParentWidget<>().width(162).coverChildrenHeight()
@@ -248,11 +254,14 @@ public class RiftCreatureScreen {
                                 )
                         )
                         //creature inventory
-                        .child(Flow.column()
+                        .childIf(data.getDeploymentType() != CreatureDeployment.BASE_INACTIVE,
+                                () -> Flow.column()
                                 .coverChildren()
                                 //header
                                 .child(new ParentWidget<>().width(162).coverChildrenHeight()
-                                        .child(IKey.str(creatureInvName).asWidget().left(0))
+                                        .child(IKey.dynamic(() -> {
+                                            return I18n.format("inventory.inventory", data.getName(false));
+                                        }).asWidget().left(0))
                                 )
                                 //if inventory is bigger than 27 slots, the inventory widget is to be a scrollable list
                                 .childIf(matrixHeight > 3, () -> new ListWidget<>()
@@ -290,6 +299,14 @@ public class RiftCreatureScreen {
         IWidget turretTargetingOptions = turretTargetingOptionGroup(data, syncManager, hasOptionsButtons);
         IWidget creatureBehavior = creatureBehaviorGroup(data, syncManager, hasOptionsButtons);
 
+        //panel
+        IPanelHandler creatureNamePopupPanel = syncManager.syncedPanel(
+                "creatureNamePopupPanel", true,
+                (panelSyncMan, panelHandler) -> {
+                    return creatureNamePopupPanel(data);
+                }
+        );
+
         //final return value
         return new ParentWidget<>()
                 .name("settingsPage")
@@ -300,8 +317,9 @@ public class RiftCreatureScreen {
                                 .name("top")
                                 .widthRel(1f)
                                 .coverChildrenHeight()
-                                .child(Flow.column().coverChildren()
-                                        .childPadding(2)
+                                .child(Flow.column().coverChildrenHeight().width(80)
+                                        .childPadding(3)
+                                        .left(0)
                                         .child(Flow.row()
                                                 .name("sittingRow")
                                                 .coverChildrenHeight()
@@ -322,22 +340,33 @@ public class RiftCreatureScreen {
                                         )
                                         //if creature has turret mode and is at base, add option
                                         .childIf(data.canEnterTurretMode()
-                                                && data.getDeploymentType() == CreatureDeployment.BASE,
+                                                        && data.getDeploymentType() == CreatureDeployment.BASE,
                                                 () -> Flow.row()
-                                                .coverChildrenHeight()
-                                                .childPadding(2)
-                                                .child(new CycleButtonWidget()
-                                                        .value(new BoolValue.Dynamic(
-                                                                turretModeValue::getValue,
-                                                                value -> {
-                                                                    turretModeValue.setBoolValue(value);
-                                                                    sittingValue.setBoolValue(false);
-                                                                }
-                                                        ))
-                                                        .stateOverlay(GuiTextures.CHECK_BOX)
-                                                        .size(14, 14)
-                                                )
-                                                .child(IKey.lang("creature_menu.turret_mode").asWidget().verticalCenter())
+                                                        .coverChildrenHeight()
+                                                        .childPadding(2)
+                                                        .child(new CycleButtonWidget()
+                                                                .value(new BoolValue.Dynamic(
+                                                                        turretModeValue::getValue,
+                                                                        value -> {
+                                                                            turretModeValue.setBoolValue(value);
+                                                                            sittingValue.setBoolValue(false);
+                                                                        }
+                                                                ))
+                                                                .stateOverlay(GuiTextures.CHECK_BOX)
+                                                                .size(14, 14)
+                                                        )
+                                                        .child(IKey.lang("creature_menu.turret_mode").asWidget().verticalCenter())
+                                        )
+                                )
+                                .child(Flow.column().coverChildrenHeight().width(80)
+                                        .childPadding(3)
+                                        .right(0)
+                                        .child(new ButtonWidget<>().size(60, 20)
+                                                .overlay(IKey.lang("creature_menu.change_name"))
+                                                .onMousePressed(mouseButton -> {
+                                                    creatureNamePopupPanel.openPanel();
+                                                    return true;
+                                                })
                                         )
                                 )
                         )
@@ -376,6 +405,7 @@ public class RiftCreatureScreen {
                                         })
                                         .name("creatureBehaviorOrTurretTargeting")
                                         .coverChildren()
+                                        .leftRel(0.5f)
                                 )
                         )
                         .coverChildrenHeight()
@@ -521,7 +551,7 @@ public class RiftCreatureScreen {
                                         .child(new EntityWidget<>(duplicateCreatureForRender(data), 10f)
                                                 .size(92, 60).center().yawRotationAngle(135f))
                                 )
-                                .child(IKey.str(data.getName(false)).scale(0.75f).asWidget())
+                                .child(IKey.dynamic(() -> data.getName(false)).scale(0.75f).asWidget())
                                 .child(IKey.lang("tametrait.level", data.getLevel()).scale(0.75f).asWidget())
                         )
                         //separator line
@@ -629,7 +659,9 @@ public class RiftCreatureScreen {
                                         .childPadding(5).coverChildren()
                                         //header
                                         .child(new ParentWidget<>().width(96).coverChildrenHeight()
-                                                .child(IKey.lang("tamepanel.current_moves", data.getName(false)).asWidget().scale(0.75f).left(0))
+                                                .child(IKey.dynamic(
+                                                        () -> I18n.format("tamepanel.current_moves", data.getName(false))
+                                                ).asWidget().scale(0.75f).left(0))
                                         )
                                         //current moves
                                         .child(new MoveListWidget(data, selectedMoveValue, SelectedMoveInfo.SelectedMoveType.LEARNT, moveSwapInfo, isMoveSwitching).size(90, 70))
@@ -684,6 +716,42 @@ public class RiftCreatureScreen {
                                                 .child(new MoveListWidget(data, selectedMoveValue, SelectedMoveInfo.SelectedMoveType.LEARNABLE, moveSwapInfo, isMoveSwitching)
                                                         .size(90, 120).center())
                                         )
+                                )
+                        )
+                );
+    }
+
+    private static ModularPanel creatureNamePopupPanel(CreatureGuiData data) {
+        Dialog<?> toReturn = new Dialog<>("boxNamePopup", null);
+        TextFieldWidget nameTextBox = new TextFieldWidget().widthRel(0.75f)
+                .value(new StringValue.Dynamic(
+                        () -> data.getCreatureNBT().getCustomName(),
+                        value -> {}
+                ));
+
+        return toReturn.setDisablePanelsBelow(true)
+                .setCloseOnOutOfBoundsClick(false)
+                .size(160, 100)
+                .padding(5)
+                .child(ButtonWidget.panelCloseButton())
+                .child(Flow.column().coverChildrenHeight().widthRel(1f).childPadding(15).center()
+                        .child(IKey.lang("tamepanel.change_creature_name").asWidget())
+                        .child(nameTextBox)
+                        .child(Flow.row().coverChildren().childPadding(5)
+                                .child(new ButtonWidget<>().width(48)
+                                        .overlay(IKey.lang("choice.confirm"))
+                                        .onMousePressed(mouseButton -> {
+                                            data.setCustomName(nameTextBox.getText());
+                                            toReturn.getPanel().closeIfOpen();
+                                            return true;
+                                        })
+                                )
+                                .child(new ButtonWidget<>().width(48)
+                                        .overlay(IKey.lang("choice.cancel"))
+                                        .onMousePressed(mouseButton -> {
+                                            toReturn.getPanel().closeIfOpen();
+                                            return true;
+                                        })
                                 )
                         )
                 );

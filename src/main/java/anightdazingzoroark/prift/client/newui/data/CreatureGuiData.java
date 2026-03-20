@@ -12,6 +12,8 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
+import anightdazingzoroark.prift.server.message.RiftChangeCreatureName;
+import anightdazingzoroark.prift.server.message.RiftMessages;
 import com.cleanroommc.modularui.factory.GuiData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -444,6 +446,21 @@ public class CreatureGuiData extends GuiData {
         }
     }
     //-----move related stuff ends here-----
+
+    public void setCustomName(String newName) {
+        if (this.dataType == DataType.CREATURE) {
+            System.out.println("set custom name");
+            RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureName(this.creature, newName));
+        }
+        else if (this.dataType == DataType.SELECTION) {
+            CreatureNBT creatureNBT = this.getCreatureNBT();
+            if (!creatureNBT.nbtIsEmpty()) {
+                System.out.println("set nbt name");
+                this.syncedNBT.getValue().setCustomName(newName);
+                this.syncedNBT.notifyUpdate();
+            }
+        }
+    }
 
     public enum DataType {
         CREATURE,
