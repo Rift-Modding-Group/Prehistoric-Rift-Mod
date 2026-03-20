@@ -61,11 +61,11 @@ public class CreatureBoxStorage {
         return this.creatureBoxContents.get(index);
     }
 
-    public void setBoxCreature(int index, int indexInBox, CreatureNBT creatureNBT) {
-        if (index < 0 || index >= maxBoxAmnt) throw new UnsupportedOperationException("Cannot get value beyond bounds");
-        FixedSizeList<CreatureNBT> changedList = this.creatureBoxContents.get(index);
-        changedList.set(indexInBox, creatureNBT);
-        this.creatureBoxContents.set(index, changedList);
+    public void setBoxCreature(int boxIndex, int index, CreatureNBT creatureNBT) {
+        if (boxIndex < 0 || boxIndex >= maxBoxAmnt) throw new UnsupportedOperationException("Cannot get value beyond bounds");
+        FixedSizeList<CreatureNBT> changedList = this.creatureBoxContents.get(boxIndex);
+        changedList.set(index, creatureNBT);
+        this.creatureBoxContents.set(boxIndex, changedList);
     }
 
     public void addCreatureToBox(CreatureNBT creatureNBT) {

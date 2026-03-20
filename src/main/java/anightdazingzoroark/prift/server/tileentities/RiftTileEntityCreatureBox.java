@@ -6,10 +6,7 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.helper.ChunkPosWithVerticality;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.RiftUtil;
-import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.FixedSizeListPropertyValue;
-import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.IntPropertyValue;
-import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.StringPropertyValue;
-import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.UUIDPropertyValue;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.*;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.CreatureDeployment;
@@ -33,11 +30,11 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class RiftTileEntityCreatureBox extends RiftTileEntity implements ITickable, IGuiHolder<PosGuiData> {
+    private final HashMap<Integer, RiftCreature> convertedDeployedHash = new HashMap<>();
+
     //for use in ui
     private boolean isCreatureSwitching;
     private SelectedCreatureInfo selectedCreatureInfo;
@@ -69,15 +66,50 @@ public class RiftTileEntityCreatureBox extends RiftTileEntity implements ITickab
     @Override
     public void update() {
         //if box has contents, make it so that its indestructible when there's creatures inside
-        RiftCreatureBox creatureBox = (RiftCreatureBox)this.world.getBlockState(this.pos).getBlock();
+        RiftCreatureBox creatureBox = (RiftCreatureBox) this.world.getBlockState(this.pos).getBlock();
         if (this.isUnbreakable()) creatureBox.setHardness(-1.0f);
         else creatureBox.setHardness(0f);
 
         //create creatures
-        //if (!this.world.isRemote) this.createCreaturesForWandering();
+        FixedSizeList<CreatureNBT> deployedCreatures = this.getDeployedCreatures();
+        for (int index = 0; index < deployedCreatures.size(); index++) {
+            CreatureNBT creatureNBT = deployedCreatures.get(index);
 
-        //print creatures
-        //System.out.println("this.getDeployedCreatures(): "+this.getDeployedCreatures());
+            //-----check in hashmap-----
+            if (this.convertedDeployedHash.containsKey(index)) {
+                //if the creature nbt by that point is empty, remove from the hashmap
+                //and skip
+                if (creatureNBT.nbtIsEmpty()) this.convertedDeployedHash.remove(index);
+            }
+            //not in hashmap, time to create the creature or find it in the world
+            else {
+                //if empty, just skip
+                if (creatureNBT.nbtIsEmpty()) continue;
+
+                //find corresponding creature
+                RiftCreature corresponded = creatureNBT.findCorrespondingCreature(this.world);
+
+                //if corresponded is null, time to create, only in server
+                if (corresponded == null && !this.world.isRemote) {
+                    corresponded = creatureNBT.getCreatureAsNBT(this.world);
+
+                    //set position
+                    BlockPos spawnPosition = RiftTileEntityCreatureBoxHelper.creatureCreatureSpawnPoint(this.pos, this.world, corresponded);
+
+                    //if spawnPosition is somehow null, skip
+                    if (spawnPosition == null) continue;
+
+                    //otherwise, continue as normal
+                    corresponded.setPosition(spawnPosition.getX(), spawnPosition.getY(), spawnPosition.getZ());
+                    corresponded.setHomePos(this.pos.getX(), this.pos.getY(), this.pos.getZ());
+                    this.world.spawnEntity(corresponded);
+                }
+
+                //add the corresponded creature to the hash map once corresponded is
+                //no longer null
+                if (corresponded != null) this.convertedDeployedHash.put(index, corresponded);
+            }
+        }
 
         //remove creatures that are not recently spawned from the wander range of the creature box
         if (GeneralConfig.creatureBoxPreventMobSpawn) {
@@ -85,11 +117,13 @@ public class RiftTileEntityCreatureBox extends RiftTileEntity implements ITickab
             for (EntityLiving creature : this.world.getEntitiesWithinAABB(EntityLiving.class, removeAABB, new Predicate<EntityLiving>() {
                 @Override
                 public boolean apply(@Nullable EntityLiving entityLiving) {
-                    if (entityLiving == null) return false;
-                    else if (entityLiving instanceof RiftEgg) return false;
-                    else if (entityLiving instanceof RiftLargeWeapon) return false;
-                    else if (entityLiving instanceof EntityTameable) return !((EntityTameable) entityLiving).isTamed() && entityLiving.ticksExisted <= 100;
-                    else return entityLiving.ticksExisted <= 100;
+                    return switch (entityLiving) {
+                        case null -> false;
+                        case RiftEgg riftEgg -> false;
+                        case RiftLargeWeapon riftLargeWeapon -> false;
+                        case EntityTameable tameable -> !tameable.isTamed() && entityLiving.ticksExisted <= 100;
+                        default -> entityLiving.ticksExisted <= 100;
+                    };
                 }
             })) {
                 if (creature instanceof RiftCreature) ((RiftCreature) creature).setDeploymentType(CreatureDeployment.BASE_INACTIVE);

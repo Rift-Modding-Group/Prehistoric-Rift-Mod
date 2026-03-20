@@ -148,6 +148,7 @@ public class RiftCreatureBoxScreen {
                                                 2, PlayerPartyHelper.maxSize,
                                                 index -> new CreatureInBoxButtonWidget(
                                                         playerParty, index,
+                                                        data.getBlockPos(),
                                                         selectedCreatureInfoDynamic,
                                                         creatureSwitchingDynamic,
                                                         creatureSwapInfoDynamic
@@ -237,6 +238,7 @@ public class RiftCreatureBoxScreen {
                                                 5, CreatureBoxStorage.maxBoxStorableCreatures,
                                                 index -> new CreatureInBoxButtonWidget(
                                                         playerBox, currentBoxIndexDynamic, index,
+                                                        data.getBlockPos(),
                                                         selectedCreatureInfoDynamic,
                                                         creatureSwitchingDynamic,
                                                         creatureSwapInfoDynamic
@@ -257,6 +259,7 @@ public class RiftCreatureBoxScreen {
                                                 2, RiftCreatureBox.maxDeployableCreatures,
                                                 index -> new CreatureInBoxButtonWidget(
                                                         teCreatureBox, index,
+                                                        data.getBlockPos(),
                                                         selectedCreatureInfoDynamic,
                                                         creatureSwitchingDynamic,
                                                         creatureSwapInfoDynamic

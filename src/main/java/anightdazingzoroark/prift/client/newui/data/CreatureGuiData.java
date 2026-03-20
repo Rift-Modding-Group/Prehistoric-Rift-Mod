@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.client.newui.holder.HolderHelper;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.newui.holder.SelectedMoveInfo;
 import anightdazingzoroark.prift.client.newui.value.CreatureNBTSyncValue;
+import anightdazingzoroark.prift.helper.BlockPosUtil;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.*;
@@ -14,6 +15,7 @@ import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import com.cleanroommc.modularui.factory.GuiData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -21,7 +23,8 @@ import java.util.List;
 
 public class CreatureGuiData extends GuiData {
     //menu relation stuff
-    private final boolean openedFromParty;
+    private final SelectedCreatureInfo.MenuOpenedFrom menuOpenedFrom;
+    private final BlockPos lastCreatureBoxPos;
     private final int pageToOpenTo;
 
     //data type stuff
@@ -36,15 +39,20 @@ public class CreatureGuiData extends GuiData {
     public SelectedMoveInfo selectedMoveInfoUI;
     public SelectedMoveInfo.SwapInfo moveSwapInfoUI = new SelectedMoveInfo.SwapInfo();
 
-    public CreatureGuiData(EntityPlayer player, RiftCreature creature, boolean openedFromParty, int pageToOpenTo) {
+    public CreatureGuiData(
+            EntityPlayer player, RiftCreature creature,
+            SelectedCreatureInfo.MenuOpenedFrom menuOpenedFrom, int pageToOpenTo,
+            BlockPos lastCreatureBoxPos
+    ) {
         super(player);
         this.creature = creature;
         this.dataType = DataType.CREATURE;
-        this.openedFromParty = openedFromParty;
+        this.menuOpenedFrom = menuOpenedFrom;
+        this.lastCreatureBoxPos = lastCreatureBoxPos;
         this.pageToOpenTo = pageToOpenTo;
     }
 
-    public CreatureGuiData(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo, boolean openedFromParty, int pageToOpenTo) {
+    public CreatureGuiData(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo, int pageToOpenTo) {
         super(player);
         this.selectedCreatureInfo = selectedCreatureInfo;
         this.syncedNBT = new CreatureNBTSyncValue(
@@ -52,14 +60,17 @@ public class CreatureGuiData extends GuiData {
                 data -> HolderHelper.setSelectedCreature(player, selectedCreatureInfo, data)
         );
         this.dataType = DataType.SELECTION;
-        this.openedFromParty = openedFromParty;
+        this.menuOpenedFrom = selectedCreatureInfo.getMenuOpenedFrom();
+        this.lastCreatureBoxPos = selectedCreatureInfo.getCreatureBoxPos();
         this.pageToOpenTo = pageToOpenTo;
     }
 
     public CreatureGuiData(EntityPlayer player, NBTTagCompound nbtTagCompound) {
         super(player);
         this.dataType = DataType.values()[nbtTagCompound.getInteger("DataType")];
-        this.openedFromParty = nbtTagCompound.getBoolean("OpenedFromParty");
+        this.menuOpenedFrom = (nbtTagCompound.hasKey("MenuOpenedFrom") && nbtTagCompound.getInteger("MenuOpenedFrom") >= 0) ?
+                SelectedCreatureInfo.MenuOpenedFrom.values()[nbtTagCompound.getInteger("MenuOpenedFrom")] : null;
+        this.lastCreatureBoxPos = BlockPosUtil.getBlockPosFromNBT(nbtTagCompound.getCompoundTag("LastCreatureBoxPos"));
         this.pageToOpenTo = nbtTagCompound.getInteger("PageToOpenTo");
         if (this.dataType == DataType.CREATURE) {
             this.creature = (RiftCreature) player.world.getEntityByID(nbtTagCompound.getInteger("CreatureId"));
@@ -83,8 +94,12 @@ public class CreatureGuiData extends GuiData {
         return this.syncedNBT;
     }
 
-    public boolean getOpenedFromParty() {
-        return this.openedFromParty;
+    public SelectedCreatureInfo.MenuOpenedFrom getMenuOpenedFrom() {
+        return this.menuOpenedFrom;
+    }
+
+    public BlockPos getLastCreatureBoxPos() {
+        return this.lastCreatureBoxPos;
     }
 
     public int getPageToOpenTo() {
@@ -346,7 +361,8 @@ public class CreatureGuiData extends GuiData {
         NBTTagCompound toReturn = new NBTTagCompound();
 
         toReturn.setInteger("DataType", this.dataType.ordinal());
-        toReturn.setBoolean("OpenedFromParty", this.openedFromParty);
+        toReturn.setInteger("MenuOpenedFrom", this.menuOpenedFrom != null ? this.menuOpenedFrom.ordinal() : -1);
+        toReturn.setTag("LastCreatureBoxPos", BlockPosUtil.getBlockPosAsNBT(this.lastCreatureBoxPos));
         toReturn.setInteger("PageToOpenTo", this.pageToOpenTo);
         if (this.dataType == DataType.CREATURE) toReturn.setInteger("CreatureId", this.creature.getEntityId());
         else if (this.dataType == DataType.SELECTION) toReturn.setTag("SelectionInfo", this.selectedCreatureInfo.getNBT());

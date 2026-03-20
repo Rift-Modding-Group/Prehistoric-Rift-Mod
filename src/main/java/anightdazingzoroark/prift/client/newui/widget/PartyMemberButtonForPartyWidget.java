@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.client.newui.RiftUIIcons;
 import anightdazingzoroark.prift.client.newui.UIColors;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.newui.screens.player.PlayerUIHelper;
 import anightdazingzoroark.prift.client.newui.screens.synced.RiftCreatureScreen;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.helper.CreatureNBT;
@@ -266,16 +267,12 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
                 (index, playerParty) -> true,
                 (index, playerParty) -> {
                     EntityPlayer player = Minecraft.getMinecraft().player;
-                    CreatureNBT creatureNBT = playerParty.getPartyMember(index);
-                    RiftCreature creature = creatureNBT.findCorrespondingCreature(player.world);
-                    if (creature != null) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.inventoryPageNum));
-                    }
-                    else {
-                        SelectedCreatureInfo selectionInfo = SelectedCreatureInfo.partySelectedInfo(index);
-                        selectionInfo.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.PARTY);
-                        RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo, RiftCreatureScreen.inventoryPageNum));
-                    }
+                    SelectedCreatureInfo selectionInfo = SelectedCreatureInfo.partySelectedInfo(index);
+                    selectionInfo.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.PARTY);
+
+                    PlayerUIHelper.openCreatureScreen(
+                            player, selectionInfo, RiftCreatureScreen.inventoryPageNum
+                    );
                     return true;
                 }
         ),
@@ -283,16 +280,12 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
                 (index, playerParty) -> true,
                 (index, playerParty) -> {
                     EntityPlayer player = Minecraft.getMinecraft().player;
-                    CreatureNBT creatureNBT = playerParty.getPartyMember(index);
-                    RiftCreature creature = creatureNBT.findCorrespondingCreature(player.world);
-                    if (creature != null) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.optionsPageNum));
-                    }
-                    else {
-                        SelectedCreatureInfo selectionInfo = SelectedCreatureInfo.partySelectedInfo(index);
-                        selectionInfo.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.PARTY);
-                        RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo, RiftCreatureScreen.optionsPageNum));
-                    }
+                    SelectedCreatureInfo selectionInfo = SelectedCreatureInfo.partySelectedInfo(index);
+                    selectionInfo.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.PARTY);
+
+                    PlayerUIHelper.openCreatureScreen(
+                            player, selectionInfo, RiftCreatureScreen.optionsPageNum
+                    );
                     return true;
                 }
         ),
@@ -300,16 +293,12 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
                 (index, playerParty) -> true,
                 (index, playerParty) -> {
                     EntityPlayer player = Minecraft.getMinecraft().player;
-                    CreatureNBT creatureNBT = playerParty.getPartyMember(index);
-                    RiftCreature creature = creatureNBT.findCorrespondingCreature(player.world);
-                    if (creature != null) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.infoPageNum));
-                    }
-                    else {
-                        SelectedCreatureInfo selectionInfo = SelectedCreatureInfo.partySelectedInfo(index);
-                        selectionInfo.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.PARTY);
-                        RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo, RiftCreatureScreen.infoPageNum));
-                    }
+                    SelectedCreatureInfo selectionInfo = SelectedCreatureInfo.partySelectedInfo(index);
+                    selectionInfo.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.PARTY);
+
+                    PlayerUIHelper.openCreatureScreen(
+                            player, selectionInfo, RiftCreatureScreen.infoPageNum
+                    );
                     return true;
                 }
         ),
@@ -317,16 +306,12 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
                 (index, playerParty) -> true,
                 (index, playerParty) -> {
                     EntityPlayer player = Minecraft.getMinecraft().player;
-                    CreatureNBT creatureNBT = playerParty.getPartyMember(index);
-                    RiftCreature creature = creatureNBT.findCorrespondingCreature(player.world);
-                    if (creature != null) {
-                        RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, creature, RiftCreatureScreen.movesPageNum));
-                    }
-                    else {
-                        SelectedCreatureInfo selectionInfo = SelectedCreatureInfo.partySelectedInfo(index);
-                        selectionInfo.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.PARTY);
-                        RiftMessages.WRAPPER.sendToServer(new RiftOpenCreatureScreen(player, selectionInfo, RiftCreatureScreen.movesPageNum));
-                    }
+                    SelectedCreatureInfo selectionInfo = SelectedCreatureInfo.partySelectedInfo(index);
+                    selectionInfo.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.PARTY);
+
+                    PlayerUIHelper.openCreatureScreen(
+                            player, selectionInfo, RiftCreatureScreen.movesPageNum
+                    );
                     return true;
                 }
         ),

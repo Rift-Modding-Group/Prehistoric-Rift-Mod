@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.client.newui.holder;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.screens.synced.RiftCreatureScreen;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
+import anightdazingzoroark.prift.helper.BlockPosUtil;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.ModularScreen;
@@ -10,6 +11,10 @@ import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.value.IntValue;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 //this helper class is for sending creature information to UIs and no less
 public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
@@ -17,13 +22,16 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
     public final SelectedPosType selectedPosType;
     private final int index;
     private MenuOpenedFrom menuOpenedFrom;
+    private BlockPos creatureBoxPos = BlockPos.ORIGIN;
 
-    //box only
+    //player box only
     private boolean boxIndexIsDynamic;
     private int boxIndex;
     private IntValue.Dynamic boxIndexDynamic;
 
-    public static SelectedCreatureInfo createFromNBT(NBTTagCompound nbtTagCompound) {
+    public static SelectedCreatureInfo createFromNBT(@NotNull NBTTagCompound nbtTagCompound) {
+        Objects.requireNonNull(nbtTagCompound);
+
         if (nbtTagCompound.isEmpty()) return null;
 
         //constructor stuff
@@ -35,6 +43,7 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
         toReturn.menuOpenedFrom = (nbtTagCompound.hasKey("MenuOpenedFrom") && nbtTagCompound.getInteger("MenuOpenedFrom") >= 0) ?
                 MenuOpenedFrom.values()[nbtTagCompound.getInteger("MenuOpenedFrom")] : null;
         toReturn.boxIndex = nbtTagCompound.getInteger("BoxIndex");
+        toReturn.creatureBoxPos = BlockPosUtil.getBlockPosFromNBT(nbtTagCompound.getCompoundTag("CreatureBoxPos"));
 
         return toReturn;
     }
@@ -61,6 +70,18 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
         return new SelectedCreatureInfo(SelectedPosType.BOX_DEPLOYED, pos);
     }
 
+    public static SelectedCreatureInfo duplicate(SelectedCreatureInfo selectedCreatureInfo) {
+        SelectedCreatureInfo toReturn = new SelectedCreatureInfo(
+                selectedCreatureInfo.selectedPosType,
+                selectedCreatureInfo.index
+        );
+        toReturn.boxIndexIsDynamic = selectedCreatureInfo.boxIndexIsDynamic;
+        toReturn.boxIndex = selectedCreatureInfo.boxIndex;
+        toReturn.menuOpenedFrom = selectedCreatureInfo.menuOpenedFrom;
+
+        return toReturn;
+    }
+
     private SelectedCreatureInfo(SelectedPosType selectedPosType, int index) {
         this.selectedPosType = selectedPosType;
         this.index = index;
@@ -68,6 +89,18 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
 
     public void setMenuOpenedFrom(MenuOpenedFrom value) {
         this.menuOpenedFrom = value;
+    }
+
+    public MenuOpenedFrom getMenuOpenedFrom() {
+        return this.menuOpenedFrom;
+    }
+
+    public void setCreatureBoxPos(BlockPos creatureBoxPos) {
+        this.creatureBoxPos = creatureBoxPos;
+    }
+
+    public BlockPos getCreatureBoxPos() {
+        return this.creatureBoxPos;
     }
 
     public int getIndex() {
@@ -86,6 +119,7 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
         toReturn.setInteger("Index", this.index);
         toReturn.setInteger("MenuOpenedFrom", this.menuOpenedFrom != null ? this.menuOpenedFrom.ordinal() : -1);
         toReturn.setInteger("BoxIndex", this.boxIndexIsDynamic ? this.boxIndexDynamic.getValue() : this.boxIndex);
+        toReturn.setTag("CreatureBoxPos", BlockPosUtil.getBlockPosAsNBT(this.creatureBoxPos));
 
         return toReturn;
     }

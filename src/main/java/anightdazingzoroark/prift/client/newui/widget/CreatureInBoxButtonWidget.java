@@ -4,8 +4,13 @@ import anightdazingzoroark.prift.client.newui.RiftUIIcons;
 import anightdazingzoroark.prift.client.newui.UIColors;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.newui.screens.player.PlayerUIHelper;
+import anightdazingzoroark.prift.client.newui.screens.synced.RiftCreatureScreen;
 import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.CreatureDeployment;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftOpenCreatureScreen;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
@@ -28,10 +33,16 @@ import com.cleanroommc.modularui.widgets.ListWidget;
 import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.cleanroommc.modularui.widgets.menu.ContextMenuButton;
 import com.cleanroommc.modularui.widgets.menu.Menu;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxButtonWidget> implements Interactable {
     @NotNull
@@ -64,7 +75,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     //the party only requires the index and the player
     public CreatureInBoxButtonWidget(
             PlayerPartyProperties playerParty,
-            int index,
+            int index, BlockPos creatureBoxPos,
             ObjectValue.@NotNull Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic,
             BoolValue.@NotNull Dynamic creatureSwitchingDynamic,
             ObjectValue.@NotNull Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic
@@ -78,6 +89,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
         this.creatureSwapInfoDynamic = creatureSwapInfoDynamic;
 
         this.selectedCreatureInfo = SelectedCreatureInfo.partySelectedInfo(index);
+        this.selectedCreatureInfo.setCreatureBoxPos(creatureBoxPos);
 
         this.commonSetup();
     }
@@ -85,7 +97,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     //the box requires the box index, the index within the box, and the player
     public CreatureInBoxButtonWidget(
             PlayerCreatureBoxProperties playerBox,
-            IntValue.Dynamic currentBoxIndexDynamic, int index,
+            IntValue.Dynamic currentBoxIndexDynamic, int index, BlockPos creatureBoxPos,
             ObjectValue.@NotNull Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic,
             BoolValue.@NotNull Dynamic creatureSwitchingDynamic,
             ObjectValue.@NotNull Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic
@@ -100,6 +112,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
         this.creatureSwapInfoDynamic = creatureSwapInfoDynamic;
 
         this.selectedCreatureInfo = SelectedCreatureInfo.boxSelectedInfoDynamic(currentBoxIndexDynamic, index);
+        this.selectedCreatureInfo.setCreatureBoxPos(creatureBoxPos);
 
         this.commonSetup();
     }
@@ -108,7 +121,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     //deployed creatures
     public CreatureInBoxButtonWidget(
             RiftTileEntityCreatureBox teCreatureBox,
-            int index,
+            int index,  BlockPos creatureBoxPos,
             ObjectValue.@NotNull Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic,
             BoolValue.@NotNull Dynamic creatureSwitchingDynamic,
             ObjectValue.@NotNull Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic
@@ -122,6 +135,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
         this.creatureSwapInfoDynamic = creatureSwapInfoDynamic;
 
         this.selectedCreatureInfo = SelectedCreatureInfo.boxDeployedInfo(index);
+        this.selectedCreatureInfo.setCreatureBoxPos(creatureBoxPos);
 
         this.commonSetup();
     }
@@ -130,6 +144,8 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
         this.size(32);
         this.menu(new MenuForCreature(this));
         this.openCustom();
+
+        this.selectedCreatureInfo.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.BOX);
     }
 
     @Override
@@ -274,6 +290,9 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
             super.onUpdate();
 
             if (this.parentIsSelected == null || this.parentIsSelected != this.parent.isSelected) {
+                //reset resizer
+                this.resizer().resetPosition();
+
                 //reset children
                 this.removeAll();
 
@@ -362,10 +381,16 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     }
 
     private enum Option {
-        INVENTORY,
-        OPTIONS,
-        INFO,
-        MOVES;
+        INVENTORY(RiftCreatureScreen.inventoryPageNum),
+        OPTIONS(RiftCreatureScreen.optionsPageNum),
+        INFO(RiftCreatureScreen.infoPageNum),
+        MOVES(RiftCreatureScreen.movesPageNum);
+
+        private final int pageToOpenTo;
+
+        Option(int pageToOpenTo) {
+            this.pageToOpenTo = pageToOpenTo;
+        }
 
         private String getTranslatedName() {
             return I18n.format("box.dropdown."+this.name().toLowerCase());
@@ -389,6 +414,22 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
             String text = this.option.getTranslatedName();
             int textColor = this.isHovering() ? 0xFFFFFFFF : IKey.TEXT_COLOR;
             return IKey.str(text).scale(0.5f).color(textColor);
+        }
+
+        @Override
+        @NotNull
+        public Result onMousePressed(int mouseButton) {
+            if (this.parent == null) return Result.ACCEPT;
+            if (this.parent.creatureNBT.nbtIsEmpty()) return Result.ACCEPT;
+
+            //assume success
+            EntityPlayer player = Minecraft.getMinecraft().player;
+            PlayerUIHelper.openCreatureScreen(
+                    player, this.parent.selectedCreatureInfo,
+                    this.option.pageToOpenTo
+            );
+            this.parent.selectedCreatureInfoDynamic.setValue(null);
+            return Result.SUCCESS;
         }
     }
 }

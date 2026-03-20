@@ -10,6 +10,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,24 +18,17 @@ import java.util.Objects;
 
 public class CreatureGuiFactory extends AbstractUIFactory<CreatureGuiData> {
     public static CreatureGuiFactory INSTANCE = new CreatureGuiFactory();
-    public static CreatureGuiFactory INSTANCE_FROM_PARTY = new CreatureGuiFactory(true);
 
-    public static CreatureGuiFactory openToPage(int page) {
-        CreatureGuiFactory toReturn = INSTANCE_FROM_PARTY;
-        toReturn.pageToOpenTo = page;
-        return toReturn;
+    public static Opener create() {
+        return new Opener();
     }
 
-    private final boolean openedFromParty;
     private int pageToOpenTo;
+    private SelectedCreatureInfo.MenuOpenedFrom menuOpenedFrom;
+    private BlockPos lastCreatureBoxPos = BlockPos.ORIGIN;
 
     protected CreatureGuiFactory() {
-        this(false);
-    }
-
-    protected CreatureGuiFactory(boolean openedFromParty) {
         super(RiftInitialize.MODID+":creature");
-        this.openedFromParty = openedFromParty;
     }
 
     private <E extends RiftCreature & IGuiHolder<CreatureGuiData>> void verifyEntity(EntityPlayer player, E entity) {
@@ -50,12 +44,12 @@ public class CreatureGuiFactory extends AbstractUIFactory<CreatureGuiData> {
     public <E extends RiftCreature & IGuiHolder<CreatureGuiData>> void open(EntityPlayer player, E entity) {
         Objects.requireNonNull(player);
         this.verifyEntity(player, entity);
-        GuiManager.open(this, new CreatureGuiData(player, entity, this.openedFromParty, this.pageToOpenTo), (EntityPlayerMP) player);
+        GuiManager.open(this, new CreatureGuiData(player, entity, this.menuOpenedFrom, this.pageToOpenTo, this.lastCreatureBoxPos), (EntityPlayerMP) player);
     }
 
     public void open(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo) {
         Objects.requireNonNull(selectedCreatureInfo);
-        GuiManager.open(this, new CreatureGuiData(player, selectedCreatureInfo, this.openedFromParty, this.pageToOpenTo), (EntityPlayerMP) player);
+        GuiManager.open(this, new CreatureGuiData(player, selectedCreatureInfo, this.pageToOpenTo), (EntityPlayerMP) player);
     }
 
     @Override
@@ -80,8 +74,32 @@ public class CreatureGuiFactory extends AbstractUIFactory<CreatureGuiData> {
         RiftCreature creature = (RiftCreature) guiData.getGuiHolder();
         return super.canInteractWith(player, guiData) &&
                 creature != null &&
-                player.getDistanceSq(creature.posX, creature.posY, creature.posZ) <= 64 &&
                 player.world == creature.world &&
                 creature.isEntityAlive();
+    }
+
+    public static class Opener {
+        private final CreatureGuiFactory toOpen = INSTANCE;
+
+        private Opener() {}
+
+        public Opener setPageToOpenTo(int page) {
+            this.toOpen.pageToOpenTo = page;
+            return this;
+        }
+
+        public Opener setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom menuOpenedFrom) {
+            this.toOpen.menuOpenedFrom = menuOpenedFrom;
+            return this;
+        }
+
+        public Opener setLastCreatureBox(BlockPos pos) {
+            this.toOpen.lastCreatureBoxPos = pos;
+            return this;
+        }
+
+        public CreatureGuiFactory build() {
+            return INSTANCE;
+        }
     }
 }

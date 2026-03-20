@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.message;
 
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiFactory;
+import anightdazingzoroark.prift.client.newui.holder.HolderHelper;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.riftlib.message.RiftLibMessage;
@@ -13,42 +14,28 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class RiftOpenCreatureScreen extends RiftLibMessage<RiftOpenCreatureScreen> {
-    private boolean useSelectedCreature;
     private int playerId;
-    private int creatureId;
     private NBTTagCompound selectedCreatureInfoNBT;
     private int pageToOpenTo;
 
     public RiftOpenCreatureScreen() {}
 
-    public RiftOpenCreatureScreen(EntityPlayer player, RiftCreature creature, int pageToOpenTo) {
-        this.playerId = player.getEntityId();
-        this.creatureId = creature.getEntityId();
-        this.useSelectedCreature = false;
-        this.pageToOpenTo = pageToOpenTo;
-    }
-
     public RiftOpenCreatureScreen(EntityPlayer player, SelectedCreatureInfo selectedCreatureInfo, int pageToOpenTo) {
         this.playerId = player.getEntityId();
         this.selectedCreatureInfoNBT = selectedCreatureInfo.getNBT();
-        this.useSelectedCreature = true;
         this.pageToOpenTo = pageToOpenTo;
     }
 
     @Override
     public void fromBytes(ByteBuf byteBuf) {
-        this.useSelectedCreature = byteBuf.readBoolean();
         this.playerId = byteBuf.readInt();
-        this.creatureId = byteBuf.readInt();
         this.selectedCreatureInfoNBT = ByteBufUtils.readTag(byteBuf);
         this.pageToOpenTo = byteBuf.readInt();
     }
 
     @Override
     public void toBytes(ByteBuf byteBuf) {
-        byteBuf.writeBoolean(this.useSelectedCreature);
         byteBuf.writeInt(this.playerId);
-        byteBuf.writeInt(this.creatureId);
         ByteBufUtils.writeTag(byteBuf, this.selectedCreatureInfoNBT);
         byteBuf.writeInt(this.pageToOpenTo);
     }
@@ -56,13 +43,48 @@ public class RiftOpenCreatureScreen extends RiftLibMessage<RiftOpenCreatureScree
     @Override
     public void executeOnServer(MinecraftServer minecraftServer, RiftOpenCreatureScreen message, EntityPlayer entityPlayer, MessageContext messageContext) {
         EntityPlayer player = (EntityPlayer) minecraftServer.getEntityWorld().getEntityByID(message.playerId);
-        if (message.useSelectedCreature) {
-            SelectedCreatureInfo selectedCreatureInfo = SelectedCreatureInfo.createFromNBT(message.selectedCreatureInfoNBT);
-            CreatureGuiFactory.openToPage(message.pageToOpenTo).open(player, selectedCreatureInfo);
+        if (player == null) return;
+
+        //define selected creature info
+        SelectedCreatureInfo selectedCreatureInfo = SelectedCreatureInfo.createFromNBT(message.selectedCreatureInfoNBT);
+        if (selectedCreatureInfo == null) return;
+
+        //open box deployed creature
+        if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+            RiftCreature creature = HolderHelper.getSelectedCreature(player, selectedCreatureInfo)
+                    .findCorrespondingCreature(player.world);
+
+            if (creature != null) CreatureGuiFactory.create()
+                    .setPageToOpenTo(message.pageToOpenTo)
+                    .setMenuOpenedFrom(selectedCreatureInfo.getMenuOpenedFrom())
+                    .setLastCreatureBox(selectedCreatureInfo.getCreatureBoxPos())
+                    .build().open(player, creature);
         }
-        else {
-            RiftCreature creature = (RiftCreature) minecraftServer.getEntityWorld().getEntityByID(message.creatureId);
-            CreatureGuiFactory.openToPage(message.pageToOpenTo).open(player, creature);
+        //open player party creature
+        else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
+            RiftCreature creature = HolderHelper.getSelectedCreature(player, selectedCreatureInfo)
+                    .findCorrespondingCreature(player.world);
+
+            //found in the world means its already deployed
+            if (creature != null) CreatureGuiFactory.create()
+                        .setPageToOpenTo(message.pageToOpenTo)
+                        .setMenuOpenedFrom(selectedCreatureInfo.getMenuOpenedFrom())
+                        .setLastCreatureBox(selectedCreatureInfo.getCreatureBoxPos())
+                        .build().open(player, creature);
+            //otherwise it means its not
+            else CreatureGuiFactory.create()
+                        .setPageToOpenTo(message.pageToOpenTo)
+                        .setMenuOpenedFrom(selectedCreatureInfo.getMenuOpenedFrom())
+                        .setLastCreatureBox(selectedCreatureInfo.getCreatureBoxPos())
+                        .build().open(player, selectedCreatureInfo);
+        }
+        //open box creature
+        else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
+            CreatureGuiFactory.create()
+                    .setPageToOpenTo(message.pageToOpenTo)
+                    .setMenuOpenedFrom(selectedCreatureInfo.getMenuOpenedFrom())
+                    .setLastCreatureBox(selectedCreatureInfo.getCreatureBoxPos())
+                    .build().open(player, selectedCreatureInfo);
         }
     }
 

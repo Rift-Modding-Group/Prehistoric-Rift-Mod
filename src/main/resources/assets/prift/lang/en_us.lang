@@ -544,6 +544,7 @@ tametab.manage=Management
 tametab.info=Info
 tametab.moves=Moves
 tametab.return_to_party=Return to Party
+tametab.return_to_creature_box=Return to Box
 
 tamepanel.current_moves=%s Moves
 tamepanel.available_moves=Available Moves

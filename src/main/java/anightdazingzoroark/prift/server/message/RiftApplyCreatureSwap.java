@@ -326,6 +326,9 @@ public class RiftApplyCreatureSwap extends RiftLibMessage<RiftApplyCreatureSwap>
         //find creature deployed in the world first
         RiftCreature corresponded = creatureNBT.findCorrespondingCreature(server.getEntityWorld());
 
+        //if corresponded exists, remove home point
+        if (corresponded != null) corresponded.clearHomePos();
+
         //override the stored nbt with the deployed creature's nbt
         //already takes into consideration if corresponded is null
         creatureNBT.overrideCreature(corresponded);

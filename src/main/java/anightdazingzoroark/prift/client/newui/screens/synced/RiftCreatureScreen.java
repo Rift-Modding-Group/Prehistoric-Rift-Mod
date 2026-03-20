@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.newui.screens.synced;
 
 import anightdazingzoroark.prift.client.ClientProxy;
+import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.newui.screens.player.PlayerUIHelper;
 import anightdazingzoroark.prift.client.newui.RiftUIIcons;
 import anightdazingzoroark.prift.client.newui.UIColors;
@@ -26,6 +27,7 @@ import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.GuiTextures;
 import com.cleanroommc.modularui.drawable.ItemDrawable;
 import com.cleanroommc.modularui.drawable.Rectangle;
+import com.cleanroommc.modularui.factory.GuiFactories;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.utils.Alignment;
@@ -66,8 +68,12 @@ public class RiftCreatureScreen {
 
         return new ModularPanelExitAffectable(UIPanelNames.INTERACTED_CREATURE_SCREEN)
                 .onEscPressed(panel -> {
-                    if (data.getOpenedFromParty()) {
+                    if (data.getMenuOpenedFrom() == SelectedCreatureInfo.MenuOpenedFrom.PARTY) {
                         PlayerUIHelper.openUI(data.getPlayer(), UIPanelNames.PARTY_SCREEN);
+                        return true;
+                    }
+                    else if (data.getMenuOpenedFrom() == SelectedCreatureInfo.MenuOpenedFrom.BOX) {
+                        PlayerUIHelper.openCreatureBoxUI(data.getPlayer(), data.getLastCreatureBoxPos());
                         return true;
                     }
                     return false;
@@ -147,7 +153,7 @@ public class RiftCreatureScreen {
                         .addPage(creatureInfoPage(data, syncManager, settings))
                         .addPage(creatureMovesPage(data, syncManager, settings))
                 )
-                .childIf(data.getOpenedFromParty(), () -> Flow.column()
+                .childIf(data.getMenuOpenedFrom() == SelectedCreatureInfo.MenuOpenedFrom.PARTY, () -> Flow.column()
                         .coverChildren()
                         .rightRel(0f, 4, 1f)
                         .child(new SideButton()
@@ -157,6 +163,19 @@ public class RiftCreatureScreen {
                                     return true;
                                 })
                                 .addTooltipElement(IKey.lang("tametab.return_to_party"))
+                                .tab(GuiTextures.TAB_RIGHT, -1)
+                        )
+                )
+                .childIf(data.getMenuOpenedFrom() == SelectedCreatureInfo.MenuOpenedFrom.BOX, () -> Flow.column()
+                        .coverChildren()
+                        .rightRel(0f, 4, 1f)
+                        .child(new SideButton()
+                                .overlay(RiftUIIcons.BACK.asIcon().size(24))
+                                .onMousePressed(button -> {
+                                    PlayerUIHelper.openCreatureBoxUI(data.getPlayer(), data.getLastCreatureBoxPos());
+                                    return true;
+                                })
+                                .addTooltipElement(IKey.lang("tametab.return_to_creature_box"))
                                 .tab(GuiTextures.TAB_RIGHT, -1)
                         )
                 );
@@ -439,9 +458,7 @@ public class RiftCreatureScreen {
                 .child(IKey.lang("creature_menu.header.base_options").asWidget());
 
         //workstation button
-        if (creature instanceof IWorkstationUser) {
-            IWorkstationUser workstationUser = (IWorkstationUser) creature;
-
+        if (creature instanceof IWorkstationUser workstationUser) {
             creatureOptions.child(
                     new ButtonWidget<>().size(80, 20)
                             .overlay(IKey.dynamic(() -> {
@@ -466,9 +483,7 @@ public class RiftCreatureScreen {
         }
 
         //harvest on wander button
-        if (creature instanceof IHarvestWhenWandering) {
-            IHarvestWhenWandering harvestWhenWanderingUser = (IHarvestWhenWandering) creature;
-
+        if (creature instanceof IHarvestWhenWandering harvestWhenWanderingUser) {
             BooleanSyncValue harvestWhenWanderingVal = new BooleanSyncValue(
                     harvestWhenWanderingUser::canHarvest,
                     harvestWhenWanderingUser::setCanHarvest

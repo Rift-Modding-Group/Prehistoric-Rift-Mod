@@ -15,7 +15,11 @@ import java.util.HashMap;
 
 public abstract class RiftTileEntity extends TileEntity {
     protected final HashMap<String, ImmutablePair<AbstractPropertyValue<?>, Boolean>> propertyValueMap = new HashMap<>();
-    private boolean propertiesRegistered;
+
+    public RiftTileEntity() {
+        super();
+        this.registerValues();
+    }
 
     //-----initialization and registration of values-----
     public abstract void registerValues();
@@ -88,10 +92,6 @@ public abstract class RiftTileEntity extends TileEntity {
     @Override
     public void readFromNBT(@NotNull NBTTagCompound compound) {
         super.readFromNBT(compound);
-        if (!this.propertiesRegistered) {
-            this.registerValues();
-            this.propertiesRegistered = true;
-        }
         for (ImmutablePair<AbstractPropertyValue<?>, Boolean> propertyValuePair : this.propertyValueMap.values()) {
             if (propertyValuePair.right) propertyValuePair.left.readFromNBT(compound);
         }
@@ -100,10 +100,6 @@ public abstract class RiftTileEntity extends TileEntity {
     @Override
     public @NotNull NBTTagCompound writeToNBT(@NotNull NBTTagCompound compound) {
         super.writeToNBT(compound);
-        if (!this.propertiesRegistered) {
-            this.registerValues();
-            this.propertiesRegistered = true;
-        }
         for (ImmutablePair<AbstractPropertyValue<?>, Boolean> propertyValuePair : this.propertyValueMap.values()) {
             if (propertyValuePair.right) propertyValuePair.left.writeToNBT(compound);
         }

@@ -10,32 +10,45 @@ import net.minecraft.world.World;
 
 public class RiftTileEntityCreatureBoxHelper {
     public static BlockPos creatureCreatureSpawnPoint(BlockPos creatureBoxPos, World world, RiftCreature creature) {
-        for (int i = 0; i < 10; i++) {
-            int xSpawnPos = RiftUtil.randomInRange(creatureBoxPos.getX() - 16, creatureBoxPos.getX() + 16);
-            int ySpawnPos = RiftUtil.randomInRange(creatureBoxPos.getY() - 8, creatureBoxPos.getY() + 8);
-            int zSpawnPos = RiftUtil.randomInRange(creatureBoxPos.getZ() - 16, creatureBoxPos.getZ() + 16);
-            BlockPos pos = new BlockPos(xSpawnPos, ySpawnPos, zSpawnPos);
-            IBlockState downState = world.getBlockState(pos.down());
+        if (creature == null || creatureBoxPos == null) return null;
 
-            if (creature instanceof RiftWaterCreature) {
-                RiftWaterCreature waterCreature = (RiftWaterCreature) creature;
+        //get creature box
+        RiftTileEntityCreatureBox creatureBox = (RiftTileEntityCreatureBox) world.getTileEntity(creatureBoxPos);
+        if (creatureBox == null) return null;
+
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        for (int i = 0; i < 100; i++) {
+            if (creature instanceof RiftWaterCreature waterCreature) {
+                int xSpawnPos = RiftUtil.randomInRange(creatureBox.getXBounds()[0], creatureBox.getXBounds()[1]);
+                int ySpawnPos = RiftUtil.randomInRange(creatureBox.getYBounds()[0], creatureBox.getYBounds()[1]);
+                int zSpawnPos = RiftUtil.randomInRange(creatureBox.getZBounds()[0], creatureBox.getZBounds()[1]);
+                pos.setPos(xSpawnPos, ySpawnPos, zSpawnPos);
+                IBlockState downState = world.getBlockState(pos.down());
+
                 //spawn amphibious creatures
                 if (waterCreature.isAmphibious()) {
-                    if ((canFitInArea(world, creature, pos) && downState.getMaterial() != Material.AIR) || entireAreaWater(world, creature, pos)) {
-                        return new BlockPos(xSpawnPos, ySpawnPos, zSpawnPos);
+                    if ((canFitInArea(world, creature, pos) && downState.getMaterial() != Material.AIR)
+                            || entireAreaWater(world, creature, pos)) {
+                        return new BlockPos(pos);
                     }
                 }
                 //spawn aquatic creatures
                 else {
                     if (entireAreaWater(world, creature, pos)) {
-                        return new BlockPos(xSpawnPos, ySpawnPos, zSpawnPos);
+                        return new BlockPos(pos);
                     }
                 }
             }
             else {
+                int xSpawnPos = RiftUtil.randomInRange(creatureBox.getXBounds()[0], creatureBox.getXBounds()[1]);
+                int ySpawnPos = RiftUtil.randomInRange(creatureBox.getYBounds()[0], creatureBox.getYBounds()[1]);
+                int zSpawnPos = RiftUtil.randomInRange(creatureBox.getZBounds()[0], creatureBox.getZBounds()[1]);
+                pos.setPos(xSpawnPos, ySpawnPos, zSpawnPos);
+                IBlockState downState = world.getBlockState(pos.down());
+
                 //spawn regular land creatures
                 if (canFitInArea(world, creature, pos) && downState.getMaterial() != Material.AIR) {
-                    return new BlockPos(xSpawnPos, ySpawnPos, zSpawnPos);
+                    return new BlockPos(pos);
                 }
             }
         }

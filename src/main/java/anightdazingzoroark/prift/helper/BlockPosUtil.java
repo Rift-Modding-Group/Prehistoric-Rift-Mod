@@ -11,7 +11,8 @@ public class BlockPosUtil {
         return toReturn;
     }
 
-    public static BlockPos getBlockPosFromNBT(@NotNull NBTTagCompound nbtTagCompound) {
+    public static BlockPos getBlockPosFromNBT(NBTTagCompound nbtTagCompound) {
+        if (nbtTagCompound == null) return BlockPos.ORIGIN;
         int[] array = nbtTagCompound.getIntArray("BlockPos");
         return new BlockPos(array[0], array[1], array[2]);
     }
