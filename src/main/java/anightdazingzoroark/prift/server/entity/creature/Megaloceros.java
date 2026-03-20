@@ -5,7 +5,6 @@ import anightdazingzoroark.prift.client.RiftSounds;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import net.minecraft.entity.player.EntityPlayer;
@@ -21,9 +20,9 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
+import org.jspecify.annotations.NonNull;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -70,7 +69,7 @@ public class Megaloceros extends RiftCreature implements IHarvestWhenWandering {
     }
 
     @Override
-    public void writeEntityToNBT(NBTTagCompound compound) {
+    public void writeEntityToNBT(@NonNull NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         this.writeHarvestWanderDataToNBT(compound);
     }

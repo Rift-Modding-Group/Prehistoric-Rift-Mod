@@ -7,7 +7,6 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.helper.WeightedList;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
-import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
 import net.minecraft.block.Block;
@@ -25,6 +24,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import net.minecraft.world.storage.loot.LootTableList;
+import org.jspecify.annotations.NonNull;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -98,7 +98,7 @@ public class Stegosaurus extends RiftCreature implements ILeadWorkstationUser, I
      */
 
     @Override
-    public void writeEntityToNBT(NBTTagCompound compound) {
+    public void writeEntityToNBT(@NonNull NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         this.writeHarvestWanderDataToNBT(compound);
         this.writeLeadWorkDataToNBT(compound);

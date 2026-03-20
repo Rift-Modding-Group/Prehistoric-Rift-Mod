@@ -32,6 +32,7 @@ import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.BoolValue;
+import com.cleanroommc.modularui.value.DoubleValue;
 import com.cleanroommc.modularui.value.sync.*;
 import com.cleanroommc.modularui.widget.ParentWidget;
 import com.cleanroommc.modularui.widget.sizer.Unit;
@@ -542,12 +543,12 @@ public class RiftCreatureScreen {
                                                 )
                                         )
                                         .child(new ParentWidget<>().size(96, 3)
-                                                .child(new Rectangle().color(UIColors.barBorderColor).asWidget().size(96, 3))
-                                                .child(new Rectangle().color(UIColors.barEmptyColor).asWidget().size(94, 1).center())
-                                                .child(new Rectangle().color(UIColors.barHealthColor).asWidget().height(1)
-                                                        .width(() -> (94 * data.getHealth()[0] / data.getHealth()[1]), Unit.Measure.PIXEL)
-                                                        .right(() -> (94 - (94 * data.getHealth()[0] / data.getHealth()[1]) + 1), Unit.Measure.PIXEL)
-                                                        .bottom(1)
+                                                .child(new RectangleProgressWidget().size(96, 3)
+                                                        .valueColor(UIColors.barHealthColor)
+                                                        .setValue(new DoubleValue.Dynamic(
+                                                                () -> data.getHealth()[0] / data.getHealth()[1],
+                                                                value -> {}
+                                                        ))
                                                 )
                                         )
                                 )
@@ -559,12 +560,12 @@ public class RiftCreatureScreen {
                                                 )
                                         )
                                         .child(new ParentWidget<>().size(96, 3)
-                                                .child(new Rectangle().color(UIColors.barBorderColor).asWidget().size(96, 3))
-                                                .child(new Rectangle().color(UIColors.barEmptyColor).asWidget().size(94, 1).center())
-                                                .child(new Rectangle().color(UIColors.barEnergyColor).asWidget().height(1)
-                                                        .width(() -> ((double) (94 * data.getEnergy()[0]) / data.getEnergy()[1]), Unit.Measure.PIXEL)
-                                                        .right(() -> (94 - ((double) (94 * data.getEnergy()[0]) / data.getEnergy()[1]) + 1), Unit.Measure.PIXEL)
-                                                        .bottom(1)
+                                                .child(new RectangleProgressWidget().size(96, 3)
+                                                        .valueColor(UIColors.barEnergyColor)
+                                                        .setValue(new DoubleValue.Dynamic(
+                                                                () -> (double) data.getEnergy()[0] / (double) data.getEnergy()[1],
+                                                                value -> {}
+                                                        ))
                                                 )
                                         )
                                 )
@@ -576,12 +577,12 @@ public class RiftCreatureScreen {
                                                 )
                                         )
                                         .child(new ParentWidget<>().size(96, 3)
-                                                .child(new Rectangle().color(UIColors.barBorderColor).asWidget().size(96, 3))
-                                                .child(new Rectangle().color(UIColors.barEmptyColor).asWidget().size(94, 1).center())
-                                                .child(new Rectangle().color(UIColors.barXpColor).asWidget().height(1)
-                                                        .width(() -> ((double) (94 * data.getXP()[0]) / data.getXP()[1]), Unit.Measure.PIXEL)
-                                                        .right(() -> (94 - ((double) (94 * data.getXP()[0]) / data.getXP()[1]) + 1), Unit.Measure.PIXEL)
-                                                        .bottom(1)
+                                                .child(new RectangleProgressWidget().size(96, 3)
+                                                        .valueColor(UIColors.barXpColor)
+                                                        .setValue(new DoubleValue.Dynamic(
+                                                                () -> (double) data.getXP()[0] / (double) data.getXP()[1],
+                                                                value -> {}
+                                                        ))
                                                 )
                                         )
                                 )

@@ -37,6 +37,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.IFluidBlock;
+import org.jspecify.annotations.NonNull;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -300,7 +301,7 @@ public class Dimetrodon extends RiftCreature {
     }
 
     @Override
-    public void writeEntityToNBT(NBTTagCompound compound) {
+    public void writeEntityToNBT(@NonNull NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         compound.setByte("Temperature", (byte) this.getTemperature().ordinal());
         compound.setBoolean("ForcedTemperature", this.isTemperatureForced());

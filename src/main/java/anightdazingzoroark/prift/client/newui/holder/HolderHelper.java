@@ -2,6 +2,9 @@ package anightdazingzoroark.prift.client.newui.holder;
 
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.CreatureNBT;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftReleaseCreature;
+import anightdazingzoroark.prift.server.message.RiftSetSelectedCreature;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxHelper;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
@@ -31,10 +34,28 @@ public class HolderHelper {
             );
             playerCreatureBoxProperties.setCreatureBoxStorage(storage);
         }
+        else if (selectedCreature.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+            TileEntity tileEntity = player.world.getTileEntity(selectedCreature.getCreatureBoxPos());
+            if (!(tileEntity instanceof RiftTileEntityCreatureBox teCreatureBox)) return;
+
+            FixedSizeList<CreatureNBT> deployedFromBox = teCreatureBox.getDeployedCreatures();
+            deployedFromBox.set(selectedCreature.getIndex(), creatureNBT);
+            teCreatureBox.setDeployedCreatures(deployedFromBox);
+        }
+    }
+
+    public static void setSelectedCreatureClient(EntityPlayer player, SelectedCreatureInfo selectedCreature, CreatureNBT creatureNBT) {
+        if (player == null || !player.world.isRemote) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftSetSelectedCreature(player, selectedCreature, creatureNBT));
+    }
+
+    public static void releaseCreatureClient(EntityPlayer player, SelectedCreatureInfo selectedCreature) {
+        if (player == null || !player.world.isRemote) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftReleaseCreature(player, selectedCreature));
     }
 
     public static CreatureNBT getSelectedCreature(EntityPlayer player, SelectedCreatureInfo selectedCreature) {
-        if (player == null) return new CreatureNBT();
+        if (player == null || selectedCreature == null) return new CreatureNBT();
         if (selectedCreature.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
             return PlayerPartyHelper.getPlayerParty(player).getPartyMember(selectedCreature.getIndex());
         }

@@ -5,8 +5,11 @@ import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.items.RiftItems;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
@@ -109,5 +112,24 @@ public class CreatureGearHandler extends ItemStackHandler {
     private ItemStack saddleItemStack() {
         String saddleItemId = RiftConfigHandler.getConfig(this.creatureType).general.saddleItem;
         return RiftUtil.getItemStackFromString(saddleItemId);
+    }
+
+    public void dropAllItems(World world, BlockPos pos) {
+        if (world.isRemote) return;
+
+        //drop all items in this creatures inventory
+        for (int i = 0; i < this.stacks.size(); i++) {
+            ItemStack itemStack = this.stacks.get(i);
+            if (itemStack.isEmpty()) continue;
+
+            //create itemStack as an entity and spawn it
+            EntityItem droppedItem = new EntityItem(world);
+            droppedItem.setItem(itemStack);
+            droppedItem.setPosition(pos.getX(), pos.getY() + 0.5D, pos.getZ());
+            world.spawnEntity(droppedItem);
+
+            //clear up after dropping
+            this.stacks.set(i, ItemStack.EMPTY);
+        }
     }
 }

@@ -419,7 +419,7 @@ public class CreatureNBT {
     }
 
     public void dropInventory(World world, BlockPos posToDrop) {
-        if (this.creatureNBT.isEmpty()) return;
+        if (world.isRemote || this.creatureNBT.isEmpty()) return;
 
         //step 1: get all the items
         NBTTagCompound inventoryNBT = this.getInventoryNBT();
@@ -439,6 +439,37 @@ public class CreatureNBT {
         //step 2: remove items
         for (Integer posToRemove : positionsToRemove) inventoryTagList.removeTag(posToRemove);
         this.creatureNBT.setTag("Items", inventoryTagList);
+
+        //step 3: drop all the items at the location of the owner
+        for (ItemStack item : itemsToDrop) {
+            EntityItem droppedItem = new EntityItem(world);
+            droppedItem.setItem(item);
+            droppedItem.setPosition(posToDrop.getX(), posToDrop.getY() + 0.5, posToDrop.getZ());
+            world.spawnEntity(droppedItem);
+        }
+    }
+
+    public void dropGear(World world, BlockPos posToDrop) {
+        if (world.isRemote || this.creatureNBT.isEmpty()) return;
+
+        //step 1: get all the items
+        NBTTagCompound gearNBT = this.getGearNBT();
+        NBTTagList gearTagList = gearNBT.getTagList("Items", 10);
+        List<ItemStack> itemsToDrop = new ArrayList<>();
+        List<Integer> positionsToRemove = new ArrayList<>();
+        for (int i = 0; i < gearTagList.tagCount(); i++) {
+            NBTTagCompound itemNBT = gearTagList.getCompoundTagAt(i);
+            ItemStack stackToTest = new ItemStack(itemNBT);
+            if (!stackToTest.equals(ItemStack.EMPTY)) {
+                itemsToDrop.add(stackToTest);
+                positionsToRemove.add(i);
+            }
+        }
+        if (itemsToDrop.isEmpty()) return;
+
+        //step 2: remove items
+        for (Integer posToRemove : positionsToRemove) gearTagList.removeTag(posToRemove);
+        this.creatureNBT.setTag("Items", gearTagList);
 
         //step 3: drop all the items at the location of the owner
         for (ItemStack item : itemsToDrop) {
