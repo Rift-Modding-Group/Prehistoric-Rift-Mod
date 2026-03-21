@@ -536,4 +536,15 @@ public class RiftUtil {
         }
         return minValue;
     }
+
+    public static String ticksToMinSecTimeExpression(int ticks) {
+        int minutes = ticks / 1200;
+        int seconds = ticks / 20;
+        seconds = seconds - (minutes * 60);
+
+        String minutesString = (minutes < 10 ? "0" : "")+minutes;
+        String secondsString = (seconds < 10 ? "0" : "")+seconds;
+
+        return minutesString+":"+secondsString;
+    }
 }

@@ -4,8 +4,8 @@ import anightdazingzoroark.prift.client.newui.RiftUIIcons;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.holder.HolderHelper;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
-import anightdazingzoroark.prift.client.newui.panel.ModularPanelExitAffectable;
-import anightdazingzoroark.prift.client.newui.value.FixedSizeCreatureListSyncValue;
+import anightdazingzoroark.prift.client.newui.panel.RiftModularPanel;
+import anightdazingzoroark.prift.client.newui.value.HashMapValue;
 import anightdazingzoroark.prift.client.newui.widget.CreatureInBoxButtonWidget;
 import anightdazingzoroark.prift.client.newui.widget.PaddedGrid;
 import anightdazingzoroark.prift.helper.CreatureNBT;
@@ -44,7 +44,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class RiftCreatureBoxScreen {
     public static ModularPanel buildCreatureBoxUI(PosGuiData data, PanelSyncManager syncManager, UISettings settings) {
@@ -78,6 +83,10 @@ public class RiftCreatureBoxScreen {
                 teCreatureBox::getCreatureSwapInfo,
                 teCreatureBox::setCreatureSwapInfo
         );
+        HashMapValue.Dynamic<ImmutablePair<Integer, Integer>, Integer> boxRevival = new HashMapValue.Dynamic<>(
+                playerBox::getCreatureReviveTime,
+                value -> {}
+        );
 
         //panel stuff
         IPanelHandler changeNamePanel = syncManager.syncedPanel(
@@ -93,19 +102,54 @@ public class RiftCreatureBoxScreen {
                 }
         );
         IPanelHandler confirmCreatureReleasePopupPanel = syncManager.syncedPanel(
-                "", true,
+                "confirmCreatureReleasePanel", true,
                 (panelSyncMan, panelHandler) -> {
                     return confirmCreatureReleasePopupPanel(selectedCreatureInfoDynamic);
                 }
         );
 
-        return new ModularPanelExitAffectable(UIPanelNames.CREATURE_BOX_SCREEN)
+        return new RiftModularPanel(UIPanelNames.CREATURE_BOX_SCREEN)
+                .onOpen(panel -> {
+                    //set last opened time for player
+                    PlayerCreatureBoxHelper.setLastOpenedTimeClient(player, player.ticksExisted);
+
+                })
                 .onEscPressed(panel -> {
+                    //reset some values
                     selectedCreatureInfoDynamic.setValue(null);
                     creatureSwitchingDynamic.setBoolValue(false);
+
+                    //sync revival info back to box
+                    PlayerCreatureBoxHelper.setRevivalClient(player, boxRevival.getValue());
                     return false;
                 })
                 .onUpdateListener(panel -> {
+                    //manage creature revival
+                    HashMap<ImmutablePair<Integer, Integer>, Integer> creatureRevivalMap = boxRevival.getValue();
+
+                    //constantly tick creature revival while opened
+                    List<ImmutablePair<Integer, Integer>> revivalResults = PlayerCreatureBoxHelper.manageRevival(creatureRevivalMap);
+
+                    //set positions to revive
+                    List<ImmutablePair<SelectedCreatureInfo, CreatureNBT>> positionsToRevive = new ArrayList<>();
+                    if (!revivalResults.isEmpty()) {
+                        for (ImmutablePair<Integer, Integer> revivedPos : revivalResults) {
+                            SelectedCreatureInfo selectedToRevive = SelectedCreatureInfo.boxSelectedInfo(
+                                    revivedPos.getLeft(), revivedPos.getRight()
+                            );
+
+                            //get creature nbt and restore to full health
+                            CreatureNBT creatureNBT = HolderHelper.getSelectedCreature(player, selectedToRevive);
+                            creatureNBT.setCreatureHealth(creatureNBT.getCreatureHealth()[1]);
+
+                            //now add to positionsToRevive
+                            positionsToRevive.add(new ImmutablePair<>(selectedToRevive, creatureNBT));
+                        }
+                    }
+
+                    //revive those creatures
+                    if (!positionsToRevive.isEmpty()) HolderHelper.setSelectedCreatureClient(player, positionsToRevive);
+
                     //check if any of the swap positions have full inventories and are from the party
                     if (creatureSwapInfoDynamic.getValue().canSwap()) {
                         //flag for opening inventoryDropPopupPanel
@@ -247,7 +291,8 @@ public class RiftCreatureBoxScreen {
                                         .matrix(Grid.mapToMatrix(
                                                 5, CreatureBoxStorage.maxBoxStorableCreatures,
                                                 index -> new CreatureInBoxButtonWidget(
-                                                        playerBox, currentBoxIndexDynamic, index,
+                                                        playerBox, boxRevival,
+                                                        currentBoxIndexDynamic, index,
                                                         data.getBlockPos(),
                                                         selectedCreatureInfoDynamic,
                                                         creatureSwitchingDynamic,

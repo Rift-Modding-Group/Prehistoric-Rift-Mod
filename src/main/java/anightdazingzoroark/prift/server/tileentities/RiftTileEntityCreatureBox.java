@@ -28,12 +28,18 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.*;
 
 public class RiftTileEntityCreatureBox extends RiftTileEntity implements ITickable, IGuiHolder<PosGuiData> {
+    //to be edited only on the client
     private final HashMap<Integer, RiftCreature> convertedDeployedHash = new HashMap<>();
+
+    //to be edited only on the server
+    private final List<Integer> deployedIndexes = new ArrayList<>();
 
     //for use in ui
     private boolean isCreatureSwitching;
@@ -70,44 +76,85 @@ public class RiftTileEntityCreatureBox extends RiftTileEntity implements ITickab
         if (this.isUnbreakable()) creatureBox.setHardness(-1.0f);
         else creatureBox.setHardness(0f);
 
-        //create creatures
         FixedSizeList<CreatureNBT> deployedCreatures = this.getDeployedCreatures();
-        for (int index = 0; index < deployedCreatures.size(); index++) {
-            CreatureNBT creatureNBT = deployedCreatures.get(index);
 
-            //-----check in hashmap-----
-            if (this.convertedDeployedHash.containsKey(index)) {
-                //if the creature nbt by that point is empty, remove from the hashmap
-                //and skip
-                if (creatureNBT.nbtIsEmpty()) this.convertedDeployedHash.remove(index);
-            }
-            //not in hashmap, time to create the creature or find it in the world
-            else {
-                //if empty, just skip
-                if (creatureNBT.nbtIsEmpty()) continue;
+        //create creatures on the server
+        if (!this.world.isRemote) {
+            for (int index = 0; index < deployedCreatures.size(); index++) {
+                CreatureNBT creatureNBT = deployedCreatures.get(index);
 
-                //find corresponding creature
-                RiftCreature corresponded = creatureNBT.findCorrespondingCreature(this.world);
+                //for if the index is already deployed
+                if (this.deployedIndexes.contains(index)) {
+                    //if there's no creature, remove it there and continue
+                    if (creatureNBT.nbtIsEmpty()) {
+                        this.deployedIndexes.remove(Integer.valueOf(index));
+                        continue;
+                    }
 
-                //if corresponded is null, time to create, only in server
-                if (corresponded == null && !this.world.isRemote) {
-                    corresponded = creatureNBT.getCreatureAsNBT(this.world);
-
-                    //set position
-                    BlockPos spawnPosition = RiftTileEntityCreatureBoxHelper.creatureCreatureSpawnPoint(this.pos, this.world, corresponded);
-
-                    //if spawnPosition is somehow null, skip
-                    if (spawnPosition == null) continue;
-
-                    //otherwise, continue as normal
-                    corresponded.setPosition(spawnPosition.getX(), spawnPosition.getY(), spawnPosition.getZ());
-                    corresponded.setHomePos(this.pos.getX(), this.pos.getY(), this.pos.getZ());
-                    this.world.spawnEntity(corresponded);
+                    //if creature is dead, remove it there
+                    if (creatureNBT.getCreatureHealth()[0] <= 0) this.deployedIndexes.remove(Integer.valueOf(index));
                 }
+                //for cases otherwise
+                else {
+                    //if empty, just skip
+                    if (creatureNBT.nbtIsEmpty()) continue;
 
-                //add the corresponded creature to the hash map once corresponded is
-                //no longer null
-                if (corresponded != null) this.convertedDeployedHash.put(index, corresponded);
+                    //if corresponded happens to be dead, skip
+                    if (creatureNBT.getCreatureHealth()[0] <= 0) continue;
+
+                    //find corresponding creature
+                    RiftCreature corresponded = creatureNBT.findCorrespondingCreature(this.world);
+
+                    //if corresponded is null, time to create
+                    if (corresponded == null) {
+                        corresponded = creatureNBT.getCreatureAsNBT(this.world);
+
+                        //set position
+                        BlockPos spawnPosition = RiftTileEntityCreatureBoxHelper.creatureCreatureSpawnPoint(this.pos, this.world, corresponded);
+
+                        //if spawnPosition is somehow null, skip
+                        if (spawnPosition == null) continue;
+
+                        //otherwise, continue as normal
+                        corresponded.setPosition(spawnPosition.getX(), spawnPosition.getY(), spawnPosition.getZ());
+                        corresponded.setHomePos(this.pos.getX(), this.pos.getY(), this.pos.getZ());
+                        this.world.spawnEntity(corresponded);
+                        this.deployedIndexes.add(index);
+                    }
+                }
+            }
+        }
+
+        //manage deployment hashmap on client
+        if (this.world.isRemote && !this.world.loadedEntityList.isEmpty()) {
+            for (int index = 0; index < deployedCreatures.size(); index++) {
+                CreatureNBT creatureNBT = deployedCreatures.get(index);
+
+                //for if the index is already deployed
+                if (this.convertedDeployedHash.containsKey(index)) {
+                    //if empty, remove and continue
+                    if (creatureNBT.nbtIsEmpty()) {
+                        this.convertedDeployedHash.remove(index);
+                        continue;
+                    }
+
+                    //if dead, remove
+                    if (creatureNBT.getCreatureHealth()[0] <= 0) this.convertedDeployedHash.remove(index);
+                }
+                //for cases otherwise
+                else {
+                    //if empty, just skip
+                    if (creatureNBT.nbtIsEmpty()) continue;
+
+                    //if dead, skip
+                    if (creatureNBT.getCreatureHealth()[0] <= 0) continue;
+
+                    //find corresponding creature
+                    RiftCreature corresponded = creatureNBT.findCorrespondingCreature(this.world);
+
+                    //if corresponded is not null, time to add
+                    if (corresponded != null) this.convertedDeployedHash.put(index, corresponded);
+                }
             }
         }
 
@@ -173,6 +220,37 @@ public class RiftTileEntityCreatureBox extends RiftTileEntity implements ITickab
     }
 
     //-----indirect setters and getters-----
+    public void updateDeployedCreature(RiftCreature creature) {
+        if (this.world.isRemote || creature == null) return;
+
+        FixedSizeList<CreatureNBT> deployedCreatureList = this.getDeployedCreatures();
+        for (int index = 0; index < deployedCreatureList.size(); index++) {
+            CreatureNBT creatureNBT = deployedCreatureList.get(index);
+            if (creatureNBT.nbtIsEmpty()) continue;
+            if (creatureNBT.getUniqueID().equals(creature.getUniqueID())) {
+                //set in deployed creature list
+                deployedCreatureList.set(index, new CreatureNBT(creature));
+
+                //when a creature dies, its also removed from the loaded map
+                this.convertedDeployedHash.remove(index);
+
+                break;
+            }
+        }
+        this.setDeployedCreatures(deployedCreatureList);
+    }
+
+    @SideOnly(Side.CLIENT)
+    public RiftCreature getLoadedDeployedCreature(int index) {
+        if (this.convertedDeployedHash.containsKey(index)) return this.convertedDeployedHash.get(index);
+        return null;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public boolean deployedCreatureIsLoadedAtIndex(int index) {
+        return this.convertedDeployedHash.containsKey(index);
+    }
+
     public boolean isUnbreakable() {
         return !this.getDeployedCreatures().isEmpty();
     }

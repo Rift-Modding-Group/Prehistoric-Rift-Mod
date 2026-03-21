@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftReleaseCreature;
 import anightdazingzoroark.prift.server.message.RiftSetSelectedCreature;
+import anightdazingzoroark.prift.server.message.RiftSetSelectedCreatureMultiple;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.CreatureBoxStorage;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxHelper;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
@@ -13,6 +14,9 @@ import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProper
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import java.util.List;
 
 public class HolderHelper {
     public static void setSelectedCreature(EntityPlayer player, SelectedCreatureInfo selectedCreature, CreatureNBT creatureNBT) {
@@ -47,6 +51,11 @@ public class HolderHelper {
     public static void setSelectedCreatureClient(EntityPlayer player, SelectedCreatureInfo selectedCreature, CreatureNBT creatureNBT) {
         if (player == null || !player.world.isRemote) return;
         RiftMessages.WRAPPER.sendToServer(new RiftSetSelectedCreature(player, selectedCreature, creatureNBT));
+    }
+
+    public static void setSelectedCreatureClient(EntityPlayer player, List<ImmutablePair<SelectedCreatureInfo, CreatureNBT>> positionsToSet) {
+        if (player == null || !player.world.isRemote) return;
+        RiftMessages.WRAPPER.sendToServer(new RiftSetSelectedCreatureMultiple(player, positionsToSet));
     }
 
     public static void releaseCreatureClient(EntityPlayer player, SelectedCreatureInfo selectedCreature) {

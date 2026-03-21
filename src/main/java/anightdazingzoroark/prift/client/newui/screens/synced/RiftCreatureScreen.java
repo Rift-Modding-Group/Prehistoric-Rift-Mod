@@ -2,12 +2,12 @@ package anightdazingzoroark.prift.client.newui.screens.synced;
 
 import anightdazingzoroark.prift.client.ClientProxy;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.newui.panel.RiftModularPanel;
 import anightdazingzoroark.prift.client.newui.screens.player.PlayerUIHelper;
 import anightdazingzoroark.prift.client.newui.RiftUIIcons;
 import anightdazingzoroark.prift.client.newui.UIColors;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.holder.SelectedMoveInfo;
-import anightdazingzoroark.prift.client.newui.panel.ModularPanelExitAffectable;
 import anightdazingzoroark.prift.client.newui.value.MoveSwapInfoSyncValue;
 import anightdazingzoroark.prift.client.newui.value.SelectedMoveInfoSyncValue;
 import anightdazingzoroark.prift.client.newui.widget.*;
@@ -22,25 +22,20 @@ import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
-import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxHelper;
-import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
 import com.cleanroommc.modularui.api.IPanelHandler;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.GuiTextures;
 import com.cleanroommc.modularui.drawable.ItemDrawable;
 import com.cleanroommc.modularui.drawable.Rectangle;
-import com.cleanroommc.modularui.factory.GuiFactories;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.BoolValue;
 import com.cleanroommc.modularui.value.DoubleValue;
-import com.cleanroommc.modularui.value.IntValue;
 import com.cleanroommc.modularui.value.StringValue;
 import com.cleanroommc.modularui.value.sync.*;
 import com.cleanroommc.modularui.widget.ParentWidget;
-import com.cleanroommc.modularui.widget.sizer.Unit;
 import com.cleanroommc.modularui.widgets.*;
 import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.cleanroommc.modularui.widgets.slot.ItemSlot;
@@ -73,7 +68,7 @@ public class RiftCreatureScreen {
         //tab controlling
         PagedWidget.Controller tabController = new PagedWidget.Controller();
 
-        return new ModularPanelExitAffectable(UIPanelNames.INTERACTED_CREATURE_SCREEN)
+        return new RiftModularPanel(UIPanelNames.INTERACTED_CREATURE_SCREEN)
                 .onEscPressed(panel -> {
                     if (data.getMenuOpenedFrom() == SelectedCreatureInfo.MenuOpenedFrom.PARTY) {
                         PlayerUIHelper.openUI(data.getPlayer(), UIPanelNames.PARTY_SCREEN);

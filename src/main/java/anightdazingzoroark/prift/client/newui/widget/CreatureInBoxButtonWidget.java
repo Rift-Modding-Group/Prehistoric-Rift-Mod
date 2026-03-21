@@ -7,7 +7,9 @@ import anightdazingzoroark.prift.client.newui.holder.HolderHelper;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.client.newui.screens.player.PlayerUIHelper;
 import anightdazingzoroark.prift.client.newui.screens.synced.RiftCreatureScreen;
+import anightdazingzoroark.prift.client.newui.value.HashMapValue;
 import anightdazingzoroark.prift.helper.CreatureNBT;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
@@ -36,10 +38,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.function.Consumer;
 
 public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxButtonWidget> implements Interactable {
@@ -63,6 +67,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     //creature box only stuff
     private PlayerCreatureBoxProperties playerBox;
     private IntValue.Dynamic currentBoxIndexDynamic;
+    private HashMapValue.Dynamic<ImmutablePair<Integer, Integer>, Integer> boxRevival;
 
     //deployed from box only stuff
     private RiftTileEntityCreatureBox teCreatureBox;
@@ -99,6 +104,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     //the box requires the box index, the index within the box, and the player
     public CreatureInBoxButtonWidget(
             PlayerCreatureBoxProperties playerBox,
+            HashMapValue.Dynamic<ImmutablePair<Integer, Integer>, Integer> boxRevival,
             IntValue.Dynamic currentBoxIndexDynamic, int index, BlockPos creatureBoxPos,
             ObjectValue.@NotNull Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic,
             BoolValue.@NotNull Dynamic creatureSwitchingDynamic,
@@ -110,6 +116,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
         this.currentBoxIndexDynamic = currentBoxIndexDynamic;
         this.index = index;
         this.playerBox = playerBox;
+        this.boxRevival = boxRevival;
         this.selectedCreatureInfoDynamic = selectedCreatureInfoDynamic;
         this.creatureSwitchingDynamic = creatureSwitchingDynamic;
         this.creatureSwapInfoDynamic = creatureSwapInfoDynamic;
@@ -214,15 +221,32 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
 
     private CreatureNBT getCreatureNBT() {
         if (this.section == SelectedCreatureInfo.SelectedPosType.PARTY) {
-            return this.playerParty.getPartyMember(this.index);
+            if (this.playerParty.deployedCreatureIsLoadedAtIndex(this.index)) {
+                return new CreatureNBT(this.playerParty.getLoadedDeployedCreature(this.index));
+            }
+            else return this.playerParty.getPartyMember(this.index);
         }
         else if (this.section == SelectedCreatureInfo.SelectedPosType.BOX) {
             return this.playerBox.getCreatureBoxStorage().getBoxContents(this.currentBoxIndexDynamic.getIntValue()).get(this.index);
         }
         else if (this.section == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
-            return this.teCreatureBox.getDeployedCreatures().get(this.index);
+            if (this.teCreatureBox.deployedCreatureIsLoadedAtIndex(this.index)) {
+                return new CreatureNBT(this.teCreatureBox.getLoadedDeployedCreature(this.index));
+            }
+            else return this.teCreatureBox.getDeployedCreatures().get(this.index);
         }
         return new CreatureNBT();
+    }
+
+    private int getRevivalTime() {
+        if (this.section != SelectedCreatureInfo.SelectedPosType.BOX) return 0;
+        HashMap<ImmutablePair<Integer, Integer>, Integer> boxRevivalValue = this.boxRevival.getValue();
+        ImmutablePair<Integer, Integer> posAsPair = new ImmutablePair<>(
+                this.currentBoxIndexDynamic.getIntValue(),
+                this.index
+        );
+        if (boxRevivalValue.containsKey(posAsPair)) return boxRevivalValue.get(posAsPair);
+        return 0;
     }
 
     @Override
@@ -243,6 +267,16 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
             int iconSize = (int) (this.getArea().w() * 0.75);
             int iconOffset = (int) ((this.getArea().w() - iconSize) / 2D);
             RiftUIIcons.creatureIcon(this.creatureNBT.getCreatureType()).draw(context, iconOffset, iconOffset, iconSize, iconSize, theme);
+
+            //put on timer if reviving and in box
+            if (this.creatureNBT.getCreatureHealth()[0] <= 0 && this.section == SelectedCreatureInfo.SelectedPosType.BOX) {
+                //rectangle bg
+                int revivalBoxUpperBound = (int) (this.getArea().h() * 0.5) - 6;
+                new Rectangle().color(0x80808080).draw(context, 2, revivalBoxUpperBound, this.getArea().w() - 4, 12, theme);
+
+                String revivalTime = RiftUtil.ticksToMinSecTimeExpression(this.getRevivalTime());
+                IKey.str(revivalTime).drawAtZero(context, this.getArea(), theme);
+            }
         }
         else new Rectangle().color(0xFF212121).cornerRadius(5).drawAtZero(context, this.getArea(), theme);
     }

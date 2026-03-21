@@ -25,6 +25,7 @@ import java.util.UUID;
 
 public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer> {
     //this ensures that data for deployed creatures is accurately reflected on UIs
+    //to be edited on client only
     private final HashMap<Integer, RiftCreature> convertedPartyHash = new HashMap<>();
 
     public PlayerPartyProperties(@NotNull String key, @NotNull EntityPlayer entityHolder) {
@@ -105,14 +106,17 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
         if (!this.canAddToParty()) return;
 
         FixedSizeList<CreatureNBT> playerPartyList = this.getPlayerParty();
+        int foundIndex = -1;
         for (int index = 0; index < playerPartyList.size(); index++) {
             CreatureNBT creatureNBT = playerPartyList.get(index);
             if (creatureNBT.nbtIsEmpty()) {
                 playerPartyList.set(index, new CreatureNBT(creature));
+                foundIndex = index;
                 break;
             }
         }
         this.setPlayerParty(playerPartyList);
+        if (foundIndex >= 0) this.addCreatureToDeployMap(foundIndex, creature);
     }
 
     public void updatePartyMember(RiftCreature creature) {

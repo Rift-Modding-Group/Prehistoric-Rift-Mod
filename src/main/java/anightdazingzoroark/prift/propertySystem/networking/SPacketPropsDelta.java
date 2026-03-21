@@ -53,7 +53,7 @@ public class SPacketPropsDelta implements IMessage {
                 Entity entity = world.getEntityByID(message.entityId);
                 if (entity == null) return;
 
-                AbstractEntityProperties properties = Property.getProperty(message.setKey, entity);
+                AbstractEntityProperties<?> properties = Property.getProperty(message.setKey, entity);
                 if (properties == null) return;
 
                 properties.readOneFromNBT(message.propertyNbt, message.propertyKey);

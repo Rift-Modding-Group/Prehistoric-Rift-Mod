@@ -73,6 +73,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.potion.PotionUtils;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -3101,34 +3102,41 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         if (this.grabVictim != null) NonPotionEffectsHelper.setGrabbed(this.grabVictim, false);
         if (this.getAttackTarget() != null) NonPotionEffectsHelper.setGrabbed(this.getAttackTarget(), false);
 
+        this.getActivePotionEffects().clear();
+
         //for undeploying a creature (requires having an owner and being tamed)
         if (!this.isTamed() || this.getOwner() == null) {
             super.onDeath(cause);
             return;
         }
-        this.setSitting(false);
-        this.getActivePotionEffects().clear();
-        this.setBoxReviveTime(GeneralConfig.creatureBoxReviveTime);
+        EntityPlayer owner = (EntityPlayer) this.getOwner();
+        if (owner == null) {
+            super.onDeath(cause);
+            return;
+        }
 
-        PlayerPartyProperties playerPartyProperties = PlayerPartyHelper.getPlayerParty((EntityPlayer) this.getOwner());
-        if (this.getDeploymentType() == CreatureDeployment.PARTY) {
-            this.setDeploymentType(CreatureDeployment.PARTY_INACTIVE);
-            playerPartyProperties.updatePartyMember(this);
+        //for server only
+        if (!this.world.isRemote) {
+            this.setSitting(false);
+            this.setBoxReviveTime(GeneralConfig.creatureBoxReviveTime);
+
+            if (this.getDeploymentType() == CreatureDeployment.PARTY) {
+                PlayerPartyProperties playerPartyProperties = PlayerPartyHelper.getPlayerParty(owner);
+                this.setDeploymentType(CreatureDeployment.PARTY_INACTIVE);
+                playerPartyProperties.updatePartyMember(this);
+            }
+            else if (this.getDeploymentType() == CreatureDeployment.BASE) {
+                TileEntity tileEntity = this.world.getTileEntity(this.getHomePos());
+                if (tileEntity instanceof RiftTileEntityCreatureBox teCreatureBox) {
+                    this.setDeploymentType(CreatureDeployment.BASE_INACTIVE);
+                    teCreatureBox.updateDeployedCreature(this);
+                }
+            }
         }
-        /*
-        if (this.getDeploymentType() == CreatureDeployment.BASE) {
-            PlayerTamedCreaturesHelper.updateIndividualBoxDeployedCreatureServer((EntityPlayer) this.getOwner(), this);
-            PlayerTamedCreaturesHelper.updateIndividualBoxDeployedCreatureClient((EntityPlayer) this.getOwner(), this);
-        }
-         */
+        //for client only
+        else owner.sendStatusMessage(new TextComponentTranslation("reminder.revive_in_creature_box", this.getName()), false);
 
         super.onDeath(cause);
-    }
-
-    private void sendDeathMessage() {
-        if (this.isTamed() && !this.world.isRemote && this.world.getGameRules().getBoolean("showDeathMessages") && this.getOwner() instanceof EntityPlayerMP) {
-            this.getOwner().sendMessage(this.getCombatTracker().getDeathMessage());
-        }
     }
 
     public int getBoxReviveTime() {

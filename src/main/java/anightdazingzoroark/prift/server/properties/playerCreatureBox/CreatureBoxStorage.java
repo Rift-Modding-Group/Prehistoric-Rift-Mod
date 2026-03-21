@@ -26,26 +26,6 @@ public class CreatureBoxStorage {
         }
     }
 
-    //this is for making a new CreatureBoxStorage instance
-    //from saved NBT
-    @Deprecated
-    public CreatureBoxStorage(NBTTagList savedNBT) {
-        for (int x = 0; x < savedNBT.tagCount(); x++) {
-            NBTTagCompound nbtFromList = savedNBT.getCompoundTagAt(x);
-            //initialize names
-            this.creatureBoxNames.add(nbtFromList.getString("BoxName"));
-
-            //initialize creatures
-            NBTTagList storedCreaturesNBT = nbtFromList.getTagList("BoxCreatures", 10);
-            FixedSizeList<CreatureNBT> storedCreaturesToAdd = new FixedSizeList<>(storedCreaturesNBT.tagCount(), new CreatureNBT());
-            for (int y = 0; y < storedCreaturesNBT.tagCount(); y++) {
-                CreatureNBT storedCreature = new CreatureNBT(storedCreaturesNBT.getCompoundTagAt(y));
-                storedCreaturesToAdd.set(y, storedCreature);
-            }
-            this.creatureBoxContents.add(storedCreaturesToAdd);
-        }
-    }
-
     public String getBoxName(int index) {
         if (index < 0 || index >= maxBoxAmnt) throw new UnsupportedOperationException("Cannot get value beyond bounds");
         return this.creatureBoxNames.get(index);
@@ -99,17 +79,6 @@ public class CreatureBoxStorage {
             }
         }
         return true;
-    }
-
-    public void countdownCreatureRevival(int time) {
-        for (int x = 0; x < maxBoxAmnt; x++) {
-            for (int y = 0; y < maxBoxStorableCreatures; y++) {
-                CreatureNBT creatureNBT = this.creatureBoxContents.get(x).get(y);
-                if (creatureNBT.getCreatureHealth()[0] <= 0 && creatureNBT.getReviveTimeTicks() > 0) {
-                    creatureNBT.countDownReviveTime(time);
-                }
-            }
-        }
     }
 
     public NBTTagList writeNBTList() {

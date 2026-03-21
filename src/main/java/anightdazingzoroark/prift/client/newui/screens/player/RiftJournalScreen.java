@@ -3,19 +3,17 @@ package anightdazingzoroark.prift.client.newui.screens.player;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.UIThemes;
-import anightdazingzoroark.prift.client.newui.panel.ModularPanelExitAffectable;
+import anightdazingzoroark.prift.client.newui.panel.RiftModularPanel;
 import anightdazingzoroark.prift.client.newui.value.NullableEnumValue;
 import anightdazingzoroark.prift.client.newui.widget.JournalLeftPageWidget;
 import anightdazingzoroark.prift.client.newui.widget.JournalRightPageWidget;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressHelper;
 import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressProperties;
-import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.screen.CustomModularScreen;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.viewport.ModularGuiContext;
-import com.cleanroommc.modularui.widget.ParentWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import org.jetbrains.annotations.NotNull;
@@ -46,10 +44,10 @@ public class RiftJournalScreen extends CustomModularScreen {
                 value -> this.currentCreature = value
         );
 
-        return new ModularPanelExitAffectable(UIPanelNames.JOURNAL_SCREEN)
-                .onEscPressed(new Function<ModularPanelExitAffectable, Boolean>() {
+        return new RiftModularPanel(UIPanelNames.JOURNAL_SCREEN)
+                .onEscPressed(new Function<RiftModularPanel, Boolean>() {
                     @Override
-                    public Boolean apply(ModularPanelExitAffectable panel) {
+                    public Boolean apply(RiftModularPanel panel) {
                         JournalLeftPageWidget leftPageWidget = this.getLeftPageWidget(panel);
                         if (leftPageWidget == null) return false;
 
@@ -71,7 +69,7 @@ public class RiftJournalScreen extends CustomModularScreen {
                         return true;
                     }
 
-                    private JournalLeftPageWidget getLeftPageWidget(@NotNull ModularPanelExitAffectable panel) {
+                    private JournalLeftPageWidget getLeftPageWidget(@NotNull RiftModularPanel panel) {
                         for (IWidget child : panel.getChildren()) {
                             if (child instanceof JournalLeftPageWidget leftPageWidget) return leftPageWidget;
                         }

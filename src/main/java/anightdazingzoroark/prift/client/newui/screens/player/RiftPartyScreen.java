@@ -3,12 +3,10 @@ package anightdazingzoroark.prift.client.newui.screens.player;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
-import anightdazingzoroark.prift.client.newui.panel.ModularPanelExitAffectable;
-import anightdazingzoroark.prift.client.newui.value.HashMapValue;
+import anightdazingzoroark.prift.client.newui.panel.RiftModularPanel;
 import anightdazingzoroark.prift.client.newui.widget.PartyMemberButtonForPartyWidget;
 import anightdazingzoroark.prift.client.newui.widget.PaddedGrid;
 import anightdazingzoroark.prift.client.newui.widget.SideButton;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.widget.IWidget;
@@ -22,7 +20,6 @@ import com.cleanroommc.modularui.value.BoolValue;
 import com.cleanroommc.modularui.value.ObjectValue;
 import com.cleanroommc.modularui.widget.ParentWidget;
 import com.cleanroommc.modularui.widgets.ToggleButton;
-import com.cleanroommc.modularui.widgets.layout.Column;
 import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.cleanroommc.modularui.widgets.layout.Grid;
 import net.minecraft.client.Minecraft;
@@ -30,7 +27,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.function.Function;
 
 public class RiftPartyScreen extends CustomModularScreen {
@@ -76,17 +72,17 @@ public class RiftPartyScreen extends CustomModularScreen {
                 .padding(4);
 
 
-        return new ModularPanelExitAffectable(UIPanelNames.PARTY_SCREEN)
-                .onEscPressed(new Function<ModularPanelExitAffectable, Boolean>() {
+        return new RiftModularPanel(UIPanelNames.PARTY_SCREEN)
+                .onEscPressed(new Function<RiftModularPanel, Boolean>() {
                     @Override
-                    public Boolean apply(ModularPanelExitAffectable panel) {
+                    public Boolean apply(RiftModularPanel panel) {
                         selectedCreatureInfoDynamic.setValue(null);
                         if (!this.hasOpenedDropdown(panel)) return false;
                         this.closeAllPartyPanels(panel);
                         return true;
                     }
 
-                    private boolean hasOpenedDropdown(ModularPanelExitAffectable panel) {
+                    private boolean hasOpenedDropdown(RiftModularPanel panel) {
                         if (panel == null || !panel.isValid()) return false;
                         PaddedGrid grid = this.getGrid(panel);
                         if (grid == null || !grid.isValid()) return false;
@@ -102,7 +98,7 @@ public class RiftPartyScreen extends CustomModularScreen {
                         return false;
                     }
 
-                    private void closeAllPartyPanels(ModularPanelExitAffectable panel) {
+                    private void closeAllPartyPanels(RiftModularPanel panel) {
                         if (panel == null || !panel.isValid()) return;
                         PaddedGrid grid = this.getGrid(panel);
                         if (grid == null || !grid.isValid()) return;

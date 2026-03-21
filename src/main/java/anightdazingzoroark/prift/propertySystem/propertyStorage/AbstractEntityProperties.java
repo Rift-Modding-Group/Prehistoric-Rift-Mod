@@ -7,7 +7,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 public abstract class AbstractEntityProperties<E extends Entity> {
     protected final HashMap<String, ImmutablePair<AbstractPropertyValue<?>, Boolean>> propertyValueMap = new HashMap<>();
@@ -59,6 +61,10 @@ public abstract class AbstractEntityProperties<E extends Entity> {
     }
 
     public <I> void set(String key, I value) {
+        this.set(key, value, true);
+    }
+
+    public <I> void set(String key, I value, boolean includeSync) {
         //check if key corresponds to value
         AbstractPropertyValue<I> propertyValue = this.getExistingProperty(key);
 
@@ -70,7 +76,7 @@ public abstract class AbstractEntityProperties<E extends Entity> {
         propertyValue.setValue(value);
         boolean persist = this.propertyValueMap.get(key).right;
         this.propertyValueMap.put(key, new ImmutablePair<>(propertyValue, persist));
-        this.syncToClient(propertyValue);
+        if (includeSync) this.syncToClient(propertyValue);
     }
 
     //sync to client from server
@@ -83,6 +89,16 @@ public abstract class AbstractEntityProperties<E extends Entity> {
                     this.writeOneToNBT(value.getKey())
             );
         }
+    }
+
+    protected void syncToClientMultiple(String... keys) {
+        if (this.entityHolder == null || this.entityHolder.world.isRemote) return;
+        PropertiesNetworking.sendMultiple(
+                this.entityHolder,
+                this.propertyName,
+                Arrays.asList(keys),
+                this.writeMultipleToNBT(keys)
+        );
     }
 
     //-----general getters-----
@@ -109,7 +125,7 @@ public abstract class AbstractEntityProperties<E extends Entity> {
     public NBTTagCompound writeAllToNBT() {
         NBTTagCompound tag = new NBTTagCompound();
         for (ImmutablePair<AbstractPropertyValue<?>, Boolean> propertyValuePair : this.propertyValueMap.values()) {
-            if (propertyValuePair.right) propertyValuePair.left.writeToNBT(tag);
+            if (propertyValuePair.right) propertyValuePair.getLeft().writeToNBT(tag);
         }
         return tag;
     }
@@ -117,7 +133,7 @@ public abstract class AbstractEntityProperties<E extends Entity> {
     //load all properties
     public void readAllFromNBT(NBTTagCompound tag) {
         for (ImmutablePair<AbstractPropertyValue<?>, Boolean> propertyValuePair : this.propertyValueMap.values()) {
-            if (propertyValuePair.right) propertyValuePair.left.readFromNBT(tag);
+            if (propertyValuePair.right) propertyValuePair.getLeft().readFromNBT(tag);
         }
     }
 
@@ -126,7 +142,7 @@ public abstract class AbstractEntityProperties<E extends Entity> {
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
         ImmutablePair<AbstractPropertyValue<?>, Boolean> propertyValuePair = this.propertyValueMap.get(key);
         if (propertyValuePair == null) return nbtTagCompound;
-        AbstractPropertyValue<?> propertyValue = propertyValuePair.left;
+        AbstractPropertyValue<?> propertyValue = propertyValuePair.getLeft();
         if (propertyValue != null) propertyValue.writeToNBT(nbtTagCompound);
         return nbtTagCompound;
     }
@@ -135,7 +151,29 @@ public abstract class AbstractEntityProperties<E extends Entity> {
     public void readOneFromNBT(NBTTagCompound tag, String key) {
         ImmutablePair<AbstractPropertyValue<?>, Boolean> propertyValuePair = this.propertyValueMap.get(key);
         if (propertyValuePair == null) return;
-        AbstractPropertyValue<?> propertyValue = propertyValuePair.left;
+        AbstractPropertyValue<?> propertyValue = propertyValuePair.getLeft();
         if (propertyValue != null) propertyValue.readFromNBT(tag);
+    }
+
+    //save multiple specified properties by key
+    public NBTTagCompound writeMultipleToNBT(String... keys) {
+        NBTTagCompound nbtTagCompound = new NBTTagCompound();
+        for (String key : keys) {
+            ImmutablePair<AbstractPropertyValue<?>, Boolean> propertyValuePair = this.propertyValueMap.get(key);
+            if (propertyValuePair == null) continue;
+            AbstractPropertyValue<?> propertyValue = propertyValuePair.getLeft();
+            if (propertyValue != null) propertyValue.writeToNBT(nbtTagCompound);
+        }
+        return nbtTagCompound;
+    }
+
+    //read multiple properties by key
+    public void readMultipleFromNBT(NBTTagCompound tag, List<String> keys) {
+        for (String key : keys) {
+            ImmutablePair<AbstractPropertyValue<?>, Boolean> propertyValuePair = this.propertyValueMap.get(key);
+            if (propertyValuePair == null) continue;
+            AbstractPropertyValue<?> propertyValue = propertyValuePair.getLeft();
+            if (propertyValue != null) propertyValue.readFromNBT(tag);
+        }
     }
 }
