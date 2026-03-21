@@ -13,6 +13,7 @@ import anightdazingzoroark.prift.client.newui.value.SelectedMoveInfoSyncValue;
 import anightdazingzoroark.prift.client.newui.widget.*;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.helper.CreatureNBT;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.CreatureGearHandler;
 import anightdazingzoroark.prift.server.entity.CreatureInventoryHandler;
@@ -20,6 +21,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IHarvestWhenWandering;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
+import anightdazingzoroark.prift.server.entity.other.RiftEmbryo;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import com.cleanroommc.modularui.api.IPanelHandler;
@@ -56,6 +58,7 @@ public class RiftCreatureScreen {
     public static final int optionsPageNum = 1;
     public static final int infoPageNum = 2;
     public static final int movesPageNum = 3;
+    public static final int embryoPageNum = 4;
 
     public static ModularPanel buildCreatureUI(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
         settings.getRecipeViewerSettings().disable();
@@ -132,29 +135,14 @@ public class RiftCreatureScreen {
                                 .addTooltipElement(IKey.lang("tametab.moves"))
                                 .tab(GuiTextures.TAB_LEFT, 0)
                         )
+                        .childIf(data.isPregnant(),
+                                () -> new PageButton(embryoPageNum, tabController)
+                                        .overlay(new ItemDrawable(Items.IRON_SWORD).asIcon())
+                                        .addTooltipElement(IKey.lang("tametab.pregnancy"))
+                                        .tab(GuiTextures.TAB_LEFT, 0)
+                        )
                 )
-                .child(new PagedWidget<>().name("pagedWidget")
-                        .controller(tabController).widthRel(1f).coverChildrenHeight()
-                        .onPageChange(page -> {
-                            //reset move selection when switching page
-                            SyncHandler selectedMoveSyncHandler = syncManager.getSyncHandlerFromMapKey("selectedMove:0");
-                            SyncHandler moveSwapSyncHandler = syncManager.getSyncHandlerFromMapKey("moveSwapInfo:0");
-                            SyncHandler moveSwitchingSyncHandler = syncManager.getSyncHandlerFromMapKey("moveSwitching:0");
-
-                            if (!(selectedMoveSyncHandler instanceof SelectedMoveInfoSyncValue selectedMoveValue)
-                                    || !(moveSwapSyncHandler instanceof MoveSwapInfoSyncValue moveSwapValue)
-                                    || !(moveSwitchingSyncHandler instanceof BooleanSyncValue moveSwitchingValue)) return;
-
-                            selectedMoveValue.setValue(null);
-                            moveSwapValue.getValue().clear();
-                            moveSwitchingValue.setBoolValue(false);
-                        })
-                        .initialPage(data.getPageToOpenTo())
-                        .addPage(creatureInventoryPage(data, syncManager))
-                        .addPage(creatureSettingsPage(data, syncManager))
-                        .addPage(creatureInfoPage(data, syncManager, settings))
-                        .addPage(creatureMovesPage(data, syncManager, settings))
-                )
+                .child(createPagedWidget(data, syncManager, settings, tabController))
                 .childIf(data.getMenuOpenedFrom() == SelectedCreatureInfo.MenuOpenedFrom.PARTY, () -> Flow.column()
                         .coverChildren()
                         .rightRel(0f, 4, 1f)
@@ -181,6 +169,34 @@ public class RiftCreatureScreen {
                                 .tab(GuiTextures.TAB_RIGHT, -1)
                         )
                 );
+    }
+
+    private static PagedWidget<?> createPagedWidget(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings, PagedWidget.Controller tabController) {
+        PagedWidget<?> toReturn = new PagedWidget<>().name("pagedWidget")
+                .controller(tabController).widthRel(1f).coverChildrenHeight()
+                .onPageChange(page -> {
+                    //reset move selection when switching page
+                    SyncHandler selectedMoveSyncHandler = syncManager.getSyncHandlerFromMapKey("selectedMove:0");
+                    SyncHandler moveSwapSyncHandler = syncManager.getSyncHandlerFromMapKey("moveSwapInfo:0");
+                    SyncHandler moveSwitchingSyncHandler = syncManager.getSyncHandlerFromMapKey("moveSwitching:0");
+
+                    if (!(selectedMoveSyncHandler instanceof SelectedMoveInfoSyncValue selectedMoveValue)
+                            || !(moveSwapSyncHandler instanceof MoveSwapInfoSyncValue moveSwapValue)
+                            || !(moveSwitchingSyncHandler instanceof BooleanSyncValue moveSwitchingValue)) return;
+
+                    selectedMoveValue.setValue(null);
+                    moveSwapValue.getValue().clear();
+                    moveSwitchingValue.setBoolValue(false);
+                })
+                .initialPage(data.getPageToOpenTo())
+                .addPage(creatureInventoryPage(data, syncManager))
+                .addPage(creatureSettingsPage(data, syncManager))
+                .addPage(creatureInfoPage(data, syncManager, settings))
+                .addPage(creatureMovesPage(data, syncManager, settings));
+
+        if (data.isPregnant()) toReturn.addPage(creaturePregnancyPage(data, syncManager, settings));
+
+        return toReturn;
     }
 
     private static ParentWidget<?> creatureInventoryPage(CreatureGuiData data, PanelSyncManager syncManager) {
@@ -544,7 +560,7 @@ public class RiftCreatureScreen {
                                         .child(new Rectangle().color(0xFF808080).cornerRadius(5)
                                                 .asWidget().size(94, 62).center())
                                         .child(new EntityWidget<>(duplicateCreatureForRender(data), 10f)
-                                                .size(92, 60).center().yawRotationAngle(135f))
+                                                .size(92, 60).center().yawRotationAngle(135))
                                 )
                                 .child(IKey.dynamic(() -> data.getName(false)).scale(0.75f).asWidget())
                                 .child(IKey.lang("tametrait.level", data.getLevel()).scale(0.75f).asWidget())
@@ -713,6 +729,22 @@ public class RiftCreatureScreen {
                                         )
                                 )
                         )
+                );
+    }
+
+    private static ParentWidget<?> creaturePregnancyPage(CreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
+        //create an embryo
+        RiftEmbryo embryo = new RiftEmbryo(data.getWorld());
+
+        return new ParentWidget<>().size(176, 166)
+                .child(Flow.column().coverChildrenHeight().align(Alignment.Center)
+                        .childPadding(15)
+                        .child(IKey.lang("prift.pregnancy.name", data.getName(false)).asWidget())
+                        .child(new EntityWidget<>(embryo, 60f).size(60).rotateEntity())
+                        .child(IKey.dynamic(() -> I18n.format(
+                                "prift.pregnancy.remaining_gestation_time",
+                                RiftUtil.ticksToMinSecTimeExpression(data.getPregnancyTime())
+                        )).asWidget())
                 );
     }
 

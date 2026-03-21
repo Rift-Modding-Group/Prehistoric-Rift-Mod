@@ -371,7 +371,7 @@ reminder.revive_in_creature_box=%s has been slain! Put it back in your creature 
 
 prift.pregnancy.name=%s pregnancy
 prift.egg.remaining_hatch_time=Remaining Hatch Time: %s
-prift.pregnancy.remaining_gestation_time=Remaining Gestation Time:
+prift.pregnancy.remaining_gestation_time=Remaining Gestation Time: %s
 prift.egg.too_cold=Too cold for hatching!
 prift.egg.too_warm=Too warm for hatching!
 
@@ -516,6 +516,7 @@ turrettargeting.all=%s will now target anything it deems unfriendly
 
 party.label=Your Party
 party.party_member_name=%s (Level %s)
+party.party_member_name_with_baby_growth=%s (%s%%)
 party.swap_creatures=Swap Creatures
 party.open_journal=Journal
 
@@ -543,10 +544,12 @@ tametrait.xp=Experience: %s/%s
 tametrait.uuid=Unique ID: %s
 tametrait.species=Species: %s
 tametrait.age=Age: %s day(s) old
+tametrait.infant_growth=Growth: %s%%
 tametab.inventory=Inventory
 tametab.manage=Management
 tametab.info=Info
 tametab.moves=Moves
+tametab.pregnancy=Pregnancy
 tametab.return_to_party=Return to Party
 tametab.return_to_creature_box=Return to Box
 
@@ -671,7 +674,7 @@ creature_move.life_drain.description=The user drags its target into its jaws, th
 creature_move.cloak.name=Cloak
 creature_move.cloak.description=The user cloaks itself, allowing for it to remain almost indetectable.
 creature_move.light_blast.name=Light Blast
-creature_move.light_blast.description=The user releases a burst of light, dealing 25% of its attack damage to all surrounding mobs and burning them.
+creature_move.light_blast.description=The user releases a burst of light, dealing 25%% of its attack damage to all surrounding mobs and burning them.
 creature_move.sniff.name=Sniff
 creature_move.sniff.description=The user uses its nose to search for signs of the presence of mobs or chests.
 creature_move.leap.name=Leap

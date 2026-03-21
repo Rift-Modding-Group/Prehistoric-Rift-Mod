@@ -926,15 +926,21 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                     else if (itemstack.isEmpty() && !this.isSaddled()) {
                         if (this.canBePregnant() && this.isPregnant() && player.isSneaking()) {
-                            //todo: open for embryo screen
+                            if (!this.world.isRemote) CreatureGuiFactory.create()
+                                    .setPageToOpenTo(RiftCreatureScreen.embryoPageNum)
+                                    .build();
                         }
-                        else if (!this.world.isRemote) CreatureGuiFactory.INSTANCE.open(player, this);
+                        else {
+                            if (!this.world.isRemote) CreatureGuiFactory.INSTANCE.open(player, this);
+                        }
                     }
                     else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && (!this.canEnterTurretMode() || !this.isTurretMode()) && !this.getDeploymentType().equals(CreatureDeployment.BASE)) {
                         if (this.canBePregnant()) {
                             if (!this.isPregnant()) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
                             else {
-                                //todo: open for embryo ui
+                                if (!this.world.isRemote) CreatureGuiFactory.create()
+                                        .setPageToOpenTo(RiftCreatureScreen.embryoPageNum)
+                                        .build();
                             }
                         }
                         else if ((this instanceof IWorkstationUser) || (this instanceof ILeadWorkstationUser)) {

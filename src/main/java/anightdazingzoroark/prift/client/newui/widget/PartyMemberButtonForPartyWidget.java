@@ -70,7 +70,8 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
 
         this.requiresClick();
         this.size(80, 48);
-        this.openDown();
+        if (this.index <= 3) this.openDown();
+        else this.openUp();
         this.menuList(list -> {
             list.name("options").width(64).coverChildrenHeight().children(
                     Arrays.asList(Option.values()), option -> new PartyMemberDropdownOptionWidget(this, option)
@@ -112,14 +113,19 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
         if (!canUseCondition) return Result.ACCEPT;
 
         Interactable.playButtonClickSound();
-        this.selectedCreatureInfoDynamic.setValue(this.selectedCreatureInfo);
+        if (this.selectedCreatureInfoDynamic.getValue() == null) {
+            this.selectedCreatureInfoDynamic.setValue(this.selectedCreatureInfo);
+        }
+        else if (this.selectedCreatureInfoDynamic.getValue().getIndex() == this.index) {
+            this.selectedCreatureInfoDynamic.setValue(null);
+        }
         if (!(this.getParent() instanceof PaddedGrid gridParent)) return super.onMousePressed(mouseButton);
 
         //clear other already opened dropdowns
         for (IWidget child : gridParent.getChildren()) {
             if (!(child instanceof PartyMemberButtonForPartyWidget partyMemButton)) continue;
             if (!partyMemButton.getMenu().isValid()) continue;
-            partyMemButton.getMenu().getPanel().closeIfOpen();
+            partyMemButton.closeMenu(true);
         }
 
         //when not swapping, just return default value
@@ -159,12 +165,22 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
             //draw creature icon
             RiftUIIcons.creatureIcon(this.creatureNBT.getCreatureType()).draw(context, 4, 4, 24, 24, theme);
 
+            //draw pacifier if its a baby
+            if (this.creatureNBT.isBaby()) {
+                RiftUIIcons.BABY.asIcon().draw(context, 20, 20, 8, 8, theme);
+            }
+
             //define strings and other values
             IKey creatureNameString = IKey.str(this.creatureNBT.getCreatureName(false)).alignment(Alignment.CenterLeft);
             IKey creatureLevelString = IKey.lang("tametrait.level", this.creatureNBT.getCreatureLevel()).alignment(Alignment.CenterLeft);
+            IKey infantGrowthString = IKey.lang(
+                    "tametrait.infant_growth",
+                    RiftUtil.roundDecimalPoints(this.creatureNBT.getBabyGrowth(), 2)
+            ).alignment(Alignment.CenterLeft);
+            IKey secondaryString = this.creatureNBT.isBaby() ? infantGrowthString : creatureLevelString;
             int longestWidth = RiftUtil.maxWithinMultiple(
                     creatureNameString.asTextIcon().getWidth(),
-                    creatureLevelString.asTextIcon().getWidth()
+                    secondaryString.asTextIcon().getWidth()
             );
             int xTextOff = 64;
 
@@ -177,12 +193,12 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
                             theme
                     );
 
-            //draw creature level
-            creatureLevelString.scale(textScale)
+            //draw creature level or creature growth for babies
+            secondaryString.scale(textScale)
                     .color(theme.getTextColor())
                     .draw(context, (int) (xTextOff * textScale), (int) (24 * textScale),
                             longestWidth,
-                            creatureLevelString.asTextIcon().getHeight(),
+                            secondaryString.asTextIcon().getHeight(),
                             theme
                     );
 

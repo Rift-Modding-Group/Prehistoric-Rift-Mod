@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.client.overlay;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.RiftControls;
-import anightdazingzoroark.prift.client.ui.elements.RiftControlButtonDisplay;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;

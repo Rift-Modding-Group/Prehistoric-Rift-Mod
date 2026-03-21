@@ -12,6 +12,7 @@ public class RiftUIIcons {
     public static final UITexture RIGHT_ARROW = icon("rightArrow", 32, 0);
     public static final UITexture LEFT_ARROW_SELECTED = icon("leftArrowSelected", 0, 16);
     public static final UITexture RIGHT_ARROW_SELECTED = icon("rightArrowSelected", 16, 16);
+    public static final UITexture BABY = icon("baby", 32, 16);
 
     private static UITexture icon(String name, int x, int y) {
         return UITexture.builder()

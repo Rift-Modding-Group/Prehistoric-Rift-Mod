@@ -449,17 +449,35 @@ public class CreatureGuiData extends GuiData {
 
     public void setCustomName(String newName) {
         if (this.dataType == DataType.CREATURE) {
-            System.out.println("set custom name");
             RiftMessages.WRAPPER.sendToServer(new RiftChangeCreatureName(this.creature, newName));
         }
         else if (this.dataType == DataType.SELECTION) {
             CreatureNBT creatureNBT = this.getCreatureNBT();
             if (!creatureNBT.nbtIsEmpty()) {
-                System.out.println("set nbt name");
                 this.syncedNBT.getValue().setCustomName(newName);
                 this.syncedNBT.notifyUpdate();
             }
         }
+    }
+
+    public boolean isPregnant() {
+        if (this.dataType == DataType.CREATURE) return this.creature.isPregnant();
+        else if (this.dataType == DataType.SELECTION) {
+            CreatureNBT creatureNBT = this.getCreatureNBT();
+            if (!creatureNBT.nbtIsEmpty()) {
+                return creatureNBT.isPregnant();
+            }
+        }
+        return false;
+    }
+
+    public int getPregnancyTime() {
+        if (this.dataType == DataType.CREATURE) return this.creature.getPregnancyTimer();
+        else if (this.dataType == DataType.SELECTION) {
+            CreatureNBT creatureNBT = this.getCreatureNBT();
+            if (!creatureNBT.nbtIsEmpty()) return creatureNBT.getBirthTime();
+        }
+        return 0;
     }
 
     public enum DataType {

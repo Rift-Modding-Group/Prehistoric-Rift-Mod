@@ -281,6 +281,15 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
             int iconOffset = (int) ((this.getArea().w() - iconSize) / 2D);
             RiftUIIcons.creatureIcon(this.creatureNBT.getCreatureType()).draw(context, iconOffset, iconOffset, iconSize, iconSize, theme);
 
+            //draw pacifier if its a baby
+            if (this.creatureNBT.isBaby()) {
+                int babyIconX = (int) (this.getArea().w() * 0.625);
+                int babyIconY = (int) (this.getArea().h() * 0.625);
+                int babyIconWidth = (int) (this.getArea().w() * 0.25);
+                int babyIconHeight = (int) (this.getArea().h() * 0.25);
+                RiftUIIcons.BABY.asIcon().draw(context, babyIconX, babyIconY, babyIconWidth, babyIconHeight, theme);
+            }
+
             //put on timer if reviving and in box
             if (this.creatureNBT.getCreatureHealth()[0] <= 0 && this.section == SelectedCreatureInfo.SelectedPosType.BOX) {
                 //rectangle bg
@@ -376,12 +385,23 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
                                         return cNBT.getCreatureName(false);
                                     }).scale(0.75f).asWidget())
                             )
-                            //level
-                            .child(new ParentWidget<>().widthRel(1f).coverChildrenHeight()
+                            //level, only for adults
+                            .childIf(!this.parentCreatureNBT.getValue().isBaby(),
+                                    () -> new ParentWidget<>().widthRel(1f).coverChildrenHeight()
                                     .child(IKey.dynamic(() -> {
                                         CreatureNBT cNBT = this.parentCreatureNBT.getValue();
                                         return I18n.format("tametrait.level", cNBT.getCreatureLevel());
                                     }).scale(0.75f).asWidget())
+                            )
+                            //growth for babies
+                            .childIf(this.parentCreatureNBT.getValue().isBaby(),
+                                    () -> new ParentWidget<>().widthRel(1f).coverChildrenHeight()
+                                            .child(IKey.dynamic(() -> {
+                                                CreatureNBT cNBT = this.parentCreatureNBT.getValue();
+                                                float babyGrowth = RiftUtil.roundDecimalPoints(cNBT.getBabyGrowth(), 2);
+
+                                                return I18n.format("tametrait.infant_growth", babyGrowth);
+                                            }).scale(0.75f).asWidget())
                             )
                             //health
                             .child(new RectangleProgressWidget().height(3).widthRel(1f)

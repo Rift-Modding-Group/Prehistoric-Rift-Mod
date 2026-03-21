@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.CreatureNBT;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
@@ -14,6 +15,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
@@ -100,7 +102,13 @@ public class RiftPartyMembersOverlay {
 
             //name and level
             float textScale = 0.5f;
-            String partyMemName = partyMemNBT.getCreatureName(true);
+            String partyMemName = partyMemNBT.isBaby() ?
+                    I18n.format(
+                            "party.party_member_name_with_baby_growth",
+                            partyMemNBT.getCreatureName(false),
+                            RiftUtil.roundDecimalPoints(partyMemNBT.getBabyGrowth(), 2)
+                    )
+                    : partyMemNBT.getCreatureName(true);
             float partyMemNameHeight = fontRenderer.FONT_HEIGHT * textScale;
             float unscaledPartyMemNameX = xSize / 2f + xPosOnScreen + 5;
             float unscaledPartyMemNameY = (ySize - partyMemNameHeight) / 2f + yPosOnScreen - 5;

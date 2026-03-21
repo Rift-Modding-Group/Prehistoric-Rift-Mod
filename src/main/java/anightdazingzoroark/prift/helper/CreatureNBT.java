@@ -185,6 +185,12 @@ public class CreatureNBT {
         return this.getAgeInTicks() / 24000;
     }
 
+    public float getBabyGrowth() {
+        if (this.creatureNBT.isEmpty()) return 0f;
+        if (!this.isBaby()) return 1f;
+        return this.getAgeInTicks() / 24000f;
+    }
+
     public String getAcquisitionInfoString() {
         if (this.creatureNBT.isEmpty()) return new CreatureAcquisitionInfo(null, 0L).acquisitionInfoString();
         CreatureAcquisitionInfo acquisitionInfo = new CreatureAcquisitionInfo(this.creatureNBT.getCompoundTag("AcquisitionInfo"));
@@ -341,32 +347,6 @@ public class CreatureNBT {
                 CreatureNBTKeyword.LEARNABLE_MOVES,
                 MoveListUtil.getNBTFromListCreatureMove(learnableMoves)
         );
-    }
-
-    public int getMoveCooldown(int moveIndex) {
-        switch (moveIndex) {
-            case 0:
-                return this.creatureNBT.getInteger("CooldownMoveOne");
-            case 1:
-                return this.creatureNBT.getInteger("CooldownMoveTwo");
-            case 2:
-                return this.creatureNBT.getInteger("CooldownMoveThree");
-        }
-        return 0;
-    }
-
-    public void setMoveCooldown(int moveIndex, int cooldown) {
-        switch (moveIndex) {
-            case 0:
-                this.creatureNBT.setInteger("CooldownMoveOne", cooldown);
-                break;
-            case 1:
-                this.creatureNBT.setInteger("CooldownMoveTwo", cooldown);
-                break;
-            case 2:
-                this.creatureNBT.setInteger("CooldownMoveThree", cooldown);
-                break;
-        }
     }
 
     public NBTTagCompound getInventoryNBT() {
@@ -735,20 +715,20 @@ public class CreatureNBT {
         return 0;
     }
 
-    public int[] getBirthTimeMinutes() {
-        if (this.nbtIsEmpty()) return new int[]{};
-        int pregnancyTime = this.creatureNBT.getInteger("PregnancyTime");
-        int minutes = (int)(pregnancyTime / 1200f);
-        int seconds = (int)(pregnancyTime / 20f);
-        seconds = seconds - (minutes * 60);
-        return new int[]{minutes, seconds};
+    public int getBirthTime() {
+        if (this.nbtIsEmpty()) return 0;
+        return this.creatureNBT.getInteger("PregnancyTime");
+    }
+
+    public boolean isPregnant() {
+        if (this.nbtIsEmpty()) return false;
+        return this.creatureNBT.getBoolean("IsPregnancy");
     }
 
     @Override
     public boolean equals(Object object) {
         if (object == null || this.creatureNBT == null) return false;
-        if (!(object instanceof CreatureNBT)) return false;
-        CreatureNBT nbtToTest = (CreatureNBT) object;
+        if (!(object instanceof CreatureNBT nbtToTest)) return false;
         if (nbtToTest.creatureNBT == null) return false;
         return this.creatureNBT.equals(nbtToTest.creatureNBT);
     }

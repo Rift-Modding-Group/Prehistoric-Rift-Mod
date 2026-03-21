@@ -14,15 +14,21 @@ import org.lwjgl.opengl.GL11;
 public class EntityWidget<T extends EntityWidget<T>> extends Widget<T> {
     private final Entity entity;
     private final float entityScale;
-    private float yawRotationAngle = 180f;
+    private int yawRotationAngle = 180;
+    private boolean rotateEntity;
 
     public EntityWidget(Entity entity, float entityScale) {
         this.entity = entity;
         this.entityScale = entityScale;
     }
 
-    public EntityWidget<T> yawRotationAngle(float value) {
+    public EntityWidget<T> yawRotationAngle(int value) {
         this.yawRotationAngle = value;
+        return this;
+    }
+
+    public EntityWidget<T> rotateEntity() {
+        this.rotateEntity = true;
         return this;
     }
 
@@ -71,6 +77,13 @@ public class EntityWidget<T extends EntityWidget<T>> extends Widget<T> {
         GlStateManager.disableDepth();
         GlStateManager.color(1f, 1f, 1f, 1f);
         GlStateManager.popMatrix();
+
+        //-----deal with rotation-----
+        if (this.rotateEntity) {
+            int newYawRotation = this.yawRotationAngle + 1;
+            if (newYawRotation >= 360) newYawRotation = 0;
+            this.yawRotationAngle = newYawRotation;
+        }
     }
 
     private float getCreatureScale() {

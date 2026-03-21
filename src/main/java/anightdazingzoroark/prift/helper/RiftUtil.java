@@ -547,4 +547,10 @@ public class RiftUtil {
 
         return minutesString+":"+secondsString;
     }
+
+    public static float roundDecimalPoints(float value, int maxPoints) {
+        if (maxPoints <= 0) return value;
+        int incrementor = (int) Math.pow(10, maxPoints);
+        return ((int) (value * incrementor)) / (float) incrementor;
+    }
 }
