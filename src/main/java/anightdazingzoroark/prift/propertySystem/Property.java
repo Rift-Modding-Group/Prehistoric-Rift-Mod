@@ -8,11 +8,7 @@ import anightdazingzoroark.prift.server.properties.RiftPropertyRegistry;
 import net.minecraft.entity.Entity;
 
 public class Property {
-    public static void registerProperty(String name, Class<? extends Entity> entityClass, Class<? extends AbstractEntityProperties> propertiesClass) {
-
-    }
-
-    public static <T extends AbstractEntityProperties> T getProperty(String name, Entity entity) {
+    public static <T extends AbstractEntityProperties<?>> T getProperty(String name, Entity entity) {
         PropertiesRoot root = entity.getCapability(PropertiesBootstrap.CAP, null);
         if (root == null) return null;
         return root.getOrCreate(name, entity);

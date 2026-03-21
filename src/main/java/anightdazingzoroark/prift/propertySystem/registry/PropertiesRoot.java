@@ -26,7 +26,7 @@ public class PropertiesRoot {
 
     public NBTTagCompound writeToNBT() {
         NBTTagCompound toReturn = new NBTTagCompound();
-        for (Map.Entry<String, AbstractEntityProperties<?>> entry : sets.entrySet()) {
+        for (Map.Entry<String, AbstractEntityProperties<?>> entry : this.sets.entrySet()) {
             toReturn.setTag(entry.getKey(), entry.getValue().writeAllToNBT());
         }
         return toReturn;

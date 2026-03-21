@@ -4,9 +4,13 @@ import anightdazingzoroark.prift.propertySystem.Property;
 import anightdazingzoroark.prift.propertySystem.networking.PropertiesNetworking;
 import anightdazingzoroark.prift.propertySystem.networking.SPacketPropsFull;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.AbstractEntityProperties;
+import anightdazingzoroark.prift.propertySystem.registry.PropertiesBootstrap;
+import anightdazingzoroark.prift.propertySystem.registry.PropertiesRoot;
 import anightdazingzoroark.prift.propertySystem.registry.PropertyRegistry;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -33,8 +37,21 @@ public class PropertySyncEvents {
         }
     }
 
+    @SubscribeEvent
+    public void onPlayerClone(PlayerEvent.Clone event) {
+        //define old and current properties for player
+        PropertiesRoot originalProperties = event.getOriginal().getCapability(PropertiesBootstrap.CAP, null);
+        PropertiesRoot currentProperties = event.getEntityPlayer().getCapability(PropertiesBootstrap.CAP, null);
+
+        if (originalProperties == null || currentProperties == null) return;
+
+        //clone original properties into current
+        NBTTagCompound nbtToSend = originalProperties.writeToNBT();
+        currentProperties.readFromNBT(nbtToSend, event.getEntityPlayer());
+    }
+
     private void syncSetTo(Entity target, EntityPlayerMP watcher, String setKey) {
-        AbstractEntityProperties set = Property.getProperty(setKey, target);
+        AbstractEntityProperties<?> set = Property.getProperty(setKey, target);
         if (set == null) return;
 
         PropertiesNetworking.channel.sendTo(
