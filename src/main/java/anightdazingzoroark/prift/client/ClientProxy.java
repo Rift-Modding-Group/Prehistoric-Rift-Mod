@@ -52,7 +52,6 @@ public class ClientProxy extends ServerProxy {
         }
         EntityRenderer.registerRenderers();
         BlockRenderer.registerRenderers();
-        RiftGui.registerUI();
         IThemeApi.get().registerTheme(UIThemes.JOURNAL_THEME);
         MinecraftForge.EVENT_BUS.register(new RiftMountEnergyBar());
         MinecraftForge.EVENT_BUS.register(new RiftCreatureControls());

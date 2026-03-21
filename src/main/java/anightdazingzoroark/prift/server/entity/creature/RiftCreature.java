@@ -4,7 +4,6 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.screens.synced.RiftCreatureScreen;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiFactory;
-import anightdazingzoroark.prift.client.ui.RiftEggScreen;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftControls;
@@ -12,7 +11,6 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.config.RiftConfigHandler;
 import anightdazingzoroark.prift.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.helper.WeightedList;
-import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.blocks.RiftCreatureBox;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.helper.CreatureNBTKeyword;
@@ -41,8 +39,6 @@ import anightdazingzoroark.riftlib.core.builder.LoopType;
 import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
 import anightdazingzoroark.riftlib.hitboxLogic.IMultiHitboxUser;
 import anightdazingzoroark.riftlib.ridePositionLogic.IDynamicRideUser;
-import anightdazingzoroark.riftlib.ui.RiftLibUIData;
-import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.ModularScreen;
@@ -61,7 +57,6 @@ import net.minecraft.entity.ai.EntityAITarget;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
@@ -931,32 +926,16 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     }
                     else if (itemstack.isEmpty() && !this.isSaddled()) {
                         if (this.canBePregnant() && this.isPregnant() && player.isSneaking()) {
-                            RiftLibUIHelper.showUI(
-                                    player,
-                                    RiftGui.EGG_SCREEN,
-                                    new RiftLibUIData()
-                                            .addInteger("EggType", RiftEggScreen.EggType.EMBRYO.ordinal())
-                                            .addInteger("ImpregnableID", this.getEntityId()),
-                                    0,
-                                    0,
-                                    0
-                            );
+                            //todo: open for embryo screen
                         }
                         else if (!this.world.isRemote) CreatureGuiFactory.INSTANCE.open(player, this);
                     }
                     else if (itemstack.isEmpty() && this.isSaddled() && !player.isSneaking() && !this.isSleeping() && (!this.canEnterTurretMode() || !this.isTurretMode()) && !this.getDeploymentType().equals(CreatureDeployment.BASE)) {
                         if (this.canBePregnant()) {
                             if (!this.isPregnant()) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
-                            else RiftLibUIHelper.showUI(
-                                    player,
-                                    RiftGui.EGG_SCREEN,
-                                    new RiftLibUIData()
-                                            .addInteger("EggType", RiftEggScreen.EggType.EMBRYO.ordinal())
-                                            .addInteger("ImpregnableID", this.getEntityId()),
-                                    0,
-                                    0,
-                                    0
-                            );
+                            else {
+                                //todo: open for embryo ui
+                            }
                         }
                         else if ((this instanceof IWorkstationUser) || (this instanceof ILeadWorkstationUser)) {
                             boolean usingWorkstation = this instanceof IWorkstationUser && ((IWorkstationUser) this).hasWorkstation();

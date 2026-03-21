@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.widget.EntityWidget;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressHelper;
@@ -20,6 +21,7 @@ import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.cleanroommc.modularui.widgets.layout.Column;
+import com.cleanroommc.modularui.widgets.layout.Flow;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
@@ -166,28 +168,16 @@ public class RiftSac extends EntityTameable implements IAnimatable, IGuiHolder<E
         if (compound.hasKey("CreatureType")) this.setCreatureType(RiftCreatureType.values()[compound.getByte("CreatureType")]);
     }
 
-    public int[] getHatchTimeMinutes() {
-        int minutes = (int)((float)this.getHatchTime() / 1200F);
-        int seconds = (int)((float)this.getHatchTime() / 20F);
-        seconds = seconds - (minutes * 60);
-        return new int[]{minutes, seconds};
-    }
-
     public String getHatchTimeString() {
         if (this.isInWater()) {
-            int minutes = this.getHatchTimeMinutes()[0];
-            int seconds = this.getHatchTimeMinutes()[1];
-            String minutesString = (minutes < 10 ? "0" : "")+minutes;
-            String secondsString = (seconds < 10 ? "0" : "")+seconds;
-            String timeString = minutesString+":"+secondsString;
-
+            String timeString = RiftUtil.ticksToMinSecTimeExpression(this.getHatchTime());
             return I18n.format("prift.egg.remaining_hatch_time", timeString);
         }
         else return I18n.format("prift.sac.not_wet");
     }
 
     public int getHatchTime() {
-        return this.dataManager.get(HATCH_TIME).intValue();
+        return this.dataManager.get(HATCH_TIME);
     }
 
     public void setHatchTime(int time) {
@@ -195,7 +185,7 @@ public class RiftSac extends EntityTameable implements IAnimatable, IGuiHolder<E
     }
 
     public RiftCreatureType getCreatureType() {
-        return RiftCreatureType.values()[this.dataManager.get(SAC_TYPE).byteValue()];
+        return RiftCreatureType.values()[this.dataManager.get(SAC_TYPE)];
     }
 
     public void setCreatureType(RiftCreatureType type) {
@@ -221,8 +211,7 @@ public class RiftSac extends EntityTameable implements IAnimatable, IGuiHolder<E
         RiftSac sacData = (RiftSac) data.getGuiHolder();
 
         return ModularPanel.defaultPanel(UIPanelNames.SAC_SCREEN).size(176, 166)
-                .child(new Column()
-                        .coverChildrenHeight().align(Alignment.Center)
+                .child(Flow.column().coverChildrenHeight().align(Alignment.Center)
                         .childPadding(15)
                         .child(IKey.lang("item."+sacData.getCreatureType().name().toLowerCase()+"_sac.name").asWidget())
                         .child(new EntityWidget<>(sacData, 60f).size(60))

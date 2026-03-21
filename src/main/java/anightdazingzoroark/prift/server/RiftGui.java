@@ -31,12 +31,6 @@ public class RiftGui implements IGuiHandler {
     public static final int GUI_MILLSTONE = 10;
     public static final int GUI_MECHANICAL_FILTER = 11;
 
-    public static final String EGG_SCREEN = "eggScreen";
-
-    public static void registerUI() {
-        RiftLibUIRegistry.registerUI(EGG_SCREEN, RiftEggScreen.class);
-    }
-
     @Nullable
     @Override
     public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {

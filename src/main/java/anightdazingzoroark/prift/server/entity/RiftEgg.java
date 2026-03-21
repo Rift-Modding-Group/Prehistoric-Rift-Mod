@@ -30,6 +30,7 @@ import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.cleanroommc.modularui.widgets.layout.Column;
+import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -427,21 +428,9 @@ public class RiftEgg extends EntityTameable implements IAnimatable, IGuiHolder<E
         this.dataManager.set(HATCH_TIME, time);
     }
 
-    public int[] getHatchTimeMinutes() {
-        int minutes = (int)((float)this.getHatchTime() / 1200F);
-        int seconds = (int)((float)this.getHatchTime() / 20F);
-        seconds = seconds - (minutes * 60);
-        return new int[]{minutes, seconds};
-    }
-
     public String getHatchTimeString() {
         if (this.isInRightTemperature()) {
-            int minutes = this.getHatchTimeMinutes()[0];
-            int seconds = this.getHatchTimeMinutes()[1];
-            String minutesString = (minutes < 10 ? "0" : "")+minutes;
-            String secondsString = (seconds < 10 ? "0" : "")+seconds;
-            String timeString = minutesString+":"+secondsString;
-
+            String timeString = RiftUtil.ticksToMinSecTimeExpression(this.getHatchTime());
             return I18n.format("prift.egg.remaining_hatch_time", timeString);
         }
         else {
@@ -457,7 +446,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable, IGuiHolder<E
     }
 
     public RiftCreatureType getCreatureType() {
-        return RiftCreatureType.values()[this.dataManager.get(EGG_TYPE).byteValue()];
+        return RiftCreatureType.values()[this.dataManager.get(EGG_TYPE)];
     }
 
     public void setCreatureType(RiftCreatureType type) {
@@ -465,7 +454,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable, IGuiHolder<E
     }
 
     public EggTemperature getTemperature() {
-        return EggTemperature.values()[this.dataManager.get(TEMPERATURE).byteValue()];
+        return EggTemperature.values()[this.dataManager.get(TEMPERATURE)];
     }
 
     public void setTemperature(EggTemperature value) {
@@ -486,8 +475,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable, IGuiHolder<E
         RiftEgg eggData = (RiftEgg) data.getGuiHolder();
 
         return ModularPanel.defaultPanel(UIPanelNames.EGG_SCREEN).size(176, 166)
-                .child(new Column()
-                        .coverChildrenHeight().align(Alignment.Center)
+                .child(Flow.column().coverChildrenHeight().align(Alignment.Center)
                         .childPadding(15)
                         .child(IKey.lang("item."+eggData.getCreatureType().name().toLowerCase()+"_egg.name").asWidget())
                         .child(new EntityWidget<>(eggData, 60f).size(60))
