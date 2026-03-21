@@ -63,10 +63,14 @@ public class PlayerCreatureBoxProperties extends AbstractEntityProperties<Entity
         //otherwise compare with already existing positions in positionsToRevive before adding
         for (int boxIndex = 0; boxIndex < CreatureBoxStorage.maxBoxAmnt; boxIndex++) {
             for (int index = 0; index < CreatureBoxStorage.maxBoxStorableCreatures; index++) {
-                CreatureNBT creatureNBT = creatureBoxStorage.getBoxContents(boxIndex).get(index);
-                if (creatureNBT.nbtIsEmpty()) continue;
-
                 ImmutablePair<Integer, Integer> newPairToRevive = new ImmutablePair<>(boxIndex, index);
+
+                CreatureNBT creatureNBT = creatureBoxStorage.getBoxContents(boxIndex).get(index);
+                if (creatureNBT.nbtIsEmpty()) {
+                    positionsToRevive.remove(newPairToRevive);
+                    continue;
+                }
+
                 if (!this.positionOccupied(positionsToRevive, newPairToRevive) && creatureNBT.getCreatureHealth()[0] <= 0) {
                     positionsToRevive.put(newPairToRevive, GeneralConfig.creatureBoxReviveTime);
                 }

@@ -179,10 +179,19 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
                     && this.creatureSwapInfoDynamic.getValue().canSwapHalfway()
             ) {
                 this.creatureSwapInfoDynamic.getValue().setCreature(this.selectedCreatureInfo);
+                Interactable.playButtonClickSound();
                 return Result.SUCCESS;
             }
             else return Result.ACCEPT;
         }
+        //prevent swapping of box creature if creature is still reviving
+        else if (this.creatureNBT.getCreatureHealth()[0] <= 0
+                && this.section == SelectedCreatureInfo.SelectedPosType.BOX
+                && this.creatureSwitchingDynamic.getBoolValue()
+        ) {
+            return Result.ACCEPT;
+        }
+        //normal clicking operations
         else {
             //this is to make sure that the relationship between selectedCreatureInfoDynamic
             //and selectedCreatureInfo results in isSelected being true or false
@@ -190,11 +199,15 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
             else this.selectedCreatureInfoDynamic.setValue(this.selectedCreatureInfo);
 
             //swapping related operations
-            if (!this.creatureSwitchingDynamic.getBoolValue()) return super.onMousePressed(mouseButton);
+            if (!this.creatureSwitchingDynamic.getBoolValue()) {
+                Interactable.playButtonClickSound();
+                return super.onMousePressed(mouseButton);
+            }
 
             if (!this.creatureSwapInfoDynamic.getValue().canSwap()) {
                 this.creatureSwapInfoDynamic.getValue().setCreature(this.selectedCreatureInfo);
             }
+            Interactable.playButtonClickSound();
             return Result.SUCCESS;
         }
     }
@@ -494,6 +507,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
 
             //assume success
             this.option.onClick.accept(this.parent);
+            Interactable.playButtonClickSound();
             return Result.SUCCESS;
         }
     }

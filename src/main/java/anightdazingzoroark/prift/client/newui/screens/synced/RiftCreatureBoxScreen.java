@@ -150,11 +150,12 @@ public class RiftCreatureBoxScreen {
                     //revive those creatures
                     if (!positionsToRevive.isEmpty()) HolderHelper.setSelectedCreatureClient(player, positionsToRevive);
 
-                    //check if any of the swap positions have full inventories and are from the party
+                    //manage creature swapping
                     if (creatureSwapInfoDynamic.getValue().canSwap()) {
                         //flag for opening inventoryDropPopupPanel
                         boolean alertToDeployedInventory = false;
 
+                        //check if any of the swap positions have full inventories and are from the party
                         if (creatureSwapInfoDynamic.getValue().getCreatureOne().selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY
                             && creatureSwapInfoDynamic.getValue().getCreatureTwo().selectedPosType != SelectedCreatureInfo.SelectedPosType.PARTY
                         ) {
@@ -178,7 +179,7 @@ public class RiftCreatureBoxScreen {
                             alertToDeployedInventory = !creatureNBT.inventoryIsEmpty();
                         }
 
-                        //-----final decision-----
+                        //-----final creature swap decision-----
                         //show the inventory drop confirmation panel
                         if (alertToDeployedInventory) inventoryDropPopupPanel.openPanel();
                         //normal swapping
