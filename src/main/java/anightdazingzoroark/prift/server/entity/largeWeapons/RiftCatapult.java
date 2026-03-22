@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.largeWeapons;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
+import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCatapultBoulder;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftIncrementControlUse;
@@ -64,7 +65,7 @@ public class RiftCatapult extends RiftLargeWeapon {
         EntityPlayer player = Minecraft.getMinecraft().player;
 
         if (this.isBeingRidden()) {
-            if (this.getPassengers().get(0).equals(player)) {
+            if (this.getPassengers().getFirst().equals(player)) {
                 RiftMessages.WRAPPER.sendToServer(new RiftManageUtilizingControl(this, settings.keyBindAttack.isKeyDown() && this.getLeftClickCooldown() == 0));
                 if (settings.keyBindAttack.isKeyDown() && this.getLeftClickCooldown() == 0) {
                     RiftMessages.WRAPPER.sendToServer(new RiftIncrementControlUse(this));
@@ -77,63 +78,51 @@ public class RiftCatapult extends RiftLargeWeapon {
     }
 
     private void catapultLogic() {
-        if (!this.world.isRemote) {
-            if (!this.isCharging() && this.isUsingLeftClick()) this.setCharging(true);
-            else if (this.isCharging() && !this.isUsingLeftClick()) this.setCharging(false);
+        if (!this.world.isRemote) return;
+        if (!this.isCharging() && this.isUsingLeftClick()) this.setCharging(true);
+        else if (this.isCharging() && !this.isUsingLeftClick()) this.setCharging(false);
 
-            if (this.isLaunching()) {
-                this.launchTick++;
-                if (this.launchTick > 7) {
-                    this.setLaunching(false);
-                    this.launchTick = 0;
-                }
+        if (this.isLaunching()) {
+            this.launchTick++;
+            if (this.launchTick > 7) {
+                this.setLaunching(false);
+                this.launchTick = 0;
             }
         }
     }
 
     private void catapultIsLoaded() {
-        boolean flag1 = false;
-        boolean flag2 = this.isBeingRidden() ? (this.getPassengers().get(0) instanceof EntityPlayer ? ((EntityPlayer)this.getPassengers().get(0)).isCreative() : false) : false;
-        for (int x = this.weaponInventory.getSizeInventory() - 1; x >= 0; x--) {
-            if (!this.weaponInventory.getStackInSlot(x).isEmpty()) {
-                if (this.weaponInventory.getStackInSlot(x).getItem().equals(this.ammoItem)) {
-                    flag1 = true;
-                    break;
-                }
-            }
-        }
-        this.setLoaded(flag1 || flag2);
+        boolean controllerInCreative = this.isBeingRidden() && (this.getPassengers().getFirst() instanceof EntityPlayer && ((EntityPlayer) this.getPassengers().getFirst()).isCreative());
+        RiftInventoryHandler.ItemSearchResult foundAmmoRes = this.weaponInventory.findItem(
+                RiftInventoryHandler.ItemSearchDirection.LAST_TO_FIRST, this.ammoItem
+        );
+        boolean itemFound = foundAmmoRes.successful();
+        this.setLoaded(itemFound || controllerInCreative);
     }
 
     @Override
     public void launchProjectile(EntityPlayer player, int charge) {
-        if (!this.world.isRemote) {
-            boolean flag1 = false;
-            boolean flag2 = player.isCreative();
-            int indexToRemove = -1;
-            for (int x = this.weaponInventory.getSizeInventory() - 1; x >= 0; x--) {
-                if (!this.weaponInventory.getStackInSlot(x).isEmpty()) {
-                    if (this.weaponInventory.getStackInSlot(x).getItem().equals(this.ammoItem)) {
-                        flag1 = true;
-                        indexToRemove = x;
-                        break;
-                    }
-                }
-            }
-            if (!flag1 && !flag2) player.sendStatusMessage(new TextComponentTranslation("reminder.catapult_no_ammo", this.getName()), false);
-            if (flag1 || flag2) {
-                this.setLaunching(true);
-                RiftCatapultBoulder boulder = new RiftCatapultBoulder(this.world, this, player);
-                float velocity = RiftUtil.clamp((float) charge * 0.015f + 1.5f, 1.5f, 3f);
-                float power = RiftUtil.clamp( 0.03f * charge + 3f, 3f, 6f);
-                boulder.setPower(power);
-                boulder.shoot(this, RiftUtil.clamp(this.rotationPitch, -180f, 0f), this.rotationYaw, 0.0F, velocity, 1.0F);
-                this.world.spawnEntity(boulder);
-                this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
-                this.setLeftClickCooldown(charge * 2);
-            }
-            this.setLeftClickUse(0);
+        if (this.world.isRemote) return;
+        RiftInventoryHandler.ItemSearchResult foundAmmoRes = this.weaponInventory.findItem(
+                RiftInventoryHandler.ItemSearchDirection.LAST_TO_FIRST, this.ammoItem
+        );
+        boolean itemFound = foundAmmoRes.successful();
+
+        if (!itemFound && !player.isCreative()) {
+            player.sendStatusMessage(new TextComponentTranslation("reminder.catapult_no_ammo", this.getName()), false);
         }
+        if (itemFound || player.isCreative()) {
+            this.setLaunching(true);
+            RiftCatapultBoulder boulder = new RiftCatapultBoulder(this.world, this, player);
+            float velocity = RiftUtil.slopeResult(charge, true, 0, 100, 1.5f, 3f);
+            float power = RiftUtil.slopeResult(charge, true, 0, 100, 3f, 6f);
+            boulder.setPower(power);
+            boulder.shoot(this, RiftUtil.clamp(this.rotationPitch, -180f, 0f), this.rotationYaw, 0.0F, velocity, 1.0F);
+            this.world.spawnEntity(boulder);
+            if (itemFound) this.weaponInventory.getStackInSlot(foundAmmoRes.slot()).setCount(0);
+            this.setLeftClickCooldown(charge * 2);
+        }
+        this.setLeftClickUse(0);
     }
 
     public Vec3d riderPos() {

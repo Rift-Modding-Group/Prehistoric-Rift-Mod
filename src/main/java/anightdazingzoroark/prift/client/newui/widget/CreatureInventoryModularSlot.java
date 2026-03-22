@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.client.newui.widget;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.helper.CreatureNBTKeyword;
-import anightdazingzoroark.prift.server.entity.CreatureInventoryHandler;
+import anightdazingzoroark.prift.server.entity.inventory.CreatureInventoryHandler;
 import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;

@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.server.entity;
+package anightdazingzoroark.prift.server.entity.inventory;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import net.minecraft.entity.item.EntityItem;
@@ -11,17 +11,29 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
-public class CreatureInventoryHandler extends ItemStackHandler {
+public abstract class RiftInventoryHandler extends ItemStackHandler {
     private final ItemSearchResult noItemFound = new ItemSearchResult(false, ItemStack.EMPTY, -1);
 
-    public CreatureInventoryHandler(int inventorySize) {
-        super(inventorySize);
+    public RiftInventoryHandler(int size) {
+        super(size);
+    }
+
+    public boolean isEmpty() {
+        for (ItemStack itemStack : this.stacks) {
+            if (!itemStack.isEmpty()) return false;
+        }
+        return true;
     }
 
     public ItemStack addItem(ItemStack itemStackToAdd) {
-        ItemSearchResult similarItemResult = this.findItem(ItemSearchDirection.FIRST_TO_LAST, itemStack -> {
-            return RiftUtil.itemStacksEqual(itemStack, itemStackToAdd) && itemStack.isStackable() && itemStack.getCount() < itemStackToAdd.getMaxStackSize();
-        });
+        ItemSearchResult similarItemResult = this.findItem(
+                ItemSearchDirection.FIRST_TO_LAST,
+                itemStack -> {
+                    return RiftUtil.itemStacksEqual(itemStack, itemStackToAdd)
+                        && itemStack.isStackable()
+                        && itemStack.getCount() < itemStackToAdd.getMaxStackSize();
+                }
+        );
         ItemSearchResult emptySpaceResult = this.findItem(ItemSearchDirection.FIRST_TO_LAST, ItemStack.EMPTY);
 
         if (similarItemResult.successful) {
@@ -136,13 +148,6 @@ public class CreatureInventoryHandler extends ItemStackHandler {
             //clear up after dropping
             this.stacks.set(i, ItemStack.EMPTY);
         }
-    }
-
-    public boolean isEmpty() {
-        for (ItemStack itemStack : this.stacks) {
-            if (!itemStack.isEmpty()) return false;
-        }
-        return true;
     }
 
     @Override

@@ -3,14 +3,10 @@ package anightdazingzoroark.prift.server;
 import anightdazingzoroark.prift.client.ui.*;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.*;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.*;
-import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.prift.server.inventory.FeedingTroughContainer;
-import anightdazingzoroark.prift.server.inventory.WeaponContainer;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
-import anightdazingzoroark.riftlib.ui.RiftLibUIRegistry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -22,7 +18,6 @@ import javax.annotation.Nullable;
 
 public class RiftGui implements IGuiHandler {
     //NOTE: soon all of this will be replaced with modularui stuff
-    public static final int GUI_WEAPON_INVENTORY = 4;
     public static final int GUI_FEEDING_TROUGH = 5;
     public static final int GUI_SEMI_MANUAL_EXTRACTOR = 6;
     public static final int GUI_SEMI_MANUAL_PRESSER = 7;
@@ -34,14 +29,8 @@ public class RiftGui implements IGuiHandler {
     @Nullable
     @Override
     public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-        Entity entity = world.getEntityByID(x);
         TileEntity tileEntity = world.getTileEntity(new BlockPos(x, y, z));
-        if (id == GUI_WEAPON_INVENTORY) {
-            if (entity instanceof RiftLargeWeapon) {
-                return new WeaponContainer((RiftLargeWeapon) entity, player);
-            }
-        }
-        else if (id == GUI_FEEDING_TROUGH) {
+        if (id == GUI_FEEDING_TROUGH) {
             if (tileEntity instanceof RiftTileEntityFeedingTrough) {
                 return new FeedingTroughContainer((RiftTileEntityFeedingTrough)tileEntity, player);
             }
@@ -84,11 +73,7 @@ public class RiftGui implements IGuiHandler {
     public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
         Entity entity = world.getEntityByID(x);
         TileEntity tileEntity = world.getTileEntity(new BlockPos(x, y, z));
-        if (id == GUI_WEAPON_INVENTORY) {
-            IInventory playerInventory = player.inventory;
-            return new RiftWeaponInvMenu(playerInventory, (RiftLargeWeapon) entity);
-        }
-        else if (id == GUI_FEEDING_TROUGH) {
+        if (id == GUI_FEEDING_TROUGH) {
             if (tileEntity instanceof RiftTileEntityFeedingTrough) {
                 return new RiftFeedingTroughInvMenu((RiftTileEntityFeedingTrough) tileEntity, player.inventory);
             }

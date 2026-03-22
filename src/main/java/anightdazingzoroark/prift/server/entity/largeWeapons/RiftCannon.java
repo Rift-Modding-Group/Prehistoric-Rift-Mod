@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.largeWeapons;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
+import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.entity.EntityAgeable;
@@ -21,24 +22,19 @@ public class RiftCannon extends RiftLargeWeapon {
 
     @Override
     public void launchProjectile(EntityPlayer player, int charge) {
-        boolean flag1 = false;
-        boolean flag2 = player.isCreative();
-        int indexToRemove = -1;
-        for (int x = this.weaponInventory.getSizeInventory() - 1; x >= 0; x--) {
-            if (!this.weaponInventory.getStackInSlot(x).isEmpty()) {
-                if (this.weaponInventory.getStackInSlot(x).getItem().equals(this.ammoItem)) {
-                    flag1 = true;
-                    indexToRemove = x;
-                    break;
-                }
-            }
+        RiftInventoryHandler.ItemSearchResult foundAmmoRes = this.weaponInventory.findItem(
+                RiftInventoryHandler.ItemSearchDirection.LAST_TO_FIRST, this.ammoItem
+        );
+        boolean itemFound = foundAmmoRes.successful();
+
+        if (!itemFound && !player.isCreative()) {
+            player.sendStatusMessage(new TextComponentTranslation("reminder.cannon_no_ammo", this.getName()), false);
         }
-        if (!flag1 && !flag2) player.sendStatusMessage(new TextComponentTranslation("reminder.cannon_no_ammo", this.getName()), false);
-        if (flag1 || flag2) {
+        if (itemFound || player.isCreative()) {
             RiftCannonball cannonball = new RiftCannonball(this.world, this, player);
             cannonball.shoot(this, RiftUtil.clamp(this.rotationPitch, -180f, 0f), this.rotationYaw, 0.0F, 1.6F, 1.0F);
             this.world.spawnEntity(cannonball);
-            this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
+            if (itemFound) this.weaponInventory.getStackInSlot(foundAmmoRes.slot()).setCount(0);
             this.setLeftClickCooldown(this.maxCooldown());
         }
     }

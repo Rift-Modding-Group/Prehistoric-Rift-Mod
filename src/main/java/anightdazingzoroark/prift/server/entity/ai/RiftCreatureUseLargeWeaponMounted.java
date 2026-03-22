@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
-import anightdazingzoroark.prift.server.entity.CreatureInventoryHandler;
+import anightdazingzoroark.prift.server.entity.inventory.CreatureInventoryHandler;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;

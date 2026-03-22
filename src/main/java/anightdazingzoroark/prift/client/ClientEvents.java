@@ -92,7 +92,7 @@ public class ClientEvents {
         }
     }
 
-    //open creature inventory while riding
+    //open inventory of creature or large weapon being ridden
     @SubscribeEvent
     public void openInvWhileRiding(GuiOpenEvent event) {
         EntityPlayer player = Minecraft.getMinecraft().player;
@@ -101,9 +101,9 @@ public class ClientEvents {
             RiftMessages.WRAPPER.sendToServer(new RiftOpenInventoryFromMenu(player, (RiftCreature) player.getRidingEntity()));
             event.setCanceled(true);
         }
-        if (event.getGui() instanceof GuiInventory && player.isRiding() && player.getRidingEntity() instanceof RiftLargeWeapon) {
+        if (event.getGui() instanceof GuiInventory && player.isRiding() && player.getRidingEntity() instanceof RiftLargeWeapon largeWeapon) {
             player.closeScreen();
-            RiftMessages.WRAPPER.sendToServer(new RiftOpenWeaponInventory((RiftLargeWeapon)player.getRidingEntity()));
+            RiftMessages.WRAPPER.sendToServer(new RiftOpenWeaponInventory(player, largeWeapon));
             event.setCanceled(true);
         }
     }

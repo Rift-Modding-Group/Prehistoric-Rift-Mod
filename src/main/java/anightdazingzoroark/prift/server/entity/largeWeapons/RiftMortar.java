@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.largeWeapons;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
+import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import anightdazingzoroark.prift.server.entity.projectile.RiftMortarShell;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftIncrementControlUse;
@@ -48,30 +49,26 @@ public class RiftMortar extends RiftLargeWeapon {
 
     @Override
     public void launchProjectile(EntityPlayer player, int charge) {
-        if (!this.world.isRemote) {
-            int launchDist = RiftUtil.clamp((int)(0.1D * charge) + 6, 6, 16);
-            boolean flag1 = false;
-            boolean flag2 = player.isCreative();
-            int indexToRemove = -1;
-            for (int x = this.weaponInventory.getSizeInventory() - 1; x >= 0; x--) {
-                if (!this.weaponInventory.getStackInSlot(x).isEmpty()) {
-                    if (this.weaponInventory.getStackInSlot(x).getItem().equals(this.ammoItem)) {
-                        flag1 = true;
-                        indexToRemove = x;
-                        break;
-                    }
-                }
-            }
-            if (!flag1 && !flag2) player.sendStatusMessage(new TextComponentTranslation("reminder.mortar_no_ammo", this.getName()), false);
-            if (flag1 || flag2) {
-                RiftMortarShell mortarShell = new RiftMortarShell(this.world, this, player);
-                mortarShell.shoot(this, launchDist);
-                this.world.spawnEntity(mortarShell);
-                this.weaponInventory.getStackInSlot(indexToRemove).setCount(0);
-                this.setLeftClickCooldown(Math.max(charge * 2, 60));
-            }
-            this.setLeftClickUse(0);
+        if (this.world.isRemote) return;
+
+        int launchDist = (int) RiftUtil.slopeResult(charge, true, 0, 100, 6, 16);
+        RiftInventoryHandler.ItemSearchResult foundAmmoRes = this.weaponInventory.findItem(
+                RiftInventoryHandler.ItemSearchDirection.LAST_TO_FIRST, this.ammoItem
+        );
+        boolean itemFound = foundAmmoRes.successful();
+
+        if (!itemFound && !player.isCreative()) {
+            player.sendStatusMessage(new TextComponentTranslation("reminder.mortar_no_ammo", this.getName()), false);
         }
+        if (itemFound || player.isCreative()) {
+            System.out.println("hello!");
+            RiftMortarShell mortarShell = new RiftMortarShell(this.world, this, player);
+            mortarShell.shoot(this, launchDist);
+            this.world.spawnEntity(mortarShell);
+            if (itemFound) this.weaponInventory.getStackInSlot(foundAmmoRes.slot()).setCount(0);
+            this.setLeftClickCooldown(Math.max(charge * 2, 60));
+        }
+        this.setLeftClickUse(0);
     }
 
     public Vec3d riderPos() {

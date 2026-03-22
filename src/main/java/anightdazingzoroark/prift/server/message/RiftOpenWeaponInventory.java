@@ -1,44 +1,46 @@
 package anightdazingzoroark.prift.server.message;
 
-import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.server.RiftGui;
-import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftLargeWeapon;
 import anightdazingzoroark.riftlib.message.RiftLibMessage;
+import com.cleanroommc.modularui.factory.EntityGuiFactory;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class RiftOpenWeaponInventory extends RiftLibMessage<RiftOpenWeaponInventory> {
+    private int playerId;
     private int weaponId;
 
     public RiftOpenWeaponInventory() {}
 
-    public RiftOpenWeaponInventory(RiftLargeWeapon weapon) {
+    public RiftOpenWeaponInventory(EntityPlayer player, RiftLargeWeapon weapon) {
+        this.playerId = player.getEntityId();
         this.weaponId = weapon.getEntityId();
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
+        this.playerId = buf.readInt();
         this.weaponId = buf.readInt();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
+        buf.writeInt(this.playerId);
         buf.writeInt(this.weaponId);
     }
 
     @Override
-    public void executeOnServer(MinecraftServer minecraftServer, RiftOpenWeaponInventory message, EntityPlayer messagePlayer, MessageContext messageContext) {
-        World world = messagePlayer.getEntityWorld();
-        messagePlayer.openGui(RiftInitialize.instance, RiftGui.GUI_WEAPON_INVENTORY, world, message.weaponId, 0, 0);
+    public void executeOnServer(MinecraftServer server, RiftOpenWeaponInventory message, EntityPlayer messagePlayer, MessageContext messageContext) {
+        EntityPlayer player = (EntityPlayer) server.getEntityWorld().getEntityByID(message.playerId);
+        if (player == null) return;
+
+        RiftLargeWeapon largeWeapon = (RiftLargeWeapon) server.getEntityWorld().getEntityByID(message.weaponId);
+        if (largeWeapon == null) return;
+
+        EntityGuiFactory.INSTANCE.open(player, largeWeapon);
     }
 
     @Override

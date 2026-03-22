@@ -1,7 +1,21 @@
 package anightdazingzoroark.prift.server.entity.largeWeapons;
 
+import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
+import anightdazingzoroark.prift.server.entity.inventory.LargeWeaponInventoryHandler;
 import anightdazingzoroark.prift.server.message.*;
+import com.cleanroommc.modularui.api.IGuiHolder;
+import com.cleanroommc.modularui.api.drawable.IKey;
+import com.cleanroommc.modularui.factory.EntityGuiData;
+import com.cleanroommc.modularui.factory.EntityGuiFactory;
+import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.screen.UISettings;
+import com.cleanroommc.modularui.value.sync.PanelSyncManager;
+import com.cleanroommc.modularui.widget.ParentWidget;
+import com.cleanroommc.modularui.widgets.SlotGroupWidget;
+import com.cleanroommc.modularui.widgets.layout.Flow;
+import com.cleanroommc.modularui.widgets.slot.ItemSlot;
+import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
@@ -9,13 +23,8 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.ContainerHorseChest;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.IInventoryChangedListener;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -30,20 +39,18 @@ import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.manager.AnimationData;
 import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
-public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatable {
+public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatable, IGuiHolder<EntityGuiData> {
     private static final DataParameter<Boolean> USING_LEFT_CLICK = EntityDataManager.createKey(RiftLargeWeapon.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> LEFT_CLICK_USE = EntityDataManager.createKey(RiftLargeWeapon.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEFT_CLICK_COOLDOWN = EntityDataManager.createKey(RiftLargeWeapon.class, DataSerializers.VARINT);
-    public RiftLargeWeaponInventory weaponInventory;
+    public final LargeWeaponInventoryHandler weaponInventory = new LargeWeaponInventoryHandler(5);
     public final RiftLargeWeaponType weaponType;
-    private final int slotCount = 5;
     private AnimationFactory factory = new AnimationFactory(this);
     public final Item weaponItem;
     public final Item ammoItem;
 
     public RiftLargeWeapon(World worldIn, RiftLargeWeaponType weaponType, Item weaponItem, Item ammoItem) {
         super(worldIn);
-        this.initInventory();
         this.weaponType = weaponType;
         this.weaponItem = weaponItem;
         this.ammoItem = ammoItem;
@@ -92,59 +99,22 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         if (!player.isSneaking()) RiftMessages.WRAPPER.sendToServer(new RiftStartRiding(this));
-        else RiftMessages.WRAPPER.sendToServer(new RiftOpenWeaponInventory(this));
-        return false;
-    }
-
-    private void initInventory() {
-        int inventorySize = this.slotCount;
-        this.weaponInventory = new RiftLargeWeapon.RiftLargeWeaponInventory("weaponInventory", inventorySize, this);
-        this.weaponInventory.setCustomName(this.getName());
-        if (this.weaponInventory != null) {
-            for (int i = 0; i < inventorySize; ++i) {
-                ItemStack itemStack = this.weaponInventory.getStackInSlot(i);
-                if (!itemStack.isEmpty()) this.weaponInventory.setInventorySlotContents(i, itemStack.copy());
-            }
+        else {
+            if (!player.world.isRemote) EntityGuiFactory.INSTANCE.open(player, this);
         }
+        return false;
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
-        if (this.weaponInventory != null) {
-            NBTTagList nbtTagList = compound.getTagList("Items", 10);
-            this.initInventory();
-            for (int i = 0; i < nbtTagList.tagCount(); ++i) {
-                NBTTagCompound nbttagcompound = nbtTagList.getCompoundTagAt(i);
-                int j = nbttagcompound.getByte("Slot") & 255;
-                int inventorySize = this.slotCount;
-                if (j < inventorySize) this.weaponInventory.setInventorySlotContents(j, new ItemStack(nbttagcompound));
-            }
-        } else {
-            NBTTagList nbtTagList = compound.getTagList("Items", 10);
-            this.initInventory();
-            for (int i = 0; i < nbtTagList.tagCount(); ++i) {
-                NBTTagCompound nbttagcompound = nbtTagList.getCompoundTagAt(i);
-                int j = nbttagcompound.getByte("Slot") & 255;
-                this.weaponInventory.setInventorySlotContents(j, new ItemStack(nbttagcompound));
-            }
-        }
+        this.weaponInventory.deserializeNBT(compound.getCompoundTag("Items"));
     }
 
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
-        NBTTagList nbttaglist = new NBTTagList();
-        for (int i = 0; i < this.weaponInventory.getSizeInventory(); ++i) {
-            ItemStack itemstack = this.weaponInventory.getStackInSlot(i);
-            if (!itemstack.isEmpty()) {
-                NBTTagCompound nbttagcompound = new NBTTagCompound();
-                nbttagcompound.setByte("Slot", (byte) i);
-                itemstack.writeToNBT(nbttagcompound);
-                nbttaglist.appendTag(nbttagcompound);
-            }
-        }
-        compound.setTag("Items", nbttaglist);
+        compound.setTag("Items", this.weaponInventory.serializeNBT());
     }
 
     public abstract void launchProjectile(EntityPlayer player, int charge);
@@ -225,33 +195,48 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
         return this.factory;
     }
 
-    public class RiftLargeWeaponInventory extends ContainerHorseChest {
-        public RiftLargeWeaponInventory(String inventoryTitle, int slotCount, RiftLargeWeapon weapon) {
-            super(inventoryTitle, slotCount);
-            this.addInventoryChangeListener(new RiftLargeWeapon.RiftWeaponInvListener(weapon));
-        }
+    @Override
+    public ModularPanel buildUI(EntityGuiData entityGuiData, PanelSyncManager syncManager, UISettings uiSettings) {
+        RiftLargeWeapon largeWeapon = (RiftLargeWeapon) entityGuiData.getGuiHolder();
+        if (largeWeapon == null) return new ModularPanel(UIPanelNames.LARGE_WEAPON_SCREEN);
 
-        public void setInventoryFromData(RiftChangeWeaponInvFromMenu.RiftWeaponInvData data) {
-            ItemStack[] contents = data.getInventoryContents();
+        String playerName = entityGuiData.getPlayer().getName();
 
-            if (contents.length != getSizeInventory()) {
-                throw new IllegalArgumentException("Invalid inventory size");
-            }
+        syncManager.registerSlotGroup("largeWeaponInventory", largeWeapon.weaponInventory.getSlots());
+        SlotGroupWidget.Builder weaponInvBuilder = SlotGroupWidget.builder()
+                .key('I', index -> new ItemSlot().slot(
+                        new ModularSlot(largeWeapon.weaponInventory, index).slotGroup("largeWeaponInventory")
+                                .filter(itemStack -> {
+                                    return itemStack.getItem() == largeWeapon.ammoItem;
+                                })
+                        )
+                )
+                .matrix("IIIII");
 
-            for (int i = 0; i < getSizeInventory(); i++) {
-                setInventorySlotContents(i, contents[i]);
-            }
-        }
-    }
 
-    class RiftWeaponInvListener implements IInventoryChangedListener {
-        RiftLargeWeapon weapon;
-
-        public RiftWeaponInvListener(RiftLargeWeapon weapon) {
-            this.weapon = weapon;
-        }
-
-        @Override
-        public void onInventoryChanged(IInventory invBasic) {}
+        return new ModularPanel(UIPanelNames.LARGE_WEAPON_SCREEN)
+                .padding(7, 7).height(131)
+                .child(Flow.column().childPadding(5).coverChildrenHeight()
+                        //weapon inventory
+                        .child(new ParentWidget<>().widthRel(1f).coverChildrenHeight()
+                                .child(Flow.column().widthRel(1f).coverChildrenHeight()
+                                        .child(new ParentWidget<>().width(162).coverChildrenHeight()
+                                                .child(IKey.str(largeWeapon.getName()).asWidget().left(0))
+                                        )
+                                        .child(new ParentWidget<>().width(162).coverChildrenHeight()
+                                                .child(weaponInvBuilder.build().left(0))
+                                        )
+                                )
+                        )
+                        //player inventory
+                        .child(new ParentWidget<>().widthRel(1f).coverChildrenHeight()
+                                .child(Flow.column().widthRel(1f).coverChildren()
+                                        .child(new ParentWidget<>().width(162).coverChildrenHeight()
+                                                .child(IKey.str(playerName).asWidget().left(0))
+                                        )
+                                        .child(SlotGroupWidget.playerInventory(false))
+                                )
+                        )
+                );
     }
 }

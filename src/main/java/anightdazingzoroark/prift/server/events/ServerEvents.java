@@ -472,8 +472,7 @@ public class ServerEvents {
     @SubscribeEvent
     public void manageProjectileExplosion(ExplosionEvent.Detonate event) {
         //manage cannon explosion stuff
-        if (event.getExplosion().getExplosivePlacedBy() instanceof RiftCannon) {
-            RiftCannon cannon = (RiftCannon) event.getExplosion().getExplosivePlacedBy();
+        if (event.getExplosion().getExplosivePlacedBy() instanceof RiftCannon cannon) {
             if (!cannon.getPassengers().isEmpty()) {
                 EntityPlayer user = (EntityPlayer) cannon.getPassengers().get(0);
                 //remove cannon and user
@@ -494,8 +493,7 @@ public class ServerEvents {
             }
         }
         //manage catapult explosion stuff
-        if (event.getExplosion().getExplosivePlacedBy() instanceof RiftCatapult) {
-            RiftCatapult catapult = (RiftCatapult) event.getExplosion().getExplosivePlacedBy();
+        if (event.getExplosion().getExplosivePlacedBy() instanceof RiftCatapult catapult) {
             EntityPlayer user = (EntityPlayer) catapult.getPassengers().get(0);
             //remove catapult and user
             event.getAffectedEntities().remove(catapult);
@@ -520,8 +518,7 @@ public class ServerEvents {
             }
         }
         //manage mortar explosion stuff
-        if (event.getExplosion().getExplosivePlacedBy() instanceof RiftMortar) {
-            RiftMortar mortar = (RiftMortar) event.getExplosion().getExplosivePlacedBy();
+        if (event.getExplosion().getExplosivePlacedBy() instanceof RiftMortar mortar) {
             EntityPlayer user = (EntityPlayer) mortar.getPassengers().get(0);
             //remove catapult and user
             event.getAffectedEntities().remove(mortar);

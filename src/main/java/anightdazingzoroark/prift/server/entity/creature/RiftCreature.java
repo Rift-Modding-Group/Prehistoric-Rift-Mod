@@ -22,6 +22,8 @@ import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHe
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creatureMoves.RiftCreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.*;
+import anightdazingzoroark.prift.server.entity.inventory.CreatureGearHandler;
+import anightdazingzoroark.prift.server.entity.inventory.CreatureInventoryHandler;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
@@ -224,10 +226,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private int chosenAnimFromMultiple = -1;
     private int resetEnergyTick;
     private int ticksSinceHitboxRemoval = 0;
-    //for updating hud stuff when creature is deployed from party
-    private int cachedHealthBucket = -1;
-    private int cachedEnergyBucket = -1;
-    private int cachedXPBucket = -1;
     //for charge management, for server only
     public boolean stopChargeFlag;
     //for leap management, for server only
@@ -464,15 +462,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }
 
-        switch (this.world.getDifficulty()) {
-            case EASY:
-                return easyIncrement;
-            case NORMAL:
-                return easyIncrement + normalIncrement;
-            case HARD:
-                return easyIncrement + normalIncrement + hardIncrement;
-        }
-        return 0;
+        return switch (this.world.getDifficulty()) {
+            case EASY -> easyIncrement;
+            case NORMAL -> easyIncrement + normalIncrement;
+            case HARD -> easyIncrement + normalIncrement + hardIncrement;
+            default -> 0;
+        };
     }
 
     @Override
@@ -928,7 +923,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         if (this.canBePregnant() && this.isPregnant() && player.isSneaking()) {
                             if (!this.world.isRemote) CreatureGuiFactory.create()
                                     .setPageToOpenTo(RiftCreatureScreen.embryoPageNum)
-                                    .build();
+                                    .build().open(player, this);
                         }
                         else {
                             if (!this.world.isRemote) CreatureGuiFactory.INSTANCE.open(player, this);
@@ -940,7 +935,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                             else {
                                 if (!this.world.isRemote) CreatureGuiFactory.create()
                                         .setPageToOpenTo(RiftCreatureScreen.embryoPageNum)
-                                        .build();
+                                        .build().open(player, this);
                             }
                         }
                         else if ((this instanceof IWorkstationUser) || (this instanceof ILeadWorkstationUser)) {

@@ -6,6 +6,8 @@ import anightdazingzoroark.prift.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.server.entity.*;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
+import anightdazingzoroark.prift.server.entity.inventory.CreatureGearHandler;
+import anightdazingzoroark.prift.server.entity.inventory.CreatureInventoryHandler;
 import anightdazingzoroark.prift.server.enums.TameBehaviorType;
 import anightdazingzoroark.prift.server.enums.TurretModeTargeting;
 import net.minecraft.client.resources.I18n;
