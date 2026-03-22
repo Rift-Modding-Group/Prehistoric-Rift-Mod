@@ -1,10 +1,9 @@
 package anightdazingzoroark.prift.server.blocks;
 
-import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.creativetab.RiftCreativeTabs;
-import anightdazingzoroark.prift.server.RiftGui;
-import anightdazingzoroark.prift.server.ServerProxy;
+import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
+import com.cleanroommc.modularui.factory.GuiFactories;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyDirection;
@@ -87,10 +86,20 @@ public class RiftFeedingTroughBlock extends Block implements ITileEntityProvider
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+    public void onBlockHarvested(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player) {
         if (!worldIn.isRemote) {
-            playerIn.openGui(RiftInitialize.instance, RiftGui.GUI_FEEDING_TROUGH, worldIn, pos.getX(), pos.getY(), pos.getZ());
+            TileEntity tileEntity = worldIn.getTileEntity(pos);
+            if (tileEntity instanceof RiftTileEntityFeedingTrough teFeedingTrough) {
+                RiftInventoryHandler inventoryHandler = teFeedingTrough.getInventory();
+                inventoryHandler.dropAllItems(worldIn, pos);
+            }
         }
+        super.onBlockHarvested(worldIn, pos, state, player);
+    }
+
+    @Override
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        if (!worldIn.isRemote) GuiFactories.tileEntity().open(playerIn, pos);
         return true;
     }
 }

@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
-public abstract class RiftInventoryHandler extends ItemStackHandler {
+public class RiftInventoryHandler extends ItemStackHandler {
     private final ItemSearchResult noItemFound = new ItemSearchResult(false, ItemStack.EMPTY, -1);
 
     public RiftInventoryHandler(int size) {

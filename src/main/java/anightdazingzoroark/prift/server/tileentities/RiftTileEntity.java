@@ -70,6 +70,17 @@ public abstract class RiftTileEntity extends TileEntity {
         if (syncToClient) this.updateServerData();
     }
 
+    public void set(String key, NBTTagCompound nbtTagCompound) {
+        //check if key corresponds to value
+        AbstractPropertyValue<?> propertyValue = this.getExistingProperty(key);
+
+        //now set as usual
+        propertyValue.readFromNBT(nbtTagCompound);
+        boolean persist = this.propertyValueMap.get(key).right;
+        this.propertyValueMap.put(key, new ImmutablePair<>(propertyValue, persist));
+        this.updateServerData();
+    }
+
     //-----general getters-----
     public <I> I get(String key) {
         AbstractPropertyValue<I> propertyValue = this.getExistingProperty(key);

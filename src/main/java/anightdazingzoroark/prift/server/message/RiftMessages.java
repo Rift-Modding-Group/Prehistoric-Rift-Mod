@@ -57,5 +57,7 @@ public class RiftMessages {
         WRAPPER.registerMessage(RiftSetSelectedCreatureMultiple.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftSetRevivalInfoClient.class, RiftLibMessageSide.SERVER);
         WRAPPER.registerMessage(RiftSetBoxLastOpenedTime.class, RiftLibMessageSide.SERVER);
+        WRAPPER.registerMessage(RiftUpdateTileEntityProperty.class, RiftLibMessageSide.SERVER);
+        WRAPPER.registerMessage(RiftUpdateTileEntityProperty.class, RiftLibMessageSide.SERVER);
     }
 }

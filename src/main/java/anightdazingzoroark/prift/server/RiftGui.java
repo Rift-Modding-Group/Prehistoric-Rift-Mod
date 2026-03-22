@@ -3,9 +3,6 @@ package anightdazingzoroark.prift.server;
 import anightdazingzoroark.prift.client.ui.*;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.*;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.*;
-import anightdazingzoroark.prift.server.inventory.FeedingTroughContainer;
-import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -18,7 +15,6 @@ import javax.annotation.Nullable;
 
 public class RiftGui implements IGuiHandler {
     //NOTE: soon all of this will be replaced with modularui stuff
-    public static final int GUI_FEEDING_TROUGH = 5;
     public static final int GUI_SEMI_MANUAL_EXTRACTOR = 6;
     public static final int GUI_SEMI_MANUAL_PRESSER = 7;
     public static final int GUI_SEMI_MANUAL_EXTRUDER = 8;
@@ -30,12 +26,7 @@ public class RiftGui implements IGuiHandler {
     @Override
     public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
         TileEntity tileEntity = world.getTileEntity(new BlockPos(x, y, z));
-        if (id == GUI_FEEDING_TROUGH) {
-            if (tileEntity instanceof RiftTileEntityFeedingTrough) {
-                return new FeedingTroughContainer((RiftTileEntityFeedingTrough)tileEntity, player);
-            }
-        }
-        else if (id == GUI_SEMI_MANUAL_EXTRACTOR) {
+        if (id == GUI_SEMI_MANUAL_EXTRACTOR) {
             if (tileEntity instanceof TileEntitySemiManualExtractor) {
                 return new SemiManualExtractorContainer((TileEntitySemiManualExtractor)tileEntity, player);
             }
@@ -71,14 +62,8 @@ public class RiftGui implements IGuiHandler {
     @Override
     @SideOnly(Side.CLIENT)
     public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-        Entity entity = world.getEntityByID(x);
         TileEntity tileEntity = world.getTileEntity(new BlockPos(x, y, z));
-        if (id == GUI_FEEDING_TROUGH) {
-            if (tileEntity instanceof RiftTileEntityFeedingTrough) {
-                return new RiftFeedingTroughInvMenu((RiftTileEntityFeedingTrough) tileEntity, player.inventory);
-            }
-        }
-        else if (id == GUI_SEMI_MANUAL_EXTRACTOR) {
+        if (id == GUI_SEMI_MANUAL_EXTRACTOR) {
             if (tileEntity instanceof TileEntitySemiManualExtractor) {
                 return new RiftSemiManualExtractorMenu((TileEntitySemiManualExtractor) tileEntity, player.inventory);
             }

@@ -12,7 +12,7 @@ public class FeedingTroughRenderer extends GeoBlockRenderer<RiftTileEntityFeedin
 
     @Override
     public void render(GeoModel model, RiftTileEntityFeedingTrough animatable, float partialTicks, float red, float green, float blue, float alpha) {
-        model.getBone("contents").get().setHidden(animatable.inventoryIsEmpty());
+        model.getBone("contents").get().setHidden(animatable.getInventory().isEmpty());
         super.render(model, animatable, partialTicks, red, green, blue, alpha);
     }
 }
