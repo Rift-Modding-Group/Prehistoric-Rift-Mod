@@ -1,12 +1,9 @@
 package anightdazingzoroark.prift.server.tileentities;
 
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
-import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.ObjectPropertyValue;
 import anightdazingzoroark.prift.server.blocks.RiftFeedingTroughBlock;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftUpdateTileEntityProperty;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.factory.PosGuiData;
@@ -20,46 +17,30 @@ import com.cleanroommc.modularui.widgets.slot.ItemSlot;
 import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import com.google.common.base.Predicate;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraftforge.items.ItemStackHandler;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.manager.AnimationData;
 import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 public class RiftTileEntityFeedingTrough extends RiftTileEntity implements IAnimatable, ITickable, IGuiHolder<PosGuiData> {
     private final AnimationFactory factory = new AnimationFactory(this);
-    public static final int INV_SIZE = 9;
     private int feedCountdown = 0;
 
     @Override
-    public void registerValues() {
-        this.register(new ObjectPropertyValue<RiftInventoryHandler>(
-                "Inventory", new RiftInventoryHandler(INV_SIZE), RiftInventoryHandler.class,
-                ItemStackHandler::serializeNBT,
-                nbtBase -> {
-                    RiftInventoryHandler toReturn = new RiftInventoryHandler(INV_SIZE);
-                    if (!(nbtBase instanceof NBTTagCompound nbtTagCompound)) return toReturn;
-                    toReturn.deserializeNBT(nbtTagCompound);
-                    return toReturn;
-                }
-        ));
+    public void registerValues() {}
+
+    @Override
+    public void registerInventories() {
+        this.registerInventory("Inventory", 9);
     }
 
     public RiftInventoryHandler getInventory() {
-        return this.get("Inventory");
-    }
-
-    public void setInventory(RiftInventoryHandler inventory) {
-        this.set("Inventory", inventory);
+        return this.getInventory("Inventory");
     }
 
     @Override
@@ -71,7 +52,7 @@ public class RiftTileEntityFeedingTrough extends RiftTileEntity implements IAnim
             List<RiftCreature> creatures = this.world.getEntitiesWithinAABB(RiftCreature.class, this.getFeedingRange(), new Predicate<RiftCreature>() {
                 @Override
                 public boolean apply(@Nullable RiftCreature creature) {
-                    return creature.isTamed() && !creature.isSleeping();
+                    return creature != null && creature.isTamed() && !creature.isSleeping();
                 }
             });
 
@@ -93,8 +74,6 @@ public class RiftTileEntityFeedingTrough extends RiftTileEntity implements IAnim
                         else if (creature.isEnergyRegenItem(itemSearchResult.foundStack())) {
                             creature.eatFoodForEnergyRegen(itemSearchResult.foundStack());
                         }
-
-                        this.setInventory(inventory);
                     }
                 }
             }
@@ -130,36 +109,7 @@ public class RiftTileEntityFeedingTrough extends RiftTileEntity implements IAnim
         syncManager.registerSlotGroup("feedingTroughInventory", feedingTrough.getInventory().getSlots());
         SlotGroupWidget.Builder weaponInvBuilder = SlotGroupWidget.builder()
                 .key('I', index -> new ItemSlot().slot(
-                                new ModularSlot(feedingTroughInventory, index) {
-                                    @Override
-                                    public void onSlotChanged() {
-                                        this.updateFeedingTrough();
-                                    }
-
-                                    @Override
-                                    public void onSlotChangedReal(ItemStack itemStack, boolean onlyChangedAmount, boolean client, boolean init) {
-                                        super.onSlotChangedReal(itemStack, onlyChangedAmount, client, init);
-                                        this.updateFeedingTrough();
-                                    }
-
-                                    @Override
-                                    public void onCraftShiftClick(EntityPlayer player, ItemStack stack) {
-                                        this.updateFeedingTrough();
-                                    }
-
-                                    @Override
-                                    public void putStack(@NotNull ItemStack stack) {
-                                        super.putStack(stack);
-                                        this.updateFeedingTrough();
-                                    }
-
-                                    private void updateFeedingTrough() {
-                                        RiftInventoryHandler feedingTroughInventory = (RiftInventoryHandler) this.getItemHandler();
-                                        RiftMessages.WRAPPER.sendToServer(new RiftUpdateTileEntityProperty(
-                                                posGuiData.getBlockPos(), "Inventory", feedingTroughInventory.serializeNBT()
-                                        ));
-                                    }
-                                }.slotGroup("feedingTroughInventory")
+                                new ModularSlot(feedingTroughInventory, index).slotGroup("feedingTroughInventory")
                         )
                 )
                 .matrix("IIIIIIIII");

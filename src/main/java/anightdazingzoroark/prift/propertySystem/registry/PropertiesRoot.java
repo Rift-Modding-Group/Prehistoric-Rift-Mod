@@ -45,7 +45,7 @@ public class PropertiesRoot {
             return propertyClassPair.getRight().getDeclaredConstructor(String.class, propertyClassPair.getLeft()).newInstance(key, entity);
         }
         catch (Exception e) {
-            throw new RuntimeException("Properties class must have a public no-arg ctor: " + propertyClassPair.getRight().getName(), e);
+            throw new RuntimeException("Properties class must have a public no-arg actor: " + propertyClassPair.getRight().getName(), e);
         }
     }
 }

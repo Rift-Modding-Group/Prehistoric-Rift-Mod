@@ -14,6 +14,10 @@ import java.util.function.Function;
 public class RiftInventoryHandler extends ItemStackHandler {
     private final ItemSearchResult noItemFound = new ItemSearchResult(false, ItemStack.EMPTY, -1);
 
+    public RiftInventoryHandler() {
+        super();
+    }
+
     public RiftInventoryHandler(int size) {
         super(size);
     }

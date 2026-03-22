@@ -49,7 +49,7 @@ public class RiftTileEntityCreatureBox extends RiftTileEntity implements ITickab
 
     @Override
     public void registerValues() {
-        this.register(new FixedSizeListPropertyValue<CreatureNBT>(
+        this.registerValue(new FixedSizeListPropertyValue<CreatureNBT>(
                 "CreatureList", new CreatureNBT(), RiftCreatureBox.maxDeployableCreatures,
                 fixedSizeList -> {
                     NBTTagCompound toReturn = new NBTTagCompound();
@@ -63,11 +63,14 @@ public class RiftTileEntityCreatureBox extends RiftTileEntity implements ITickab
                     return getDeployedListFromNBT(nbtTagCompound);
                 }
         ));
-        this.register(new UUIDPropertyValue("UniqueID", RiftUtil.nilUUID));
-        this.register(new UUIDPropertyValue("OwnerID", RiftUtil.nilUUID));
-        this.register(new StringPropertyValue("OwnerName"));
-        this.register(new IntPropertyValue("DeploymentRange", 1));
+        this.registerValue(new UUIDPropertyValue("UniqueID", RiftUtil.nilUUID));
+        this.registerValue(new UUIDPropertyValue("OwnerID", RiftUtil.nilUUID));
+        this.registerValue(new StringPropertyValue("OwnerName"));
+        this.registerValue(new IntPropertyValue("DeploymentRange", 1));
     }
+
+    @Override
+    public void registerInventories() {}
 
     @Override
     public void update() {
@@ -181,42 +184,42 @@ public class RiftTileEntityCreatureBox extends RiftTileEntity implements ITickab
 
     //-----getters and setters-----
     public void setDeployedCreatures(FixedSizeList<CreatureNBT> value) {
-        this.set("CreatureList", value);
+        this.setValue("CreatureList", value);
     }
 
     public FixedSizeList<CreatureNBT> getDeployedCreatures() {
-        return this.get("CreatureList");
+        return this.getValue("CreatureList");
     }
 
     public void setOwner(EntityPlayer player) {
-        this.set("OwnerID", player.getUniqueID(), false);
-        this.set("OwnerName", player.getName(), false);
+        this.setValue("OwnerID", player.getUniqueID(), false);
+        this.setValue("OwnerName", player.getName(), false);
         this.updateServerData();
     }
 
     public String getOwnerName() {
-        String ownerName = this.get("OwnerName");
+        String ownerName = this.getValue("OwnerName");
         return ownerName.isEmpty() ? I18n.format("creature_box.no_owner_name") : ownerName;
     }
 
     public UUID getOwnerID() {
-        return this.get("OwnerID");
+        return this.getValue("OwnerID");
     }
 
     public void setUniqueID(UUID uuid) {
-        this.set("UniqueID", uuid);
+        this.setValue("UniqueID", uuid);
     }
 
     public UUID getUniqueID() {
-        return this.get("UniqueID");
+        return this.getValue("UniqueID");
     }
 
     public void setDeploymentRange(int value) {
-        this.set("DeploymentRange", value);
+        this.setValue("DeploymentRange", value);
     }
 
     public int getDeploymentRange() {
-        return this.get("DeploymentRange");
+        return this.getValue("DeploymentRange");
     }
 
     //-----indirect setters and getters-----
