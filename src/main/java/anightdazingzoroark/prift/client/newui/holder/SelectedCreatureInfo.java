@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.newui.holder;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.client.newui.screens.synced.RiftCreatureScreen;
 import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
 import anightdazingzoroark.prift.helper.BlockPosUtil;
@@ -87,16 +88,18 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
         this.index = index;
     }
 
-    public void setMenuOpenedFrom(MenuOpenedFrom value) {
+    public SelectedCreatureInfo setMenuOpenedFrom(MenuOpenedFrom value) {
         this.menuOpenedFrom = value;
+        return this;
     }
 
     public MenuOpenedFrom getMenuOpenedFrom() {
         return this.menuOpenedFrom;
     }
 
-    public void setCreatureBoxPos(BlockPos creatureBoxPos) {
+    public SelectedCreatureInfo setCreatureBoxPos(BlockPos creatureBoxPos) {
         this.creatureBoxPos = creatureBoxPos;
+        return this;
     }
 
     public BlockPos getCreatureBoxPos() {
@@ -149,6 +152,19 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
         }
 
         return check;
+    }
+
+    public String getMenuName() {
+        if (this.selectedPosType == SelectedPosType.PARTY) {
+            return UIPanelNames.BOX_DROPDOWN+":party:"+this.index;
+        }
+        else if (this.selectedPosType == SelectedPosType.BOX) {
+            return UIPanelNames.BOX_DROPDOWN+":box:"+this.index;
+        }
+        else if (this.selectedPosType == SelectedPosType.BOX_DEPLOYED) {
+            return UIPanelNames.BOX_DROPDOWN+":boxdeployed:"+this.index;
+        }
+        return "";
     }
 
     @Override

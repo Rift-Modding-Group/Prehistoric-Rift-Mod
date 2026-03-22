@@ -214,7 +214,7 @@ public class RiftSac extends EntityTameable implements IAnimatable, IGuiHolder<E
                 .child(Flow.column().coverChildrenHeight().align(Alignment.Center)
                         .childPadding(15)
                         .child(IKey.lang("item."+sacData.getCreatureType().name().toLowerCase()+"_sac.name").asWidget())
-                        .child(new EntityWidget<>(sacData, 60f).size(60))
+                        .child(new EntityWidget<>(sacData, 60f).size(60).rotateEntity())
                         .child(IKey.dynamic(this::getHatchTimeString).asWidget())
                 );
     }

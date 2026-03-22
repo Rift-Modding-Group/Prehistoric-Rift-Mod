@@ -123,7 +123,8 @@ public class PlayerCreatureBoxProperties extends AbstractEntityProperties<Entity
 
     public void setLastTimeOpened(int value) {
         //set time change and last time opened
-        int timeChange = Math.max(0, value - this.getLastTimeOpened());
+        //the delta is divided by 2 because for some reason it subtracts too much time otherwise
+        int timeChange = Math.max(0, (value - this.getLastTimeOpened()) / 2);
         this.set("LastTimeOpened", value, false);
 
         //use above info to change revive time

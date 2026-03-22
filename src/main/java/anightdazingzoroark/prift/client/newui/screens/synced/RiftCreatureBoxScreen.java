@@ -201,12 +201,17 @@ public class RiftCreatureBoxScreen {
                                         .matrix(Grid.mapToMatrix(
                                                 2, PlayerPartyHelper.maxSize,
                                                 index -> new CreatureInBoxButtonWidget(
-                                                        playerParty, index,
-                                                        data.getBlockPos(),
+                                                        SelectedCreatureInfo.partySelectedInfo(index)
+                                                                .setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.BOX)
+                                                                .setCreatureBoxPos(data.getBlockPos()),
                                                         selectedCreatureInfoDynamic,
                                                         creatureSwitchingDynamic,
                                                         creatureSwapInfoDynamic,
-                                                        confirmCreatureReleasePopupPanel
+                                                        confirmCreatureReleasePopupPanel,
+                                                        playerParty,
+                                                        playerBox,
+                                                        boxRevival,
+                                                        teCreatureBox
                                                 )
                                         ))
                                         .padding(2)
@@ -292,13 +297,17 @@ public class RiftCreatureBoxScreen {
                                         .matrix(Grid.mapToMatrix(
                                                 5, CreatureBoxStorage.maxBoxStorableCreatures,
                                                 index -> new CreatureInBoxButtonWidget(
-                                                        playerBox, boxRevival,
-                                                        currentBoxIndexDynamic, index,
-                                                        data.getBlockPos(),
+                                                        SelectedCreatureInfo.boxSelectedInfoDynamic(currentBoxIndexDynamic, index)
+                                                                .setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.BOX)
+                                                                .setCreatureBoxPos(data.getBlockPos()),
                                                         selectedCreatureInfoDynamic,
                                                         creatureSwitchingDynamic,
                                                         creatureSwapInfoDynamic,
-                                                        confirmCreatureReleasePopupPanel
+                                                        confirmCreatureReleasePopupPanel,
+                                                        playerParty,
+                                                        playerBox,
+                                                        boxRevival,
+                                                        teCreatureBox
                                                 ).size(40)
                                         ))
                                         .padding(2)
@@ -315,12 +324,17 @@ public class RiftCreatureBoxScreen {
                                         .matrix(Grid.mapToMatrix(
                                                 2, RiftCreatureBox.maxDeployableCreatures,
                                                 index -> new CreatureInBoxButtonWidget(
-                                                        teCreatureBox, index,
-                                                        data.getBlockPos(),
+                                                        SelectedCreatureInfo.boxDeployedInfo(index)
+                                                                .setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.BOX)
+                                                                .setCreatureBoxPos(data.getBlockPos()),
                                                         selectedCreatureInfoDynamic,
                                                         creatureSwitchingDynamic,
                                                         creatureSwapInfoDynamic,
-                                                        confirmCreatureReleasePopupPanel
+                                                        confirmCreatureReleasePopupPanel,
+                                                        playerParty,
+                                                        playerBox,
+                                                        boxRevival,
+                                                        teCreatureBox
                                                 )
                                         ))
                                         .padding(2)

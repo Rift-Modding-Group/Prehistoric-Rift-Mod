@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.helper;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.config.GeneralConfig;
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.enums.MobSize;
@@ -552,5 +553,12 @@ public class RiftUtil {
         if (maxPoints <= 0) return value;
         int incrementor = (int) Math.pow(10, maxPoints);
         return ((int) (value * incrementor)) / (float) incrementor;
+    }
+
+    //note: maybe do this later, only deal with this in the
+    public static float creatureUIScale(RiftCreatureType creatureType) {
+        if (creatureType == RiftCreatureType.TYRANNOSAURUS) return 3f;
+        else if (creatureType == RiftCreatureType.APATOSAURUS) return 4f;
+        return 20f;
     }
 }

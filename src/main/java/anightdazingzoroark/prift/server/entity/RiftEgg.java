@@ -478,7 +478,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable, IGuiHolder<E
                 .child(Flow.column().coverChildrenHeight().align(Alignment.Center)
                         .childPadding(15)
                         .child(IKey.lang("item."+eggData.getCreatureType().name().toLowerCase()+"_egg.name").asWidget())
-                        .child(new EntityWidget<>(eggData, 60f).size(60))
+                        .child(new EntityWidget<>(eggData, 60f).size(60).rotateEntity())
                         .child(IKey.dynamic(this::getHatchTimeString).asWidget())
                 );
     }

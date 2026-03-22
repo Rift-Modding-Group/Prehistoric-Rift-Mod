@@ -42,7 +42,6 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemberButtonForPartyWidget> implements Interactable {
-    private final int index;
     private final ObjectValue.Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic;
     private final ObjectValue.Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic;
     private final BoolValue.Dynamic creatureSwitchingDynamic;
@@ -54,23 +53,22 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
     private CreatureNBT creatureNBT = new CreatureNBT();
 
     public PartyMemberButtonForPartyWidget(
-            int indexIn,
+            SelectedCreatureInfo selectedCreatureInfo,
             EntityPlayer player,
             ObjectValue.Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic,
             ObjectValue.Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
             BoolValue.Dynamic creatureSwitchingDynamic
     ) {
-        super(UIPanelNames.PARTY_DROPDOWN+indexIn);
-        this.index = indexIn;
+        super(UIPanelNames.PARTY_DROPDOWN+selectedCreatureInfo.getIndex());
+        this.selectedCreatureInfo = selectedCreatureInfo;
         this.selectedCreatureInfoDynamic = selectedCreatureInfoDynamic;
         this.creatureSwapInfoDynamic = creatureSwapInfoDynamic;
         this.creatureSwitchingDynamic = creatureSwitchingDynamic;
-        this.selectedCreatureInfo = SelectedCreatureInfo.partySelectedInfo(indexIn);
         this.playerParty = PlayerPartyHelper.getPlayerParty(player);
 
         this.requiresClick();
         this.size(80, 48);
-        if (this.index <= 3) this.openDown();
+        if (this.selectedCreatureInfo.getIndex() <= 3) this.openDown();
         else this.openUp();
         this.menuList(list -> {
             list.name("options").width(64).coverChildrenHeight().children(
@@ -92,11 +90,11 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
     //get the nbt. its info will be displayed, and if its deployed, should update dynamically
     private CreatureNBT getCreatureNBT() {
         //to dynamically update deployed creature info
-        if (this.playerParty.deployedCreatureIsLoadedAtIndex(this.index)) {
-            return new CreatureNBT(this.playerParty.getLoadedDeployedCreature(this.index));
+        if (this.playerParty.deployedCreatureIsLoadedAtIndex(this.selectedCreatureInfo.getIndex())) {
+            return new CreatureNBT(this.playerParty.getLoadedDeployedCreature(this.selectedCreatureInfo.getIndex()));
         }
         //if its not deployed, it remains as is
-        return this.playerParty.getPartyMember(this.index);
+        return this.playerParty.getPartyMember(this.selectedCreatureInfo.getIndex());
     }
 
     //wrapper for use in public for closing this button's menu if its ever open
@@ -116,7 +114,7 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
         if (this.selectedCreatureInfoDynamic.getValue() == null) {
             this.selectedCreatureInfoDynamic.setValue(this.selectedCreatureInfo);
         }
-        else if (this.selectedCreatureInfoDynamic.getValue().getIndex() == this.index) {
+        else if (this.selectedCreatureInfoDynamic.getValue().getIndex() == this.selectedCreatureInfo.getIndex()) {
             this.selectedCreatureInfoDynamic.setValue(null);
         }
         if (!(this.getParent() instanceof PaddedGrid gridParent)) return super.onMousePressed(mouseButton);
@@ -449,8 +447,8 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
             this.widthRel(1f).height(10);
             this.tooltipBuilder(tooltipBuilder -> {
                 if (this.parent.creatureNBT.nbtIsEmpty()) return;
-                if (this.option.hasIneligibilityText() && !this.option.canBeClicked(this.parent.index, this.parent.playerParty)) {
-                    String result = this.option.getIneligibilityText(this.parent.index, this.parent.playerParty);
+                if (this.option.hasIneligibilityText() && !this.option.canBeClicked(this.parent.selectedCreatureInfo.getIndex(), this.parent.playerParty)) {
+                    String result = this.option.getIneligibilityText(this.parent.selectedCreatureInfo.getIndex(), this.parent.playerParty);
                     if (!result.isEmpty()) tooltipBuilder.addLine(result);
                 }
             });
@@ -461,8 +459,8 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
         public Result onMousePressed(int mouseButton) {
             if (this.parent == null) return Result.ACCEPT;
             if (this.parent.creatureNBT.nbtIsEmpty()) return Result.ACCEPT;
-            if (!this.option.canBeClicked(this.parent.index, this.parent.playerParty)) return Result.ACCEPT;
-            if (this.option.click(this.parent.index, this.parent.playerParty)) {
+            if (!this.option.canBeClicked(this.parent.selectedCreatureInfo.getIndex(), this.parent.playerParty)) return Result.ACCEPT;
+            if (this.option.click(this.parent.selectedCreatureInfo.getIndex(), this.parent.playerParty)) {
                 Interactable.playButtonClickSound();
                 this.markAllTooltipsDirty();
                 return Result.SUCCESS;
@@ -481,7 +479,7 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
         @Override
         public IDrawable getOverlay() {
             if (this.parent == null || this.parent.creatureNBT.nbtIsEmpty()) return IKey.NONE;
-            String text = this.option.getTranslatedName(this.parent.index, this.parent.playerParty);
+            String text = this.option.getTranslatedName(this.parent.selectedCreatureInfo.getIndex(), this.parent.playerParty);
             int textColor = this.isHovering() ? 0xFFFFFFFF : IKey.TEXT_COLOR;
             return IKey.str(text).scale(0.5f).color(textColor);
         }
@@ -489,7 +487,7 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
         @Override
         public IDrawable getHoverBackground() {
             if (this.parent == null || this.parent.creatureNBT.nbtIsEmpty()) return IKey.NONE;
-            if (this.option.canBeClicked(this.parent.index, this.parent.playerParty)) {
+            if (this.option.canBeClicked(this.parent.selectedCreatureInfo.getIndex(), this.parent.playerParty)) {
                 return new DrawableStack(
                         new Rectangle().color(0xFFB5377B),
                         new Rectangle().color(0xFF942C64).hollow(0.5f)

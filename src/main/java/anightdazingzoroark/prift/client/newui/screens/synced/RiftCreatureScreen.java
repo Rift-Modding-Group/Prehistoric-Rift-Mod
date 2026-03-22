@@ -559,7 +559,7 @@ public class RiftCreatureScreen {
                                                 .asWidget().size(96, 64))
                                         .child(new Rectangle().color(0xFF808080).cornerRadius(5)
                                                 .asWidget().size(94, 62).center())
-                                        .child(new EntityWidget<>(duplicateCreatureForRender(data), 10f)
+                                        .child(new EntityWidget<>(duplicateCreatureForRender(data), RiftUtil.creatureUIScale(data.getCreatureType()))
                                                 .size(92, 60).center().yawRotationAngle(135))
                                 )
                                 .child(IKey.dynamic(() -> data.getName(false)).scale(0.75f).asWidget())
@@ -801,6 +801,14 @@ public class RiftCreatureScreen {
     private static RiftCreature duplicateCreatureForRender(CreatureGuiData data) {
         if (data == null) return null;
         CreatureNBT creatureNBT = data.getCreatureNBT();
-        return creatureNBT.recreateCreatureAsNBT(data.getWorld());
+        RiftCreature recreatedCreature = creatureNBT.recreateCreatureAsNBT(data.getWorld());
+
+        //age up creature
+        recreatedCreature.setAgeInDays(1);
+
+        //set health to negate red tint of death
+        recreatedCreature.setHealth(recreatedCreature.getMaxHealth());
+
+        return recreatedCreature;
     }
 }

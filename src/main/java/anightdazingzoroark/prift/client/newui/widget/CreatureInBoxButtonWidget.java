@@ -48,9 +48,6 @@ import java.util.function.Consumer;
 
 public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxButtonWidget> implements Interactable {
     @NotNull
-    private final SelectedCreatureInfo.SelectedPosType section;
-    private final int index;
-    @NotNull
     private final ObjectValue.Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic;
     @NotNull
     private final BoolValue.Dynamic creatureSwitchingDynamic;
@@ -66,7 +63,6 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
 
     //creature box only stuff
     private PlayerCreatureBoxProperties playerBox;
-    private IntValue.Dynamic currentBoxIndexDynamic;
     private HashMapValue.Dynamic<ImmutablePair<Integer, Integer>, Integer> boxRevival;
 
     //deployed from box only stuff
@@ -77,88 +73,40 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     private CreatureNBT creatureNBT = new CreatureNBT();
     private boolean isSelected;
 
-    //the party only requires the index and the player
     public CreatureInBoxButtonWidget(
-            PlayerPartyProperties playerParty,
-            int index, BlockPos creatureBoxPos,
+            @NotNull SelectedCreatureInfo selectedCreatureInfo,
             ObjectValue.@NotNull Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic,
             BoolValue.@NotNull Dynamic creatureSwitchingDynamic,
             ObjectValue.@NotNull Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
-            @NonNull IPanelHandler confirmCreatureReleasePopupPanel
+            @NotNull IPanelHandler confirmCreatureReleasePopupPanel,
+            @NotNull PlayerPartyProperties playerParty,
+            @NotNull PlayerCreatureBoxProperties playerBox,
+            @NotNull HashMapValue.Dynamic<ImmutablePair<Integer, Integer>, Integer> boxRevival,
+            @NotNull RiftTileEntityCreatureBox teCreatureBox
     ) {
-        super(UIPanelNames.BOX_DROPDOWN+":party:"+index);
-        this.section = SelectedCreatureInfo.SelectedPosType.PARTY;
-        this.index = index;
-        this.playerParty = playerParty;
+        super(selectedCreatureInfo.getMenuName());
+        this.selectedCreatureInfo = selectedCreatureInfo;
         this.selectedCreatureInfoDynamic = selectedCreatureInfoDynamic;
         this.creatureSwitchingDynamic = creatureSwitchingDynamic;
         this.creatureSwapInfoDynamic = creatureSwapInfoDynamic;
         this.confirmCreatureReleasePopupPanel = confirmCreatureReleasePopupPanel;
 
-        this.selectedCreatureInfo = SelectedCreatureInfo.partySelectedInfo(index);
-        this.selectedCreatureInfo.setCreatureBoxPos(creatureBoxPos);
+        //section based stuff
+        if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY) {
+            this.playerParty = playerParty;
+        }
+        else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
+            this.playerBox = playerBox;
+            this.boxRevival = boxRevival;
+        }
+        else if (selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
+            this.teCreatureBox = teCreatureBox;
+        }
 
-        this.commonSetup();
-    }
-
-    //the box requires the box index, the index within the box, and the player
-    public CreatureInBoxButtonWidget(
-            PlayerCreatureBoxProperties playerBox,
-            HashMapValue.Dynamic<ImmutablePair<Integer, Integer>, Integer> boxRevival,
-            IntValue.Dynamic currentBoxIndexDynamic, int index, BlockPos creatureBoxPos,
-            ObjectValue.@NotNull Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic,
-            BoolValue.@NotNull Dynamic creatureSwitchingDynamic,
-            ObjectValue.@NotNull Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
-            @NonNull IPanelHandler confirmCreatureReleasePopupPanel
-    ) {
-        super(UIPanelNames.BOX_DROPDOWN+":box:"+index);
-        this.section = SelectedCreatureInfo.SelectedPosType.BOX;
-        this.currentBoxIndexDynamic = currentBoxIndexDynamic;
-        this.index = index;
-        this.playerBox = playerBox;
-        this.boxRevival = boxRevival;
-        this.selectedCreatureInfoDynamic = selectedCreatureInfoDynamic;
-        this.creatureSwitchingDynamic = creatureSwitchingDynamic;
-        this.creatureSwapInfoDynamic = creatureSwapInfoDynamic;
-        this.confirmCreatureReleasePopupPanel = confirmCreatureReleasePopupPanel;
-
-        this.selectedCreatureInfo = SelectedCreatureInfo.boxSelectedInfoDynamic(currentBoxIndexDynamic, index);
-        this.selectedCreatureInfo.setCreatureBoxPos(creatureBoxPos);
-
-        this.commonSetup();
-    }
-
-    //deployed from box requires a FixedSizeCreatureListSyncValue which has the box's
-    //deployed creatures
-    public CreatureInBoxButtonWidget(
-            RiftTileEntityCreatureBox teCreatureBox,
-            int index, BlockPos creatureBoxPos,
-            ObjectValue.@NotNull Dynamic<SelectedCreatureInfo> selectedCreatureInfoDynamic,
-            BoolValue.@NotNull Dynamic creatureSwitchingDynamic,
-            ObjectValue.@NotNull Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
-            @NonNull IPanelHandler confirmCreatureReleasePopupPanel
-    ) {
-        super(UIPanelNames.BOX_DROPDOWN+":boxdeployed:"+index);
-        this.section = SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED;
-        this.teCreatureBox = teCreatureBox;
-        this.index = index;
-        this.selectedCreatureInfoDynamic = selectedCreatureInfoDynamic;
-        this.creatureSwitchingDynamic = creatureSwitchingDynamic;
-        this.creatureSwapInfoDynamic = creatureSwapInfoDynamic;
-        this.confirmCreatureReleasePopupPanel = confirmCreatureReleasePopupPanel;
-
-        this.selectedCreatureInfo = SelectedCreatureInfo.boxDeployedInfo(index);
-        this.selectedCreatureInfo.setCreatureBoxPos(creatureBoxPos);
-
-        this.commonSetup();
-    }
-
-    private void commonSetup() {
+        //menu based stuff
         this.size(32);
         this.menu(new MenuForCreature(this));
         this.openCustom();
-
-        this.selectedCreatureInfo.setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.BOX);
     }
 
     @Override
@@ -168,6 +116,22 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
 
         this.isSelected = this.selectedCreatureInfo.equals(this.selectedCreatureInfoDynamic.getValue());
         this.creatureNBT = this.getCreatureNBT();
+
+        //tooltip, mainly for warning about how reviving box creatures cannot be swapped
+        boolean tooltipAdd = !this.creatureNBT.nbtIsEmpty()
+                && this.creatureNBT.getCreatureHealth()[0] <= 0
+                && this.creatureSwitchingDynamic.getBoolValue();
+        boolean tooltipRemoveSwapping = !this.creatureNBT.nbtIsEmpty() && this.creatureNBT.getCreatureHealth()[0] > 0 && this.creatureSwitchingDynamic.getBoolValue();
+        boolean tooltipRemoveNotSwapping = this.creatureNBT.nbtIsEmpty() || !this.creatureSwitchingDynamic.getBoolValue();
+
+        if (this.tooltip().isEmpty() && tooltipAdd) {
+            this.tooltip().addLine(IKey.lang("box.tooltip.cannot_swap_out_reviving"));
+            this.tooltip().markDirty();
+        }
+        else if (tooltipRemoveSwapping || tooltipRemoveNotSwapping) {
+            this.tooltip().clearText();
+            this.tooltip().markDirty();
+        }
     }
 
     @Override
@@ -186,7 +150,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
         }
         //prevent swapping of box creature if creature is still reviving
         else if (this.creatureNBT.getCreatureHealth()[0] <= 0
-                && this.section == SelectedCreatureInfo.SelectedPosType.BOX
+                && this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX
                 && this.creatureSwitchingDynamic.getBoolValue()
         ) {
             return Result.ACCEPT;
@@ -206,6 +170,7 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
 
             if (!this.creatureSwapInfoDynamic.getValue().canSwap()) {
                 this.creatureSwapInfoDynamic.getValue().setCreature(this.selectedCreatureInfo);
+                this.closeMenu(false);
             }
             Interactable.playButtonClickSound();
             return Result.SUCCESS;
@@ -216,10 +181,14 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     //is selected and when not swapping creatures can the hover menu be opened
     @Override
     public void onMouseEnterArea() {
-        if (!this.creatureNBT.nbtIsEmpty()
-                && this.selectedCreatureInfoDynamic.getValue() == null
-                && !this.creatureSwitchingDynamic.getBoolValue()
-        ) {
+        boolean hoverConditionNotSwitching = !this.creatureSwitchingDynamic.getBoolValue()
+                && !this.creatureNBT.nbtIsEmpty()
+                && this.selectedCreatureInfoDynamic.getValue() == null;
+        boolean hoverConditionSwitching = this.creatureSwitchingDynamic.getBoolValue()
+                && !this.creatureNBT.nbtIsEmpty()
+                && !this.isSelected;
+
+        if (hoverConditionNotSwitching || hoverConditionSwitching) {
             super.onMouseEnterArea();
         }
     }
@@ -233,30 +202,35 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
     }
 
     private CreatureNBT getCreatureNBT() {
-        if (this.section == SelectedCreatureInfo.SelectedPosType.PARTY) {
-            if (this.playerParty.deployedCreatureIsLoadedAtIndex(this.index)) {
-                return new CreatureNBT(this.playerParty.getLoadedDeployedCreature(this.index));
+        int index = this.selectedCreatureInfo.getIndex();
+        switch (this.selectedCreatureInfo.selectedPosType) {
+            case PARTY: {
+                if (this.playerParty.deployedCreatureIsLoadedAtIndex(index)) {
+                    return new CreatureNBT(this.playerParty.getLoadedDeployedCreature(index));
+                }
+                else return this.playerParty.getPartyMember(index);
             }
-            else return this.playerParty.getPartyMember(this.index);
-        }
-        else if (this.section == SelectedCreatureInfo.SelectedPosType.BOX) {
-            return this.playerBox.getCreatureBoxStorage().getBoxContents(this.currentBoxIndexDynamic.getIntValue()).get(this.index);
-        }
-        else if (this.section == SelectedCreatureInfo.SelectedPosType.BOX_DEPLOYED) {
-            if (this.teCreatureBox.deployedCreatureIsLoadedAtIndex(this.index)) {
-                return new CreatureNBT(this.teCreatureBox.getLoadedDeployedCreature(this.index));
+            case BOX: {
+                return this.playerBox.getCreatureBoxStorage()
+                        .getBoxContents(this.selectedCreatureInfo.getBoxIndex())
+                        .get(index);
             }
-            else return this.teCreatureBox.getDeployedCreatures().get(this.index);
+            case BOX_DEPLOYED: {
+                if (this.teCreatureBox.deployedCreatureIsLoadedAtIndex(index)) {
+                    return new CreatureNBT(this.teCreatureBox.getLoadedDeployedCreature(index));
+                }
+                else return this.teCreatureBox.getDeployedCreatures().get(index);
+            }
         }
         return new CreatureNBT();
     }
 
     private int getRevivalTime() {
-        if (this.section != SelectedCreatureInfo.SelectedPosType.BOX) return 0;
+        if (this.selectedCreatureInfo.selectedPosType != SelectedCreatureInfo.SelectedPosType.BOX) return 0;
         HashMap<ImmutablePair<Integer, Integer>, Integer> boxRevivalValue = this.boxRevival.getValue();
         ImmutablePair<Integer, Integer> posAsPair = new ImmutablePair<>(
-                this.currentBoxIndexDynamic.getIntValue(),
-                this.index
+                this.selectedCreatureInfo.getBoxIndex(),
+                this.selectedCreatureInfo.getIndex()
         );
         if (boxRevivalValue.containsKey(posAsPair)) return boxRevivalValue.get(posAsPair);
         return 0;
@@ -291,13 +265,15 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
             }
 
             //put on timer if reviving and in box
-            if (this.creatureNBT.getCreatureHealth()[0] <= 0 && this.section == SelectedCreatureInfo.SelectedPosType.BOX) {
+            if (this.creatureNBT.getCreatureHealth()[0] <= 0 &&
+                    this.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX
+            ) {
                 //rectangle bg
                 int revivalBoxUpperBound = (int) (this.getArea().h() * 0.5) - 6;
                 new Rectangle().color(0x80808080).draw(context, 2, revivalBoxUpperBound, this.getArea().w() - 4, 12, theme);
 
                 String revivalTime = RiftUtil.ticksToMinSecTimeExpression(this.getRevivalTime());
-                IKey.str(revivalTime).drawAtZero(context, this.getArea(), theme);
+                IKey.str(revivalTime).color(0xFFFFFFFF).drawAtZero(context, this.getArea(), theme);
             }
         }
         else new Rectangle().color(0xFF212121).cornerRadius(5).drawAtZero(context, this.getArea(), theme);
@@ -440,8 +416,8 @@ public class CreatureInBoxButtonWidget extends ContextMenuButton<CreatureInBoxBu
 
         private void unselectedFlex() {
             //if on party or box, show to the right
-            if (this.parent.section == SelectedCreatureInfo.SelectedPosType.PARTY
-                || this.parent.section == SelectedCreatureInfo.SelectedPosType.BOX) {
+            if (this.parent.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.PARTY
+                || this.parent.selectedCreatureInfo.selectedPosType == SelectedCreatureInfo.SelectedPosType.BOX) {
                 this.resizer().leftRel(1f).topRel(0.5f);
             }
             //otherwise, to the left

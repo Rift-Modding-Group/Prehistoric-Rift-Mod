@@ -62,7 +62,7 @@ public class RiftPartyScreen extends CustomModularScreen {
                 .matrix(Grid.mapToMatrix(
                         2, PlayerPartyHelper.maxSize,
                         index -> new PartyMemberButtonForPartyWidget(
-                                index,
+                                SelectedCreatureInfo.partySelectedInfo(index).setMenuOpenedFrom(SelectedCreatureInfo.MenuOpenedFrom.PARTY),
                                 player,
                                 selectedCreatureInfoDynamic,
                                 creatureSwapInfoDynamic,
