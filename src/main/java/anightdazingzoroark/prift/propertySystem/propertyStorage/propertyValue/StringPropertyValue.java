@@ -3,8 +3,8 @@ package anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class StringPropertyValue extends AbstractPropertyValue<String> {
-    public StringPropertyValue(String key) {
-        super(key, "");
+    public StringPropertyValue(String key, String initValue) {
+        super(key, initValue);
     }
 
     @Override

@@ -8,19 +8,18 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.world.World;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.items.CapabilityItemHandler;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.IntStream;
 
 public abstract class RiftTileEntity extends TileEntity {
     protected final HashMap<String, ImmutablePair<AbstractPropertyValue<?>, Boolean>> propertyValueMap = new HashMap<>();
     protected final HashMap<String, RiftInventoryHandler> inventoryMap = new HashMap<>();
+    protected final InventorySideInfo inventorySideInfo = new InventorySideInfo();
 
     public RiftTileEntity() {
         super();
@@ -126,10 +125,23 @@ public abstract class RiftTileEntity extends TileEntity {
         }
     }
 
+    //for dealing with how inventories can be inserted into or extracted from by hoppers or pipes
+    //depending on the side, must be put in registerInventories after registering inventories
+    protected void registerInventorySiding(@NotNull String key, boolean extract, @NotNull EnumFacing... sides) {
+        //check if the inventory already exists, if it doesn't, skip
+        if (!this.inventoryMap.containsKey(key)) {
+            throw new UnsupportedOperationException("Inventory "+key+" does not exist in this tile entity!");
+        }
+
+        this.inventorySideInfo.addKey(key, this.inventoryMap.get(key).getSlots(), extract, sides);
+    }
+
     //-----getting inventory-----
     public RiftInventoryHandler getInventory(String key) {
         return this.inventoryMap.get(key);
     }
+
+    //-----inventory operations that take advantage of inventorySidingMap, for use in anything that has ISidedInventory-----
 
     //-----saving and updating nbt-----
     protected void updateServerData() {
@@ -190,5 +202,75 @@ public abstract class RiftTileEntity extends TileEntity {
     @Override
     public void handleUpdateTag(@NotNull NBTTagCompound compound) {
         this.readFromNBT(compound);
+    }
+
+    //for info on restricting inventory extraction via pipes or hoppers or whatever depending on the side
+    //of the tile entity it was placed next to
+    protected static class InventorySideInfo {
+        private final HashMap<String, ImmutableTriple<Integer, Boolean, List<EnumFacing>>> inventorySideOrder = new HashMap<>();
+        private final HashMap<EnumFacing, List<Integer>> enumIndexes = new HashMap<>();
+        private final HashMap<Integer, Boolean> canExtractIndexes = new HashMap<>();
+        private final List<String> orderedKeys = new ArrayList<>();
+
+        public void addKey(String key, int inventorySize, boolean extract, EnumFacing[] directions) {
+            this.orderedKeys.add(key);
+            this.inventorySideOrder.put(key, new ImmutableTriple<>(inventorySize, extract, Arrays.asList(directions)));
+        }
+
+        //must be run at the end of registerInventories() after registering all inventories
+        public void finalizeInfo() {
+            for (Map.Entry<String, ImmutableTriple<Integer, Boolean, List<EnumFacing>>> entry : this.inventorySideOrder.entrySet()) {
+                for (EnumFacing facing : entry.getValue().getRight()) {
+                    int[] indexesAtSide = this.getSlotsForSide(facing);
+
+                    //deal with enumIndexes, which is for indexes that correspond to a direction
+                    //check if facing as key exists in enumIndexes
+                    //if yes, then perform appending
+                    //otherwise, add it
+                    if (this.enumIndexes.containsKey(facing)) {
+                        List<Integer> oldIndexes = this.enumIndexes.get(facing);
+                        if (indexesAtSide.length > 0) {
+                            oldIndexes.addAll(Arrays.stream(indexesAtSide).boxed().toList());
+                            this.enumIndexes.put(facing, oldIndexes);
+                        }
+                    }
+                    else {
+                        if (indexesAtSide.length > 0) {
+                            this.enumIndexes.put(facing, Arrays.stream(indexesAtSide).boxed().toList());
+                        }
+                    }
+
+                    //deal with canExtractIndexes, which deals with whether or not an index can be extracted from or inserted into
+                    for (int indexAtSide : indexesAtSide) {
+                        this.canExtractIndexes.put(indexAtSide, entry.getValue().getMiddle());
+                    }
+                }
+
+            }
+        }
+
+        private int[] getSlotsForSide(EnumFacing direction) {
+            int[] toReturn = new int[]{};
+            int accumulatedSize = 0;
+            for (String key : this.orderedKeys) {
+                ImmutableTriple<Integer, Boolean, List<EnumFacing>> sideInfo = this.inventorySideOrder.get(key);
+
+                //add to accumulative size and skip if triple doesn't contain direction
+                if (!sideInfo.getRight().contains(direction)) {
+                    accumulatedSize += sideInfo.getLeft();
+                    continue;
+                }
+
+                //create a new array (as a stream) whose integer values are between accumulated size and the ideal last pos
+                IntStream sidesStream = IntStream.range(accumulatedSize, accumulatedSize + sideInfo.getLeft());
+
+                //now append to toReturn
+                toReturn = IntStream.concat(sidesStream, Arrays.stream(toReturn)).toArray();
+
+                //add to accumulative size
+                accumulatedSize += sideInfo.getLeft();
+            }
+            return toReturn;
+        }
     }
 }

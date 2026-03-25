@@ -2,9 +2,7 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.blocks;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityMechanicalFilter;
-import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityMillstone;
 import anightdazingzoroark.prift.server.RiftGui;
-import anightdazingzoroark.prift.server.ServerProxy;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.ITileEntityProvider;

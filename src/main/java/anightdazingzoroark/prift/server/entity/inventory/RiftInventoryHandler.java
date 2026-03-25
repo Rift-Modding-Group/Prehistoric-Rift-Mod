@@ -10,8 +10,10 @@ import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 public class RiftInventoryHandler extends ItemStackHandler {
+    //fallback value for item searching if nothing can be found
     private final ItemSearchResult noItemFound = new ItemSearchResult(false, ItemStack.EMPTY, -1);
 
     public RiftInventoryHandler() {
@@ -153,6 +155,16 @@ public class RiftInventoryHandler extends ItemStackHandler {
             this.stacks.set(i, ItemStack.EMPTY);
         }
     }
+
+    //-----methods for use in ISidedInventory starts here-----
+    public int[] getSlotIndexes() {
+        return this.getSlotIndexes(0);
+    }
+
+    public int[] getSlotIndexes(int displacement) {
+        return IntStream.range(displacement, this.getSlots() + displacement).toArray();
+    }
+    //-----methods for use in ISidedInventory ends here-----
 
     @Override
     public String toString() {

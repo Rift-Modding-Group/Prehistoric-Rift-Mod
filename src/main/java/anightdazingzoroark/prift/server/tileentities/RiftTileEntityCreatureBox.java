@@ -65,7 +65,7 @@ public class RiftTileEntityCreatureBox extends RiftTileEntity implements ITickab
         ));
         this.registerValue(new UUIDPropertyValue("UniqueID", RiftUtil.nilUUID));
         this.registerValue(new UUIDPropertyValue("OwnerID", RiftUtil.nilUUID));
-        this.registerValue(new StringPropertyValue("OwnerName"));
+        this.registerValue(new StringPropertyValue("OwnerName", ""));
         this.registerValue(new IntPropertyValue("DeploymentRange", 1));
     }
 
