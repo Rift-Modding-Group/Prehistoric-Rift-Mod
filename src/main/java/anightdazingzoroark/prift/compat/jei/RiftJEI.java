@@ -145,10 +145,6 @@ public class RiftJEI implements IModPlugin {
                 registry.addRecipeClickArea(RiftSemiManualHammererMenu.class, 58, 33, 21, 14, smHammererCat);
                 registry.addRecipeCatalyst(new ItemStack(RiftMMItems.SEMI_MANUAL_HAMMERER), smHammererCat);
             }
-
-            registry.addRecipes(this.mechanicalFilterWrappers(), mechFilterCat);
-            registry.addRecipeClickArea(RiftMechanicalFilterMenu.class, 81, 44, 14, 22, mechFilterCat);
-            registry.addRecipeCatalyst(new ItemStack(RiftMMBlocks.MECHANICAL_FILTER), mechFilterCat);
         }
     }
 

@@ -6,7 +6,6 @@ import mezz.jei.api.ingredients.VanillaTypes;
 import mezz.jei.api.recipe.IRecipeWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.item.crafting.Ingredient;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -23,7 +22,7 @@ public class RiftJEIMechanicalFilterWrapper implements IRecipeWrapper {
     @Override
     public void getIngredients(IIngredients iIngredients) {
         iIngredients.setInputs(VanillaTypes.ITEM, Arrays.asList(this.recipe.input.matchingStacks));
-        iIngredients.setOutputs(VanillaTypes.ITEM, Arrays.asList(this.output.getOutput().matchingStacks));
+        iIngredients.setOutputs(VanillaTypes.ITEM, Arrays.asList(this.output.output().matchingStacks));
     }
 
     @Override
@@ -33,9 +32,9 @@ public class RiftJEIMechanicalFilterWrapper implements IRecipeWrapper {
         int mPowerStringHeight = minecraft.fontRenderer.FONT_HEIGHT;
 
         double totalWeight = this.recipe.output.stream()
-                .mapToInt(MechanicalFilterRecipe.MechanicalFilterOutput::getWeight)
+                .mapToInt(MechanicalFilterRecipe.MechanicalFilterOutput::weight)
                 .sum();
-        double chanceNum = this.output.getWeight() / totalWeight * 100;
+        double chanceNum = this.output.weight() / totalWeight * 100;
         double chanceRounded = (double) Math.round(chanceNum * 100) / 100;
         String chance = I18n.format("jei.chance", chanceRounded+" %");
         int chanceStringWidth = minecraft.fontRenderer.getStringWidth(chance);

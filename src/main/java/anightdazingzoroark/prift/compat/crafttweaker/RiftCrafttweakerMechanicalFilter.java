@@ -37,7 +37,7 @@ public class RiftCrafttweakerMechanicalFilter {
     public static void removeOutputFromRecipe(IItemStack input, IItemStack output) {
         RiftMMRecipes.mechanicalFilterRecipes.stream()
                 .filter(recipe -> recipe.input.apply(CraftTweakerMC.getItemStack(input)))
-                .forEach(recipe -> recipe.output.removeIf(mechanicalFilterOutput -> mechanicalFilterOutput.getOutput().apply(CraftTweakerMC.getItemStack(output))));
+                .forEach(recipe -> recipe.output.removeIf(mechanicalFilterOutput -> mechanicalFilterOutput.output().apply(CraftTweakerMC.getItemStack(output))));
     }
 
     @ZenMethod

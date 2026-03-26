@@ -1,8 +1,10 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.RiftUIIcons;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.compat.jei.RiftJEI;
+import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.ConsumerMechCapability;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.MillstoneRecipe;
@@ -47,6 +49,7 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import anightdazingzoroark.riftlib.core.IAnimatable;
@@ -63,6 +66,7 @@ public class TileEntityMillstone extends RiftTileEntityContainer implements IAni
     private final IMechCapability mechPower;
 
     public TileEntityMillstone() {
+        super();
         this.mechPower = new ConsumerMechCapability() {
             @Override
             public void onPowerChange() {
@@ -239,7 +243,7 @@ public class TileEntityMillstone extends RiftTileEntityContainer implements IAni
     @Override
     public ModularPanel buildUI(PosGuiData posGuiData, PanelSyncManager syncManager, UISettings uiSettings) {
         TileEntityMillstone millstone = (TileEntityMillstone) posGuiData.getTileEntity();
-        if (millstone == null) return new ModularPanel(UIPanelNames.FEEDING_TROUGH_SCREEN);
+        if (millstone == null) return new ModularPanel(UIPanelNames.MILLSTONE_SCREEN);
         RiftInventoryHandler inputInventory = millstone.getInputInventory();
         RiftInventoryHandler outputInventory = millstone.getOutputInventory();
 
@@ -283,7 +287,8 @@ public class TileEntityMillstone extends RiftTileEntityContainer implements IAni
                                                                                 null
                                                                         ))
                                                                 )
-                                                                .child(new ButtonWidget<>().size(20)
+                                                                .childIf(Loader.isModLoaded(RiftInitialize.JEI_MOD_ID),
+                                                                        () -> new ButtonWidget<>().size(20)
                                                                         .addTooltipElement(I18n.format("jei.show_recipes"))
                                                                         .hoverBackground(IDrawable.EMPTY)
                                                                         .background(IDrawable.EMPTY)

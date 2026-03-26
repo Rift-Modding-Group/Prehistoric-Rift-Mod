@@ -31,21 +31,5 @@ public class MechanicalFilterRecipe {
         return powerIn >= this.getMinPower() && this.input.apply(itemIn);
     }
 
-    public static class MechanicalFilterOutput {
-        private final Ingredient output;
-        private final int weight;
-
-        public MechanicalFilterOutput(Ingredient output, int weight) {
-            this.output = output;
-            this.weight = weight;
-        }
-
-        public Ingredient getOutput() {
-            return this.output;
-        }
-
-        public int getWeight() {
-            return this.weight;
-        }
-    }
+    public record MechanicalFilterOutput(Ingredient output, int weight) {}
 }
