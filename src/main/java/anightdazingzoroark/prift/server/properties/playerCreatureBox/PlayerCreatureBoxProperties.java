@@ -4,11 +4,10 @@ import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.AbstractEntityProperties;
 import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.HashMapPropertyValue;
-import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.IntPropertyValue;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.IntegerPropertyValue;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.ObjectPropertyValue;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
@@ -44,7 +43,7 @@ public class PlayerCreatureBoxProperties extends AbstractEntityProperties<Entity
                 }
         ));
         //is in ticks
-        this.register(new IntPropertyValue("LastTimeOpened", 0), false);
+        this.register(new IntegerPropertyValue("LastTimeOpened", 0), false);
     }
 
     //-----direct creature box contents editing and getting-----

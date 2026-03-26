@@ -2,8 +2,8 @@ package anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue;
 
 import net.minecraft.nbt.NBTTagCompound;
 
-public class IntPropertyValue extends AbstractPropertyValue<Integer> {
-    public IntPropertyValue(String key, Integer defaultValue) {
+public class IntegerPropertyValue extends AbstractPropertyValue<Integer> {
+    public IntegerPropertyValue(String key, Integer defaultValue) {
         super(key, defaultValue);
     }
 

@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public abstract class RiftTileEntity extends TileEntity {
@@ -312,7 +313,7 @@ public abstract class RiftTileEntity extends TileEntity {
 
         public void addKey(String key, int inventorySize, SideInvInteraction sideInvInteraction, EnumFacing[] directions) {
             if (!this.orderedKeys.contains(key)) this.orderedKeys.add(key);
-            this.inventorySideInfos.add(new InventorySideInfo(key, inventorySize, sideInvInteraction, Arrays.asList(directions)));
+            this.inventorySideInfos.add(new InventorySideInfo(key, inventorySize, sideInvInteraction, new ArrayList<>(Arrays.asList(directions))));
         }
 
         //must be run at the end of registerInventories() after registering all inventories
@@ -350,7 +351,7 @@ public abstract class RiftTileEntity extends TileEntity {
                 if (matches.isEmpty()) continue;
 
                 InventorySideInfo match = matches.getFirst();
-                List<Integer> indexes = IntStream.range(accumulativeSize, accumulativeSize + match.size).boxed().toList();
+                List<Integer> indexes = IntStream.range(accumulativeSize, accumulativeSize + match.size).boxed().collect(Collectors.toList());
                 this.displacedIndexes.put(key, indexes);
                 accumulativeSize += match.size;
             }
@@ -373,7 +374,7 @@ public abstract class RiftTileEntity extends TileEntity {
                     if (this.slotsAndDirections.containsKey(direction)) {
                         List<Integer> slots = this.slotsAndDirections.get(direction);
                         slots.addAll(entry.getValue());
-                        this.slotsAndDirections.put(direction, entry.getValue());
+                        this.slotsAndDirections.put(direction, slots);
                     }
                     else this.slotsAndDirections.put(direction, entry.getValue());
                 }

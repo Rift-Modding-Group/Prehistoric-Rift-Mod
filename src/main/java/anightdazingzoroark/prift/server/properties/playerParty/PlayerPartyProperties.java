@@ -5,7 +5,7 @@ import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.AbstractEntityProperties;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.FixedSizeListPropertyValue;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.HashMapPropertyValue;
-import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.IntPropertyValue;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.IntegerPropertyValue;
 import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -88,7 +88,7 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
                     return toReturn;
                 }
         ));
-        this.register(new IntPropertyValue("QuickSelectedPos", 0));
+        this.register(new IntegerPropertyValue("QuickSelectedPos", 0));
     }
 
     //-----direct party member editing and getting-----

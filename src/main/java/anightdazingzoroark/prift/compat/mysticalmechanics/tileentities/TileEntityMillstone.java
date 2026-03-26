@@ -1,9 +1,31 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
+import anightdazingzoroark.prift.client.newui.RiftUIIcons;
+import anightdazingzoroark.prift.client.newui.UIPanelNames;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.ConsumerMechCapability;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.MillstoneRecipe;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.DoublePropertyValue;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.IntegerPropertyValue;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.StringPropertyValue;
+import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntity;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
+import com.cleanroommc.modularui.api.IGuiHolder;
+import com.cleanroommc.modularui.api.drawable.IKey;
+import com.cleanroommc.modularui.drawable.GuiTextures;
+import com.cleanroommc.modularui.factory.PosGuiData;
+import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.screen.UISettings;
+import com.cleanroommc.modularui.value.DoubleValue;
+import com.cleanroommc.modularui.value.sync.PanelSyncManager;
+import com.cleanroommc.modularui.widget.ParentWidget;
+import com.cleanroommc.modularui.widgets.ProgressWidget;
+import com.cleanroommc.modularui.widgets.SlotGroupWidget;
+import com.cleanroommc.modularui.widgets.layout.Flow;
+import com.cleanroommc.modularui.widgets.slot.ItemSlot;
+import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import mysticalmechanics.api.IMechCapability;
 import mysticalmechanics.api.MysticalMechanicsAPI;
 import mysticalmechanics.util.Misc;
@@ -17,7 +39,6 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.capabilities.Capability;
@@ -32,13 +53,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TileEntityMillstone extends TileEntity implements IAnimatable, ITickable, ISidedInventory {
+public class TileEntityMillstone extends RiftTileEntity implements IAnimatable, ITickable, ISidedInventory, IGuiHolder<PosGuiData> {
     private final AnimationFactory factory = new AnimationFactory(this);
     private final IMechCapability mechPower;
-    private int timeHeld;
-    private double compPerc;
-    protected NonNullList<ItemStack> itemStackHandler = NonNullList.<ItemStack>withSize(12, ItemStack.EMPTY);
-    private MillstoneRecipe currentRecipe;
 
     public TileEntityMillstone() {
         this.mechPower = new ConsumerMechCapability() {
@@ -50,6 +67,23 @@ public class TileEntityMillstone extends TileEntity implements IAnimatable, ITic
     }
 
     @Override
+    public void registerValues() {
+        this.registerValue(new IntegerPropertyValue("TimeHeld", 0));
+        this.registerValue(new DoublePropertyValue("Completion", 0D));
+        this.registerValue(new StringPropertyValue("CurrentRecipe", ""));
+    }
+
+    @Override
+    public void registerInventories() {
+        this.registerInventory("Input", 3);
+        this.registerInventory("Output", 9);
+
+        this.registerInventorySiding("Input", SideInvInteraction.INSERT, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.EAST, EnumFacing.WEST);
+        this.registerInventorySiding("Output", SideInvInteraction.EXTRACT, EnumFacing.DOWN);
+        this.finalizeInventorySidingInfo();
+    }
+
+    @Override
     public void update() {
         if (this.world.isRemote) {
             //get nearby players that will hear the sounds
@@ -58,8 +92,9 @@ public class TileEntityMillstone extends TileEntity implements IAnimatable, ITic
             if (this.getPower() > 0 && this.world.rand.nextInt(40) < 2) for (EntityPlayer player : playerList) this.world.playSound(player, this.pos, SoundEvents.ENTITY_MINECART_RIDING, SoundCategory.BLOCKS, 0.75F, this.world.rand.nextFloat() * 0.4F + 0.8F);
         }
         else {
+            MillstoneRecipe currentRecipe = this.getCurrentRecipe();
             if (this.getPower() > 0) {
-                if (this.getCurrentRecipe() == null) {
+                if (currentRecipe == null) {
                     for (MillstoneRecipe recipe : RiftMMRecipes.millstoneRecipes) {
                         if (recipe.matches(this.getPower(), this.getInputItem())) {
                             this.setCurrentRecipe(recipe);
@@ -67,16 +102,17 @@ public class TileEntityMillstone extends TileEntity implements IAnimatable, ITic
                     }
                 }
                 else {
-                    if (this.itemToInventoryTest(false, this.currentRecipe.output.matchingStacks[0], 3)) {
+                    RiftInventoryHandler outputInv = this.getOutputInventory();
+                    if (outputInv.canInsertItem(currentRecipe.output.matchingStacks[0])) {
                         this.setTimeHeld(this.getTimeHeld() + 1);
-                        if (this.getMaxRecipeTime() != 69420666) this.setCompletionPercentage((double)this.getTimeHeld()/(double)this.getMaxRecipeTime());
+                        if (this.getMaxRecipeTime() != 69420666) this.setCompletionPercentage((double)this.getTimeHeld() / (double)this.getMaxRecipeTime());
                         if (this.getTimeHeld() >= this.getMaxRecipeTime()) {
-                            this.itemToInventoryTest(true, this.currentRecipe.output.matchingStacks[0], 3);
+                            outputInv.insertItem(currentRecipe.output.matchingStacks[0]);
                             this.getInputItem().shrink(1);
                             this.setTimeHeld(0);
                         }
                     }
-                    if (!this.currentRecipe.input.apply(this.getInputItem())) {
+                    if (!currentRecipe.input.apply(this.getInputItem())) {
                         this.setTimeHeld(0);
                         this.setCompletionPercentage(0);
                         this.setCurrentRecipe(null);
@@ -84,78 +120,46 @@ public class TileEntityMillstone extends TileEntity implements IAnimatable, ITic
                 }
             }
             else {
-                if (this.getCurrentRecipe() != null) {
-                    if (!this.currentRecipe.input.apply(this.getInputItem())) {
-                        this.setTimeHeld(0);
-                        this.setCompletionPercentage(0);
-                        this.setCurrentRecipe(null);
-                    }
+                if (currentRecipe != null && !currentRecipe.input.apply(this.getInputItem())) {
+                    this.setTimeHeld(0);
+                    this.setCompletionPercentage(0);
+                    this.setCurrentRecipe(null);
                 }
             }
         }
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound compound) {
-        super.readFromNBT(compound);
-        this.itemStackHandler = NonNullList.<ItemStack>withSize(this.getSizeInventory(), ItemStack.EMPTY);
-        ItemStackHelper.loadAllItems(compound, this.itemStackHandler);
-        this.mechPower.readFromNBT(compound);
-        this.timeHeld = compound.getInteger("timeHeld");
-        this.currentRecipe = RiftMMRecipes.getMillstoneRecipe(compound.getString("currentRecipe"));
-        this.compPerc = compound.getDouble("completionPercentage");
-    }
-
-    @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        compound = super.writeToNBT(compound);
-        ItemStackHelper.saveAllItems(compound, this.itemStackHandler);
-        this.mechPower.writeToNBT(compound);
-        compound.setInteger("timeHeld", this.timeHeld);
-        compound.setString("currentRecipe", this.getCurrentRecipeId());
-        compound.setDouble("completionPercentage", this.getCompletionPercentage());
-        return compound;
-    }
-
-    @Override
     public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
-        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) return true;
-        else if (capability == MysticalMechanicsAPI.MECH_CAPABILITY && facing == EnumFacing.UP) return true;
+        if (capability == MysticalMechanicsAPI.MECH_CAPABILITY && facing == EnumFacing.UP) return true;
         return super.hasCapability(capability, facing);
     }
 
     @Nullable
     @Override
     public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
-        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-            if (facing == EnumFacing.DOWN) return (T) new SidedInvWrapper(this, EnumFacing.DOWN);
-            else if (facing == EnumFacing.UP)  return (T) new SidedInvWrapper(this, EnumFacing.UP);
-            else if (facing == EnumFacing.EAST)  return (T) new SidedInvWrapper(this, EnumFacing.EAST);
-            else if (facing == EnumFacing.WEST)  return (T) new SidedInvWrapper(this, EnumFacing.WEST);
-            else if (facing == EnumFacing.NORTH)  return (T) new SidedInvWrapper(this, EnumFacing.NORTH);
-            else if (facing == EnumFacing.SOUTH)  return (T) new SidedInvWrapper(this, EnumFacing.SOUTH);
-            else return (T) new SidedInvWrapper(this, EnumFacing.UP);
-        }
-        else if (capability == MysticalMechanicsAPI.MECH_CAPABILITY && facing == EnumFacing.UP) return (T) this.mechPower;
+        if (capability == MysticalMechanicsAPI.MECH_CAPABILITY && facing == EnumFacing.UP) return (T) this.mechPower;
         return super.getCapability(capability, facing);
     }
 
+    public RiftInventoryHandler getInputInventory() {
+        return this.getInventory("Input");
+    }
+
+    public RiftInventoryHandler getOutputInventory() {
+        return this.getInventory("Output");
+    }
+
     public MillstoneRecipe getCurrentRecipe() {
-        return this.currentRecipe;
+        return RiftMMRecipes.getMillstoneRecipe(this.getCurrentRecipeId());
     }
 
     public String getCurrentRecipeId() {
-        if (this.currentRecipe != null) return this.currentRecipe.getId();
-        return "";
+        return this.getValue("CurrentRecipe");
     }
 
     public void setCurrentRecipe(MillstoneRecipe value) {
-        this.currentRecipe = value;
-        if (!this.world.isRemote) {
-            this.markDirty();
-            IBlockState state = this.world.getBlockState(this.pos);
-            this.world.notifyBlockUpdate(this.pos, state, state, 3);
-        }
+        this.setValue("CurrentRecipe", value != null ? value.getId() : "");
     }
 
     public int getMaxRecipeTime() {
@@ -163,11 +167,16 @@ public class TileEntityMillstone extends TileEntity implements IAnimatable, ITic
         //at min power required its the default 10 seconds, but the higher the power the lower
         //the max time is until it reaches 3 seconds, which is 8x the min power
         //note that output is in ticks
-        if (this.currentRecipe != null) {
-            double minPower = this.currentRecipe.getMinPower();
+        MillstoneRecipe currentRecipe = this.getCurrentRecipe();
+        if (currentRecipe != null) {
+            double minPower = currentRecipe.getMinPower();
             if (minPower <= this.getPower()) {
-                double result = -1D / minPower * (this.getPower() - minPower) + 10D;
-                return (int) RiftUtil.clamp(result, 5D, 30D) * 20;
+                double result = RiftUtil.slopeResult(
+                        this.getPower(), true,
+                        minPower, minPower * 8,
+                        30, 5
+                ) * 20;
+                return (int) result;
             }
         }
         return 69420666;
@@ -178,55 +187,19 @@ public class TileEntityMillstone extends TileEntity implements IAnimatable, ITic
     }
 
     public int getTimeHeld() {
-        return this.timeHeld;
+        return this.getValue("TimeHeld");
     }
 
     public void setTimeHeld(int value) {
-        this.timeHeld = value;
-        if (!this.world.isRemote) {
-            this.markDirty();
-            IBlockState state = this.world.getBlockState(this.pos);
-            this.world.notifyBlockUpdate(this.pos, state, state, 3);
-        }
+        this.setValue("TimeHeld", value);
     }
 
     public double getCompletionPercentage() {
-        return this.compPerc;
+        return this.getValue("Completion");
     }
 
     public void setCompletionPercentage(double value) {
-        this.compPerc = value;
-        if (!this.world.isRemote) {
-            this.markDirty();
-            IBlockState state = this.world.getBlockState(this.pos);
-            this.world.notifyBlockUpdate(this.pos, state, state, 3);
-        }
-    }
-
-    @Override
-    @Nullable
-    public SPacketUpdateTileEntity getUpdatePacket() {
-        return new SPacketUpdateTileEntity(this.pos, 1, this.getUpdateTag());
-    }
-
-    @Override
-    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-        this.readFromNBT(pkt.getNbtCompound());
-    }
-
-    @Override
-    public NBTTagCompound getUpdateTag() {
-        return this.writeToNBT(new NBTTagCompound());
-    }
-
-    @Override
-    public void handleUpdateTag(NBTTagCompound tag) {
-        this.itemStackHandler = NonNullList.<ItemStack>withSize(this.getSizeInventory(), ItemStack.EMPTY);
-        ItemStackHelper.loadAllItems(tag, this.itemStackHandler);
-        this.mechPower.readFromNBT(tag);
-        this.timeHeld = tag.getInteger("timeHeld");
-        this.currentRecipe = RiftMMRecipes.getMillstoneRecipe(tag.getString("currentRecipe"));
-        this.compPerc = tag.getDouble("completionPercentage");
+        this.setValue("Completion", value);
     }
 
     @Override
@@ -238,104 +211,47 @@ public class TileEntityMillstone extends TileEntity implements IAnimatable, ITic
     //inventory stuff starts here
     @Override
     public int[] getSlotsForFace(EnumFacing side) {
-        if (side == EnumFacing.DOWN) return new int[]{3, 4, 5, 6, 7, 8, 9, 10, 11};
-        else if (side == EnumFacing.NORTH || side == EnumFacing.EAST || side == EnumFacing.WEST || side == EnumFacing.SOUTH) return new int[]{0, 1, 2};
-        return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+        return this.getSlotsAtSide(side);
     }
 
     @Override
     public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction) {
-        return this.isItemValidForSlot(index, itemStackIn);
+        return this.canInsertAtSlot(index, direction);
     }
 
     @Override
     public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
-        if (index != 0 && index != 1 && index != 2) return direction == EnumFacing.DOWN;
-        return true;
+        return this.canExtractAtSlot(index, direction);
     }
 
     @Override
     public int getSizeInventory() {
-        return this.itemStackHandler.size();
+        return this.getTotalSidingInfoSize();
     }
 
     @Override
     public boolean isEmpty() {
-        for (ItemStack itemstack : this.itemStackHandler) {
-            if (!itemstack.isEmpty()) return false;
-        }
-        return true;
+        return this.hasEmptySidedInv();
     }
 
     @Override
     public ItemStack getStackInSlot(int index) {
-        return this.itemStackHandler.get(index);
+        return this.getStackAtSidedSlot(index);
     }
 
     @Override
     public ItemStack decrStackSize(int index, int count) {
-        return ItemStackHelper.getAndSplit(this.itemStackHandler, index, count);
+        return this.decStackSizeAtSidedSlot(index, count);
     }
 
     @Override
     public ItemStack removeStackFromSlot(int index) {
-        return ItemStackHelper.getAndRemove(this.itemStackHandler, index);
-    }
-
-    public void insertItemToSlot(int slot, ItemStack itemStack) {
-        int newCount = this.getStackInSlot(slot).getCount() + itemStack.getCount();
-        itemStack.setCount(newCount);
-        this.setInventorySlotContents(slot, itemStack);
-    }
-
-    public boolean itemToInventoryTest(boolean addItem, ItemStack toAdd, int startInd) {
-        //scan for indices to insert into
-        List<Integer> amntToInsert = Arrays.asList(new Integer[this.getSizeInventory() - startInd]); //amnt of items to insert into each, for if theres multiple
-        amntToInsert = amntToInsert.stream().map(integer -> 0).collect(Collectors.toList());
-        int count = toAdd.getCount();
-        for (int x = startInd; x < this.getSizeInventory(); x++) {
-            if (Ingredient.fromStacks(this.getStackInSlot(x)).apply(toAdd)) {
-                if (this.getStackInSlot(x).getCount() + count <= toAdd.getMaxStackSize()) {
-                    amntToInsert.set(x - startInd, count);
-                    break;
-                }
-                else {
-                    amntToInsert.set(x - startInd, toAdd.getMaxStackSize() - this.getStackInSlot(x).getCount());
-                    count = count - (toAdd.getMaxStackSize() - this.getStackInSlot(x).getCount());
-                }
-            }
-            else if (this.getStackInSlot(x).isEmpty()) {
-                amntToInsert.set(x - startInd, count);
-                break;
-            }
-        }
-
-        //now insert the item in each valid slot
-        //test first tho
-        int countDist = amntToInsert.stream().mapToInt(Integer::intValue).sum();
-        if (countDist == toAdd.getCount()) {
-            if (addItem) {
-                for (int x = 0; x < amntToInsert.size(); x++) {
-                    if (amntToInsert.get(x) > 0) {
-                        ItemStack stackToAdd = toAdd.copy();
-                        stackToAdd.setCount(amntToInsert.get(x));
-                        this.insertItemToSlot(x + startInd, stackToAdd);
-                    }
-                }
-            }
-            return true;
-        }
-        return false;
+        return this.removeStackFromSidedSlot(index);
     }
 
     @Override
     public void setInventorySlotContents(int index, ItemStack stack) {
-        this.itemStackHandler.set(index, stack);
-
-        if (!stack.isEmpty() && stack.getCount() > this.getInventoryStackLimit()) {
-            stack.setCount(this.getInventoryStackLimit());
-        }
-
+        this.setStackAtSidedSlot(index, stack, this.getInventoryStackLimit());
         this.markDirty();
     }
 
@@ -346,7 +262,7 @@ public class TileEntityMillstone extends TileEntity implements IAnimatable, ITic
 
     @Override
     public boolean isUsableByPlayer(EntityPlayer player) {
-        return !isInvalid() && player.getDistanceSq(this.pos.add(0.5D, 0.5D, 0.5D)) <= 64D;
+        return !this.isInvalid() && player.getDistanceSq(this.pos.add(0.5D, 0.5D, 0.5D)) <= 64D;
     }
 
     @Override
@@ -374,9 +290,7 @@ public class TileEntityMillstone extends TileEntity implements IAnimatable, ITic
     }
 
     @Override
-    public void clear() {
-        this.itemStackHandler.clear();
-    }
+    public void clear() {}
 
     @Override
     public String getName() {
@@ -388,26 +302,84 @@ public class TileEntityMillstone extends TileEntity implements IAnimatable, ITic
         return false;
     }
 
-    public int getUsableInputSlot() {
-        for (int x = 0; x < 3; x++) {
-            if (!this.getStackInSlot(x).isEmpty()) return x;
-        }
-        return -1;
-    }
-
     public ItemStack getInputItem() {
-        if (this.getUsableInputSlot() > -1) return this.getStackInSlot(this.getUsableInputSlot());
+        RiftInventoryHandler inputInventory = this.getInputInventory();
+        for (ItemStack itemStack : inputInventory.getItemStackList()) {
+            if (!itemStack.isEmpty()) return itemStack;
+        }
         return ItemStack.EMPTY;
     }
     //inventory stuff ends here
 
     @Override
-    public void registerControllers(AnimationData animationData) {
-
-    }
+    public void registerControllers(AnimationData animationData) {}
 
     @Override
     public AnimationFactory getFactory() {
         return this.factory;
+    }
+
+    @Override
+    public ModularPanel buildUI(PosGuiData posGuiData, PanelSyncManager syncManager, UISettings uiSettings) {
+        TileEntityMillstone millstone = (TileEntityMillstone) posGuiData.getTileEntity();
+        if (millstone == null) return new ModularPanel(UIPanelNames.FEEDING_TROUGH_SCREEN);
+        RiftInventoryHandler inputInventory = millstone.getInputInventory();
+        RiftInventoryHandler outputInventory = millstone.getOutputInventory();
+
+        String playerName = posGuiData.getPlayer().getName();
+
+        syncManager.registerSlotGroup("inputInventory", inputInventory.getSlots());
+        SlotGroupWidget.Builder inputInvBuilder = SlotGroupWidget.builder()
+                .key('I', index -> new ItemSlot().slot(
+                                new ModularSlot(inputInventory, index).slotGroup("inputInventory")
+                        )
+                )
+                .matrix("III");
+        syncManager.registerSlotGroup("outputInventory", outputInventory.getSlots());
+        SlotGroupWidget.Builder outputInvBuilder = SlotGroupWidget.builder()
+                .key('I', index -> new ItemSlot().slot(
+                                new ModularSlot(outputInventory, index).slotGroup("outputInventory").accessibility(false, true)
+                        )
+                )
+                .matrix("IIIIIIIII");
+
+        return new ModularPanel(UIPanelNames.MILLSTONE_SCREEN)
+                .padding(7, 7).height(177)
+                .child(Flow.column().childPadding(5).coverChildrenHeight()
+                        //millstone inventory
+                        .child(new ParentWidget<>().widthRel(1f).coverChildrenHeight()
+                                .child(Flow.column().widthRel(1f).coverChildrenHeight()
+                                        .child(new ParentWidget<>().width(162).coverChildrenHeight()
+                                                .child(IKey.lang("tile.millstone.name").asWidget().left(0))
+                                        )
+                                        .child(new ParentWidget<>().width(162).coverChildrenHeight()
+                                                .child(Flow.column().childPadding(5).widthRel(1f).coverChildrenHeight()
+                                                        //inputs
+                                                        .child(inputInvBuilder.build())
+                                                        //progress bar
+                                                        .child(new ProgressWidget()
+                                                                .texture(RiftUIIcons.PROGRESS_BAR_DOWNWARD, 20)
+                                                                .direction(ProgressWidget.Direction.DOWN)
+                                                                .value(new DoubleValue.Dynamic(
+                                                                        millstone::getCompletionPercentage,
+                                                                        null
+                                                                ))
+                                                        )
+                                                        //outputs
+                                                        .child(outputInvBuilder.build())
+                                                )
+                                        )
+                                )
+                        )
+                        //player inventory
+                        .child(new ParentWidget<>().widthRel(1f).coverChildrenHeight()
+                                .child(Flow.column().widthRel(1f).coverChildren()
+                                        .child(new ParentWidget<>().width(162).coverChildrenHeight()
+                                                .child(IKey.str(playerName).asWidget().left(0))
+                                        )
+                                        .child(SlotGroupWidget.playerInventory(false))
+                                )
+                        )
+                );
     }
 }

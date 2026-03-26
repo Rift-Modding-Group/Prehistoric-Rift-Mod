@@ -11,6 +11,7 @@ public class UIPanelNames {
     public static final String CREATURE_BOX_SCREEN = "creatureBoxScreen";
     public static final String LARGE_WEAPON_SCREEN = "largeWeaponScreen";
     public static final String FEEDING_TROUGH_SCREEN = "feedingTroughScreen";
+    public static final String MILLSTONE_SCREEN = "millstoneScreen";
     public static final String PARTY_DROPDOWN = "partyDropdown";
     public static final String BOX_DROPDOWN = "boxDropdown";
     public static final String EGG_SCREEN = "eggScreen";

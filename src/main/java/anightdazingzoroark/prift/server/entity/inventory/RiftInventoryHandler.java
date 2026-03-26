@@ -161,6 +161,48 @@ public class RiftInventoryHandler extends ItemStackHandler {
         return this.stacks;
    }
 
+   public boolean canInsertItem(ItemStack itemToInsert) {
+        int count = itemToInsert.getCount();
+        for (ItemStack itemStack : this.stacks) {
+            if (itemStack.isEmpty()) count = 0;
+            else if (ItemStack.areItemsEqual(itemStack, itemToInsert)) {
+                int countSum = count + itemStack.getCount();
+
+                if (countSum <= itemStack.getMaxStackSize()) count = 0;
+                else count = countSum - itemStack.getMaxStackSize();
+            }
+
+            if (count <= 0) return true;
+        }
+        return false;
+   }
+
+   public void insertItem(ItemStack itemToInsert) {
+       int count = itemToInsert.getCount();
+       for (int index = 0; index < this.stacks.size(); index++) {
+           ItemStack itemStack = this.stacks.get(index);
+
+           if (itemStack.isEmpty()) {
+               this.stacks.set(index, itemToInsert.copy());
+               break;
+           }
+           else if (ItemStack.areItemsEqual(itemStack, itemToInsert)) {
+               int countSum = count + itemStack.getCount();
+
+               if (countSum <= itemStack.getMaxStackSize()) {
+                   itemStack.setCount(countSum);
+                   break;
+               }
+               else {
+                   count = countSum - itemStack.getMaxStackSize();
+                   itemStack.setCount(itemStack.getMaxStackSize());
+               }
+           }
+
+           if (count <= 0) break;
+       }
+   }
+
     @Override
     public String toString() {
         return this.stacks.toString();
