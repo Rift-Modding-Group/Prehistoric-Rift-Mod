@@ -2,9 +2,7 @@ package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.MechanicalFilterContainer;
-import anightdazingzoroark.prift.compat.mysticalmechanics.inventory.MillstoneContainer;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityMechanicalFilter;
-import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntityMillstone;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;

@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
 import anightdazingzoroark.prift.client.newui.RiftUIIcons;
 import anightdazingzoroark.prift.client.newui.UIPanelNames;
+import anightdazingzoroark.prift.compat.jei.RiftJEI;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.ConsumerMechCapability;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.MillstoneRecipe;
@@ -13,6 +14,7 @@ import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntity;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
 import com.cleanroommc.modularui.api.IGuiHolder;
+import com.cleanroommc.modularui.api.drawable.IDrawable;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.drawable.GuiTextures;
 import com.cleanroommc.modularui.factory.PosGuiData;
@@ -21,6 +23,7 @@ import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.value.DoubleValue;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.cleanroommc.modularui.widget.ParentWidget;
+import com.cleanroommc.modularui.widgets.ButtonWidget;
 import com.cleanroommc.modularui.widgets.ProgressWidget;
 import com.cleanroommc.modularui.widgets.SlotGroupWidget;
 import com.cleanroommc.modularui.widgets.layout.Flow;
@@ -30,6 +33,7 @@ import mysticalmechanics.api.IMechCapability;
 import mysticalmechanics.api.MysticalMechanicsAPI;
 import mysticalmechanics.util.Misc;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.ISidedInventory;
@@ -357,13 +361,24 @@ public class TileEntityMillstone extends RiftTileEntity implements IAnimatable, 
                                                         //inputs
                                                         .child(inputInvBuilder.build())
                                                         //progress bar
-                                                        .child(new ProgressWidget()
-                                                                .texture(RiftUIIcons.PROGRESS_BAR_DOWNWARD, 20)
-                                                                .direction(ProgressWidget.Direction.DOWN)
-                                                                .value(new DoubleValue.Dynamic(
-                                                                        millstone::getCompletionPercentage,
-                                                                        null
-                                                                ))
+                                                        .child(new ParentWidget<>().size(20)
+                                                                .child(new ProgressWidget()
+                                                                        .texture(RiftUIIcons.PROGRESS_BAR_DOWNWARD, 20)
+                                                                        .direction(ProgressWidget.Direction.DOWN)
+                                                                        .value(new DoubleValue.Dynamic(
+                                                                                millstone::getCompletionPercentage,
+                                                                                null
+                                                                        ))
+                                                                )
+                                                                .child(new ButtonWidget<>().size(20)
+                                                                        .addTooltipElement(I18n.format("jei.show_recipes"))
+                                                                        .hoverBackground(IDrawable.EMPTY)
+                                                                        .background(IDrawable.EMPTY)
+                                                                        .onMousePressed(button -> {
+                                                                            RiftJEI.showRecipesForCategory(RiftJEI.millstoneCat);
+                                                                            return true;
+                                                                        })
+                                                                )
                                                         )
                                                         //outputs
                                                         .child(outputInvBuilder.build())

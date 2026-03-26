@@ -19,7 +19,6 @@ public class RiftGui implements IGuiHandler {
     public static final int GUI_SEMI_MANUAL_PRESSER = 7;
     public static final int GUI_SEMI_MANUAL_EXTRUDER = 8;
     public static final int GUI_SEMI_MANUAL_HAMMERER = 9;
-    public static final int GUI_MILLSTONE = 10;
     public static final int GUI_MECHANICAL_FILTER = 11;
 
     @Nullable
@@ -44,11 +43,6 @@ public class RiftGui implements IGuiHandler {
         else if (id == GUI_SEMI_MANUAL_HAMMERER) {
             if (tileEntity instanceof TileEntitySemiManualHammerer) {
                 return new SemiManualHammererContainer((TileEntitySemiManualHammerer)tileEntity, player);
-            }
-        }
-        else if (id == GUI_MILLSTONE) {
-            if (tileEntity instanceof TileEntityMillstone) {
-                return new MillstoneContainer((TileEntityMillstone)tileEntity, player);
             }
         }
         else if (id == GUI_MECHANICAL_FILTER) {
@@ -81,11 +75,6 @@ public class RiftGui implements IGuiHandler {
         else if (id == GUI_SEMI_MANUAL_HAMMERER) {
             if (tileEntity instanceof TileEntitySemiManualHammerer) {
                 return new RiftSemiManualHammererMenu((TileEntitySemiManualHammerer) tileEntity, player.inventory);
-            }
-        }
-        else if (id == GUI_MILLSTONE) {
-            if (tileEntity instanceof TileEntityMillstone) {
-                return new RiftMillstoneMenu((TileEntityMillstone) tileEntity, player.inventory);
             }
         }
         else if (id == GUI_MECHANICAL_FILTER) {

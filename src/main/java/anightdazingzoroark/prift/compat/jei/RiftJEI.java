@@ -17,12 +17,13 @@ import mezz.jei.api.*;
 import mezz.jei.api.ingredients.IIngredientBlacklist;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IRecipeCategoryRegistration;
-import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -145,18 +146,17 @@ public class RiftJEI implements IModPlugin {
                 registry.addRecipeCatalyst(new ItemStack(RiftMMItems.SEMI_MANUAL_HAMMERER), smHammererCat);
             }
 
-            registry.addRecipes(this.millstoneWrappers(), millstoneCat);
-            registry.addRecipeClickArea(RiftMillstoneMenu.class, 81, 44, 14, 22, millstoneCat);
-            registry.addRecipeCatalyst(new ItemStack(RiftMMBlocks.MILLSTONE), millstoneCat);
-
             registry.addRecipes(this.mechanicalFilterWrappers(), mechFilterCat);
             registry.addRecipeClickArea(RiftMechanicalFilterMenu.class, 81, 44, 14, 22, mechFilterCat);
             registry.addRecipeCatalyst(new ItemStack(RiftMMBlocks.MECHANICAL_FILTER), mechFilterCat);
         }
     }
 
-    public static boolean showRecipesForItemStack(ItemStack itemStack, boolean isUses) {
+    public static void showRecipesForItemStack(ItemStack itemStack, boolean isUses) {
         jeiRuntime.getRecipesGui().show(jeiRuntime.getRecipeRegistry().createFocus(isUses ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT, itemStack));
-        return Minecraft.getMinecraft().currentScreen instanceof IRecipesGui;
+    }
+
+    public static void showRecipesForCategory(String category) {
+        jeiRuntime.getRecipesGui().showCategories(Collections.singletonList(category));
     }
 }
