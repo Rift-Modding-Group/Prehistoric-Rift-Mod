@@ -23,9 +23,6 @@ repositories {
         name = "ModMaven"
         url = "https://modmaven.dev"
     }
-    maven {
-        url 'https://maven.mcmoddev.com'
-    }
     mavenLocal() // Must be last for caching to work
 }
 

@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.helper.RiftUtil;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.items.ItemStackHandler;
@@ -156,15 +157,9 @@ public class RiftInventoryHandler extends ItemStackHandler {
         }
     }
 
-    //-----methods for use in ISidedInventory starts here-----
-    public int[] getSlotIndexes() {
-        return this.getSlotIndexes(0);
-    }
-
-    public int[] getSlotIndexes(int displacement) {
-        return IntStream.range(displacement, this.getSlots() + displacement).toArray();
-    }
-    //-----methods for use in ISidedInventory ends here-----
+   public NonNullList<ItemStack> getItemStackList() {
+        return this.stacks;
+   }
 
     @Override
     public String toString() {
