@@ -70,9 +70,6 @@ public class RiftTileEntityCreatureBox extends RiftTileEntity implements ITickab
     }
 
     @Override
-    public void registerInventories() {}
-
-    @Override
     public void update() {
         //if box has contents, make it so that its indestructible when there's creatures inside
         RiftCreatureBox creatureBox = (RiftCreatureBox) this.world.getBlockState(this.pos).getBlock();

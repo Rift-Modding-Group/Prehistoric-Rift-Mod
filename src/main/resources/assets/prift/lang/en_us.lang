@@ -217,7 +217,7 @@ item.gold_rod.name=Gold Rod
 
 jei.min_power=Minimum Power: %s R
 jei.chance=Chance: %s
-jei.show_recipes=Show recipes
+jei.show_recipes=Click to show recipes
 
 journal.index=Index
 journal.search_tooltip=Search
