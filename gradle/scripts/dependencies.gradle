@@ -44,6 +44,6 @@ dependencies {
     compileOnly files("libs/riftlib-1.1.0-dev.jar")
     compileOnly "curse.maven:serene-seasons-291874:2799213"
     compileOnly "net.darkhax.gamestages:GameStages-1.12.2:2.0.123"
-    modImplementation ("com.cleanroommc:modularui:3.1.4") { transitive = false }
+    modImplementation ("com.cleanroommc:modularui:3.1.5") { transitive = false }
     implementation 'org.jetbrains:annotations:16.0.2'
 }

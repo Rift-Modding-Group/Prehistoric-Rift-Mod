@@ -61,7 +61,7 @@ public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget>
 
     //todo: maybe add statistics on how many creatures unlocked? idk
     private Flow noCreaturePageContents() {
-        return new Column().sizeRel(1f).childPadding(5)
+        return Flow.column().sizeRel(1f).childPadding(5)
                 .child(IKey.str("The journal is where you get to read about creatures you have encountered.").asWidget()
                         .scale(0.75f).left(0));
     }
@@ -76,10 +76,10 @@ public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget>
         //creature info, only if the creature can have it
         if (this.canHaveInfoTab()) pagedWidget.addPage(this.creatureInfoTab());
 
-        return new Column().sizeRel(1f).childPadding(5)
+        return Flow.column().sizeRel(1f).childPadding(5)
                 .child(IKey.str(this.currentCreature.getValue().getTranslatedName()).asWidget().left(0))
                 .child(RiftUIIcons.creatureIllustration(this.currentCreature.getValue()).asWidget().size(120, 90))
-                .child(new Row().childPadding(3).coverChildren().left(0)
+                .child(Flow.row().childPadding(3).coverChildren().left(0)
                         .child(new JournalTabButton(0, tabController)
                                 .overlay(IKey.lang("journal.tab.description"))
                                 .background(false, new Rectangle().hollow().color(0xFF000000))
@@ -98,7 +98,7 @@ public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget>
         if (this.currentCreature.getValue() == null) return new ListWidget<>().size(181, 85).align(Alignment.CENTER);
 
         return new ListWidget<>().size(181, 85).align(Alignment.CENTER)
-                .child(new Column().widthRel(1f).coverChildrenHeight().childPadding(3)
+                .child(Flow.column().widthRel(1f).coverChildrenHeight().childPadding(3)
                         .childIf(!this.journalProgress.getEncounteredCreatures().get(this.currentCreature.getValue()),
                                 () -> IKey.lang("journal.entry.locked").scale(0.75f)
                                         .alignment(Alignment.CenterLeft).asWidget().left(0)
@@ -155,7 +155,7 @@ public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget>
         ).collect(Collectors.toList()) : Collections.emptyList();
 
         return new ListWidget<>().size(181, 85).align(Alignment.CENTER)
-                .child(new Column().widthRel(1f).coverChildrenHeight().childPadding(3)
+                .child(Flow.column().widthRel(1f).coverChildrenHeight().childPadding(3)
                         //message for if the creature must be tamed by killing and hoping an egg drops
                         .childIf(!this.journalProgress.getEncounteredCreatures().get(this.currentCreature.getValue())
                                         && this.currentCreature.getValue().isTameable
@@ -164,7 +164,7 @@ public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget>
                                         .alignment(Alignment.CenterLeft).left(0)
                         )
                         //block break rates
-                        .childIf(!listBlockBreak.isEmpty(), () -> new Column().coverChildrenHeight().widthRel(1f)
+                        .childIf(!listBlockBreak.isEmpty(), () -> Flow.column().coverChildrenHeight().widthRel(1f)
                                 .child(IKey.lang("journal.mining_levels").scale(0.75f).asWidget().alignment(Alignment.CenterLeft).left(0))
                                 .child(new PaddedGrid().coverChildren()
                                         .matrix(Grid.mapToMatrix(
@@ -175,7 +175,7 @@ public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget>
                                 )
                         )
                         //list of foods it must consume to be tamed or bred
-                        .childIf(!listMealsItemStack.isEmpty(), () -> new Column().coverChildrenHeight().widthRel(1f)
+                        .childIf(!listMealsItemStack.isEmpty(), () -> Flow.column().coverChildrenHeight().widthRel(1f)
                                 //for if the creature can be tamed by being fed
                                 .childIf(this.currentCreature.getValue().isTameableByFeeding,
                                         () -> IKey.lang("journal.taming_or_breeding_foods").scale(0.75f).asWidget().alignment(Alignment.CenterLeft).left(0)
@@ -193,7 +193,7 @@ public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget>
                                 )
                         )
                         //list of foods that it can be fed to be healed
-                        .childIf(!listFoodsItemStack.isEmpty(), () -> new Column().coverChildrenHeight().widthRel(1f)
+                        .childIf(!listFoodsItemStack.isEmpty(), () -> Flow.column().coverChildrenHeight().widthRel(1f)
                                 .child(IKey.lang("journal.favorite_foods").scale(0.75f).asWidget().alignment(Alignment.CenterLeft).left(0))
                                 .child(new PaddedGrid().coverChildren()
                                         .matrix(Grid.mapToMatrix(
