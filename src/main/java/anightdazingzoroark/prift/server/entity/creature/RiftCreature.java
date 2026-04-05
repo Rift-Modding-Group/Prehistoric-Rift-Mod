@@ -38,8 +38,10 @@ import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProper
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBoxHelper;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
+import anightdazingzoroark.riftlib.core.event.AnimationEvent;
 import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
 import anightdazingzoroark.riftlib.hitboxLogic.IMultiHitboxUser;
+import anightdazingzoroark.riftlib.ridePositionLogic.DynamicRidePosList;
 import anightdazingzoroark.riftlib.ridePositionLogic.IDynamicRideUser;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.screen.ModularPanel;
@@ -86,7 +88,6 @@ import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
-import anightdazingzoroark.riftlib.core.event.predicate.AnimationEvent;
 import anightdazingzoroark.riftlib.core.manager.AnimationData;
 import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 import org.jetbrains.annotations.NotNull;
@@ -209,7 +210,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Deprecated
     public String saddleItem;
     public Entity[] hitboxArray = {};
-    private List<Vec3d> ridePositions;
+    private DynamicRidePosList ridePositions;
     public float oldScale;
     private int healthRegen;
     protected double attackDamage;
@@ -262,7 +263,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.healthRegen = 0;
         this.isFloatingOnWater = false;
         this.initializeHitboxes(this);
-        this.initializeRiderPositions(this);
 
         //ais are now initialized here
         if (!worldIn.isRemote) this.initRiftCreatureAI();
@@ -2687,16 +2687,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return this;
     }
 
-    public void createRidePositions(List<Vec3d> value) {
-        this.ridePositions = value;
-    }
-
-    public List<Vec3d> ridePositions() {
+    @Override
+    public DynamicRidePosList ridePosList() {
         return this.ridePositions;
     }
 
-    public void setRidePosition(int index, Vec3d value) {
-        this.ridePositions.set(index, value);
+    @Override
+    public void setRidePosition(DynamicRidePosList dynamicRidePosList) {
+        this.ridePositions = dynamicRidePosList;
     }
 
     public void updatePassenger(Entity passenger) {

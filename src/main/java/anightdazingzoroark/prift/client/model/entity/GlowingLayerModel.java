@@ -27,7 +27,7 @@ public class GlowingLayerModel<T extends EntityLiving & IAnimatable> extends Geo
     }
 
     @Override
-    public void render(T entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, Color renderColor) {
+    public void render(T entitylivingbaseIn, float partialTicks, float ageInTicks,  Color renderColor) {
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         GlStateManager.disableLighting();
@@ -62,7 +62,7 @@ public class GlowingLayerModel<T extends EntityLiving & IAnimatable> extends Geo
                 entity,
                 partialTicks,
                 (float) renderColor.getRed() / 255f,
-                (float) renderColor.getBlue() / 255f,
+                (float) renderColor.getGreen() / 255f,
                 (float) renderColor.getGreen() / 255f,
                 (float) renderColor.getAlpha() / 255
         );

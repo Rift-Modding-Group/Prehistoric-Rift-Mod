@@ -1,11 +1,9 @@
 package anightdazingzoroark.prift.server.blocks;
 
-import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.capabilities.creatureBoxData.CreatureBoxDataHelper;
 import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
-import anightdazingzoroark.riftlib.ui.RiftLibUIHelper;
 import com.cleanroommc.modularui.factory.GuiFactories;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;

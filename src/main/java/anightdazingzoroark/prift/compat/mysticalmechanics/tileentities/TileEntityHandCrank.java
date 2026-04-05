@@ -1,15 +1,15 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPoweredCrank;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.DoublePropertyValue;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntity;
+import anightdazingzoroark.riftlib.core.AnimatableValue;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
 import mysticalmechanics.api.DefaultMechCapability;
 import mysticalmechanics.api.IMechCapability;
 import mysticalmechanics.api.MysticalMechanicsAPI;
 import mysticalmechanics.util.Misc;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
@@ -18,17 +18,18 @@ import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
-import anightdazingzoroark.riftlib.core.event.predicate.AnimationEvent;
+import anightdazingzoroark.riftlib.core.event.AnimationEvent;
 import anightdazingzoroark.riftlib.core.manager.AnimationData;
 import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
-import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-public class TileEntityHandCrank extends TileEntity implements IAnimatable, ITickable {
+public class TileEntityHandCrank extends RiftTileEntity implements IAnimatable, ITickable {
     private final AnimationFactory factory = new AnimationFactory(this);
     public IMechCapability mechPower;
     private float power;
-    private float rotation = 0;
     private int atMaxPowerTimer;
 
     public TileEntityHandCrank() {
@@ -57,6 +58,11 @@ public class TileEntityHandCrank extends TileEntity implements IAnimatable, ITic
     }
 
     @Override
+    public void registerValues() {
+        this.registerValue(new DoublePropertyValue("Rotation", 0D));
+    }
+
+    @Override
     public void update() {
         if (!this.world.isRemote) {
             if (this.power > 0) {
@@ -75,10 +81,12 @@ public class TileEntityHandCrank extends TileEntity implements IAnimatable, ITic
             this.markDirty();
         }
         if (this.power > 0) {
-            if (this.getFacing().equals(EnumFacing.NORTH) || this.getFacing().equals(EnumFacing.WEST) || this.getFacing().equals(EnumFacing.UP)) this.setRotation(this.rotation + this.power);
-            else this.setRotation(this.rotation - this.power);
-            if (this.rotation >= 360f) this.setRotation(this.rotation - 360f);
-            else if (this.rotation < 0f) this.setRotation(this.rotation + 360f);
+            if (this.getFacing().equals(EnumFacing.NORTH) || this.getFacing().equals(EnumFacing.WEST) || this.getFacing().equals(EnumFacing.UP)) {
+                this.setRotation(this.getRotation() + this.power);
+            }
+            else this.setRotation(this.getRotation() - this.power);
+            if (this.getRotation() >= 360) this.setRotation(this.getRotation() - 360D);
+            else if (this.getRotation() < 0D) this.setRotation(this.getRotation() + 360D);
         }
     }
 
@@ -133,17 +141,12 @@ public class TileEntityHandCrank extends TileEntity implements IAnimatable, ITic
         }
     }
 
-    public float getRotation() {
-        return this.rotation;
+    public double getRotation() {
+        return this.getValue("Rotation");
     }
 
-    public void setRotation(float value) {
-        this.rotation = value;
-        if (!this.world.isRemote) {
-            this.markDirty();
-            IBlockState state = this.world.getBlockState(this.pos);
-            this.world.notifyBlockUpdate(this.pos, state, state, 3);
-        }
+    public void setRotation(double value) {
+        this.setValue("Rotation", value);
     }
 
     public void setMaxPowerTimer(int value) {
@@ -155,48 +158,9 @@ public class TileEntityHandCrank extends TileEntity implements IAnimatable, ITic
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        super.writeToNBT(compound);
-        compound.setFloat("power", this.power);
-        compound.setFloat("rotation", this.rotation);
-        return compound;
-    }
-
-    @Override
-    public void readFromNBT(NBTTagCompound compound) {
-        super.readFromNBT(compound);
-        this.power = compound.getFloat("power");
-        this.rotation = compound.getInteger("rotation");
-    }
-
-    @Override
-    @Nullable
-    public SPacketUpdateTileEntity getUpdatePacket() {
-        NBTTagCompound nbtTag = new NBTTagCompound();
-        this.writeToNBT(nbtTag);
-        return new SPacketUpdateTileEntity(this.pos, 1, nbtTag);
-    }
-
-    @Override
-    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-        this.readFromNBT(pkt.getNbtCompound());
-    }
-
-    @Override
     public void markDirty() {
         super.markDirty();
         Misc.syncTE(this, false);
-    }
-
-    @Override
-    public NBTTagCompound getUpdateTag() {
-        return this.writeToNBT(new NBTTagCompound());
-    }
-
-    @Override
-    public void handleUpdateTag(NBTTagCompound tag) {
-        this.power = tag.getFloat("power");
-        this.rotation = tag.getInteger("rotation");
     }
 
     @Override
@@ -207,6 +171,16 @@ public class TileEntityHandCrank extends TileEntity implements IAnimatable, ITic
     private <E extends IAnimatable> PlayState rotation(AnimationEvent<E> event) {
         event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.hand_crank.rotation", LoopType.LOOP));
         return PlayState.CONTINUE;
+    }
+
+    @Override
+    public List<AnimatableValue> createAnimationVariables() {
+        return List.of(new AnimatableValue("rotation", 0D));
+    }
+
+    @Override
+    public List<AnimatableValue> tickAnimationVariables() {
+        return List.of(new AnimatableValue("rotation", this.getRotation()));
     }
 
     @Override

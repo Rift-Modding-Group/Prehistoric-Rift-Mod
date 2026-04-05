@@ -41,7 +41,7 @@ dependencies {
     compileOnly "curse.maven:crafttweaker-239197:5354089"
     compileOnly "curse.maven:pams-harvestcraft-221857:2904825"
     compileOnly files("libs/Hwyla-1.8.26-B41_1.12.2-api.jar")
-    compileOnly files("libs/riftlib-1.1.0-dev.jar")
+    compileOnly files("libs/riftlib-2.0.0-dev.jar")
     compileOnly "curse.maven:serene-seasons-291874:2799213"
     compileOnly "net.darkhax.gamestages:GameStages-1.12.2:2.0.123"
     modImplementation ("com.cleanroommc:modularui:3.1.5") { transitive = false }

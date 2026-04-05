@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.client;
 
-import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.newui.UIThemes;
 import anightdazingzoroark.prift.client.overlay.RiftCreatureControls;
 import anightdazingzoroark.prift.client.overlay.RiftLargeWeaponControls;
@@ -11,12 +10,10 @@ import anightdazingzoroark.prift.client.renderer.BlockRenderer;
 import anightdazingzoroark.prift.client.renderer.EntityRenderer;
 import anightdazingzoroark.prift.client.renderer.FluidRenderer;
 import anightdazingzoroark.prift.client.renderer.ItemRenderer;
-import anightdazingzoroark.prift.server.RiftGui;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSection;
 import anightdazingzoroark.prift.client.data.GlowingMetadataSectionSerializer;
 import anightdazingzoroark.prift.server.entity.RiftCreatureHitboxLinker;
-import anightdazingzoroark.prift.server.entity.RiftCreatureRidePosLinker;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.riftlib.RiftLibLinkerRegistry;
 import com.cleanroommc.modularui.api.IThemeApi;
@@ -48,7 +45,6 @@ public class ClientProxy extends ServerProxy {
         super.preInit(e);
         for (RiftCreatureType creatureType : RiftCreatureType.values()) {
             RiftLibLinkerRegistry.registerEntityHitboxLinker(creatureType.getCreature(), new RiftCreatureHitboxLinker());
-            RiftLibLinkerRegistry.registerDynamicRidePosLinker(creatureType.getCreature(), new RiftCreatureRidePosLinker());
         }
         EntityRenderer.registerRenderers();
         BlockRenderer.registerRenderers();
