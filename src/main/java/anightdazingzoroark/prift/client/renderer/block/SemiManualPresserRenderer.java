@@ -27,9 +27,8 @@ public class SemiManualPresserRenderer extends GeoBlockRenderer<TileEntitySemiMa
         TileEntitySemiManualPresserTop topTE = (TileEntitySemiManualPresserTop)animatable.getTopTEntity();
         float recipeTRatio = topTE != null ? (float)topTE.getTimeHeld()/(float)topTE.getMaxRecipeTime() : -1;
 
-        IItemHandler itemStackHandler = animatable.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-        boolean canRenderItemFlag = itemStackHandler != null && (!itemStackHandler.getStackInSlot(0).isEmpty() || !itemStackHandler.getStackInSlot(1).isEmpty());
-        ItemStack itemToRender =  itemStackHandler != null && itemStackHandler.getStackInSlot(0).isEmpty() ? itemStackHandler.getStackInSlot(1) : itemStackHandler.getStackInSlot(0);
+        boolean canRenderItemFlag = !animatable.getInputInventory().isEmpty() && !animatable.getOutputInventory().isEmpty();
+        ItemStack itemToRender =  animatable.getInputItem().isEmpty() ? animatable.getOutputItem() : animatable.getInputItem();
         if (canRenderItemFlag && recipeTRatio >= 0 && recipeTRatio < 0.75 && !topTE.getMustBeReset() && !animatable.canDoResetAnim()) {
             GL11.glPushMatrix();
             RenderHelper.enableStandardItemLighting();

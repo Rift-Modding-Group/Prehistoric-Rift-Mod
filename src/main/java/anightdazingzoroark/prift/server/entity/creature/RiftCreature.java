@@ -1,9 +1,9 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.newui.screens.synced.RiftCreatureScreen;
-import anightdazingzoroark.prift.client.newui.data.CreatureGuiData;
-import anightdazingzoroark.prift.client.newui.data.CreatureGuiFactory;
+import anightdazingzoroark.prift.client.ui.screens.synced.RiftCreatureScreen;
+import anightdazingzoroark.prift.client.ui.data.CreatureGuiData;
+import anightdazingzoroark.prift.client.ui.data.CreatureGuiFactory;
 import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftControls;

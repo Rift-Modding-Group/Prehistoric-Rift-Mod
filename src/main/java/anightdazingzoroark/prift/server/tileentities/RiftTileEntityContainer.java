@@ -8,20 +8,25 @@ import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public abstract class RiftTileEntityContainer extends RiftTileEntity implements ISidedInventory {
     protected final HashMap<String, RiftInventoryHandler> inventoryMap = new HashMap<>();
+    private final HashMap<String, FluidTank> fluidTankMap = new HashMap<>();
     protected final InventorySideContainer inventorySideInfo = new InventorySideContainer();
 
     public RiftTileEntityContainer() {
         super();
         this.registerInventories();
+        this.registerFluidTanks();
     }
 
     //-----initialization and registration of inventories-----
@@ -32,28 +37,16 @@ public abstract class RiftTileEntityContainer extends RiftTileEntity implements 
     }
 
     protected void registerInventory(String key, int size) {
-        //check if the inventory already exists, if it already does, skip
-        if (this.inventoryMap.containsKey(key)) {
-            throw new UnsupportedOperationException("Inventory "+key+" already exists in this tile entity!");
-        }
-
-        this.inventoryMap.put(key, new RiftInventoryHandler(size));
+        this.registerInventory(key, new RiftInventoryHandler(size));
     }
 
-    protected <I extends RiftInventoryHandler> void registerInventory(String key, int size, Class<I> inventoryClass) {
+    protected void registerInventory(String key, RiftInventoryHandler invHandler) {
         //check if the inventory already exists, if it already does, skip
         if (this.inventoryMap.containsKey(key)) {
             throw new UnsupportedOperationException("Inventory "+key+" already exists in this tile entity!");
         }
 
-        //try to create using the class
-        try {
-            RiftInventoryHandler toCreate = inventoryClass.getDeclaredConstructor(Integer.class).newInstance(size);
-            this.inventoryMap.put(key, toCreate);
-        }
-        catch (Exception e) {
-            throw new RuntimeException("Inventory class must have a public no-arg actor: " + inventoryClass.getName(), e);
-        }
+        this.inventoryMap.put(key, invHandler);
     }
 
     //for dealing with how inventories can be inserted into or extracted from by hoppers or pipes
@@ -72,6 +65,23 @@ public abstract class RiftTileEntityContainer extends RiftTileEntity implements 
         return this.inventoryMap.get(key);
     }
 
+    //-----initialization and registration of fluidtanks-----
+    public abstract void registerFluidTanks();
+
+    protected void registerFluidTank(String key, int volume) {
+        //check if the fluid tank already exists, if it doesn't, skip
+        if (this.fluidTankMap.containsKey(key)) {
+            throw new UnsupportedOperationException("FluidTank "+key+" already not exist in this tile entity!");
+        }
+
+        this.fluidTankMap.put(key, new FluidTank(volume));
+    }
+
+    //-----getting fluid tank-----
+    public FluidTank getFluidTank(String key) {
+        return this.fluidTankMap.get(key);
+    }
+
     //-----inventory operations that take advantage of inventorySidingMap, for use in anything that has ISidedInventory-----
     @Override
     public int[] getSlotsForFace(EnumFacing facing) {
@@ -83,7 +93,17 @@ public abstract class RiftTileEntityContainer extends RiftTileEntity implements 
         return this.inventorySideInfo.interactionAtSide.containsKey(facing)
                 && this.inventorySideInfo.slotsAndDirections.containsKey(facing)
                 && this.inventorySideInfo.interactionAtSide.get(facing) == SideInvInteraction.INSERT
-                && this.inventorySideInfo.slotsAndDirections.get(facing).contains(index);
+                && this.inventorySideInfo.slotsAndDirections.get(facing).contains(index)
+                && this.itemIsFiltered(index, itemStackIn);
+    }
+
+    private boolean itemIsFiltered(int index, ItemStack itemStackIn) {
+        String invAtIndex = this.inventorySideInfo.inventoryKeyAtPos(index);
+        if (invAtIndex == null) return false;
+        RiftInventoryHandler inventoryHandler = this.inventoryMap.get(invAtIndex);
+        if (inventoryHandler == null) return false;
+        if (inventoryHandler.getItemFilter() == null) return true;
+        return inventoryHandler.getItemFilter().apply(itemStackIn);
     }
 
     @Override
@@ -197,7 +217,6 @@ public abstract class RiftTileEntityContainer extends RiftTileEntity implements 
     public boolean hasCustomName() {
         return false;
     }
-    //-----inventory stuff ends here-----
 
     protected ImmutablePair<String, Integer> getSlotAndInv(int slotRelativeToSidingInfo) {
         String matchedInventory = null;
@@ -220,6 +239,7 @@ public abstract class RiftTileEntityContainer extends RiftTileEntity implements 
         }
         return new ImmutablePair<>(matchedInventory, matchedSlot);
     }
+    //-----inventory stuff ends here-----
 
     //-----saving and updating nbt-----
     @Override
@@ -229,6 +249,12 @@ public abstract class RiftTileEntityContainer extends RiftTileEntity implements 
         for (Map.Entry<String, RiftInventoryHandler> inventoryEntry : this.inventoryMap.entrySet()) {
             NBTTagCompound inventoryNBT = compound.getCompoundTag(inventoryEntry.getKey());
             inventoryEntry.getValue().deserializeNBT(inventoryNBT);
+        }
+
+        //nbt for fluid tanks
+        for (Map.Entry<String, FluidTank> fluidTankEntry : this.fluidTankMap.entrySet()) {
+            NBTTagCompound fluidNBT = compound.getCompoundTag(fluidTankEntry.getKey());
+            fluidTankEntry.getValue().readFromNBT(fluidNBT);
         }
     }
 
@@ -240,9 +266,16 @@ public abstract class RiftTileEntityContainer extends RiftTileEntity implements 
             NBTTagCompound inventoryNBT = inventoryEntry.getValue().serializeNBT();
             compound.setTag(inventoryEntry.getKey(), inventoryNBT);
         }
+        //nbt for fluid tanks
+        for (Map.Entry<String, FluidTank> fluidTankEntry : this.fluidTankMap.entrySet()) {
+            NBTTagCompound fluidNBT = new NBTTagCompound();
+            fluidTankEntry.getValue().writeToNBT(fluidNBT);
+            compound.setTag(fluidTankEntry.getKey(), fluidNBT);
+        }
         return compound;
     }
 
+    //-----subclasses for inventory siding-----
     protected record InventorySideInfo(String key, int size, SideInvInteraction sideInvInteraction, List<EnumFacing> directions) {}
 
     //for info on restricting inventory extraction via pipes or hoppers or whatever depending on the side
@@ -331,6 +364,13 @@ public abstract class RiftTileEntityContainer extends RiftTileEntity implements 
                     this.interactionAtSide.put(direction, invSideInfo.sideInvInteraction());
                 }
             }
+        }
+
+        public String inventoryKeyAtPos(int pos) {
+            for (Map.Entry<String, List<Integer>> entry : this.displacedIndexes.entrySet()) {
+                if (entry.getValue().contains(pos)) return entry.getKey();
+            }
+            return null;
         }
     }
 

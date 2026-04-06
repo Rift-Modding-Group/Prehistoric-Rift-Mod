@@ -1,8 +1,8 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.newui.RiftUIIcons;
-import anightdazingzoroark.prift.client.newui.UIPanelNames;
+import anightdazingzoroark.prift.client.ui.RiftUIIcons;
+import anightdazingzoroark.prift.client.ui.UIPanelNames;
 import anightdazingzoroark.prift.compat.jei.RiftJEI;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.ConsumerMechCapability;
@@ -83,6 +83,9 @@ public class TileEntityMechanicalFilter extends RiftTileEntityContainer implemen
         this.registerInventorySiding("Output", SideInvInteraction.EXTRACT, EnumFacing.DOWN);
         this.finalizeInventorySidingInfo();
     }
+
+    @Override
+    public void registerFluidTanks() {}
 
     @Override
     public void update() {

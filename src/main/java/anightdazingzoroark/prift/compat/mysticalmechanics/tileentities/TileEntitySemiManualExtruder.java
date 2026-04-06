@@ -3,6 +3,9 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualExtruderRecipe;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualPresserRecipe;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.DoublePropertyValue;
+import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
+import anightdazingzoroark.riftlib.core.AnimatableValue;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -12,70 +15,81 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
-public class TileEntitySemiManualExtruder extends TileEntitySemiManualBase {
-    private float rotation = 0f;
+import java.util.Arrays;
+import java.util.List;
 
-    public TileEntitySemiManualExtruder() {
-        super(2);
+public class TileEntitySemiManualExtruder extends TileEntitySemiManualBase {
+    @Override
+    public void registerValues() {
+        super.registerValues();
+        this.registerValue(new DoublePropertyValue("Rotation", 0D));
+    }
+
+    @Override
+    public void registerInventories() {
+        super.registerInventories();
+        this.registerInventory("Output", 1);
+        this.registerInventorySiding("Output", SideInvInteraction.EXTRACT, EnumFacing.DOWN);
     }
 
     @Override
     public void update() {
         super.update();
-        if (!this.world.isRemote) {
-            if (this.getTopTEntity() != null) {
-                if (this.getTopTEntity().getPower() > 0) {
-                    if (this.getTopTEntity().getCurrentRecipe() == null) {
-                        for (SemiManualExtruderRecipe recipe : RiftMMRecipes.smExtruderRecipes) {
-                            if (recipe.matches(this.getTopTEntity().getPower(), this.getInputItem())) {
-                                this.getTopTEntity().setCurrentRecipe(recipe);
-                            }
+        if (this.world.isRemote) return;
+        if (this.getTopTEntity() != null) {
+            if (this.getTopTEntity().getPower() > 0) {
+                if (this.getTopTEntity().getCurrentRecipe() == null) {
+                    for (SemiManualExtruderRecipe recipe : RiftMMRecipes.smExtruderRecipes) {
+                        if (recipe.matches(this.getTopTEntity().getPower(), this.getInputItem())) {
+                            this.getTopTEntity().setCurrentRecipe(recipe);
                         }
                     }
-                    else {
-                        if (!this.getTopTEntity().getMustBeReset() && !this.canDoResetAnim()) {
-                            boolean outputUsability = (this.getOutpuItem().isEmpty() || ((SemiManualExtruderRecipe)this.getTopTEntity().getCurrentRecipe()).output.apply(this.getOutpuItem())) && this.getOutpuItem().getCount() + ((SemiManualExtruderRecipe)this.getTopTEntity().getCurrentRecipe()).output.matchingStacks[0].getCount() <= this.getOutpuItem().getMaxStackSize();
-                            if (outputUsability) {
-                                if (this.getTopTEntity().getTimeHeld() < this.getTopTEntity().getMaxRecipeTime()) {
-                                    this.getTopTEntity().setTimeHeld(this.getTopTEntity().getTimeHeld() + 1);
-                                }
-                                else {
-                                    ItemStack outputStack = ((SemiManualExtruderRecipe)this.getTopTEntity().getCurrentRecipe()).output.getMatchingStacks()[0].copy();
-                                    this.insertItemToSlot(1, outputStack);
-                                    this.getInputItem().shrink(1);
-                                    this.getTopTEntity().setTimeHeld(0);
-                                    this.getTopTEntity().setMustBeReset(true);
-                                }
+                }
+                else {
+                    if (!this.getTopTEntity().getMustBeReset() && !this.canDoResetAnim()) {
+                        SemiManualExtruderRecipe currentRecipe = (SemiManualExtruderRecipe) this.getTopTEntity().getCurrentRecipe();
+                        boolean outputUsability = (this.getOutpuItem().isEmpty() || currentRecipe.output.apply(this.getOutpuItem())) && this.getOutpuItem().getCount() + currentRecipe.output.matchingStacks[0].getCount() <= this.getOutpuItem().getMaxStackSize();
+                        if (outputUsability) {
+                            if (this.getTopTEntity().getTimeHeld() < this.getTopTEntity().getMaxRecipeTime()) {
+                                this.getTopTEntity().setTimeHeld(this.getTopTEntity().getTimeHeld() + 1);
                             }
-                            if (!this.getTopTEntity().getCurrentRecipe().matches(this.getTopTEntity().getPower(), this.getInputItem())) {
+                            else {
+                                RiftInventoryHandler outputInv = this.getOutputInventory();
+                                ItemStack outputStack = currentRecipe.output.getMatchingStacks()[0].copy();
+                                outputInv.insertItem(outputStack);
+                                this.getInputItem().shrink(1);
                                 this.getTopTEntity().setTimeHeld(0);
-                                this.getTopTEntity().setCurrentRecipe(null);
                                 this.getTopTEntity().setMustBeReset(true);
                             }
                         }
+                        if (!this.getTopTEntity().getCurrentRecipe().matches(this.getTopTEntity().getPower(), this.getInputItem())) {
+                            this.getTopTEntity().setTimeHeld(0);
+                            this.getTopTEntity().setCurrentRecipe(null);
+                            this.getTopTEntity().setMustBeReset(true);
+                        }
                     }
+                }
 
-                    //rotation update
-                    if (!this.getTopTEntity().getMustBeReset()) {
-                        this.setRotation(this.rotation + (float) this.getTopTEntity().getPower());
-                        if (this.getRotation() >= 360f) this.setRotation(this.rotation - 360f);
-                    }
+                //rotation update
+                if (!this.getTopTEntity().getMustBeReset()) {
+                    double newRotation = this.getRotation() + this.getTopTEntity().getPower();
+                    if (newRotation >= 360f) newRotation = newRotation - 360f;
+                    this.setRotation(newRotation);
                 }
             }
         }
     }
 
-    public float getRotation() {
-        return this.rotation;
+    public RiftInventoryHandler getOutputInventory() {
+        return this.getInventory("Output");
     }
 
-    public void setRotation(float value) {
-        this.rotation = value;
-        if (!this.world.isRemote) {
-            this.markDirty();
-            IBlockState state = this.world.getBlockState(this.pos);
-            this.world.notifyBlockUpdate(this.pos, state, state, 3);
-        }
+    public double getRotation() {
+        return this.getValue("Rotation");
+    }
+
+    public void setRotation(double value) {
+        this.setValue("Rotation", value);
     }
 
     public ItemStack getOutpuItem() {
@@ -83,20 +97,12 @@ public class TileEntitySemiManualExtruder extends TileEntitySemiManualBase {
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        super.writeToNBT(compound);
-        compound.setFloat("rotation", this.rotation);
-        return compound;
+    public List<AnimatableValue> createAnimationVariables() {
+        return List.of(new AnimatableValue("spinAxle", 0D));
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound compound) {
-        super.readFromNBT(compound);
-        this.rotation = compound.getInteger("rotation");
-    }
-
-    @Override
-    public void handleUpdateTag(NBTTagCompound tag) {
-        this.rotation = tag.getInteger("rotation");
+    public List<AnimatableValue> tickAnimationVariables() {
+        return List.of(new AnimatableValue("spinAxle", this.getRotation()));
     }
 }

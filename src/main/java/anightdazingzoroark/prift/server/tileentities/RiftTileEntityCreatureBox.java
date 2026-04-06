@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.tileentities;
 
-import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
-import anightdazingzoroark.prift.client.newui.screens.synced.RiftCreatureBoxScreen;
+import anightdazingzoroark.prift.client.ui.holder.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.ui.screens.synced.RiftCreatureBoxScreen;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.helper.ChunkPosWithVerticality;
 import anightdazingzoroark.prift.helper.FixedSizeList;

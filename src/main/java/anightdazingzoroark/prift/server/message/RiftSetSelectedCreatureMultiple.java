@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.message;
 
-import anightdazingzoroark.prift.client.newui.holder.HolderHelper;
-import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.ui.holder.HolderHelper;
+import anightdazingzoroark.prift.client.ui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.helper.CreatureNBT;
 import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;

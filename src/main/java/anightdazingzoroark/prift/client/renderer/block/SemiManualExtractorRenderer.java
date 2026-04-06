@@ -33,10 +33,9 @@ public class SemiManualExtractorRenderer extends GeoBlockRenderer<TileEntitySemi
         TileEntitySemiManualExtractorTop topTE = (TileEntitySemiManualExtractorTop)animatable.getTopTEntity();
         float recipeTRatio = topTE != null ? (float)topTE.getTimeHeld()/(float)topTE.getMaxRecipeTime() : -1;
 
-        IItemHandler itemStackHandler = animatable.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-        boolean canRenderItemFlag = itemStackHandler != null && !itemStackHandler.getStackInSlot(0).isEmpty();
+        boolean canRenderItemFlag = !animatable.getInputItem().isEmpty();
         if (canRenderItemFlag && recipeTRatio >= 0 && recipeTRatio < 0.75 && !topTE.getMustBeReset() && !animatable.canDoResetAnim()) {
-            ItemStack stack = itemStackHandler.getStackInSlot(0);
+            ItemStack stack = animatable.getInputItem();
             GL11.glPushMatrix();
             RenderHelper.enableStandardItemLighting();
             GlStateManager.enableLighting();
@@ -47,9 +46,9 @@ public class SemiManualExtractorRenderer extends GeoBlockRenderer<TileEntitySemi
         }
 
         //render liquids
-        FluidStack fluidStack = animatable.getTank().getFluid();
+        FluidStack fluidStack = animatable.getOutputTank().getFluid();
         if (fluidStack != null) {
-            double fluidHeight = fluidStack.amount / (double) animatable.getTank().getCapacity() * 0.75;
+            double fluidHeight = fluidStack.amount / (double) animatable.getOutputTank().getCapacity() * 0.75;
             GlStateManager.pushMatrix();
             GlStateManager.translate(x - 0.05, y, z - 0.05);
 

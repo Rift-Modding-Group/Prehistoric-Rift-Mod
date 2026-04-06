@@ -1,6 +1,12 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockSemiManualBase;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.BooleanPropertyValue;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.DoublePropertyValue;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.IntegerPropertyValue;
+import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.StringPropertyValue;
+import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
+import anightdazingzoroark.prift.server.tileentities.RiftTileEntityContainer;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -28,26 +34,33 @@ import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
 
-public abstract class TileEntitySemiManualBase extends TileEntity implements IAnimatable, ITickable, ISidedInventory {
+public abstract class TileEntitySemiManualBase extends RiftTileEntityContainer implements IAnimatable, ITickable, ISidedInventory {
     private final AnimationFactory factory = new AnimationFactory(this);
-    protected NonNullList<ItemStack> itemStackHandler;
-    private boolean playResetAnim;
-    private int resetAnimTime;
 
-    protected TileEntitySemiManualBase(int invSize) {
-        this.itemStackHandler = NonNullList.<ItemStack>withSize(invSize, ItemStack.EMPTY);
+    @Override
+    public void registerValues() {
+        this.registerValue(new BooleanPropertyValue("PlayResetAnim", false));
+        this.registerValue(new IntegerPropertyValue("ResetAnimTime", 0));
     }
+
+    @Override
+    public void registerInventories() {
+        this.registerInventory("Input", 1);
+        this.registerInventorySiding("Input", SideInvInteraction.INSERT, EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.EAST, EnumFacing.WEST);
+    }
+
+    @Override
+    public void registerFluidTanks() {}
 
     @Override
     public void update() {
         //manage reset anim
-        if (!this.world.isRemote) {
-            if (this.canDoResetAnim()) {
-                this.setResetAnimTime(this.getResetAnimTime() + 1);
-                if (this.getResetAnimTime() >= 10) {
-                    this.setPlayResetAnim(false);
-                    this.setResetAnimTime(0);
-                }
+        if (this.world.isRemote) return;
+        if (this.canDoResetAnim()) {
+            this.setResetAnimTime(this.getResetAnimTime() + 1);
+            if (this.getResetAnimTime() >= 10) {
+                this.setPlayResetAnim(false);
+                this.setResetAnimTime(0);
             }
         }
     }
@@ -55,24 +68,6 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
     public EnumFacing getFacing() {
         IBlockState state = this.getWorld().getBlockState(this.getPos());
         return state.getValue(BlockSemiManualBase.FACING);
-    }
-
-    @Override
-    public void readFromNBT(NBTTagCompound compound) {
-        super.readFromNBT(compound);
-        this.itemStackHandler = NonNullList.<ItemStack>withSize(this.getSizeInventory(), ItemStack.EMPTY);
-        ItemStackHelper.loadAllItems(compound, this.itemStackHandler);
-        this.playResetAnim = compound.getBoolean("playResetAnim");
-        this.resetAnimTime = compound.getInteger("resetAnimTime");
-    }
-
-    @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        compound = super.writeToNBT(compound);
-        ItemStackHelper.saveAllItems(compound, this.itemStackHandler);
-        compound.setBoolean("playResetAnim", this.playResetAnim);
-        compound.setInteger("resetAnimTime", this.resetAnimTime);
-        return compound;
     }
 
     @Override
@@ -97,174 +92,35 @@ public abstract class TileEntitySemiManualBase extends TileEntity implements IAn
     }
 
     public boolean canDoResetAnim() {
-        return this.playResetAnim;
+        return this.getValue("PlayResetAnim");
     }
 
     public void setPlayResetAnim(boolean value) {
-        this.playResetAnim = value;
-        if (!this.world.isRemote) {
-            this.markDirty();
-            IBlockState state = this.world.getBlockState(this.pos);
-            this.world.notifyBlockUpdate(this.pos, state, state, 3);
-        }
+        this.setValue("PlayResetAnim", value);
     }
 
     public int getResetAnimTime() {
-        return this.resetAnimTime;
+        return this.getValue("ResetAnimTime");
     }
 
     public void setResetAnimTime(int value) {
-        this.resetAnimTime = value;
-        if (!this.world.isRemote) {
-            this.markDirty();
-            IBlockState state = this.world.getBlockState(this.pos);
-            this.world.notifyBlockUpdate(this.pos, state, state, 3);
-        }
-    }
-
-    @Override
-    @Nullable
-    public SPacketUpdateTileEntity getUpdatePacket() {
-        return new SPacketUpdateTileEntity(this.pos, 1, this.getUpdateTag());
-    }
-
-    @Override
-    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-        this.readFromNBT(pkt.getNbtCompound());
-    }
-
-    @Override
-    public NBTTagCompound getUpdateTag() {
-        return this.writeToNBT(new NBTTagCompound());
-    }
-
-    @Override
-    public void handleUpdateTag(NBTTagCompound tag) {
-        this.itemStackHandler = NonNullList.<ItemStack>withSize(this.getSizeInventory(), ItemStack.EMPTY);
-        ItemStackHelper.loadAllItems(tag, this.itemStackHandler);
-        this.playResetAnim = tag.getBoolean("playResetAnim");
-        this.resetAnimTime = tag.getInteger("resetAnimTime");
+        this.setValue("ResetAnimTime", value);
     }
 
     //inventory stuff starts here
-    @Override
-    public int[] getSlotsForFace(EnumFacing side) {
-        if (side == EnumFacing.DOWN) return new int[]{1};
-        return new int[]{0};
+    public RiftInventoryHandler getInputInventory() {
+        return this.getInventory("Input");
     }
 
-    @Override
-    public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction) {
-        return this.isItemValidForSlot(index, itemStackIn);
-    }
-
-    @Override
-    public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
-        if (index == 1) return direction == EnumFacing.DOWN;
-        return true;
-    }
-
-    @Override
-    public int getSizeInventory() {
-        return this.itemStackHandler.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        for (ItemStack itemstack : this.itemStackHandler) {
-            if (!itemstack.isEmpty()) return false;
-        }
-        return true;
-    }
-
-    @Override
-    public ItemStack getStackInSlot(int index) {
-        return this.itemStackHandler.get(index);
-    }
-
-    @Override
-    public ItemStack decrStackSize(int index, int count) {
-        return ItemStackHelper.getAndSplit(this.itemStackHandler, index, count);
-    }
-
-    @Override
-    public ItemStack removeStackFromSlot(int index) {
-        return ItemStackHelper.getAndRemove(this.itemStackHandler, index);
-    }
-
-    public void insertItemToSlot(int slot, ItemStack itemStack) {
-        int newCount = this.getStackInSlot(slot).getCount() + itemStack.getCount();
-        itemStack.setCount(newCount);
-        this.setInventorySlotContents(slot, itemStack);
-    }
-
-    @Override
-    public void setInventorySlotContents(int index, ItemStack stack) {
-        this.itemStackHandler.set(index, stack);
-
-        if (!stack.isEmpty() && stack.getCount() > this.getInventoryStackLimit()) {
-            stack.setCount(this.getInventoryStackLimit());
-        }
-
-        this.markDirty();
-    }
-
-    @Override
-    public int getInventoryStackLimit() {
-        return 64;
-    }
-
-    @Override
-    public boolean isUsableByPlayer(EntityPlayer player) {
-        return !isInvalid() && player.getDistanceSq(this.pos.add(0.5D, 0.5D, 0.5D)) <= 64D;
-    }
-
-    @Override
-    public void openInventory(EntityPlayer player) {}
-
-    @Override
-    public void closeInventory(EntityPlayer player) {}
-
-    @Override
-    public boolean isItemValidForSlot(int index, ItemStack stack) {
-        return index != 1;
-    }
-
-    @Override
-    public int getField(int id) {
-        return 0;
-    }
-
-    @Override
-    public void setField(int id, int value) {}
-
-    @Override
-    public int getFieldCount() {
-        return 0;
-    }
-
-    @Override
-    public void clear() {
-        this.itemStackHandler.clear();
-    }
-
-    @Override
-    public String getName() {
-        return "";
-    }
-
-    @Override
-    public boolean hasCustomName() {
-        return false;
+    public ItemStack getInputItem() {
+        return this.getInputInventory().getStackInSlot(0);
     }
     //inventory stuff ends here
 
-    public ItemStack getInputItem() {
-        return this.getStackInSlot(0);
-    }
-
     public TileEntitySemiManualTopBase getTopTEntity() {
-        return (TileEntitySemiManualTopBase)this.world.getTileEntity(this.pos.up());
+        TileEntity tileEntity = this.world.getTileEntity(this.pos.up());
+        if (!(tileEntity instanceof TileEntitySemiManualTopBase teSemiManualTop)) return null;
+        return teSemiManualTop;
     }
 
     @Override

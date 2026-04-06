@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.client;
 
-import anightdazingzoroark.prift.client.newui.UIThemes;
+import anightdazingzoroark.prift.client.ui.UIThemes;
 import anightdazingzoroark.prift.client.overlay.RiftCreatureControls;
 import anightdazingzoroark.prift.client.overlay.RiftLargeWeaponControls;
 import anightdazingzoroark.prift.client.overlay.RiftMountEnergyBar;

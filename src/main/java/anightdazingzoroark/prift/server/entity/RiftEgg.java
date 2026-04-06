@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity;
 
-import anightdazingzoroark.prift.client.newui.UIPanelNames;
-import anightdazingzoroark.prift.client.newui.widget.EntityWidget;
+import anightdazingzoroark.prift.client.ui.UIPanelNames;
+import anightdazingzoroark.prift.client.ui.widget.EntityWidget;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.config.DimetrodonConfig;
@@ -29,7 +29,6 @@ import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
-import com.cleanroommc.modularui.widgets.layout.Column;
 import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;

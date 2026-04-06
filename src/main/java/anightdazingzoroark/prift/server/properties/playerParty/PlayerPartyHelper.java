@@ -1,15 +1,11 @@
 package anightdazingzoroark.prift.server.properties.playerParty;
 
-import anightdazingzoroark.prift.client.newui.holder.SelectedCreatureInfo;
+import anightdazingzoroark.prift.client.ui.holder.SelectedCreatureInfo;
 import anightdazingzoroark.prift.propertySystem.Property;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.*;
 import anightdazingzoroark.prift.server.properties.RiftPropertyRegistry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.HashMap;
 
 public class PlayerPartyHelper {
     public static final int maxSize = 6;

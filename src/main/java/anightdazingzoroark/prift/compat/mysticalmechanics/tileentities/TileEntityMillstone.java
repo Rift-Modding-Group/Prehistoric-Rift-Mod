@@ -1,10 +1,9 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.newui.RiftUIIcons;
-import anightdazingzoroark.prift.client.newui.UIPanelNames;
+import anightdazingzoroark.prift.client.ui.RiftUIIcons;
+import anightdazingzoroark.prift.client.ui.UIPanelNames;
 import anightdazingzoroark.prift.compat.jei.RiftJEI;
-import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.ConsumerMechCapability;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.MillstoneRecipe;
@@ -13,13 +12,10 @@ import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.Do
 import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.IntegerPropertyValue;
 import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.StringPropertyValue;
 import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
-import anightdazingzoroark.prift.server.tileentities.RiftTileEntity;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityContainer;
-import anightdazingzoroark.prift.server.tileentities.RiftTileEntityFeedingTrough;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.api.drawable.IDrawable;
 import com.cleanroommc.modularui.api.drawable.IKey;
-import com.cleanroommc.modularui.drawable.GuiTextures;
 import com.cleanroommc.modularui.factory.PosGuiData;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
@@ -35,31 +31,20 @@ import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import mysticalmechanics.api.IMechCapability;
 import mysticalmechanics.api.MysticalMechanicsAPI;
 import mysticalmechanics.util.Misc;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.inventory.ISidedInventory;
-import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.manager.AnimationData;
 import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class TileEntityMillstone extends RiftTileEntityContainer implements IAnimatable, ITickable, IGuiHolder<PosGuiData> {
     private final AnimationFactory factory = new AnimationFactory(this);
@@ -91,6 +76,9 @@ public class TileEntityMillstone extends RiftTileEntityContainer implements IAni
         this.registerInventorySiding("Output", SideInvInteraction.EXTRACT, EnumFacing.DOWN);
         this.finalizeInventorySidingInfo();
     }
+
+    @Override
+    public void registerFluidTanks() {}
 
     @Override
     public void update() {

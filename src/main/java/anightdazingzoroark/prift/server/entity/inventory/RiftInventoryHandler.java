@@ -16,15 +16,26 @@ import java.util.stream.IntStream;
 public class RiftInventoryHandler extends ItemStackHandler {
     //fallback value for item searching if nothing can be found
     private final ItemSearchResult noItemFound = new ItemSearchResult(false, ItemStack.EMPTY, -1);
+    private Function<ItemStack, Boolean> itemFilter;
 
     public RiftInventoryHandler() {
-        super();
+        this(1);
     }
 
     public RiftInventoryHandler(int size) {
-        super(size);
+        this(size, null);
     }
 
+    public RiftInventoryHandler(int size, Function<ItemStack, Boolean> itemFilter) {
+        super(size);
+        this.itemFilter = itemFilter;
+    }
+
+    public Function<ItemStack, Boolean> getItemFilter() {
+        return this.itemFilter;
+    }
+
+    //check if all slots are empty
     public boolean isEmpty() {
         for (ItemStack itemStack : this.stacks) {
             if (!itemStack.isEmpty()) return false;
@@ -32,7 +43,11 @@ public class RiftInventoryHandler extends ItemStackHandler {
         return true;
     }
 
+    //this adds an itemstack to the inventory and edits itemStackToAdd
     public ItemStack addItem(ItemStack itemStackToAdd) {
+        //block based on filter
+        if (this.itemFilter != null && !this.itemFilter.apply(itemStackToAdd)) return ItemStack.EMPTY;
+
         ItemSearchResult similarItemResult = this.findItem(
                 ItemSearchDirection.FIRST_TO_LAST,
                 itemStack -> {
@@ -61,6 +76,36 @@ public class RiftInventoryHandler extends ItemStackHandler {
             return ItemStack.EMPTY;
         }
         else return itemStackToAdd;
+    }
+
+    //similar to addItem but does not edit the itemstack given as parameter
+    public void insertItem(ItemStack itemToInsert) {
+        //block based on filter
+        if (this.itemFilter != null && !this.itemFilter.apply(itemToInsert)) return;
+
+        int count = itemToInsert.getCount();
+        for (int index = 0; index < this.stacks.size(); index++) {
+            ItemStack itemStack = this.stacks.get(index);
+
+            if (itemStack.isEmpty()) {
+                this.stacks.set(index, itemToInsert.copy());
+                break;
+            }
+            else if (ItemStack.areItemsEqual(itemStack, itemToInsert)) {
+                int countSum = count + itemStack.getCount();
+
+                if (countSum <= itemStack.getMaxStackSize()) {
+                    itemStack.setCount(countSum);
+                    break;
+                }
+                else {
+                    count = countSum - itemStack.getMaxStackSize();
+                    itemStack.setCount(itemStack.getMaxStackSize());
+                }
+            }
+
+            if (count <= 0) break;
+        }
     }
 
     public void removeItem(@NotNull ItemSearchDirection itemSearchDirection, ItemStack itemStackToRemove) {
@@ -175,32 +220,6 @@ public class RiftInventoryHandler extends ItemStackHandler {
             if (count <= 0) return true;
         }
         return false;
-   }
-
-   public void insertItem(ItemStack itemToInsert) {
-       int count = itemToInsert.getCount();
-       for (int index = 0; index < this.stacks.size(); index++) {
-           ItemStack itemStack = this.stacks.get(index);
-
-           if (itemStack.isEmpty()) {
-               this.stacks.set(index, itemToInsert.copy());
-               break;
-           }
-           else if (ItemStack.areItemsEqual(itemStack, itemToInsert)) {
-               int countSum = count + itemStack.getCount();
-
-               if (countSum <= itemStack.getMaxStackSize()) {
-                   itemStack.setCount(countSum);
-                   break;
-               }
-               else {
-                   count = countSum - itemStack.getMaxStackSize();
-                   itemStack.setCount(itemStack.getMaxStackSize());
-               }
-           }
-
-           if (count <= 0) break;
-       }
    }
 
     @Override

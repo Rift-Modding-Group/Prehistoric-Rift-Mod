@@ -3,8 +3,8 @@ package anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class BooleanPropertyValue extends AbstractPropertyValue<Boolean> {
-    public BooleanPropertyValue(String key) {
-        super(key, false);
+    public BooleanPropertyValue(String key, boolean initValue) {
+        super(key, initValue);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.tileentities;
 
-import anightdazingzoroark.prift.client.newui.UIPanelNames;
+import anightdazingzoroark.prift.client.ui.UIPanelNames;
 import anightdazingzoroark.prift.server.blocks.RiftFeedingTroughBlock;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
@@ -46,6 +46,9 @@ public class RiftTileEntityFeedingTrough extends RiftTileEntityContainer impleme
     public RiftInventoryHandler getInventory() {
         return this.getInventory("Inventory");
     }
+
+    @Override
+    public void registerFluidTanks() {}
 
     @Override
     public void update() {

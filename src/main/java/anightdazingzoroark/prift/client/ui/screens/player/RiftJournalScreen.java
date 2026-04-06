@@ -1,0 +1,89 @@
+package anightdazingzoroark.prift.client.ui.screens.player;
+
+import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.client.ui.UIPanelNames;
+import anightdazingzoroark.prift.client.ui.UIThemes;
+import anightdazingzoroark.prift.client.ui.panel.RiftModularPanel;
+import anightdazingzoroark.prift.client.ui.value.NullableEnumValue;
+import anightdazingzoroark.prift.client.ui.widget.JournalLeftPageWidget;
+import anightdazingzoroark.prift.client.ui.widget.JournalRightPageWidget;
+import anightdazingzoroark.prift.server.entity.RiftCreatureType;
+import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressHelper;
+import anightdazingzoroark.prift.server.properties.journalProgress.JournalProgressProperties;
+import com.cleanroommc.modularui.api.widget.IWidget;
+import com.cleanroommc.modularui.screen.CustomModularScreen;
+import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.screen.viewport.ModularGuiContext;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Function;
+
+public class RiftJournalScreen extends CustomModularScreen {
+    private RiftCreatureType.CreatureCategory currentCategory;
+    private RiftCreatureType currentCreature;
+
+    public RiftJournalScreen() {
+        super(RiftInitialize.MODID);
+    }
+
+    @Override
+    public @NotNull ModularPanel buildUI(ModularGuiContext context) {
+        EntityPlayer player = Minecraft.getMinecraft().player;
+        JournalProgressProperties journalProgress = JournalProgressHelper.getJournalProgress(player);
+
+        NullableEnumValue.Dynamic<RiftCreatureType.CreatureCategory> currentCategoryDynamic = new NullableEnumValue.Dynamic<>(
+                RiftCreatureType.CreatureCategory.class,
+                () -> this.currentCategory,
+                value -> this.currentCategory = value
+        );
+        NullableEnumValue.Dynamic<RiftCreatureType> currentCreatureDynamic = new NullableEnumValue.Dynamic<>(
+                RiftCreatureType.class,
+                () -> this.currentCreature,
+                value -> this.currentCreature = value
+        );
+
+        return new RiftModularPanel(UIPanelNames.JOURNAL_SCREEN)
+                .onEscPressed(new Function<RiftModularPanel, Boolean>() {
+                    @Override
+                    public Boolean apply(RiftModularPanel panel) {
+                        JournalLeftPageWidget leftPageWidget = this.getLeftPageWidget(panel);
+                        if (leftPageWidget == null) return false;
+
+                        //reset search related stuff
+                        if (leftPageWidget.getIsSearching()) {
+                            leftPageWidget.resetSearching();
+                            currentCreatureDynamic.setValue(null);
+                            leftPageWidget.updatePages();
+                            return true;
+                        }
+
+                        //reset current creature category
+                        if (currentCategoryDynamic.getValue() != null) {
+                            currentCategoryDynamic.setValue(null);
+                            currentCreatureDynamic.setValue(null);
+                            leftPageWidget.updatePages();
+                        }
+                        else PlayerUIHelper.openUI(player, UIPanelNames.PARTY_SCREEN);
+                        return true;
+                    }
+
+                    private JournalLeftPageWidget getLeftPageWidget(@NotNull RiftModularPanel panel) {
+                        for (IWidget child : panel.getChildren()) {
+                            if (child instanceof JournalLeftPageWidget leftPageWidget) return leftPageWidget;
+                        }
+                        return null;
+                    }
+                })
+                .widgetTheme(UIThemes.JOURNAL_PANEL)
+                //-----left page-----
+                .child(new JournalLeftPageWidget(journalProgress, currentCategoryDynamic, currentCreatureDynamic)
+                        .name("leftPage").size(189, 225).left(8).top(8)
+                )
+                //-----right page-----
+                .child(new JournalRightPageWidget(journalProgress, currentCreatureDynamic)
+                        .name("rightPage").size(189, 225).right(8).top(8)
+                );
+    }
+}

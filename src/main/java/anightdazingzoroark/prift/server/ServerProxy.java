@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.client.newui.data.CreatureGuiFactory;
+import anightdazingzoroark.prift.client.ui.data.CreatureGuiFactory;
 import anightdazingzoroark.prift.propertySystem.networking.PropertiesNetworking;
 import anightdazingzoroark.prift.propertySystem.registry.PropertiesBootstrap;
 import anightdazingzoroark.prift.propertySystem.sync.PropertySyncEvents;
@@ -42,7 +42,6 @@ import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 @Mod.EventBusSubscriber
@@ -59,7 +58,6 @@ public class ServerProxy {
         MinecraftForge.EVENT_BUS.register(new CapabilityHandler());
 
         RiftMessages.registerMessages();
-        NetworkRegistry.INSTANCE.registerGuiHandler(RiftInitialize.instance, new RiftGui());
         RiftFluids.registerFluids();
         RiftBlocks.registerBlocks();
         RiftItems.registerItems();

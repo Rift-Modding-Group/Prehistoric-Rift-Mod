@@ -1,10 +1,8 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.blocks;
 
-import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.compat.mysticalmechanics.items.RiftMMItems;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualHammerer;
-import anightdazingzoroark.prift.server.RiftGui;
-import anightdazingzoroark.prift.server.ServerProxy;
+import com.cleanroommc.modularui.factory.GuiFactories;
 import com.codetaylor.mc.pyrotech.modules.tech.bloomery.ModuleTechBloomery;
 import com.codetaylor.mc.pyrotech.modules.tech.bloomery.item.spi.ItemTongsFullBase;
 import com.codetaylor.mc.pyrotech.modules.tech.bloomery.util.BloomHelper;
@@ -18,8 +16,6 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 
@@ -40,12 +36,11 @@ public class BlockSemiManualHammerer extends BlockSemiManualBase {
                 ItemStack bloomStack = BloomHelper.createBloomAsItemStack(new ItemStack(ModuleTechBloomery.Blocks.BLOOM), bloomTagCompound);
                 TileEntitySemiManualHammerer te = (TileEntitySemiManualHammerer) worldIn.getTileEntity(pos);
                 if (te != null && te.getInputItem() != null && te.getInputItem().isEmpty()) {
-                    IItemHandler itemHandler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-                    itemHandler.insertItem(0, bloomStack, false);
+                    te.getInputInventory().insertItem(bloomStack);
                     playerIn.setHeldItem(hand, BloomHelper.createItemTongsEmpty(playerIn.getHeldItem(hand), !playerIn.isCreative()));
                 }
             }
-            else playerIn.openGui(RiftInitialize.instance, RiftGui.GUI_SEMI_MANUAL_HAMMERER, worldIn, pos.getX(), pos.getY(), pos.getZ());
+            else GuiFactories.tileEntity().open(playerIn, pos);
         }
         return true;
     }

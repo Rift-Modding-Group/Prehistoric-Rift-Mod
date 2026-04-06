@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.entity.largeWeapons;
 
-import anightdazingzoroark.prift.client.newui.UIPanelNames;
+import anightdazingzoroark.prift.client.ui.UIPanelNames;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.inventory.LargeWeaponInventoryHandler;
 import anightdazingzoroark.prift.server.message.*;

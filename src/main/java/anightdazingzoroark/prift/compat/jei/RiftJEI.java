@@ -128,21 +128,23 @@ public class RiftJEI implements IModPlugin {
 
         //add the custom recipes
         if (GeneralConfig.canUseMM()) {
+            registry.addRecipes(this.millstoneWrappers(), millstoneCat);
+            registry.addRecipeCatalyst(new ItemStack(RiftMMBlocks.MILLSTONE), millstoneCat);
+
+            registry.addRecipes(this.mechanicalFilterWrappers(), mechFilterCat);
+            registry.addRecipeCatalyst(new ItemStack(RiftMMBlocks.MECHANICAL_FILTER), mechFilterCat);
+
             registry.addRecipes(this.semiManualExtractorWrappers(), smExtractorCat);
-            registry.addRecipeClickArea(RiftSemiManualExtractorMenu.class, 64, 33, 21, 14, smExtractorCat);
             registry.addRecipeCatalyst(new ItemStack(RiftMMItems.SEMI_MANUAL_EXTRACTOR), smExtractorCat);
 
             registry.addRecipes(this.semiManualPresserWrappers(), smPresserCat);
-            registry.addRecipeClickArea(RiftSemiManualPresserMenu.class, 74, 33, 21, 14, smPresserCat);
             registry.addRecipeCatalyst(new ItemStack(RiftMMItems.SEMI_MANUAL_PRESSER), smPresserCat);
 
             registry.addRecipes(this.semiManualExtruderWrappers(), smExtruderCat);
-            registry.addRecipeClickArea(RiftSemiManualExtruderMenu.class, 74, 33, 21, 14, smExtruderCat);
             registry.addRecipeCatalyst(new ItemStack(RiftMMItems.SEMI_MANUAL_EXTRUDER), smExtruderCat);
 
             if (GeneralConfig.canUsePyrotech() && ModPyrotechConfig.MODULES.get(ModuleTechBloomery.MODULE_ID)) {
                 registry.addRecipes(this.semiManualHammererWrappers(), smHammererCat);
-                registry.addRecipeClickArea(RiftSemiManualHammererMenu.class, 58, 33, 21, 14, smHammererCat);
                 registry.addRecipeCatalyst(new ItemStack(RiftMMItems.SEMI_MANUAL_HAMMERER), smHammererCat);
             }
         }

@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.blocks;
 
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualBase;
+import com.cleanroommc.modularui.factory.GuiFactories;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.ITileEntityProvider;
@@ -15,6 +16,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
@@ -59,6 +61,12 @@ public abstract class BlockSemiManualBase extends Block implements ITileEntityPr
 
     @Nullable
     public abstract TileEntity createNewTileEntity(World worldIn, int meta);
+
+    @Override
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        if (!worldIn.isRemote) GuiFactories.tileEntity().open(playerIn, pos);
+        return true;
+    }
 
     @Override
     public EnumBlockRenderType getRenderType(IBlockState state) {
