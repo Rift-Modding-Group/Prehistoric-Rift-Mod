@@ -24,12 +24,14 @@ public class SemiManualPresserRenderer extends GeoBlockRenderer<TileEntitySemiMa
     public void render(TileEntitySemiManualPresser animatable, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
         super.render(animatable, x, y, z, partialTicks, destroyStage, alpha);
         //render items
-        TileEntitySemiManualPresserTop topTE = (TileEntitySemiManualPresserTop)animatable.getTopTEntity();
-        float recipeTRatio = topTE != null ? (float)topTE.getTimeHeld()/(float)topTE.getMaxRecipeTime() : -1;
+        TileEntitySemiManualPresserTop topTE = (TileEntitySemiManualPresserTop) animatable.getTopTEntity();
+        float recipeTRatio = topTE != null ? (float) topTE.getTimeHeld() / (float)topTE.getMaxRecipeTime() : 0f;
+        boolean notResetting = topTE == null || !topTE.getMustBeReset();
 
-        boolean canRenderItemFlag = !animatable.getInputInventory().isEmpty() && !animatable.getOutputInventory().isEmpty();
-        ItemStack itemToRender =  animatable.getInputItem().isEmpty() ? animatable.getOutputItem() : animatable.getInputItem();
-        if (canRenderItemFlag && recipeTRatio >= 0 && recipeTRatio < 0.75 && !topTE.getMustBeReset() && !animatable.canDoResetAnim()) {
+        boolean canRenderItemFlag = !animatable.getInputInventory().isEmpty() || !animatable.getOutputInventory().isEmpty();
+        ItemStack itemToRender = animatable.getOutputItem().isEmpty() ? animatable.getInputItem() : animatable.getOutputItem();
+        //todo: maybe add in riftlibrary the ability to render an item at a locator
+        if (canRenderItemFlag && recipeTRatio >= 0 && recipeTRatio < 0.75 && notResetting && !animatable.canDoResetAnim()) {
             GL11.glPushMatrix();
             RenderHelper.enableStandardItemLighting();
             GlStateManager.enableLighting();

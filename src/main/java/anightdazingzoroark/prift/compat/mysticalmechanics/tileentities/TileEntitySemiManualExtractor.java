@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualExtractorRecipe;
 import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
@@ -19,6 +20,7 @@ public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase {
             return itemStack.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
         }));
         this.registerInventory("BucketOutput", 1);
+        this.registerInventorySiding("BucketOutput", SideInvInteraction.EXTRACT, EnumFacing.DOWN);
     }
 
     @Override

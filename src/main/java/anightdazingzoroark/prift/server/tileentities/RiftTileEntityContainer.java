@@ -60,6 +60,10 @@ public abstract class RiftTileEntityContainer extends RiftTileEntity implements 
         this.inventorySideInfo.addKey(key, this.inventoryMap.get(key).getSlots(), sideInvInteraction, sides);
     }
 
+    public List<RiftInventoryHandler> getInventories() {
+        return new ArrayList<>(this.inventoryMap.values());
+    }
+
     //-----getting inventory-----
     public RiftInventoryHandler getInventory(String key) {
         return this.inventoryMap.get(key);

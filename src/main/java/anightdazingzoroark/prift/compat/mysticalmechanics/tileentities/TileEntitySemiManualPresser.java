@@ -54,7 +54,7 @@ public class TileEntitySemiManualPresser extends TileEntitySemiManualBase implem
                 }
                 else {
                     if (!this.getTopTEntity().getMustBeReset() && !this.canDoResetAnim()) {
-                        ItemStack outputItem = this.getOutputInventory().getStackInSlot(0);
+                        ItemStack outputItem = this.getOutputItem();
                         boolean outputUsability = (outputItem.isEmpty() || currentRecipe.output.apply(outputItem)) && outputItem.getCount() + currentRecipe.output.matchingStacks[0].getCount() <= outputItem.getMaxStackSize();
                         if (outputUsability) {
                             if (this.getTopTEntity().getTimeHeld() < this.getTopTEntity().getMaxRecipeTime()) {

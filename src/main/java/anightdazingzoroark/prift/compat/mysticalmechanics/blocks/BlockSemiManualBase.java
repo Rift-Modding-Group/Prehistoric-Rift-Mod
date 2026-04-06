@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.compat.mysticalmechanics.blocks;
 
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualBase;
+import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import com.cleanroommc.modularui.factory.GuiFactories;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
@@ -86,32 +87,23 @@ public abstract class BlockSemiManualBase extends Block implements ITileEntityPr
     @Override
     public void onBlockHarvested(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player) {
         if (!worldIn.isRemote) {
+            //drop items from inventory
+            this.dropInventory(worldIn, pos);
+
             //destroy upper block
             Block topBlock = worldIn.getBlockState(pos.up()).getBlock();
-
             if (topBlock instanceof BlockSemiManualBaseTop) {
                 worldIn.destroyBlock(pos.up(), false);
             }
-
-            //drop items from inventory
-            this.dropInventory(worldIn, pos);
         }
         super.onBlockHarvested(worldIn, pos, state, player);
     }
 
     public void dropInventory(World worldIn, BlockPos pos) {
         TileEntity tileEntity = worldIn.getTileEntity(pos);
-        if (tileEntity instanceof TileEntitySemiManualBase) {
-            TileEntitySemiManualBase semiManualBase = (TileEntitySemiManualBase)tileEntity;
-            IItemHandler itemHandler = semiManualBase.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-            for (int x = 0; x < itemHandler.getSlots(); x++) {
-                ItemStack stack = itemHandler.getStackInSlot(x);
-                if (!stack.isEmpty()) {
-                    EntityItem droppedItem = new EntityItem(worldIn);
-                    droppedItem.setPosition(pos.getX(), pos.getY() + 1, pos.getZ());
-                    droppedItem.setItem(stack);
-                    worldIn.spawnEntity(droppedItem);
-                }
+        if (tileEntity instanceof TileEntitySemiManualBase semiManualBase) {
+            for (RiftInventoryHandler inventory : semiManualBase.getInventories()) {
+                inventory.dropAllItems(worldIn, pos);
             }
         }
     }

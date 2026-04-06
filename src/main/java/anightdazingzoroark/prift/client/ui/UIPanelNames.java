@@ -14,6 +14,7 @@ public class UIPanelNames {
     public static final String MILLSTONE_SCREEN = "millstoneScreen";
     public static final String MECHANICAL_FILTER_SCREEN = "mechanicalFilterScreen";
     public static final String SEMI_MANUAL_PRESSER_SCREEN = "semiManualPresserScreen";
+    public static final String SEMI_MANUAL_EXTRUDER_SCREEN = "semiManualExtruderScreen";
     public static final String PARTY_DROPDOWN = "partyDropdown";
     public static final String BOX_DROPDOWN = "boxDropdown";
     public static final String EGG_SCREEN = "eggScreen";
