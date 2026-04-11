@@ -624,6 +624,9 @@ large_weapon_control.cannon=Fire Cannon
 large_weapon_control.mortar=Charge Mortar
 large_weapon_control.catapult=Charge Catapult
 
+info.fluid.name=Fluid: %s
+info.fluid.amount=%s mB
+
 creature_move.no_move=(empty)
 creature_move.none_selected.description=Click on a move for more info.
 creature_move.none_selected_switch.description=Click on two moves to swap.
@@ -722,6 +725,3 @@ creature_move.rage_powder.name=Rage Powder
 creature_move.rage_powder.description=The user spreads a powder that enrages all mobs it hits, making them prone to infighting.
 creature_move.sleep_powder.name=Sleep Powder
 creature_move.sleep_powder.description=The user spreads a powder that makes all mobs it hits feel drowsy.
-
-gui.tab_header.entry=Entry
-gui.tab_header.info=Info

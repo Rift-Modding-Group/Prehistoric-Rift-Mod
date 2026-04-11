@@ -9,12 +9,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.FluidTank;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -78,7 +76,15 @@ public abstract class RiftTileEntityContainer extends RiftTileEntity implements 
             throw new UnsupportedOperationException("FluidTank "+key+" already not exist in this tile entity!");
         }
 
-        this.fluidTankMap.put(key, new FluidTank(volume));
+        FluidTank tank = new FluidTank(volume) {
+            @Override
+            protected void onContentsChanged() {
+                markDirty();
+                if (!world.isRemote) getWorld().notifyBlockUpdate(pos, getWorld().getBlockState(pos), getWorld().getBlockState(pos), 2);
+            }
+        };
+        tank.setTileEntity(this);
+        this.fluidTankMap.put(key, tank);
     }
 
     //-----getting fluid tank-----

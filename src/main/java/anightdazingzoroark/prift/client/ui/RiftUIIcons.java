@@ -12,6 +12,9 @@ public class RiftUIIcons {
     public static final UITexture LEFT_ARROW_SELECTED = icon("leftArrowSelected", 0, 16);
     public static final UITexture RIGHT_ARROW_SELECTED = icon("rightArrowSelected", 16, 16);
     public static final UITexture BABY = icon("baby", 32, 16);
+    public static final UITexture ARROW_DOWNWARD = UITexture.builder()
+            .location(new ResourceLocation(RiftInitialize.MODID, "textures/ui/progress_bar_down.png"))
+            .imageSize(20, 40).subAreaXYWH(0, 0, 20, 20).canApplyTheme().build();
     public static final UITexture PROGRESS_BAR_DOWNWARD = UITexture.builder()
             .location(new ResourceLocation(RiftInitialize.MODID, "textures/ui/progress_bar_down.png"))
             .imageSize(20, 40).canApplyTheme().build();
