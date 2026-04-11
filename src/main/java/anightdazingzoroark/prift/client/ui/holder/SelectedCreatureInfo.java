@@ -156,13 +156,13 @@ public class SelectedCreatureInfo implements IGuiHolder<CreatureGuiData> {
 
     public String getMenuName() {
         if (this.selectedPosType == SelectedPosType.PARTY) {
-            return UIPanelNames.BOX_DROPDOWN+":party:"+this.index;
+            return "menuName:party:"+this.index;
         }
         else if (this.selectedPosType == SelectedPosType.BOX) {
-            return UIPanelNames.BOX_DROPDOWN+":box:"+this.index;
+            return "menuName:box:"+this.index;
         }
         else if (this.selectedPosType == SelectedPosType.BOX_DEPLOYED) {
-            return UIPanelNames.BOX_DROPDOWN+":boxdeployed:"+this.index;
+            return "menuName:boxdeployed:"+this.index;
         }
         return "";
     }

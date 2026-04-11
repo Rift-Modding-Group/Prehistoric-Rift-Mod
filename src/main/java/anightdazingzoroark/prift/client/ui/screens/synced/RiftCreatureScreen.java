@@ -71,7 +71,7 @@ public class RiftCreatureScreen {
         //tab controlling
         PagedWidget.Controller tabController = new PagedWidget.Controller();
 
-        return new RiftModularPanel(UIPanelNames.INTERACTED_CREATURE_SCREEN)
+        return new RiftModularPanel("creatureScreen")
                 .onEscPressed(panel -> {
                     if (data.getMenuOpenedFrom() == SelectedCreatureInfo.MenuOpenedFrom.PARTY) {
                         PlayerUIHelper.openUI(data.getPlayer(), UIPanelNames.PARTY_SCREEN);

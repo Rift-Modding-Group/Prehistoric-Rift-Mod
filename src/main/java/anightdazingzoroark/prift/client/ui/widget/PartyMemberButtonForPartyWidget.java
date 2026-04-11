@@ -57,7 +57,7 @@ public class PartyMemberButtonForPartyWidget extends ContextMenuButton<PartyMemb
             ObjectValue.Dynamic<SelectedCreatureInfo.SwapInfo> creatureSwapInfoDynamic,
             BoolValue.Dynamic creatureSwitchingDynamic
     ) {
-        super(UIPanelNames.PARTY_DROPDOWN+selectedCreatureInfo.getIndex());
+        super("partyDropdown"+selectedCreatureInfo.getIndex());
         this.selectedCreatureInfo = selectedCreatureInfo;
         this.selectedCreatureInfoDynamic = selectedCreatureInfoDynamic;
         this.creatureSwapInfoDynamic = creatureSwapInfoDynamic;

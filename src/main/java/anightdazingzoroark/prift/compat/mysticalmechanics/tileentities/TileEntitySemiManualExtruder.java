@@ -131,9 +131,9 @@ public class TileEntitySemiManualExtruder extends TileEntitySemiManualBase imple
     @Override
     public ModularPanel buildUI(PosGuiData posGuiData, PanelSyncManager syncManager, UISettings uiSettings) {
         TileEntitySemiManualExtruder smExtruder = (TileEntitySemiManualExtruder) posGuiData.getTileEntity();
-        if (smExtruder == null) return new ModularPanel(UIPanelNames.SEMI_MANUAL_EXTRUDER_SCREEN);
+        if (smExtruder == null) return new ModularPanel("semiManualExtruderScreen");
         TileEntitySemiManualExtruderTop smExtruderTop = (TileEntitySemiManualExtruderTop) smExtruder.getTopTEntity();
-        if (smExtruderTop == null) return new ModularPanel(UIPanelNames.SEMI_MANUAL_EXTRUDER_SCREEN);
+        if (smExtruderTop == null) return new ModularPanel("semiManualExtruderScreen");
 
         RiftInventoryHandler inputInventory = smExtruder.getInputInventory();
         syncManager.registerSlotGroup("inputInventory", inputInventory.getSlots());
@@ -155,7 +155,7 @@ public class TileEntitySemiManualExtruder extends TileEntitySemiManualBase imple
 
         String playerName = posGuiData.getPlayer().getName();
 
-        return new ModularPanel(UIPanelNames.SEMI_MANUAL_EXTRUDER_SCREEN)
+        return new ModularPanel("semiManualExtruderScreen")
                 .padding(7, 7)
                 //semi manual presser title
                 .child(new ParentWidget<>().widthRel(1f).coverChildrenHeight().topRel(0)

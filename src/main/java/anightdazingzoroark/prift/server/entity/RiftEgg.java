@@ -473,7 +473,7 @@ public class RiftEgg extends EntityTameable implements IAnimatable, IGuiHolder<E
         settings.getRecipeViewerSettings().disable();
         RiftEgg eggData = (RiftEgg) data.getGuiHolder();
 
-        return ModularPanel.defaultPanel(UIPanelNames.EGG_SCREEN).size(176, 166)
+        return ModularPanel.defaultPanel("eggScreen").size(176, 166)
                 .child(Flow.column().coverChildrenHeight().align(Alignment.Center)
                         .childPadding(15)
                         .child(IKey.lang("item."+eggData.getCreatureType().name().toLowerCase()+"_egg.name").asWidget())

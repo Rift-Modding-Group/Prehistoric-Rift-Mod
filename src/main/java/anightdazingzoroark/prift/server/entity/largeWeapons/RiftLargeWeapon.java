@@ -198,7 +198,7 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
     @Override
     public ModularPanel buildUI(EntityGuiData entityGuiData, PanelSyncManager syncManager, UISettings uiSettings) {
         RiftLargeWeapon largeWeapon = (RiftLargeWeapon) entityGuiData.getGuiHolder();
-        if (largeWeapon == null) return new ModularPanel(UIPanelNames.LARGE_WEAPON_SCREEN);
+        if (largeWeapon == null) return new ModularPanel("largeWeaponScreen");
 
         String playerName = entityGuiData.getPlayer().getName();
 
@@ -214,7 +214,7 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
                 .matrix("IIIII");
 
 
-        return new ModularPanel(UIPanelNames.LARGE_WEAPON_SCREEN)
+        return new ModularPanel("largeWeaponScreen")
                 .padding(7, 7).height(131)
                 .child(Flow.column().childPadding(5).coverChildrenHeight()
                         //weapon inventory

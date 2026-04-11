@@ -4,13 +4,18 @@ import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.RiftMMRecipes;
 import anightdazingzoroark.prift.compat.mysticalmechanics.recipes.SemiManualExtractorRecipe;
 import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
+import com.cleanroommc.modularui.api.IGuiHolder;
+import com.cleanroommc.modularui.factory.PosGuiData;
+import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.screen.UISettings;
+import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
-public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase {
+public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase implements IGuiHolder<PosGuiData> {
     private final int maxVolume = 4000;
 
     @Override
@@ -94,5 +99,10 @@ public class TileEntitySemiManualExtractor extends TileEntitySemiManualBase {
 
     public RiftInventoryHandler getBucketOutput() {
         return this.getInventory("BucketOutput");
+    }
+
+    @Override
+    public ModularPanel buildUI(PosGuiData posGuiData, PanelSyncManager panelSyncManager, UISettings uiSettings) {
+        return null;
     }
 }

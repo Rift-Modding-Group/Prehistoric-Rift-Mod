@@ -57,7 +57,7 @@ public class RiftCreatureBoxScreen {
 
         //get the creature box
         TileEntity tileEntity = data.getTileEntity();
-        if (!(tileEntity instanceof RiftTileEntityCreatureBox teCreatureBox)) return new ModularPanel(UIPanelNames.CREATURE_BOX_SCREEN);
+        if (!(tileEntity instanceof RiftTileEntityCreatureBox teCreatureBox)) return new ModularPanel("creatureBoxScreen");
 
         //get player party and box info
         EntityPlayer player = data.getPlayer();
@@ -108,7 +108,7 @@ public class RiftCreatureBoxScreen {
                 }
         );
 
-        return new RiftModularPanel(UIPanelNames.CREATURE_BOX_SCREEN)
+        return new RiftModularPanel("creatureBoxScreen")
                 .onOpen(panel -> {
                     //set last opened time for player
                     PlayerCreatureBoxHelper.setLastOpenedTimeClient(player, player.ticksExisted);

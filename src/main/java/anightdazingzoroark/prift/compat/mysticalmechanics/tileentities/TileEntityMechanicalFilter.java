@@ -277,7 +277,7 @@ public class TileEntityMechanicalFilter extends RiftTileEntityContainer implemen
     @Override
     public ModularPanel buildUI(PosGuiData posGuiData, PanelSyncManager syncManager, UISettings uiSettings) {
         TileEntityMechanicalFilter mechanicalFilter = (TileEntityMechanicalFilter) posGuiData.getTileEntity();
-        if (mechanicalFilter == null) return new ModularPanel(UIPanelNames.MECHANICAL_FILTER_SCREEN);
+        if (mechanicalFilter == null) return new ModularPanel("mechanicalFilterScreen");
         RiftInventoryHandler inputInventory = mechanicalFilter.getInputInventory();
         RiftInventoryHandler outputInventory = mechanicalFilter.getOutputInventory();
 
@@ -298,7 +298,7 @@ public class TileEntityMechanicalFilter extends RiftTileEntityContainer implemen
                 )
                 .matrix("IIIIIIIII");
 
-        return new ModularPanel(UIPanelNames.MECHANICAL_FILTER_SCREEN)
+        return new ModularPanel("mechanicalFilterScreen")
                 .padding(7, 7).height(177)
                 .child(Flow.column().childPadding(5).coverChildrenHeight()
                         //millstone inventory

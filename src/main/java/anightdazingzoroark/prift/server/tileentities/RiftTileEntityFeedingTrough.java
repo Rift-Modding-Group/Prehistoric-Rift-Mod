@@ -108,7 +108,7 @@ public class RiftTileEntityFeedingTrough extends RiftTileEntityContainer impleme
     @Override
     public ModularPanel buildUI(PosGuiData posGuiData, PanelSyncManager syncManager, UISettings uiSettings) {
         RiftTileEntityFeedingTrough feedingTrough = (RiftTileEntityFeedingTrough) posGuiData.getTileEntity();
-        if (feedingTrough == null) return new ModularPanel(UIPanelNames.FEEDING_TROUGH_SCREEN);
+        if (feedingTrough == null) return new ModularPanel("feedingTroughScreen");
         RiftInventoryHandler feedingTroughInventory = feedingTrough.getInventory();
 
         String playerName = posGuiData.getPlayer().getName();
@@ -121,7 +121,7 @@ public class RiftTileEntityFeedingTrough extends RiftTileEntityContainer impleme
                 )
                 .matrix("IIIIIIIII");
 
-        return new ModularPanel(UIPanelNames.FEEDING_TROUGH_SCREEN)
+        return new ModularPanel("feedingTroughScreen")
                 .padding(7, 7).height(131)
                 .child(Flow.column().childPadding(5).coverChildrenHeight()
                         //weapon inventory

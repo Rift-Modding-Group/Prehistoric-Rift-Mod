@@ -91,9 +91,9 @@ public class TileEntitySemiManualPresser extends TileEntitySemiManualBase implem
     @Override
     public ModularPanel buildUI(PosGuiData posGuiData, PanelSyncManager syncManager, UISettings uiSettings) {
         TileEntitySemiManualPresser smPresser = (TileEntitySemiManualPresser) posGuiData.getTileEntity();
-        if (smPresser == null) return new ModularPanel(UIPanelNames.SEMI_MANUAL_PRESSER_SCREEN);
+        if (smPresser == null) return new ModularPanel("semiManualPresserScreen");
         TileEntitySemiManualPresserTop smPresserTop = (TileEntitySemiManualPresserTop) smPresser.getTopTEntity();
-        if (smPresserTop == null) return new ModularPanel(UIPanelNames.SEMI_MANUAL_PRESSER_SCREEN);
+        if (smPresserTop == null) return new ModularPanel("semiManualPresserScreen");
 
         RiftInventoryHandler inputInventory = smPresser.getInputInventory();
         syncManager.registerSlotGroup("inputInventory", inputInventory.getSlots());
@@ -115,7 +115,7 @@ public class TileEntitySemiManualPresser extends TileEntitySemiManualBase implem
 
         String playerName = posGuiData.getPlayer().getName();
 
-        return new ModularPanel(UIPanelNames.SEMI_MANUAL_PRESSER_SCREEN)
+        return new ModularPanel("semiManualPresserScreen")
                 .padding(7, 7)
                 //semi manual presser title
                 .child(new ParentWidget<>().widthRel(1f).coverChildrenHeight().topRel(0)

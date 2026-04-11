@@ -231,7 +231,7 @@ public class TileEntityMillstone extends RiftTileEntityContainer implements IAni
     @Override
     public ModularPanel buildUI(PosGuiData posGuiData, PanelSyncManager syncManager, UISettings uiSettings) {
         TileEntityMillstone millstone = (TileEntityMillstone) posGuiData.getTileEntity();
-        if (millstone == null) return new ModularPanel(UIPanelNames.MILLSTONE_SCREEN);
+        if (millstone == null) return new ModularPanel("millstoneScreen");
         RiftInventoryHandler inputInventory = millstone.getInputInventory();
         RiftInventoryHandler outputInventory = millstone.getOutputInventory();
 
@@ -252,7 +252,7 @@ public class TileEntityMillstone extends RiftTileEntityContainer implements IAni
                 )
                 .matrix("IIIIIIIII");
 
-        return new ModularPanel(UIPanelNames.MILLSTONE_SCREEN)
+        return new ModularPanel("millstoneScreen")
                 .padding(7, 7).height(177)
                 .child(Flow.column().childPadding(5).coverChildrenHeight()
                         //millstone inventory
