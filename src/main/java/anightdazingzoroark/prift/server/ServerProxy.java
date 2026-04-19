@@ -21,6 +21,7 @@ import anightdazingzoroark.prift.server.creatureSpawning.RiftCreatureSpawning;
 import anightdazingzoroark.prift.server.dataSerializers.PrimerEventHandler;
 import anightdazingzoroark.prift.server.effect.RiftEffects;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
+import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureRegistry;
 import anightdazingzoroark.prift.server.events.RiftCreatureBoxBorder;
 import anightdazingzoroark.prift.server.events.ServerEvents;
 import anightdazingzoroark.prift.server.fluids.RiftFluids;
@@ -57,6 +58,7 @@ public class ServerProxy {
         CapabilityManager.INSTANCE.register(ICreatureBoxData.class, new CreatureBoxDataStorage(), CreatureBoxData::new);
         MinecraftForge.EVENT_BUS.register(new CapabilityHandler());
 
+        RiftCreatureRegistry.createCreatures();
         RiftMessages.registerMessages();
         RiftFluids.registerFluids();
         RiftBlocks.registerBlocks();

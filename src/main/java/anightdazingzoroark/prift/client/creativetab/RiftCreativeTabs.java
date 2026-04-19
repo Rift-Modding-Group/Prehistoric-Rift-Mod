@@ -20,4 +20,17 @@ public class RiftCreativeTabs {
             return "itemGroup.prift_items";
         }
     };
+
+    public static final CreativeTabs spawnEggsTab = new CreativeTabs(RiftInitialize.MODID) {
+        @Override
+        @SideOnly(Side.CLIENT)
+        public ItemStack createIcon() {
+            return new ItemStack(RiftItems.TYRANNOSAURUS_ARM);
+        }
+
+        @Override
+        public String getTranslationKey() {
+            return "itemGroup.prift_spawn_eggs";
+        }
+    };
 }

@@ -56,7 +56,7 @@ public class JournalRightPageWidget extends ParentWidget<JournalRightPageWidget>
     //todo: maybe add statistics on how many creatures unlocked? idk
     private Flow noCreaturePageContents() {
         return Flow.column().sizeRel(1f).childPadding(5)
-                .child(IKey.str("The journal is where you get to read about creatures you have encountered.").asWidget()
+                .child(IKey.str("The journal is where you get to readToNBT about creatures you have encountered.").asWidget()
                         .scale(0.75f).left(0));
     }
 

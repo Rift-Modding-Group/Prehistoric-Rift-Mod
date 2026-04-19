@@ -109,6 +109,7 @@ fluid.cryoberry_juice=Cryoberry Juice
 inventory.gear=%s Gear
 inventory.inventory=%s Inventory
 
+item.spawn_egg.name= Spawn %s
 item.raw_exotic_meat.name=Raw Exotic Meat
 item.raw_fibrous_meat.name=Raw Fibrous Meat
 item.raw_hemolymph.name=Raw Hemolymph

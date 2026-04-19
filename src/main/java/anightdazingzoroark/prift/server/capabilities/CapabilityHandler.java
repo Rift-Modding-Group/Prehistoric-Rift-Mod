@@ -205,7 +205,7 @@ public class CapabilityHandler {
                     if (!nbtsToUpdate.isEmpty()) {
                         for (Map.Entry<Integer, CreatureNBT> nbtEntry : nbtsToUpdate.entrySet()) {
                             RiftMessages.WRAPPER.sendTo(
-                                    new RiftUpdateIndividualPartyCreatureClient(player, nbtEntry.getKey(), nbtEntry.getValue()),
+                                    new RiftUpdateIndividualPartyCreatureClient(player, nbtEntry.getKey(), nbtEntry.getValueFromNBT()),
                                     (EntityPlayerMP) player
                             );
                         }
