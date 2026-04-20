@@ -5,10 +5,10 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntit
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.EnumFacing;
 import anightdazingzoroark.riftlib.geo.render.GeoModel;
-import anightdazingzoroark.riftlib.renderers.geo.GeoBlockRenderer;
+import anightdazingzoroark.riftlib.renderers.geo.GeoTileEntityRenderer;
 import anightdazingzoroark.riftlib.resource.RiftLibCache;
 
-public class HandCrankRenderer extends GeoBlockRenderer<TileEntityHandCrank> {
+public class HandCrankRenderer extends GeoTileEntityRenderer<TileEntityHandCrank> {
     public HandCrankRenderer() {
         super(new RiftHandCrankModel());
     }

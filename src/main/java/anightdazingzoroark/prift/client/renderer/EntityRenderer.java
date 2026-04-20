@@ -5,6 +5,8 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.RiftSac;
+import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureRegistry;
+import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
@@ -17,6 +19,9 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class EntityRenderer {
     public static void registerRenderers() {
         //creatures
@@ -25,6 +30,12 @@ public class EntityRenderer {
                 RenderingRegistry.registerEntityRenderingHandler(creatureType.getCreature(), RiftCreatureGlowingRenderer::new);
             else
                 RenderingRegistry.registerEntityRenderingHandler(creatureType.getCreature(), RiftCreatureRenderer::new);
+        }
+
+        //creatures (NEW)
+        List<RiftCreatureBuilder> builderList = new ArrayList<>(RiftCreatureRegistry.creatureBuilderMap.values());
+        for (RiftCreatureBuilder builder : builderList) {
+            RenderingRegistry.registerEntityRenderingHandler(builder.getCreatureClass(), RiftCreatureNewRenderer::new);
         }
 
         //everythin else

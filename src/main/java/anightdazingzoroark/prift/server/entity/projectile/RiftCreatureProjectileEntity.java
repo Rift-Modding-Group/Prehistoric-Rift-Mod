@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataProjectile;
 import anightdazingzoroark.riftlib.projectile.RiftLibProjectile;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.network.datasync.DataParameter;
@@ -132,7 +132,7 @@ public class RiftCreatureProjectileEntity extends RiftLibProjectile {
     }
 
     @Override
-    public void registerControllers(AnimationData animationData) {
+    public void registerControllers(AnimationDataProjectile animationData) {
         if (this.getProjectileBuilder() == null) return;
         if (this.getProjectileBuilder().getHasAnimation()) {
             animationData.addAnimationController(this.getProjectileBuilder().getAnimationController().apply(this));

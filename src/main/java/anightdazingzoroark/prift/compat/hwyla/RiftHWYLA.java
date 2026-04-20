@@ -5,7 +5,7 @@ import anightdazingzoroark.prift.compat.hwyla.provider.*;
 import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.*;
 import anightdazingzoroark.prift.config.GeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
+import anightdazingzoroark.riftlib.hitbox.EntityHitbox;
 import mcp.mobius.waila.api.IWailaPlugin;
 import mcp.mobius.waila.api.IWailaRegistrar;
 import mcp.mobius.waila.api.WailaPlugin;

@@ -19,9 +19,9 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import org.lwjgl.opengl.GL11;
 import anightdazingzoroark.riftlib.geo.render.GeoModel;
-import anightdazingzoroark.riftlib.renderers.geo.GeoBlockRenderer;
+import anightdazingzoroark.riftlib.renderers.geo.GeoTileEntityRenderer;
 
-public class SemiManualExtractorRenderer extends GeoBlockRenderer<TileEntitySemiManualExtractor> {
+public class SemiManualExtractorRenderer extends GeoTileEntityRenderer<TileEntitySemiManualExtractor> {
     public SemiManualExtractorRenderer() {
         super(new RiftSemiManualExtractorModel());
     }

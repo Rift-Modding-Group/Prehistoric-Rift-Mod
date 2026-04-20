@@ -10,6 +10,7 @@ import anightdazingzoroark.prift.server.message.RiftLaunchLWeaponProjectile;
 import anightdazingzoroark.prift.server.message.RiftManageUtilizingControl;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.EntityAgeable;
@@ -27,7 +28,6 @@ import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.event.AnimationEvent;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
 
@@ -161,27 +161,29 @@ public class RiftCatapult extends RiftLargeWeapon {
     }
 
     @Override
-    public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController(this, "charge", 0, this::catapultCharge));
-        data.addAnimationController(new AnimationController(this, "launch", 0, this::catapultLaunch));
-    }
-
-    private <E extends IAnimatable> PlayState catapultCharge(AnimationEvent<E> event) {
-        if (this.isCharging()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.catapult.charging", LoopType.LOOP));
-            return PlayState.CONTINUE;
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
-    }
-
-    private <E extends IAnimatable> PlayState catapultLaunch(AnimationEvent<E> event) {
-        if (this.isLaunching()) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.catapult.launching", LoopType.PLAY_ONCE));
-            return PlayState.CONTINUE;
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
+    public void registerControllers(AnimationDataEntity data) {
+        data.addAnimationController(new AnimationController<>(
+                this, "charge", 0,
+                event -> {
+                    if (this.isCharging()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.catapult.charging", LoopType.LOOP));
+                        return PlayState.CONTINUE;
+                    }
+                    event.getController().clearAnimationCache();
+                    return PlayState.STOP;
+                }
+        ));
+        data.addAnimationController(new AnimationController<>(
+                this, "launch", 0,
+                event -> {
+                    if (this.isLaunching()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.catapult.launching", LoopType.PLAY_ONCE));
+                        return PlayState.CONTINUE;
+                    }
+                    event.getController().clearAnimationCache();
+                    return PlayState.STOP;
+                }
+        ));
     }
 
     @Nullable

@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.Do
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntity;
 import anightdazingzoroark.riftlib.core.AnimatableValue;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataTileEntity;
 import mysticalmechanics.api.DefaultMechCapability;
 import mysticalmechanics.api.IMechCapability;
 import mysticalmechanics.api.MysticalMechanicsAPI;
@@ -19,15 +20,13 @@ import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.event.AnimationEvent;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
-import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class TileEntityHandCrank extends RiftTileEntity implements IAnimatable, ITickable {
-    private final AnimationFactory factory = new AnimationFactory(this);
+public class TileEntityHandCrank extends RiftTileEntity implements IAnimatable<AnimationDataTileEntity>, ITickable {
+    private final AnimationDataTileEntity animationData = new AnimationDataTileEntity(this);
     public IMechCapability mechPower;
     private float power;
     private int atMaxPowerTimer;
@@ -164,13 +163,14 @@ public class TileEntityHandCrank extends RiftTileEntity implements IAnimatable, 
     }
 
     @Override
-    public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController(this, "rotation", 0, this::rotation));
-    }
-
-    private <E extends IAnimatable> PlayState rotation(AnimationEvent<E> event) {
-        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.hand_crank.rotation", LoopType.LOOP));
-        return PlayState.CONTINUE;
+    public void registerControllers(AnimationDataTileEntity data) {
+        data.addAnimationController(new AnimationController<>(
+                this, "rotation", 0,
+                event -> {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.hand_crank.rotation", LoopType.LOOP));
+                    return PlayState.CONTINUE;
+                }
+        ));
     }
 
     @Override
@@ -184,7 +184,7 @@ public class TileEntityHandCrank extends RiftTileEntity implements IAnimatable, 
     }
 
     @Override
-    public AnimationFactory getFactory() {
-        return this.factory;
+    public AnimationDataTileEntity getAnimationData() {
+        return this.animationData;
     }
 }

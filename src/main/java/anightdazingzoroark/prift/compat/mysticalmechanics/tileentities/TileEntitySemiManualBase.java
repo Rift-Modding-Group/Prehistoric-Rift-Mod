@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.St
 import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityContainer;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataTileEntity;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
@@ -29,13 +30,11 @@ import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.event.AnimationEvent;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
-import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
 
-public abstract class TileEntitySemiManualBase extends RiftTileEntityContainer implements IAnimatable, ITickable, ISidedInventory {
-    private final AnimationFactory factory = new AnimationFactory(this);
+public abstract class TileEntitySemiManualBase extends RiftTileEntityContainer implements IAnimatable<AnimationDataTileEntity>, ITickable, ISidedInventory {
+    private final AnimationDataTileEntity animationData = new AnimationDataTileEntity(this);
 
     @Override
     public void registerValues() {
@@ -124,23 +123,23 @@ public abstract class TileEntitySemiManualBase extends RiftTileEntityContainer i
     }
 
     @Override
-    public void registerControllers(AnimationData animationData) {
-        animationData.addAnimationController(new AnimationController(this, "reset", 0, new AnimationController.IAnimationPredicate() {
-            @Override
-            public PlayState test(AnimationEvent animationEvent) {
-                if (canDoResetAnim()) {
-                    animationEvent.getController().setAnimation(new AnimationBuilder().addAnimation("animation.semi_manual_extractor.release", LoopType.PLAY_ONCE));
-                    return PlayState.CONTINUE;
+    public void registerControllers(AnimationDataTileEntity animationData) {
+        animationData.addAnimationController(new AnimationController<>(
+                this, "reset", 0,
+                event -> {
+                    if (canDoResetAnim()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.semi_manual_extractor.release", LoopType.PLAY_ONCE));
+                        return PlayState.CONTINUE;
+                    }
+                    event.getController().clearAnimationCache();
+                    return PlayState.STOP;
                 }
-                animationEvent.getController().clearAnimationCache();
-                return PlayState.STOP;
-            }
-        }));
+        ));
     }
 
     @Override
-    public AnimationFactory getFactory() {
-        return this.factory;
+    public AnimationDataTileEntity getAnimationData() {
+        return this.animationData;
     }
 
     @Override

@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.client.ui.UIPanelNames;
 import anightdazingzoroark.prift.server.blocks.RiftFeedingTroughBlock;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataTileEntity;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.factory.PosGuiData;
@@ -21,14 +22,12 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import anightdazingzoroark.riftlib.core.IAnimatable;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
-import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class RiftTileEntityFeedingTrough extends RiftTileEntityContainer implements IAnimatable, ITickable, IGuiHolder<PosGuiData> {
-    private final AnimationFactory factory = new AnimationFactory(this);
+public class RiftTileEntityFeedingTrough extends RiftTileEntityContainer implements IAnimatable<AnimationDataTileEntity>, ITickable, IGuiHolder<PosGuiData> {
+    private final AnimationDataTileEntity animationData = new AnimationDataTileEntity(this);
     private int feedCountdown = 0;
 
     @Override
@@ -98,11 +97,11 @@ public class RiftTileEntityFeedingTrough extends RiftTileEntityContainer impleme
     }
 
     @Override
-    public void registerControllers(AnimationData animationData) {}
+    public void registerControllers(AnimationDataTileEntity animationData) {}
 
     @Override
-    public AnimationFactory getFactory() {
-        return this.factory;
+    public AnimationDataTileEntity getAnimationData() {
+        return this.animationData;
     }
 
     @Override

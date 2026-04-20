@@ -9,6 +9,7 @@ import anightdazingzoroark.prift.server.message.RiftIncrementControlUse;
 import anightdazingzoroark.prift.server.message.RiftLaunchLWeaponProjectile;
 import anightdazingzoroark.prift.server.message.RiftManageUtilizingControl;
 import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.EntityAgeable;
@@ -18,7 +19,6 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
 
@@ -83,7 +83,7 @@ public class RiftMortar extends RiftLargeWeapon {
     }
 
     @Override
-    public void registerControllers(AnimationData data) {}
+    public void registerControllers(AnimationDataEntity data) {}
 
     @Nullable
     @Override

@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.riftlib.hitboxLogic.EntityHitboxLinker;
+import anightdazingzoroark.riftlib.hitbox.EntityHitboxLinker;
 import net.minecraft.util.ResourceLocation;
 
 public class RiftCreatureHitboxLinker extends EntityHitboxLinker<RiftCreature> {

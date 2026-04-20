@@ -25,6 +25,11 @@ public class CreatureNBTKeywordNew<T> {
             IRiftCreature::getAgeInTicks,
             IRiftCreature::setAgeInTicks
     );
+    public static final CreatureNBTKeywordNew<Float> STAMINA = new CreatureNBTKeywordNew<>(
+            "Stamina", Float.class,
+            IRiftCreature::getStamina,
+            IRiftCreature::setStamina
+    );
 
     //normal class operations here
     private final String name;
@@ -55,6 +60,9 @@ public class CreatureNBTKeywordNew<T> {
         if (this.typeClass == Integer.class) {
             return this.typeClass.cast(nbtTagCompound.getInteger(this.name));
         }
+        else if (this.typeClass == Float.class) {
+            return this.typeClass.cast(nbtTagCompound.getFloat(this.name));
+        }
         else if (this.typeClass == String.class) {
             return this.typeClass.cast(nbtTagCompound.getString(this.name));
         }
@@ -69,6 +77,9 @@ public class CreatureNBTKeywordNew<T> {
         if (this.typeClass == Integer.class) {
             nbtTagCompound.setInteger(this.name, (Integer) value);
         }
+        else if (this.typeClass == Float.class) {
+            nbtTagCompound.setFloat(this.name, (Float) value);
+        }
         else if (this.typeClass == String.class) {
             nbtTagCompound.setString(this.name, (String) value);
         }
@@ -81,6 +92,9 @@ public class CreatureNBTKeywordNew<T> {
         if (this.writeValue == null) return;
         if (this.typeClass == Integer.class) {
             nbtTagCompound.setInteger(this.name, (Integer) this.writeValue.apply(creature));
+        }
+        else if (this.typeClass == Float.class) {
+            nbtTagCompound.setFloat(this.name, (Float) this.writeValue.apply(creature));
         }
         else if (this.typeClass == String.class) {
             nbtTagCompound.setString(this.name, (String) this.writeValue.apply(creature));

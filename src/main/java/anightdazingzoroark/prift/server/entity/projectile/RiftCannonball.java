@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataProjectile;
 import anightdazingzoroark.riftlib.projectile.RiftLibProjectile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -56,5 +56,5 @@ public class RiftCannonball extends RiftLibProjectile {
     }
 
     @Override
-    public void registerControllers(AnimationData animationData) {}
+    public void registerControllers(AnimationDataProjectile animationData) {}
 }

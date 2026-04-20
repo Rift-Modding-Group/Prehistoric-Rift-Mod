@@ -13,9 +13,9 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import org.lwjgl.opengl.GL11;
 import anightdazingzoroark.riftlib.geo.render.GeoModel;
-import anightdazingzoroark.riftlib.renderers.geo.GeoBlockRenderer;
+import anightdazingzoroark.riftlib.renderers.geo.GeoTileEntityRenderer;
 
-public class SemiManualPresserRenderer extends GeoBlockRenderer<TileEntitySemiManualPresser> {
+public class SemiManualPresserRenderer extends GeoTileEntityRenderer<TileEntitySemiManualPresser> {
     public SemiManualPresserRenderer() {
         super(new RiftSemiManualPresserModel());
     }

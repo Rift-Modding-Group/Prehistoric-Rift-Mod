@@ -44,8 +44,7 @@ public class RiftCreatureRenderer extends GeoEntityRenderer<RiftCreature> {
         if (model.getBone("chest").isPresent()) model.getBone("chest").get().setHidden(true);
         if (model.getBone("hiddenBySaddle").isPresent()) model.getBone("hiddenBySaddle").get().setHidden(animatable.isSaddled());
 
-        if (animatable instanceof Apatosaurus) {
-            Apatosaurus apatosaurus = (Apatosaurus) animatable;
+        if (animatable instanceof Apatosaurus apatosaurus) {
             model.getBone("platform").get().setHidden(!animatable.isSaddled());
             model.getBone("neck0Saddle").get().setHidden(!animatable.isSaddled());
             model.getBone("neck1Saddle").get().setHidden(!animatable.isSaddled());
@@ -85,5 +84,10 @@ public class RiftCreatureRenderer extends GeoEntityRenderer<RiftCreature> {
         super.render(model, animatable, partialTicks, red, green, blue, translucency);
         GlStateManager.disableBlend();
         GlStateManager.popMatrix();
+    }
+
+    @Override
+    protected float entityScale(RiftCreature animatable) {
+        return animatable.scale();
     }
 }

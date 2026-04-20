@@ -1,9 +1,11 @@
 package anightdazingzoroark.prift.client.model.entity;
 
 import anightdazingzoroark.prift.client.renderer.layer.AutoGlowingTexture;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.util.Color;
@@ -14,7 +16,7 @@ import java.util.function.Function;
 
 //a good chunk of this code and everything else related to it is based on code from Chocolate Quest Repoured
 //https://github.com/TeamChocoQuest/ChocolateQuestRepoured/blob/1.12.2/src/main/java/team/cqr/cqrepoured/client/render/entity/RenderCQREntityGeo.java
-public class GlowingLayerModel<T extends EntityLiving & IAnimatable> extends GeoLayerRenderer<T> {
+public class GlowingLayerModel<T extends EntityLivingBase & IAnimatable<AnimationDataEntity>> extends GeoLayerRenderer<T> {
     protected final Function<T, ResourceLocation> funcGetCurrentTexture;
     protected final Function<T, ResourceLocation> funcGetCurrentModel;
     protected GeoEntityRenderer<T> geoRendererInstance;
@@ -63,7 +65,7 @@ public class GlowingLayerModel<T extends EntityLiving & IAnimatable> extends Geo
                 partialTicks,
                 (float) renderColor.getRed() / 255f,
                 (float) renderColor.getGreen() / 255f,
-                (float) renderColor.getGreen() / 255f,
+                (float) renderColor.getBlue() / 255f,
                 (float) renderColor.getAlpha() / 255
         );
     }

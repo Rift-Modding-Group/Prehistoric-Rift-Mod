@@ -9,7 +9,8 @@ public interface IRiftCreature {
         return new CreatureNBTKeywordNew[]{
                 CreatureNBTKeywordNew.CREATURE_TYPE,
                 CreatureNBTKeywordNew.LEVEL,
-                CreatureNBTKeywordNew.AGE_IN_TICKS
+                CreatureNBTKeywordNew.AGE_IN_TICKS,
+                CreatureNBTKeywordNew.STAMINA
         };
     }
     default void writeCreatureNBT(NBTTagCompound nbtTagCompound) {
@@ -29,4 +30,9 @@ public interface IRiftCreature {
     void setLevel(int value);
     int getAgeInTicks();
     void setAgeInTicks(int value);
+    float getHealth();
+    float getMaxHealth();
+    float getStamina();
+    void setStamina(float value);
+    float getMaxStamina();
 }

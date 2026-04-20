@@ -3,12 +3,15 @@ package anightdazingzoroark.prift.server.entity.creaturenew.info;
 import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureNew;
 import net.minecraft.client.resources.I18n;
 
+import java.util.Arrays;
+import java.util.Map;
+
 //this class defines creature information
 public class RiftCreatureBuilder {
     //all the following variables are required and must not be null, validated in isValid()
     private final Class<? extends RiftCreatureNew> creatureClass;
-    private String creatureName = "";
-    private double[] stats;
+    private String creatureName;
+    private Map<RiftCreatureEnums.Stats, Double> stats;
     private RiftCreatureEnums.CreatureCategory creatureCategory;
     private RiftCreatureEnums.CreatureDiet creatureDiet;
     private int[] spawnEggColors;
@@ -19,11 +22,11 @@ public class RiftCreatureBuilder {
     private boolean hostileToHumans;
     private boolean retaliateWhenAttacked, broadcastRetaliation;
     private boolean isNocturnal;
+    private boolean canBeKnockedBack;
     private boolean flopOnLand;
     private String[] breathableBlocks = new String[]{"minecraft:air"};
     private RiftCreatureEnums.Movement[] movementOptions;
     private boolean cannotFloatOnWater = true;
-    private double landSpeed = 0.25D;
     private boolean isHerder;
     private int inventorySize = 27;
     private int daysUntilAdult = 1;
@@ -57,12 +60,19 @@ public class RiftCreatureBuilder {
      * Stats are to be on a scale of 0.5-10 with steps of 0.5
      * and will be represented as stars on most UIs
      * */
-    public RiftCreatureBuilder setStats(double health, double meleeAttack, double elementalAttack, double stamina) {
-        this.stats = new double[]{health, meleeAttack, elementalAttack, stamina};
+    public RiftCreatureBuilder setStats(double health, double meleeAttack, double elementalAttack, double stamina, double speed) {
+        this.stats = Map.of(
+                RiftCreatureEnums.Stats.HEALTH, health,
+                RiftCreatureEnums.Stats.MELEE_DAMAGE, meleeAttack,
+                RiftCreatureEnums.Stats.ELEMENTAL_DAMAGE, elementalAttack,
+                RiftCreatureEnums.Stats.STAMINA, stamina,
+                RiftCreatureEnums.Stats.SPEED, speed
+
+        );
         return this;
     }
 
-    public double[] getStats() {
+    public Map<RiftCreatureEnums.Stats, Double> getStats() {
         return this.stats;
     }
 
@@ -173,6 +183,18 @@ public class RiftCreatureBuilder {
     }
 
     /**
+     * Make it so the creature can be knocked back
+     * */
+    public RiftCreatureBuilder setCanBeKnockedBack() {
+        this.canBeKnockedBack = true;
+        return this;
+    }
+
+    public boolean getCanBeKnockedBack() {
+        return this.canBeKnockedBack;
+    }
+
+    /**
      * Make creature flop on land, effectively making them waterbound
      * */
     public RiftCreatureBuilder setFlopOnLand() {
@@ -223,18 +245,6 @@ public class RiftCreatureBuilder {
     }
 
     /**
-     * Set the creature's speed when on land
-     * */
-    public RiftCreatureBuilder setLandSpeed(double landSpeed) {
-        this.landSpeed = landSpeed;
-        return this;
-    }
-
-    public double getLandSpeed() {
-        return this.landSpeed;
-    }
-
-    /**
      * Allows creature to perform herding
      * */
     public RiftCreatureBuilder setIsHerder() {
@@ -271,9 +281,14 @@ public class RiftCreatureBuilder {
     }
 
     /**
-     * Get validity based on if some params
+     * Get validity based on if all params are not null
      * */
     public boolean isValid() {
-        return this.creatureClass != null && this.creatureName != null && this.stats != null && this.creatureCategory != null && this.creatureDiet != null && this.spawnEggColors != null && this.scaleRangeForAge != null;
+        return this.creatureClass != null
+                && this.stats != null
+                && this.creatureCategory != null
+                && this.creatureDiet != null
+                && this.spawnEggColors != null
+                && this.scaleRangeForAge != null;
     }
 }

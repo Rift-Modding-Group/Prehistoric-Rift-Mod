@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPowere
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataTileEntity;
 import mysticalmechanics.api.DefaultMechCapability;
 import mysticalmechanics.api.IMechCapability;
 import mysticalmechanics.api.MysticalMechanicsAPI;
@@ -22,14 +23,12 @@ import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.event.AnimationEvent;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
-import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
 
-public class TileEntityLeadPoweredCrank extends TileEntity implements IAnimatable, ITickable {
-    private final AnimationFactory factory = new AnimationFactory(this);
+public class TileEntityLeadPoweredCrank extends TileEntity implements IAnimatable<AnimationDataTileEntity>, ITickable {
+    private final AnimationDataTileEntity animationData = new AnimationDataTileEntity(this);
     private boolean hasLead = false;
     private float rotation = 0;
     private RiftCreature worker;
@@ -274,17 +273,18 @@ public class TileEntityLeadPoweredCrank extends TileEntity implements IAnimatabl
     }
 
     @Override
-    public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController(this, "rotation", 0, this::rotation));
-    }
-
-    private <E extends IAnimatable> PlayState rotation(AnimationEvent<E> event) {
-        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.lead_powered_crank.rotate", LoopType.LOOP));
-        return PlayState.CONTINUE;
+    public void registerControllers(AnimationDataTileEntity data) {
+        data.addAnimationController(new AnimationController<>(
+                this, "rotation", 0,
+                event -> {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.lead_powered_crank.rotate", LoopType.LOOP));
+                    return PlayState.CONTINUE;
+                }
+        ));
     }
 
     @Override
-    public AnimationFactory getFactory() {
-        return this.factory;
+    public AnimationDataTileEntity getAnimationData() {
+        return this.animationData;
     }
 }

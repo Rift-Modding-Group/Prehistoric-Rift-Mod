@@ -12,6 +12,7 @@ import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.interfaces.IWorkstationUser;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
@@ -27,12 +28,9 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
-import anightdazingzoroark.riftlib.core.event.AnimationEvent;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
 import org.jspecify.annotations.NonNull;
 
 import javax.annotation.Nullable;
@@ -332,14 +330,15 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
     }
 
     @Override
-    public void registerControllers(AnimationData data) {
+    public void registerControllers(AnimationDataEntity data) {
         super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "weaponResize", 0, this::apatosaurusWeaponSize));
-    }
-
-    private <E extends IAnimatable> PlayState apatosaurusWeaponSize(AnimationEvent<E> event) {
-        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.weapon_size_change", LoopType.LOOP));
-        return PlayState.CONTINUE;
+        data.addAnimationController(new AnimationController<>(
+                this, "weaponResize", 0,
+                event -> {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.weapon_size_change", LoopType.LOOP));
+                    return PlayState.CONTINUE;
+                }
+        ));
     }
 
     protected SoundEvent getAmbientSound() {

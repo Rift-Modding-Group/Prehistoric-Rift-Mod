@@ -39,8 +39,9 @@ import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBox;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityCreatureBoxHelper;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
 import anightdazingzoroark.riftlib.core.event.AnimationEvent;
-import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
-import anightdazingzoroark.riftlib.hitboxLogic.IMultiHitboxUser;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
+import anightdazingzoroark.riftlib.hitbox.EntityHitbox;
+import anightdazingzoroark.riftlib.hitbox.IMultiHitboxUser;
 import anightdazingzoroark.riftlib.ridePositionLogic.DynamicRidePosList;
 import anightdazingzoroark.riftlib.ridePositionLogic.IDynamicRideUser;
 import com.cleanroommc.modularui.api.IGuiHolder;
@@ -88,8 +89,6 @@ import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
-import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -97,7 +96,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class RiftCreature extends EntityTameable implements IAnimatable, IMultiHitboxUser, IDynamicRideUser, IGuiHolder<CreatureGuiData> {
+public abstract class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, IMultiHitboxUser, IDynamicRideUser, IGuiHolder<CreatureGuiData> {
     private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> XP = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LOVE_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -194,7 +193,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private boolean informNoEnergy;
     public boolean cannotUseRightClick;
     public final RiftCreatureType creatureType;
-    public AnimationFactory factory = new AnimationFactory(this);
+    public AnimationDataEntity factory = new AnimationDataEntity(this);
     public boolean isRideable;
     public final CreatureGearHandler creatureGear;
     public final CreatureInventoryHandler creatureInventory;
@@ -226,7 +225,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private Entity grabVictim;
     private int chosenAnimFromMultiple = -1;
     private int resetEnergyTick;
-    private int ticksSinceHitboxRemoval = 0;
     //for charge management, for server only
     public boolean stopChargeFlag;
     //for leap management, for server only
@@ -522,20 +520,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             RiftMessages.WRAPPER.sendToServer(new RiftSetSprinting(this, this.getControllingPassenger() != null && this.getControllingPassenger().isSprinting()));
         }
         if (this.isBurrowing()) this.manageBurrowingEffects();
-
-        //deal with hitbox and creature removal upon being dismissed
-        if (this.getDeploymentType() != CreatureDeployment.PARTY_INACTIVE
-                && this.getDeploymentType() != CreatureDeployment.BASE_INACTIVE) {
-            this.updateParts();
-            this.ticksSinceHitboxRemoval = 0;
-        }
-        else {
-            this.deleteAllHitboxes();
-            this.ticksSinceHitboxRemoval++;
-            if (this.ticksSinceHitboxRemoval > 2 && !this.world.isRemote) {
-                this.world.removeEntity(this);
-            }
-        }
         this.manageGrabVictim();
     }
 
@@ -1779,7 +1763,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return this.targetList;
     }
 
-    @Override
     public float scale() {
         return RiftUtil.slopeResult(this.getAgeInTicks(), true, 0, 24000, this.ageScaleParams()[0], this.ageScaleParams()[1]);
     }
@@ -2309,6 +2292,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     @Override
+    public float multiHitboxUserScale() {
+        return this.scale();
+    }
+
+    @Override
     public Entity[] getParts() {
         return this.hitboxArray;
     }
@@ -2321,13 +2309,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     public World getWorld() {
         return this.world;
-    }
-
-    private void deleteAllHitboxes() {
-        for (Entity entity : this.hitboxArray) {
-            EntityHitbox hitbox = (EntityHitbox) entity;
-            this.world.removeEntityDangerously(hitbox);
-        }
     }
 
     public EntityHitbox getHeadHitbox() {
@@ -2685,6 +2666,11 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     //ride pos management starts here
     public EntityLiving getDynamicRideUser() {
         return this;
+    }
+
+    @Override
+    public float dynamicRiderUserScale() {
+        return this.scale();
     }
 
     @Override
@@ -3153,10 +3139,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     @Override
-    public void registerControllers(AnimationData data) {
+    public void registerControllers(AnimationDataEntity data) {
         RiftCreature user = this;
         //for movement
-        data.addAnimationController(new AnimationController(this, "movement", 0, new AnimationController.IAnimationPredicate() {
+        data.addAnimationController(new AnimationController<>(this, "movement", 0, new AnimationController.IAnimationPredicate() {
             @Override
             public PlayState test(AnimationEvent event) {
                 //for warning
@@ -3180,7 +3166,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     return PlayState.CONTINUE;
                 }
                 //walking
-                else if (event.isMoving() || (isSitting() && hasTarget())) {
+                else if (data.isMoving() || (isSitting() && hasTarget())) {
                     event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".walk", LoopType.LOOP));
                     return PlayState.CONTINUE;
                 }
@@ -3191,7 +3177,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }));
         //for sleeping
-        data.addAnimationController(new AnimationController(this, "sleep", 0, new AnimationController.IAnimationPredicate() {
+        data.addAnimationController(new AnimationController<>(this, "sleep", 0, new AnimationController.IAnimationPredicate() {
             @Override
             public PlayState test(AnimationEvent event) {
                 if (isSleeping()) {
@@ -3207,7 +3193,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }));
         //for use of uncharged moves
-        data.addAnimationController(new AnimationController(this, "useUnchargedMove", 0, new AnimationController.IAnimationPredicate() {
+        data.addAnimationController(new AnimationController<>(this, "useUnchargedMove", 0, new AnimationController.IAnimationPredicate() {
             @Override
             public PlayState test(AnimationEvent event) {
                 if (currentCreatureMove() != null && !currentCreatureMove().chargeType.requiresCharge()) {
@@ -3243,7 +3229,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             }
         }));
         //for use of charged moves
-        data.addAnimationController(new AnimationController(this, "useChargedMove", 0, new AnimationController.IAnimationPredicate() {
+        data.addAnimationController(new AnimationController<>(this, "useChargedMove", 0, new AnimationController.IAnimationPredicate() {
             @Override
             public PlayState test(AnimationEvent event) {
                 int movePos = currentCreatureMove() != null ? getLearnedMoves().indexOf(currentCreatureMove()) : -1;
@@ -3363,7 +3349,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     @Override
-    public AnimationFactory getFactory() {
+    public AnimationDataEntity getAnimationData() {
         return this.factory;
     }
 

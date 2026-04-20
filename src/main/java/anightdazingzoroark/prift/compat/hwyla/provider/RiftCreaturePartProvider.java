@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.compat.hwyla.provider;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.riftlib.hitboxLogic.EntityHitbox;
+import anightdazingzoroark.riftlib.hitbox.EntityHitbox;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaEntityAccessor;
 import mcp.mobius.waila.api.IWailaEntityProvider;

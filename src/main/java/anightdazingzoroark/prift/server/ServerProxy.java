@@ -91,7 +91,8 @@ public class ServerProxy {
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new ServerEvents());
         MinecraftForge.EVENT_BUS.register(new RiftCreatureBoxBorder.RiftCreatureBorderHandler());
-        MinecraftForge.EVENT_BUS.register(new RiftCreatureSpawning());
+        //temporarily disabled and will be replaced with smth better too
+        //MinecraftForge.EVENT_BUS.register(new RiftCreatureSpawning());
         GameRegistry.registerWorldGenerator(new RiftPlantGenerator(), 0);
         GameRegistry.registerWorldGenerator(new RiftStructureGenerator(), 0);
     }

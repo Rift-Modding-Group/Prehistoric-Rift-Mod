@@ -8,18 +8,15 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
-import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
-import anightdazingzoroark.riftlib.core.event.AnimationEvent;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -95,21 +92,22 @@ public class Dodo extends RiftCreature {
     }
 
     @Override
-    public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController(this, "movement", 0, this::dodoMovement));
-    }
-
-    private <E extends IAnimatable> PlayState dodoMovement(AnimationEvent<E> event) {
-        if (event.isMoving() && this.onGround) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.dodo.walk", LoopType.LOOP));
-            return PlayState.CONTINUE;
-        }
-        else if (!this.onGround) {
-            event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.dodo.fall", LoopType.LOOP));
-            return PlayState.CONTINUE;
-        }
-        event.getController().clearAnimationCache();
-        return PlayState.STOP;
+    public void registerControllers(AnimationDataEntity data) {
+        data.addAnimationController(new AnimationController<>(
+                this, "movement", 0,
+                event -> {
+                    if (data.isMoving() && this.onGround) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.dodo.walk", LoopType.LOOP));
+                        return PlayState.CONTINUE;
+                    }
+                    else if (!this.onGround) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.dodo.fall", LoopType.LOOP));
+                        return PlayState.CONTINUE;
+                    }
+                    event.getController().clearAnimationCache();
+                    return PlayState.STOP;
+                }
+        ));
     }
 
     protected SoundEvent getAmbientSound() {

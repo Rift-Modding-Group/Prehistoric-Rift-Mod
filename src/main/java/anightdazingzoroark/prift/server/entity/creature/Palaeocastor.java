@@ -1,4 +1,5 @@
 package anightdazingzoroark.prift.server.entity.creature;
+import net.minecraft.util.math.Vec3d;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.RiftSounds;
@@ -40,11 +41,6 @@ public class Palaeocastor extends RiftCreature implements IHarvestWhenWandering 
         super.entityInit();
         this.dataManager.register(HARVESTING, false);
         this.dataManager.register(CAN_HARVEST, false);
-    }
-
-    @Override
-    public void updateParts() {
-        super.updateParts();
     }
 
     @Override

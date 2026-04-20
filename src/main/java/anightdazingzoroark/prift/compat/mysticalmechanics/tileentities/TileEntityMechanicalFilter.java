@@ -14,6 +14,8 @@ import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.In
 import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.StringPropertyValue;
 import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityContainer;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataTileEntity;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.api.drawable.IDrawable;
 import com.cleanroommc.modularui.api.drawable.IKey;
@@ -43,16 +45,14 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.capabilities.Capability;
 import anightdazingzoroark.riftlib.core.IAnimatable;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
-import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 import net.minecraftforge.fml.common.Loader;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class TileEntityMechanicalFilter extends RiftTileEntityContainer implements ITickable, IAnimatable, IGuiHolder<PosGuiData> {
-    private final AnimationFactory factory = new AnimationFactory(this);
+public class TileEntityMechanicalFilter extends RiftTileEntityContainer implements ITickable, IAnimatable<AnimationDataTileEntity>, IGuiHolder<PosGuiData> {
+    private final AnimationDataTileEntity animationData = new AnimationDataTileEntity(this);
     private final IMechCapability mechPower;
     //left is current input, right is current possible output
     private final MutablePair<ItemStack, ItemStack> inputAndPossibleOutput = new MutablePair<>(ItemStack.EMPTY, ItemStack.EMPTY);
@@ -267,11 +267,11 @@ public class TileEntityMechanicalFilter extends RiftTileEntityContainer implemen
     //inventory stuff ends here
 
     @Override
-    public void registerControllers(AnimationData animationData) {}
+    public void registerControllers(AnimationDataTileEntity animationData) {}
 
     @Override
-    public AnimationFactory getFactory() {
-        return this.factory;
+    public AnimationDataTileEntity getAnimationData() {
+        return this.animationData;
     }
 
     @Override

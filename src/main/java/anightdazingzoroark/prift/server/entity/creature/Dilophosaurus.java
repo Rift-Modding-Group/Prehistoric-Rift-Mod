@@ -9,18 +9,17 @@ import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.ai.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import net.minecraft.init.MobEffects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.event.AnimationEvent;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -118,9 +117,9 @@ public class Dilophosaurus extends RiftCreature {
     }
 
     @Override
-    public void registerControllers(AnimationData data) {
+    public void registerControllers(AnimationDataEntity data) {
         super.registerControllers(data);
-        data.addAnimationController(new AnimationController(this, "frillSetup", 0, new AnimationController.IAnimationPredicate() {
+        data.addAnimationController(new AnimationController<>(this, "frillSetup", 0, new AnimationController.IAnimationPredicate() {
             @Override
             public PlayState test(AnimationEvent event) {
                 if ((currentCreatureMove() == null || (currentCreatureMove() != null && currentCreatureMove().moveAnimType != CreatureMove.MoveAnimType.RANGED)) && !isWarning()) {
@@ -133,7 +132,7 @@ public class Dilophosaurus extends RiftCreature {
                 }
             }
         }));
-        data.addAnimationController(new AnimationController(this, "sacSetup", 0, new AnimationController.IAnimationPredicate() {
+        data.addAnimationController(new AnimationController<>(this, "sacSetup", 0, new AnimationController.IAnimationPredicate() {
             @Override
             public PlayState test(AnimationEvent event) {
                 if ((currentCreatureMove() == null || (currentCreatureMove() != null && currentCreatureMove().moveAnimType != CreatureMove.MoveAnimType.RANGED)) && !isWarning()) {

@@ -25,18 +25,6 @@ public class Coelacanth extends RiftWaterCreature {
         this.speed = 0.5D;
     }
 
-    /*
-    protected void initEntityAI() {
-        this.tasks.addTask(3, new RiftHerdMemberFollow(this));
-        this.tasks.addTask(4, new RiftWanderWater(this, 1.0D));
-    }
-     */
-
-    @Override
-    public void updateParts() {
-        super.updateParts();
-    }
-
     //move related stuff starts here
     @Override
     public WeightedList<List<CreatureMove>> possibleStartingMoves() {

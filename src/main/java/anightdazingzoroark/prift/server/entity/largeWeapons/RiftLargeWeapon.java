@@ -1,9 +1,9 @@
 package anightdazingzoroark.prift.server.entity.largeWeapons;
 
-import anightdazingzoroark.prift.client.ui.UIPanelNames;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.inventory.LargeWeaponInventoryHandler;
 import anightdazingzoroark.prift.server.message.*;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.factory.EntityGuiData;
@@ -36,16 +36,14 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import anightdazingzoroark.riftlib.core.IAnimatable;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
-import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
-public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatable, IGuiHolder<EntityGuiData> {
+public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatable<AnimationDataEntity>, IGuiHolder<EntityGuiData> {
     private static final DataParameter<Boolean> USING_LEFT_CLICK = EntityDataManager.createKey(RiftLargeWeapon.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> LEFT_CLICK_USE = EntityDataManager.createKey(RiftLargeWeapon.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> LEFT_CLICK_COOLDOWN = EntityDataManager.createKey(RiftLargeWeapon.class, DataSerializers.VARINT);
     public final LargeWeaponInventoryHandler weaponInventory = new LargeWeaponInventoryHandler(5);
     public final RiftLargeWeaponType weaponType;
-    private AnimationFactory factory = new AnimationFactory(this);
+    private final AnimationDataEntity animationData = new AnimationDataEntity(this);
     public final Item weaponItem;
     public final Item ammoItem;
 
@@ -188,11 +186,11 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
     public abstract Vec3d riderPos();
 
     @Override
-    public abstract void registerControllers(AnimationData data);
+    public abstract void registerControllers(AnimationDataEntity data);
 
     @Override
-    public AnimationFactory getFactory() {
-        return this.factory;
+    public AnimationDataEntity getAnimationData() {
+        return this.animationData;
     }
 
     @Override

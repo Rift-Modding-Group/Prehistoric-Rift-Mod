@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockBlowPoweredTurbine;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataTileEntity;
 import mysticalmechanics.api.DefaultMechCapability;
 import mysticalmechanics.api.IMechCapability;
 import mysticalmechanics.api.MysticalMechanicsAPI;
@@ -19,14 +20,11 @@ import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
-import anightdazingzoroark.riftlib.core.event.AnimationEvent;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
-import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
 
-public class TileEntityBlowPoweredTurbine extends TileEntity implements IAnimatable, ITickable {
-    private final AnimationFactory factory = new AnimationFactory(this);
+public class TileEntityBlowPoweredTurbine extends TileEntity implements IAnimatable<AnimationDataTileEntity>, ITickable {
+    private final AnimationDataTileEntity animationData = new AnimationDataTileEntity(this);
     public IMechCapability mechPower;
     private float power;
     private float rotation = 0;
@@ -186,18 +184,19 @@ public class TileEntityBlowPoweredTurbine extends TileEntity implements IAnimata
     }
 
     @Override
-    public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController(this, "rotation", 0, this::rotation));
-    }
-
-    private <E extends IAnimatable> PlayState rotation(AnimationEvent<E> event) {
-        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.blow_powered_turbine.rotate", LoopType.LOOP));
-        return PlayState.CONTINUE;
+    public void registerControllers(AnimationDataTileEntity data) {
+        data.addAnimationController(new AnimationController<>(
+                this, "rotation", 0,
+                event -> {
+                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.blow_powered_turbine.rotate", LoopType.LOOP));
+                    return PlayState.CONTINUE;
+                }
+        ));
     }
 
     @Override
-    public AnimationFactory getFactory() {
-        return this.factory;
+    public AnimationDataTileEntity getAnimationData() {
+        return this.animationData;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creaturenew;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureEnums;
 
@@ -14,6 +15,10 @@ public class RiftCreatureRegistry {
     }
 
     public static void registerCreatureType(String name, RiftCreatureBuilder builder) {
+        if (!builder.isValid()) {
+            RiftInitialize.logger.warn("Builder for creature type {} is invalid!", name);
+            return;
+        }
         creatureBuilderMap.put(name, builder.setName(name));
     }
 
@@ -23,9 +28,10 @@ public class RiftCreatureRegistry {
                 new RiftCreatureBuilder(TyrannosaurusNew.class)
                         .setCreatureCategory(RiftCreatureEnums.CreatureCategory.DINOSAUR)
                         .setCreatureDiet(RiftCreatureEnums.CreatureDiet.CARNIVORE)
-                        .setStats(9, 7, 5, 7)
+                        .setStats(9, 7, 5, 7, 3)
                         .setScaleRangeForAge(0.5f, 3.25f)
                         .setSpawnEggColors(3670016, 2428687)
+                        .setMainHitboxSize(3.25f, 4f)
                         .setDaysUntilAdult(7)
                         .setHostileToHumans()
                         .setRetaliateWhenAttacked()
@@ -35,9 +41,10 @@ public class RiftCreatureRegistry {
                 new RiftCreatureBuilder(StegosaurusNew.class)
                         .setCreatureCategory(RiftCreatureEnums.CreatureCategory.DINOSAUR)
                         .setCreatureDiet(RiftCreatureEnums.CreatureDiet.HERBIVORE)
-                        .setStats(5.5, 5, 2, 4)
+                        .setStats(5.5, 5, 2, 4, 2)
                         .setScaleRangeForAge(0.3f, 2.125f)
                         .setSpawnEggColors(1731840, 16743424)
+                        .setMainHitboxSize(2.125f, 2.5f)
                         .setDaysUntilAdult(3)
                         .setIsHerder()
                         .setRetaliateWhenAttacked(true)

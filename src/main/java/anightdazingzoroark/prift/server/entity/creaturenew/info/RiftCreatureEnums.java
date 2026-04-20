@@ -9,11 +9,6 @@ public class RiftCreatureEnums {
         LARGE_WEAPON
     }
 
-    public static enum EnergyRechargeCategory {
-        FAST,
-        SLOW;
-    }
-
     public enum CreatureCategory {
         ALL,
         DINOSAUR,
@@ -62,6 +57,23 @@ public class RiftCreatureEnums {
         BURROW
     }
 
+    //Stats are to be on a scale of 0.5-10 with steps of 0.5
+    //and will be represented as stars on most UIs
+    public enum Stats {
+        //health is well health
+        HEALTH,
+        //melee damage is damage from charge attacks, physical moves, and physical projectiles
+        MELEE_DAMAGE,
+        //elemental damage is damage from attacks with elemental properties, like breathing fire or exploding
+        ELEMENTAL_DAMAGE,
+        //stamina is required to perform actions (movement, using moves) and recharges at the same rate for each creature
+        STAMINA,
+        //speed is movement speed, specifically on land. in water and air movement,
+        //all creatures have different movement speeds that factor this in and their own individual fly and swim multipliers.
+        //its unique among other stats in that it is on a scale of 1-5, has steps of 1, and is unaffected by leveling
+        SPEED;
+    }
+
     public static enum LevelupRate {
         VERY_SLOW(1.6D),
         SLOW(1.4D),
@@ -84,15 +96,7 @@ public class RiftCreatureEnums {
         }
     }
 
-    //these mostly influence wild only behaviors
-    public static enum Behavior {
-        HERDER, //will use herding or pack hunting behaviors
-        DOCILE, //will retaliate when attacked
-        BLOCK_BREAKER, //will break blocks in front when pursuing a target
-        NOCTURNAL; //will be active at night and sleep at day
-
-        public String getTranslatedName() {
-            return I18n.format("behavior."+this.name().toLowerCase());
-        }
-    }
+    //just like how it works in pokemon, some creatures have a nature that
+    //boosts one stat bu lowers another, and some natures do nothing
+    public enum Nature {}
 }

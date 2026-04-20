@@ -17,6 +17,7 @@ import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreat
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import com.charles445.simpledifficulty.api.config.JsonConfig;
 import com.charles445.simpledifficulty.api.config.json.JsonTemperature;
 import com.charles445.simpledifficulty.api.temperature.TemperatureEnum;
@@ -61,19 +62,17 @@ import net.minecraft.world.biome.Biome;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.IFluidBlock;
 import anightdazingzoroark.riftlib.core.IAnimatable;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
-import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class RiftEgg extends EntityTameable implements IAnimatable, IGuiHolder<EntityGuiData> {
+public class RiftEgg extends EntityTameable implements IAnimatable<AnimationDataEntity>, IGuiHolder<EntityGuiData> {
     private static final DataParameter<Integer> HATCH_TIME = EntityDataManager.<Integer>createKey(RiftEgg.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> EGG_TYPE = EntityDataManager.createKey(RiftEgg.class, DataSerializers.BYTE);
     private static final DataParameter<Byte> TEMPERATURE = EntityDataManager.createKey(RiftEgg.class, DataSerializers.BYTE);
-    public AnimationFactory factory = new AnimationFactory(this);
+    private final AnimationDataEntity animationData = new AnimationDataEntity(this);
 
     public RiftEgg(World worldIn) {
         super(worldIn);
@@ -461,11 +460,11 @@ public class RiftEgg extends EntityTameable implements IAnimatable, IGuiHolder<E
     }
 
     @Override
-    public void registerControllers(AnimationData data) {}
+    public void registerControllers(AnimationDataEntity data) {}
 
     @Override
-    public AnimationFactory getFactory() {
-        return this.factory;
+    public AnimationDataEntity getAnimationData() {
+        return this.animationData;
     }
 
     @Override

@@ -13,6 +13,7 @@ import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.In
 import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.StringPropertyValue;
 import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityContainer;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataTileEntity;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.api.drawable.IDrawable;
 import com.cleanroommc.modularui.api.drawable.IKey;
@@ -40,14 +41,12 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.common.Loader;
 import anightdazingzoroark.riftlib.core.IAnimatable;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
-import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class TileEntityMillstone extends RiftTileEntityContainer implements IAnimatable, ITickable, IGuiHolder<PosGuiData> {
-    private final AnimationFactory factory = new AnimationFactory(this);
+public class TileEntityMillstone extends RiftTileEntityContainer implements IAnimatable<AnimationDataTileEntity>, ITickable, IGuiHolder<PosGuiData> {
+    private final AnimationDataTileEntity animationData = new AnimationDataTileEntity(this);
     private final IMechCapability mechPower;
 
     public TileEntityMillstone() {
@@ -221,11 +220,11 @@ public class TileEntityMillstone extends RiftTileEntityContainer implements IAni
     //inventory stuff ends here
 
     @Override
-    public void registerControllers(AnimationData animationData) {}
+    public void registerControllers(AnimationDataTileEntity animationData) {}
 
     @Override
-    public AnimationFactory getFactory() {
-        return this.factory;
+    public AnimationDataTileEntity getAnimationData() {
+        return this.animationData;
     }
 
     @Override

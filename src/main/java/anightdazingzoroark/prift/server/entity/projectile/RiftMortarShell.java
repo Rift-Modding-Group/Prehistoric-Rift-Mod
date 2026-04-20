@@ -1,18 +1,12 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.interfaces.IRiftProjectile;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataProjectile;
 import anightdazingzoroark.riftlib.projectile.RiftLibProjectile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
 public class RiftMortarShell extends RiftLibProjectile {
@@ -63,5 +57,5 @@ public class RiftMortarShell extends RiftLibProjectile {
     }
 
     @Override
-    public void registerControllers(AnimationData animationData) {}
+    public void registerControllers(AnimationDataProjectile animationData) {}
 }

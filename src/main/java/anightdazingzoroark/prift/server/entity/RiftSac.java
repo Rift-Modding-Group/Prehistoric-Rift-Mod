@@ -12,6 +12,7 @@ import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreat
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.factory.EntityGuiData;
@@ -38,15 +39,13 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import anightdazingzoroark.riftlib.core.IAnimatable;
-import anightdazingzoroark.riftlib.core.manager.AnimationData;
-import anightdazingzoroark.riftlib.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
 
-public class RiftSac extends EntityTameable implements IAnimatable, IGuiHolder<EntityGuiData> {
+public class RiftSac extends EntityTameable implements IAnimatable<AnimationDataEntity>, IGuiHolder<EntityGuiData> {
     private static final DataParameter<Integer> HATCH_TIME = EntityDataManager.<Integer>createKey(RiftSac.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> SAC_TYPE = EntityDataManager.createKey(RiftSac.class, DataSerializers.BYTE);
-    public AnimationFactory factory = new AnimationFactory(this);
+    private final AnimationDataEntity animationData = new AnimationDataEntity(this);
 
     public RiftSac(World worldIn) {
         super(worldIn);
@@ -197,11 +196,11 @@ public class RiftSac extends EntityTameable implements IAnimatable, IGuiHolder<E
     }
 
     @Override
-    public void registerControllers(AnimationData animationData) {}
+    public void registerControllers(AnimationDataEntity animationData) {}
 
     @Override
-    public AnimationFactory getFactory() {
-        return this.factory;
+    public AnimationDataEntity getAnimationData() {
+        return this.animationData;
     }
 
     @Override
