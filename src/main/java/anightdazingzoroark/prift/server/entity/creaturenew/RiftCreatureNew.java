@@ -27,10 +27,6 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import org.jspecify.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public abstract class RiftCreatureNew extends EntityTameable implements IAnimatable<AnimationDataEntity>, /* IMultiHitboxUser, IDynamicRideUser,*/ IRiftCreature {
     private final RiftCreatureBuilder creatureType;
     private final RiftInventoryHandler creatureInventory;

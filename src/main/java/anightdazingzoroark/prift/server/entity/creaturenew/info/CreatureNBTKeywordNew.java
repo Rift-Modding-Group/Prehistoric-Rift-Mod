@@ -147,12 +147,12 @@ public class CreatureNBTKeywordNew<T> {
             nbtTagCompound.setString(this.name, ((RiftCreatureBuilder) this.writeValue.apply(creature)).getName());
         }
         else if (this.typeClass == CreatureStatsStorage.class) {
-            CreatureStatsStorage creatureStatsStorage = creature.getCreatureStats();
+            CreatureStatsStorage creatureStatsStorage = (CreatureStatsStorage) this.writeValue.apply(creature);
             if (creatureStatsStorage == null) return;
             nbtTagCompound.setTag(this.name, creatureStatsStorage.getAsNBT());
         }
         else if (this.typeClass == CreatureMoveStorage.class) {
-            CreatureMoveStorage creatureMoveStorage = creature.getCreatureMoves();
+            CreatureMoveStorage creatureMoveStorage = (CreatureMoveStorage) this.writeValue.apply(creature);
             if (creatureMoveStorage == null) return;
             nbtTagCompound.setTag(this.name, creatureMoveStorage.getAsNBT());
         }

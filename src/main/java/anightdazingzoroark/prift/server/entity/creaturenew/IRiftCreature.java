@@ -16,6 +16,7 @@ public interface IRiftCreature {
                 CreatureNBTKeywordNew.NATURE,
                 CreatureNBTKeywordNew.AGE_IN_TICKS,
                 CreatureNBTKeywordNew.STAMINA,
+                CreatureNBTKeywordNew.CREATURE_STATS,
                 CreatureNBTKeywordNew.CREATURE_MOVES
         };
     }
