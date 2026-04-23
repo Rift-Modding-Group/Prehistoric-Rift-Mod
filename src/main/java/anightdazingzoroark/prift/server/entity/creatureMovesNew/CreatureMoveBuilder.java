@@ -9,6 +9,7 @@ public class CreatureMoveBuilder {
 
     //the following can be left alone
     private int movePower;
+    private boolean requireFindTargetToUse;
     private boolean makesContact;
     private Element element;
     private double elementEffectChance;
@@ -38,6 +39,18 @@ public class CreatureMoveBuilder {
 
     public int getBasePower() {
         return this.movePower;
+    }
+
+    /**
+     * Set that this move will be used only if the creature has encountered a target
+     * */
+    public CreatureMoveBuilder setRequireFindTargetToUse() {
+        this.requireFindTargetToUse = true;
+        return this;
+    }
+
+    public boolean getRequireFindTargetToUse() {
+        return this.requireFindTargetToUse;
     }
 
     /**

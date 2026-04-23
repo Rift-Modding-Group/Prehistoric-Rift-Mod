@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creaturenew.info;
 
 import anightdazingzoroark.prift.server.entity.creaturenew.CreatureMoveStorage;
+import anightdazingzoroark.prift.server.entity.creaturenew.CreatureStatsStorage;
 import anightdazingzoroark.prift.server.entity.creaturenew.IRiftCreature;
 import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureRegistry;
 import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
@@ -22,6 +23,11 @@ public class CreatureNBTKeywordNew<T> {
             IRiftCreature::getLevel,
             IRiftCreature::setLevel
     );
+    public static final CreatureNBTKeywordNew<RiftCreatureEnums.Nature> NATURE = new CreatureNBTKeywordNew<>(
+            "Nature", RiftCreatureEnums.Nature.class,
+            IRiftCreature::getNature,
+            IRiftCreature::setNature
+    );
     public static final CreatureNBTKeywordNew<Integer> AGE_IN_TICKS = new CreatureNBTKeywordNew<>(
             "AgeInTicks", Integer.class,
             IRiftCreature::getAgeInTicks,
@@ -31,6 +37,11 @@ public class CreatureNBTKeywordNew<T> {
             "Stamina", Float.class,
             IRiftCreature::getStamina,
             IRiftCreature::setStamina
+    );
+    public static final CreatureNBTKeywordNew<CreatureStatsStorage> CREATURE_STATS = new CreatureNBTKeywordNew<>(
+            "CreatureStats", CreatureStatsStorage.class,
+            IRiftCreature::getCreatureStats,
+            IRiftCreature::setCreatureStats
     );
     public static final CreatureNBTKeywordNew<CreatureMoveStorage> CREATURE_MOVES = new CreatureNBTKeywordNew<>(
             "CreatureMoves", CreatureMoveStorage.class,
@@ -77,10 +88,22 @@ public class CreatureNBTKeywordNew<T> {
             RiftCreatureBuilder builder = RiftCreatureRegistry.getCreatureBuilder(nbtTagCompound.getString(this.name));
             return this.typeClass.cast(builder);
         }
+        else if (this.typeClass == CreatureStatsStorage.class) {
+            CreatureStatsStorage moveStorage = new CreatureStatsStorage();
+            moveStorage.readFromNBT(nbtTagCompound.getCompoundTag(this.name));
+            return this.typeClass.cast(moveStorage);
+        }
         else if (this.typeClass == CreatureMoveStorage.class) {
             CreatureMoveStorage moveStorage = new CreatureMoveStorage();
-            moveStorage.readFromNBT(nbtTagCompound);
+            moveStorage.readFromNBT(nbtTagCompound.getCompoundTag(this.name));
             return this.typeClass.cast(moveStorage);
+        }
+        else if (this.typeClass.isEnum()) {
+            if (!nbtTagCompound.hasKey(this.name)) return null;
+            int ordinal = nbtTagCompound.getByte(this.name);
+            Object[] enumConstants = this.typeClass.getEnumConstants();
+            if (ordinal < 0 || ordinal >= enumConstants.length) return null;
+            return this.typeClass.cast(enumConstants[ordinal]);
         }
         return null;
     }
@@ -98,8 +121,14 @@ public class CreatureNBTKeywordNew<T> {
         else if (this.typeClass == RiftCreatureBuilder.class) {
             nbtTagCompound.setString(this.name, ((RiftCreatureBuilder) value).getName());
         }
+        else if (this.typeClass == CreatureStatsStorage.class) {
+            nbtTagCompound.setTag(this.name, ((CreatureStatsStorage) value).getAsNBT());
+        }
         else if (this.typeClass == CreatureMoveStorage.class) {
             nbtTagCompound.setTag(this.name, ((CreatureMoveStorage) value).getAsNBT());
+        }
+        else if (this.typeClass.isEnum()) {
+            nbtTagCompound.setByte(this.name, value == null ? (byte) -1 : (byte) ((Enum<?>) value).ordinal());
         }
     }
 
@@ -117,15 +146,24 @@ public class CreatureNBTKeywordNew<T> {
         else if (this.typeClass == RiftCreatureBuilder.class) {
             nbtTagCompound.setString(this.name, ((RiftCreatureBuilder) this.writeValue.apply(creature)).getName());
         }
+        else if (this.typeClass == CreatureStatsStorage.class) {
+            CreatureStatsStorage creatureStatsStorage = creature.getCreatureStats();
+            if (creatureStatsStorage == null) return;
+            nbtTagCompound.setTag(this.name, creatureStatsStorage.getAsNBT());
+        }
         else if (this.typeClass == CreatureMoveStorage.class) {
             CreatureMoveStorage creatureMoveStorage = creature.getCreatureMoves();
             if (creatureMoveStorage == null) return;
             nbtTagCompound.setTag(this.name, creatureMoveStorage.getAsNBT());
         }
+        else if (this.typeClass.isEnum()) {
+            Enum<?> enumValue = (Enum<?>) this.writeValue.apply(creature);
+            nbtTagCompound.setByte(this.name, enumValue == null ? (byte) -1 : (byte) enumValue.ordinal());
+        }
     }
 
     public void readToNBT(NBTTagCompound nbtTagCompound, IRiftCreature creature) {
-        if (this.readValue == null) return;
+        if (this.readValue == null || creature == null) return;
         this.readValue.accept(creature, this.getValueFromNBT(nbtTagCompound));
     }
 }

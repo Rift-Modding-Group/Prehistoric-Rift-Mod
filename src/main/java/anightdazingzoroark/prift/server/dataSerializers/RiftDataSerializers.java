@@ -8,7 +8,10 @@ import anightdazingzoroark.prift.server.entity.CreatureAcquisitionInfo;
 import anightdazingzoroark.prift.server.entity.MoveListUtil;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
 import anightdazingzoroark.prift.server.entity.creaturenew.CreatureMoveStorage;
+import anightdazingzoroark.prift.server.entity.creaturenew.CreatureStatsStorage;
+import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureEnums;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializer;
@@ -16,8 +19,7 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.registries.DataSerializerEntry;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class RiftDataSerializers {
     @Deprecated
@@ -65,6 +67,33 @@ public class RiftDataSerializers {
 
         @Override
         public CreatureMoveStorage copyValue(CreatureMoveStorage value) {
+            return value;
+        }
+    };
+
+    public static final DataSerializer<CreatureStatsStorage> CREATURE_STATS_STORAGE = new DataSerializer<CreatureStatsStorage>() {
+        @Override
+        public void write(PacketBuffer buf, CreatureStatsStorage value) {
+            NBTTagCompound nbtTagCompound = value.getAsNBT();
+            ByteBufUtils.writeTag(buf, nbtTagCompound);
+        }
+
+        @Override
+        public CreatureStatsStorage read(PacketBuffer buf) {
+            CreatureStatsStorage toReturn = new CreatureStatsStorage();
+            NBTTagCompound nbtTagCompound = ByteBufUtils.readTag(buf);
+            if (nbtTagCompound == null) return toReturn;
+            toReturn.readFromNBT(nbtTagCompound);
+            return toReturn;
+        }
+
+        @Override
+        public DataParameter<CreatureStatsStorage> createKey(int id) {
+            return new DataParameter<>(id, this);
+        }
+
+        @Override
+        public CreatureStatsStorage copyValue(CreatureStatsStorage value) {
             return value;
         }
     };
@@ -133,6 +162,7 @@ public class RiftDataSerializers {
     public static void registerSerializers() {
         ServerProxy.registryPrimer.register(new DataSerializerEntry(LIST_CREATURE_MOVE).setRegistryName(RiftInitialize.MODID, "move_list"));
         ServerProxy.registryPrimer.register(new DataSerializerEntry(CREATURE_MOVE_STORAGE).setRegistryName(RiftInitialize.MODID, "move_storage"));
+        ServerProxy.registryPrimer.register(new DataSerializerEntry(CREATURE_STATS_STORAGE)).setRegistryName(RiftInitialize.MODID, "stats_storage");
         ServerProxy.registryPrimer.register(new DataSerializerEntry(FIXED_SIZE_LIST_CREATURE_MOVE).setRegistryName(RiftInitialize.MODID, "fixed_size_move_list"));
         ServerProxy.registryPrimer.register(new DataSerializerEntry(ACQUISITION_INFO).setRegistryName(RiftInitialize.MODID, "acquisition_info"));
     }

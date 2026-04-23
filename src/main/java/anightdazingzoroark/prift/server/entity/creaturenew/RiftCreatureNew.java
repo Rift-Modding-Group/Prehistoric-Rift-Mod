@@ -4,12 +4,14 @@ import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.aiNew.RiftLookAroundNew;
 import anightdazingzoroark.prift.server.entity.aiNew.RiftWanderNew;
-import anightdazingzoroark.prift.server.entity.creaturenew.builder.AbstractCreatureBuilder;
-import anightdazingzoroark.prift.server.entity.creaturenew.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureEnums;
-import anightdazingzoroark.prift.server.entity.inventory.CreatureInventoryHandler;
+import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import anightdazingzoroark.riftlib.core.IAnimatable;
+import anightdazingzoroark.riftlib.core.PlayState;
+import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
+import anightdazingzoroark.riftlib.core.builder.LoopType;
+import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.IEntityLivingData;
@@ -25,27 +27,31 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import org.jspecify.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class RiftCreatureNew extends EntityTameable implements IAnimatable<AnimationDataEntity>, /* IMultiHitboxUser, IDynamicRideUser,*/ IRiftCreature {
     private final RiftCreatureBuilder creatureType;
-    private final CreatureInventoryHandler creatureInventory;
+    private final RiftInventoryHandler creatureInventory;
     private final AnimationDataEntity factory = new AnimationDataEntity(this);
 
-    private static final IAttribute ELEMENTAL_DAMAGE = new RangedAttribute(null, "rift.elementalDamage", 2.0, 0.0, 2048.0);
-    private static final IAttribute STAMINA = new RangedAttribute(null, "rift.stamina", 2.0, 0.0, 2048.0);
+    public static final IAttribute ELEMENTAL_DAMAGE_ATTRIBUTE = new RangedAttribute(null, "rift.elementalDamage", 2.0, 0.0, 2048.0);
+    public static final IAttribute STAMINA_ATTRIBUTE = new RangedAttribute(null, "rift.stamina", 2.0, 0.0, 2048.0);
 
     private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreatureNew.class, DataSerializers.VARINT);
+    private static final DataParameter<Byte> NATURE = EntityDataManager.createKey(RiftCreatureNew.class, DataSerializers.BYTE);
     private static final DataParameter<Integer> AGE_TICKS = EntityDataManager.createKey(RiftCreatureNew.class, DataSerializers.VARINT);
     private static final DataParameter<Float> STAMINA_CURRENT = EntityDataManager.createKey(RiftCreatureNew.class, DataSerializers.FLOAT);
     private static final DataParameter<CreatureMoveStorage> CREATURE_MOVES = EntityDataManager.createKey(RiftCreatureNew.class, RiftDataSerializers.CREATURE_MOVE_STORAGE);
+    private static final DataParameter<CreatureStatsStorage> CREATURE_STATS = EntityDataManager.createKey(RiftCreatureNew.class, RiftDataSerializers.CREATURE_STATS_STORAGE);
+    private static final DataParameter<String> CURRENTLY_USED_MOVE = EntityDataManager.createKey(RiftCreatureNew.class, DataSerializers.STRING);
 
     public RiftCreatureNew(World worldIn, String creatureName) {
         super(worldIn);
         this.creatureType = RiftCreatureRegistry.getCreatureBuilder(creatureName);
         this.setSize(this.creatureType.getMainHitboxSize()[0], this.creatureType.getMainHitboxSize()[1]);
-        this.creatureInventory = new CreatureInventoryHandler(this.creatureType.getInventorySize());
-        this.parseStats();
+        this.creatureInventory = new RiftInventoryHandler(this.creatureType.getInventorySize());
         if (!this.creatureType.getCanBeKnockedBack()) this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
     }
 
@@ -53,61 +59,41 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
     protected void entityInit() {
         super.entityInit();
         this.dataManager.register(LEVEL, 1);
+        this.dataManager.register(NATURE, (byte) 0);
         this.dataManager.register(AGE_TICKS, 0);
         this.dataManager.register(STAMINA_CURRENT, 0f);
         this.dataManager.register(CREATURE_MOVES, new CreatureMoveStorage());
+        this.dataManager.register(CREATURE_STATS, new CreatureStatsStorage());
+        this.dataManager.register(CURRENTLY_USED_MOVE, "");
     }
 
     //this is gonna be mostly for registering the custom attributes
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
+        //vanilla ATTACK_DAMAGE is to be used for melee damage attribute
         this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
-        this.getAttributeMap().registerAttribute(ELEMENTAL_DAMAGE);
-        this.getAttributeMap().registerAttribute(STAMINA);
-    }
-
-    //this turns the stats of a creature into real usable values
-    private void parseStats() {
-        //parse health
-        double healthStat = this.creatureType.getStats().get(RiftCreatureEnums.Stats.HEALTH);
-        double finalHealth = RiftUtil.slopeResult(healthStat, false, 0, 10, 0, 200);
-        finalHealth += finalHealth * 0.1D * (this.getLevel() - 1);
-        finalHealth = Math.round(finalHealth);
-        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(finalHealth);
-        this.heal((float) finalHealth);
-
-        //parse melee damage
-        double meleeAttackStat = this.creatureType.getStats().get(RiftCreatureEnums.Stats.MELEE_DAMAGE);
-        double finalMeleeAttack = RiftUtil.slopeResult(meleeAttackStat, false, 0, 10, 0, 25);
-        finalMeleeAttack += finalMeleeAttack * 0.1D * (this.getLevel() - 1);
-        finalMeleeAttack = Math.round(finalMeleeAttack);
-        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(finalMeleeAttack);
-
-        //parse elemental damage
-        double elementalAttackStat = this.creatureType.getStats().get(RiftCreatureEnums.Stats.ELEMENTAL_DAMAGE);
-        double finalElementalAttack = RiftUtil.slopeResult(elementalAttackStat, false, 0, 10, 0, 25);
-        finalElementalAttack += finalElementalAttack * 0.1D * (this.getLevel() - 1);
-        finalElementalAttack = Math.round(finalElementalAttack);
-        this.getEntityAttribute(ELEMENTAL_DAMAGE).setBaseValue(finalElementalAttack);
-
-        //parse stamina
-        double staminaStat = this.creatureType.getStats().get(RiftCreatureEnums.Stats.STAMINA);
-        double finalStamina = RiftUtil.slopeResult(staminaStat, false, 0, 10, 0, 80);
-        finalStamina += finalStamina * 0.1 * (this.getLevel() - 1);
-        finalStamina = Math.round(finalStamina);
-        this.getEntityAttribute(STAMINA).setBaseValue(finalStamina);
-
-        //parse speed
-        double speedStat = this.creatureType.getStats().get(RiftCreatureEnums.Stats.SPEED);
-        double finalSpeed = RiftUtil.slopeResult(speedStat, false, 1, 5, 0.15D, 0.35D);
-        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(finalSpeed);
+        this.getAttributeMap().registerAttribute(ELEMENTAL_DAMAGE_ATTRIBUTE);
+        this.getAttributeMap().registerAttribute(STAMINA_ATTRIBUTE);
     }
 
     @Override
     public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
+        //creature is to be an adult
         this.setAgeInTicks(this.creatureType.getDaysUntilAdult() * 24000);
-        //for move storage initialization
+
+        //initialize creature nature
+        int randNatureIndex = this.rand.nextInt(RiftCreatureEnums.Nature.values().length);
+        this.setNature(RiftCreatureEnums.Nature.values()[randNatureIndex]);
+
+        //initialize creature stats
+        CreatureStatsStorage creatureStatsStorage = this.getCreatureStats();
+        creatureStatsStorage.initializeIndividualValues();
+        creatureStatsStorage.parseStats(this.creatureType, this.getLevel(), this.getNature());
+        creatureStatsStorage.applyStatsToCreature(this);
+        this.setCreatureStats(creatureStatsStorage);
+
+        //initialize move storage
         CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
         creatureMoveStorage.initLearnableMoves(this.creatureType.getLearnableMoves());
         creatureMoveStorage.initUsableMovesPerPhase(this.creatureType.getInitUsableMovesPerPhase());
@@ -134,6 +120,19 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
         );
     }
 
+    //-----move use management-----
+    public String getMove() {
+        return this.dataManager.get(CURRENTLY_USED_MOVE);
+    }
+
+    public void setMove(String name) {
+        this.dataManager.set(CURRENTLY_USED_MOVE, name);
+    }
+
+    public void resetMove() {
+        this.setMove("");
+    }
+
     //-----IRiftCreature boilerplate stuff-----
     @Override
     public RiftCreatureBuilder getCreatureType() {
@@ -148,6 +147,19 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
     @Override
     public void setLevel(int value) {
         this.dataManager.set(LEVEL, value);
+    }
+
+    @Override
+    public RiftCreatureEnums.Nature getNature() {
+        byte natureOrdinal = this.dataManager.get(NATURE);
+        if (natureOrdinal < 0 || natureOrdinal >= RiftCreatureEnums.Nature.values().length) return null;
+        return RiftCreatureEnums.Nature.values()[natureOrdinal];
+    }
+
+    @Override
+    public void setNature(RiftCreatureEnums.Nature value) {
+        byte byteToSet = value != null ? (byte) value.ordinal() : (byte) -1;
+        this.dataManager.set(NATURE, byteToSet);
     }
 
     @Override
@@ -176,7 +188,22 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
 
     @Override
     public float getMaxStamina() {
-        return (float) this.getEntityAttribute(STAMINA).getAttributeValue();
+        return (float) this.getEntityAttribute(STAMINA_ATTRIBUTE).getAttributeValue();
+    }
+
+    @Override
+    public RiftInventoryHandler getCreatureInventory() {
+        return this.creatureInventory;
+    }
+
+    @Override
+    public CreatureStatsStorage getCreatureStats() {
+        return this.dataManager.get(CREATURE_STATS);
+    }
+
+    @Override
+    public void setCreatureStats(CreatureStatsStorage value) {
+        this.dataManager.set(CREATURE_STATS, value);
     }
 
     @Override
@@ -223,7 +250,17 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
     //-----animation related methods-----
     @Override
     public void registerControllers(AnimationDataEntity animationData) {
-
+        animationData.addAnimationController(new AnimationController<>(
+                this, "movement", 0,
+                event -> {
+                    if (animationData.isMoving()) {
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+this.creatureType.getName()+".walk", LoopType.LOOP));
+                        return PlayState.CONTINUE;
+                    }
+                    event.getController().clearAnimationCache();
+                    return PlayState.STOP;
+                }
+        ));
     }
 
     @Override

@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creatureMovesNew;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
 
 import java.util.HashMap;
 
@@ -29,11 +28,13 @@ public class CreatureMoveRegistry {
         registerMove(CreatureMoveNew.BITE, new CreatureMoveBuilder()
                 .setBasePower(50)
                 .setMakesContact()
+                .setRequireFindTargetToUse()
                 .setPhysical()
         );
         registerMove(CreatureMoveNew.THAGOMIZE, new CreatureMoveBuilder()
                 .setBasePower(60)
                 .setMakesContact()
+                .setRequireFindTargetToUse()
                 .setPhysical()
         );
     }

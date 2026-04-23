@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creaturenew.info;
 
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import net.minecraft.client.resources.I18n;
+import org.jetbrains.annotations.NotNull;
 
 public class RiftCreatureEnums {
     public static enum InventoryGearType {
@@ -148,15 +149,14 @@ public class RiftCreatureEnums {
         }
 
         public boolean isNeutral() {
-            return this.statToBoost.equals(this.statToWeaken);
+            return this.statToBoost == this.statToWeaken;
         }
 
-        public boolean boostsStat(Stats stat) {
-            return !this.isNeutral() && this.statToBoost.equals(stat);
-        }
-
-        public boolean weakensStat(Stats stat) {
-            return !this.isNeutral() && this.statToWeaken.equals(stat);
+        public double getStatModifier(@NotNull Stats stat) {
+            if (this.isNeutral()) return 0D;
+            else if (stat == this.statToBoost) return 0.20D;
+            else if (stat == this.statToWeaken) return -0.20D;
+            return 0D;
         }
 
         public String getTranslatedName() {

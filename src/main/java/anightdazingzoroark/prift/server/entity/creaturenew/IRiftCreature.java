@@ -3,6 +3,9 @@ package anightdazingzoroark.prift.server.entity.creaturenew;
 import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creaturenew.info.CreatureNBTKeywordNew;
 import anightdazingzoroark.prift.server.entity.creaturenew.builder.AbstractCreatureBuilder;
+import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureEnums;
+import anightdazingzoroark.prift.server.entity.inventory.CreatureInventoryHandler;
+import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import net.minecraft.nbt.NBTTagCompound;
 
 public interface IRiftCreature {
@@ -10,6 +13,7 @@ public interface IRiftCreature {
         return new CreatureNBTKeywordNew[]{
                 CreatureNBTKeywordNew.CREATURE_TYPE,
                 CreatureNBTKeywordNew.LEVEL,
+                CreatureNBTKeywordNew.NATURE,
                 CreatureNBTKeywordNew.AGE_IN_TICKS,
                 CreatureNBTKeywordNew.STAMINA,
                 CreatureNBTKeywordNew.CREATURE_MOVES
@@ -30,6 +34,8 @@ public interface IRiftCreature {
     RiftCreatureBuilder getCreatureType();
     int getLevel();
     void setLevel(int value);
+    RiftCreatureEnums.Nature getNature();
+    void setNature(RiftCreatureEnums.Nature value);
     int getAgeInTicks();
     void setAgeInTicks(int value);
     float getHealth();
@@ -37,6 +43,9 @@ public interface IRiftCreature {
     float getStamina();
     void setStamina(float value);
     float getMaxStamina();
+    RiftInventoryHandler getCreatureInventory();
+    CreatureStatsStorage getCreatureStats();
+    void setCreatureStats(CreatureStatsStorage value);
     CreatureMoveStorage getCreatureMoves();
     void setCreatureMoves(CreatureMoveStorage value);
 }

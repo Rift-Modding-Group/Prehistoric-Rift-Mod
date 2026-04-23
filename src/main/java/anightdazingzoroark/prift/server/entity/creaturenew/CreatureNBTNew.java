@@ -2,7 +2,8 @@ package anightdazingzoroark.prift.server.entity.creaturenew;
 
 import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creaturenew.info.CreatureNBTKeywordNew;
-import anightdazingzoroark.prift.server.entity.creaturenew.builder.AbstractCreatureBuilder;
+import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureEnums;
+import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
@@ -45,6 +46,17 @@ public class CreatureNBTNew implements IRiftCreature {
     }
 
     @Override
+    public RiftCreatureEnums.Nature getNature() {
+        if (this.nbtTagCompound.isEmpty()) return null;
+        return CreatureNBTKeywordNew.NATURE.getValueFromNBT(this.nbtTagCompound);
+    }
+
+    @Override
+    public void setNature(RiftCreatureEnums.Nature value) {
+        CreatureNBTKeywordNew.NATURE.setValueInNBT(this.nbtTagCompound, value);
+    }
+
+    @Override
     public int getAgeInTicks() {
         if (this.nbtTagCompound.isEmpty()) return 0;
         return CreatureNBTKeywordNew.AGE_IN_TICKS.getValueFromNBT(this.nbtTagCompound);
@@ -79,6 +91,22 @@ public class CreatureNBTNew implements IRiftCreature {
     @Override
     public float getMaxStamina() {
         return this.getAttributeValue("rift.stamina");
+    }
+
+    @Override
+    public RiftInventoryHandler getCreatureInventory() {
+        return null;
+    }
+
+    @Override
+    public CreatureStatsStorage getCreatureStats() {
+        if (this.nbtTagCompound.isEmpty()) return null;
+        return CreatureNBTKeywordNew.CREATURE_STATS.getValueFromNBT(this.nbtTagCompound);
+    }
+
+    @Override
+    public void setCreatureStats(CreatureStatsStorage value) {
+        CreatureNBTKeywordNew.CREATURE_STATS.setValueInNBT(this.nbtTagCompound, value);
     }
 
     @Override
