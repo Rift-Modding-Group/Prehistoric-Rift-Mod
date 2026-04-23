@@ -1,9 +1,9 @@
 package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureNew;
 import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureRegistry;
-import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureBuilder;
+import anightdazingzoroark.prift.server.entity.creaturenew.builder.AbstractCreatureBuilder;
+import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.other.RiftEmbryo;
 import anightdazingzoroark.prift.server.entity.other.RiftTrap;
 import anightdazingzoroark.prift.server.entity.projectile.*;
@@ -12,7 +12,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class RiftEntities {

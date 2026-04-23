@@ -1,7 +1,9 @@
 package anightdazingzoroark.prift.server.entity.creaturenew;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureBuilder;
+import anightdazingzoroark.prift.server.entity.creatureMovesNew.CreatureMoveNew;
+import anightdazingzoroark.prift.server.entity.creaturenew.builder.AbstractCreatureBuilder;
+import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureEnums;
 
 import java.util.HashMap;
@@ -15,11 +17,16 @@ public class RiftCreatureRegistry {
     }
 
     public static void registerCreatureType(String name, RiftCreatureBuilder builder) {
+        if (creatureBuilderMap.containsKey(name)) {
+            RiftInitialize.logger.warn("Builder for creature type {} already exists!", name);
+            return;
+        }
         if (!builder.isValid()) {
             RiftInitialize.logger.warn("Builder for creature type {} is invalid!", name);
             return;
         }
-        creatureBuilderMap.put(name, builder.setName(name));
+        builder.setName(name);
+        creatureBuilderMap.put(name, builder);
     }
 
     public static void createCreatures() {
@@ -35,6 +42,10 @@ public class RiftCreatureRegistry {
                         .setDaysUntilAdult(7)
                         .setHostileToHumans()
                         .setRetaliateWhenAttacked()
+                        .setLearnableMoves(
+                                new CreatureMoveStorage.LearnableMoveHolder(CreatureMoveNew.BITE, "bite")
+                        )
+                        .setInitMainUsableMoves(CreatureMoveNew.BITE)
         );
         registerCreatureType(
                 "stegosaurus",
@@ -48,6 +59,10 @@ public class RiftCreatureRegistry {
                         .setDaysUntilAdult(3)
                         .setIsHerder()
                         .setRetaliateWhenAttacked(true)
+                        .setLearnableMoves(
+                                new CreatureMoveStorage.LearnableMoveHolder(CreatureMoveNew.THAGOMIZE, "tail_attack")
+                        )
+                        .setInitMainUsableMoves(CreatureMoveNew.THAGOMIZE)
         );
         /*
         registerCreatureType(

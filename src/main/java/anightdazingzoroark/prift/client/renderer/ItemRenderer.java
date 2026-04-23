@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.client.renderer;
 
 import anightdazingzoroark.prift.server.blocks.RiftBlocks;
 import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureRegistry;
-import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureBuilder;
+import anightdazingzoroark.prift.server.entity.creaturenew.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.server.items.RiftCreatureSpawnEggItem;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import net.minecraft.client.Minecraft;
@@ -24,7 +24,7 @@ public class ItemRenderer {
                 (stack, tintIndex) -> {
                     if (!(stack.getItem() instanceof RiftCreatureSpawnEggItem)) return 0xFFFFFF;
 
-                    RiftCreatureBuilder builder = RiftCreatureRegistry.getCreatureBuilder(RiftCreatureSpawnEggItem.getCreatureName(stack));
+                    AbstractCreatureBuilder builder = RiftCreatureRegistry.getCreatureBuilder(RiftCreatureSpawnEggItem.getCreatureName(stack));
                     if (builder == null) return 0xFFFFFF;
 
                     int[] colors = builder.getSpawnEggColors();

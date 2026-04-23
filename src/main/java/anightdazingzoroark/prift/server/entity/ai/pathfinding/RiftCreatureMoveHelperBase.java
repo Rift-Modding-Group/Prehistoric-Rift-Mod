@@ -28,7 +28,7 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
         this.creature = creature;
     }
 
-    //reminder to self that this is meant to be executed every tick
+    //reminder to getThis that this is meant to be executed every tick
     @Override
     public void setMoveTo(double x, double y, double z, double speedIn) {
         this.angleToMoveTo = null;

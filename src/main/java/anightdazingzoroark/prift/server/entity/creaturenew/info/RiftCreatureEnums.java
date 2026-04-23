@@ -97,6 +97,70 @@ public class RiftCreatureEnums {
     }
 
     //just like how it works in pokemon, some creatures have a nature that
-    //boosts one stat bu lowers another, and some natures do nothing
-    public enum Nature {}
+    //boosts one stat but lowers another, and some natures do nothing
+    //soon this will be used to affect creature ai when tamed or wild
+    public enum Nature {
+        STEADY(Stats.HEALTH, Stats.HEALTH),
+        COMPOSED(Stats.MELEE_DAMAGE, Stats.MELEE_DAMAGE),
+        TEMPERATE(Stats.ELEMENTAL_DAMAGE, Stats.ELEMENTAL_DAMAGE),
+        PATIENT(Stats.STAMINA, Stats.STAMINA),
+        ADAPTABLE(Stats.SPEED, Stats.SPEED),
+
+        GUARDED(Stats.HEALTH, Stats.MELEE_DAMAGE),
+        GROUNDED(Stats.HEALTH, Stats.ELEMENTAL_DAMAGE),
+        STOUT(Stats.HEALTH, Stats.STAMINA),
+        CAREFUL(Stats.HEALTH, Stats.SPEED),
+
+        RECKLESS(Stats.MELEE_DAMAGE, Stats.HEALTH),
+        BLUNT(Stats.MELEE_DAMAGE, Stats.ELEMENTAL_DAMAGE),
+        IMPETUOUS(Stats.MELEE_DAMAGE, Stats.STAMINA),
+        BRUTISH(Stats.MELEE_DAMAGE, Stats.SPEED),
+
+        FERVID(Stats.ELEMENTAL_DAMAGE, Stats.HEALTH),
+        SPIRITUAL(Stats.ELEMENTAL_DAMAGE, Stats.MELEE_DAMAGE),
+        INTENSE(Stats.ELEMENTAL_DAMAGE, Stats.STAMINA),
+        FOCUSED(Stats.ELEMENTAL_DAMAGE, Stats.SPEED),
+
+        TENACIOUS(Stats.STAMINA, Stats.HEALTH),
+        DISCIPLINED(Stats.STAMINA, Stats.MELEE_DAMAGE),
+        RESERVED(Stats.STAMINA, Stats.ELEMENTAL_DAMAGE),
+        CALM(Stats.STAMINA, Stats.SPEED),
+
+        SKITTISH(Stats.SPEED, Stats.HEALTH),
+        NIMBLE(Stats.SPEED, Stats.MELEE_DAMAGE),
+        RESTLESS(Stats.SPEED, Stats.ELEMENTAL_DAMAGE),
+        HASTY(Stats.SPEED, Stats.STAMINA);
+
+        private final Stats statToBoost;
+        private final Stats statToWeaken;
+
+        Nature(Stats statToBoost, Stats statToWeaken) {
+            this.statToBoost = statToBoost;
+            this.statToWeaken = statToWeaken;
+        }
+
+        public Stats getStatToBoost() {
+            return this.statToBoost;
+        }
+
+        public Stats getStatToWeaken() {
+            return this.statToWeaken;
+        }
+
+        public boolean isNeutral() {
+            return this.statToBoost.equals(this.statToWeaken);
+        }
+
+        public boolean boostsStat(Stats stat) {
+            return !this.isNeutral() && this.statToBoost.equals(stat);
+        }
+
+        public boolean weakensStat(Stats stat) {
+            return !this.isNeutral() && this.statToWeaken.equals(stat);
+        }
+
+        public String getTranslatedName() {
+            return I18n.format("nature.creature."+this.name().toLowerCase());
+        }
+    }
 }

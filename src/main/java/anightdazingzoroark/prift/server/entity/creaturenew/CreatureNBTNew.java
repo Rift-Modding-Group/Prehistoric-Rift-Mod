@@ -1,7 +1,8 @@
 package anightdazingzoroark.prift.server.entity.creaturenew;
 
+import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creaturenew.info.CreatureNBTKeywordNew;
-import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureBuilder;
+import anightdazingzoroark.prift.server.entity.creaturenew.builder.AbstractCreatureBuilder;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
@@ -78,5 +79,16 @@ public class CreatureNBTNew implements IRiftCreature {
     @Override
     public float getMaxStamina() {
         return this.getAttributeValue("rift.stamina");
+    }
+
+    @Override
+    public CreatureMoveStorage getCreatureMoves() {
+        if (this.nbtTagCompound.isEmpty()) return null;
+        return CreatureNBTKeywordNew.CREATURE_MOVES.getValueFromNBT(this.nbtTagCompound);
+    }
+
+    @Override
+    public void setCreatureMoves(CreatureMoveStorage value) {
+        CreatureNBTKeywordNew.CREATURE_MOVES.setValueInNBT(this.nbtTagCompound, value);
     }
 }

@@ -1,14 +1,18 @@
 package anightdazingzoroark.prift.server.entity.creaturenew;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
+import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.aiNew.RiftLookAroundNew;
 import anightdazingzoroark.prift.server.entity.aiNew.RiftWanderNew;
-import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureBuilder;
+import anightdazingzoroark.prift.server.entity.creaturenew.builder.AbstractCreatureBuilder;
+import anightdazingzoroark.prift.server.entity.creaturenew.builder.CreaturePhaseBuilder;
+import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureEnums;
 import anightdazingzoroark.prift.server.entity.inventory.CreatureInventoryHandler;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
@@ -17,12 +21,15 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Map;
+
 public abstract class RiftCreatureNew extends EntityTameable implements IAnimatable<AnimationDataEntity>, /* IMultiHitboxUser, IDynamicRideUser,*/ IRiftCreature {
     private final RiftCreatureBuilder creatureType;
-    public final CreatureInventoryHandler creatureInventory;
+    private final CreatureInventoryHandler creatureInventory;
     private final AnimationDataEntity factory = new AnimationDataEntity(this);
 
     private static final IAttribute ELEMENTAL_DAMAGE = new RangedAttribute(null, "rift.elementalDamage", 2.0, 0.0, 2048.0);
@@ -31,6 +38,7 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
     private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreatureNew.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> AGE_TICKS = EntityDataManager.createKey(RiftCreatureNew.class, DataSerializers.VARINT);
     private static final DataParameter<Float> STAMINA_CURRENT = EntityDataManager.createKey(RiftCreatureNew.class, DataSerializers.FLOAT);
+    private static final DataParameter<CreatureMoveStorage> CREATURE_MOVES = EntityDataManager.createKey(RiftCreatureNew.class, RiftDataSerializers.CREATURE_MOVE_STORAGE);
 
     public RiftCreatureNew(World worldIn, String creatureName) {
         super(worldIn);
@@ -47,6 +55,7 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
         this.dataManager.register(LEVEL, 1);
         this.dataManager.register(AGE_TICKS, 0);
         this.dataManager.register(STAMINA_CURRENT, 0f);
+        this.dataManager.register(CREATURE_MOVES, new CreatureMoveStorage());
     }
 
     //this is gonna be mostly for registering the custom attributes
@@ -95,10 +104,17 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
         this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(finalSpeed);
     }
 
-    //this is to be run when a creature is spawned for the first time in the world
-    //todo: maybe use mixins to make the summon command use this when summoning creatures
-    public void spawnAsAdult() {
+    @Override
+    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
         this.setAgeInTicks(this.creatureType.getDaysUntilAdult() * 24000);
+        //for move storage initialization
+        CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+        creatureMoveStorage.initLearnableMoves(this.creatureType.getLearnableMoves());
+        creatureMoveStorage.initUsableMovesPerPhase(this.creatureType.getInitUsableMovesPerPhase());
+        this.setCreatureMoves(creatureMoveStorage);
+
+        //return value
+        return super.onInitialSpawn(difficulty, livingdata);
     }
 
     //this is temporary for testing purposes, will be replaced w something more dynamic
@@ -161,6 +177,16 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
     @Override
     public float getMaxStamina() {
         return (float) this.getEntityAttribute(STAMINA).getAttributeValue();
+    }
+
+    @Override
+    public CreatureMoveStorage getCreatureMoves() {
+        return this.dataManager.get(CREATURE_MOVES);
+    }
+
+    @Override
+    public void setCreatureMoves(CreatureMoveStorage value) {
+        this.dataManager.set(CREATURE_MOVES, value);
     }
 
     //-----nbt parsing related stuff-----

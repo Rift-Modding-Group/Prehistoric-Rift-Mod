@@ -1,7 +1,9 @@
 package anightdazingzoroark.prift.server.entity.creaturenew.info;
 
+import anightdazingzoroark.prift.server.entity.creaturenew.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creaturenew.IRiftCreature;
 import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureRegistry;
+import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.function.BiConsumer;
@@ -29,6 +31,11 @@ public class CreatureNBTKeywordNew<T> {
             "Stamina", Float.class,
             IRiftCreature::getStamina,
             IRiftCreature::setStamina
+    );
+    public static final CreatureNBTKeywordNew<CreatureMoveStorage> CREATURE_MOVES = new CreatureNBTKeywordNew<>(
+            "CreatureMoves", CreatureMoveStorage.class,
+            IRiftCreature::getCreatureMoves,
+            IRiftCreature::setCreatureMoves
     );
 
     //normal class operations here
@@ -70,6 +77,11 @@ public class CreatureNBTKeywordNew<T> {
             RiftCreatureBuilder builder = RiftCreatureRegistry.getCreatureBuilder(nbtTagCompound.getString(this.name));
             return this.typeClass.cast(builder);
         }
+        else if (this.typeClass == CreatureMoveStorage.class) {
+            CreatureMoveStorage moveStorage = new CreatureMoveStorage();
+            moveStorage.readFromNBT(nbtTagCompound);
+            return this.typeClass.cast(moveStorage);
+        }
         return null;
     }
 
@@ -86,10 +98,13 @@ public class CreatureNBTKeywordNew<T> {
         else if (this.typeClass == RiftCreatureBuilder.class) {
             nbtTagCompound.setString(this.name, ((RiftCreatureBuilder) value).getName());
         }
+        else if (this.typeClass == CreatureMoveStorage.class) {
+            nbtTagCompound.setTag(this.name, ((CreatureMoveStorage) value).getAsNBT());
+        }
     }
 
     public void writeToNBT(NBTTagCompound nbtTagCompound, IRiftCreature creature) {
-        if (this.writeValue == null) return;
+        if (this.writeValue == null || creature == null) return;
         if (this.typeClass == Integer.class) {
             nbtTagCompound.setInteger(this.name, (Integer) this.writeValue.apply(creature));
         }
@@ -101,6 +116,11 @@ public class CreatureNBTKeywordNew<T> {
         }
         else if (this.typeClass == RiftCreatureBuilder.class) {
             nbtTagCompound.setString(this.name, ((RiftCreatureBuilder) this.writeValue.apply(creature)).getName());
+        }
+        else if (this.typeClass == CreatureMoveStorage.class) {
+            CreatureMoveStorage creatureMoveStorage = creature.getCreatureMoves();
+            if (creatureMoveStorage == null) return;
+            nbtTagCompound.setTag(this.name, creatureMoveStorage.getAsNBT());
         }
     }
 

@@ -3,10 +3,9 @@ package anightdazingzoroark.prift.client.renderer;
 import anightdazingzoroark.prift.client.renderer.entity.*;
 import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.prift.server.entity.RiftEgg;
-import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.RiftSac;
 import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureRegistry;
-import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureBuilder;
+import anightdazingzoroark.prift.server.entity.creaturenew.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCannon;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftCatapult;
 import anightdazingzoroark.prift.server.entity.largeWeapons.RiftMortar;
@@ -33,8 +32,8 @@ public class EntityRenderer {
         }
 
         //creatures (NEW)
-        List<RiftCreatureBuilder> builderList = new ArrayList<>(RiftCreatureRegistry.creatureBuilderMap.values());
-        for (RiftCreatureBuilder builder : builderList) {
+        List<AbstractCreatureBuilder> builderList = new ArrayList<>(RiftCreatureRegistry.creatureBuilderMap.values());
+        for (AbstractCreatureBuilder builder : builderList) {
             RenderingRegistry.registerEntityRenderingHandler(builder.getCreatureClass(), RiftCreatureNewRenderer::new);
         }
 

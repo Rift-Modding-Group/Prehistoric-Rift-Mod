@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.entity.CreatureAcquisitionInfo;
 import anightdazingzoroark.prift.server.entity.MoveListUtil;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
+import anightdazingzoroark.prift.server.entity.creaturenew.CreatureMoveStorage;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RiftDataSerializers {
+    @Deprecated
     public static final DataSerializer<List<CreatureMove>> LIST_CREATURE_MOVE = new DataSerializer<List<CreatureMove>>() {
         public void write(PacketBuffer buf, List<CreatureMove> value) {
             NBTTagCompound listNBT = MoveListUtil.getNBTFromListCreatureMove(value);
@@ -40,6 +42,34 @@ public class RiftDataSerializers {
         }
     };
 
+    public static final DataSerializer<CreatureMoveStorage> CREATURE_MOVE_STORAGE = new DataSerializer<CreatureMoveStorage>() {
+        @Override
+        public void write(PacketBuffer buf, CreatureMoveStorage value) {
+            NBTTagCompound nbtTagCompound = value.getAsNBT();
+            ByteBufUtils.writeTag(buf, nbtTagCompound);
+        }
+
+        @Override
+        public CreatureMoveStorage read(PacketBuffer buf) {
+            CreatureMoveStorage toReturn = new CreatureMoveStorage();
+            NBTTagCompound nbtTagCompound = ByteBufUtils.readTag(buf);
+            if (nbtTagCompound == null) return toReturn;
+            toReturn.readFromNBT(nbtTagCompound);
+            return toReturn;
+        }
+
+        @Override
+        public DataParameter<CreatureMoveStorage> createKey(int id) {
+            return new DataParameter<>(id, this);
+        }
+
+        @Override
+        public CreatureMoveStorage copyValue(CreatureMoveStorage value) {
+            return value;
+        }
+    };
+
+    @Deprecated
     public static final DataSerializer<FixedSizeList<CreatureMove>> FIXED_SIZE_LIST_CREATURE_MOVE = new DataSerializer<FixedSizeList<CreatureMove>>() {
         @Override
         public void write(PacketBuffer buf, FixedSizeList<CreatureMove> value) {
@@ -102,6 +132,7 @@ public class RiftDataSerializers {
 
     public static void registerSerializers() {
         ServerProxy.registryPrimer.register(new DataSerializerEntry(LIST_CREATURE_MOVE).setRegistryName(RiftInitialize.MODID, "move_list"));
+        ServerProxy.registryPrimer.register(new DataSerializerEntry(CREATURE_MOVE_STORAGE).setRegistryName(RiftInitialize.MODID, "move_storage"));
         ServerProxy.registryPrimer.register(new DataSerializerEntry(FIXED_SIZE_LIST_CREATURE_MOVE).setRegistryName(RiftInitialize.MODID, "fixed_size_move_list"));
         ServerProxy.registryPrimer.register(new DataSerializerEntry(ACQUISITION_INFO).setRegistryName(RiftInitialize.MODID, "acquisition_info"));
     }

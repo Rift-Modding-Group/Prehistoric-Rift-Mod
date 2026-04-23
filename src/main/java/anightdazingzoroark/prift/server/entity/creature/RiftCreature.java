@@ -96,6 +96,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Deprecated
 public abstract class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, IMultiHitboxUser, IDynamicRideUser, IGuiHolder<CreatureGuiData> {
     private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> XP = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -368,7 +369,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         for (int x = 0; x < behaviors.size(); x++) this.tasks.addTask(x, behaviors.get(x));
     }
 
-    //note to self: priority is based on when a behavior is being added
+    //note to getThis: priority is based on when a behavior is being added
     //if placed early it means its priority is high
     //those placed later have lower priority
     private List<EntityAITarget> createTargetBehaviors() {
@@ -1962,7 +1963,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         //assign new leader
         this.herdLeader = creature;
 
-        //if leader is valid and not self, add to leader’s member set
+        //if leader is valid and not getThis, add to leader’s member set
         if (this.herdLeader != null && !this.herdLeader.equals(this)) {
             this.herdLeader.addHerdMember(this);
         }

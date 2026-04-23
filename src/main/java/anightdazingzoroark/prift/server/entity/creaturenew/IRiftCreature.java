@@ -1,7 +1,8 @@
 package anightdazingzoroark.prift.server.entity.creaturenew;
 
+import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creaturenew.info.CreatureNBTKeywordNew;
-import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureBuilder;
+import anightdazingzoroark.prift.server.entity.creaturenew.builder.AbstractCreatureBuilder;
 import net.minecraft.nbt.NBTTagCompound;
 
 public interface IRiftCreature {
@@ -10,7 +11,8 @@ public interface IRiftCreature {
                 CreatureNBTKeywordNew.CREATURE_TYPE,
                 CreatureNBTKeywordNew.LEVEL,
                 CreatureNBTKeywordNew.AGE_IN_TICKS,
-                CreatureNBTKeywordNew.STAMINA
+                CreatureNBTKeywordNew.STAMINA,
+                CreatureNBTKeywordNew.CREATURE_MOVES
         };
     }
     default void writeCreatureNBT(NBTTagCompound nbtTagCompound) {
@@ -35,4 +37,6 @@ public interface IRiftCreature {
     float getStamina();
     void setStamina(float value);
     float getMaxStamina();
+    CreatureMoveStorage getCreatureMoves();
+    void setCreatureMoves(CreatureMoveStorage value);
 }

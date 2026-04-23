@@ -116,7 +116,7 @@ public class RiftPartyScreen extends CustomModularScreen {
                     private PaddedGrid getGrid(IWidget panel) {
                         if (panel == null || !panel.isValid()) return null;
                         for (IWidget child : panel.getChildren()) {
-                            //search in self
+                            //search in getThis
                             if (child instanceof PaddedGrid grid) return grid;
 
                             //search in children too

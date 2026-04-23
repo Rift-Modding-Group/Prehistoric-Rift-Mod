@@ -1,16 +1,15 @@
-package anightdazingzoroark.prift.server.entity.creaturenew.info;
+package anightdazingzoroark.prift.server.entity.creaturenew.builder;
 
 import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureNew;
+import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureEnums;
 import net.minecraft.client.resources.I18n;
 
-import java.util.Arrays;
 import java.util.Map;
 
 //this class defines creature information
-public class RiftCreatureBuilder {
+public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<T>> {
     //all the following variables are required and must not be null, validated in isValid()
     private final Class<? extends RiftCreatureNew> creatureClass;
-    private String creatureName;
     private Map<RiftCreatureEnums.Stats, Double> stats;
     private RiftCreatureEnums.CreatureCategory creatureCategory;
     private RiftCreatureEnums.CreatureDiet creatureDiet;
@@ -31,8 +30,13 @@ public class RiftCreatureBuilder {
     private int inventorySize = 27;
     private int daysUntilAdult = 1;
 
-    public RiftCreatureBuilder(Class<? extends RiftCreatureNew> creatureClass) {
+    public AbstractCreatureBuilder(Class<? extends RiftCreatureNew> creatureClass) {
         this.creatureClass = creatureClass;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected final T getThis() {
+        return (T) this;
     }
 
     public Class<? extends RiftCreatureNew> getCreatureClass() {
@@ -40,36 +44,19 @@ public class RiftCreatureBuilder {
     }
 
     /**
-     * Set the name of the species of the creature, is required
-     * */
-    public RiftCreatureBuilder setName(String name) {
-        this.creatureName = name;
-        return this;
-    }
-
-    public String getName() {
-        return this.creatureName;
-    }
-
-    public String getLocalizedName() {
-        return I18n.format("entity."+this.creatureName+".name");
-    }
-
-    /**
      * Set the stats of the creature.
      * Stats are to be on a scale of 0.5-10 with steps of 0.5
      * and will be represented as stars on most UIs
      * */
-    public RiftCreatureBuilder setStats(double health, double meleeAttack, double elementalAttack, double stamina, double speed) {
+    public T setStats(double health, double meleeAttack, double elementalAttack, double stamina, double speed) {
         this.stats = Map.of(
                 RiftCreatureEnums.Stats.HEALTH, health,
                 RiftCreatureEnums.Stats.MELEE_DAMAGE, meleeAttack,
                 RiftCreatureEnums.Stats.ELEMENTAL_DAMAGE, elementalAttack,
                 RiftCreatureEnums.Stats.STAMINA, stamina,
                 RiftCreatureEnums.Stats.SPEED, speed
-
         );
-        return this;
+        return this.getThis();
     }
 
     public Map<RiftCreatureEnums.Stats, Double> getStats() {
@@ -79,9 +66,9 @@ public class RiftCreatureBuilder {
     /**
      * Set category of the species
      * */
-    public RiftCreatureBuilder setCreatureCategory(RiftCreatureEnums.CreatureCategory creatureCategory) {
+    public T setCreatureCategory(RiftCreatureEnums.CreatureCategory creatureCategory) {
         this.creatureCategory = creatureCategory;
-        return this;
+        return this.getThis();
     }
 
     public RiftCreatureEnums.CreatureCategory getCreatureCategory() {
@@ -91,9 +78,9 @@ public class RiftCreatureBuilder {
     /**
      * Set diet of the species
      * */
-    public RiftCreatureBuilder setCreatureDiet(RiftCreatureEnums.CreatureDiet creatureDiet) {
+    public T setCreatureDiet(RiftCreatureEnums.CreatureDiet creatureDiet) {
         this.creatureDiet = creatureDiet;
-        return this;
+        return this.getThis();
     }
 
     public RiftCreatureEnums.CreatureDiet getCreatureDiet() {
@@ -103,9 +90,9 @@ public class RiftCreatureBuilder {
     /**
      * Set the colors of the spawn egg for the creature
      * */
-    public RiftCreatureBuilder setSpawnEggColors(int background, int foreground) {
+    public T setSpawnEggColors(int background, int foreground) {
         this.spawnEggColors = new int[]{background, foreground};
-        return this;
+        return this.getThis();
     }
 
     public int[] getSpawnEggColors() {
@@ -116,9 +103,9 @@ public class RiftCreatureBuilder {
      * Set the range of values for a creature to be scaled by based on their age
      * So babies will be smol, adults will be big
      * */
-    public RiftCreatureBuilder setScaleRangeForAge(float min, float max) {
+    public T setScaleRangeForAge(float min, float max) {
         this.scaleRangeForAge = new float[]{min, max};
-        return this;
+        return this.getThis();
     }
 
     public float[] getScaleRangeForAge() {
@@ -128,9 +115,9 @@ public class RiftCreatureBuilder {
     /**
      * Set main hitbox size, which for now manage collisions with entity
      * */
-    public RiftCreatureBuilder setMainHitboxSize(float width, float height) {
+    public T setMainHitboxSize(float width, float height) {
         this.mainHitboxSize = new float[]{width, height};
-        return this;
+        return this.getThis();
     }
 
     public float[] getMainHitboxSize() {
@@ -140,9 +127,9 @@ public class RiftCreatureBuilder {
     /***
      * Make creature attack humans. Humans include players, villagers, pillagers, and witches
      * */
-    public RiftCreatureBuilder setHostileToHumans() {
+    public T setHostileToHumans() {
         this.hostileToHumans = true;
-        return this;
+        return this.getThis();
     }
 
     public boolean getHostileToHumans() {
@@ -152,7 +139,7 @@ public class RiftCreatureBuilder {
     /**
      * Make creature fight back if attacked
      * */
-    public RiftCreatureBuilder setRetaliateWhenAttacked() {
+    public T setRetaliateWhenAttacked() {
         return this.setRetaliateWhenAttacked(false);
     }
 
@@ -160,10 +147,10 @@ public class RiftCreatureBuilder {
      * Similar to above, but has additional option where, if the creature is a herder and is in a herd,
      * the herdmates will help it
      * */
-    public RiftCreatureBuilder setRetaliateWhenAttacked(boolean broadcastRetaliation) {
+    public T setRetaliateWhenAttacked(boolean broadcastRetaliation) {
         this.retaliateWhenAttacked = true;
         this.broadcastRetaliation = broadcastRetaliation;
-        return this;
+        return this.getThis();
     }
 
     public boolean[] getRetaliateWhenAttacked() {
@@ -173,9 +160,9 @@ public class RiftCreatureBuilder {
     /**
      * Make creature nocturnal
      * */
-    public RiftCreatureBuilder setIsNocturnal() {
+    public T setIsNocturnal() {
         this.isNocturnal = true;
-        return this;
+        return this.getThis();
     }
 
     public boolean getIsNocturnal() {
@@ -185,9 +172,9 @@ public class RiftCreatureBuilder {
     /**
      * Make it so the creature can be knocked back
      * */
-    public RiftCreatureBuilder setCanBeKnockedBack() {
+    public T setCanBeKnockedBack() {
         this.canBeKnockedBack = true;
-        return this;
+        return this.getThis();
     }
 
     public boolean getCanBeKnockedBack() {
@@ -197,9 +184,9 @@ public class RiftCreatureBuilder {
     /**
      * Make creature flop on land, effectively making them waterbound
      * */
-    public RiftCreatureBuilder setFlopOnLand() {
+    public T setFlopOnLand() {
         this.flopOnLand = true;
-        return this;
+        return this.getThis();
     }
 
     public boolean getFlopOnLand() {
@@ -209,9 +196,9 @@ public class RiftCreatureBuilder {
     /**
      * Set which blocks a creature can breathe in. If left alone, just air is considered
      * */
-    public RiftCreatureBuilder setBreathableBlocks(String... breathableBlocks) {
+    public T setBreathableBlocks(String... breathableBlocks) {
         this.breathableBlocks = breathableBlocks;
-        return this;
+        return this.getThis();
     }
 
     public String[] getBreathableBlocks() {
@@ -222,9 +209,9 @@ public class RiftCreatureBuilder {
      * Set movement options for creature. Note that walking isn't here because all creatures
      * must have some kind of land movement no matter what
      * */
-    public RiftCreatureBuilder setMovementOptions(RiftCreatureEnums.Movement... options) {
+    public T setMovementOptions(RiftCreatureEnums.Movement... options) {
         this.movementOptions = options;
-        return this;
+        return this.getThis();
     }
 
     public RiftCreatureEnums.Movement[] getMovementOptions() {
@@ -235,9 +222,9 @@ public class RiftCreatureBuilder {
      * Most land creatures can float on water, this disables that
      * Creatures that swim ignore this
      * */
-    public RiftCreatureBuilder setCannotFloatOnWater() {
+    public T setCannotFloatOnWater() {
         this.cannotFloatOnWater = false;
-        return this;
+        return this.getThis();
     }
 
     public boolean getCannotFloatOnWater() {
@@ -247,9 +234,9 @@ public class RiftCreatureBuilder {
     /**
      * Allows creature to perform herding
      * */
-    public RiftCreatureBuilder setIsHerder() {
+    public T setIsHerder() {
         this.isHerder = true;
-        return this;
+        return this.getThis();
     }
 
     public boolean isHerder() {
@@ -259,9 +246,9 @@ public class RiftCreatureBuilder {
     /**
      * Set the creature's inventory size
      * */
-    public RiftCreatureBuilder setInventorySize(int value) {
+    public T setInventorySize(int value) {
         this.inventorySize = value;
-        return this;
+        return this.getThis();
     }
 
     public int getInventorySize() {
@@ -271,9 +258,9 @@ public class RiftCreatureBuilder {
     /**
      * Set how long the creature spends as a baby
      * */
-    public RiftCreatureBuilder setDaysUntilAdult(int value) {
+    public T setDaysUntilAdult(int value) {
         this.daysUntilAdult = value;
-        return this;
+        return this.getThis();
     }
 
     public int getDaysUntilAdult() {

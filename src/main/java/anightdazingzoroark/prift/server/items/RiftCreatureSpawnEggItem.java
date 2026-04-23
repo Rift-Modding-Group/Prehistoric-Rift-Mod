@@ -3,7 +3,8 @@ package anightdazingzoroark.prift.server.items;
 import anightdazingzoroark.prift.client.creativetab.RiftCreativeTabs;
 import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureNew;
 import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureRegistry;
-import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureBuilder;
+import anightdazingzoroark.prift.server.entity.creaturenew.builder.AbstractCreatureBuilder;
+import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -81,7 +82,7 @@ public class RiftCreatureSpawnEggItem extends Item {
             RiftCreatureNew creature = this.createCreature(world, builder);
             if (creature == null) return EnumActionResult.FAIL;
 
-            creature.spawnAsAdult();
+            creature.onInitialSpawn(world.getDifficultyForLocation(new BlockPos(creature)), null);
             creature.setLocationAndAngles(spawnPos.getX() + 0.5D, spawnPos.getY(), spawnPos.getZ() + 0.5D, world.rand.nextFloat() * 360f, 0f);
             creature.enablePersistence();
             world.spawnEntity(creature);

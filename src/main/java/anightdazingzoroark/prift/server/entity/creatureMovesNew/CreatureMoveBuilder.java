@@ -105,6 +105,6 @@ public class CreatureMoveBuilder {
      * Get validity based on if some params are not null
      * */
     public boolean isValid() {
-        return this.moveName != null && this.moveType != null;
+        return this.moveType != null;
     }
 }

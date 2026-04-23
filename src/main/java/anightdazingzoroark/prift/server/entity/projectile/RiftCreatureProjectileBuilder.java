@@ -34,7 +34,7 @@ public class RiftCreatureProjectileBuilder {
     //if true, projectile cannot rotate vertically
     private boolean noVerticalRotate;
 
-    //if true, projectile will self-destruct
+    //if true, projectile will getThis-destruct
     private boolean selfDestruct;
 
     //for on hit effect
