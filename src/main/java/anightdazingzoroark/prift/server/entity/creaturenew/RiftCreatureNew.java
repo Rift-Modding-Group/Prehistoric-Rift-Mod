@@ -3,7 +3,9 @@ package anightdazingzoroark.prift.server.entity.creaturenew;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.aiNew.RiftLookAroundNew;
+import anightdazingzoroark.prift.server.entity.aiNew.RiftUnmountedUseMoveNew;
 import anightdazingzoroark.prift.server.entity.aiNew.RiftWanderNew;
+import anightdazingzoroark.prift.server.entity.creatureMovesNew.*;
 import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureEnums;
 import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
@@ -13,19 +15,25 @@ import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
+import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.DamageSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import org.jspecify.annotations.Nullable;
+
+import java.util.HashMap;
 
 public abstract class RiftCreatureNew extends EntityTameable implements IAnimatable<AnimationDataEntity>, /* IMultiHitboxUser, IDynamicRideUser,*/ IRiftCreature {
     private final RiftCreatureBuilder creatureType;
@@ -41,6 +49,7 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
     private static final DataParameter<Float> STAMINA_CURRENT = EntityDataManager.createKey(RiftCreatureNew.class, DataSerializers.FLOAT);
     private static final DataParameter<CreatureMoveStorage> CREATURE_MOVES = EntityDataManager.createKey(RiftCreatureNew.class, RiftDataSerializers.CREATURE_MOVE_STORAGE);
     private static final DataParameter<CreatureStatsStorage> CREATURE_STATS = EntityDataManager.createKey(RiftCreatureNew.class, RiftDataSerializers.CREATURE_STATS_STORAGE);
+    private static final DataParameter<String> CREATURE_PHASE = EntityDataManager.createKey(RiftCreatureNew.class, DataSerializers.STRING);
     private static final DataParameter<String> CURRENTLY_USED_MOVE = EntityDataManager.createKey(RiftCreatureNew.class, DataSerializers.STRING);
 
     public RiftCreatureNew(World worldIn, String creatureName) {
@@ -60,6 +69,7 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
         this.dataManager.register(STAMINA_CURRENT, 0f);
         this.dataManager.register(CREATURE_MOVES, new CreatureMoveStorage());
         this.dataManager.register(CREATURE_STATS, new CreatureStatsStorage());
+        this.dataManager.register(CREATURE_PHASE, "");
         this.dataManager.register(CURRENTLY_USED_MOVE, "");
     }
 
@@ -78,6 +88,13 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
         //creature is to be an adult
         this.setAgeInTicks(this.creatureType.getDaysUntilAdult() * 24000);
 
+        //set level based on distance from 0, 0
+        double distFromCenter = Math.sqrt(this.posX * this.posX + this.posZ * this.posZ);
+        double levelSlopeResult = RiftUtil.slopeResult(distFromCenter, false, 0, 1024, 1, 2);
+        levelSlopeResult = RiftUtil.clamp(levelSlopeResult, 1, 10);
+        levelSlopeResult = Math.round(levelSlopeResult);
+        this.setLevel((int) levelSlopeResult);
+
         //initialize creature nature
         int randNatureIndex = this.rand.nextInt(RiftCreatureEnums.Nature.values().length);
         this.setNature(RiftCreatureEnums.Nature.values()[randNatureIndex]);
@@ -93,6 +110,7 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
         CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
         creatureMoveStorage.initLearnableMoves(this.creatureType.getLearnableMoves());
         creatureMoveStorage.initUsableMovesPerPhase(this.creatureType.getInitUsableMovesPerPhase());
+        creatureMoveStorage.setCreaturePhase(this.getPhase());
         this.setCreatureMoves(creatureMoveStorage);
 
         //return value
@@ -103,8 +121,29 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
     //after being developed further
     @Override
     protected void initEntityAI() {
-        this.tasks.addTask(0, new RiftWanderNew(this, 1D));
-        this.tasks.addTask(1, new RiftLookAroundNew(this));
+        //temporary, will use the configs soon
+        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityCow.class, true));
+
+        this.tasks.addTask(1, new RiftUnmountedUseMoveNew(this));
+        this.tasks.addTask(2, new RiftWanderNew(this, 1D));
+        this.tasks.addTask(3, new RiftLookAroundNew(this));
+    }
+
+    @Override
+    public void onLivingUpdate() {
+        super.onLivingUpdate();
+
+        //disable default growth system
+        if (this.getGrowingAge() < 0) this.setGrowingAge(0);
+
+        if (!this.world.isRemote) {
+            this.setAgeInTicks(this.getAgeInTicks() + 1);
+
+            //tick move cooldowns
+            CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+            creatureMoveStorage.tickCooldowns();
+            this.setCreatureMoves(creatureMoveStorage);
+        }
     }
 
     //this gets the scale of the model of the entity
@@ -116,17 +155,38 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
         );
     }
 
+    //the vanilla attack entity method. is now used for damage calculations
+    @Override
+    public boolean attackEntityAsMob(Entity entityIn) {
+        if (entityIn == null) return false;
+
+        double damage = CreatureMoveNew.calculateDamage(this);
+        boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float) damage);
+        this.setLastAttackedEntity(entityIn);
+        return flag;
+    }
+
+    //-----creature phase management-----
+    public String getPhase() {
+        return this.dataManager.get(CREATURE_PHASE);
+    }
+
+    public void setPhase(String value) {
+        if (value == null) return;
+        this.dataManager.set(CREATURE_PHASE, value);
+    }
+
     //-----move use management-----
-    public String getMove() {
+    public String getCurrentMove() {
         return this.dataManager.get(CURRENTLY_USED_MOVE);
     }
 
-    public void setMove(String name) {
+    public void setCurrentMove(String name) {
         this.dataManager.set(CURRENTLY_USED_MOVE, name);
     }
 
-    public void resetMove() {
-        this.setMove("");
+    public void resetCurrentMove() {
+        this.setCurrentMove("");
     }
 
     //-----IRiftCreature boilerplate stuff-----
@@ -257,11 +317,40 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
                     return PlayState.STOP;
                 }
         ));
+        animationData.addAnimationController(new AnimationController<>(
+                this, "moveUse", 0,
+                event -> {
+                    if (!this.getCurrentMove().isEmpty()) {
+                        String animName = this.getCreatureMoves().getAnimationNameForMove(this.getCurrentMove());
+                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+this.creatureType.getName()+"."+animName, LoopType.PLAY_ONCE));
+                        return PlayState.CONTINUE;
+                    }
+                    event.getController().clearAnimationCache();
+                    return PlayState.STOP;
+                }
+        ));
     }
 
     @Override
     public AnimationDataEntity getAnimationData() {
         return this.factory;
+    }
+
+    @Override
+    public HashMap<String, Runnable> animationMessageEffects() {
+        HashMap<String, Runnable> toReturn = new HashMap<>();
+        toReturn.put("applyMoveEffect", () -> {
+            if (this.getCurrentMove().isEmpty()) return;
+
+            //temporarily is the attack target, will be changed so that it will become whatever was
+            //selected as target from whatever method
+            this.attackEntityAsMob(this.getAttackTarget());
+        });
+        toReturn.put("endMoveEffect", () -> {
+            System.out.println("end!");
+            this.resetCurrentMove();
+        });
+        return toReturn;
     }
 
     //-----dynamic ride position methods-----

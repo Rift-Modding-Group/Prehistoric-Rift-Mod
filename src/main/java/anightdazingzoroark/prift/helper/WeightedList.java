@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.helper;
 
 import java.util.*;
 
+@Deprecated
 public class WeightedList<E> {
     private final NavigableMap<Integer, E> map = new TreeMap<Integer, E>();
     private final Random random;

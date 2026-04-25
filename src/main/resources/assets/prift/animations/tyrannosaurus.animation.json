@@ -163,6 +163,10 @@
 						"0.25": [0, 0, 0]
 					}
 				}
+			},
+			"timeline": {
+				"0.25": "applyMoveEffect",
+				"0.5": "endMoveEffect"
 			}
 		},
 		"animation.tyrannosaurus.incapacitated": {

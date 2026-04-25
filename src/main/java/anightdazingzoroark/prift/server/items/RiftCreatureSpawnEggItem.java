@@ -82,8 +82,8 @@ public class RiftCreatureSpawnEggItem extends Item {
             RiftCreatureNew creature = this.createCreature(world, builder);
             if (creature == null) return EnumActionResult.FAIL;
 
-            creature.onInitialSpawn(world.getDifficultyForLocation(new BlockPos(creature)), null);
             creature.setLocationAndAngles(spawnPos.getX() + 0.5D, spawnPos.getY(), spawnPos.getZ() + 0.5D, world.rand.nextFloat() * 360f, 0f);
+            creature.onInitialSpawn(world.getDifficultyForLocation(new BlockPos(creature)), null);
             creature.enablePersistence();
             world.spawnEntity(creature);
         }

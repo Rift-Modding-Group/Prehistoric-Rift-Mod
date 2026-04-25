@@ -29,6 +29,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private boolean isHerder;
     private int inventorySize = 27;
     private int daysUntilAdult = 1;
+    private int physicalReach = 4;
 
     public AbstractCreatureBuilder(Class<? extends RiftCreatureNew> creatureClass) {
         this.creatureClass = creatureClass;
@@ -265,6 +266,18 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     public int getDaysUntilAdult() {
         return this.daysUntilAdult;
+    }
+
+    /**
+     * Get the distance in blocks from which this creature can use its contact moves
+     * */
+    public T setPhysicalReach(int value) {
+        this.physicalReach = value;
+        return this.getThis();
+    }
+
+    public int getPhysicalReach() {
+        return this.physicalReach;
     }
 
     /**

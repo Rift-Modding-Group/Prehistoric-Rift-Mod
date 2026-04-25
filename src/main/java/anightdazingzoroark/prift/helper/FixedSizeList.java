@@ -125,6 +125,27 @@ public class FixedSizeList<T> {
         return this.list;
     }
 
+    public FixedSizeList<T> combine(FixedSizeList<T> otherList) {
+        if (otherList.defaultValue != this.defaultValue) {
+            throw new UnsupportedOperationException("Cannot combine FixedSizeList instances with different default values!");
+        }
+        FixedSizeList<T> toReturn = new FixedSizeList<>(this.maxSize + otherList.maxSize, this.defaultValue);
+
+        //set from this list
+        for (int index = 0; index < this.maxSize; index++) {
+            T toAdd = this.list.get(index);
+            toReturn.set(index, toAdd);
+        }
+
+        //set from other list
+        for (int index = 0; index < otherList.maxSize; index++) {
+            T toAdd = otherList.list.get(index);
+            toReturn.set(this.maxSize + index, toAdd);
+        }
+
+        return toReturn;
+    }
+
     public String toString() {
         return this.list.toString();
     }

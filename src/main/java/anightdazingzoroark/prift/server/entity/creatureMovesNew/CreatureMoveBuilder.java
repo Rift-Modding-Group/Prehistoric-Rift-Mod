@@ -1,11 +1,18 @@
 package anightdazingzoroark.prift.server.entity.creatureMovesNew;
 
 import anightdazingzoroark.prift.server.entity.Element;
+import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureNew;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.math.BlockPos;
+
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 public class CreatureMoveBuilder {
     //all the following variables are required and must not be null, validated in isValid()
     private String moveName;
     private CreatureMoveEnums.MoveType moveType;
+    private BiFunction<RiftCreatureNew, Entity, Integer> canUsePredicate;
 
     //the following can be left alone
     private int movePower;
@@ -14,6 +21,8 @@ public class CreatureMoveBuilder {
     private Element element;
     private double elementEffectChance;
     private int elementEffectStrength;
+    private BiConsumer<RiftCreatureNew, Entity> onTargetHitEffect;
+    private BiConsumer<RiftCreatureNew, BlockPos> onBlockHitEffect;
 
     /**
      * Set the name of the move, is required
@@ -115,9 +124,39 @@ public class CreatureMoveBuilder {
     }
 
     /**
+     * Set the conditions in which the creature can use this move. This affects when on its own
+     * and when being ridden. The function parameters are the creature that will use it and the
+     * potential target it can attack. The return value is an integer that represents the priority in
+     * which the move will be used. Higher priority values means the move will be more likely
+     * to be used. A negative priority means it will never be used. A priority of 0 means that move
+     * will even be considered if its not part of its current usable moves and will swap to
+     * the list containing it just to use it if it can use it.
+     * */
+    public CreatureMoveBuilder setCanUsePredicate(BiFunction<RiftCreatureNew, Entity, Integer> canUsePredicate) {
+        this.canUsePredicate = canUsePredicate;
+        return this;
+    }
+
+    public BiFunction<RiftCreatureNew, Entity, Integer> getCanUsePredicate() {
+        return this.canUsePredicate;
+    }
+
+    /**
+     * Set any additional effects that will happen when attacking an entity
+     * */
+    public CreatureMoveBuilder setOnHitTargetEffect(BiConsumer<RiftCreatureNew, Entity> onTargetHitEffect) {
+        this.onTargetHitEffect = onTargetHitEffect;
+        return this;
+    }
+
+    public BiConsumer<RiftCreatureNew, Entity> getOnTargetHitEffect() {
+        return this.onTargetHitEffect;
+    }
+
+    /**
      * Get validity based on if some params are not null
      * */
     public boolean isValid() {
-        return this.moveType != null;
+        return this.moveType != null && this.canUsePredicate != null;
     }
 }

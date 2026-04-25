@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creaturenew;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.helper.FixedSizeList;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creatureMovesNew.CreatureMoveRegistry;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -20,23 +21,36 @@ public class CreatureMoveStorage {
     //list down usable moves based on the creature's phase
     //note that a creature can have one or two sets of usable moves
     private final Map<String, ImmutablePair<FixedSizeList<String>, FixedSizeList<String>>> usableMovesByPhase = new HashMap<>();
+    private final Map<String, Integer> moveCooldowns = new HashMap<>();
 
-    //-----learnable move related stuff-----
-    public void initLearnableMoves(LearnableMoveHolder... moveHolders) {
-        for (LearnableMoveHolder moveHolderToAdd : moveHolders) {
-            //safety
-            if (moveHolderToAdd == null) continue;
-            //check invalid move name
-            else if (!CreatureMoveRegistry.moveExists(moveHolderToAdd.moveName)) {
-                RiftInitialize.logger.warn("No builder exists for {}! Skipping...", moveHolderToAdd.moveName);
-                continue;
-            }
-            this.allLearnableMoves.add(moveHolderToAdd);
-        }
+    //the phase of the creature that has this
+    @NotNull
+    private String creaturePhase = "";
+    //the current usable moves to use, from usableMovesByPhase. 0 is left, 1 is right
+    private byte currentUsableMoves = 0;
+    //how many times a creature can use its current usable moves before switching thru switchUsableMoves()
+    //this resets when the creature is mounted or reloading the world
+    private int moveUseCountUntilSwitch = RiftUtil.randomInRange(10, 15);
+
+    public FixedSizeList<String> getCurrentUsableMoves() {
+        return this.getCurrentUsableMoves(false);
     }
 
-    public List<LearnableMoveHolder> getLearnableMoves() {
-        return Collections.unmodifiableList(this.allLearnableMoves);
+    public FixedSizeList<String> getCurrentUsableMoves(boolean invert) {
+        if (invert) {
+            if (this.currentUsableMoves == 0) return this.usableMovesByPhase.get(this.creaturePhase).getRight();
+            if (this.currentUsableMoves == 1) return this.usableMovesByPhase.get(this.creaturePhase).getLeft();
+        }
+        else {
+            if (this.currentUsableMoves == 0) return this.usableMovesByPhase.get(this.creaturePhase).getLeft();
+            if (this.currentUsableMoves == 1) return this.usableMovesByPhase.get(this.creaturePhase).getRight();
+        }
+        return null;
+    }
+
+    public FixedSizeList<String> getAllUsableMoves() {
+        ImmutablePair<FixedSizeList<String>, FixedSizeList<String>> usableMovesPair = this.usableMovesByPhase.get(this.creaturePhase);
+        return usableMovesPair.getLeft().combine(usableMovesPair.getRight());
     }
 
     //check if the move can be used at a certain phase
@@ -69,7 +83,71 @@ public class CreatureMoveStorage {
         return "";
     }
 
-    //-----usable move related stuff-----
+    //get usable moves
+    public ImmutablePair<FixedSizeList<String>, FixedSizeList<String>> getUsableMovesByPhase() {
+        return this.usableMovesByPhase.get(this.creaturePhase);
+    }
+
+    //should only count down when the creature is on its own and not mounted,
+    //after the creature uses the move, and if its second usable moves list is
+    //not empty
+    public void countDownToMoveSwitch() {
+        //block if its other usable moves list is empty for some reason
+        if (this.getCurrentUsableMoves(true).isEmpty()) return;
+
+        if (this.moveUseCountUntilSwitch-- <= 0) {
+            this.switchUsableMoves();
+            this.moveUseCountUntilSwitch = RiftUtil.randomInRange(10, 15);
+        }
+    }
+
+    public void switchUsableMoves() {
+        if (this.currentUsableMoves <= 0) this.currentUsableMoves = 1;
+        else this.currentUsableMoves = 0;
+    }
+
+    //should be run when the creature changes phase
+    public void setCreaturePhase(@NotNull String creaturePhase) {
+        this.creaturePhase = creaturePhase;
+    }
+
+    //-------cooldown management-------
+    public void putMoveOnCooldown(String moveName, int cooldownToSet) {
+        this.moveCooldowns.put(moveName, cooldownToSet);
+    }
+
+    public int moveCurrentCooldown(String moveName) {
+        if (!this.moveCooldowns.containsKey(moveName)) return 0;
+        return this.moveCooldowns.get(moveName);
+    }
+
+    public void tickCooldowns() {
+        List<String> movesToRemoveFromCooldown = new ArrayList<>();
+        for (Map.Entry<String, Integer> moveCooldownDef : this.moveCooldowns.entrySet()) {
+            int tickedCooldownVal = moveCooldownDef.getValue() - 1;
+
+            if (tickedCooldownVal <= 0) movesToRemoveFromCooldown.add(moveCooldownDef.getKey());
+            else this.moveCooldowns.put(moveCooldownDef.getKey(), tickedCooldownVal);
+        }
+
+        for (String moveToRemove : movesToRemoveFromCooldown) this.moveCooldowns.remove(moveToRemove);
+    }
+
+    //-------setters for initialization-------
+    //all the learnable moves for a creature r initialized here
+    public void initLearnableMoves(LearnableMoveHolder... moveHolders) {
+        for (LearnableMoveHolder moveHolderToAdd : moveHolders) {
+            //safety
+            if (moveHolderToAdd == null) continue;
+            //check invalid move name
+            else if (!CreatureMoveRegistry.moveExists(moveHolderToAdd.moveName)) {
+                RiftInitialize.logger.warn("No builder exists for {}! Skipping...", moveHolderToAdd.moveName);
+                continue;
+            }
+            this.allLearnableMoves.add(moveHolderToAdd);
+        }
+    }
+
     //these are the usable moves that a creature will always spawn with
     public void initUsableMovesPerPhase(Map<String, List<String>> movesPerPhase) {
         for (Map.Entry<String, List<String>> movesPerPhaseEntry : movesPerPhase.entrySet()) {
@@ -83,8 +161,8 @@ public class CreatureMoveStorage {
             }
 
             //define movesets
-            FixedSizeList<String> movesetOne = new FixedSizeList<>(usableMoveCount);
-            FixedSizeList<String> movesetTwo = new FixedSizeList<>(usableMoveCount);
+            FixedSizeList<String> movesetOne = new FixedSizeList<>(usableMoveCount, "");
+            FixedSizeList<String> movesetTwo = new FixedSizeList<>(usableMoveCount, "");
 
             //add from moves to the movesets
             for (int index = 0; index < moves.size(); index++) {
@@ -113,17 +191,12 @@ public class CreatureMoveStorage {
         }
     }
 
-    //get usable moves
-    public ImmutablePair<FixedSizeList<String>, FixedSizeList<String>> getUsableMovesByPhase(String phase) {
-        return this.usableMovesByPhase.get(phase);
-    }
-
-    //-----utility method to test if this storage is valid-----
+    //-------utility method to test if this storage is valid-------
     public boolean isValid() {
         return !this.allLearnableMoves.isEmpty() && !this.usableMovesByPhase.isEmpty();
     }
 
-    //-----for nbt related stuff-----
+    //-------for nbt related stuff-------
     public NBTTagCompound getAsNBT() {
         NBTTagCompound toReturn = new NBTTagCompound();
 
@@ -221,8 +294,8 @@ public class CreatureMoveStorage {
             NBTTagCompound phaseNBT = usableMovesTagList.getCompoundTagAt(index);
             String phaseName = phaseNBT.getString("Phase");
 
-            FixedSizeList<String> movesetOne = new FixedSizeList<>(usableMoveCount);
-            FixedSizeList<String> movesetTwo = new FixedSizeList<>(usableMoveCount);
+            FixedSizeList<String> movesetOne = new FixedSizeList<>(usableMoveCount, "");
+            FixedSizeList<String> movesetTwo = new FixedSizeList<>(usableMoveCount, "");
 
             NBTTagList movesetOneNBTList = phaseNBT.getTagList("MovesetOne", 10);
             for (int moveIndex = 0; moveIndex < movesetOneNBTList.tagCount(); moveIndex++) {

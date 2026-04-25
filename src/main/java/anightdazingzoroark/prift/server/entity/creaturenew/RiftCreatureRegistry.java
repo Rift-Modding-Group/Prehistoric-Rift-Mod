@@ -42,6 +42,7 @@ public class RiftCreatureRegistry {
                         .setDaysUntilAdult(7)
                         .setHostileToHumans()
                         .setRetaliateWhenAttacked()
+                        .setPhysicalReach(5)
                         .setLearnableMoves(
                                 new CreatureMoveStorage.LearnableMoveHolder(CreatureMoveNew.BITE, "bite")
                         )
@@ -59,6 +60,7 @@ public class RiftCreatureRegistry {
                         .setDaysUntilAdult(3)
                         .setIsHerder()
                         .setRetaliateWhenAttacked(true)
+                        .setPhysicalReach(5)
                         .setLearnableMoves(
                                 new CreatureMoveStorage.LearnableMoveHolder(CreatureMoveNew.THAGOMIZE, "tail_attack")
                         )
