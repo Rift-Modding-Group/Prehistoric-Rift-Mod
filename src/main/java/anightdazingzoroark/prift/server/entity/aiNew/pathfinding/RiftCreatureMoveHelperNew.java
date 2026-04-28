@@ -22,6 +22,14 @@ public class RiftCreatureMoveHelperNew extends RiftCreatureMoveHelperBaseNew {
         this.creatureAction = CreatureAction.MOVE_TO;
     }
 
+    public void setChargeTo(double x, double y, double z, double speedIn) {
+        this.posX = x;
+        this.posY = y;
+        this.posZ = z;
+        this.speed = speedIn;
+        this.creatureAction = CreatureAction.CHARGE;
+    }
+
     @Override
     public void strafe(float forward, float strafe) {
         this.creatureAction = CreatureAction.STRAFE;

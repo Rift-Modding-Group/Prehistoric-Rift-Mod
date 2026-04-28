@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.aiNew;
 
 import anightdazingzoroark.prift.helper.FixedSizeList;
+import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.helper.WeightedListNew;
 import anightdazingzoroark.prift.server.entity.creatureMovesNew.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMovesNew.CreatureMoveRegistry;
@@ -16,6 +17,7 @@ import net.minecraft.pathfinding.Path;
  * */
 public class RiftUnmountedUseMoveNew extends EntityAIBase {
     private final RiftCreatureNew creature;
+    private MoveResult moveResult;
     private boolean isPathing;
 
     public RiftUnmountedUseMoveNew(RiftCreatureNew creature) {
@@ -46,12 +48,10 @@ public class RiftUnmountedUseMoveNew extends EntityAIBase {
 
         //-----every 5-10 seconds the creature will sprint if the target is too far-----
         if (this.creature.getCreatureType().getCanSprintToAttack() && this.creature.sprintToAttackCooldown <= 0 && attackTarget != null) {
-            double minChargeDist = this.creature.getCreatureType().getPhysicalReach() + this.creature.getCreatureType().getPhysicalReach() * 0.5D + this.creature.width;
-            double maxChargeDist = Math.max(16, minChargeDist);
             double distFromTarget = this.creature.getDistance(attackTarget);
 
-            if (distFromTarget >= minChargeDist && distFromTarget <= maxChargeDist) {
-                this.creature.setSprinting(true);
+            if (distFromTarget <= 16) {
+                this.moveResult = MoveResult.SPRINT;
                 return true;
             }
         }
@@ -82,27 +82,63 @@ public class RiftUnmountedUseMoveNew extends EntityAIBase {
         String finalMoveToUse = weightedMoveList.next();
         if (finalMoveToUse == null) return false;
         this.creature.setCurrentMove(finalMoveToUse);
+        this.moveResult = MoveResult.USE_MOVE;
         return true;
     }
 
     @Override
     public boolean shouldContinueExecuting() {
         //must keep executing as long as there is a current move
-        return !this.creature.getCurrentMove().isEmpty();
+        if (this.moveResult == MoveResult.USE_MOVE) return !this.creature.getCurrentMove().isEmpty();
+        //when sprinting towards the target, the target should be alive for this to continue executing
+        else if (this.moveResult == MoveResult.SPRINT) {
+            return this.creature.isSprinting() && this.creature.getAttackTarget() != null && this.creature.getAttackTarget().isEntityAlive();
+        }
+        else return false;
     }
 
     @Override
     public void startExecuting() {
-        CreatureMoveBuilder creatureMoveBuilder = CreatureMoveRegistry.getCreatureMove(this.creature.getCurrentMove());
-        if (creatureMoveBuilder.getUseCanStopMovement()) {
-            this.creature.getNavigator().clearPath();
-            this.isPathing = false;
+        if (this.moveResult == MoveResult.USE_MOVE) {
+            CreatureMoveBuilder creatureMoveBuilder = CreatureMoveRegistry.getCreatureMove(this.creature.getCurrentMove());
+            if (creatureMoveBuilder.getUseCanStopMovement()) {
+                this.creature.getNavigator().clearPath();
+                this.isPathing = false;
+            }
+        }
+        else if (this.moveResult == MoveResult.SPRINT) {
+            this.creature.setSprinting(true);
         }
     }
 
     @Override
     public void resetTask() {
+        if (this.moveResult == MoveResult.SPRINT) {
+            this.creature.sprintToAttackCooldown = RiftUtil.randomInRange(5, 10) * 20;
+            this.creature.setSprinting(false);
+        }
+
         this.creature.getNavigator().clearPath();
         this.isPathing = false;
+        this.moveResult = null;
+    }
+
+    @Override
+    public void updateTask() {
+        if (this.moveResult == MoveResult.SPRINT) {
+            if (this.creature.getAttackTarget() == null) return;
+            this.creature.getMoveHelper().setMoveTo(
+                    this.creature.getAttackTarget().posX,
+                    this.creature.getAttackTarget().posY,
+                    this.creature.getAttackTarget().posZ,
+                    1D
+            );
+        }
+    }
+
+    private enum MoveResult {
+        USE_MOVE,
+        SPRINT,
+        LEAP
     }
 }

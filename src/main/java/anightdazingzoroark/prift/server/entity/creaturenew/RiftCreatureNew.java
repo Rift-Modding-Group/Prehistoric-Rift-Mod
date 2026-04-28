@@ -30,11 +30,14 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.List;
 
 public abstract class RiftCreatureNew extends EntityTameable implements IAnimatable<AnimationDataEntity>, /* IMultiHitboxUser, IDynamicRideUser,*/ IRiftCreature {
     private final RiftCreatureBuilder creatureType;
@@ -54,7 +57,7 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
     private static final DataParameter<String> CURRENTLY_USED_MOVE = EntityDataManager.createKey(RiftCreatureNew.class, DataSerializers.STRING);
 
     //manage sprint and sprint to attack
-    public int sprintToAttackCooldown; //only matters when the creature is unmounted
+    public int sprintToAttackCooldown; //manages a creature's ability to sprint based on whether or not it attacked before
 
     public RiftCreatureNew(World worldIn, String creatureName) {
         super(worldIn);
@@ -63,9 +66,12 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
         this.setSize(this.creatureType.getMainHitboxSize()[0], this.creatureType.getMainHitboxSize()[1]);
         this.creatureInventory = new RiftInventoryHandler(this.creatureType.getInventorySize());
         if (!this.creatureType.getCanBeKnockedBack()) this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
+
+        /*
         if (this.creatureType.getCanSprintToAttack()) {
             this.sprintToAttackCooldown = RiftUtil.randomInRange(5, 10) * 20;
         }
+         */
     }
 
     @Override
@@ -153,10 +159,47 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
             this.setCreatureMoves(creatureMoveStorage);
 
             //tick sprinting related stuff
-            if (this.creatureType.getCanSprintToAttack()) {
-                if (this.sprintToAttackCooldown > 0) this.sprintToAttackCooldown--;
+            if (this.sprintToAttackCooldown > 0) this.sprintToAttackCooldown--;
+            if (this.isSprinting() && this.sprintToAttackCooldown <= 0) {
+                AxisAlignedBB frontAABB = this.getFrontAABB();
+                List<EntityLivingBase> hitEntities = this.world.getEntitiesWithinAABB(EntityLivingBase.class, frontAABB)
+                        .stream().filter(entity -> {
+                             return entity != null && !this.equals(entity) && !this.isRelatedToEntity(entity);
+                        }).toList();
+
+                if (!hitEntities.isEmpty()) {
+                    for (Entity hitEntity : hitEntities) this.attackEntityFromSprint(hitEntity);
+
+                    this.sprintToAttackCooldown = RiftUtil.randomInRange(5, 10) * 20;
+                    this.setSprinting(false);
+                }
             }
         }
+    }
+
+    //this creates an AABB that is ahead of is center by 1.5 blocks + its width
+    public AxisAlignedBB getFrontAABB() {
+        double frontWidth = this.width / 2D + 1.5D;
+        double frontHeight = this.height;
+        Vec3d look = this.getLookVec().normalize();
+        double perpX = -look.z;
+        double perpZ = look.x;
+        double centerX = this.posX + look.x * this.width;
+        double centerZ = this.posZ + look.z * this.width;
+
+        double startX = centerX - perpX * frontWidth;
+        double startZ = centerZ - perpZ * frontWidth;
+        double endX = centerX + perpX * frontWidth;
+        double endZ = centerZ + perpZ * frontWidth;
+
+        return new AxisAlignedBB(
+                Math.min(startX, endX),
+                this.posY,
+                Math.min(startZ, endZ),
+                Math.max(startX, endX),
+                this.posY + frontHeight,
+                Math.max(startZ, endZ)
+        );
     }
 
     //this gets the scale of the model of the entity
@@ -185,6 +228,19 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
         this.setLastAttackedEntity(entityIn);
 
         return flag;
+    }
+
+    //this method is to be used when attacking from sprinting. sprinting is considered
+    //a physical move that makes contact
+    private void attackEntityFromSprint(Entity entityIn) {
+        if (entityIn == null) return;
+
+        double attackStat = this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
+        int sprintBasePower = 10; //is like this so that i can adjust whenever i need to
+        double sprintDamage = attackStat * sprintBasePower * 0.005D;
+
+        entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float) sprintDamage);
+        this.setLastAttackedEntity(entityIn);
     }
 
     //test if another entity is related to this creature
@@ -351,6 +407,16 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
                         return PlayState.CONTINUE;
                     }
                     event.getController().clearAnimationCache();
+                    return PlayState.STOP;
+                }
+        ));
+        animationData.addAnimationController(new AnimationController<>(
+                this, "sprintState", 20,
+                event -> {
+                    if (animationData.getHolder().isSprinting()) {
+                        //todo: add animation pose for sprinting
+                        return PlayState.CONTINUE;
+                    }
                     return PlayState.STOP;
                 }
         ));

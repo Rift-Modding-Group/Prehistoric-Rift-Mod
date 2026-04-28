@@ -58,14 +58,13 @@ public class CreatureMoveRegistry {
                             creatureAABB.maxZ + creature.getCreatureType().getPhysicalReach()
                     );
 
-                    List<Entity> entitiesInStompRange = creature.world.getEntitiesWithinAABB(
-                            Entity.class, stompRangeAABB
+                    List<EntityLivingBase> entitiesInStompRange = creature.world.getEntitiesWithinAABB(
+                            EntityLivingBase.class, stompRangeAABB
                     );
-                    for (Entity entity : entitiesInStompRange) {
-                        if (!(entity instanceof EntityLivingBase entityLivingBase)) continue;
-                        if (creature.isRelatedToEntity(entityLivingBase)) continue;
+                    for (EntityLivingBase entity : entitiesInStompRange) {
+                        if (creature.isRelatedToEntity(entity)) continue;
                         if (entity.equals(creature)) continue;
-                        creature.attackEntityAsMob(entityLivingBase);
+                        creature.attackEntityAsMob(entity);
                     }
                 })
         );

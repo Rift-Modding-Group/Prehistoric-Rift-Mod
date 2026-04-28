@@ -43,7 +43,7 @@ public class RiftCreatureRegistry {
                         .setHostileToHumans()
                         .setRetaliateWhenAttacked()
                         .setPhysicalReach(5)
-                        //.setCanSprintToAttack()
+                        .setCanSprintToAttack()
                         .setLearnableMoves(
                                 new CreatureMoveStorage.LearnableMoveHolder(CreatureMoveNew.BITE, "bite"),
                                 new CreatureMoveStorage.LearnableMoveHolder(CreatureMoveNew.STOMP, "stomp")
