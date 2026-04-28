@@ -41,35 +41,8 @@ public class RiftUnmountedUseMoveNew extends EntityAIBase {
             if (!this.creature.getNavigator().noPath()) this.creature.getNavigator().clearPath();
         }
 
-        //-----find and use move that has 0 priority (must use no matter the current loadout)-----
-        FixedSizeList<String> allUsableMoves = creatureMoves.getAllUsableMoves();
-        for (int index = 0; index < allUsableMoves.size(); index++) {
-            String moveName = allUsableMoves.get(index);
-            if (moveName.isEmpty()) continue;
-
-            CreatureMoveBuilder move = CreatureMoveRegistry.getCreatureMove(moveName);
-            boolean moveCanAttackTarget = move.getRequireFindTargetToUse() && attackTarget != null;
-
-            if (moveCanAttackTarget) {
-                if (move.getCanUsePredicate().apply(this.creature, attackTarget) == 0
-                    && creatureMoves.moveCurrentCooldown(moveName) <= 0
-                ) {
-                    this.creature.setCurrentMove(moveName);
-                    return true;
-                }
-            }
-            else {
-                if (move.getCanUsePredicate().apply(this.creature, null) == 0
-                        && creatureMoves.moveCurrentCooldown(moveName) <= 0
-                ) {
-                    this.creature.setCurrentMove(moveName);
-                    return true;
-                }
-            }
-        }
-
         //-----find and use move from current list-----
-        FixedSizeList<String> currentUsableMoves = creatureMoves.getCurrentUsableMoves();
+        FixedSizeList<String> currentUsableMoves = creatureMoves.getAllUsableMoves();
         WeightedListNew<String> weightedMoveList = new WeightedListNew<>();
         for (int index = 0; index < currentUsableMoves.size(); index++) {
             String moveName = currentUsableMoves.get(index);
@@ -98,11 +71,8 @@ public class RiftUnmountedUseMoveNew extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        System.out.println("current move: "+this.creature.getCurrentMove());
-        boolean flag = !this.creature.getCurrentMove().isEmpty();
-        System.out.println("flag: "+flag);
         //must keep executing as long as there is a current move
-        return flag;
+        return !this.creature.getCurrentMove().isEmpty();
     }
 
     @Override

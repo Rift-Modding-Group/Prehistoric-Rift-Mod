@@ -346,10 +346,7 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
             //selected as target from whatever method
             this.attackEntityAsMob(this.getAttackTarget());
         });
-        toReturn.put("endMoveEffect", () -> {
-            System.out.println("end!");
-            this.resetCurrentMove();
-        });
+        toReturn.put("endMoveEffect", this::resetCurrentMove);
         return toReturn;
     }
 

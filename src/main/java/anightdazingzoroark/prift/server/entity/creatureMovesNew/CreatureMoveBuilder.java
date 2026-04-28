@@ -128,9 +128,7 @@ public class CreatureMoveBuilder {
      * and when being ridden. The function parameters are the creature that will use it and the
      * potential target it can attack. The return value is an integer that represents the priority in
      * which the move will be used. Higher priority values means the move will be more likely
-     * to be used. A negative priority means it will never be used. A priority of 0 means that move
-     * will even be considered if its not part of its current usable moves and will swap to
-     * the list containing it just to use it if it can use it.
+     * to be used. A negative priority means it will never be used.
      * */
     public CreatureMoveBuilder setCanUsePredicate(BiFunction<RiftCreatureNew, Entity, Integer> canUsePredicate) {
         this.canUsePredicate = canUsePredicate;

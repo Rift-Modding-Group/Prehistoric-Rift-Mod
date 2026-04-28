@@ -125,6 +125,19 @@ public class FixedSizeList<T> {
         return this.list;
     }
 
+    public FixedSizeList<T> sublist(int minRange, int maxRange) {
+        if (minRange < 0 || maxRange > this.maxSize) {
+            throw new UnsupportedOperationException("Invalid range!");
+        }
+
+        int newSize = maxRange - minRange;
+        if (newSize < 0) {
+            throw new UnsupportedOperationException("Range size of "+newSize+" is invalid!");
+        }
+
+        return new FixedSizeList<>(newSize, this.list.subList(minRange, maxRange), this.defaultValue);
+    }
+
     public FixedSizeList<T> combine(FixedSizeList<T> otherList) {
         if (otherList.defaultValue != this.defaultValue) {
             throw new UnsupportedOperationException("Cannot combine FixedSizeList instances with different default values!");

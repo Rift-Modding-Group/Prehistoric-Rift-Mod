@@ -2,11 +2,9 @@ package anightdazingzoroark.prift.server.entity.creaturenew;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.helper.FixedSizeList;
-import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.creatureMovesNew.CreatureMoveRegistry;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -15,42 +13,39 @@ import java.util.*;
 * A creature's moves are to be stored here
 * */
 public class CreatureMoveStorage {
-    private static final int usableMoveCount = 3;
+    private static final int usableMoveCount = 6;
     //list down all moves that the creature can learn
     private final List<LearnableMoveHolder> allLearnableMoves = new ArrayList<>();
     //list down usable moves based on the creature's phase
     //note that a creature can have one or two sets of usable moves
-    private final Map<String, ImmutablePair<FixedSizeList<String>, FixedSizeList<String>>> usableMovesByPhase = new HashMap<>();
+    private final Map<String, FixedSizeList<String>> usableMovesByPhase = new HashMap<>();
     private final Map<String, Integer> moveCooldowns = new HashMap<>();
 
     //the phase of the creature that has this
     @NotNull
     private String creaturePhase = "";
-    //the current usable moves to use, from usableMovesByPhase. 0 is left, 1 is right
+    //flag for the current usable moves to use, from usableMovesByPhase. 0 is left, 1 is right
+    //this only matters in player controlling creatures
     private byte currentUsableMoves = 0;
-    //how many times a creature can use its current usable moves before switching thru switchUsableMoves()
-    //this resets when the creature is mounted or reloading the world
-    private int moveUseCountUntilSwitch = RiftUtil.randomInRange(10, 15);
 
-    public FixedSizeList<String> getCurrentUsableMoves() {
-        return this.getCurrentUsableMoves(false);
+    //to be used by creatures when on their own
+    public FixedSizeList<String> getAllUsableMoves() {
+        return this.usableMovesByPhase.get(this.creaturePhase);
     }
 
-    public FixedSizeList<String> getCurrentUsableMoves(boolean invert) {
-        if (invert) {
-            if (this.currentUsableMoves == 0) return this.usableMovesByPhase.get(this.creaturePhase).getRight();
-            if (this.currentUsableMoves == 1) return this.usableMovesByPhase.get(this.creaturePhase).getLeft();
+    //to be used by players when commanding a creature to use a move
+    public FixedSizeList<String> getAllUsableMovesByPlayer() {
+        //safety net
+        if (this.currentUsableMoves >= 2 || this.currentUsableMoves < 0) this.currentUsableMoves = 0;
+
+        FixedSizeList<String> movesFromCurrentPhase = this.usableMovesByPhase.get(this.creaturePhase);
+        if (this.currentUsableMoves == 0) {
+            return movesFromCurrentPhase.sublist(0, 3);
         }
-        else {
-            if (this.currentUsableMoves == 0) return this.usableMovesByPhase.get(this.creaturePhase).getLeft();
-            if (this.currentUsableMoves == 1) return this.usableMovesByPhase.get(this.creaturePhase).getRight();
+        else if (this.currentUsableMoves == 1) {
+            return movesFromCurrentPhase.sublist(3, 6);
         }
         return null;
-    }
-
-    public FixedSizeList<String> getAllUsableMoves() {
-        ImmutablePair<FixedSizeList<String>, FixedSizeList<String>> usableMovesPair = this.usableMovesByPhase.get(this.creaturePhase);
-        return usableMovesPair.getLeft().combine(usableMovesPair.getRight());
     }
 
     //check if the move can be used at a certain phase
@@ -81,24 +76,6 @@ public class CreatureMoveStorage {
             return moveHolder.moveAnimationName();
         }
         return "";
-    }
-
-    //get usable moves
-    public ImmutablePair<FixedSizeList<String>, FixedSizeList<String>> getUsableMovesByPhase() {
-        return this.usableMovesByPhase.get(this.creaturePhase);
-    }
-
-    //should only count down when the creature is on its own and not mounted,
-    //after the creature uses the move, and if its second usable moves list is
-    //not empty
-    public void countDownToMoveSwitch() {
-        //block if its other usable moves list is empty for some reason
-        if (this.getCurrentUsableMoves(true).isEmpty()) return;
-
-        if (this.moveUseCountUntilSwitch-- <= 0) {
-            this.switchUsableMoves();
-            this.moveUseCountUntilSwitch = RiftUtil.randomInRange(10, 15);
-        }
     }
 
     public void switchUsableMoves() {
@@ -161,8 +138,7 @@ public class CreatureMoveStorage {
             }
 
             //define movesets
-            FixedSizeList<String> movesetOne = new FixedSizeList<>(usableMoveCount, "");
-            FixedSizeList<String> movesetTwo = new FixedSizeList<>(usableMoveCount, "");
+            FixedSizeList<String> moveset = new FixedSizeList<>(usableMoveCount, "");
 
             //add from moves to the movesets
             for (int index = 0; index < moves.size(); index++) {
@@ -177,17 +153,11 @@ public class CreatureMoveStorage {
                 }
 
                 //add to the movesets
-                int indexToAddTo = index % usableMoveCount;
-                if (index / usableMoveCount == 0) {
-                    movesetOne.set(indexToAddTo, moveToAdd);
-                }
-                else if (index / usableMoveCount == 1) {
-                    movesetTwo.set(indexToAddTo, moveToAdd);
-                }
+                moveset.set(index, moveToAdd);
             }
 
             //add the init moveset
-            this.usableMovesByPhase.put(phaseName, new ImmutablePair<>(movesetOne, movesetTwo));
+            this.usableMovesByPhase.put(phaseName, moveset);
         }
     }
 
@@ -221,15 +191,15 @@ public class CreatureMoveStorage {
 
         //write usable moves
         NBTTagList usableMovesTagList = new NBTTagList();
-        for (Map.Entry<String, ImmutablePair<FixedSizeList<String>, FixedSizeList<String>>> movesPerPhaseEntry : this.usableMovesByPhase.entrySet()) {
+        for (Map.Entry<String, FixedSizeList<String>> movesPerPhaseEntry : this.usableMovesByPhase.entrySet()) {
             NBTTagCompound phaseNBT = new NBTTagCompound();
 
             //write phase name nbt
             phaseNBT.setString("Phase", movesPerPhaseEntry.getKey());
 
-            //write moveset one nbt
-            FixedSizeList<String> movesetOne = movesPerPhaseEntry.getValue().getLeft();
-            NBTTagList movesetOneNBTList = new NBTTagList();
+            //write moveset nbt
+            FixedSizeList<String> movesetOne = movesPerPhaseEntry.getValue();
+            NBTTagList movesetNBTList = new NBTTagList();
             for (int index = 0; index < movesetOne.size(); index++) {
                 String move = movesetOne.get(index);
                 if (move == null || move.isEmpty()) continue;
@@ -237,23 +207,9 @@ public class CreatureMoveStorage {
                 NBTTagCompound moveAsNBT = new NBTTagCompound();
                 moveAsNBT.setInteger("Index", index);
                 moveAsNBT.setString("Move", move);
-                movesetOneNBTList.appendTag(moveAsNBT);
+                movesetNBTList.appendTag(moveAsNBT);
             }
-            phaseNBT.setTag("MovesetOne", movesetOneNBTList);
-
-            //write moveset two nbt
-            FixedSizeList<String> movesetTwo = movesPerPhaseEntry.getValue().getRight();
-            NBTTagList movesetTwoNBTList = new NBTTagList();
-            for (int index = 0; index < movesetTwo.size(); index++) {
-                String move = movesetTwo.get(index);
-                if (move == null || move.isEmpty()) continue;
-
-                NBTTagCompound moveAsNBT = new NBTTagCompound();
-                moveAsNBT.setInteger("Index", index);
-                moveAsNBT.setString("Move", move);
-                movesetTwoNBTList.appendTag(moveAsNBT);
-            }
-            phaseNBT.setTag("MovesetTwo", movesetTwoNBTList);
+            phaseNBT.setTag("Moveset", movesetNBTList);
 
             usableMovesTagList.appendTag(phaseNBT);
         }
@@ -294,12 +250,11 @@ public class CreatureMoveStorage {
             NBTTagCompound phaseNBT = usableMovesTagList.getCompoundTagAt(index);
             String phaseName = phaseNBT.getString("Phase");
 
-            FixedSizeList<String> movesetOne = new FixedSizeList<>(usableMoveCount, "");
-            FixedSizeList<String> movesetTwo = new FixedSizeList<>(usableMoveCount, "");
+            FixedSizeList<String> moveset = new FixedSizeList<>(usableMoveCount, "");
 
-            NBTTagList movesetOneNBTList = phaseNBT.getTagList("MovesetOne", 10);
-            for (int moveIndex = 0; moveIndex < movesetOneNBTList.tagCount(); moveIndex++) {
-                NBTTagCompound moveAsNBT = movesetOneNBTList.getCompoundTagAt(moveIndex);
+            NBTTagList movesetNBTList = phaseNBT.getTagList("Moveset", 10);
+            for (int moveIndex = 0; moveIndex < movesetNBTList.tagCount(); moveIndex++) {
+                NBTTagCompound moveAsNBT = movesetNBTList.getCompoundTagAt(moveIndex);
                 int slot = moveAsNBT.getInteger("Index");
                 String moveName = moveAsNBT.getString("Move");
 
@@ -313,29 +268,10 @@ public class CreatureMoveStorage {
                     continue;
                 }
 
-                movesetOne.set(slot, moveName);
+                moveset.set(slot, moveName);
             }
 
-            NBTTagList movesetTwoNBTList = phaseNBT.getTagList("MovesetTwo", 10);
-            for (int moveIndex = 0; moveIndex < movesetTwoNBTList.tagCount(); moveIndex++) {
-                NBTTagCompound moveAsNBT = movesetTwoNBTList.getCompoundTagAt(moveIndex);
-                int slot = moveAsNBT.getInteger("Index");
-                String moveName = moveAsNBT.getString("Move");
-
-                if (slot < 0 || slot >= usableMoveCount) continue;
-                if (!CreatureMoveRegistry.moveExists(moveName)) {
-                    RiftInitialize.logger.warn("No builder exists for {}! Skipping...", moveName);
-                    continue;
-                }
-                if (!this.moveIsValidForPhase(moveName, phaseName)) {
-                    RiftInitialize.logger.warn("{} is not learnable by creature! Skipping...", moveName);
-                    continue;
-                }
-
-                movesetTwo.set(slot, moveName);
-            }
-
-            this.usableMovesByPhase.put(phaseName, new ImmutablePair<>(movesetOne, movesetTwo));
+            this.usableMovesByPhase.put(phaseName, moveset);
         }
     }
 
