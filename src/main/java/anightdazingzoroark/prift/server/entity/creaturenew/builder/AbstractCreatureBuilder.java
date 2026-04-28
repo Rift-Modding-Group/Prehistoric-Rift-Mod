@@ -30,6 +30,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private int inventorySize = 27;
     private int daysUntilAdult = 1;
     private int physicalReach = 4;
+    private boolean canSprintToAttack;
 
     public AbstractCreatureBuilder(Class<? extends RiftCreatureNew> creatureClass) {
         this.creatureClass = creatureClass;
@@ -278,6 +279,20 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     public int getPhysicalReach() {
         return this.physicalReach;
+    }
+
+    /**
+     * Make it so that sprinting can be used as an attack by this creature.
+     * Note that its only for when its on its own, when controlled by a rider
+     * it can spring to attack when commanded to (by simply sprinting lol)
+     * */
+    public T setCanSprintToAttack() {
+        this.canSprintToAttack = true;
+        return this.getThis();
+    }
+
+    public boolean getCanSprintToAttack() {
+        return this.canSprintToAttack;
     }
 
     /**

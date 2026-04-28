@@ -2,9 +2,11 @@ package anightdazingzoroark.prift.server.entity.creaturenew;
 
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.aiNew.RiftLookAroundNew;
 import anightdazingzoroark.prift.server.entity.aiNew.RiftUnmountedUseMoveNew;
 import anightdazingzoroark.prift.server.entity.aiNew.RiftWanderNew;
+import anightdazingzoroark.prift.server.entity.aiNew.pathfinding.RiftCreatureMoveHelperNew;
 import anightdazingzoroark.prift.server.entity.creatureMovesNew.*;
 import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureEnums;
@@ -15,15 +17,14 @@ import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityAgeable;
-import net.minecraft.entity.IEntityLivingData;
-import net.minecraft.entity.SharedMonsterAttributes;
+import anightdazingzoroark.riftlib.hitbox.EntityHitbox;
+import net.minecraft.entity.*;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.passive.EntityTameable;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -52,12 +53,19 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
     private static final DataParameter<String> CREATURE_PHASE = EntityDataManager.createKey(RiftCreatureNew.class, DataSerializers.STRING);
     private static final DataParameter<String> CURRENTLY_USED_MOVE = EntityDataManager.createKey(RiftCreatureNew.class, DataSerializers.STRING);
 
+    //manage sprint and sprint to attack
+    public int sprintToAttackCooldown; //only matters when the creature is unmounted
+
     public RiftCreatureNew(World worldIn, String creatureName) {
         super(worldIn);
         this.creatureType = RiftCreatureRegistry.getCreatureBuilder(creatureName);
+        this.moveHelper = new RiftCreatureMoveHelperNew(this);
         this.setSize(this.creatureType.getMainHitboxSize()[0], this.creatureType.getMainHitboxSize()[1]);
         this.creatureInventory = new RiftInventoryHandler(this.creatureType.getInventorySize());
         if (!this.creatureType.getCanBeKnockedBack()) this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
+        if (this.creatureType.getCanSprintToAttack()) {
+            this.sprintToAttackCooldown = RiftUtil.randomInRange(5, 10) * 20;
+        }
     }
 
     @Override
@@ -143,6 +151,11 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
             creatureMoveStorage.tickCooldowns();
             this.setCreatureMoves(creatureMoveStorage);
+
+            //tick sprinting related stuff
+            if (this.creatureType.getCanSprintToAttack()) {
+                if (this.sprintToAttackCooldown > 0) this.sprintToAttackCooldown--;
+            }
         }
     }
 
@@ -156,14 +169,38 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
     }
 
     //the vanilla attack entity method. is now used for damage calculations
+    //use this when attacking an entity
     @Override
     public boolean attackEntityAsMob(Entity entityIn) {
         if (entityIn == null) return false;
 
+        CreatureMoveBuilder creatureMoveBuilder = CreatureMoveRegistry.getCreatureMove(this.getCurrentMove());
+        if (creatureMoveBuilder == null) return false;
+
         double damage = CreatureMoveNew.calculateDamage(this);
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float) damage);
+        if (creatureMoveBuilder.getOnTargetHitEffect() != null && creatureMoveBuilder.getMakesContact()) {
+            creatureMoveBuilder.getOnTargetHitEffect().accept(this, entityIn);
+        }
         this.setLastAttackedEntity(entityIn);
+
         return flag;
+    }
+
+    //test if another entity is related to this creature
+    //such as if its tamed to its owner
+    public boolean isRelatedToEntity(Entity entity) {
+        if (entity instanceof MultiPartEntityPart hitboxPart) {
+            Entity hitboxParent = (Entity) hitboxPart.parent;
+            return this.isRelatedToEntity(hitboxParent);
+        }
+        else if (entity instanceof EntityTameable entityTameable) {
+            return entityTameable.isTamed() && entityTameable.getOwner() != null && entityTameable.getOwner().equals(this.getOwner());
+        }
+        else if (entity instanceof EntityPlayer entityPlayer) {
+            return this.isTamed() && this.getOwner() != null && this.getOwner().equals(entityPlayer);
+        }
+        return false;
     }
 
     //-----creature phase management-----
@@ -339,12 +376,11 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
     @Override
     public HashMap<String, Runnable> animationMessageEffects() {
         HashMap<String, Runnable> toReturn = new HashMap<>();
-        toReturn.put("applyMoveEffect", () -> {
+        toReturn.put("moveHitEffect", () -> {
             if (this.getCurrentMove().isEmpty()) return;
 
-            //temporarily is the attack target, will be changed so that it will become whatever was
-            //selected as target from whatever method
-            this.attackEntityAsMob(this.getAttackTarget());
+            CreatureMoveBuilder creatureMoveBuilder = CreatureMoveRegistry.getCreatureMove(this.getCurrentMove());
+            creatureMoveBuilder.getOnMoveHitEffect().accept(this);
         });
         toReturn.put("endMoveEffect", this::resetCurrentMove);
         return toReturn;

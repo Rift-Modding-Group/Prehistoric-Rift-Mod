@@ -165,7 +165,7 @@
 				}
 			},
 			"timeline": {
-				"0.25": "applyMoveEffect",
+				"0.25": "moveHitEffect",
 				"0.5": "endMoveEffect"
 			}
 		},
@@ -245,6 +245,10 @@
 						"1.0": [0, 0, 0]
 					}
 				}
+			},
+			"timeline": {
+				"0.625": "moveHitEffect",
+				"1": "endMoveEffect"
 			}
 		},
 		"animation.tyrannosaurus.use_stomp_type_move": {

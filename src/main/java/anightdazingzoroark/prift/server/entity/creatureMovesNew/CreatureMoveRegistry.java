@@ -1,29 +1,15 @@
 package anightdazingzoroark.prift.server.entity.creatureMovesNew;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureNew;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.math.AxisAlignedBB;
 
 import java.util.HashMap;
-import java.util.function.BiFunction;
+import java.util.List;
 
 public class CreatureMoveRegistry {
     private static final HashMap<String, CreatureMoveBuilder> moveBuilderMap = new HashMap<>();
-
-    //some common raisePriorityPredicate instances for use
-    private static final BiFunction<RiftCreatureNew, Entity, Integer> generalMeleePredicate = (creatureNew, possibleTarget) -> {
-        if (possibleTarget == null) return -1;
-        if (creatureNew.getDistance(possibleTarget) <= creatureNew.getCreatureType().getPhysicalReach())
-            return 3;
-        return -1;
-    };
-    private static final BiFunction<RiftCreatureNew, Entity, Integer> generalRangedPredicate = (creatureNew, possibleTarget) -> {
-        if (possibleTarget == null) return -1;
-        if (creatureNew.getDistance(possibleTarget) > creatureNew.getCreatureType().getPhysicalReach()
-                && creatureNew.getDistance(possibleTarget) <= 16) //that 16 is temporary, idk really what to do with it
-            return 2;
-        return -1;
-    };
 
     public static boolean moveExists(String name) {
         return moveBuilderMap.containsKey(name);
@@ -52,14 +38,45 @@ public class CreatureMoveRegistry {
                 .setMakesContact()
                 .setRequireFindTargetToUse()
                 .setPhysical()
-                .setCanUsePredicate(generalMeleePredicate)
+                .setCanUsePredicate(CreatureMoveNew.generalMeleePredicate)
+                .setOnMoveHitEffect(CreatureMoveNew.generalAttackEntityEffect)
+        );
+        registerMove(CreatureMoveNew.STOMP, new CreatureMoveBuilder()
+                .setBasePower(30)
+                .setRequireFindTargetToUse()
+                .setPhysical()
+                .setUseCanStopMovement()
+                .setCanUsePredicate(CreatureMoveNew.generalMeleePredicate)
+                .setOnMoveHitEffect(creature -> {
+                    AxisAlignedBB creatureAABB = creature.getEntityBoundingBox();
+                    AxisAlignedBB stompRangeAABB = new AxisAlignedBB(
+                            creatureAABB.minX - creature.getCreatureType().getPhysicalReach(),
+                            creatureAABB.minY,
+                            creatureAABB.minZ - creature.getCreatureType().getPhysicalReach(),
+                            creatureAABB.maxX + creature.getCreatureType().getPhysicalReach(),
+                            creatureAABB.minY + 1,
+                            creatureAABB.maxZ + creature.getCreatureType().getPhysicalReach()
+                    );
+
+                    List<Entity> entitiesInStompRange = creature.world.getEntitiesWithinAABB(
+                            Entity.class, stompRangeAABB
+                    );
+                    for (Entity entity : entitiesInStompRange) {
+                        if (!(entity instanceof EntityLivingBase entityLivingBase)) continue;
+                        if (creature.isRelatedToEntity(entityLivingBase)) continue;
+                        if (entity.equals(creature)) continue;
+                        creature.attackEntityAsMob(entityLivingBase);
+                    }
+                })
         );
         registerMove(CreatureMoveNew.THAGOMIZE, new CreatureMoveBuilder()
                 .setBasePower(60)
                 .setMakesContact()
                 .setRequireFindTargetToUse()
                 .setPhysical()
-                .setCanUsePredicate(generalMeleePredicate)
+                .setUseCanStopMovement()
+                .setCanUsePredicate(CreatureMoveNew.generalMeleePredicate)
+                .setOnMoveHitEffect(CreatureMoveNew.generalAttackEntityEffect)
         );
     }
 }

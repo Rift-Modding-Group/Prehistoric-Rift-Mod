@@ -10,6 +10,10 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.Path;
 
+/**
+ * This is for managing a creature being able to use moves as well as other offensive
+ * actions that are not moves.
+ * */
 public class RiftUnmountedUseMoveNew extends EntityAIBase {
     private final RiftCreatureNew creature;
     private boolean isPathing;
@@ -25,7 +29,6 @@ public class RiftUnmountedUseMoveNew extends EntityAIBase {
         //cannot execute if the creature is using a move
         if (!this.creature.getCurrentMove().isEmpty()) return false;
 
-        CreatureMoveStorage creatureMoves = this.creature.getCreatureMoves();
         EntityLivingBase attackTarget = this.creature.getAttackTarget();
 
         //-----path towards the target, if there is-----
@@ -38,10 +41,23 @@ public class RiftUnmountedUseMoveNew extends EntityAIBase {
         }
         if (attackTarget == null) {
             this.isPathing = false;
-            if (!this.creature.getNavigator().noPath()) this.creature.getNavigator().clearPath();
+            this.creature.getNavigator().clearPath();
+        }
+
+        //-----every 5-10 seconds the creature will sprint if the target is too far-----
+        if (this.creature.getCreatureType().getCanSprintToAttack() && this.creature.sprintToAttackCooldown <= 0 && attackTarget != null) {
+            double minChargeDist = this.creature.getCreatureType().getPhysicalReach() + this.creature.getCreatureType().getPhysicalReach() * 0.5D + this.creature.width;
+            double maxChargeDist = Math.max(16, minChargeDist);
+            double distFromTarget = this.creature.getDistance(attackTarget);
+
+            if (distFromTarget >= minChargeDist && distFromTarget <= maxChargeDist) {
+                this.creature.setSprinting(true);
+                return true;
+            }
         }
 
         //-----find and use move from current list-----
+        CreatureMoveStorage creatureMoves = this.creature.getCreatureMoves();
         FixedSizeList<String> currentUsableMoves = creatureMoves.getAllUsableMoves();
         WeightedListNew<String> weightedMoveList = new WeightedListNew<>();
         for (int index = 0; index < currentUsableMoves.size(); index++) {
@@ -76,8 +92,16 @@ public class RiftUnmountedUseMoveNew extends EntityAIBase {
     }
 
     @Override
+    public void startExecuting() {
+        CreatureMoveBuilder creatureMoveBuilder = CreatureMoveRegistry.getCreatureMove(this.creature.getCurrentMove());
+        if (creatureMoveBuilder.getUseCanStopMovement()) {
+            this.creature.getNavigator().clearPath();
+            this.isPathing = false;
+        }
+    }
+
+    @Override
     public void resetTask() {
-        this.creature.setAttackTarget(null);
         this.creature.getNavigator().clearPath();
         this.isPathing = false;
     }

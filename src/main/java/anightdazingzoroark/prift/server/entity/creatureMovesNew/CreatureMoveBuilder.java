@@ -7,12 +7,14 @@ import net.minecraft.util.math.BlockPos;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 public class CreatureMoveBuilder {
     //all the following variables are required and must not be null, validated in isValid()
     private String moveName;
     private CreatureMoveEnums.MoveType moveType;
     private BiFunction<RiftCreatureNew, Entity, Integer> canUsePredicate;
+    private Consumer<RiftCreatureNew> onMoveHitEffect;
 
     //the following can be left alone
     private int movePower;
@@ -23,6 +25,7 @@ public class CreatureMoveBuilder {
     private int elementEffectStrength;
     private BiConsumer<RiftCreatureNew, Entity> onTargetHitEffect;
     private BiConsumer<RiftCreatureNew, BlockPos> onBlockHitEffect;
+    private boolean useCanStopMovement;
 
     /**
      * Set the name of the move, is required
@@ -140,6 +143,18 @@ public class CreatureMoveBuilder {
     }
 
     /**
+     * Set what will happen when the move's animation reaches the "hit" phase
+     * */
+    public CreatureMoveBuilder setOnMoveHitEffect(Consumer<RiftCreatureNew> onMoveHitEffect) {
+        this.onMoveHitEffect = onMoveHitEffect;
+        return this;
+    }
+
+    public Consumer<RiftCreatureNew> getOnMoveHitEffect() {
+        return this.onMoveHitEffect;
+    }
+
+    /**
      * Set any additional effects that will happen when attacking an entity
      * */
     public CreatureMoveBuilder setOnHitTargetEffect(BiConsumer<RiftCreatureNew, Entity> onTargetHitEffect) {
@@ -152,9 +167,21 @@ public class CreatureMoveBuilder {
     }
 
     /**
+     * Make it so that when the move is being used, the user cannot move
+     * */
+    public CreatureMoveBuilder setUseCanStopMovement() {
+        this.useCanStopMovement = true;
+        return this;
+    }
+
+    public boolean getUseCanStopMovement() {
+        return this.useCanStopMovement;
+    }
+
+    /**
      * Get validity based on if some params are not null
      * */
     public boolean isValid() {
-        return this.moveType != null && this.canUsePredicate != null;
+        return this.moveType != null && this.canUsePredicate != null && this.onMoveHitEffect != null;
     }
 }

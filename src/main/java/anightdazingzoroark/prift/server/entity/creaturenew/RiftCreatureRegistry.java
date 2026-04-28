@@ -43,10 +43,12 @@ public class RiftCreatureRegistry {
                         .setHostileToHumans()
                         .setRetaliateWhenAttacked()
                         .setPhysicalReach(5)
+                        //.setCanSprintToAttack()
                         .setLearnableMoves(
-                                new CreatureMoveStorage.LearnableMoveHolder(CreatureMoveNew.BITE, "bite")
+                                new CreatureMoveStorage.LearnableMoveHolder(CreatureMoveNew.BITE, "bite"),
+                                new CreatureMoveStorage.LearnableMoveHolder(CreatureMoveNew.STOMP, "stomp")
                         )
-                        .setInitMainUsableMoves(CreatureMoveNew.BITE)
+                        .setInitMainUsableMoves(CreatureMoveNew.BITE, CreatureMoveNew.STOMP)
         );
         registerCreatureType(
                 "stegosaurus",
@@ -61,6 +63,7 @@ public class RiftCreatureRegistry {
                         .setIsHerder()
                         .setRetaliateWhenAttacked(true)
                         .setPhysicalReach(5)
+                        //.setCanSprintToAttack()
                         .setLearnableMoves(
                                 new CreatureMoveStorage.LearnableMoveHolder(CreatureMoveNew.THAGOMIZE, "tail_attack")
                         )
