@@ -41,6 +41,8 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
      * The builder that is used to define the creature is treated as a phase called ""
      * */
     public RiftCreatureBuilder addPhase(String phaseName, CreaturePhaseBuilder phaseBuilder) {
+        if (this.locked) return this.getThis();
+
         if (this.creaturePhaseBuilderMap == null) {
             this.creaturePhaseBuilderMap = new HashMap<>();
         }
@@ -60,6 +62,8 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
      * Define the moves that the creature can learn
      * */
     public RiftCreatureBuilder setLearnableMoves(CreatureMoveStorage.LearnableMoveHolder... learnableMoves) {
+        if (this.locked) return this.getThis();
+
         this.learnableMoves = learnableMoves;
         return this;
     }
@@ -72,6 +76,8 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
      * Initialize initMovesPerPhase and set the usable move lists for the main phase
      * */
     public RiftCreatureBuilder setInitMainUsableMoves(String... mainMoves) {
+        if (this.locked) return this.getThis();
+
         this.initMovesPerPhase = new HashMap<>();
         this.initMovesPerPhase.put("", Arrays.asList(mainMoves));
         return this;
@@ -81,6 +87,8 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
      * Set usable move lists for each creature phase
      * */
     public RiftCreatureBuilder setUsableMovesForPhase(String phase, String... phaseMoves) {
+        if (this.locked) return this.getThis();
+
         if (this.initMovesPerPhase == null || phase.isEmpty()) return this;
         this.initMovesPerPhase.put(phase, Arrays.asList(phaseMoves));
         return this;

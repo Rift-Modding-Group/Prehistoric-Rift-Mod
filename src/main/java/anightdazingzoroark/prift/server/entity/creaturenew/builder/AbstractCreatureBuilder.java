@@ -55,16 +55,14 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
         this.locked = true;
     }
 
-    protected boolean isLocked() {
-        return this.locked;
-    }
-
     /**
      * Set the stats of the creature.
      * Stats are to be on a scale of 0.5-10 with steps of 0.5
      * and will be represented as stars on most UIs
      * */
     public T setStats(double health, double meleeAttack, double elementalAttack, double stamina, double speed) {
+        if (this.locked) return this.getThis();
+
         this.stats = Map.of(
                 RiftCreatureEnums.Stats.HEALTH, health,
                 RiftCreatureEnums.Stats.MELEE_DAMAGE, meleeAttack,
@@ -83,6 +81,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Set category of the species
      * */
     public T setCreatureCategory(RiftCreatureEnums.CreatureCategory creatureCategory) {
+        if (this.locked) return this.getThis();
+
         this.creatureCategory = creatureCategory;
         return this.getThis();
     }
@@ -95,6 +95,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Set diet of the species
      * */
     public T setCreatureDiet(RiftCreatureEnums.CreatureDiet creatureDiet) {
+        if (this.locked) return this.getThis();
+
         this.creatureDiet = creatureDiet;
         return this.getThis();
     }
@@ -107,6 +109,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Set the colors of the spawn egg for the creature
      * */
     public T setSpawnEggColors(int background, int foreground) {
+        if (this.locked) return this.getThis();
+
         this.spawnEggColors = new int[]{background, foreground};
         return this.getThis();
     }
@@ -120,6 +124,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * So babies will be smol, adults will be big
      * */
     public T setScaleRangeForAge(float min, float max) {
+        if (this.locked) return this.getThis();
+
         this.scaleRangeForAge = new float[]{min, max};
         return this.getThis();
     }
@@ -132,6 +138,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Set main hitbox size, which for now manage collisions with entity
      * */
     public T setMainHitboxSize(float width, float height) {
+        if (this.locked) return this.getThis();
+
         this.mainHitboxSize = new float[]{width, height};
         return this.getThis();
     }
@@ -144,6 +152,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Make creature attack humans. Humans include players, villagers, pillagers, and witches
      * */
     public T setHostileToHumans() {
+        if (this.locked) return this.getThis();
+
         this.hostileToHumans = true;
         return this.getThis();
     }
@@ -156,6 +166,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Make creature fight back if attacked
      * */
     public T setRetaliateWhenAttacked() {
+        if (this.locked) return this.getThis();
+
         return this.setRetaliateWhenAttacked(false);
     }
 
@@ -164,6 +176,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * the herdmates will help it
      * */
     public T setRetaliateWhenAttacked(boolean broadcastRetaliation) {
+        if (this.locked) return this.getThis();
+
         this.retaliateWhenAttacked = true;
         this.broadcastRetaliation = broadcastRetaliation;
         return this.getThis();
@@ -177,6 +191,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Make creature nocturnal
      * */
     public T setIsNocturnal() {
+        if (this.locked) return this.getThis();
+
         this.isNocturnal = true;
         return this.getThis();
     }
@@ -189,6 +205,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Make it so the creature can be knocked back
      * */
     public T setCanBeKnockedBack() {
+        if (this.locked) return this.getThis();
+
         this.canBeKnockedBack = true;
         return this.getThis();
     }
@@ -201,6 +219,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Make creature flop on land, effectively making them waterbound
      * */
     public T setFlopOnLand() {
+        if (this.locked) return this.getThis();
+
         this.flopOnLand = true;
         return this.getThis();
     }
@@ -213,6 +233,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Set which blocks a creature can breathe in. If left alone, just air is considered
      * */
     public T setBreathableBlocks(String... breathableBlocks) {
+        if (this.locked) return this.getThis();
+
         this.breathableBlocks = breathableBlocks;
         return this.getThis();
     }
@@ -226,6 +248,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * must have some kind of land movement no matter what
      * */
     public T setMovementOptions(RiftCreatureEnums.Movement... options) {
+        if (this.locked) return this.getThis();
+
         this.movementOptions = options;
         return this.getThis();
     }
@@ -239,6 +263,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Creatures that swim ignore this
      * */
     public T setCannotFloatOnWater() {
+        if (this.locked) return this.getThis();
+
         this.cannotFloatOnWater = false;
         return this.getThis();
     }
@@ -251,6 +277,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Allows creature to perform herding
      * */
     public T setIsHerder() {
+        if (this.locked) return this.getThis();
+
         this.isHerder = true;
         return this.getThis();
     }
@@ -263,6 +291,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Set the creature's inventory size
      * */
     public T setInventorySize(int value) {
+        if (this.locked) return this.getThis();
+
         this.inventorySize = value;
         return this.getThis();
     }
@@ -275,6 +305,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Set how long the creature spends as a baby
      * */
     public T setDaysUntilAdult(int value) {
+        if (this.locked) return this.getThis();
+
         this.daysUntilAdult = value;
         return this.getThis();
     }
@@ -287,6 +319,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Get the distance in blocks from which this creature can use its contact moves
      * */
     public T setPhysicalReach(int value) {
+        if (this.locked) return this.getThis();
+
         this.physicalReach = value;
         return this.getThis();
     }
@@ -301,6 +335,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * it can spring to attack when commanded to (by simply sprinting lol)
      * */
     public T setCanSprintToAttack() {
+        if (this.locked) return this.getThis();
+
         this.canSprintToAttack = true;
         return this.getThis();
     }

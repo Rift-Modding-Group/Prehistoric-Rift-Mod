@@ -80,7 +80,6 @@ public class RiftCreatureSpawnEggItem extends Item {
 
         if (!world.isRemote) {
             RiftCreatureNew creature = this.createCreature(world, builder);
-            if (creature == null) return EnumActionResult.FAIL;
 
             creature.setLocationAndAngles(spawnPos.getX() + 0.5D, spawnPos.getY(), spawnPos.getZ() + 0.5D, world.rand.nextFloat() * 360f, 0f);
             creature.onInitialSpawn(world.getDifficultyForLocation(new BlockPos(creature)), null);
@@ -98,7 +97,7 @@ public class RiftCreatureSpawnEggItem extends Item {
             return builder.getCreatureClass().getConstructor(World.class).newInstance(world);
         }
         catch (Exception e) {
-            return null;
+            throw new RuntimeException(e);
         }
     }
 }

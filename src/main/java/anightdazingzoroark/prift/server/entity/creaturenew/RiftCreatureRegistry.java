@@ -22,12 +22,11 @@ public class RiftCreatureRegistry {
             return;
         }
         if (!builder.isValid()) {
-            System.out.println("o no!");
             RiftInitialize.logger.warn("Builder for creature type {} is invalid!", name);
             return;
         }
-        System.out.println("registering "+name);
         builder.setName(name);
+        builder.lock();
         creatureBuilderMap.put(name, builder);
     }
 
