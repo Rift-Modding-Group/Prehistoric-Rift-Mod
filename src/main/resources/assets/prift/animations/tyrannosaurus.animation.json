@@ -165,8 +165,7 @@
 				}
 			},
 			"timeline": {
-				"0.25": "moveHitEffect",
-				"0.5": "endMoveEffect"
+				"0.25": "'moveHitEffect'"
 			}
 		},
 		"animation.tyrannosaurus.incapacitated": {
@@ -247,8 +246,7 @@
 				}
 			},
 			"timeline": {
-				"0.625": "moveHitEffect",
-				"1": "endMoveEffect"
+				"0.625": "'moveHitEffect'"
 			}
 		},
 		"animation.tyrannosaurus.use_stomp_type_move": {

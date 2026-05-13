@@ -19,7 +19,6 @@ import net.minecraft.world.storage.loot.LootTableList;
 import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
-import anightdazingzoroark.riftlib.core.event.AnimationEvent;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -114,37 +113,6 @@ public class Dilophosaurus extends RiftCreature {
     @Nullable
     protected ResourceLocation getLootTable() {
         return LOOT;
-    }
-
-    @Override
-    public void registerControllers(AnimationDataEntity data) {
-        super.registerControllers(data);
-        data.addAnimationController(new AnimationController<>(this, "frillSetup", 0, new AnimationController.IAnimationPredicate() {
-            @Override
-            public PlayState test(AnimationEvent event) {
-                if ((currentCreatureMove() == null || (currentCreatureMove() != null && currentCreatureMove().moveAnimType != CreatureMove.MoveAnimType.RANGED)) && !isWarning()) {
-                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".frill_setup", LoopType.LOOP));
-                    return PlayState.CONTINUE;
-                }
-                else {
-                    event.getController().clearAnimationCache();
-                    return PlayState.STOP;
-                }
-            }
-        }));
-        data.addAnimationController(new AnimationController<>(this, "sacSetup", 0, new AnimationController.IAnimationPredicate() {
-            @Override
-            public PlayState test(AnimationEvent event) {
-                if ((currentCreatureMove() == null || (currentCreatureMove() != null && currentCreatureMove().moveAnimType != CreatureMove.MoveAnimType.RANGED)) && !isWarning()) {
-                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+creatureType.toString().toLowerCase()+".sac_setup", LoopType.LOOP));
-                    return PlayState.CONTINUE;
-                }
-                else {
-                    event.getController().clearAnimationCache();
-                    return PlayState.STOP;
-                }
-            }
-        }));
     }
 
     protected SoundEvent getAmbientSound() {

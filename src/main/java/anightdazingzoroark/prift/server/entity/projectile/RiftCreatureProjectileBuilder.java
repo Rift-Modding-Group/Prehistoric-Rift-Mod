@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataProjectile;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.SoundEvent;
 
@@ -20,7 +21,7 @@ public class RiftCreatureProjectileBuilder {
     //for projectile animation
     //for now, its always assumed that projectiles always have 1 animation that always loops
     private boolean hasAnimation;
-    private Function<RiftCreatureProjectileEntity, AnimationController> animationController;
+    private Function<RiftCreatureProjectileEntity, AnimationController<?, AnimationDataProjectile>> animationController;
 
     //for if the user has variants so that the texture changes based on the launchers variant
     private boolean hasVariants;
@@ -71,7 +72,7 @@ public class RiftCreatureProjectileBuilder {
         return this.impactSoundEvent;
     }
 
-    public RiftCreatureProjectileBuilder setAnimation(Function<RiftCreatureProjectileEntity, AnimationController> animationController) {
+    public RiftCreatureProjectileBuilder setAnimation(Function<RiftCreatureProjectileEntity, AnimationController<?, AnimationDataProjectile>> animationController) {
         this.hasAnimation = true;
         this.animationController = animationController;
         return this;
@@ -81,7 +82,7 @@ public class RiftCreatureProjectileBuilder {
         return this.hasAnimation;
     }
 
-    public Function<RiftCreatureProjectileEntity, AnimationController> getAnimationController() {
+    public Function<RiftCreatureProjectileEntity, AnimationController<?, AnimationDataProjectile>> getAnimationController() {
         return this.animationController;
     }
 

@@ -1,12 +1,9 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.riftlib.core.PlayState;
-import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
-import anightdazingzoroark.riftlib.core.builder.LoopType;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
-import anightdazingzoroark.riftlib.core.event.AnimationEvent;
-import net.minecraft.entity.Entity;
+import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataProjectile;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.potion.PotionEffect;
@@ -59,14 +56,10 @@ public class RiftCreatureProjectile {
                         projectile.world.createExplosion(projectile, projectile.posX, projectile.posY, projectile.posZ, 2f, false);
                         projectile.setDead();
                     })
-                    .setAnimation((projectile) -> {
-                        return new AnimationController(projectile, "default", 0, new AnimationController.IAnimationPredicate() {
-                            @Override
-                            public PlayState test(AnimationEvent event) {
-                                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.venom_bomb.default", LoopType.LOOP));
-                                return PlayState.CONTINUE;
-                            }
-                        });
+                    .setAnimation((projectile) -> { //"animation.venom_bomb.default"
+                        return new AnimationController<RiftCreatureProjectileEntity, AnimationDataProjectile>(projectile, "projectile", "default",
+                                new AnimationControllerState<AnimationDataProjectile>("default").addAnimation("animation.venom_bomb.default")
+                        );
                     }),
             new RiftCreatureProjectileBuilder(MUDBALL)
                     .setHasFlatModel()

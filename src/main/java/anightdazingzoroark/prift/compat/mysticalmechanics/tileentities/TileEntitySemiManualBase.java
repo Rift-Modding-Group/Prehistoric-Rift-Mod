@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.St
 import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityContainer;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
+import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataTileEntity;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -20,7 +21,6 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.common.capabilities.Capability;
@@ -29,9 +29,9 @@ import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
-import anightdazingzoroark.riftlib.core.event.AnimationEvent;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public abstract class TileEntitySemiManualBase extends RiftTileEntityContainer implements IAnimatable<AnimationDataTileEntity>, ITickable, ISidedInventory {
     private final AnimationDataTileEntity animationData = new AnimationDataTileEntity(this);
@@ -123,18 +123,13 @@ public abstract class TileEntitySemiManualBase extends RiftTileEntityContainer i
     }
 
     @Override
-    public void registerControllers(AnimationDataTileEntity animationData) {
-        animationData.addAnimationController(new AnimationController<>(
-                this, "reset", 0,
-                event -> {
-                    if (canDoResetAnim()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.semi_manual_extractor.release", LoopType.PLAY_ONCE));
-                        return PlayState.CONTINUE;
-                    }
-                    event.getController().clearAnimationCache();
-                    return PlayState.STOP;
-                }
-        ));
+    public List<AnimationController<?, AnimationDataTileEntity>> createAnimationControllers() {
+        return List.of(
+                new AnimationController<TileEntitySemiManualBase, AnimationDataTileEntity>(this, "reset", "default",
+                        new AnimationControllerState<AnimationDataTileEntity>("default")
+                                .addAnimation("animation.semi_manual_extractor.release", animData -> this.canDoResetAnim())
+                )
+        );
     }
 
     @Override

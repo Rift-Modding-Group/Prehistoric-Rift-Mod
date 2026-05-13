@@ -8,6 +8,9 @@ import java.util.Map;
 
 //this class defines creature information
 public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<T>> {
+    //extremely important
+    protected boolean locked;
+
     //all the following variables are required and must not be null, validated in isValid()
     private final Class<? extends RiftCreatureNew> creatureClass;
     private Map<RiftCreatureEnums.Stats, Double> stats;
@@ -43,6 +46,17 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     public Class<? extends RiftCreatureNew> getCreatureClass() {
         return this.creatureClass;
+    }
+
+    /**
+     * This locks this object so that when accessing any instances of this, it can never be modified ever
+     * */
+    public void lock() {
+        this.locked = true;
+    }
+
+    protected boolean isLocked() {
+        return this.locked;
     }
 
     /**

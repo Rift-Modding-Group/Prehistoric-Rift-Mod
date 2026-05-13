@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creaturenew;
 
+import anightdazingzoroark.prift.helper.FixedSizeList;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelper;
@@ -11,11 +12,15 @@ import anightdazingzoroark.prift.server.entity.creatureMovesNew.*;
 import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureEnums;
 import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
+import anightdazingzoroark.riftlib.core.AnimatableRunValue;
+import anightdazingzoroark.riftlib.core.AnimatableValue;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
+import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
+import anightdazingzoroark.riftlib.core.manager.AbstractAnimationDataEntity;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import anightdazingzoroark.riftlib.hitbox.EntityHitbox;
 import net.minecraft.entity.*;
@@ -34,15 +39,20 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public abstract class RiftCreatureNew extends EntityTameable implements IAnimatable<AnimationDataEntity>, /* IMultiHitboxUser, IDynamicRideUser,*/ IRiftCreature {
     private final RiftCreatureBuilder creatureType;
     private final RiftInventoryHandler creatureInventory;
-    private final AnimationDataEntity factory = new AnimationDataEntity(this);
+    private final AnimationDataEntity factory;
 
     public static final IAttribute ELEMENTAL_DAMAGE_ATTRIBUTE = new RangedAttribute(null, "rift.elementalDamage", 2.0, 0.0, 2048.0);
     public static final IAttribute STAMINA_ATTRIBUTE = new RangedAttribute(null, "rift.stamina", 2.0, 0.0, 2048.0);
@@ -62,6 +72,7 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
     public RiftCreatureNew(World worldIn, String creatureName) {
         super(worldIn);
         this.creatureType = RiftCreatureRegistry.getCreatureBuilder(creatureName);
+        this.factory = new AnimationDataEntity(this);
         this.moveHelper = new RiftCreatureMoveHelperNew(this);
         this.setSize(this.creatureType.getMainHitboxSize()[0], this.creatureType.getMainHitboxSize()[1]);
         this.creatureInventory = new RiftInventoryHandler(this.creatureType.getInventorySize());
@@ -398,58 +409,67 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
 
     //-----animation related methods-----
     @Override
-    public void registerControllers(AnimationDataEntity animationData) {
-        animationData.addAnimationController(new AnimationController<>(
-                this, "movement", 0,
-                event -> {
-                    if (animationData.isMoving()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+this.creatureType.getName()+".walk", LoopType.LOOP));
-                        return PlayState.CONTINUE;
-                    }
-                    event.getController().clearAnimationCache();
-                    return PlayState.STOP;
-                }
-        ));
-        animationData.addAnimationController(new AnimationController<>(
-                this, "sprintState", 20,
-                event -> {
-                    if (animationData.getHolder().isSprinting()) {
-                        //todo: add animation pose for sprinting
-                        return PlayState.CONTINUE;
-                    }
-                    return PlayState.STOP;
-                }
-        ));
-        animationData.addAnimationController(new AnimationController<>(
-                this, "moveUse", 0,
-                event -> {
-                    if (!this.getCurrentMove().isEmpty()) {
-                        String animName = this.getCreatureMoves().getAnimationNameForMove(this.getCurrentMove());
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation."+this.creatureType.getName()+"."+animName, LoopType.PLAY_ONCE));
-                        return PlayState.CONTINUE;
-                    }
-                    event.getController().clearAnimationCache();
-                    return PlayState.STOP;
-                }
-        ));
-    }
-
-    @Override
     public AnimationDataEntity getAnimationData() {
         return this.factory;
     }
 
     @Override
-    public HashMap<String, Runnable> animationMessageEffects() {
-        HashMap<String, Runnable> toReturn = new HashMap<>();
-        toReturn.put("moveHitEffect", () -> {
-            if (this.getCurrentMove().isEmpty()) return;
+    public List<AnimationController<?, AnimationDataEntity>> createAnimationControllers() {
+        //this is for creating all the animations for moves to add to the animation controller that
+        //creates animations for moves
+        CreatureMoveStorage.LearnableMoveHolder[] creatureMoves = this.creatureType.getLearnableMoves();
+        List<AnimationControllerState<AnimationDataEntity>> creatureMovesStates = new ArrayList<>();
 
-            CreatureMoveBuilder creatureMoveBuilder = CreatureMoveRegistry.getCreatureMove(this.getCurrentMove());
-            creatureMoveBuilder.getOnMoveHitEffect().accept(this);
-        });
-        toReturn.put("endMoveEffect", this::resetCurrentMove);
-        return toReturn;
+        //add the initial state
+        AnimationControllerState<AnimationDataEntity> initialState = new AnimationControllerState<>("default");
+        creatureMovesStates.add(initialState);
+
+        //add other states
+        for (CreatureMoveStorage.LearnableMoveHolder learnableMove : creatureMoves) {
+            if (learnableMove == null) continue;
+
+            String moveAnimName = learnableMove.moveAnimationName();
+            String moveName = learnableMove.moveName();
+            String animName = "animation." + this.creatureType.getName() + "." + moveAnimName;
+            Function<AnimationDataEntity, Boolean> predicate = animData -> this.getCurrentMove().equals(moveName);
+
+            //add transition to the state when using move from the initial state
+            initialState.addStateTransition(moveName, predicate);
+
+            //add the state for the move
+            creatureMovesStates.add(new AnimationControllerState<AnimationDataEntity>(moveName)
+                    .addAnimation(animName)
+                    .addStateTransition("default", animData -> animData.allAnimationsFinished("moveUse"))
+                    .addExitEffect(new AnimatableValue("'endMoveEffect'"))
+            );
+        }
+
+        //final return value
+        return List.of(
+            new AnimationController<RiftCreatureNew, AnimationDataEntity>(this, "movement", "default",
+                new AnimationControllerState<AnimationDataEntity>("default")
+                        .addStateTransition("moving", AbstractAnimationDataEntity::isMoving),
+                new AnimationControllerState<AnimationDataEntity>("moving", 0.1)
+                        .addAnimation("animation."+this.creatureType.getName()+".walk")
+                        .addStateTransition("default", animData -> !animData.isMoving())
+            ),
+            new AnimationController<RiftCreatureNew, AnimationDataEntity>(this, "moveUse", "default",
+                    creatureMovesStates.toArray(new AnimationControllerState[0])
+            )
+        );
+    }
+
+    @Override
+    public Map<String, AnimatableRunValue> createAnimationMessageEffects() {
+        return Map.of(
+                "moveHitEffect", new AnimatableRunValue(() -> {
+                    if (this.getCurrentMove().isEmpty()) return;
+
+                    CreatureMoveBuilder creatureMoveBuilder = CreatureMoveRegistry.getCreatureMove(this.getCurrentMove());
+                    creatureMoveBuilder.getOnMoveHitEffect().accept(this);
+                }, Side.SERVER, Side.CLIENT),
+                "endMoveEffect", new AnimatableRunValue(this::resetCurrentMove, Side.CLIENT, Side.SERVER)
+        );
     }
 
     //-----dynamic ride position methods-----

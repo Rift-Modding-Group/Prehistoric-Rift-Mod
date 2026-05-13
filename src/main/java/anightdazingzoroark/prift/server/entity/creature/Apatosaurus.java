@@ -329,18 +329,6 @@ public class Apatosaurus extends RiftCreature implements IWorkstationUser {
         return LOOT;
     }
 
-    @Override
-    public void registerControllers(AnimationDataEntity data) {
-        super.registerControllers(data);
-        data.addAnimationController(new AnimationController<>(
-                this, "weaponResize", 0,
-                event -> {
-                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.apatosaurus.weapon_size_change", LoopType.LOOP));
-                    return PlayState.CONTINUE;
-                }
-        ));
-    }
-
     protected SoundEvent getAmbientSound() {
         return RiftSounds.APATOSAURUS_IDLE;
     }

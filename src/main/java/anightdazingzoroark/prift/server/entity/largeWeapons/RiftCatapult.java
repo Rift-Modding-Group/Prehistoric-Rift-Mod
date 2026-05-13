@@ -4,13 +4,16 @@ import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCatapultBoulder;
+import anightdazingzoroark.prift.server.entity.projectile.ThrownBola;
 import anightdazingzoroark.prift.server.items.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftIncrementControlUse;
 import anightdazingzoroark.prift.server.message.RiftLaunchLWeaponProjectile;
 import anightdazingzoroark.prift.server.message.RiftManageUtilizingControl;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
+import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataProjectile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.EntityAgeable;
@@ -23,13 +26,10 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import anightdazingzoroark.riftlib.core.IAnimatable;
-import anightdazingzoroark.riftlib.core.PlayState;
-import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
-import anightdazingzoroark.riftlib.core.event.AnimationEvent;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class RiftCatapult extends RiftLargeWeapon {
     private static final DataParameter<Boolean> LAUNCHING = EntityDataManager.createKey(RiftCatapult.class, DataSerializers.BOOLEAN);
@@ -161,29 +161,14 @@ public class RiftCatapult extends RiftLargeWeapon {
     }
 
     @Override
-    public void registerControllers(AnimationDataEntity data) {
-        data.addAnimationController(new AnimationController<>(
-                this, "charge", 0,
-                event -> {
-                    if (this.isCharging()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.catapult.charging", LoopType.LOOP));
-                        return PlayState.CONTINUE;
-                    }
-                    event.getController().clearAnimationCache();
-                    return PlayState.STOP;
-                }
-        ));
-        data.addAnimationController(new AnimationController<>(
-                this, "launch", 0,
-                event -> {
-                    if (this.isLaunching()) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.catapult.launching", LoopType.PLAY_ONCE));
-                        return PlayState.CONTINUE;
-                    }
-                    event.getController().clearAnimationCache();
-                    return PlayState.STOP;
-                }
-        ));
+    public List<AnimationController<?, AnimationDataEntity>> createAnimationControllers() {
+        return List.of(
+                new AnimationController<RiftCatapult, AnimationDataEntity>(this, "operation", "default",
+                        new AnimationControllerState<AnimationDataEntity>("default")
+                                .addAnimation("animation.catapult.charging", animData -> this.isCharging())
+                                .addAnimation("animation.catapult.launching", animData -> this.isLaunching())
+                )
+        );
     }
 
     @Nullable

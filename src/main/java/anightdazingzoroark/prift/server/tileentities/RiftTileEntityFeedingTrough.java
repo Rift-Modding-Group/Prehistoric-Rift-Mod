@@ -1,9 +1,9 @@
 package anightdazingzoroark.prift.server.tileentities;
 
-import anightdazingzoroark.prift.client.ui.UIPanelNames;
 import anightdazingzoroark.prift.server.blocks.RiftFeedingTroughBlock;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
+import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataTileEntity;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.api.drawable.IKey;
@@ -97,7 +97,9 @@ public class RiftTileEntityFeedingTrough extends RiftTileEntityContainer impleme
     }
 
     @Override
-    public void registerControllers(AnimationDataTileEntity animationData) {}
+    public List<AnimationController<?, AnimationDataTileEntity>> createAnimationControllers() {
+        return List.of();
+    }
 
     @Override
     public AnimationDataTileEntity getAnimationData() {

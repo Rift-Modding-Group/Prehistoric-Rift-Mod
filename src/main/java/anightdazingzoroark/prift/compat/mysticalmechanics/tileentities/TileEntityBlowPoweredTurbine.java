@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.compat.mysticalmechanics.tileentities;
 
 import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockBlowPoweredTurbine;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
+import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataTileEntity;
 import mysticalmechanics.api.DefaultMechCapability;
 import mysticalmechanics.api.IMechCapability;
@@ -22,6 +23,7 @@ import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class TileEntityBlowPoweredTurbine extends TileEntity implements IAnimatable<AnimationDataTileEntity>, ITickable {
     private final AnimationDataTileEntity animationData = new AnimationDataTileEntity(this);
@@ -184,14 +186,13 @@ public class TileEntityBlowPoweredTurbine extends TileEntity implements IAnimata
     }
 
     @Override
-    public void registerControllers(AnimationDataTileEntity data) {
-        data.addAnimationController(new AnimationController<>(
-                this, "rotation", 0,
-                event -> {
-                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.blow_powered_turbine.rotate", LoopType.LOOP));
-                    return PlayState.CONTINUE;
-                }
-        ));
+    public List<AnimationController<?, AnimationDataTileEntity>> createAnimationControllers() {
+        return List.of(
+                new AnimationController<TileEntityBlowPoweredTurbine, AnimationDataTileEntity>(this, "rotation", "default",
+                        new AnimationControllerState<AnimationDataTileEntity>("default")
+                                .addAnimation("animation.blow_powered_turbine.rotate")
+                )
+        );
     }
 
     @Override

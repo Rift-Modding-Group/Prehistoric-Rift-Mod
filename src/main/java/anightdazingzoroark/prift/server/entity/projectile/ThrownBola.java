@@ -1,13 +1,15 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
+import anightdazingzoroark.prift.compat.mysticalmechanics.tileentities.TileEntitySemiManualBase;
 import anightdazingzoroark.prift.server.capabilities.nonPotionEffects.NonPotionEffectsHelper;
 import anightdazingzoroark.prift.server.enums.MobSize;
 import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
-import anightdazingzoroark.riftlib.core.event.AnimationEvent;
+import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataProjectile;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataTileEntity;
 import anightdazingzoroark.riftlib.projectile.RiftLibProjectile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -16,7 +18,9 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
-public class ThrownBola extends RiftLibProjectile {
+import java.util.List;
+
+public class ThrownBola extends RiftLibProjectile<ThrownBola> {
     public ThrownBola(World worldIn) {
         super(worldIn);
     }
@@ -61,13 +65,12 @@ public class ThrownBola extends RiftLibProjectile {
     }
 
     @Override
-    public void registerControllers(AnimationDataProjectile data) {
-        data.addAnimationController(new AnimationController<>(this, "rotation", 0, new AnimationController.IAnimationPredicate() {
-            @Override
-            public PlayState test(AnimationEvent event) {
-                event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bola.spinning", LoopType.LOOP));
-                return PlayState.CONTINUE;
-            }
-        }));
+    public List<AnimationController<?, AnimationDataProjectile>> createAnimationControllers() {
+        return List.of(
+                new AnimationController<ThrownBola, AnimationDataProjectile>(this, "rotation", "default",
+                        new AnimationControllerState<AnimationDataProjectile>("default")
+                                .addAnimation("animation.bola.spinning")
+                )
+        );
     }
 }

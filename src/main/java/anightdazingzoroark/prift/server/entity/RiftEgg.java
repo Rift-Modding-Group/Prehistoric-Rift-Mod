@@ -17,7 +17,9 @@ import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreat
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
+import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataProjectile;
 import com.charles445.simpledifficulty.api.config.JsonConfig;
 import com.charles445.simpledifficulty.api.config.json.JsonTemperature;
 import com.charles445.simpledifficulty.api.temperature.TemperatureEnum;
@@ -460,7 +462,9 @@ public class RiftEgg extends EntityTameable implements IAnimatable<AnimationData
     }
 
     @Override
-    public void registerControllers(AnimationDataEntity data) {}
+    public List<AnimationController<?, AnimationDataEntity>> createAnimationControllers() {
+        return List.of();
+    }
 
     @Override
     public AnimationDataEntity getAnimationData() {

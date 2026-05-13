@@ -5,6 +5,8 @@ import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.Do
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntity;
 import anightdazingzoroark.riftlib.core.AnimatableValue;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
+import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataTileEntity;
 import mysticalmechanics.api.DefaultMechCapability;
 import mysticalmechanics.api.IMechCapability;
@@ -19,10 +21,7 @@ import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.PlayState;
 import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
-import anightdazingzoroark.riftlib.core.event.AnimationEvent;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class TileEntityHandCrank extends RiftTileEntity implements IAnimatable<AnimationDataTileEntity>, ITickable {
@@ -163,14 +162,13 @@ public class TileEntityHandCrank extends RiftTileEntity implements IAnimatable<A
     }
 
     @Override
-    public void registerControllers(AnimationDataTileEntity data) {
-        data.addAnimationController(new AnimationController<>(
-                this, "rotation", 0,
-                event -> {
-                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.hand_crank.rotation", LoopType.LOOP));
-                    return PlayState.CONTINUE;
-                }
-        ));
+    public List<AnimationController<?, AnimationDataTileEntity>> createAnimationControllers() {
+        return List.of(
+                new AnimationController<TileEntityHandCrank, AnimationDataTileEntity>(this, "rotation", "default",
+                        new AnimationControllerState<AnimationDataTileEntity>("default")
+                                .addAnimation("animation.hand_crank.rotation")
+                )
+        );
     }
 
     @Override

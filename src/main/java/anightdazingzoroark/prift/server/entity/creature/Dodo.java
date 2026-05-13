@@ -91,25 +91,6 @@ public class Dodo extends RiftCreature {
         return LOOT;
     }
 
-    @Override
-    public void registerControllers(AnimationDataEntity data) {
-        data.addAnimationController(new AnimationController<>(
-                this, "movement", 0,
-                event -> {
-                    if (data.isMoving() && this.onGround) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.dodo.walk", LoopType.LOOP));
-                        return PlayState.CONTINUE;
-                    }
-                    else if (!this.onGround) {
-                        event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.dodo.fall", LoopType.LOOP));
-                        return PlayState.CONTINUE;
-                    }
-                    event.getController().clearAnimationCache();
-                    return PlayState.STOP;
-                }
-        ));
-    }
-
     protected SoundEvent getAmbientSound() {
         return RiftSounds.DODO_IDLE;
     }

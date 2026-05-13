@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
+import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataProjectile;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataTileEntity;
 import anightdazingzoroark.riftlib.projectile.RiftLibProjectile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -9,7 +11,9 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
-public class RiftCannonball extends RiftLibProjectile {
+import java.util.List;
+
+public class RiftCannonball extends RiftLibProjectile<RiftCannonball> {
     private EntityLivingBase firer = null;
 
     public RiftCannonball(World worldIn) {
@@ -56,5 +60,7 @@ public class RiftCannonball extends RiftLibProjectile {
     }
 
     @Override
-    public void registerControllers(AnimationDataProjectile animationData) {}
+    public List<AnimationController<?, AnimationDataProjectile>> createAnimationControllers() {
+        return List.of();
+    }
 }

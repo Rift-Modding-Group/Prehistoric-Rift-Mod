@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.other;
 
+import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.passive.EntityAnimal;
@@ -7,6 +8,7 @@ import net.minecraft.world.World;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 //this only exists so that an embryo will be rendered in the
 //ui for pregnant mammals
@@ -25,8 +27,8 @@ public class RiftEmbryo extends EntityAnimal implements IAnimatable<AnimationDat
     }
 
     @Override
-    public void registerControllers(AnimationDataEntity animationData) {
-
+    public List<AnimationController<?, AnimationDataEntity>> createAnimationControllers() {
+        return List.of();
     }
 
     @Override

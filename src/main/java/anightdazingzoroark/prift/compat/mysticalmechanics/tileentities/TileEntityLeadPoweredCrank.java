@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.compat.mysticalmechanics.blocks.BlockLeadPowere
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.interfaces.ILeadWorkstationUser;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
+import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataTileEntity;
 import mysticalmechanics.api.DefaultMechCapability;
 import mysticalmechanics.api.IMechCapability;
@@ -19,12 +20,10 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraftforge.common.capabilities.Capability;
 import anightdazingzoroark.riftlib.core.IAnimatable;
-import anightdazingzoroark.riftlib.core.PlayState;
-import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
-import anightdazingzoroark.riftlib.core.event.AnimationEvent;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.UUID;
 
 public class TileEntityLeadPoweredCrank extends TileEntity implements IAnimatable<AnimationDataTileEntity>, ITickable {
@@ -273,14 +272,13 @@ public class TileEntityLeadPoweredCrank extends TileEntity implements IAnimatabl
     }
 
     @Override
-    public void registerControllers(AnimationDataTileEntity data) {
-        data.addAnimationController(new AnimationController<>(
-                this, "rotation", 0,
-                event -> {
-                    event.getController().setAnimation(new AnimationBuilder().addAnimation("animation.lead_powered_crank.rotate", LoopType.LOOP));
-                    return PlayState.CONTINUE;
-                }
-        ));
+    public List<AnimationController<?, AnimationDataTileEntity>> createAnimationControllers() {
+        return List.of(
+                new AnimationController<TileEntityLeadPoweredCrank, AnimationDataTileEntity>(this, "rotation", "default",
+                        new AnimationControllerState<AnimationDataTileEntity>("default")
+                                .addAnimation("animation.lead_powered_crank.rotation")
+                )
+        );
     }
 
     @Override

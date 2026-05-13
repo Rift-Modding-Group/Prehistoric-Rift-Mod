@@ -14,6 +14,7 @@ import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.In
 import anightdazingzoroark.prift.propertySystem.propertyStorage.propertyValue.StringPropertyValue;
 import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import anightdazingzoroark.prift.server.tileentities.RiftTileEntityContainer;
+import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataTileEntity;
 import com.cleanroommc.modularui.api.IGuiHolder;
@@ -267,7 +268,9 @@ public class TileEntityMechanicalFilter extends RiftTileEntityContainer implemen
     //inventory stuff ends here
 
     @Override
-    public void registerControllers(AnimationDataTileEntity animationData) {}
+    public List<AnimationController<?, AnimationDataTileEntity>> createAnimationControllers() {
+        return List.of();
+    }
 
     @Override
     public AnimationDataTileEntity getAnimationData() {

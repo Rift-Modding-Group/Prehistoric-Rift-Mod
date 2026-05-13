@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.server.entity.RiftLargeWeaponType;
 import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import anightdazingzoroark.prift.server.entity.projectile.RiftCannonball;
 import anightdazingzoroark.prift.server.items.RiftItems;
+import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -13,6 +14,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class RiftCannon extends RiftLargeWeapon {
     public RiftCannon(World worldIn) {
@@ -46,7 +48,9 @@ public class RiftCannon extends RiftLargeWeapon {
     }
 
     @Override
-    public void registerControllers(AnimationDataEntity data) {}
+    public List<AnimationController<?, AnimationDataEntity>> createAnimationControllers() {
+        return List.of();
+    }
 
     @Nullable
     @Override

@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.riftlib.core.AnimatableValue;
+import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataProjectile;
 import anightdazingzoroark.riftlib.projectile.RiftLibProjectile;
 import net.minecraft.entity.EntityLivingBase;
@@ -10,8 +12,10 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 
+import java.util.List;
+
 //this is for all projectiles launched by creatures
-public class RiftCreatureProjectileEntity extends RiftLibProjectile {
+public class RiftCreatureProjectileEntity extends RiftLibProjectile<RiftCreatureProjectileEntity> {
     //builder gets saved here on the client too
     private static final DataParameter<String> PROJECTILE_BUILDER = EntityDataManager.createKey(RiftCreatureProjectileEntity.class, DataSerializers.STRING);
 
@@ -132,11 +136,9 @@ public class RiftCreatureProjectileEntity extends RiftLibProjectile {
     }
 
     @Override
-    public void registerControllers(AnimationDataProjectile animationData) {
-        if (this.getProjectileBuilder() == null) return;
-        if (this.getProjectileBuilder().getHasAnimation()) {
-            animationData.addAnimationController(this.getProjectileBuilder().getAnimationController().apply(this));
-        }
+    public List<AnimationController<?, AnimationDataProjectile>> createAnimationControllers() {
+        if (this.getProjectileBuilder() == null) return List.of();
+        return List.of(this.getProjectileBuilder().getAnimationController().apply(this));
     }
 
     @Override

@@ -186,9 +186,6 @@ public abstract class RiftLargeWeapon extends EntityAnimal implements IAnimatabl
     public abstract Vec3d riderPos();
 
     @Override
-    public abstract void registerControllers(AnimationDataEntity data);
-
-    @Override
     public AnimationDataEntity getAnimationData() {
         return this.animationData;
     }

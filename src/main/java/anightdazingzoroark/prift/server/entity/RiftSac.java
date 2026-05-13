@@ -12,6 +12,7 @@ import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreat
 import anightdazingzoroark.prift.server.properties.playerCreatureBox.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyHelper;
 import anightdazingzoroark.prift.server.properties.playerParty.PlayerPartyProperties;
+import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.api.drawable.IKey;
@@ -41,6 +42,7 @@ import net.minecraft.world.World;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class RiftSac extends EntityTameable implements IAnimatable<AnimationDataEntity>, IGuiHolder<EntityGuiData> {
     private static final DataParameter<Integer> HATCH_TIME = EntityDataManager.<Integer>createKey(RiftSac.class, DataSerializers.VARINT);
@@ -196,7 +198,9 @@ public class RiftSac extends EntityTameable implements IAnimatable<AnimationData
     }
 
     @Override
-    public void registerControllers(AnimationDataEntity animationData) {}
+    public List<AnimationController<?, AnimationDataEntity>> createAnimationControllers() {
+        return List.of();
+    }
 
     @Override
     public AnimationDataEntity getAnimationData() {
