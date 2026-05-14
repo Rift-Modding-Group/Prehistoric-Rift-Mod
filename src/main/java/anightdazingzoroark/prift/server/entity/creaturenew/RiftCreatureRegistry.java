@@ -1,12 +1,19 @@
 package anightdazingzoroark.prift.server.entity.creaturenew;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.helper.FixedSizeList;
+import anightdazingzoroark.prift.helper.IndexedMap;
+import anightdazingzoroark.prift.server.entity.creatureMovesNew.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMovesNew.CreatureMoveNew;
-import anightdazingzoroark.prift.server.entity.creaturenew.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureEnums;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.math.AxisAlignedBB;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 //this registers creatures
 public class RiftCreatureRegistry {
@@ -45,11 +52,51 @@ public class RiftCreatureRegistry {
                         .setRetaliateWhenAttacked()
                         .setPhysicalReach(5)
                         .setCanSprintToAttack()
-                        .setLearnableMoves(
-                                new CreatureMoveStorage.LearnableMoveHolder(CreatureMoveNew.BITE, "bite"),
-                                new CreatureMoveStorage.LearnableMoveHolder(CreatureMoveNew.STOMP, "stomp")
+                        .setMoves(new FixedSizeList.Builder<ImmutablePair<String, CreatureMoveBuilder>>(CreatureMoveStorage.usableMoveCount)
+                                .put(new ImmutablePair<>("bite", new CreatureMoveBuilder()
+                                        .setBasePower(50)
+                                        .setMakesContact()
+                                        .setRequireFindTargetToUse()
+                                        .setPhysical()
+                                        .setCanUsePredicate(CreatureMoveNew.generalMeleePredicate)
+                                        .setOnMoveHitEffect(CreatureMoveNew.generalAttackEntityEffect)
+                                ))
+                                .put(new ImmutablePair<>("stomp", new CreatureMoveBuilder()
+                                        .setBasePower(30)
+                                        .setRequireFindTargetToUse()
+                                        .setPhysical()
+                                        .setUseCanStopMovement()
+                                        .setCanUsePredicate(CreatureMoveNew.generalMeleePredicate)
+                                        .setOnMoveHitEffect(creature -> {
+                                            AxisAlignedBB creatureAABB = creature.getEntityBoundingBox();
+                                            AxisAlignedBB stompRangeAABB = new AxisAlignedBB(
+                                                    creatureAABB.minX - creature.getCreatureType().getPhysicalReach(),
+                                                    creatureAABB.minY,
+                                                    creatureAABB.minZ - creature.getCreatureType().getPhysicalReach(),
+                                                    creatureAABB.maxX + creature.getCreatureType().getPhysicalReach(),
+                                                    creatureAABB.minY + 1,
+                                                    creatureAABB.maxZ + creature.getCreatureType().getPhysicalReach()
+                                            );
+
+                                            List<EntityLivingBase> entitiesInStompRange = creature.world.getEntitiesWithinAABB(
+                                                    EntityLivingBase.class, stompRangeAABB
+                                            );
+                                            for (EntityLivingBase entity : entitiesInStompRange) {
+                                                if (creature.isRelatedToEntity(entity)) continue;
+                                                if (entity.equals(creature)) continue;
+                                                creature.attackEntityAsMob(entity);
+                                            }
+                                        })
+                                ))
+                                .build()
+                        )
+                        /*
+                        .setMoves(
+                                new CreatureMoveStorage.MoveHolder(CreatureMoveNew.BITE, "bite"),
+                                new CreatureMoveStorage.MoveHolder(CreatureMoveNew.STOMP, "stomp")
                         )
                         .setInitMainUsableMoves(CreatureMoveNew.BITE, CreatureMoveNew.STOMP)
+                         */
         );
         registerCreatureType(
                 "stegosaurus",
@@ -65,10 +112,12 @@ public class RiftCreatureRegistry {
                         .setRetaliateWhenAttacked(true)
                         .setPhysicalReach(5)
                         //.setCanSprintToAttack()
-                        .setLearnableMoves(
-                                new CreatureMoveStorage.LearnableMoveHolder(CreatureMoveNew.THAGOMIZE, "tail_attack")
+                        /*
+                        .setMoves(
+                                new CreatureMoveStorage.MoveHolder(CreatureMoveNew.THAGOMIZE, "tail_attack")
                         )
                         .setInitMainUsableMoves(CreatureMoveNew.THAGOMIZE)
+                         */
         );
         /*
         registerCreatureType(

@@ -5,13 +5,15 @@ import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureNew;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public class CreatureMoveBuilder {
     //all the following variables are required and must not be null, validated in isValid()
-    private String moveName;
     private CreatureMoveEnums.MoveType moveType;
     private BiFunction<RiftCreatureNew, Entity, Integer> canUsePredicate;
     private Consumer<RiftCreatureNew> onMoveHitEffect;
@@ -26,18 +28,6 @@ public class CreatureMoveBuilder {
     private BiConsumer<RiftCreatureNew, Entity> onTargetHitEffect;
     private BiConsumer<RiftCreatureNew, BlockPos> onBlockHitEffect;
     private boolean useCanStopMovement;
-
-    /**
-     * Set the name of the move, is required
-     * */
-    public CreatureMoveBuilder setName(String name) {
-        this.moveName = name;
-        return this;
-    }
-
-    public String getName() {
-        return this.moveName;
-    }
 
     /**
      * Set the base power of a move.

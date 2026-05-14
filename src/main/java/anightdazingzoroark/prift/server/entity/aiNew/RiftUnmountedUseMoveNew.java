@@ -10,6 +10,9 @@ import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureNew;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.Path;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import java.util.Map;
 
 /**
  * This is for managing a creature being able to use moves as well as other offensive
@@ -28,6 +31,9 @@ public class RiftUnmountedUseMoveNew extends EntityAIBase {
     //checking if a move could be used happens here
     @Override
     public boolean shouldExecute() {
+        //cannot execute if the creature has no moves
+        if (!this.creature.getCreatureMoves().isInitialized()) return false;
+
         //cannot execute if the creature is using a move
         if (!this.creature.getCurrentMove().isEmpty()) return false;
 
@@ -58,13 +64,15 @@ public class RiftUnmountedUseMoveNew extends EntityAIBase {
 
         //-----find and use move from current list-----
         CreatureMoveStorage creatureMoves = this.creature.getCreatureMoves();
-        FixedSizeList<String> currentUsableMoves = creatureMoves.getAllUsableMoves();
         WeightedListNew<String> weightedMoveList = new WeightedListNew<>();
-        for (int index = 0; index < currentUsableMoves.size(); index++) {
-            String moveName = currentUsableMoves.get(index);
+        for (int index = 0; index < creatureMoves.getUsableMoves().size(); index++) {
+            ImmutablePair<String, CreatureMoveBuilder> creatureMovePair = creatureMoves.getUsableMoves().get(index);
+            if (creatureMovePair == null) continue;
+
+            String moveName = creatureMovePair.getLeft();
             if (moveName.isEmpty()) continue;
 
-            CreatureMoveBuilder move = CreatureMoveRegistry.getCreatureMove(moveName);
+            CreatureMoveBuilder move = creatureMovePair.getRight();
             boolean moveCanAttackTarget = move.getRequireFindTargetToUse() && attackTarget != null;
             int predicateResult;
             if (moveCanAttackTarget) {
@@ -100,7 +108,7 @@ public class RiftUnmountedUseMoveNew extends EntityAIBase {
     @Override
     public void startExecuting() {
         if (this.moveResult == MoveResult.USE_MOVE) {
-            CreatureMoveBuilder creatureMoveBuilder = CreatureMoveRegistry.getCreatureMove(this.creature.getCurrentMove());
+            CreatureMoveBuilder creatureMoveBuilder = this.creature.getCreatureMoves().getMoveBuilderCurrentMove();
             if (creatureMoveBuilder.getUseCanStopMovement()) {
                 this.creature.getNavigator().clearPath();
                 this.isPathing = false;

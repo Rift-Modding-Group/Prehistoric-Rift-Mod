@@ -3,7 +3,6 @@ package anightdazingzoroark.prift.server.entity.creatureMovesNew;
 import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureNew;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.util.math.AxisAlignedBB;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiFunction;
@@ -38,9 +37,7 @@ public class CreatureMoveNew {
     //calculate the damage a move will do to hit targets
     public static double calculateDamage(@NotNull RiftCreatureNew attackingCreature) {
         //get move
-        String moveName = attackingCreature.getCurrentMove();
-        if (moveName.isEmpty()) return 0D;
-        CreatureMoveBuilder moveBuilder = CreatureMoveRegistry.getCreatureMove(moveName);
+        CreatureMoveBuilder moveBuilder = attackingCreature.getCreatureMoves().getMoveBuilderCurrentMove();
         if (moveBuilder == null) return 0D;
 
         double statValueToUse = 0D;

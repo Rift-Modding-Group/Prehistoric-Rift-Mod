@@ -59,7 +59,6 @@ public class ServerProxy {
         CapabilityManager.INSTANCE.register(ICreatureBoxData.class, new CreatureBoxDataStorage(), CreatureBoxData::new);
         MinecraftForge.EVENT_BUS.register(new CapabilityHandler());
 
-        CreatureMoveRegistry.createMoves();
         RiftCreatureRegistry.createCreatures();
         RiftMessages.registerMessages();
         RiftFluids.registerFluids();

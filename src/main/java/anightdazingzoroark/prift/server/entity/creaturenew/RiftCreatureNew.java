@@ -1,9 +1,9 @@
 package anightdazingzoroark.prift.server.entity.creaturenew;
 
 import anightdazingzoroark.prift.helper.FixedSizeList;
+import anightdazingzoroark.prift.helper.IndexedMap;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
-import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.aiNew.RiftLookAroundNew;
 import anightdazingzoroark.prift.server.entity.aiNew.RiftUnmountedUseMoveNew;
 import anightdazingzoroark.prift.server.entity.aiNew.RiftWanderNew;
@@ -15,14 +15,10 @@ import anightdazingzoroark.prift.server.entity.inventory.RiftInventoryHandler;
 import anightdazingzoroark.riftlib.core.AnimatableRunValue;
 import anightdazingzoroark.riftlib.core.AnimatableValue;
 import anightdazingzoroark.riftlib.core.IAnimatable;
-import anightdazingzoroark.riftlib.core.PlayState;
-import anightdazingzoroark.riftlib.core.builder.AnimationBuilder;
-import anightdazingzoroark.riftlib.core.builder.LoopType;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
 import anightdazingzoroark.riftlib.core.manager.AbstractAnimationDataEntity;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
-import anightdazingzoroark.riftlib.hitbox.EntityHitbox;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.attributes.IAttribute;
@@ -44,7 +40,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -64,7 +59,6 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
     private static final DataParameter<CreatureMoveStorage> CREATURE_MOVES = EntityDataManager.createKey(RiftCreatureNew.class, RiftDataSerializers.CREATURE_MOVE_STORAGE);
     private static final DataParameter<CreatureStatsStorage> CREATURE_STATS = EntityDataManager.createKey(RiftCreatureNew.class, RiftDataSerializers.CREATURE_STATS_STORAGE);
     private static final DataParameter<String> CREATURE_PHASE = EntityDataManager.createKey(RiftCreatureNew.class, DataSerializers.STRING);
-    private static final DataParameter<String> CURRENTLY_USED_MOVE = EntityDataManager.createKey(RiftCreatureNew.class, DataSerializers.STRING);
 
     //manage sprint and sprint to attack
     public int sprintToAttackCooldown; //manages a creature's ability to sprint based on whether or not it attacked before
@@ -95,7 +89,6 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
         this.dataManager.register(CREATURE_MOVES, new CreatureMoveStorage());
         this.dataManager.register(CREATURE_STATS, new CreatureStatsStorage());
         this.dataManager.register(CREATURE_PHASE, "");
-        this.dataManager.register(CURRENTLY_USED_MOVE, "");
     }
 
     //this is gonna be mostly for registering the custom attributes
@@ -131,11 +124,9 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
         creatureStatsStorage.applyStatsToCreature(this);
         this.setCreatureStats(creatureStatsStorage);
 
-        //initialize move storage
+        //initialize creature moves
         CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
-        creatureMoveStorage.initLearnableMoves(this.creatureType.getLearnableMoves());
-        creatureMoveStorage.initUsableMovesPerPhase(this.creatureType.getInitUsableMovesPerPhase());
-        creatureMoveStorage.setCreaturePhase(this.getPhase());
+        creatureMoveStorage.setCreatureUser(this.creatureType);
         this.setCreatureMoves(creatureMoveStorage);
 
         //return value
@@ -228,7 +219,7 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
     public boolean attackEntityAsMob(Entity entityIn) {
         if (entityIn == null) return false;
 
-        CreatureMoveBuilder creatureMoveBuilder = CreatureMoveRegistry.getCreatureMove(this.getCurrentMove());
+        CreatureMoveBuilder creatureMoveBuilder = this.getCreatureMoves().getMoveBuilderCurrentMove();
         if (creatureMoveBuilder == null) return false;
 
         double damage = CreatureMoveNew.calculateDamage(this);
@@ -282,15 +273,19 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
 
     //-----move use management-----
     public String getCurrentMove() {
-        return this.dataManager.get(CURRENTLY_USED_MOVE);
+        return this.getCreatureMoves().getCurrentMove();
     }
 
     public void setCurrentMove(String name) {
-        this.dataManager.set(CURRENTLY_USED_MOVE, name);
+        CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+        creatureMoveStorage.setCurrentMove(name);
+        this.setCreatureMoves(creatureMoveStorage);
     }
 
     public void resetCurrentMove() {
-        this.setCurrentMove("");
+        CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+        creatureMoveStorage.resetCurrentMove();
+        this.setCreatureMoves(creatureMoveStorage);
     }
 
     //-----IRiftCreature boilerplate stuff-----
@@ -417,31 +412,37 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
     public List<AnimationController<?, AnimationDataEntity>> createAnimationControllers() {
         //this is for creating all the animations for moves to add to the animation controller that
         //creates animations for moves
-        CreatureMoveStorage.LearnableMoveHolder[] creatureMoves = this.creatureType.getLearnableMoves();
+        Map<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> creatureMoves = this.creatureType.getUsableMoves();
         List<AnimationControllerState<AnimationDataEntity>> creatureMovesStates = new ArrayList<>();
 
         //add the initial state
         AnimationControllerState<AnimationDataEntity> initialState = new AnimationControllerState<>("default");
         creatureMovesStates.add(initialState);
 
-        //add other states
-        for (CreatureMoveStorage.LearnableMoveHolder learnableMove : creatureMoves) {
-            if (learnableMove == null) continue;
+        //add other anim states for each move
+        for (Map.Entry<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> moveInPhaseEntry : creatureMoves.entrySet()) {
+            for (int index = 0; index < moveInPhaseEntry.getValue().size(); index++) {
+                ImmutablePair<String, CreatureMoveBuilder> moveEntry = moveInPhaseEntry.getValue().get(index);
+                if (moveEntry == null) continue;
 
-            String moveAnimName = learnableMove.moveAnimationName();
-            String moveName = learnableMove.moveName();
-            String animName = "animation." + this.creatureType.getName() + "." + moveAnimName;
-            Function<AnimationDataEntity, Boolean> predicate = animData -> this.getCurrentMove().equals(moveName);
+                String moveName = moveEntry.getLeft();
+                String animName = "animation." + this.creatureType.getName() + "." + moveName;
+                //animation name must be different for each phase
+                if (!moveInPhaseEntry.getKey().isEmpty()) {
+                    animName = animName + "_" + moveInPhaseEntry.getKey();
+                }
+                Function<AnimationDataEntity, Boolean> predicate = animData -> this.getCurrentMove().equals(moveName);
 
-            //add transition to the state when using move from the initial state
-            initialState.addStateTransition(moveName, predicate);
+                //add transition to the state when using move from the initial state
+                initialState.addStateTransition(moveName, predicate);
 
-            //add the state for the move
-            creatureMovesStates.add(new AnimationControllerState<AnimationDataEntity>(moveName)
-                    .addAnimation(animName)
-                    .addStateTransition("default", animData -> animData.allAnimationsFinished("moveUse"))
-                    .addExitEffect(new AnimatableValue("'endMoveEffect'"))
-            );
+                //add the state for the move
+                creatureMovesStates.add(new AnimationControllerState<AnimationDataEntity>(moveName)
+                        .addAnimation(animName)
+                        .addStateTransition("default", animData -> animData.allAnimationsFinished("moveUse"))
+                        .addExitEffect(new AnimatableValue("'endMoveEffect'"))
+                );
+            }
         }
 
         //final return value
@@ -463,9 +464,8 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
     public Map<String, AnimatableRunValue> createAnimationMessageEffects() {
         return Map.of(
                 "moveHitEffect", new AnimatableRunValue(() -> {
-                    if (this.getCurrentMove().isEmpty()) return;
-
-                    CreatureMoveBuilder creatureMoveBuilder = CreatureMoveRegistry.getCreatureMove(this.getCurrentMove());
+                    CreatureMoveBuilder creatureMoveBuilder = this.getCreatureMoves().getMoveBuilderCurrentMove();
+                    if (creatureMoveBuilder == null) return;
                     creatureMoveBuilder.getOnMoveHitEffect().accept(this);
                 }, Side.SERVER, Side.CLIENT),
                 "endMoveEffect", new AnimatableRunValue(this::resetCurrentMove, Side.CLIENT, Side.SERVER)

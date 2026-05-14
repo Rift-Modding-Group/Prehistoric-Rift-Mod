@@ -1,10 +1,12 @@
 package anightdazingzoroark.prift.server.entity.creaturenew.builder;
 
-import anightdazingzoroark.prift.server.entity.creaturenew.CreatureMoveStorage;
+import anightdazingzoroark.prift.helper.FixedSizeList;
+import anightdazingzoroark.prift.helper.IndexedMap;
+import anightdazingzoroark.prift.server.entity.creatureMovesNew.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureNew;
 import net.minecraft.client.resources.I18n;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +14,7 @@ import java.util.Map;
 public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBuilder> {
     private String creatureName;
     private Map<String, CreaturePhaseBuilder> creaturePhaseBuilderMap;
-    private CreatureMoveStorage.LearnableMoveHolder[] learnableMoves;
-    private Map<String, List<String>> initMovesPerPhase;
+    private final Map<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> movesPerPhase = new HashMap<>();
 
     public RiftCreatureBuilder(Class<? extends RiftCreatureNew> creatureClass) {
         super(creatureClass);
@@ -24,7 +25,7 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
      * */
     public RiftCreatureBuilder setName(String name) {
         this.creatureName = name;
-        return this.getThis();
+        return this;
     }
 
     public String getName() {
@@ -41,7 +42,7 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
      * The builder that is used to define the creature is treated as a phase called ""
      * */
     public RiftCreatureBuilder addPhase(String phaseName, CreaturePhaseBuilder phaseBuilder) {
-        if (this.locked) return this.getThis();
+        if (this.locked) return this;
 
         if (this.creaturePhaseBuilderMap == null) {
             this.creaturePhaseBuilderMap = new HashMap<>();
@@ -59,50 +60,35 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     }
 
     /**
-     * Define the moves that the creature can learn
+     * Initialize move list for the main phase
      * */
-    public RiftCreatureBuilder setLearnableMoves(CreatureMoveStorage.LearnableMoveHolder... learnableMoves) {
-        if (this.locked) return this.getThis();
+    public RiftCreatureBuilder setMoves(FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>> mainMoves) {
+        if (this.locked) return this;
 
-        this.learnableMoves = learnableMoves;
-        return this;
-    }
-
-    public CreatureMoveStorage.LearnableMoveHolder[] getLearnableMoves() {
-        return this.learnableMoves;
-    }
-
-    /**
-     * Initialize initMovesPerPhase and set the usable move lists for the main phase
-     * */
-    public RiftCreatureBuilder setInitMainUsableMoves(String... mainMoves) {
-        if (this.locked) return this.getThis();
-
-        this.initMovesPerPhase = new HashMap<>();
-        this.initMovesPerPhase.put("", Arrays.asList(mainMoves));
+        this.movesPerPhase.put("", mainMoves);
         return this;
     }
 
     /**
      * Set usable move lists for each creature phase
      * */
-    public RiftCreatureBuilder setUsableMovesForPhase(String phase, String... phaseMoves) {
-        if (this.locked) return this.getThis();
+    public RiftCreatureBuilder setUsableMovesForPhase(String phase, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>> phaseMoves) {
+        if (this.locked) return this;
+        if (phase.isEmpty()) return this;
 
-        if (this.initMovesPerPhase == null || phase.isEmpty()) return this;
-        this.initMovesPerPhase.put(phase, Arrays.asList(phaseMoves));
+        this.movesPerPhase.put(phase, phaseMoves);
         return this;
     }
 
     /**
-     * Getter for init usable moves
+     * Getter for usable moves per each phase
      * */
-    public Map<String, List<String>> getInitUsableMovesPerPhase() {
-        return this.initMovesPerPhase;
+    public Map<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> getUsableMoves() {
+        return this.movesPerPhase;
     }
 
     @Override
     public boolean isValid() {
-        return super.isValid() && this.learnableMoves != null && this.initMovesPerPhase != null;
+        return super.isValid() && !this.movesPerPhase.isEmpty();
     }
 }

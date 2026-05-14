@@ -121,6 +121,7 @@ public class FixedSizeList<T> {
         return this.list.indexOf(value);
     }
 
+    @Deprecated //never ever use this
     public List<T> getList() {
         return this.list;
     }
@@ -161,5 +162,33 @@ public class FixedSizeList<T> {
 
     public String toString() {
         return this.list.toString();
+    }
+
+    public static class Builder<B> {
+        private final FixedSizeList<B> toReturn;
+        private int lastIndex;
+
+        public Builder(int maxSize) {
+            this(maxSize, null);
+        }
+
+        public Builder(int maxSize, B defaultValue) {
+            this.toReturn = new FixedSizeList<>(maxSize, defaultValue);
+        }
+
+        public Builder<B> put(B value) {
+            if (this.lastIndex >= this.toReturn.size()) {
+                throw new UnsupportedOperationException("Cannot add more elements to FixedSizeList!");
+            }
+            if (value == null && this.toReturn.defaultValue != null) {
+                throw new UnsupportedOperationException("Cannot add null value to FixedSizeList!");
+            }
+            this.toReturn.set(this.lastIndex++, value);
+            return this;
+        }
+
+        public FixedSizeList<B> build() {
+            return this.toReturn;
+        }
     }
 }
