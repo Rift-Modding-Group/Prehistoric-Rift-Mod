@@ -1,13 +1,9 @@
 package anightdazingzoroark.prift.server.entity.creaturenew;
 
-import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.helper.FixedSizeList;
-import anightdazingzoroark.prift.helper.IndexedMap;
 import anightdazingzoroark.prift.server.entity.creatureMovesNew.CreatureMoveBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMovesNew.CreatureMoveRegistry;
 import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 

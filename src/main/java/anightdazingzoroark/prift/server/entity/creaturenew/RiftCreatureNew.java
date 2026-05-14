@@ -454,6 +454,13 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
                         .addAnimation("animation."+this.creatureType.getName()+".walk")
                         .addStateTransition("default", animData -> !animData.isMoving())
             ),
+            new AnimationController<RiftCreatureNew, AnimationDataEntity>(this, "sprintPosing", "default",
+                    new AnimationControllerState<AnimationDataEntity>("default", 0.2)
+                            .addStateTransition("sprint", animData -> this.isSprinting()),
+                    new AnimationControllerState<AnimationDataEntity>("sprint", 0.2)
+                            .addAnimation("animation."+this.creatureType.getName()+".sprint_pose")
+                            .addStateTransition("default", animData -> !this.isSprinting())
+            ),
             new AnimationController<RiftCreatureNew, AnimationDataEntity>(this, "moveUse", "default",
                     creatureMovesStates.toArray(new AnimationControllerState[0])
             )
