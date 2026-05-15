@@ -1,14 +1,12 @@
 package anightdazingzoroark.prift.server.entity.creaturenew.builder;
 
 import anightdazingzoroark.prift.helper.FixedSizeList;
-import anightdazingzoroark.prift.helper.IndexedMap;
 import anightdazingzoroark.prift.server.entity.creatureMovesNew.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureNew;
 import net.minecraft.client.resources.I18n;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBuilder> {
@@ -72,7 +70,7 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     /**
      * Set usable move lists for each creature phase
      * */
-    public RiftCreatureBuilder setUsableMovesForPhase(String phase, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>> phaseMoves) {
+    public RiftCreatureBuilder setMovesForPhase(String phase, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>> phaseMoves) {
         if (this.locked) return this;
         if (phase.isEmpty()) return this;
 
@@ -83,7 +81,7 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     /**
      * Getter for usable moves per each phase
      * */
-    public Map<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> getUsableMoves() {
+    public Map<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> getMoves() {
         return this.movesPerPhase;
     }
 

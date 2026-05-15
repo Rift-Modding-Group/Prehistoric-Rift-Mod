@@ -40,7 +40,7 @@ public class CreatureMoveStorage {
 
     //to be used by creatures when on their own
     public FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>> getUsableMoves() {
-        return this.creatureType.getUsableMoves().get(this.creaturePhase);
+        return this.creatureType.getMoves().get(this.creaturePhase);
     }
 
     public CreatureMoveBuilder getMoveBuilderCurrentMove() {
@@ -52,7 +52,7 @@ public class CreatureMoveStorage {
     }
 
     public CreatureMoveBuilder getUsableMoveBuilder(String phaseName, String moveName) {
-        for (Map.Entry<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> entry : this.creatureType.getUsableMoves().entrySet()) {
+        for (Map.Entry<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> entry : this.creatureType.getMoves().entrySet()) {
             if (!entry.getKey().equals(phaseName)) continue;
 
             for (int index = 0; index < entry.getValue().size(); index++) {
@@ -68,7 +68,7 @@ public class CreatureMoveStorage {
         //safety net
         if (this.currentUsableMoves >= 2 || this.currentUsableMoves < 0) this.currentUsableMoves = 0;
 
-        FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>> movesFromCurrentPhase = this.creatureType.getUsableMoves().get(this.creaturePhase);
+        FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>> movesFromCurrentPhase = this.creatureType.getMoves().get(this.creaturePhase);
         if (this.currentUsableMoves == 0) {
             return movesFromCurrentPhase.sublist(0, 3);
         }

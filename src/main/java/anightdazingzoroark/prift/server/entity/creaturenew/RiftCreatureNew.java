@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creaturenew;
 
 import anightdazingzoroark.prift.helper.FixedSizeList;
-import anightdazingzoroark.prift.helper.IndexedMap;
 import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.aiNew.RiftLookAroundNew;
@@ -222,7 +221,7 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
         CreatureMoveBuilder creatureMoveBuilder = this.getCreatureMoves().getMoveBuilderCurrentMove();
         if (creatureMoveBuilder == null) return false;
 
-        double damage = CreatureMoveNew.calculateDamage(this);
+        double damage = CreatureMoveHelper.calculateDamage(this);
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float) damage);
         if (creatureMoveBuilder.getOnTargetHitEffect() != null && creatureMoveBuilder.getMakesContact()) {
             creatureMoveBuilder.getOnTargetHitEffect().accept(this, entityIn);
@@ -412,7 +411,7 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
     public List<AnimationController<?, AnimationDataEntity>> createAnimationControllers() {
         //this is for creating all the animations for moves to add to the animation controller that
         //creates animations for moves
-        Map<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> creatureMoves = this.creatureType.getUsableMoves();
+        Map<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> creatureMoves = this.creatureType.getMoves();
         List<AnimationControllerState<AnimationDataEntity>> creatureMovesStates = new ArrayList<>();
 
         //add the initial state
@@ -421,27 +420,54 @@ public abstract class RiftCreatureNew extends EntityTameable implements IAnimata
 
         //add other anim states for each move
         for (Map.Entry<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> moveInPhaseEntry : creatureMoves.entrySet()) {
+            String phaseName = moveInPhaseEntry.getKey();
+
             for (int index = 0; index < moveInPhaseEntry.getValue().size(); index++) {
                 ImmutablePair<String, CreatureMoveBuilder> moveEntry = moveInPhaseEntry.getValue().get(index);
                 if (moveEntry == null) continue;
 
+                //the name of a move will be used as the animation state
                 String moveName = moveEntry.getLeft();
-                String animName = "animation." + this.creatureType.getName() + "." + moveName;
-                //animation name must be different for each phase
-                if (!moveInPhaseEntry.getKey().isEmpty()) {
-                    animName = animName + "_" + moveInPhaseEntry.getKey();
-                }
-                Function<AnimationDataEntity, Boolean> predicate = animData -> this.getCurrentMove().equals(moveName);
+                //for each phase, there will be different phase names
+                if (!phaseName.isEmpty()) moveName = moveName + phaseName;
 
-                //add transition to the state when using move from the initial state
-                initialState.addStateTransition(moveName, predicate);
+                //the names of the anims for the moves will be within an anim state
+                //and are to be randomly chosen within
+                String[] moveAnimNames = moveEntry.getRight().getAnimNames();
 
-                //add the state for the move
-                creatureMovesStates.add(new AnimationControllerState<AnimationDataEntity>(moveName)
-                        .addAnimation(animName)
+                //transition from initial state to a state associated with the move
+                final String finalMoveName = moveName;
+                initialState.addStateTransition(moveName, animData -> this.getCurrentMove().equals(finalMoveName));
+
+                //create the anim state for the move
+                AnimationControllerState<AnimationDataEntity> moveState = new AnimationControllerState<AnimationDataEntity>(moveName)
                         .addStateTransition("default", animData -> animData.allAnimationsFinished("moveUse"))
-                        .addExitEffect(new AnimatableValue("'endMoveEffect'"))
-                );
+                        .addExitEffect(new AnimatableValue("'endMoveEffect'"));
+
+                //if the move state has multiple animation names, make it so that upon entry it generates a random number
+                //to then use
+                if (moveAnimNames.length > 1) {
+                    moveState.addEntryEffect(new AnimatableValue("chosenMove", (double) this.rand.nextInt(moveAnimNames.length)));
+                }
+
+                //iterate over each of the anim names and put them in the state for the move
+                for (int indexx = 0; indexx < moveAnimNames.length; indexx++) {
+                    String moveAnimName = moveAnimNames[indexx];
+                    moveAnimName = "animation." + this.creatureType.getName() + "." + moveAnimName;
+
+                    //only 1 move, just add the move anim name
+                    if (moveAnimNames.length == 1) moveState.addAnimation(moveAnimName);
+                    //multiple moves, add the move anim name and a predicate that uses the chosenMove molang variable above
+                    else {
+                        int finalIndexx = indexx;
+                        moveState.addAnimation(moveAnimName, animData -> {
+                            return animData.getVariable("chosenMove") == finalIndexx;
+                        });
+                    }
+                }
+
+                //now add the final state
+                creatureMovesStates.add(moveState);
             }
         }
 

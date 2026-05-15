@@ -2,9 +2,8 @@ package anightdazingzoroark.prift.server.entity.creaturenew;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.helper.FixedSizeList;
-import anightdazingzoroark.prift.helper.IndexedMap;
 import anightdazingzoroark.prift.server.entity.creatureMovesNew.CreatureMoveBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMovesNew.CreatureMoveNew;
+import anightdazingzoroark.prift.server.entity.creatureMovesNew.CreatureMoveCommon;
 import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureEnums;
 import net.minecraft.entity.EntityLivingBase;
@@ -24,6 +23,7 @@ public class RiftCreatureRegistry {
     }
 
     public static void registerCreatureType(String name, RiftCreatureBuilder builder) {
+        //-----verify creature builder first-----
         if (creatureBuilderMap.containsKey(name)) {
             RiftInitialize.logger.warn("Builder for creature type {} already exists!", name);
             return;
@@ -32,6 +32,18 @@ public class RiftCreatureRegistry {
             RiftInitialize.logger.warn("Builder for creature type {} is invalid!", name);
             return;
         }
+        //-----verify creature move builders next-----
+        for (Map.Entry<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> moveEntry : builder.getMoves().entrySet()) {
+            for (int index = 0; index < moveEntry.getValue().size(); index++) {
+                ImmutablePair<String, CreatureMoveBuilder> movePair = moveEntry.getValue().get(index);
+                if (movePair == null) continue;
+                if (!movePair.getRight().isValid()) {
+                    RiftInitialize.logger.warn("Move {} for creature type {} in phase '{}' is invalid!", movePair.getLeft(), name, moveEntry.getKey());
+                    return;
+                }
+            }
+        }
+        //-----finalize creature info and lock them-----
         builder.setName(name);
         builder.lock();
         creatureBuilderMap.put(name, builder);
@@ -53,20 +65,16 @@ public class RiftCreatureRegistry {
                         .setPhysicalReach(5)
                         .setCanSprintToAttack()
                         .setMoves(new FixedSizeList.Builder<ImmutablePair<String, CreatureMoveBuilder>>(CreatureMoveStorage.usableMoveCount)
-                                .put(new ImmutablePair<>("bite", new CreatureMoveBuilder()
+                                .put(new ImmutablePair<>("bite", CreatureMoveCommon.standardMeleeMove.copy()
                                         .setBasePower(50)
-                                        .setMakesContact()
-                                        .setRequireFindTargetToUse()
-                                        .setPhysical()
-                                        .setCanUsePredicate(CreatureMoveNew.generalMeleePredicate)
-                                        .setOnMoveHitEffect(CreatureMoveNew.generalAttackEntityEffect)
+                                        .setAnimNames("bite")
                                 ))
                                 .put(new ImmutablePair<>("stomp", new CreatureMoveBuilder()
                                         .setBasePower(30)
                                         .setRequireFindTargetToUse()
                                         .setPhysical()
                                         .setUseCanStopMovement()
-                                        .setCanUsePredicate(CreatureMoveNew.generalMeleePredicate)
+                                        .setCanUsePredicate(CreatureMoveCommon.generalMeleePredicate)
                                         .setOnMoveHitEffect(creature -> {
                                             AxisAlignedBB creatureAABB = creature.getEntityBoundingBox();
                                             AxisAlignedBB stompRangeAABB = new AxisAlignedBB(
@@ -87,6 +95,7 @@ public class RiftCreatureRegistry {
                                                 creature.attackEntityAsMob(entity);
                                             }
                                         })
+                                        .setAnimNames("stomp")
                                 ))
                                 .build()
                         )

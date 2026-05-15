@@ -5,18 +5,16 @@ import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureNew;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public class CreatureMoveBuilder {
     //all the following variables are required and must not be null, validated in isValid()
-    private CreatureMoveEnums.MoveType moveType;
+    private CreatureMoveHelper.MoveType moveType;
     private BiFunction<RiftCreatureNew, Entity, Integer> canUsePredicate;
     private Consumer<RiftCreatureNew> onMoveHitEffect;
+    private String[] animNames;
 
     //the following can be left alone
     private int movePower;
@@ -72,7 +70,7 @@ public class CreatureMoveBuilder {
      *set move to be physical
      * */
     public CreatureMoveBuilder setPhysical() {
-        this.moveType = CreatureMoveEnums.MoveType.PHYSICAL;
+        this.moveType = CreatureMoveHelper.MoveType.PHYSICAL;
         return this;
     }
 
@@ -82,7 +80,7 @@ public class CreatureMoveBuilder {
      * if not defined, physical damage will be used instead
      * */
     public CreatureMoveBuilder setElemental(Element element, double elementEffectChance, int elementEffectStrength) {
-        this.moveType = CreatureMoveEnums.MoveType.ELEMENTAL;
+        this.moveType = CreatureMoveHelper.MoveType.ELEMENTAL;
         this.element = element;
         this.elementEffectChance = elementEffectChance;
         this.elementEffectStrength = elementEffectStrength;
@@ -105,14 +103,14 @@ public class CreatureMoveBuilder {
      * Set move to be status
      * */
     public CreatureMoveBuilder setStatus() {
-        this.moveType = CreatureMoveEnums.MoveType.STATUS;
+        this.moveType = CreatureMoveHelper.MoveType.STATUS;
         return this;
     }
 
     /**
      * general getter for move type
      * */
-    public CreatureMoveEnums.MoveType getMoveType() {
+    public CreatureMoveHelper.MoveType getMoveType() {
         return this.moveType;
     }
 
@@ -145,6 +143,20 @@ public class CreatureMoveBuilder {
     }
 
     /**
+     * Sets the name of the animations to use when using this move.
+     * If multiple names are provided, it will randomly switch between the animations.s
+     * */
+    public CreatureMoveBuilder setAnimNames(String... animNames) {
+        if (this.animNames != null) return this;
+        this.animNames = animNames;
+        return this;
+    }
+
+    public String[] getAnimNames() {
+        return this.animNames;
+    }
+
+    /**
      * Set any additional effects that will happen when attacking an entity
      * */
     public CreatureMoveBuilder setOnHitTargetEffect(BiConsumer<RiftCreatureNew, Entity> onTargetHitEffect) {
@@ -172,6 +184,30 @@ public class CreatureMoveBuilder {
      * Get validity based on if some params are not null
      * */
     public boolean isValid() {
-        return this.moveType != null && this.canUsePredicate != null && this.onMoveHitEffect != null;
+        return this.moveType != null && this.canUsePredicate != null && this.onMoveHitEffect != null && this.animNames != null && this.animNames.length > 0;
+    }
+
+    /**
+     * Create a copy of this builder
+     * */
+    public CreatureMoveBuilder copy() {
+        CreatureMoveBuilder toReturn = new CreatureMoveBuilder();
+
+        toReturn.moveType = this.moveType;
+        toReturn.canUsePredicate = this.canUsePredicate;
+        toReturn.onMoveHitEffect = this.onMoveHitEffect;
+        toReturn.animNames = this.animNames;
+
+        toReturn.movePower = this.movePower;
+        toReturn.requireFindTargetToUse = this.requireFindTargetToUse;
+        toReturn.makesContact = this.makesContact;
+        toReturn.element = this.element;
+        toReturn.elementEffectChance = this.elementEffectChance;
+        toReturn.elementEffectStrength = this.elementEffectStrength;
+        toReturn.onTargetHitEffect = this.onTargetHitEffect;
+        toReturn.onBlockHitEffect = this.onBlockHitEffect;
+        toReturn.useCanStopMovement = this.useCanStopMovement;
+
+        return toReturn;
     }
 }
