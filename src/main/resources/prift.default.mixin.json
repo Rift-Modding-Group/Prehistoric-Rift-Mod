@@ -5,8 +5,6 @@
   "target": "@env(DEFAULT)",
   "client": [],
   "mixins": [
-    "RiftMixinHypnotizedTargeting",
-    "RiftMixinPolarBearAIAttackPlayer",
     "RiftMixinSetTargetAfterHitboxHit"
   ],
   "server": [],

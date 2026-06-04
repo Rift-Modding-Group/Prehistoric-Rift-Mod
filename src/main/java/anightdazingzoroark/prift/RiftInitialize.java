@@ -1,28 +1,13 @@
 package anightdazingzoroark.prift;
 
-import anightdazingzoroark.prift.config.GeneralConfig;
-import anightdazingzoroark.prift.config.*;
-import anightdazingzoroark.prift.server.RiftMobFamilies;
 import anightdazingzoroark.prift.server.ServerProxy;
-import anightdazingzoroark.prift.server.commands.RiftBleedCommand;
-import anightdazingzoroark.prift.server.commands.RiftCreatureHighlightCommand;
-import anightdazingzoroark.prift.server.commands.RiftJournalCommand;
-import anightdazingzoroark.prift.server.commands.RiftResetWildCreaturesCommand;
-import anightdazingzoroark.prift.server.entity.RiftCreatureType;
 import anightdazingzoroark.riftlib.RiftLib;
-import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import org.apache.logging.log4j.Logger;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 @Mod(
         modid = RiftInitialize.MODID,
@@ -52,11 +37,7 @@ public class RiftInitialize {
     @Mod.Instance(MODID)
     public static RiftInitialize instance;
     public static Logger logger;
-    public static Configuration configMain;
-
-    static {
-        FluidRegistry.enableUniversalBucket();
-    }
+    //public static Configuration configMain;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -64,24 +45,17 @@ public class RiftInitialize {
         logger = event.getModLog();
 
         //init directory
-        File directory = event.getModConfigurationDirectory();
+        //File directory = event.getModConfigurationDirectory();
 
         //for general config
-        configMain = new Configuration(new File(directory.getPath(), "prift/general.cfg"));
-        GeneralConfig.readConfig();
-
-        //for creature config
-        Map<String, Class<? extends RiftCreatureConfig>> configClasses = new HashMap<>();
-        for (RiftCreatureType creatureType : RiftCreatureType.values()) {
-            if (creatureType.getConfig() != null) configClasses.put(creatureType.name().toLowerCase(), creatureType.getConfig());
-        }
-        RiftConfigHandler.init(new File(event.getModConfigurationDirectory(), "prift/creatures/"), configClasses);
+        //configMain = new Configuration(new File(directory.getPath(), "prift/general.cfg"));
+        //GeneralConfig.readConfig();
 
         //init mod content
         PROXY.preInit(event);
 
         //init mob families
-        RiftMobFamilies.initMobFamilies(directory);
+        //RiftMobFamilies.initMobFamilies(directory);
     }
 
     @Mod.EventHandler
@@ -97,12 +71,10 @@ public class RiftInitialize {
         PROXY.postInit(event);
 
         //for general config
-        if (configMain.hasChanged()) configMain.save();
-
-        //for creature config
-        RiftConfigHandler.saveAllConfigs();
+        //if (configMain.hasChanged()) configMain.save();
     }
 
+    /*
     @Mod.EventHandler
     public void serverLoad(FMLServerStartingEvent event) {
         event.registerServerCommand(new RiftBleedCommand());
@@ -110,4 +82,5 @@ public class RiftInitialize {
         event.registerServerCommand(new RiftJournalCommand());
         event.registerServerCommand(new RiftResetWildCreaturesCommand());
     }
+     */
 }
