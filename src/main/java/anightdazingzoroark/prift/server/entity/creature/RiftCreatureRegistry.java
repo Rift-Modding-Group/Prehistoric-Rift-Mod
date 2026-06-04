@@ -1,6 +1,10 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.entity.creature.built.Stegosaurus;
+import anightdazingzoroark.prift.server.entity.creature.built.Tyrannosaurus;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
+import anightdazingzoroark.prift.server.entity.serverModel.CreatureModel;
 import anightdazingzoroark.prift.util.FixedSizeList;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCommon;
@@ -16,7 +20,10 @@ import java.util.Map;
 
 //this registers creatures
 public class RiftCreatureRegistry {
+    //all creatures are stored here
     public static final HashMap<String, RiftCreatureBuilder> creatureBuilderMap = new HashMap<>();
+    //this is the main model to be used on both server and client for all creatures
+    public static final CreatureModel commonCreatureModel = new CreatureModel();
 
     public static RiftCreatureBuilder getCreatureBuilder(String name) {
         return creatureBuilderMap.get(name);

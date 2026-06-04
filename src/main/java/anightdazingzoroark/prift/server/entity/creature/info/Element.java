@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.server.entity;
+package anightdazingzoroark.prift.server.entity.creature.info;
 
 //elemental damage is too obvious to explain
 //they also have special effects attached to them

@@ -1,5 +1,6 @@
-package anightdazingzoroark.prift.server.entity.creature;
+package anightdazingzoroark.prift.server.entity.creature.info;
 
+import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.util.FixedSizeList;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;

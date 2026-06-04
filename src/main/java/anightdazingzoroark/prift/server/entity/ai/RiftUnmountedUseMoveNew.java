@@ -2,7 +2,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
-import anightdazingzoroark.prift.server.entity.creature.CreatureMoveStorage;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.util.MathUtil;
 import anightdazingzoroark.prift.util.WeightedList;
 import net.minecraft.entity.EntityLivingBase;

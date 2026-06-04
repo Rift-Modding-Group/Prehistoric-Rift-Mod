@@ -2,9 +2,9 @@ package anightdazingzoroark.prift.server.dataSerializers;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.ServerProxy;
-import anightdazingzoroark.prift.server.entity.CreatureAcquisitionInfo;
-import anightdazingzoroark.prift.server.entity.creature.CreatureMoveStorage;
-import anightdazingzoroark.prift.server.entity.creature.CreatureStatsStorage;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureAcquisitionInfo;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;

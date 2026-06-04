@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.server.entity;
+package anightdazingzoroark.prift.server.entity.creature.info;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;

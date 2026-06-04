@@ -1,5 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
 import anightdazingzoroark.prift.util.FixedSizeList;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.ai.RiftLookAroundNew;
@@ -43,7 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public abstract class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, /* IMultiHitboxUser, IDynamicRideUser,*/ IRiftCreature {
+public abstract class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, IRiftCreature {
     private final RiftCreatureBuilder creatureType;
     private final RiftLibInventoryHandler creatureInventory;
     private final AnimationDataEntity animData;
@@ -151,6 +153,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         //disable default growth system
         if (this.getGrowingAge() < 0) this.setGrowingAge(0);
 
+        //server only operations
         if (!this.world.isRemote) {
             this.setAgeInTicks(this.getAgeInTicks() + 1);
 
@@ -495,27 +498,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             CreatureMoveBuilder creatureMoveBuilder = this.getCreatureMoves().getMoveBuilderCurrentMove();
             if (creatureMoveBuilder == null) return;
             creatureMoveBuilder.getOnMoveHitEffect().accept(this);
-        }, Side.SERVER, Side.CLIENT));
+        }, Side.SERVER));
         animationData.addAnimationMessageEffect("endMoveEffect", new AnimatableRunValue(this::resetCurrentMove, Side.CLIENT, Side.SERVER));
     }
-
-    //-----dynamic ride position methods-----
-    /*
-    @Override
-    public EntityLiving getDynamicRideUser() {
-        return this;
-    }
-
-    @Override
-    public DynamicRidePosList ridePosList() {
-        return null;
-    }
-
-    @Override
-    public void setRidePosition(DynamicRidePosList dynamicRidePosList) {
-
-    }
-     */
 
     //-----other useless events idk nor care about-----
     @Override

@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
-import anightdazingzoroark.prift.server.entity.Element;
+import anightdazingzoroark.prift.server.entity.creature.info.Element;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;

@@ -1,7 +1,7 @@
-package anightdazingzoroark.prift.server.entity.creature;
+package anightdazingzoroark.prift.server.entity.creature.info;
 
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
-import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
 import anightdazingzoroark.prift.util.MathUtil;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.nbt.NBTTagCompound;

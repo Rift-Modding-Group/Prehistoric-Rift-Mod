@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.server.entity;
+package anightdazingzoroark.prift.server.entity.creature.info;
 
 public enum CreatureDeployment {
     NONE,
