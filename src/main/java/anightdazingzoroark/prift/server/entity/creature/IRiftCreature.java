@@ -8,6 +8,9 @@ import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
 import net.minecraft.nbt.NBTTagCompound;
 
+/**
+ * This is more or less a helper interface for creature information.
+ * */
 public interface IRiftCreature {
     default CreatureNBTKeyword<?>[] getNBTKeywords() {
         return new CreatureNBTKeyword[]{

@@ -1,17 +1,18 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.entity.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.server.entity.creature.built.Stegosaurus;
 import anightdazingzoroark.prift.server.entity.creature.built.Tyrannosaurus;
-import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
-import anightdazingzoroark.prift.server.entity.serverModel.CreatureModel;
-import anightdazingzoroark.prift.util.FixedSizeList;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCommon;
 import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
+import anightdazingzoroark.riftlib.ray.IRayCreator;
+import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
+import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.math.AxisAlignedBB;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.HashMap;
@@ -22,8 +23,6 @@ import java.util.Map;
 public class RiftCreatureRegistry {
     //all creatures are stored here
     public static final HashMap<String, RiftCreatureBuilder> creatureBuilderMap = new HashMap<>();
-    //this is the main model to be used on both server and client for all creatures
-    public static final CreatureModel commonCreatureModel = new CreatureModel();
 
     public static RiftCreatureBuilder getCreatureBuilder(String name) {
         return creatureBuilderMap.get(name);
@@ -40,12 +39,16 @@ public class RiftCreatureRegistry {
             return;
         }
         //-----verify creature move builders next-----
-        for (Map.Entry<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> moveEntry : builder.getMoves().entrySet()) {
-            for (int index = 0; index < moveEntry.getValue().size(); index++) {
-                ImmutablePair<String, CreatureMoveBuilder> movePair = moveEntry.getValue().get(index);
-                if (movePair == null) continue;
-                if (!movePair.getRight().isValid()) {
-                    RiftInitialize.logger.warn("Move {} for creature type {} in phase '{}' is invalid!", movePair.getLeft(), name, moveEntry.getKey());
+        for (ImmutablePair<String, CreatureMoveBuilder> moveEntry : builder.getMoves()) {
+            if (!moveEntry.getValue().isValid()) {
+                RiftInitialize.logger.warn("Move {} for creature type {} in phase '{}' is invalid!", moveEntry.getKey(), name, moveEntry.getKey());
+                return;
+            }
+        }
+        for (Map.Entry<String, CreaturePhaseBuilder> phaseEntry : builder.getPhaseBuilderMaps().entrySet()) {
+            for (ImmutablePair<String, CreatureMoveBuilder> moveEntry: phaseEntry.getValue().getMoves()) {
+                if (!moveEntry.getValue().isValid()) {
+                    RiftInitialize.logger.warn("Move {} for creature type {} in phase '{}' is invalid!", moveEntry.getKey(), name, moveEntry.getKey());
                     return;
                 }
             }
@@ -71,48 +74,34 @@ public class RiftCreatureRegistry {
                         .setRetaliateWhenAttacked()
                         .setPhysicalReach(5)
                         .setCanSprintToAttack()
-                        .setMoves(new FixedSizeList.Builder<ImmutablePair<String, CreatureMoveBuilder>>(CreatureMoveStorage.usableMoveCount)
-                                .put(new ImmutablePair<>("bite", CreatureMoveCommon.standardMeleeMove.copy()
-                                        .setBasePower(50)
-                                        .setAnimNames("bite")
-                                ))
-                                .put(new ImmutablePair<>("stomp", new CreatureMoveBuilder()
-                                        .setBasePower(30)
-                                        .setRequireFindTargetToUse()
-                                        .setPhysical()
-                                        .setUseCanStopMovement()
-                                        .setCanUsePredicate(CreatureMoveCommon.generalMeleePredicate)
-                                        .setOnMoveHitEffect(creature -> {
-                                            AxisAlignedBB creatureAABB = creature.getEntityBoundingBox();
-                                            AxisAlignedBB stompRangeAABB = new AxisAlignedBB(
-                                                    creatureAABB.minX - creature.getCreatureType().getPhysicalReach(),
-                                                    creatureAABB.minY,
-                                                    creatureAABB.minZ - creature.getCreatureType().getPhysicalReach(),
-                                                    creatureAABB.maxX + creature.getCreatureType().getPhysicalReach(),
-                                                    creatureAABB.minY + 1,
-                                                    creatureAABB.maxZ + creature.getCreatureType().getPhysicalReach()
-                                            );
-
-                                            List<EntityLivingBase> entitiesInStompRange = creature.world.getEntitiesWithinAABB(
-                                                    EntityLivingBase.class, stompRangeAABB
-                                            );
-                                            for (EntityLivingBase entity : entitiesInStompRange) {
-                                                if (creature.isRelatedToEntity(entity)) continue;
-                                                if (entity.equals(creature)) continue;
-                                                creature.attackEntityAsMob(entity);
-                                            }
-                                        })
-                                        .setAnimNames("stomp")
-                                ))
-                                .build()
+                        .addUsableRay(
+                                "footStompRay",
+                                new RiftLibRayBuilder().setShapeImpactEllipse(1, 0, 1, 8, 2, 8, true)
+                                        .setRaySpeed(1D).setOnlyOneSegment(),
+                                (creature, rayOrigin, rayHitResult) -> {
+                                    for (Entity hitEntity : rayHitResult.hitEntities()) {
+                                        if (!(hitEntity instanceof EntityLivingBase hitEntityLivingBase)) continue;
+                                        creature.attackEntityAsMob(hitEntityLivingBase);
+                                    }
+                                }
                         )
-                        /*
-                        .setMoves(
-                                new CreatureMoveStorage.MoveHolder(CreatureMoveNew.BITE, "bite"),
-                                new CreatureMoveStorage.MoveHolder(CreatureMoveNew.STOMP, "stomp")
+                        //---moves---
+                        .addMove("bite", CreatureMoveCommon.standardMeleeMove.copy()
+                                .setBasePower(50)
+                                .setAnimNames("bite")
                         )
-                        .setInitMainUsableMoves(CreatureMoveNew.BITE, CreatureMoveNew.STOMP)
-                         */
+                        .addMove("stomp", new CreatureMoveBuilder()
+                                .setBasePower(30)
+                                .setRequireFindTargetToUse()
+                                .setPhysical()
+                                .setUseCanStopMovement()
+                                .setCanUsePredicate(CreatureMoveCommon.generalMeleePredicate)
+                                .setOnMoveHitEffect(creature -> {
+                                    if (!(creature instanceof IRayCreator<?> rayCreator)) return;
+                                    RiftLibRayHelper.createRay(rayCreator, "footStompRay", "stompOrigin");
+                                })
+                                .setAnimNames("stomp")
+                        )
         );
         registerCreatureType(
                 "stegosaurus",

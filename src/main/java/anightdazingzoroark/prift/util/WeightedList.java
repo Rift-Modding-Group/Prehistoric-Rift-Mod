@@ -1,5 +1,7 @@
 package anightdazingzoroark.prift.util;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.*;
 
 public class WeightedList<T> {
@@ -22,6 +24,7 @@ public class WeightedList<T> {
         return this;
     }
 
+    @Nullable
     public T next() {
         int value = (int)(this.random.nextDouble() * this.total);
         Map.Entry<Integer, List<T>> higherEntry = this.map.higherEntry(value);

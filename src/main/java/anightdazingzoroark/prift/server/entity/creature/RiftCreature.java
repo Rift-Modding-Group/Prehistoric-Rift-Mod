@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.server.entity.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
 import anightdazingzoroark.prift.util.FixedSizeList;
@@ -13,6 +14,7 @@ import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
 import anightdazingzoroark.prift.util.MathUtil;
+import anightdazingzoroark.prift.util.TriConsumer;
 import anightdazingzoroark.riftlib.core.AnimatableRunValue;
 import anightdazingzoroark.riftlib.core.AnimatableValue;
 import anightdazingzoroark.riftlib.core.IAnimatable;
@@ -21,6 +23,9 @@ import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
 import anightdazingzoroark.riftlib.core.manager.AbstractAnimationDataEntity;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
+import anightdazingzoroark.riftlib.ray.IRayCreator;
+import anightdazingzoroark.riftlib.ray.RiftLibRay;
+import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.attributes.IAttribute;
@@ -34,20 +39,26 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 public abstract class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, IRiftCreature {
+    @NotNull
     private final RiftCreatureBuilder creatureType;
+    @NotNull
     private final RiftLibInventoryHandler creatureInventory;
+    @NotNull
     private final AnimationDataEntity animData;
 
     public static final IAttribute ELEMENTAL_DAMAGE_ATTRIBUTE = new RangedAttribute(null, "rift.elementalDamage", 2.0, 0.0, 2048.0);
@@ -64,6 +75,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     //manage sprint and sprint to attack
     public int sprintToAttackCooldown; //manages a creature's ability to sprint based on whether or not it attacked before
 
+    //ray specific params
+    protected Map<String, RiftLibRayBuilder> rayMap;
+    protected Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
+
     public RiftCreature(World worldIn, String creatureName) {
         super(worldIn);
         this.creatureType = RiftCreatureRegistry.getCreatureBuilder(creatureName);
@@ -72,6 +87,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.setSize(this.creatureType.getMainHitboxSize()[0], this.creatureType.getMainHitboxSize()[1]);
         this.creatureInventory = new RiftLibInventoryHandler(this.creatureType.getInventorySize());
         if (!this.creatureType.getCanBeKnockedBack()) this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
+
+        if (this instanceof IRayCreator<?> && this.creatureType.getRayMap() != null && this.creatureType.getRayHitEffectMap() != null) {
+            //todo: add exception if this creature is rayuser instance
+            //but !(this.creatureType.getRayMap() != null && this.creatureType.getRayHitEffectMap() != null) is true
+            //if (this.creatureType.getRayMap() == null)
+            this.rayMap = this.creatureType.getRayMap();
+            this.rayHitEffectMap = this.creatureType.getRayHitEffectMap();
+        }
 
         /*
         if (this.creatureType.getCanSprintToAttack()) {
@@ -292,6 +315,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     //-----IRiftCreature boilerplate stuff-----
     @Override
+    @NotNull
     public RiftCreatureBuilder getCreatureType() {
         return this.creatureType;
     }
@@ -349,6 +373,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     @Override
+    @NotNull
     public RiftLibInventoryHandler getCreatureInventory() {
         return this.creatureInventory;
     }
@@ -413,68 +438,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     public void initializeAnimationData(AnimationDataEntity animationData) {
         //-----create animation controllers-----
-        //this is for creating all the animations for moves to add to the animation controller that
-        //creates animations for moves
-        Map<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> creatureMoves = this.creatureType.getMoves();
-        List<AnimationControllerState<AnimationDataEntity>> creatureMovesStates = new ArrayList<>();
-
-        //add the initial state
-        AnimationControllerState<AnimationDataEntity> initialState = new AnimationControllerState<>("default");
-        creatureMovesStates.add(initialState);
-
-        //add other anim states for each move
-        for (Map.Entry<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> moveInPhaseEntry : creatureMoves.entrySet()) {
-            String phaseName = moveInPhaseEntry.getKey();
-
-            for (int index = 0; index < moveInPhaseEntry.getValue().size(); index++) {
-                ImmutablePair<String, CreatureMoveBuilder> moveEntry = moveInPhaseEntry.getValue().get(index);
-                if (moveEntry == null) continue;
-
-                //the name of a move will be used as the animation state
-                String moveName = moveEntry.getLeft();
-                //for each phase, there will be different phase names
-                if (!phaseName.isEmpty()) moveName = moveName + phaseName;
-
-                //the names of the anims for the moves will be within an anim state
-                //and are to be randomly chosen within
-                String[] moveAnimNames = moveEntry.getRight().getAnimNames();
-
-                //transition from initial state to a state associated with the move
-                final String finalMoveName = moveName;
-                initialState.addStateTransition(moveName, animData -> this.getCurrentMove().equals(finalMoveName));
-
-                //create the anim state for the move
-                AnimationControllerState<AnimationDataEntity> moveState = new AnimationControllerState<AnimationDataEntity>(moveName)
-                        .addStateTransition("default", animData -> animData.allAnimationsFinished("moveUse"))
-                        .addExitEffect(new AnimatableValue("'endMoveEffect'"));
-
-                //if the move state has multiple animation names, make it so that upon entry it generates a random number
-                //to then use
-                if (moveAnimNames.length > 1) {
-                    moveState.addEntryEffect(new AnimatableValue("chosenMove", (double) this.rand.nextInt(moveAnimNames.length)));
-                }
-
-                //iterate over each of the anim names and put them in the state for the move
-                for (int indexx = 0; indexx < moveAnimNames.length; indexx++) {
-                    String moveAnimName = moveAnimNames[indexx];
-                    moveAnimName = "animation." + this.creatureType.getName() + "." + moveAnimName;
-
-                    //only 1 move, just add the move anim name
-                    if (moveAnimNames.length == 1) moveState.addAnimation(moveAnimName);
-                        //multiple moves, add the move anim name and a predicate that uses the chosenMove molang variable above
-                    else {
-                        int finalIndexx = indexx;
-                        moveState.addAnimation(moveAnimName, animData -> {
-                            return animData.getVariable("chosenMove") == finalIndexx;
-                        });
-                    }
-                }
-
-                //now add the final state
-                creatureMovesStates.add(moveState);
-            }
-        }
-
+        //---for normal stuff---
         animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "movement", "default",
                 new AnimationControllerState<AnimationDataEntity>("default")
                         .addStateTransition("moving", AbstractAnimationDataEntity::isMoving),
@@ -489,9 +453,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                         .addAnimation("animation."+this.creatureType.getName()+".sprint_pose")
                         .addStateTransition("default", animData -> !this.isSprinting())
         ));
-        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "moveUse", "default",
-                creatureMovesStates.toArray(new AnimationControllerState[0])
-        ));
+        //---for moves---
+        //start with default
+        this.initAnimControllerForPhase(animationData, "");
+        //now to the other phases
+        for (Map.Entry<String, CreaturePhaseBuilder> phase : this.creatureType.getPhaseBuilderMaps().entrySet()) {
+            this.initAnimControllerForPhase(animationData, phase.getKey());
+        }
 
         //-----create animation message effects-----
         animationData.addAnimationMessageEffect("moveHitEffect", new AnimatableRunValue(() -> {
@@ -500,6 +468,61 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             creatureMoveBuilder.getOnMoveHitEffect().accept(this);
         }, Side.SERVER));
         animationData.addAnimationMessageEffect("endMoveEffect", new AnimatableRunValue(this::resetCurrentMove, Side.CLIENT, Side.SERVER));
+    }
+
+    private void initAnimControllerForPhase(AnimationDataEntity animationData, @NotNull String phase) {
+        List<AnimationControllerState<AnimationDataEntity>> creatureMovesStates = new ArrayList<>();
+        List<ImmutablePair<String, CreatureMoveBuilder>> moveBuilderMap;
+        if (phase.isEmpty()) moveBuilderMap = this.creatureType.getMoves();
+        else moveBuilderMap = this.creatureType.getPhaseBuilderMaps().get(phase).getMoves();
+
+        //add the initial state
+        AnimationControllerState<AnimationDataEntity> initialState = new AnimationControllerState<>("default");
+        creatureMovesStates.add(initialState);
+
+        //add other anim states for each move
+        for (ImmutablePair<String, CreatureMoveBuilder> moveEntry : moveBuilderMap) {
+            final String moveName = moveEntry.getKey();
+
+            //transition from initial state to a state associated with the move
+            initialState.addStateTransition(moveName, animData -> this.getCurrentMove().equals(moveName));
+
+            //create state for move
+            AnimationControllerState<AnimationDataEntity> moveState = new AnimationControllerState<AnimationDataEntity>(moveName)
+                    .addStateTransition("default", animData -> animData.allAnimationsFinished("moveUse"))
+                    .addExitEffect(new AnimatableValue("'endMoveEffect'"));
+
+            //if the move state has multiple animation names, make it so that upon entry it generates a random number
+            //to then use
+            String[] moveAnimNames = moveEntry.getValue().getAnimNames();
+            if (moveAnimNames.length > 1) {
+                moveState.addEntryEffect(new AnimatableValue("chosenMove", (double) this.rand.nextInt(moveAnimNames.length)));
+            }
+
+            //iterate over each of the anim names and put them in the state for the move
+            for (int index = 0; index < moveAnimNames.length; index++) {
+                String moveAnimName = moveAnimNames[index];
+                moveAnimName = "animation." + this.creatureType.getName() + "." + moveAnimName;
+
+                //only 1 move, just add the move anim name
+                if (moveAnimNames.length == 1) moveState.addAnimation(moveAnimName);
+                    //multiple moves, add the move anim name and a predicate that uses the chosenMove molang variable above
+                else {
+                    int finalIndex = index;
+                    moveState.addAnimation(moveAnimName, animData -> {
+                        return animData.getVariable("chosenMove") == finalIndex;
+                    });
+                }
+            }
+
+            //now add the final state
+            creatureMovesStates.add(moveState);
+        }
+
+        //now create animation controller for phase
+        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "moveUse"+phase, "default",
+                creatureMovesStates.toArray(new AnimationControllerState[0])
+        ));
     }
 
     //-----other useless events idk nor care about-----

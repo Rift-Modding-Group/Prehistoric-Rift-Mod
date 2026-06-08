@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBuilder> {
     private String creatureName;
-    private Map<String, CreaturePhaseBuilder> creaturePhaseBuilderMap;
+    private final Map<String, CreaturePhaseBuilder> creaturePhaseBuilderMap = new HashMap<>();
     private final Map<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> movesPerPhase = new HashMap<>();
 
     public RiftCreatureBuilder(Class<? extends RiftCreature> creatureClass) {
@@ -41,52 +41,11 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
      * */
     public RiftCreatureBuilder addPhase(String phaseName, CreaturePhaseBuilder phaseBuilder) {
         if (this.locked) return this;
-
-        if (this.creaturePhaseBuilderMap == null) {
-            this.creaturePhaseBuilderMap = new HashMap<>();
-        }
         this.creaturePhaseBuilderMap.put(phaseName, phaseBuilder.setPhaseName(phaseName));
         return this;
     }
 
     public Map<String, CreaturePhaseBuilder> getPhaseBuilderMaps() {
         return this.creaturePhaseBuilderMap;
-    }
-
-    public boolean hasPhases() {
-        return this.creaturePhaseBuilderMap != null;
-    }
-
-    /**
-     * Initialize move list for the main phase
-     * */
-    public RiftCreatureBuilder setMoves(FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>> mainMoves) {
-        if (this.locked) return this;
-
-        this.movesPerPhase.put("", mainMoves);
-        return this;
-    }
-
-    /**
-     * Set usable move lists for each creature phase
-     * */
-    public RiftCreatureBuilder setMovesForPhase(String phase, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>> phaseMoves) {
-        if (this.locked) return this;
-        if (phase.isEmpty()) return this;
-
-        this.movesPerPhase.put(phase, phaseMoves);
-        return this;
-    }
-
-    /**
-     * Getter for usable moves per each phase
-     * */
-    public Map<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> getMoves() {
-        return this.movesPerPhase;
-    }
-
-    @Override
-    public boolean isValid() {
-        return super.isValid() && !this.movesPerPhase.isEmpty();
     }
 }

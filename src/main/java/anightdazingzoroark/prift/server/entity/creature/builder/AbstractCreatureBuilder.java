@@ -1,8 +1,21 @@
 package anightdazingzoroark.prift.server.entity.creature.builder;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
+import anightdazingzoroark.prift.util.FixedSizeList;
+import anightdazingzoroark.prift.util.TriConsumer;
+import anightdazingzoroark.riftlib.ray.RiftLibRay;
+import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
+import net.minecraft.util.math.BlockPos;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 //this class defines creature information
@@ -17,6 +30,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private RiftCreatureEnums.CreatureDiet creatureDiet;
     private int[] spawnEggColors;
     private float[] scaleRangeForAge;
+    private final List<ImmutablePair<String, CreatureMoveBuilder>> moveList = new ArrayList<>();
 
     //the following can be left alone
     private float[] mainHitboxSize = new float[]{1f, 1f};
@@ -33,6 +47,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private int daysUntilAdult = 1;
     private int physicalReach = 4;
     private boolean canSprintToAttack;
+    private Map<String, RiftLibRayBuilder> rayMap;
+    private Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
 
     public AbstractCreatureBuilder(Class<? extends RiftCreature> creatureClass) {
         this.creatureClass = creatureClass;
@@ -131,6 +147,20 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     public float[] getScaleRangeForAge() {
         return this.scaleRangeForAge;
+    }
+
+    /**
+     * Set a map containing the moves that this creature can use. Key is the name,
+     * value is the move builder for that move.
+     * */
+    public T addMove(String name, CreatureMoveBuilder moveBuilder) {
+        if (this.locked) return this.getThis();
+        this.moveList.add(new ImmutablePair<>(name, moveBuilder));
+        return this.getThis();
+    }
+
+    public List<ImmutablePair<String, CreatureMoveBuilder>> getMoves() {
+        return this.moveList;
     }
 
     /**
@@ -345,6 +375,31 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     }
 
     /**
+     * Create a map of RiftLibrary rays that this creature will use.
+     * */
+    public T addUsableRay(@NotNull String name, @NotNull RiftLibRayBuilder builder, @NotNull TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult> rayHitEffect) {
+        if (this.locked) return this.getThis();
+
+        if (this.rayMap == null || this.rayHitEffectMap == null) {
+            this.rayMap = new HashMap<>();
+            this.rayHitEffectMap = new HashMap<>();
+        }
+        this.rayMap.put(name, builder);
+        this.rayHitEffectMap.put(name, rayHitEffect);
+        return this.getThis();
+    }
+
+    @Nullable
+    public Map<String, RiftLibRayBuilder> getRayMap() {
+        return this.rayMap;
+    }
+
+    @Nullable
+    public Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> getRayHitEffectMap() {
+        return this.rayHitEffectMap;
+    }
+
+    /**
      * Get validity based on if all params are not null
      * */
     public boolean isValid() {
@@ -353,6 +408,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
                 && this.creatureCategory != null
                 && this.creatureDiet != null
                 && this.spawnEggColors != null
-                && this.scaleRangeForAge != null;
+                && this.scaleRangeForAge != null
+                && !this.moveList.isEmpty();
     }
 }

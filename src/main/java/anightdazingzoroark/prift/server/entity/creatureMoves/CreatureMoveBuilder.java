@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.server.entity.creature.info.Element;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -121,11 +122,13 @@ public class CreatureMoveBuilder {
      * which the move will be used. Higher priority values means the move will be more likely
      * to be used. A negative priority means it will never be used.
      * */
+    @Deprecated
     public CreatureMoveBuilder setCanUsePredicate(BiFunction<RiftCreature, Entity, Integer> canUsePredicate) {
         this.canUsePredicate = canUsePredicate;
         return this;
     }
 
+    @Deprecated
     public BiFunction<RiftCreature, Entity, Integer> getCanUsePredicate() {
         return this.canUsePredicate;
     }

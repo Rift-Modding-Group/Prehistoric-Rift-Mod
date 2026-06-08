@@ -21,7 +21,10 @@ public class ServerProxy {
 
     public void preInit(FMLPreInitializationEvent e) {
         registryPrimer = new InternalRegistryPrimer();
+
+        //register events
         MinecraftForge.EVENT_BUS.register(new PrimerEventHandler(registryPrimer));
+        MinecraftForge.EVENT_BUS.register(new ServerEvents());
 
         //register entities
         RiftCreatureRegistry.createCreatures();

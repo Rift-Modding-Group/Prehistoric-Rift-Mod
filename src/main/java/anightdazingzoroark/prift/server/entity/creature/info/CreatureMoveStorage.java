@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuil
 import net.minecraft.nbt.NBTTagCompound;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,41 +44,46 @@ public class CreatureMoveStorage {
     }
 
     //to be used by creatures when on their own
-    public FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>> getUsableMoves() {
-        return this.creatureType.getMoves().get(this.creaturePhase);
+    //phase name has no use yet since no creatures have phases yet
+    public List<ImmutablePair<String, CreatureMoveBuilder>> getUsableMoves() {
+        if (this.creaturePhase.isEmpty()) return this.creatureType.getMoves();
+        else return this.creatureType.getPhaseBuilderMaps().get(this.creaturePhase).getMoves();
     }
 
     public CreatureMoveBuilder getMoveBuilderCurrentMove() {
         return this.getUsableMoveBuilder(this.creaturePhase, this.currentMove);
     }
 
+    @Nullable
     public CreatureMoveBuilder getUsableMoveBuilder(String moveName) {
         return this.getUsableMoveBuilder("", moveName);
     }
 
+    //phase name has no use yet since no creatures have phases yet
+    @Nullable
     public CreatureMoveBuilder getUsableMoveBuilder(String phaseName, String moveName) {
-        for (Map.Entry<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> entry : this.creatureType.getMoves().entrySet()) {
-            if (!entry.getKey().equals(phaseName)) continue;
+        List<ImmutablePair<String, CreatureMoveBuilder>> moveMap;
+        if (phaseName.isEmpty()) moveMap = this.creatureType.getMoves();
+        else moveMap = this.creatureType.getPhaseBuilderMaps().get(phaseName).getMoves();
 
-            for (int index = 0; index < entry.getValue().size(); index++) {
-                ImmutablePair<String, CreatureMoveBuilder> moveBuilderPair = entry.getValue().get(index);
-                if (moveBuilderPair.getLeft().equals(moveName)) return moveBuilderPair.getRight();
-            }
+        for (ImmutablePair<String, CreatureMoveBuilder> moveEntry : moveMap) {
+            if (!moveEntry.getKey().equals(moveName)) continue;
+            return moveEntry.getValue();
         }
         return null;
     }
 
     //to be used by players when commanding a creature to use a move
-    public FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>> getUsableMovesByPlayer() {
+    public List<ImmutablePair<String, CreatureMoveBuilder>> getUsableMovesByPlayer() {
         //safety net
         if (this.currentUsableMoves >= 2 || this.currentUsableMoves < 0) this.currentUsableMoves = 0;
 
-        FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>> movesFromCurrentPhase = this.creatureType.getMoves().get(this.creaturePhase);
+        List<ImmutablePair<String, CreatureMoveBuilder>> movesFromCurrentPhase = this.getUsableMoves();
         if (this.currentUsableMoves == 0) {
-            return movesFromCurrentPhase.sublist(0, 3);
+            return movesFromCurrentPhase.subList(0, Math.min(3, movesFromCurrentPhase.size()));
         }
         else if (this.currentUsableMoves == 1) {
-            return movesFromCurrentPhase.sublist(3, 6);
+            return movesFromCurrentPhase.subList(3, Math.min(6, movesFromCurrentPhase.size()));
         }
         return null;
     }
@@ -85,7 +91,7 @@ public class CreatureMoveStorage {
     //only matters when player is controlling the creature, allows to swap which moves they
     //can use via mouse
     public void switchUsableMoves() {
-        if (this.currentUsableMoves <= 0) this.currentUsableMoves = 1;
+        if (this.currentUsableMoves == 0 && this.getUsableMoves().size() >= 3) this.currentUsableMoves = 1;
         else this.currentUsableMoves = 0;
     }
 

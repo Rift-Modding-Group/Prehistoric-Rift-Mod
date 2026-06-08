@@ -237,7 +237,10 @@
 					"pivot": [-6, 1, 13.25],
 					"cubes": [
 						{"origin": [-7.5, 0, 10.25], "size": [3, 2, 6], "uv": [62, 37]}
-					]
+					],
+					"locators": {
+						"stompOrigin": [-6, 8, 13]
+					}
 				},
 				{
 					"name": "rightLeg",
