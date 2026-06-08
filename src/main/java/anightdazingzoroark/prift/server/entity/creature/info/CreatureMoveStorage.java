@@ -2,7 +2,9 @@ package anightdazingzoroark.prift.server.entity.creature.info;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.util.FixedSizeList;
+import anightdazingzoroark.prift.server.entity.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveSelector;
 import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
 import net.minecraft.nbt.NBTTagCompound;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -48,6 +50,15 @@ public class CreatureMoveStorage {
     public List<ImmutablePair<String, CreatureMoveBuilder>> getUsableMoves() {
         if (this.creaturePhase.isEmpty()) return this.creatureType.getMoves();
         else return this.creatureType.getPhaseBuilderMaps().get(this.creaturePhase).getMoves();
+    }
+
+    @NotNull
+    public CreatureMoveSelector getMoveSelector() {
+        if (this.creaturePhase.isEmpty()) return this.creatureType.getMoveSelector();
+
+        CreaturePhaseBuilder phaseBuilder = this.creatureType.getPhaseBuilderMaps().get(this.creaturePhase);
+        if (phaseBuilder == null) return this.creatureType.getMoveSelector();
+        return phaseBuilder.getMoveSelector();
     }
 
     public CreatureMoveBuilder getMoveBuilderCurrentMove() {

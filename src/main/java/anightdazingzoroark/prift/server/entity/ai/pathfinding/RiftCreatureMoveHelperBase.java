@@ -4,12 +4,12 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.ai.EntityMoveHelper;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class RiftCreatureMoveHelperBaseNew extends EntityMoveHelper {
+public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
     protected final RiftCreature creature;
     @NotNull
     protected CreatureAction creatureAction = CreatureAction.WAIT;
 
-    public RiftCreatureMoveHelperBaseNew(RiftCreature creature) {
+    public RiftCreatureMoveHelperBase(RiftCreature creature) {
         super(creature);
         this.creature = creature;
     }

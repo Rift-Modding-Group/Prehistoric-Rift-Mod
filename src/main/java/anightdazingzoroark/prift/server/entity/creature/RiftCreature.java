@@ -3,12 +3,10 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.server.entity.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
-import anightdazingzoroark.prift.util.FixedSizeList;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
-import anightdazingzoroark.prift.server.entity.ai.RiftLookAroundNew;
-import anightdazingzoroark.prift.server.entity.ai.RiftUnmountedUseMoveNew;
-import anightdazingzoroark.prift.server.entity.ai.RiftWanderNew;
-import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelperNew;
+import anightdazingzoroark.prift.server.entity.ai.RiftUnmountedUseMove;
+import anightdazingzoroark.prift.server.entity.ai.RiftWander;
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
@@ -23,10 +21,12 @@ import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
 import anightdazingzoroark.riftlib.core.manager.AbstractAnimationDataEntity;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
+import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
 import anightdazingzoroark.riftlib.ray.RiftLibRay;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import net.minecraft.entity.*;
+import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
@@ -49,9 +49,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 public abstract class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, IRiftCreature {
     @NotNull
@@ -72,8 +72,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<CreatureStatsStorage> CREATURE_STATS = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.CREATURE_STATS_STORAGE);
     private static final DataParameter<String> CREATURE_PHASE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.STRING);
 
-    //manage sprint and sprint to attack
+    //custom property values, which can be called and manipulated from a creature builder
+    private final Map<String, AbstractPropertyValue<?>> propertyValueMap;
+
+    //server side primitive params
     public int sprintToAttackCooldown; //manages a creature's ability to sprint based on whether or not it attacked before
+    public int timeSinceAggression; //how much time ever since it encountered a target
 
     //ray specific params
     protected Map<String, RiftLibRayBuilder> rayMap;
@@ -83,9 +87,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         super(worldIn);
         this.creatureType = RiftCreatureRegistry.getCreatureBuilder(creatureName);
         this.animData = new AnimationDataEntity(this);
-        this.moveHelper = new RiftCreatureMoveHelperNew(this);
+        this.moveHelper = new RiftCreatureMoveHelper(this);
         this.setSize(this.creatureType.getMainHitboxSize()[0], this.creatureType.getMainHitboxSize()[1]);
         this.creatureInventory = new RiftLibInventoryHandler(this.creatureType.getInventorySize());
+
+        if (this.creatureType.getPropertyValueMap() != null) this.propertyValueMap = new HashMap<>(this.creatureType.getPropertyValueMap());
+        else this.propertyValueMap = Map.of();
+
         if (!this.creatureType.getCanBeKnockedBack()) this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
 
         if (this instanceof IRayCreator<?> && this.creatureType.getRayMap() != null && this.creatureType.getRayHitEffectMap() != null) {
@@ -164,9 +172,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         //temporary, will use the configs soon
         this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityCow.class, true));
 
-        this.tasks.addTask(1, new RiftUnmountedUseMoveNew(this));
-        this.tasks.addTask(2, new RiftWanderNew(this, 1D));
-        this.tasks.addTask(3, new RiftLookAroundNew(this));
+        this.tasks.addTask(1, new RiftUnmountedUseMove(this));
+        this.tasks.addTask(2, new RiftWander(this, 1D));
+        this.tasks.addTask(3, new EntityAILookIdle(this) {
+            @Override
+            public void resetTask() {
+                this.idleTime = 0;
+            }
+        });
     }
 
     @Override
@@ -178,7 +191,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
         //server only operations
         if (!this.world.isRemote) {
+            //set age
             this.setAgeInTicks(this.getAgeInTicks() + 1);
+
+            //tick time since aggression
+            if (this.getAttackTarget() != null) this.timeSinceAggression++;
+            else this.timeSinceAggression = 0;
 
             //tick move cooldowns
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
@@ -284,6 +302,23 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             return this.isTamed() && this.getOwner() != null && this.getOwner().equals(entityPlayer);
         }
         return false;
+    }
+
+    //-----properties management-----
+    public <I> I getProperty(String key) {
+        if (!this.propertyValueMap.containsKey(key)) {
+            throw new UnsupportedOperationException("Key " + key + " does not exist in property map for " + this.creatureType.getName() + "!");
+        }
+        return (I) this.propertyValueMap.get(key);
+    }
+
+    public <I> void setProperty(String key, I value) {
+        AbstractPropertyValue<I> propertyValue = this.getProperty(key);
+        if (propertyValue.getHeldClass() != value.getClass()) {
+            throw new UnsupportedOperationException("Key " + key + " does not represent given value " + value + "!");
+        }
+        propertyValue.setValue(value);
+        //todo: make this able to sync to client as well
     }
 
     //-----creature phase management-----
@@ -467,7 +502,14 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (creatureMoveBuilder == null) return;
             creatureMoveBuilder.getOnMoveHitEffect().accept(this);
         }, Side.SERVER));
-        animationData.addAnimationMessageEffect("endMoveEffect", new AnimatableRunValue(this::resetCurrentMove, Side.CLIENT, Side.SERVER));
+        animationData.addAnimationMessageEffect("endMoveEffect", new AnimatableRunValue(() -> {
+            //execute on move end
+            CreatureMoveBuilder creatureMoveBuilder = this.getCreatureMoves().getMoveBuilderCurrentMove();
+            if (creatureMoveBuilder != null && creatureMoveBuilder.getOnMoveEndEffect() != null) creatureMoveBuilder.getOnMoveEndEffect().accept(this);
+
+            //reset current move
+            this.resetCurrentMove();
+        }, Side.CLIENT, Side.SERVER));
     }
 
     private void initAnimControllerForPhase(AnimationDataEntity animationData, @NotNull String phase) {

@@ -4,16 +4,13 @@ import anightdazingzoroark.prift.server.entity.creature.info.Element;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public class CreatureMoveBuilder {
     //all the following variables are required and must not be null, validated in isValid()
     private CreatureMoveHelper.MoveType moveType;
-    private BiFunction<RiftCreature, Entity, Integer> canUsePredicate;
     private Consumer<RiftCreature> onMoveHitEffect;
     private String[] animNames;
 
@@ -26,6 +23,7 @@ public class CreatureMoveBuilder {
     private int elementEffectStrength;
     private BiConsumer<RiftCreature, Entity> onTargetHitEffect;
     private BiConsumer<RiftCreature, BlockPos> onBlockHitEffect;
+    private Consumer<RiftCreature> onMoveEndEffect;
     private boolean useCanStopMovement;
 
     /**
@@ -116,24 +114,6 @@ public class CreatureMoveBuilder {
     }
 
     /**
-     * Set the conditions in which the creature can use this move. This affects when on its own
-     * and when being ridden. The function parameters are the creature that will use it and the
-     * potential target it can attack. The return value is an integer that represents the priority in
-     * which the move will be used. Higher priority values means the move will be more likely
-     * to be used. A negative priority means it will never be used.
-     * */
-    @Deprecated
-    public CreatureMoveBuilder setCanUsePredicate(BiFunction<RiftCreature, Entity, Integer> canUsePredicate) {
-        this.canUsePredicate = canUsePredicate;
-        return this;
-    }
-
-    @Deprecated
-    public BiFunction<RiftCreature, Entity, Integer> getCanUsePredicate() {
-        return this.canUsePredicate;
-    }
-
-    /**
      * Set what will happen when the move's animation reaches the "hit" phase
      * */
     public CreatureMoveBuilder setOnMoveHitEffect(Consumer<RiftCreature> onMoveHitEffect) {
@@ -143,6 +123,18 @@ public class CreatureMoveBuilder {
 
     public Consumer<RiftCreature> getOnMoveHitEffect() {
         return this.onMoveHitEffect;
+    }
+
+    /**
+     * Add additional effects for what will happen when the move ends.
+     * */
+    public CreatureMoveBuilder setOnMoveEndEffect(Consumer<RiftCreature> onMoveEnd) {
+        this.onMoveEndEffect = onMoveEnd;
+        return this;
+    }
+
+    public Consumer<RiftCreature> getOnMoveEndEffect() {
+        return this.onMoveEndEffect;
     }
 
     /**
@@ -187,7 +179,7 @@ public class CreatureMoveBuilder {
      * Get validity based on if some params are not null
      * */
     public boolean isValid() {
-        return this.moveType != null && this.canUsePredicate != null && this.onMoveHitEffect != null && this.animNames != null && this.animNames.length > 0;
+        return this.moveType != null && this.onMoveHitEffect != null && this.animNames != null && this.animNames.length > 0;
     }
 
     /**
@@ -197,7 +189,6 @@ public class CreatureMoveBuilder {
         CreatureMoveBuilder toReturn = new CreatureMoveBuilder();
 
         toReturn.moveType = this.moveType;
-        toReturn.canUsePredicate = this.canUsePredicate;
         toReturn.onMoveHitEffect = this.onMoveHitEffect;
         toReturn.animNames = this.animNames;
 

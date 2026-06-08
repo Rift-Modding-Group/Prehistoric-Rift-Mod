@@ -13,7 +13,10 @@
 			"bones": [
 				{
 					"name": "base",
-					"pivot": [0, 0, 0]
+					"pivot": [0, 0, 0],
+					"locators": {
+						"roarOrigin": [0, 8, 0]
+					}
 				},
 				{
 					"name": "body",
@@ -50,7 +53,7 @@
 				{
 					"name": "tail1",
 					"parent": "tail0",
-					"pivot": [0, 0, 0],
+					"pivot": [0, 18.25, 27],
 					"cubes": [
 						{"origin": [-2.5, 13.33716, 25.99619], "size": [5, 6, 12], "pivot": [0, 18.25, 27], "rotation": [-5, 0, 0], "uv": [28, 35]}
 					],

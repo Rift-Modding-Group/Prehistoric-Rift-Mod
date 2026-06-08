@@ -4,19 +4,21 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.server.entity.creature.built.Stegosaurus;
 import anightdazingzoroark.prift.server.entity.creature.built.Tyrannosaurus;
+import anightdazingzoroark.prift.server.entity.creature.info.Element;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCommon;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveSelector;
 import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 //this registers creatures
@@ -74,10 +76,27 @@ public class RiftCreatureRegistry {
                         .setRetaliateWhenAttacked()
                         .setPhysicalReach(5)
                         .setCanSprintToAttack()
+                        //---rays---
                         .addUsableRay(
                                 "footStompRay",
-                                new RiftLibRayBuilder().setShapeImpactEllipse(1, 0, 1, 8, 2, 8, true)
+                                new RiftLibRayBuilder().setShapeImpactEllipse(1, 0, 8, 2, true)
                                         .setRaySpeed(1D).setOnlyOneSegment(),
+                                (creature, rayOrigin, rayHitResult) -> {
+                                    for (Entity hitEntity : rayHitResult.hitEntities()) {
+                                        if (!(hitEntity instanceof EntityLivingBase hitEntityLivingBase)) continue;
+                                        creature.attackEntityAsMob(hitEntityLivingBase);
+                                    }
+                                }
+                        )
+                        .addUsableRay(
+                                "roarRay",
+                                new RiftLibRayBuilder().setShapeImpactSphere(0, 12, true)
+                                        .setBreakBlockCondition((rayCreator, blockPos) -> {
+                                            IBlockState blockState = rayCreator.getRayCreator().world.getBlockState(blockPos);
+                                            float hardness = blockState.getBlockHardness(rayCreator.getRayCreator().world, blockPos);
+                                            return hardness <= 1f && hardness >= 0f;
+                                        })
+                                        .setRaySpeed(1.5D).setImpactCreationSpeed(0.25D),
                                 (creature, rayOrigin, rayHitResult) -> {
                                     for (Entity hitEntity : rayHitResult.hitEntities()) {
                                         if (!(hitEntity instanceof EntityLivingBase hitEntityLivingBase)) continue;
@@ -95,12 +114,31 @@ public class RiftCreatureRegistry {
                                 .setRequireFindTargetToUse()
                                 .setPhysical()
                                 .setUseCanStopMovement()
-                                .setCanUsePredicate(CreatureMoveCommon.generalMeleePredicate)
                                 .setOnMoveHitEffect(creature -> {
                                     if (!(creature instanceof IRayCreator<?> rayCreator)) return;
                                     RiftLibRayHelper.createRay(rayCreator, "footStompRay", "stompOrigin");
                                 })
                                 .setAnimNames("stomp")
+                        )
+                        .addMove("power_roar", new CreatureMoveBuilder()
+                                .setBasePower(20)
+                                .setElemental(Element.SONIC, 1, 0)
+                                .setUseCanStopMovement()
+                                .setOnMoveHitEffect(creature -> {
+                                    if (!(creature instanceof IRayCreator<?> rayCreator)) return;
+                                    RiftLibRayHelper.createRay(rayCreator, "roarRay", "roarOrigin");
+                                })
+                                .setOnMoveEndEffect(creature -> {
+                                    if (!(creature instanceof IRayCreator<?> rayCreator)) return;
+                                    RiftLibRayHelper.killRay(rayCreator, "roarRay");
+                                })
+                                .setAnimNames("power_roar")
+                        )
+                        //---attack ai---
+                        .setMoveSelector(new CreatureMoveSelector()
+                                .addRangedMove("power_roar", 1, 16D)
+                                .addMeleeMove("bite", 3)
+                                .addMeleeMove("stomp", 3)
                         )
         );
         registerCreatureType(

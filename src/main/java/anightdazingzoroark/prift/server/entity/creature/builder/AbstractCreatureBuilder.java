@@ -1,10 +1,9 @@
 package anightdazingzoroark.prift.server.entity.creature.builder;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
-import anightdazingzoroark.prift.util.FixedSizeList;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveSelector;
 import anightdazingzoroark.prift.util.TriConsumer;
 import anightdazingzoroark.riftlib.ray.RiftLibRay;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
@@ -47,6 +46,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private int daysUntilAdult = 1;
     private int physicalReach = 4;
     private boolean canSprintToAttack;
+    private CreatureMoveSelector moveSelector = new CreatureMoveSelector();
     private Map<String, RiftLibRayBuilder> rayMap;
     private Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
 
@@ -346,7 +346,10 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     /**
      * Get the distance in blocks from which this creature can use its contact moves
+     *
+     * (will replace with individual reaches for hitboxes when i add them back)
      * */
+    @Deprecated
     public T setPhysicalReach(int value) {
         if (this.locked) return this.getThis();
 
@@ -354,6 +357,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
         return this.getThis();
     }
 
+    @Deprecated
     public int getPhysicalReach() {
         return this.physicalReach;
     }
@@ -372,6 +376,21 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     public boolean getCanSprintToAttack() {
         return this.canSprintToAttack;
+    }
+
+    /**
+     * Set how this creature chooses moves when it is not being controlled by a rider.
+     * */
+    public T setMoveSelector(@NotNull CreatureMoveSelector moveSelector) {
+        if (this.locked) return this.getThis();
+
+        this.moveSelector = moveSelector;
+        return this.getThis();
+    }
+
+    @NotNull
+    public CreatureMoveSelector getMoveSelector() {
+        return this.moveSelector;
     }
 
     /**
@@ -409,6 +428,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
                 && this.creatureDiet != null
                 && this.spawnEggColors != null
                 && this.scaleRangeForAge != null
+                && this.moveSelector != null
                 && !this.moveList.isEmpty();
     }
 }

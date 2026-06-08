@@ -7,7 +7,7 @@ public enum Element {
     WATER,
     ELECTRIC,
     ICE,
-    MESOZOICUM, //like dragon element from MH
+    MESOZOIC, //like dragon element from MH
     SONIC,
     WIND,
     POISON,

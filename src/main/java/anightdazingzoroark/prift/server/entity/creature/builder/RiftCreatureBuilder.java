@@ -3,6 +3,9 @@ package anightdazingzoroark.prift.server.entity.creature.builder;
 import anightdazingzoroark.prift.util.FixedSizeList;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
+import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.BooleanPropertyValue;
+import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.IntegerPropertyValue;
 import net.minecraft.client.resources.I18n;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -13,6 +16,7 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     private String creatureName;
     private final Map<String, CreaturePhaseBuilder> creaturePhaseBuilderMap = new HashMap<>();
     private final Map<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> movesPerPhase = new HashMap<>();
+    private Map<String, AbstractPropertyValue<?>> propertyValueMap;
 
     public RiftCreatureBuilder(Class<? extends RiftCreature> creatureClass) {
         super(creatureClass);
@@ -33,7 +37,6 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     public String getLocalizedName() {
         return I18n.format("entity."+this.creatureName+".name");
     }
-
     /**
      * A creature's "phase" implies change in appearance, usable moves, and stats
      * Creatures can change between phases depending on different things
@@ -47,5 +50,24 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
 
     public Map<String, CreaturePhaseBuilder> getPhaseBuilderMaps() {
         return this.creaturePhaseBuilderMap;
+    }
+
+    //-----for additional values to this creature. they do sync from server to client, but they do not persist.-----
+    public RiftCreatureBuilder registerIntegerValue(String name, int initVal) {
+        if (this.locked) return this;
+        if (this.propertyValueMap == null) this.propertyValueMap = new HashMap<>();
+        this.propertyValueMap.put(name, new IntegerPropertyValue(name, initVal));
+        return this;
+    }
+
+    public RiftCreatureBuilder registerBooleanValue(String name, boolean initVal) {
+        if (this.locked) return this;
+        if (this.propertyValueMap == null) this.propertyValueMap = new HashMap<>();
+        this.propertyValueMap.put(name, new BooleanPropertyValue(name, initVal));
+        return this;
+    }
+
+    public Map<String, AbstractPropertyValue<?>> getPropertyValueMap() {
+        return this.propertyValueMap;
     }
 }

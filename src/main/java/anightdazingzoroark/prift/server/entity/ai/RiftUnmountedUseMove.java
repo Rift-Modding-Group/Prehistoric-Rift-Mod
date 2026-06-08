@@ -4,22 +4,20 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.util.MathUtil;
-import anightdazingzoroark.prift.util.WeightedList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.Path;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 /**
  * This is for managing a creature being able to use moves as well as other offensive
  * actions that are not moves.
  * */
-public class RiftUnmountedUseMoveNew extends EntityAIBase {
+public class RiftUnmountedUseMove extends EntityAIBase {
     private final RiftCreature creature;
     private MoveResult moveResult;
     private boolean isPathing;
 
-    public RiftUnmountedUseMoveNew(RiftCreature creature) {
+    public RiftUnmountedUseMove(RiftCreature creature) {
         this.creature = creature;
         this.setMutexBits(3);
     }
@@ -60,30 +58,7 @@ public class RiftUnmountedUseMoveNew extends EntityAIBase {
 
         //-----find and use move from current list-----
         CreatureMoveStorage creatureMoves = this.creature.getCreatureMoves();
-        WeightedList<String> weightedMoveList = new WeightedList<>();
-        for (int index = 0; index < creatureMoves.getUsableMoves().size(); index++) {
-            ImmutablePair<String, CreatureMoveBuilder> creatureMovePair = creatureMoves.getUsableMoves().get(index);
-            if (creatureMovePair == null) continue;
-
-            String moveName = creatureMovePair.getLeft();
-            if (moveName.isEmpty()) continue;
-
-            CreatureMoveBuilder move = creatureMovePair.getRight();
-            boolean moveCanAttackTarget = move.getRequireFindTargetToUse() && attackTarget != null;
-            int predicateResult;
-            if (moveCanAttackTarget) {
-                predicateResult = move.getCanUsePredicate().apply(this.creature, attackTarget);
-            }
-            else {
-                predicateResult = move.getCanUsePredicate().apply(this.creature, null);
-            }
-
-            if (predicateResult >= 0 && creatureMoves.moveCurrentCooldown(moveName) <= 0) {
-                weightedMoveList.add(predicateResult, moveName);
-            }
-        }
-
-        String finalMoveToUse = weightedMoveList.next();
+        String finalMoveToUse = creatureMoves.getMoveSelector().selectMove(this.creature, attackTarget, creatureMoves);
         if (finalMoveToUse == null) return false;
         this.creature.setCurrentMove(finalMoveToUse);
         this.moveResult = MoveResult.USE_MOVE;

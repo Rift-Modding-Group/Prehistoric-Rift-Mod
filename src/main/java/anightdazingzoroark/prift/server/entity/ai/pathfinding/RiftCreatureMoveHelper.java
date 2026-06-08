@@ -8,8 +8,8 @@ import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.math.MathHelper;
 
-public class RiftCreatureMoveHelperNew extends RiftCreatureMoveHelperBaseNew {
-    public RiftCreatureMoveHelperNew(RiftCreature creature) {
+public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
+    public RiftCreatureMoveHelper(RiftCreature creature) {
         super(creature);
     }
 
