@@ -13,14 +13,24 @@ public class WeightedList<T> {
         if (weight <= 0) return this;
         this.total += weight;
 
+        //define list to put the result in
         List<T> listToPutIn;
         if (this.map.containsKey(weight)) {
             listToPutIn = this.map.get(weight);
         }
         else listToPutIn = new ArrayList<>();
-        listToPutIn.add(result);
+        //we only want unique objects in weighted lists
+        if (!listToPutIn.contains(result)) listToPutIn.add(result);
         this.map.put(this.total, listToPutIn);
 
+        return this;
+    }
+
+    @Nullable
+    public WeightedList<T> remove(T toRemove) {
+        for (Map.Entry<Integer, List<T>> mapEntry : this.map.entrySet()) {
+            mapEntry.getValue().remove(toRemove); //im not sure how likely a concurrentmodificationexception will come out of this...
+        }
         return this;
     }
 

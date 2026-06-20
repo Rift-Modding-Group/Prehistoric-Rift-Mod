@@ -25,6 +25,7 @@ public class CreatureMoveBuilder {
     private BiConsumer<RiftCreature, BlockPos> onBlockHitEffect;
     private Consumer<RiftCreature> onMoveEndEffect;
     private boolean useCanStopMovement;
+    
 
     /**
      * Set the base power of a move.

@@ -1,116 +1,65 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
-import anightdazingzoroark.prift.util.WeightedList;
 import net.minecraft.entity.EntityLivingBase;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  * Creature-level AI policy for choosing moves.
  * */
+//todo: add move combos
 public class CreatureMoveSelector {
-    private final Map<String, MoveRule> moveRules = new HashMap<>();
+    //general storage of move rules
+    private final Map<MoveRule, BiFunction<RiftCreature, EntityLivingBase, Integer>> moveRules = new HashMap<>();
 
-    //-----self move stuff. self moves are to be used on oneself-----
-    public CreatureMoveSelector addSelfMove(@NotNull String moveName, @NotNull Function<RiftCreature, Integer> priority) {
-        this.moveRules.put(moveName, new MoveRule(MoveUseTarget.SELF, (creature, target, moveBuilder) -> {
-            return (int) priority.apply(creature);
-        }));
+    public CreatureMoveSelector setMoveRule(String name, BiFunction<RiftCreature, EntityLivingBase, Integer> predicate) {
+        this.moveRules.put(new MoveRule(MoveResult.USE_MOVE, name), predicate);
         return this;
     }
 
-    public CreatureMoveSelector addSelfMove(@NotNull String moveName, int priority) {
-        return this.addSelfMove(moveName, creature -> priority);
-    }
-
-    //-----melee move stuff-----
-    public CreatureMoveSelector addMeleeMove(@NotNull String moveName, @NotNull BiFunction<RiftCreature, EntityLivingBase, Integer> priority) {
-        this.moveRules.put(moveName, new MoveRule(MoveUseTarget.TARGET, (creature, target, moveBuilder) -> {
-            if (target == null || creature.getDistance(target) > creature.getCreatureType().getPhysicalReach()) return -1;
-
-            return (int) priority.apply(creature, target);
-        }));
-        return this;
-    }
-
-    public CreatureMoveSelector addMeleeMove(@NotNull String moveName, int priority) {
-        return this.addMeleeMove(moveName, (creature, target) -> priority);
-    }
-
-    //-----ranged move stuff-----
-    public CreatureMoveSelector addRangedMove(@NotNull String moveName, @NotNull BiFunction<RiftCreature, EntityLivingBase, Integer> priority, double maxDistance) {
-        this.moveRules.put(moveName, new MoveRule(MoveUseTarget.TARGET, (creature, target, moveBuilder) -> {
+    /**
+     * Make it so that sprinting can be used as an attack by this creature.
+     * Note that its only for when its on its own, when controlled by a rider
+     * it can spring to attack when commanded to (by simply sprinting lol)
+     * */
+    public CreatureMoveSelector setCanSprintToAttack() {
+        this.moveRules.put(new MoveRule(MoveResult.SPRINT, ""), (creature, target) -> {
             if (target == null) return -1;
-
-            double distance = creature.getDistance(target);
-            if (distance <= creature.getCreatureType().getPhysicalReach() || distance > maxDistance) return -1;
-
-            return (int) priority.apply(creature, target);
-        }));
+            double distFromTarget = creature.getDistance(target);
+            double minReach = creature.width + 3; //is temporary
+            boolean sprintCondition = distFromTarget <= 16D && distFromTarget >= minReach && creature.sprintToAttackCooldown <= 0;
+            return sprintCondition ? 1 : -1;
+        });
         return this;
     }
 
-    public CreatureMoveSelector addRangedMove(@NotNull String moveName, int priority, double maxDistance) {
-        return this.addRangedMove(moveName, (creature, target) -> priority, maxDistance);
+    public CreatureMoveSelector setCanLeapToAttack(BiFunction<RiftCreature, EntityLivingBase, Integer> predicate) {
+        this.moveRules.put(new MoveRule(MoveResult.LEAP, ""), predicate);
+        return this;
     }
 
-    @Nullable
-    public String selectMove(
-            @NotNull RiftCreature creature,
-            @Nullable EntityLivingBase target,
-            @NotNull CreatureMoveStorage creatureMoves
-    ) {
-        WeightedList<String> weightedMoveList = new WeightedList<>();
+    public Map<MoveRule, BiFunction<RiftCreature, EntityLivingBase, Integer>> getMoveRules() {
+        return this.moveRules;
+    }
 
-        for (ImmutablePair<String, CreatureMoveBuilder> movePair : creatureMoves.getUsableMoves()) {
-            if (movePair == null) continue;
+    public enum MoveResult {
+        USE_MOVE,
+        USE_MOVE_COMBO,
+        SPRINT,
+        LEAP
+    }
 
-            String moveName = movePair.getLeft();
-            CreatureMoveBuilder moveBuilder = movePair.getRight();
-            if (moveName == null || moveName.isEmpty() || moveBuilder == null) continue;
-            if (creatureMoves.moveCurrentCooldown(moveName) > 0) continue;
+    public record MoveRule(@NotNull MoveResult moveResult, @NotNull String name) {
+        @Override
+        public boolean equals(Object object) {
+            if (!(object instanceof MoveRule(MoveResult result, String otherName))) return false;
 
-            int moveWeight = this.getMoveWeight(creature, target, moveName, moveBuilder);
-            if (moveWeight > 0) weightedMoveList.add(moveWeight, moveName);
+            if (result != MoveResult.USE_MOVE) return result == this.moveResult;
+            else return otherName.equals(this.name);
         }
-
-        return weightedMoveList.next();
     }
-
-    protected int getMoveWeight(
-            @NotNull RiftCreature creature,
-            @Nullable EntityLivingBase target,
-            @NotNull String moveName,
-            @NotNull CreatureMoveBuilder moveBuilder
-    ) {
-        MoveRule moveRule = this.moveRules.get(moveName);
-        if (moveRule == null) return -1;
-        if (moveRule.moveUseTarget() == MoveUseTarget.TARGET && target == null) return -1;
-        if (moveBuilder.getRequireFindTargetToUse() && target == null) return -1;
-        return moveRule.moveWeight().getWeight(creature, target, moveBuilder);
-    }
-
-    private enum MoveUseTarget {
-        TARGET,
-        SELF
-    }
-
-    @FunctionalInterface
-    public interface MoveWeight {
-        int getWeight(
-                @NotNull RiftCreature creature,
-                @Nullable EntityLivingBase target,
-                @NotNull CreatureMoveBuilder moveBuilder
-        );
-    }
-
-    private record MoveRule(MoveUseTarget moveUseTarget, MoveWeight moveWeight) {}
 }

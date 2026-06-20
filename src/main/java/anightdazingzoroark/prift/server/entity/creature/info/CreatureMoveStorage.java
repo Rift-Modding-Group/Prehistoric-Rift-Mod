@@ -1,23 +1,22 @@
 package anightdazingzoroark.prift.server.entity.creature.info;
 
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
-import anightdazingzoroark.prift.util.FixedSizeList;
-import anightdazingzoroark.prift.server.entity.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveSelector;
 import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
+import anightdazingzoroark.prift.util.PriorityList;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiFunction;
 
 /**
-* A creature's moves are to be stored here
+* A creature's moves are to be stored and managed here
 * */
 public class CreatureMoveStorage {
     public static final int usableMoveCount = 6;
@@ -25,6 +24,8 @@ public class CreatureMoveStorage {
     private RiftCreatureBuilder creatureType;
     //cooldowns of the moves that are used
     private final Map<String, Integer> moveCooldowns = new HashMap<>();
+    //dynamically updated priority list for usable moves
+    private final PriorityList<CreatureMoveSelector.MoveRule> prioritizedUsableMoves = new PriorityList<>();
     //the phase of the creature that has this
     @NotNull
     private String creaturePhase = "";
@@ -35,30 +36,57 @@ public class CreatureMoveStorage {
     //this only matters in player controlling creatures
     private byte currentUsableMoves = 0;
 
-    //to be used upon initialization
+    //-----initialization stuff starts here-----
+    /**
+     * to be used upon initialization
+     * */
     public void setCreatureUser(RiftCreatureBuilder creatureUser) {
         this.creatureType = creatureUser;
     }
 
-    //validate initialization
+    /**
+     * validate initialization
+     * */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isInitialized() {
         return this.creatureType != null;
     }
+    //-----initialization stuff ends here-----
 
-    //to be used by creatures when on their own
-    //phase name has no use yet since no creatures have phases yet
+    //-----manage currently usable moves-----
+    /**
+     * Update list of usable moves. To be ticked on creature it is attached to
+     * */
+    public void updateUsableMoves(@NotNull RiftCreature creature, @Nullable EntityLivingBase target) {
+        if (!this.isInitialized()) return;
+
+        Set<Map.Entry<CreatureMoveSelector.MoveRule, BiFunction<RiftCreature, EntityLivingBase, Integer>>> movePairSet = this.creatureType.getMoveSelector().getMoveRules().entrySet();
+        for (Map.Entry<CreatureMoveSelector.MoveRule, BiFunction<RiftCreature, EntityLivingBase, Integer>> movePair : movePairSet) {
+            CreatureMoveSelector.MoveRule moveRule = movePair.getKey();
+            int index = movePair.getValue().apply(creature, target);
+
+            //positive indexes can be added
+            if (index >= 0) this.prioritizedUsableMoves.add(index, moveRule);
+            //negative ones got to go
+            else this.prioritizedUsableMoves.remove(moveRule);
+        }
+
+        System.out.println("this.prioritizedUsableMoves: "+this.prioritizedUsableMoves);
+    }
+
+    @Nullable
+    public CreatureMoveSelector.MoveRule getBestMoveRuleUnmounted() {
+        return this.prioritizedUsableMoves.next();
+    }
+
+
+    /**
+     * This is to be used by creatures when on their own
+     * note that phase name has no use yet since no creatures have phases yet
+     * */
     public List<ImmutablePair<String, CreatureMoveBuilder>> getUsableMoves() {
         if (this.creaturePhase.isEmpty()) return this.creatureType.getMoves();
         else return this.creatureType.getPhaseBuilderMaps().get(this.creaturePhase).getMoves();
-    }
-
-    @NotNull
-    public CreatureMoveSelector getMoveSelector() {
-        if (this.creaturePhase.isEmpty()) return this.creatureType.getMoveSelector();
-
-        CreaturePhaseBuilder phaseBuilder = this.creatureType.getPhaseBuilderMaps().get(this.creaturePhase);
-        if (phaseBuilder == null) return this.creatureType.getMoveSelector();
-        return phaseBuilder.getMoveSelector();
     }
 
     public CreatureMoveBuilder getMoveBuilderCurrentMove() {
@@ -70,7 +98,9 @@ public class CreatureMoveStorage {
         return this.getUsableMoveBuilder("", moveName);
     }
 
-    //phase name has no use yet since no creatures have phases yet
+    /**
+     * note that phase name has no use yet since no creatures have phases yet
+     * */
     @Nullable
     public CreatureMoveBuilder getUsableMoveBuilder(String phaseName, String moveName) {
         List<ImmutablePair<String, CreatureMoveBuilder>> moveMap;

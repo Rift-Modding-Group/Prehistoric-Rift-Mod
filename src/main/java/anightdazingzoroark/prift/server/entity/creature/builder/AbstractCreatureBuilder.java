@@ -45,7 +45,6 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private int inventorySize = 27;
     private int daysUntilAdult = 1;
     private int physicalReach = 4;
-    private boolean canSprintToAttack;
     private CreatureMoveSelector moveSelector = new CreatureMoveSelector();
     private Map<String, RiftLibRayBuilder> rayMap;
     private Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
@@ -346,7 +345,6 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     /**
      * Get the distance in blocks from which this creature can use its contact moves
-     *
      * (will replace with individual reaches for hitboxes when i add them back)
      * */
     @Deprecated
@@ -360,22 +358,6 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     @Deprecated
     public int getPhysicalReach() {
         return this.physicalReach;
-    }
-
-    /**
-     * Make it so that sprinting can be used as an attack by this creature.
-     * Note that its only for when its on its own, when controlled by a rider
-     * it can spring to attack when commanded to (by simply sprinting lol)
-     * */
-    public T setCanSprintToAttack() {
-        if (this.locked) return this.getThis();
-
-        this.canSprintToAttack = true;
-        return this.getThis();
-    }
-
-    public boolean getCanSprintToAttack() {
-        return this.canSprintToAttack;
     }
 
     /**

@@ -198,8 +198,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (this.getAttackTarget() != null) this.timeSinceAggression++;
             else this.timeSinceAggression = 0;
 
-            //tick move cooldowns
+            //tick creature move storage
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+            creatureMoveStorage.updateUsableMoves(this, this.getAttackTarget());
             creatureMoveStorage.tickCooldowns();
             this.setCreatureMoves(creatureMoveStorage);
 
@@ -447,22 +448,40 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     //-----hitbox related methods-----
-    /*
-    @Override
-    public Entity getMultiHitboxUser() {
+    public RiftCreature getMultiHitboxUser() {
         return this;
     }
 
-    @Override
-    public void setParts(Entity[] entities) {
-
+    public float multiHitboxUserScale() {
+        return this.scale();
     }
 
-    @Override
-    public World getWorld() {
-        return this.world;
+    //-----dynamic ride pos related methods-----
+    public RiftCreature getDynamicRideUser() {
+        return this;
     }
-     */
+
+    public float dynamicRiderUserScale() {
+        return this.scale();
+    }
+
+    //-----ray related methods-----
+    public RiftCreature getRayCreator() {
+        return this;
+    }
+
+    public Map<String, RiftLibRayBuilder> getRayBuilders() {
+        return this.rayMap;
+    }
+
+    public void applyRaySegments(String rayName, BlockPos rayOrigin, RiftLibRay.RayHitResult rayHitResult) {
+        if (this.rayHitEffectMap == null) return;
+        this.rayHitEffectMap.get(rayName).accept(this, rayOrigin, rayHitResult);
+    }
+
+    public float rayCreatorScale() {
+        return this.scale();
+    }
 
     //-----animation related methods-----
     @Override

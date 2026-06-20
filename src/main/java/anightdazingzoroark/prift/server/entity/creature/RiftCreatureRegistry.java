@@ -13,6 +13,9 @@ import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
+import anightdazingzoroark.riftlib.ray.rayShape.impact.RiftLibRayEllipsoidImpactShape;
+import anightdazingzoroark.riftlib.ray.rayShape.impact.RiftLibRaySphereImpactShape;
+import anightdazingzoroark.riftlib.ray.rayShape.movement.RiftLibRayBoxMovementShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -75,12 +78,15 @@ public class RiftCreatureRegistry {
                         .setHostileToHumans()
                         .setRetaliateWhenAttacked()
                         .setPhysicalReach(5)
-                        .setCanSprintToAttack()
                         //---rays---
                         .addUsableRay(
                                 "footStompRay",
-                                new RiftLibRayBuilder().setShapeImpactEllipse(1, 0, 8, 2, true)
-                                        .setRaySpeed(1D).setOnlyOneSegment(),
+                                new RiftLibRayBuilder()
+                                        .setImpactOnly()
+                                        .setImpactShape(() -> new RiftLibRayEllipsoidImpactShape(1D, 0.2D, 1D).topOnly())
+                                        .setMaxMotionDistance(5D)
+                                        .setOnlyOneSegment()
+                                        .setMotionSpeed(1.5D),
                                 (creature, rayOrigin, rayHitResult) -> {
                                     for (Entity hitEntity : rayHitResult.hitEntities()) {
                                         if (!(hitEntity instanceof EntityLivingBase hitEntityLivingBase)) continue;
@@ -90,13 +96,17 @@ public class RiftCreatureRegistry {
                         )
                         .addUsableRay(
                                 "roarRay",
-                                new RiftLibRayBuilder().setShapeImpactSphere(0, 12, true)
-                                        .setBreakBlockCondition((rayCreator, blockPos) -> {
+                                new RiftLibRayBuilder()
+                                        .setImpactOnly()
+                                        .setImpactShape(() -> new RiftLibRaySphereImpactShape().topOnly())
+                                        .setMaxMotionDistance(12D)
+                                        .setMotionSpeed(1.5D)
+                                        .setBlockBreakCheck((rayCreator, blockPos) -> {
                                             IBlockState blockState = rayCreator.getRayCreator().world.getBlockState(blockPos);
                                             float hardness = blockState.getBlockHardness(rayCreator.getRayCreator().world, blockPos);
                                             return hardness <= 1f && hardness >= 0f;
                                         })
-                                        .setRaySpeed(1.5D).setImpactCreationSpeed(0.25D),
+                                        /*.setImpactCreationSpeed(0.25D)*/,
                                 (creature, rayOrigin, rayHitResult) -> {
                                     for (Entity hitEntity : rayHitResult.hitEntities()) {
                                         if (!(hitEntity instanceof EntityLivingBase hitEntityLivingBase)) continue;
@@ -136,9 +146,9 @@ public class RiftCreatureRegistry {
                         )
                         //---attack ai---
                         .setMoveSelector(new CreatureMoveSelector()
-                                .addRangedMove("power_roar", 1, 16D)
-                                .addMeleeMove("bite", 3)
-                                .addMeleeMove("stomp", 3)
+                                .setMoveRule("bite", (creature, target) -> target != null ? 3 : -1)
+                                .setMoveRule("stomp", (creature, target) -> target != null ? 3 : -1)
+                                .setCanSprintToAttack()
                         )
         );
         registerCreatureType(
