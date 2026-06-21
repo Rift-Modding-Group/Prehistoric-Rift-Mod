@@ -175,7 +175,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityCow.class, true));
 
         this.tasks.addTask(1, new RiftUnmountedUseMove(this));
-        this.tasks.addTask(2, new EntityAIWander(this, 1D, 15));
+        this.tasks.addTask(2, new EntityAIWander(this, 1D/*, 15*/));
         this.tasks.addTask(3, new EntityAILookIdle(this) {
             @Override
             public void resetTask() {
