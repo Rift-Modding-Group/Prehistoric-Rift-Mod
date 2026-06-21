@@ -452,12 +452,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.readCreatureNBT(compound);
     }
 
-    //-----overridable hitbox stuff-----
-    @Nullable
-    public EntityHitbox getHitboxByName(String name) {
-        return null;
-    }
-
     //-----dynamic ride pos related methods-----
     public RiftCreature getDynamicRideUser() {
         return this;

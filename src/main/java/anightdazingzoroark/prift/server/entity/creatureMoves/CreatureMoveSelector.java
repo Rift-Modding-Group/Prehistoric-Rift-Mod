@@ -1,12 +1,14 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * Creature-level AI policy for choosing moves.
@@ -17,7 +19,15 @@ public class CreatureMoveSelector {
     private final Map<MoveRule, BiFunction<RiftCreature, EntityLivingBase, Integer>> moveRules = new HashMap<>();
 
     public CreatureMoveSelector setMoveRule(String name, BiFunction<RiftCreature, EntityLivingBase, Integer> predicate) {
-        this.moveRules.put(new MoveRule(MoveResult.USE_MOVE, name), predicate);
+        return this.setMoveRule(name, predicate, new MaxTargetDistRule("", entity -> 16D));
+    }
+
+    public CreatureMoveSelector setMoveRule(
+            String name,
+            BiFunction<RiftCreature, EntityLivingBase, Integer> predicate,
+            MaxTargetDistRule maxTargetingDistRule
+    ) {
+        this.moveRules.put(new MoveRule(MoveResult.USE_MOVE, name, maxTargetingDistRule), predicate);
         return this;
     }
 
@@ -27,7 +37,7 @@ public class CreatureMoveSelector {
      * it can spring to attack when commanded to (by simply sprinting lol)
      * */
     public CreatureMoveSelector setCanSprintToAttack() {
-        this.moveRules.put(new MoveRule(MoveResult.SPRINT, ""), (creature, target) -> {
+        this.moveRules.put(new MoveRule(MoveResult.SPRINT, "", new MaxTargetDistRule("", entity -> -1D)), (creature, target) -> {
             if (target == null) return -1;
             double distFromTarget = creature.getDistance(target);
             double minReach = creature.width + 3; //is temporary
@@ -38,7 +48,7 @@ public class CreatureMoveSelector {
     }
 
     public CreatureMoveSelector setCanLeapToAttack(BiFunction<RiftCreature, EntityLivingBase, Integer> predicate) {
-        this.moveRules.put(new MoveRule(MoveResult.LEAP, ""), predicate);
+        this.moveRules.put(new MoveRule(MoveResult.LEAP, "", new MaxTargetDistRule("", entity -> -1D)), predicate);
         return this;
     }
 
@@ -53,13 +63,15 @@ public class CreatureMoveSelector {
         LEAP
     }
 
-    public record MoveRule(@NotNull MoveResult moveResult, @NotNull String name) {
+    public record MoveRule(@NotNull MoveResult moveResult, @NotNull String name, MaxTargetDistRule maxTargetingDistRule) {
         @Override
         public boolean equals(Object object) {
-            if (!(object instanceof MoveRule(MoveResult result, String otherName))) return false;
+            if (!(object instanceof MoveRule(MoveResult otherResult, String otherName, MaxTargetDistRule otherMaxTargetingDistRule))) return false;
 
-            if (result != MoveResult.USE_MOVE) return result == this.moveResult;
+            if (otherResult != MoveResult.USE_MOVE) return otherResult == this.moveResult;
             else return otherName.equals(this.name);
         }
     }
+
+    public record MaxTargetDistRule(@NotNull String hitboxName, @NotNull Function<Entity, Double> maxDist) {}
 }

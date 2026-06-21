@@ -1,10 +1,13 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreatureHitboxed;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveSelector;
 import anightdazingzoroark.prift.util.MathUtil;
+import anightdazingzoroark.riftlib.hitbox.EntityHitbox;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.Path;
@@ -117,8 +120,9 @@ public class RiftUnmountedUseMove extends EntityAIBase {
             }
 
             //flags for if last target pos and target are in range
-            boolean targetEntityInRange = this.creature.getDistance(target) <= this.creature.width + 1; //is temporary
-            boolean targetPointInRange = this.targetPointInRange();
+            Entity targetingBasis = this.getTargetingBasisEntity();
+            boolean targetEntityInRange = targetingBasis.getDistance(target) <= this.moveRule.maxTargetingDistRule().maxDist().apply(targetingBasis);
+            boolean targetPointInRange = this.targetPointInRange(targetingBasis);
 
             //set path
             if (!this.pathingToTargetForMove) {
@@ -140,23 +144,33 @@ public class RiftUnmountedUseMove extends EntityAIBase {
             }
         }
         //sprinting to target involves directly moving to its target position
-        //the 1D speed should not be worried about, speed boost is already taken care of somewhere...
         else if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.SPRINT) {
             this.creature.getMoveHelper().setMoveTo(target.posX, target.posY, target.posZ, 1D);
         }
     }
 
-    private boolean targetPointInRange() {
+    /**
+     * Check if the place to go to for targeting is within targeting range of the move to use
+     * */
+    private boolean targetPointInRange(Entity targetingBasis) {
         if (this.currentPathToTarget == null || this.currentPathToTarget.getFinalPathPoint() == null) return false;
 
         PathPoint finalTargetPoint = this.currentPathToTarget.getFinalPathPoint();
-        return this.creature.getDistance(finalTargetPoint.x, finalTargetPoint.y, finalTargetPoint.z) <= this.creature.width + 1;
+        return targetingBasis.getDistance(finalTargetPoint.x, finalTargetPoint.y, finalTargetPoint.z) <= this.moveRule.maxTargetingDistRule().maxDist().apply(targetingBasis);
     }
 
-    private boolean isUsingMovementBlockingMove() {
-        if (this.creature.getCurrentMove().isEmpty()) return false;
+    /**
+     * Get the targeting basis entity. Can be either the creature itself or the hitbox
+     * This is because distance from hitbox or the creature is a determining factor for how moves work
+     * */
+    @NotNull
+    private Entity getTargetingBasisEntity() {
+        if (!(this.creature instanceof RiftCreatureHitboxed hitboxedCreature)) return this.creature;
 
-        CreatureMoveBuilder creatureMoveBuilder = this.creature.getCreatureMoves().getMoveBuilderCurrentMove();
-        return creatureMoveBuilder != null && creatureMoveBuilder.getUseCanStopMovement();
+        String hitboxName = this.moveRule.maxTargetingDistRule().hitboxName();
+        if (hitboxName.isEmpty()) return this.creature;
+
+        EntityHitbox<?> hitbox = hitboxedCreature.getHitboxByName(hitboxName);
+        return hitbox != null ? hitbox : this.creature;
     }
 }

@@ -15,7 +15,6 @@ import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
 import anightdazingzoroark.riftlib.ray.rayShape.impact.RiftLibRayEllipsoidImpactShape;
 import anightdazingzoroark.riftlib.ray.rayShape.impact.RiftLibRaySphereImpactShape;
-import anightdazingzoroark.riftlib.ray.rayShape.movement.RiftLibRayBoxMovementShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -128,7 +127,7 @@ public class RiftCreatureRegistry {
                                     RiftLibRayHelper.createRay(rayCreator, "footStompRay", "stompOrigin");
                                 })
                                 .setAnimNames("stomp")
-                                .setCooldown(100)
+                                .setCooldown(200)
                         )
                         .addMove("power_roar", new CreatureMoveBuilder()
                                 .setBasePower(20)
@@ -144,13 +143,25 @@ public class RiftCreatureRegistry {
                                     RiftLibRayHelper.killRay(rayCreator, "roarRay");
                                 })
                                 .setAnimNames("power_roar")
-                                .setCooldown(200)
+                                .setCooldown(1200)
                         )
                         //---attack ai---
                         .setMoveSelector(new CreatureMoveSelector()
-                                .setMoveRule("bite", (creature, target) -> target != null ? 3 : -1)
-                                .setMoveRule("stomp", (creature, target) -> target != null ? 3 : -1)
-                                .setMoveRule("power_roar", (creature, target) -> target != null ? 0 : -1)
+                                .setMoveRule(
+                                        "bite",
+                                        (creature, target) -> target != null ? 3 : -1,
+                                        new CreatureMoveSelector.MaxTargetDistRule("", entity -> (double) (entity.width + 1))
+                                )
+                                .setMoveRule(
+                                        "stomp",
+                                        (creature, target) -> target != null ? 3 : -1,
+                                        new CreatureMoveSelector.MaxTargetDistRule("stompOrigin", entity -> 5D)
+                                )
+                                .setMoveRule(
+                                        "power_roar",
+                                        (creature, target) -> target != null ? 0 : -1,
+                                        new CreatureMoveSelector.MaxTargetDistRule("", entity -> 12D)
+                                )
                                 .setCanSprintToAttack()
                         )
         );
