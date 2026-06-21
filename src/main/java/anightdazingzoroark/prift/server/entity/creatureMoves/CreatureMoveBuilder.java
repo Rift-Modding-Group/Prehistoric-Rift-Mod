@@ -16,6 +16,7 @@ public class CreatureMoveBuilder {
 
     //the following can be left alone
     private int movePower;
+    private int moveCooldown;
     private boolean requireFindTargetToUse;
     private boolean makesContact;
     private Element element;
@@ -25,7 +26,7 @@ public class CreatureMoveBuilder {
     private BiConsumer<RiftCreature, BlockPos> onBlockHitEffect;
     private Consumer<RiftCreature> onMoveEndEffect;
     private boolean useCanStopMovement;
-    
+
 
     /**
      * Set the base power of a move.
@@ -39,6 +40,18 @@ public class CreatureMoveBuilder {
 
     public int getBasePower() {
         return this.movePower;
+    }
+
+    /**
+     * Set the cooldown for a move.
+     * */
+    public CreatureMoveBuilder setCooldown(int value) {
+        this.moveCooldown = value;
+        return this;
+    }
+
+    public int getMoveCooldown() {
+        return this.moveCooldown;
     }
 
     /**

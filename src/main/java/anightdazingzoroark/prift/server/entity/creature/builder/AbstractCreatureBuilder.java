@@ -44,7 +44,6 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private boolean isHerder;
     private int inventorySize = 27;
     private int daysUntilAdult = 1;
-    private int physicalReach = 4;
     private CreatureMoveSelector moveSelector = new CreatureMoveSelector();
     private Map<String, RiftLibRayBuilder> rayMap;
     private Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
@@ -341,23 +340,6 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     public int getDaysUntilAdult() {
         return this.daysUntilAdult;
-    }
-
-    /**
-     * Get the distance in blocks from which this creature can use its contact moves
-     * (will replace with individual reaches for hitboxes when i add them back)
-     * */
-    @Deprecated
-    public T setPhysicalReach(int value) {
-        if (this.locked) return this.getThis();
-
-        this.physicalReach = value;
-        return this.getThis();
-    }
-
-    @Deprecated
-    public int getPhysicalReach() {
-        return this.physicalReach;
     }
 
     /**

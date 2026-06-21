@@ -20,6 +20,7 @@ import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
 import anightdazingzoroark.riftlib.core.manager.AbstractAnimationDataEntity;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
+import anightdazingzoroark.riftlib.hitbox.HitboxDefinitionList;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
@@ -28,6 +29,7 @@ import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.passive.EntityCow;
@@ -173,7 +175,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityCow.class, true));
 
         this.tasks.addTask(1, new RiftUnmountedUseMove(this));
-        this.tasks.addTask(2, new RiftWander(this, 1D));
+        this.tasks.addTask(2, new EntityAIWander(this, 1D, 15));
         this.tasks.addTask(3, new EntityAILookIdle(this) {
             @Override
             public void resetTask() {
@@ -220,6 +222,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
                     this.setSprinting(false);
                 }
             }
+
+            //tick the creature on tick lambda
+            if (this.creatureType.getUpdateEffect() != null) this.creatureType.getUpdateEffect().accept(this);
         }
     }
 
@@ -445,15 +450,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
         this.readCreatureNBT(compound);
-    }
-
-    //-----hitbox related methods-----
-    public RiftCreature getMultiHitboxUser() {
-        return this;
-    }
-
-    public float multiHitboxUserScale() {
-        return this.scale();
     }
 
     //-----dynamic ride pos related methods-----

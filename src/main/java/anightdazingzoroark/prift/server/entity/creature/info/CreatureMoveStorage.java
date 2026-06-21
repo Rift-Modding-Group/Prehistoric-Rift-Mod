@@ -70,8 +70,6 @@ public class CreatureMoveStorage {
             //negative ones got to go
             else this.prioritizedUsableMoves.remove(moveRule);
         }
-
-        System.out.println("this.prioritizedUsableMoves: "+this.prioritizedUsableMoves);
     }
 
     @Nullable

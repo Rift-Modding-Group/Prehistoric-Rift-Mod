@@ -7,7 +7,9 @@ import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveSelecto
 import anightdazingzoroark.prift.util.MathUtil;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathNavigate;
+import net.minecraft.pathfinding.PathPoint;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -20,6 +22,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     private CreatureMoveSelector.MoveRule moveRule;
     private boolean pathingToTargetForMove;
     private boolean hasExecutedMove;
+    private Path currentPathToTarget;
 
     public RiftUnmountedUseMove(@NotNull RiftCreature creature) {
         this.creature = creature;
@@ -69,9 +72,6 @@ public class RiftUnmountedUseMove extends EntityAIBase {
 
     @Override
     public void startExecuting() {
-        //reset all preexisting pathing if there is a target
-        //if (this.creature.getAttackTarget() != null) this.creature.getNavigator().clearPath();
-
         //other result specific stuff
         if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.SPRINT) {
             this.creature.setSprinting(true);
@@ -85,7 +85,8 @@ public class RiftUnmountedUseMove extends EntityAIBase {
             this.creature.setSprinting(false);
         }
 
-        this.creature.getNavigator().clearPath();
+        if (this.creature.getAttackTarget() == null || !this.creature.getAttackTarget().isEntityAlive()) this.creature.getNavigator().clearPath();
+        this.currentPathToTarget = null;
         this.moveRule = null;
         this.pathingToTargetForMove = false;
         this.hasExecutedMove = false;
@@ -97,6 +98,8 @@ public class RiftUnmountedUseMove extends EntityAIBase {
      * */
     @Override
     public void updateTask() {
+        System.out.println("this.moveRule: "+this.moveRule);
+
         EntityLivingBase target = this.creature.getAttackTarget();
         if (target == null) return;
 
@@ -106,12 +109,19 @@ public class RiftUnmountedUseMove extends EntityAIBase {
 
             //set path
             if (!this.pathingToTargetForMove) {
-                creatureNavigation.setPath(creatureNavigation.getPathToEntityLiving(target), 1D);
+                creatureNavigation.clearPath();
+
+                this.currentPathToTarget = creatureNavigation.getPathToEntityLiving(target);
+                creatureNavigation.setPath(this.currentPathToTarget, 1D);
                 this.pathingToTargetForMove = true;
             }
 
+            //flags for if point and entity are in range
+            boolean targetEntityInRange = this.creature.getDistance(target) <= this.creature.width + 1;
+            boolean targetPointInRange = this.targetPointInRange();
+
             //if within specific distance, set the move
-            if (this.creature.getDistance(target) <= this.creature.width + 1) {
+            if (targetEntityInRange && targetPointInRange) {
                 this.creature.setCurrentMove(this.moveRule.name());
                 this.hasExecutedMove = true;
 
@@ -122,11 +132,22 @@ public class RiftUnmountedUseMove extends EntityAIBase {
                     this.pathingToTargetForMove = false;
                 }
             }
+            //if within range of point but not target, reset flags for pathing
+            else if (!targetEntityInRange && targetPointInRange) {
+                this.pathingToTargetForMove = false;
+            }
         }
         //sprinting to target involves directly moving to its target position
         //the 1D speed should not be worried about, speed boost is already taken care of somewhere...
         else if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.SPRINT) {
             this.creature.getMoveHelper().setMoveTo(target.posX, target.posY, target.posZ, 1D);
         }
+    }
+
+    private boolean targetPointInRange() {
+        if (this.currentPathToTarget == null || this.currentPathToTarget.getFinalPathPoint() == null) return false;
+
+        PathPoint finalTargetPoint = this.currentPathToTarget.getFinalPathPoint();
+        return this.creature.getDistance(finalTargetPoint.x, finalTargetPoint.y, finalTargetPoint.z) <= this.creature.width + 1;
     }
 }

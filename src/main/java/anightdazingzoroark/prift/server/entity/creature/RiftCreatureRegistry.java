@@ -77,7 +77,6 @@ public class RiftCreatureRegistry {
                         .setDaysUntilAdult(7)
                         .setHostileToHumans()
                         .setRetaliateWhenAttacked()
-                        .setPhysicalReach(5)
                         //---rays---
                         .addUsableRay(
                                 "footStompRay",
@@ -148,6 +147,7 @@ public class RiftCreatureRegistry {
                         .setMoveSelector(new CreatureMoveSelector()
                                 .setMoveRule("bite", (creature, target) -> target != null ? 3 : -1)
                                 .setMoveRule("stomp", (creature, target) -> target != null ? 3 : -1)
+                                .setMoveRule("power_roar", (creature, target) -> target != null ? 0 : -1)
                                 .setCanSprintToAttack()
                         )
         );
@@ -163,7 +163,6 @@ public class RiftCreatureRegistry {
                         .setDaysUntilAdult(3)
                         .setIsHerder()
                         .setRetaliateWhenAttacked(true)
-                        .setPhysicalReach(5)
                         //.setCanSprintToAttack()
                         /*
                         .setMoves(

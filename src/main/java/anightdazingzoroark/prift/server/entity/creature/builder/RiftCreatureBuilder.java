@@ -8,15 +8,18 @@ import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.BooleanPropertyV
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.IntegerPropertyValue;
 import net.minecraft.client.resources.I18n;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBuilder> {
     private String creatureName;
     private final Map<String, CreaturePhaseBuilder> creaturePhaseBuilderMap = new HashMap<>();
-    private final Map<String, FixedSizeList<ImmutablePair<String, CreatureMoveBuilder>>> movesPerPhase = new HashMap<>();
     private Map<String, AbstractPropertyValue<?>> propertyValueMap;
+    @Nullable
+    private Consumer<RiftCreature> updateEffect;
 
     public RiftCreatureBuilder(Class<? extends RiftCreature> creatureClass) {
         super(creatureClass);
@@ -69,5 +72,16 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
 
     public Map<String, AbstractPropertyValue<?>> getPropertyValueMap() {
         return this.propertyValueMap;
+    }
+    //-----additional values end here-----
+
+    public RiftCreatureBuilder registerOnUpdateEffect(Consumer<RiftCreature> onUpdate) {
+        this.updateEffect = onUpdate;
+        return this;
+    }
+
+    @Nullable
+    public Consumer<RiftCreature> getUpdateEffect() {
+        return this.updateEffect;
     }
 }
