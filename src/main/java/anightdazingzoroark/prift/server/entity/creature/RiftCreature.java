@@ -20,7 +20,7 @@ import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
 import anightdazingzoroark.riftlib.core.manager.AbstractAnimationDataEntity;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
-import anightdazingzoroark.riftlib.hitbox.HitboxDefinitionList;
+import anightdazingzoroark.riftlib.hitbox.EntityHitbox;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
@@ -450,6 +450,12 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
         this.readCreatureNBT(compound);
+    }
+
+    //-----overridable hitbox stuff-----
+    @Nullable
+    public EntityHitbox getHitboxByName(String name) {
+        return null;
     }
 
     //-----dynamic ride pos related methods-----

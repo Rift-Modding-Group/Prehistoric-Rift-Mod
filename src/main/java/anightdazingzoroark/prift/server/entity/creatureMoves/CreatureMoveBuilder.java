@@ -26,7 +26,7 @@ public class CreatureMoveBuilder {
     private BiConsumer<RiftCreature, BlockPos> onBlockHitEffect;
     private Consumer<RiftCreature> onMoveEndEffect;
     private boolean useCanStopMovement;
-
+    private int cooldown;
 
     /**
      * Set the base power of a move.
@@ -43,7 +43,7 @@ public class CreatureMoveBuilder {
     }
 
     /**
-     * Set the cooldown for a move.
+     * Set the cooldown in ticks for a move.
      * */
     public CreatureMoveBuilder setCooldown(int value) {
         this.moveCooldown = value;

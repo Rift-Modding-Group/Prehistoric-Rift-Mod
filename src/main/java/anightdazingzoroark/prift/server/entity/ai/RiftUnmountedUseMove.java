@@ -98,14 +98,27 @@ public class RiftUnmountedUseMove extends EntityAIBase {
      * */
     @Override
     public void updateTask() {
-        System.out.println("this.moveRule: "+this.moveRule);
-
         EntityLivingBase target = this.creature.getAttackTarget();
         if (target == null) return;
 
         //normal move usage involves just proper pathing until it reaches a specific distance
         if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.USE_MOVE) {
             PathNavigate creatureNavigation = this.creature.getNavigator();
+
+            //block all further pathing attempts if currently used move says no
+            if (!this.creature.getCurrentMove().isEmpty()) {
+                CreatureMoveBuilder creatureMoveBuilder = this.creature.getCreatureMoves().getMoveBuilderCurrentMove();
+                if (creatureMoveBuilder != null && creatureMoveBuilder.getUseCanStopMovement()) {
+                    creatureNavigation.clearPath();
+                    this.currentPathToTarget = null;
+                    this.pathingToTargetForMove = false;
+                    return;
+                }
+            }
+
+            //flags for if last target pos and target are in range
+            boolean targetEntityInRange = this.creature.getDistance(target) <= this.creature.width + 1; //is temporary
+            boolean targetPointInRange = this.targetPointInRange();
 
             //set path
             if (!this.pathingToTargetForMove) {
@@ -116,21 +129,10 @@ public class RiftUnmountedUseMove extends EntityAIBase {
                 this.pathingToTargetForMove = true;
             }
 
-            //flags for if point and entity are in range
-            boolean targetEntityInRange = this.creature.getDistance(target) <= this.creature.width + 1;
-            boolean targetPointInRange = this.targetPointInRange();
-
             //if within specific distance, set the move
             if (targetEntityInRange && targetPointInRange) {
                 this.creature.setCurrentMove(this.moveRule.name());
                 this.hasExecutedMove = true;
-
-                //block all further pathing if associated move builder says so
-                CreatureMoveBuilder creatureMoveBuilder = this.creature.getCreatureMoves().getMoveBuilderCurrentMove();
-                if (creatureMoveBuilder.getUseCanStopMovement()) {
-                    this.creature.getNavigator().clearPath();
-                    this.pathingToTargetForMove = false;
-                }
             }
             //if within range of point but not target, reset flags for pathing
             else if (!targetEntityInRange && targetPointInRange) {
@@ -149,5 +151,12 @@ public class RiftUnmountedUseMove extends EntityAIBase {
 
         PathPoint finalTargetPoint = this.currentPathToTarget.getFinalPathPoint();
         return this.creature.getDistance(finalTargetPoint.x, finalTargetPoint.y, finalTargetPoint.z) <= this.creature.width + 1;
+    }
+
+    private boolean isUsingMovementBlockingMove() {
+        if (this.creature.getCurrentMove().isEmpty()) return false;
+
+        CreatureMoveBuilder creatureMoveBuilder = this.creature.getCreatureMoves().getMoveBuilderCurrentMove();
+        return creatureMoveBuilder != null && creatureMoveBuilder.getUseCanStopMovement();
     }
 }

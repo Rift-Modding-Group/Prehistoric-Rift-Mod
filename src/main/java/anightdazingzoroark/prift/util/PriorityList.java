@@ -9,7 +9,7 @@ public class PriorityList<T> {
     private final Random random = new Random();
 
     public PriorityList<T> add(int priority, T item) {
-        if (priority <= 0) return this;
+        if (priority < 0) return this;
 
         //if list exists at said priority, put it there
         if (this.map.containsKey(priority)) {

@@ -1,10 +1,12 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.riftlib.hitbox.EntityHitbox;
 import anightdazingzoroark.riftlib.hitbox.HitboxDefinitionList;
 import anightdazingzoroark.riftlib.hitbox.IMultiHitboxUser;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Any creature that has hitboxes must extend this class
@@ -51,5 +53,11 @@ public abstract class RiftCreatureHitboxed extends RiftCreature implements IMult
     @Override
     public World getWorld() {
         return this.world;
+    }
+
+    @Override
+    @Nullable
+    public EntityHitbox getHitboxByName(String name) {
+        return IMultiHitboxUser.super.getHitboxByName(name);
     }
 }

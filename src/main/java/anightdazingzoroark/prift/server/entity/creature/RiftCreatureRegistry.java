@@ -128,9 +128,11 @@ public class RiftCreatureRegistry {
                                     RiftLibRayHelper.createRay(rayCreator, "footStompRay", "stompOrigin");
                                 })
                                 .setAnimNames("stomp")
+                                .setCooldown(100)
                         )
                         .addMove("power_roar", new CreatureMoveBuilder()
                                 .setBasePower(20)
+                                .setRequireFindTargetToUse()
                                 .setElemental(Element.SONIC, 1, 0)
                                 .setUseCanStopMovement()
                                 .setOnMoveHitEffect(creature -> {
@@ -142,6 +144,7 @@ public class RiftCreatureRegistry {
                                     RiftLibRayHelper.killRay(rayCreator, "roarRay");
                                 })
                                 .setAnimNames("power_roar")
+                                .setCooldown(200)
                         )
                         //---attack ai---
                         .setMoveSelector(new CreatureMoveSelector()

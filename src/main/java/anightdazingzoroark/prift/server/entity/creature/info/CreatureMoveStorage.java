@@ -65,6 +65,11 @@ public class CreatureMoveStorage {
             CreatureMoveSelector.MoveRule moveRule = movePair.getKey();
             int index = movePair.getValue().apply(creature, target);
 
+            //being on cooldown forcibly changes the index to -1
+            if (this.moveCooldowns.containsKey(moveRule.name()) && this.moveCooldowns.get(moveRule.name()) > 0) {
+                index = -1;
+            }
+
             //positive indexes can be added
             if (index >= 0) this.prioritizedUsableMoves.add(index, moveRule);
             //negative ones got to go
@@ -145,14 +150,17 @@ public class CreatureMoveStorage {
     }
 
     public void resetCurrentMove() {
+        //put on cooldown first
+        CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
+        if (currentMoveBuilder != null && currentMoveBuilder.getMoveCooldown() > 0) {
+            this.moveCooldowns.put(this.currentMove, currentMoveBuilder.getMoveCooldown());
+        }
+
+        //now reset
         this.currentMove = "";
     }
 
     //-------move cooldown management-------
-    public void putMoveOnCooldown(String moveName, int cooldownToSet) {
-        this.moveCooldowns.put(moveName, cooldownToSet);
-    }
-
     public int moveCurrentCooldown(String moveName) {
         if (!this.moveCooldowns.containsKey(moveName)) return 0;
         return this.moveCooldowns.get(moveName);
