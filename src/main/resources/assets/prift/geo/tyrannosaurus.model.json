@@ -1,6 +1,6 @@
 {
 	"format_version": "1.12.0",
-	"minecraft:geometry": [
+	"riftlibrary:geometry": [
 		{
 			"description": {
 				"identifier": "geometry.tyrannosaurus",
@@ -23,9 +23,19 @@
 					"name": "body",
 					"parent": "base",
 					"pivot": [0, 16, 12.5],
-					"locators": {
-						"hitbox_body": [0, 17, 3],
-						"hitbox_body_0": [0, 17, -1.3]
+					"bounding_boxes": {
+						"body": {
+							"origin": [-4.625, 11.75, -6.125],
+							"size": [9.25, 10.5],
+							"collision": true,
+							"tags": ["body"]
+						},
+						"body2": {
+							"origin": [-4.625, 11.75, -1.125],
+							"size": [9.25, 10.5],
+							"collision": true,
+							"tags": ["body"]
+						}
 					}
 				},
 				{
@@ -35,8 +45,13 @@
 					"cubes": [
 						{"origin": [-4.5, 11, 8], "size": [9, 11, 9], "uv": [37, 15]}
 					],
-					"locators": {
-						"hitbox_hips": [0, 16.5, 12.5]
+					"bounding_boxes": {
+						"hips": {
+							"origin": [-4.625, 10.75, 7.875],
+							"size": [9.25, 11.5],
+							"collision": true,
+							"tags": ["body"]
+						}
 					}
 				},
 				{
@@ -44,11 +59,21 @@
 					"parent": "hips",
 					"pivot": [0, 20, 15],
 					"cubes": [
-						{"origin": [-3, 13.5, 14], "size": [6, 8, 14], "pivot": [0, 20, 15], "rotation": [-7.5, 0, 0], "uv": [0, 24]}
+						{"origin": [-3, 13.5, 14], "size": [6, 8, 14], "uv": [0, 24]}
 					],
-					"locators": {
-						"hitbox_tail_0": [0, 17, 20],
-						"hitbox_tail_1": [0, 16.5, 25]
+					"bounding_boxes": {
+						"tail": {
+							"origin": [-3.25, 13.25, 21.75],
+							"size": [6.5, 8.5],
+							"collision": true,
+							"tags": ["tail"]
+						},
+						"tail2": {
+							"origin": [-3.25, 13.25, 16.75],
+							"size": [6.5, 8.5],
+							"collision": true,
+							"tags": ["tail"]
+						}
 					}
 				},
 				{
@@ -56,24 +81,50 @@
 					"parent": "tail0",
 					"pivot": [0, 18.25, 27],
 					"cubes": [
-						{"origin": [-2.5, 13.33716, 25.99619], "size": [5, 6, 12], "pivot": [0, 18.25, 27], "rotation": [-5, 0, 0], "uv": [28, 35]}
+						{"origin": [-2.5, 14.5, 25.99619], "size": [5, 6, 12], "uv": [28, 35]}
 					],
-					"locators": {
-						"hitbox_tail_2": [0, 16, 30],
-						"hitbox_tail_3": [0, 15.5, 35.25]
+					"bounding_boxes": {
+						"tail3": {
+							"origin": [-2.75, 14.25, 32.75],
+							"size": [5.5, 6.5],
+							"collision": true,
+							"tags": ["tail"]
+						},
+						"tail4": {
+							"origin": [-2.75, 14.25, 27.75],
+							"size": [5.5, 6.5],
+							"collision": true,
+							"tags": ["tail"]
+						}
 					}
 				},
 				{
 					"name": "tail2",
 					"parent": "tail1",
-					"pivot": [0, 0, 0],
+					"pivot": [0, 18.675, 37],
 					"cubes": [
-						{"origin": [-2, 13.55, 35], "size": [4, 4, 12], "uv": [0, 46]},
-						{"origin": [-4, 15.8, 43], "size": [8, 0, 8], "uv": [24, 6]}
+						{"origin": [-2, 15.5, 35], "size": [4, 4, 12], "uv": [0, 46]},
+						{"origin": [-4, 17.8, 43], "size": [8, 0, 8], "uv": [24, 6]}
 					],
-					"locators": {
-						"hitbox_tail_4": [0, 15.5, 40],
-						"hitbox_tail_5": [0, 15.5, 44.75]
+					"bounding_boxes": {
+						"tail5": {
+							"origin": [-2.25, 15.25, 42.75],
+							"size": [4.5, 4.5],
+							"collision": true,
+							"tags": ["tail"]
+						},
+						"tail6": {
+							"origin": [-2.25, 15.25, 39.75],
+							"size": [4.5, 4.5],
+							"collision": true,
+							"tags": ["tail"]
+						},
+						"tail7": {
+							"origin": [-2.25, 15.25, 36.75],
+							"size": [4.5, 4.5],
+							"collision": true,
+							"tags": ["tail"]
+						}
 					}
 				},
 				{
@@ -83,8 +134,13 @@
 					"cubes": [
 						{"origin": [-3, 14.5, -9.5], "size": [6, 8, 8], "pivot": [0, 19.5, -7], "rotation": [-22.5, 0, 0], "uv": [60, 45]}
 					],
-					"locators": {
-						"hitbox_neck": [0, 18.5, -7]
+					"bounding_boxes": {
+						"neck": {
+							"origin": [-3.125, 13.5, -10.125],
+							"size": [6.25, 9.75],
+							"collision": true,
+							"tags": ["head"]
+						}
 					}
 				},
 				{
@@ -95,7 +151,27 @@
 						{"origin": [-3.5, 15, -15], "size": [7, 9, 7], "uv": [32, 53]}
 					],
 					"locators": {
-						"hitbox_head": [0, 19.5, -11.5]
+						"jawLocator": [0, 18.5, -19]
+					},
+					"bounding_boxes": {
+						"head": {
+							"origin": [-3.75, 14.625, -15.25],
+							"size": [7.5, 9.75],
+							"collision": true,
+							"tags": ["head"]
+						},
+						"jaw": {
+							"origin": [-3.25, 15.25, -23.25],
+							"size": [6.5, 8.5],
+							"collision": true,
+							"tags": ["head", "jaw"]
+						},
+						"jaw2": {
+							"origin": [-3.25, 15.25, -19.25],
+							"size": [6.5, 8.5],
+							"collision": true,
+							"tags": ["head", "jaw"]
+						}
 					}
 				},
 				{
@@ -104,11 +180,7 @@
 					"pivot": [0, 0, 0],
 					"cubes": [
 						{"origin": [-3, 18.5, -23], "size": [6, 5, 8], "uv": [56, 0]}
-					],
-					"locators": {
-						"hitbox_upper_jaw": [0, 19.5, -18],
-						"hitbox_upper_jaw_0": [0, 19.5, -20]
-					}
+					]
 				},
 				{
 					"name": "lowerJaw",
@@ -129,28 +201,6 @@
 						{"origin": [4.125, 16.6, -15.4], "size": [0, 3, 13], "pivot": [4.125, 18.1, -15.4], "rotation": [28, 0, 0], "uv": [88, 45], "mirror": true},
 						{"origin": [3.25, 17.6, -16], "size": [1, 1, 1], "inflate": 0.125, "uv": [87, 39], "mirror": true},
 						{"origin": [-4, 14.5, -15.125], "size": [8, 10, 7], "inflate": -0.25, "uv": [88, 41]}
-					]
-				},
-				{
-					"name": "christmasHead",
-					"parent": "head",
-					"pivot": [0, 19.5, -9],
-					"cubes": [
-						{"origin": [-14.5, 22.5, -15.75], "size": [12, 7, 9], "inflate": -1, "pivot": [-3.5, 23.5, -11.25], "rotation": [0, 0, 7.5], "uv": [0, 79]},
-						{"origin": [2.5, 22.5, -15.75], "size": [12, 7, 9], "inflate": -1, "pivot": [3.5, 23.5, -11.25], "rotation": [0, 0, -7.5], "uv": [0, 79], "mirror": true},
-						{"origin": [-1, 22.5, -24], "size": [2, 2, 2], "uv": [33, 84]},
-						{"origin": [-4, 23.5, -15.5], "size": [8, 2, 8], "pivot": [0, 24.5, -14.5], "rotation": [-4, 0, 0], "uv": [79, 61]},
-						{"origin": [-3.5, 24.5, -15.25], "size": [7, 3, 7], "pivot": [0, 24.5, -14.5], "rotation": [-12.5, 0, 0], "uv": [82, 71]},
-						{"origin": [-3, 26.5, -15.25], "size": [6, 3, 6], "pivot": [-0.5, 24.5, -14.5], "rotation": [-20, 0, 0], "uv": [64, 75]},
-						{"origin": [-2, 26.175, -13.5], "size": [4, 3, 7], "pivot": [0, 28.875, -13.5], "rotation": [15, 0, 0], "uv": [55, 85]}
-					]
-				},
-				{
-					"name": "christmasNeck",
-					"parent": "neck",
-					"pivot": [0, 20.5, -4],
-					"cubes": [
-						{"origin": [-4, 13.5, -7.125], "size": [8, 10, 2], "pivot": [-1, 19.5, -7], "rotation": [-22.5, 0, 0], "uv": [42, 80]}
 					]
 				},
 				{
@@ -191,18 +241,6 @@
 					"pivot": [0, 1, 0],
 					"cubes": [
 						{"origin": [-4.5, 12, -3.5], "size": [9, 10, 9], "inflate": 0.5, "uv": [76, 4]}
-					],
-					"locators": {
-						"rider_pos_0": [0, 22.5, 1]
-					}
-				},
-				{
-					"name": "chest",
-					"parent": "body",
-					"pivot": [0, 0, 0],
-					"cubes": [
-						{"origin": [2.25, 15.5, -3], "size": [6, 8, 8], "inflate": -2, "uv": [77, 23]},
-						{"origin": [-8.25, 15.5, -3], "size": [6, 8, 8], "inflate": -2, "uv": [77, 23], "mirror": true}
 					]
 				},
 				{
@@ -220,8 +258,13 @@
 					"cubes": [
 						{"origin": [-7.5, 8, 9.5], "size": [3, 10, 6], "uv": [18, 63]}
 					],
-					"locators": {
-						"hitbox_left_leg": [-4.5, 13, 12.5]
+					"bounding_boxes": {
+						"leftLeg": {
+							"origin": [1.375, 7.75, 9.375],
+							"size": [6.25, 10.5],
+							"collision": true,
+							"tags": ["leg"]
+						}
 					}
 				},
 				{
@@ -231,8 +274,13 @@
 					"cubes": [
 						{"origin": [-7.5, 1.5, 13], "size": [3, 9, 4], "inflate": -0.25, "uv": [0, 24]}
 					],
-					"locators": {
-						"hitbox_left_shin": [-5.75, 5, 15]
+					"bounding_boxes": {
+						"leftShin": {
+							"origin": [4.25, 0, 13.25],
+							"size": [3.5, 10.5],
+							"collision": true,
+							"tags": ["leg"]
+						}
 					}
 				},
 				{
@@ -250,8 +298,13 @@
 					"cubes": [
 						{"origin": [4.5, 8, 9.5], "size": [3, 10, 6], "uv": [0, 62]}
 					],
-					"locators": {
-						"hitbox_right_leg": [4.5, 13, 12.5]
+					"bounding_boxes": {
+						"rightLeg": {
+							"origin": [-7.625, 7.75, 9.375],
+							"size": [6.25, 10.5],
+							"collision": true,
+							"tags": ["leg"]
+						}
 					}
 				},
 				{
@@ -261,8 +314,13 @@
 					"cubes": [
 						{"origin": [4.5, 1.5, 13], "size": [3, 9, 4], "inflate": -0.25, "uv": [0, 0]}
 					],
-					"locators": {
-						"hitbox_right_shin": [5.75, 5, 15]
+					"bounding_boxes": {
+						"rightShin": {
+							"origin": [-7.75, 0, 13.25],
+							"size": [3.5, 10.5],
+							"collision": true,
+							"tags": ["leg"]
+						}
 					}
 				},
 				{

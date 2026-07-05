@@ -121,7 +121,7 @@
 				}
 			},
 			"timeline": {
-				"0.25": "'moveHitEffect'"
+				"0.25": "function.send_message('moveHitEffect');"
 			}
 		},
 		"animation.tyrannosaurus.incapacitated": {
@@ -202,7 +202,7 @@
 				}
 			},
 			"timeline": {
-				"0.625": "'moveHitEffect'"
+				"0.625": "function.send_message('moveHitEffect');"
 			}
 		},
 		"animation.tyrannosaurus.warn": {
@@ -397,7 +397,7 @@
 				}
 			},
 			"timeline": {
-				"0.5": "'moveHitEffect'"
+				"0.5": "function.send_message('moveHitEffect');"
 			}
 		}
 	}

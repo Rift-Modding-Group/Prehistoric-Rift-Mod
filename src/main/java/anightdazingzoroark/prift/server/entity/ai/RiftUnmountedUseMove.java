@@ -1,19 +1,23 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreatureHitboxed;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveSelector;
 import anightdazingzoroark.prift.util.MathUtil;
-import anightdazingzoroark.riftlib.hitbox.EntityHitbox;
+import anightdazingzoroark.riftlib.model.AnimatedLocator;
+import anightdazingzoroark.riftlib.util.QuaternionUtils;
+import anightdazingzoroark.riftlib.util.VectorUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.pathfinding.PathPoint;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
+import org.lwjglx.util.vector.Quaternion;
 
 /**
  * This is for managing a creature being able to use moves as well as other offensive
@@ -120,9 +124,10 @@ public class RiftUnmountedUseMove extends EntityAIBase {
             }
 
             //flags for if last target pos and target are in range
-            Entity targetingBasis = this.getTargetingBasisEntity();
-            boolean targetEntityInRange = targetingBasis.getDistance(target) <= this.moveRule.maxTargetingDistRule().maxDist().apply(targetingBasis);
-            boolean targetPointInRange = this.targetPointInRange(targetingBasis);
+            BlockPos targetPoint = this.getTargetPoint();
+            double targetDistFromTargetPoint = Math.sqrt(targetPoint.distanceSq(target.getPosition()));
+            boolean targetEntityInRange = targetDistFromTargetPoint <= this.moveRule.maxTargetingDistRule().maxDist();
+            boolean targetPointInRange = this.targetPointInRange(targetPoint);
 
             //set path
             if (!this.pathingToTargetForMove) {
@@ -152,25 +157,35 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     /**
      * Check if the place to go to for targeting is within targeting range of the move to use
      * */
-    private boolean targetPointInRange(Entity targetingBasis) {
+    private boolean targetPointInRange(BlockPos targetPoint) {
         if (this.currentPathToTarget == null || this.currentPathToTarget.getFinalPathPoint() == null) return false;
 
         PathPoint finalTargetPoint = this.currentPathToTarget.getFinalPathPoint();
-        return targetingBasis.getDistance(finalTargetPoint.x, finalTargetPoint.y, finalTargetPoint.z) <= this.moveRule.maxTargetingDistRule().maxDist().apply(targetingBasis);
+        return targetPoint.getDistance(finalTargetPoint.x, finalTargetPoint.y, finalTargetPoint.z) <= this.moveRule.maxTargetingDistRule().maxDist();
     }
 
     /**
-     * Get the targeting basis entity. Can be either the creature itself or the hitbox
-     * This is because distance from hitbox or the creature is a determining factor for how moves work
+     * Get the targeting point on the entity. Can be either a locator or the entity's centerpoint
      * */
     @NotNull
-    private Entity getTargetingBasisEntity() {
-        if (!(this.creature instanceof RiftCreatureHitboxed hitboxedCreature)) return this.creature;
+    private BlockPos getTargetPoint() {
+        String locatorName = this.moveRule.maxTargetingDistRule().locatorName();
+        if (locatorName.isEmpty()) return this.creature.getPosition();
 
-        String hitboxName = this.moveRule.maxTargetingDistRule().hitboxName();
-        if (hitboxName.isEmpty()) return this.creature;
-
-        EntityHitbox<?> hitbox = hitboxedCreature.getHitboxByName(hitboxName);
-        return hitbox != null ? hitbox : this.creature;
+        //get animated locator and convert to world pos
+        AnimatedLocator animatedLocator = this.creature.getAnimationData().getAnimatedLocator(locatorName);
+        Vec3d modelSpacePos = animatedLocator.getModelSpacePosition();
+        float parentScale = this.creature.scale();
+        float locatorX = -(float) (modelSpacePos.x / 16f);
+        float locatorY = (float) (modelSpacePos.y / 16f);
+        float locatorZ = -(float) (modelSpacePos.z / 16f);
+        Vec3d posVec = new Vec3d(locatorX * parentScale, locatorY * parentScale, locatorZ * parentScale);
+        Quaternion quaternion = QuaternionUtils.createXYZQuaternion(0f, -Math.toRadians(this.creature.rotationYawHead), 0f);
+        posVec = VectorUtils.rotateVectorWithQuaternion(posVec, quaternion);
+        return new BlockPos(
+                this.creature.posX + posVec.x,
+                this.creature.posY + posVec.y,
+                this.creature.posZ + posVec.z
+        );
     }
 }

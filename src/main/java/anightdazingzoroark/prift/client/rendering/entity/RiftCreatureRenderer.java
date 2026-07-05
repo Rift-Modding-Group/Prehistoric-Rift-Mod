@@ -1,9 +1,8 @@
 package anightdazingzoroark.prift.client.rendering.entity;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.server.entity.serverModel.CreatureModel;
-import anightdazingzoroark.riftlib.geo.render.GeoModel;
+import anightdazingzoroark.riftlib.geo.GeoModel;
 import anightdazingzoroark.riftlib.renderers.geo.GeoEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderManager;
 
@@ -18,10 +17,9 @@ public class RiftCreatureRenderer extends GeoEntityRenderer<RiftCreature> {
     @Override
     public void render(GeoModel model, RiftCreature animatable, float partialTicks, float red, float green, float blue, float alpha) {
         //hide saddle stuff
-        if (model.getBone("saddle").isPresent()) model.getBone("saddle").get().setHidden(true);
-        if (model.getBone("headSaddle").isPresent()) model.getBone("headSaddle").get().setHidden(true);
-        if (model.getBone("chest").isPresent()) model.getBone("chest").get().setHidden(true);
-        if (model.getBone("hiddenBySaddle").isPresent()) model.getBone("hiddenBySaddle").get().setHidden(true);
+        if (model.allBones.get("saddle") != null) model.allBones.get("saddle").setHidden(true);
+        if (model.allBones.get("headSaddle") != null) model.allBones.get("headSaddle").setHidden(true);
+        if (model.allBones.get("hiddenBySaddle") != null) model.allBones.get("hiddenBySaddle").setHidden(true);
 
         super.render(model, animatable, partialTicks, red, green, blue, alpha);
     }

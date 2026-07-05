@@ -5,7 +5,6 @@ import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.ai.RiftUnmountedUseMove;
-import anightdazingzoroark.prift.server.entity.ai.RiftWander;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
@@ -14,13 +13,11 @@ import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
 import anightdazingzoroark.prift.util.MathUtil;
 import anightdazingzoroark.prift.util.TriConsumer;
 import anightdazingzoroark.riftlib.core.AnimatableRunValue;
-import anightdazingzoroark.riftlib.core.AnimatableValue;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
 import anightdazingzoroark.riftlib.core.manager.AbstractAnimationDataEntity;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
-import anightdazingzoroark.riftlib.hitbox.EntityHitbox;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
@@ -547,13 +544,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             //create state for move
             AnimationControllerState<AnimationDataEntity> moveState = new AnimationControllerState<AnimationDataEntity>(moveName)
                     .addStateTransition("default", animData -> animData.allAnimationsFinished("moveUse"))
-                    .addExitEffect(new AnimatableValue("'endMoveEffect'"));
+                    .addExitEffect(animData -> animData.sendMessage("endMoveEffect"));
 
             //if the move state has multiple animation names, make it so that upon entry it generates a random number
             //to then use
             String[] moveAnimNames = moveEntry.getValue().getAnimNames();
             if (moveAnimNames.length > 1) {
-                moveState.addEntryEffect(new AnimatableValue("chosenMove", (double) this.rand.nextInt(moveAnimNames.length)));
+                moveState.addEntryEffect(animData -> animData.setVariable("chosenMove", this.rand.nextInt(moveAnimNames.length)));
             }
 
             //iterate over each of the anim names and put them in the state for the move

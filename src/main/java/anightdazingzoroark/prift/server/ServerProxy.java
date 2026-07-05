@@ -2,14 +2,12 @@ package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.server.dataSerializers.InternalRegistryPrimer;
 import anightdazingzoroark.prift.server.dataSerializers.PrimerEventHandler;
-import anightdazingzoroark.prift.server.entity.CreatureHitboxLinker;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureHitboxed;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.server.entity.serverModel.CreatureModel;
 import anightdazingzoroark.prift.server.item.RiftItems;
-import anightdazingzoroark.riftlib.RiftLibLinkerRegistry;
 import anightdazingzoroark.riftlib.model.ServerModelRegistry;
 import anightdazingzoroark.riftlib.resource.server.RiftLibCacheServer;
 import net.minecraftforge.common.MinecraftForge;
@@ -36,9 +34,6 @@ public class ServerProxy {
         //register items
         RiftItems.registerItems();
         MinecraftForge.EVENT_BUS.register(new RiftItems());
-
-        //register hitbox linkers
-        RiftLibLinkerRegistry.registerEntityHitboxLinker(RiftCreatureHitboxed.class, new CreatureHitboxLinker());
 
         //register server models
         ServerModelRegistry.registerServerModel(RiftCreature.class, CreatureModel::new);

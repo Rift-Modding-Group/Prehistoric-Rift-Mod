@@ -150,17 +150,17 @@ public class RiftCreatureRegistry {
                                 .setMoveRule(
                                         "bite",
                                         (creature, target) -> target != null ? 3 : -1,
-                                        new CreatureMoveSelector.MaxTargetDistRule("", entity -> (double) (entity.width + 1))
+                                        new CreatureMoveSelector.MaxTargetDistRule("jawLocator", 3D)
                                 )
                                 .setMoveRule(
                                         "stomp",
                                         (creature, target) -> target != null ? 3 : -1,
-                                        new CreatureMoveSelector.MaxTargetDistRule("stompOrigin", entity -> 5D)
+                                        new CreatureMoveSelector.MaxTargetDistRule("stompOrigin", 5D)
                                 )
                                 .setMoveRule(
                                         "power_roar",
                                         (creature, target) -> target != null ? 0 : -1,
-                                        new CreatureMoveSelector.MaxTargetDistRule("", entity -> 12D)
+                                        new CreatureMoveSelector.MaxTargetDistRule("",12D)
                                 )
                                 .setCanSprintToAttack()
                         )
