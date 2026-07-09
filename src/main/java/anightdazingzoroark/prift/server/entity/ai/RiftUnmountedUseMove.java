@@ -123,7 +123,16 @@ public class RiftUnmountedUseMove extends EntityAIBase {
 
         //preserve last look direction after target is gone
         EntityLivingBase target = this.creature.getAttackTarget();
-        if (target == null || !target.isEntityAlive()) this.preserveLastLookDirection();
+        if ((target == null || !target.isEntityAlive()) && this.hasLastLookDirection) {
+            this.creature.rotationYaw = this.lastRotationYawHead;
+            this.creature.prevRotationYaw = this.lastPrevRotationYawHead;
+            this.creature.renderYawOffset = this.lastRotationYawHead;
+            this.creature.prevRenderYawOffset = this.lastPrevRotationYawHead;
+            this.creature.rotationYawHead = this.lastRotationYawHead;
+            this.creature.prevRotationYawHead = this.lastPrevRotationYawHead;
+            this.creature.rotationPitch = this.lastRotationPitch;
+            this.creature.prevRotationPitch = this.lastPrevRotationPitch;
+        }
     }
 
     /**
@@ -132,13 +141,10 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     @Override
     public void updateTask() {
         EntityLivingBase target = this.creature.getAttackTarget();
-        //preserve last look direction after target is gone
-        if (target == null || !target.isEntityAlive()) {
-            this.preserveLastLookDirection();
-            return;
-        }
 
+        //---when using a normal move---
         if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.USE_MOVE) {
+            //---when move is already being used, stop pathing---
             if (this.hasExecutedMove && !this.creature.getCurrentMove().isEmpty()) {
                 this.directTargetMoveStallTicks = 0;
                 this.holdCloseTargetStrafe = false;
@@ -148,7 +154,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
             }
 
             //pathing to go to target is all dealt with here, if said move requires target
-            if (this.selectedMoveBuilder.getRequireFindTargetToUse()) {
+            if (this.selectedMoveBuilder.getRequireFindTargetToUse() && target != null && target.isEntityAlive()) {
                 //set look at target
                 this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, 0f);
                 this.hasLastLookDirection = true;
@@ -162,6 +168,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
                     //forcibly stop rotation upon using a move
                     double targetX = target.posX - this.creature.posX;
                     double targetZ = target.posZ - this.creature.posZ;
+                    //only rotate if target direction is usable
                     if (targetX * targetX + targetZ * targetZ >= 1E-4D) {
                         float targetYaw = (float)(Math.atan2(targetZ, targetX) * 180f / (float) Math.PI) - 90f;
                         this.creature.rotationYaw = targetYaw;
@@ -186,23 +193,20 @@ public class RiftUnmountedUseMove extends EntityAIBase {
                 }
                 //pathing to ensure target can be found by creature
                 else {
+                    //tick down repath cooldown
                     if (this.repathCooldown > 0) this.repathCooldown--;
                     PathNavigate creatureNavigation = this.creature.getNavigator();
 
-                    //---when target is way too close, move away---
-                    if (this.moveRule.detectionRule().targetTooClose(this.creature, target)) {
-                        this.directTargetMoveStallTicks = 0;
-                        this.holdCloseTargetStrafe = false;
-                        this.closeTargetStrafeTicks = CLOSE_TARGET_STRAFE_TICKS;
-                    }
-
+                    //---when held strafe should stop due to target movement---
                     if (this.holdCloseTargetStrafe && this.hasLastTargetPos && target.getDistanceSq(this.lastTargetX, this.lastTargetY, this.lastTargetZ) > TARGET_MOVED_REPATH_DISTANCE_SQ * 4D) {
                         this.directTargetMoveStallTicks = 0;
                         this.holdCloseTargetStrafe = false;
                         this.closeTargetStrafeTicks = 0;
                     }
 
+                    //---when creature is strafing away from close target---
                     if (this.closeTargetStrafeTicks > 0 || this.holdCloseTargetStrafe) {
+                        //tick down temporary strafe
                         if (this.closeTargetStrafeTicks > 0) this.closeTargetStrafeTicks--;
 
                         //face close target
@@ -223,31 +227,36 @@ public class RiftUnmountedUseMove extends EntityAIBase {
                         boolean targetMoved = !this.hasLastTargetPos || target.getDistanceSq(this.lastTargetX, this.lastTargetY, this.lastTargetZ) > TARGET_MOVED_REPATH_DISTANCE_SQ;
                         boolean shouldRepath = this.repathCooldown <= 0 && (creatureNavigation.noPath() || targetMoved);
 
+                        //---when target moved or path ended, try to repath---
                         if (shouldRepath) {
                             this.rememberTargetPos(target);
                             this.repathCooldown = 4 + this.creature.world.rand.nextInt(7);
+                            //when pathing succeeds, reset direct movement fallback
                             if (creatureNavigation.tryMoveToEntityLiving(target, 1D)) {
                                 this.directTargetMoveStallTicks = 0;
                                 this.holdCloseTargetStrafe = false;
                             }
                         }
 
+                        //---when navigator has no path, move directly to target---
                         if (creatureNavigation.noPath()) {
                             double targetDistanceSq = this.creature.getDistanceSq(target);
+                            //when direct movement is not getting closer, count a stall
                             if (this.directTargetMoveStallTicks > 0 && targetDistanceSq + 0.01D >= this.lastDirectTargetDistanceSq) {
                                 this.directTargetMoveStallTicks++;
                             }
-                            else {
-                                this.directTargetMoveStallTicks = 1;
-                            }
+                            //otherwise reset stall counter
+                            else this.directTargetMoveStallTicks = 1;
                             this.lastDirectTargetDistanceSq = targetDistanceSq;
 
+                            //when direct movement stalls, strafe away instead
                             if (this.directTargetMoveStallTicks >= DIRECT_TARGET_MOVE_STALL_TICKS) {
                                 this.directTargetMoveStallTicks = 0;
                                 this.holdCloseTargetStrafe = true;
                                 this.closeTargetStrafeTicks = CLOSE_TARGET_STRAFE_TICKS;
                                 this.rememberTargetPos(target);
                             }
+                            //otherwise keep directly moving to target
                             else {
                                 this.creature.getMoveHelper().setMoveTo(target.posX, target.posY, target.posZ, 1D);
                                 this.rememberTargetPos(target);
@@ -259,7 +268,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
         }
         //sprinting to target involves directly moving to its target position
         else if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.SPRINT) {
-            this.creature.getMoveHelper().setMoveTo(target.posX, target.posY, target.posZ, 1D);
+            if (target != null && target.isEntityAlive()) this.creature.getMoveHelper().setMoveTo(target.posX, target.posY, target.posZ, 1D);
         }
     }
 
@@ -268,18 +277,5 @@ public class RiftUnmountedUseMove extends EntityAIBase {
         this.lastTargetX = target.posX;
         this.lastTargetY = target.posY;
         this.lastTargetZ = target.posZ;
-    }
-
-    private void preserveLastLookDirection() {
-        if (!this.hasLastLookDirection) return;
-
-        this.creature.rotationYaw = this.lastRotationYawHead;
-        this.creature.prevRotationYaw = this.lastPrevRotationYawHead;
-        this.creature.renderYawOffset = this.lastRotationYawHead;
-        this.creature.prevRenderYawOffset = this.lastPrevRotationYawHead;
-        this.creature.rotationYawHead = this.lastRotationYawHead;
-        this.creature.prevRotationYawHead = this.lastPrevRotationYawHead;
-        this.creature.rotationPitch = this.lastRotationPitch;
-        this.creature.prevRotationPitch = this.lastPrevRotationPitch;
     }
 }

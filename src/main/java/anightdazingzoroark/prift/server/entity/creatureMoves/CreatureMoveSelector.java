@@ -79,8 +79,6 @@ public class CreatureMoveSelector {
     //-----target detection rules for moves-----
     public abstract static class DetectionRule {
         public abstract boolean targetWithinRange(@NotNull RiftCreature user, @NotNull EntityLivingBase target);
-
-        public abstract boolean targetTooClose(@NotNull RiftCreature user, @NotNull EntityLivingBase target);
     }
 
     public static class BoundingBoxDetectionRule extends DetectionRule {
@@ -95,11 +93,6 @@ public class CreatureMoveSelector {
         public boolean targetWithinRange(@NotNull RiftCreature user, @NotNull EntityLivingBase target) {
             return user.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), this.boundingBoxName);
         }
-
-        @Override
-        public boolean targetTooClose(@NotNull RiftCreature user, @NotNull EntityLivingBase target) {
-            return false;
-        }
     }
 
     public static class DistanceFromUserDetectionRule extends DetectionRule {
@@ -107,6 +100,14 @@ public class CreatureMoveSelector {
         private final String locatorName;
         private final double minDistance;
         private final double maxDistance;
+
+        public DistanceFromUserDetectionRule(double maxDistance) {
+            this("", -1, maxDistance);
+        }
+
+        public DistanceFromUserDetectionRule(double minDistance, double maxDistance) {
+            this("", minDistance, maxDistance);
+        }
 
         public DistanceFromUserDetectionRule(@NotNull String locatorName, double maxDistance) {
             this(locatorName, -1, maxDistance);
@@ -128,11 +129,6 @@ public class CreatureMoveSelector {
                 return distance >= this.minDistance && distance <= this.maxDistance;
             }
             throw new UnsupportedOperationException("Given maxDistance is smaller than minDistance!");
-        }
-
-        @Override
-        public boolean targetTooClose(@NotNull RiftCreature user, @NotNull EntityLivingBase target) {
-            return this.minDistance >= 0 && this.getDistanceFromUserPoint(user, target) < this.minDistance;
         }
 
         private double getDistanceFromUserPoint(@NotNull RiftCreature user, @NotNull EntityLivingBase target) {

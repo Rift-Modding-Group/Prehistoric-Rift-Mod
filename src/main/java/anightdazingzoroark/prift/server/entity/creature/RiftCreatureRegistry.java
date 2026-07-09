@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.server.entity.creature.built.Stegosaurus;
 import anightdazingzoroark.prift.server.entity.creature.built.Tyrannosaurus;
+import anightdazingzoroark.prift.server.entity.creature.info.Element;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCommon;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveSelector;
@@ -127,12 +128,10 @@ public class RiftCreatureRegistry {
                                 .setAnimNames("stomp")
                                 .setCooldown(200)
                         )
-                        /*
                         .addMove("power_roar", new CreatureMoveBuilder()
                                 .setBasePower(20)
                                 .setRequireFindTargetToUse()
                                 .setElemental(Element.SONIC, 1, 0)
-                                .setUseCanStopMovement()
                                 .setOnMoveHitEffect(creature -> {
                                     if (!(creature instanceof IRayCreator<?> rayCreator)) return;
                                     RiftLibRayHelper.createRay(rayCreator, "roarRay", "roarOrigin");
@@ -144,7 +143,6 @@ public class RiftCreatureRegistry {
                                 .setAnimNames("power_roar")
                                 .setCooldown(1200)
                         )
-                         */
                         //---attack ai---
                         .setMoveSelector(new CreatureMoveSelector()
                                 .setMoveRule(
@@ -157,14 +155,12 @@ public class RiftCreatureRegistry {
                                         (creature, target) -> target != null ? 3 : -1,
                                         new CreatureMoveSelector.BoundingBoxDetectionRule("stompHitZone")
                                 )
-                                /*
                                 .setMoveRule(
                                         "power_roar",
                                         (creature, target) -> target != null ? 0 : -1,
-                                        new CreatureMoveSelector.MaxTargetDistRule("", 12D)
+                                        new CreatureMoveSelector.DistanceFromUserDetectionRule(12D)
                                 )
                                 .setCanSprintToAttack()
-                                 */
                         )
         );
         registerCreatureType(
