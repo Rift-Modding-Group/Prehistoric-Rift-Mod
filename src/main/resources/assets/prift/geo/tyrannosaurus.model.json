@@ -17,6 +17,18 @@
 					"locators": {
 						"roarOrigin": [0, 0, 0],
 						"stompOrigin": [-6, 0, 13]
+					},
+					"bounding_boxes": {
+						"stompHitZone": {
+							"origin": [-6, 0, 1],
+							"size": [24, 4],
+							"collision": false
+						},
+						"jawHitZone": {
+							"origin": [-1, 0, -20],
+							"size": [2, 10],
+							"collision": false
+						}
 					}
 				},
 				{
@@ -150,9 +162,6 @@
 					"cubes": [
 						{"origin": [-3.5, 15, -15], "size": [7, 9, 7], "uv": [32, 53]}
 					],
-					"locators": {
-						"jawLocator": [0, 18.5, -19]
-					},
 					"bounding_boxes": {
 						"head": {
 							"origin": [-3.75, 14.625, -15.25],

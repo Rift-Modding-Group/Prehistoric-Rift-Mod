@@ -23,9 +23,4 @@ public class RiftCreatureRenderer extends GeoEntityRenderer<RiftCreature> {
 
         super.render(model, animatable, partialTicks, red, green, blue, alpha);
     }
-
-    @Override
-    protected float entityScale(RiftCreature animatable) {
-        return animatable.scale();
-    }
 }

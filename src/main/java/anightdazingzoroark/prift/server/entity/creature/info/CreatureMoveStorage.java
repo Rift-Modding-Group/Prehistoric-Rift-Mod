@@ -19,7 +19,6 @@ import java.util.function.BiFunction;
 * A creature's moves are to be stored and managed here
 * */
 public class CreatureMoveStorage {
-    public static final int usableMoveCount = 6;
     //creature builder will be used to determine the moves
     private RiftCreatureBuilder creatureType;
     //cooldowns of the moves that are used

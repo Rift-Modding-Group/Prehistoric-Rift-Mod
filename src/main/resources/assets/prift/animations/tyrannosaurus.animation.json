@@ -121,7 +121,8 @@
 				}
 			},
 			"timeline": {
-				"0.25": "function.send_message('moveHitEffect');"
+				"0.15": "function.create_offense_hitbox_by_tag('jaw');",
+				"0.25": "function.destroy_offense_hitbox_by_tag('jaw');"
 			}
 		},
 		"animation.tyrannosaurus.incapacitated": {

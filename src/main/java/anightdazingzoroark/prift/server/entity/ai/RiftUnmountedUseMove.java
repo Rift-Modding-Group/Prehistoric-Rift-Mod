@@ -5,31 +5,46 @@ import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveSelector;
 import anightdazingzoroark.prift.util.MathUtil;
-import anightdazingzoroark.riftlib.model.AnimatedLocator;
-import anightdazingzoroark.riftlib.util.QuaternionUtils;
-import anightdazingzoroark.riftlib.util.VectorUtils;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathNavigate;
-import net.minecraft.pathfinding.PathPoint;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
-import org.lwjglx.util.vector.Quaternion;
 
 /**
  * This is for managing a creature being able to use moves as well as other offensive
  * actions that are not moves.
  * */
 public class RiftUnmountedUseMove extends EntityAIBase {
+    private static final double TARGET_MOVED_REPATH_DISTANCE_SQ = 1D;
+    private static final int DIRECT_TARGET_MOVE_STALL_TICKS = 8;
+    private static final int CLOSE_TARGET_STRAFE_TICKS = 10;
+
     @NotNull
     private final RiftCreature creature;
     private CreatureMoveSelector.MoveRule moveRule;
-    private boolean pathingToTargetForMove;
-    private boolean hasExecutedMove;
-    private Path currentPathToTarget;
+
+    //---move use result related stuff---
+    private String selectedMoveName;
+    private CreatureMoveBuilder selectedMoveBuilder;
+    private boolean hasExecutedMove; //flag to set to true when a move is currently being used by a creature
+
+    //---pathing related stuff---
+    private int repathCooldown;
+    private boolean hasLastTargetPos;
+    private double lastTargetX;
+    private double lastTargetY;
+    private double lastTargetZ;
+    private int directTargetMoveStallTicks;
+    private double lastDirectTargetDistanceSq;
+    private boolean holdCloseTargetStrafe;
+    private int closeTargetStrafeTicks;
+
+    //---look direction preservation---
+    private boolean hasLastLookDirection;
+    private float lastRotationYawHead;
+    private float lastPrevRotationYawHead;
+    private float lastRotationPitch;
+    private float lastPrevRotationPitch;
 
     public RiftUnmountedUseMove(@NotNull RiftCreature creature) {
         this.creature = creature;
@@ -52,14 +67,23 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     }
 
     @Override
+    public void startExecuting() {
+        if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.USE_MOVE) {
+            this.selectedMoveName = this.moveRule.name();
+            this.selectedMoveBuilder = this.creature.getCreatureMoves().getUsableMoveBuilder(this.selectedMoveName);
+        }
+        else if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.SPRINT) {
+            this.creature.setSprinting(true);
+        }
+    }
+
+    @Override
     public boolean shouldContinueExecuting() {
         EntityLivingBase target = this.creature.getAttackTarget();
         boolean targetAvailability = target != null && target.isEntityAlive();
 
         if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.USE_MOVE) {
-            //use the moverule as basis for checking if the move can be used as its needed for target check
-            CreatureMoveBuilder creatureMoveToUseBuilder = this.creature.getCreatureMoves().getUsableMoveBuilder(this.moveRule.name());
-            boolean moveBuilderTargetCondition = (creatureMoveToUseBuilder != null && creatureMoveToUseBuilder.getRequireFindTargetToUse()) ? targetAvailability : true;
+            boolean moveBuilderTargetCondition = !this.selectedMoveBuilder.getRequireFindTargetToUse() || targetAvailability;
 
             //move execution depends on if current move hasnt been reset and if target is gone (requires move to actually require targeting)
             if (this.hasExecutedMove) {
@@ -78,26 +102,28 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     }
 
     @Override
-    public void startExecuting() {
-        //other result specific stuff
-        if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.SPRINT) {
-            this.creature.setSprinting(true);
-        }
-    }
-
-    @Override
     public void resetTask() {
+        //specific to sprinting
         if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.SPRINT) {
             this.creature.sprintToAttackCooldown = MathUtil.randomInRange(this.creature.world.rand, 5, 10) * 20;
             this.creature.setSprinting(false);
         }
 
-        if (this.creature.getAttackTarget() == null || !this.creature.getAttackTarget().isEntityAlive()) this.creature.getNavigator().clearPath();
-        this.currentPathToTarget = null;
-        this.moveRule = null;
-        this.pathingToTargetForMove = false;
-        this.hasExecutedMove = false;
+        this.selectedMoveName = null;
+        this.selectedMoveBuilder = null;
         this.creature.resetCurrentMove();
+        this.hasExecutedMove = false;
+        this.repathCooldown = 0;
+        this.hasLastTargetPos = false;
+        this.directTargetMoveStallTicks = 0;
+        this.holdCloseTargetStrafe = false;
+        this.closeTargetStrafeTicks = 0;
+        this.creature.getNavigator().clearPath();
+        this.creature.getAnimationData().clearAllWorldSpaceAABBs();
+
+        //preserve last look direction after target is gone
+        EntityLivingBase target = this.creature.getAttackTarget();
+        if (target == null || !target.isEntityAlive()) this.preserveLastLookDirection();
     }
 
     /**
@@ -106,46 +132,129 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     @Override
     public void updateTask() {
         EntityLivingBase target = this.creature.getAttackTarget();
-        if (target == null) return;
+        //preserve last look direction after target is gone
+        if (target == null || !target.isEntityAlive()) {
+            this.preserveLastLookDirection();
+            return;
+        }
 
-        //normal move usage involves just proper pathing until it reaches a specific distance
         if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.USE_MOVE) {
-            PathNavigate creatureNavigation = this.creature.getNavigator();
+            if (this.hasExecutedMove && !this.creature.getCurrentMove().isEmpty()) {
+                this.directTargetMoveStallTicks = 0;
+                this.holdCloseTargetStrafe = false;
+                this.closeTargetStrafeTicks = 0;
+                this.creature.getNavigator().clearPath();
+                return;
+            }
 
-            //block all further pathing attempts if currently used move says no
-            if (!this.creature.getCurrentMove().isEmpty()) {
-                CreatureMoveBuilder creatureMoveBuilder = this.creature.getCreatureMoves().getMoveBuilderCurrentMove();
-                if (creatureMoveBuilder != null && creatureMoveBuilder.getUseCanStopMovement()) {
-                    creatureNavigation.clearPath();
-                    this.currentPathToTarget = null;
-                    this.pathingToTargetForMove = false;
-                    return;
+            //pathing to go to target is all dealt with here, if said move requires target
+            if (this.selectedMoveBuilder.getRequireFindTargetToUse()) {
+                //set look at target
+                this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, 0f);
+                this.hasLastLookDirection = true;
+                this.lastRotationYawHead = this.creature.rotationYawHead;
+                this.lastPrevRotationYawHead = this.creature.prevRotationYawHead;
+                this.lastRotationPitch = this.creature.rotationPitch;
+                this.lastPrevRotationPitch = this.creature.prevRotationPitch;
+
+                //execute move when target is in range
+                if (this.moveRule.detectionRule().targetWithinRange(this.creature, target)) {
+                    //forcibly stop rotation upon using a move
+                    double targetX = target.posX - this.creature.posX;
+                    double targetZ = target.posZ - this.creature.posZ;
+                    if (targetX * targetX + targetZ * targetZ >= 1E-4D) {
+                        float targetYaw = (float)(Math.atan2(targetZ, targetX) * 180f / (float) Math.PI) - 90f;
+                        this.creature.rotationYaw = targetYaw;
+                        this.creature.prevRotationYaw = targetYaw;
+                        this.creature.renderYawOffset = targetYaw;
+                        this.creature.prevRenderYawOffset = targetYaw;
+                        this.creature.rotationYawHead = targetYaw;
+                        this.creature.prevRotationYawHead = targetYaw;
+                        this.lastRotationYawHead = targetYaw;
+                        this.lastPrevRotationYawHead = targetYaw;
+                    }
+
+                    //execute move
+                    this.hasExecutedMove = true;
+                    this.creature.setCurrentMove(this.selectedMoveName);
+
+                    //stop pathing
+                    this.directTargetMoveStallTicks = 0;
+                    this.holdCloseTargetStrafe = false;
+                    this.closeTargetStrafeTicks = 0;
+                    this.creature.getNavigator().clearPath();
                 }
-            }
+                //pathing to ensure target can be found by creature
+                else {
+                    if (this.repathCooldown > 0) this.repathCooldown--;
+                    PathNavigate creatureNavigation = this.creature.getNavigator();
 
-            //flags for if last target pos and target are in range
-            BlockPos targetPoint = this.getTargetPoint();
-            double targetDistFromTargetPoint = Math.sqrt(targetPoint.distanceSq(target.getPosition()));
-            boolean targetEntityInRange = targetDistFromTargetPoint <= this.moveRule.maxTargetingDistRule().maxDist();
-            boolean targetPointInRange = this.targetPointInRange(targetPoint);
+                    //---when target is way too close, move away---
+                    if (this.moveRule.detectionRule().targetTooClose(this.creature, target)) {
+                        this.directTargetMoveStallTicks = 0;
+                        this.holdCloseTargetStrafe = false;
+                        this.closeTargetStrafeTicks = CLOSE_TARGET_STRAFE_TICKS;
+                    }
 
-            //set path
-            if (!this.pathingToTargetForMove) {
-                creatureNavigation.clearPath();
+                    if (this.holdCloseTargetStrafe && this.hasLastTargetPos && target.getDistanceSq(this.lastTargetX, this.lastTargetY, this.lastTargetZ) > TARGET_MOVED_REPATH_DISTANCE_SQ * 4D) {
+                        this.directTargetMoveStallTicks = 0;
+                        this.holdCloseTargetStrafe = false;
+                        this.closeTargetStrafeTicks = 0;
+                    }
 
-                this.currentPathToTarget = creatureNavigation.getPathToEntityLiving(target);
-                creatureNavigation.setPath(this.currentPathToTarget, 1D);
-                this.pathingToTargetForMove = true;
-            }
+                    if (this.closeTargetStrafeTicks > 0 || this.holdCloseTargetStrafe) {
+                        if (this.closeTargetStrafeTicks > 0) this.closeTargetStrafeTicks--;
 
-            //if within specific distance, set the move
-            if (targetEntityInRange && targetPointInRange) {
-                this.creature.setCurrentMove(this.moveRule.name());
-                this.hasExecutedMove = true;
-            }
-            //if within range of point but not target, reset flags for pathing
-            else if (!targetEntityInRange && targetPointInRange) {
-                this.pathingToTargetForMove = false;
+                        //face close target
+                        double targetX = target.posX - this.creature.posX;
+                        double targetZ = target.posZ - this.creature.posZ;
+                        if (targetX * targetX + targetZ * targetZ >= 1E-4D) {
+                            this.creature.faceEntity(target, 90f, 0f);
+                            this.creature.renderYawOffset = this.creature.rotationYaw;
+                        }
+
+                        creatureNavigation.clearPath();
+                        this.directTargetMoveStallTicks = 0;
+                        this.creature.getMoveHelper().strafe(-1f, 0f);
+                        if (!this.holdCloseTargetStrafe) this.rememberTargetPos(target);
+                    }
+                    //---normal pathing---
+                    else {
+                        boolean targetMoved = !this.hasLastTargetPos || target.getDistanceSq(this.lastTargetX, this.lastTargetY, this.lastTargetZ) > TARGET_MOVED_REPATH_DISTANCE_SQ;
+                        boolean shouldRepath = this.repathCooldown <= 0 && (creatureNavigation.noPath() || targetMoved);
+
+                        if (shouldRepath) {
+                            this.rememberTargetPos(target);
+                            this.repathCooldown = 4 + this.creature.world.rand.nextInt(7);
+                            if (creatureNavigation.tryMoveToEntityLiving(target, 1D)) {
+                                this.directTargetMoveStallTicks = 0;
+                                this.holdCloseTargetStrafe = false;
+                            }
+                        }
+
+                        if (creatureNavigation.noPath()) {
+                            double targetDistanceSq = this.creature.getDistanceSq(target);
+                            if (this.directTargetMoveStallTicks > 0 && targetDistanceSq + 0.01D >= this.lastDirectTargetDistanceSq) {
+                                this.directTargetMoveStallTicks++;
+                            }
+                            else {
+                                this.directTargetMoveStallTicks = 1;
+                            }
+                            this.lastDirectTargetDistanceSq = targetDistanceSq;
+
+                            if (this.directTargetMoveStallTicks >= DIRECT_TARGET_MOVE_STALL_TICKS) {
+                                this.directTargetMoveStallTicks = 0;
+                                this.holdCloseTargetStrafe = true;
+                                this.closeTargetStrafeTicks = CLOSE_TARGET_STRAFE_TICKS;
+                                this.rememberTargetPos(target);
+                            }
+                            else {
+                                this.creature.getMoveHelper().setMoveTo(target.posX, target.posY, target.posZ, 1D);
+                                this.rememberTargetPos(target);
+                            }
+                        }
+                    }
+                }
             }
         }
         //sprinting to target involves directly moving to its target position
@@ -154,38 +263,23 @@ public class RiftUnmountedUseMove extends EntityAIBase {
         }
     }
 
-    /**
-     * Check if the place to go to for targeting is within targeting range of the move to use
-     * */
-    private boolean targetPointInRange(BlockPos targetPoint) {
-        if (this.currentPathToTarget == null || this.currentPathToTarget.getFinalPathPoint() == null) return false;
-
-        PathPoint finalTargetPoint = this.currentPathToTarget.getFinalPathPoint();
-        return targetPoint.getDistance(finalTargetPoint.x, finalTargetPoint.y, finalTargetPoint.z) <= this.moveRule.maxTargetingDistRule().maxDist();
+    private void rememberTargetPos(@NotNull EntityLivingBase target) {
+        this.hasLastTargetPos = true;
+        this.lastTargetX = target.posX;
+        this.lastTargetY = target.posY;
+        this.lastTargetZ = target.posZ;
     }
 
-    /**
-     * Get the targeting point on the entity. Can be either a locator or the entity's centerpoint
-     * */
-    @NotNull
-    private BlockPos getTargetPoint() {
-        String locatorName = this.moveRule.maxTargetingDistRule().locatorName();
-        if (locatorName.isEmpty()) return this.creature.getPosition();
+    private void preserveLastLookDirection() {
+        if (!this.hasLastLookDirection) return;
 
-        //get animated locator and convert to world pos
-        AnimatedLocator animatedLocator = this.creature.getAnimationData().getAnimatedLocator(locatorName);
-        Vec3d modelSpacePos = animatedLocator.getModelSpacePosition();
-        float parentScale = this.creature.scale();
-        float locatorX = -(float) (modelSpacePos.x / 16f);
-        float locatorY = (float) (modelSpacePos.y / 16f);
-        float locatorZ = -(float) (modelSpacePos.z / 16f);
-        Vec3d posVec = new Vec3d(locatorX * parentScale, locatorY * parentScale, locatorZ * parentScale);
-        Quaternion quaternion = QuaternionUtils.createXYZQuaternion(0f, -Math.toRadians(this.creature.rotationYawHead), 0f);
-        posVec = VectorUtils.rotateVectorWithQuaternion(posVec, quaternion);
-        return new BlockPos(
-                this.creature.posX + posVec.x,
-                this.creature.posY + posVec.y,
-                this.creature.posZ + posVec.z
-        );
+        this.creature.rotationYaw = this.lastRotationYawHead;
+        this.creature.prevRotationYaw = this.lastPrevRotationYawHead;
+        this.creature.renderYawOffset = this.lastRotationYawHead;
+        this.creature.prevRenderYawOffset = this.lastPrevRotationYawHead;
+        this.creature.rotationYawHead = this.lastRotationYawHead;
+        this.creature.prevRotationYawHead = this.lastPrevRotationYawHead;
+        this.creature.rotationPitch = this.lastRotationPitch;
+        this.creature.prevRotationPitch = this.lastPrevRotationPitch;
     }
 }

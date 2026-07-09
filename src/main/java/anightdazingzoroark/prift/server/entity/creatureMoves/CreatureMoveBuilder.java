@@ -178,18 +178,6 @@ public class CreatureMoveBuilder {
     }
 
     /**
-     * Make it so that when the move is being used, the user cannot move
-     * */
-    public CreatureMoveBuilder setUseCanStopMovement() {
-        this.useCanStopMovement = true;
-        return this;
-    }
-
-    public boolean getUseCanStopMovement() {
-        return this.useCanStopMovement;
-    }
-
-    /**
      * Get validity based on if some params are not null
      * */
     public boolean isValid() {

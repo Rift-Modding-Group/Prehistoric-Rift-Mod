@@ -44,11 +44,6 @@ public abstract class RiftCreatureHitboxed extends RiftCreature implements IMult
     }
 
     @Override
-    public float multiHitboxUserScale() {
-        return this.scale();
-    }
-
-    @Override
     @NotNull
     public MultiHitboxList<RiftCreatureHitboxed> getMultiHitboxList() {
         return this.multiHitboxList;

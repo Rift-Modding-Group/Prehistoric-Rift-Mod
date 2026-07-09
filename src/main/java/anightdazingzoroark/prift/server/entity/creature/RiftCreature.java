@@ -19,10 +19,13 @@ import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
 import anightdazingzoroark.riftlib.core.manager.AbstractAnimationDataEntity;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
+import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
 import anightdazingzoroark.riftlib.ray.RiftLibRay;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
+import anightdazingzoroark.riftlib.util.QuaternionUtils;
+import anightdazingzoroark.riftlib.util.VectorUtils;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
@@ -46,6 +49,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
+import org.lwjglx.util.vector.Quaternion;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,7 +89,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public RiftCreature(World worldIn, String creatureName) {
         super(worldIn);
         this.creatureType = RiftCreatureRegistry.getCreatureBuilder(creatureName);
-        this.animData = new AnimationDataEntity(this);
+        this.animData = new AnimationDataEntity(this, holder -> this.scale());
         this.moveHelper = new RiftCreatureMoveHelper(this);
         this.setSize(this.creatureType.getMainHitboxSize()[0], this.creatureType.getMainHitboxSize()[1]);
         this.creatureInventory = new RiftLibInventoryHandler(this.creatureType.getInventorySize());
@@ -225,6 +229,21 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
     }
 
+    /**
+     * Used to check if a given BlockPos is within the bounds of an AnimatedBoundingBox
+     * */
+    public boolean posWithinBoundingBox(@NotNull Vec3d posVec, @NotNull String boundingBoxName) {
+        AxisAlignedBB aabb = this.animData.getOrCreateWorldSpaceAABB(boundingBoxName);
+        if (aabb == null) return false;
+        return aabb.grow(1e-5D).contains(posVec);
+    }
+
+    public boolean aabbIntersectsBoundingBox(@NotNull AxisAlignedBB otherAABB, @NotNull String boundingBoxName) {
+        AxisAlignedBB aabb = this.animData.getOrCreateWorldSpaceAABB(boundingBoxName);
+        if (aabb == null) return false;
+        return aabb.intersects(otherAABB);
+    }
+
     //this creates an AABB that is ahead of is center by 1.5 blocks + its width
     public AxisAlignedBB getFrontAABB() {
         double frontWidth = this.width / 2D + 1.5D;
@@ -308,6 +327,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     //-----properties management-----
+    @SuppressWarnings("unchecked")
     public <I> I getProperty(String key) {
         if (!this.propertyValueMap.containsKey(key)) {
             throw new UnsupportedOperationException("Key " + key + " does not exist in property map for " + this.creatureType.getName() + "!");
@@ -454,10 +474,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         return this;
     }
 
-    public float dynamicRiderUserScale() {
-        return this.scale();
-    }
-
     //-----ray related methods-----
     public RiftCreature getRayCreator() {
         return this;
@@ -470,10 +486,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     public void applyRaySegments(String rayName, BlockPos rayOrigin, RiftLibRay.RayHitResult rayHitResult) {
         if (this.rayHitEffectMap == null) return;
         this.rayHitEffectMap.get(rayName).accept(this, rayOrigin, rayHitResult);
-    }
-
-    public float rayCreatorScale() {
-        return this.scale();
     }
 
     //-----animation related methods-----
