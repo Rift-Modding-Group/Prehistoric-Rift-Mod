@@ -287,13 +287,20 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         CreatureMoveBuilder creatureMoveBuilder = this.getCreatureMoves().getMoveBuilderCurrentMove();
         if (creatureMoveBuilder == null) return false;
 
+        //apply damage
         double damage = CreatureMoveHelper.calculateDamage(this);
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float) damage);
         if (creatureMoveBuilder.getOnTargetHitEffect() != null && creatureMoveBuilder.getMakesContact()) {
             creatureMoveBuilder.getOnTargetHitEffect().accept(this, entityIn);
         }
-        this.setLastAttackedEntity(entityIn);
 
+        //apply elemental effects
+        if (creatureMoveBuilder.getElement() != null) {
+            creatureMoveBuilder.getElement().applyElementEffect.accept(entityIn, creatureMoveBuilder.getElementEffectStrength());
+        }
+
+        //other stuff
+        this.setLastAttackedEntity(entityIn);
         return flag;
     }
 
@@ -526,14 +533,6 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (creatureMoveBuilder == null) return;
             creatureMoveBuilder.getOnMoveHitEffect().accept(this);
         }, Side.SERVER));
-        animationData.addAnimationMessageEffect("endMoveEffect", new AnimatableRunValue(() -> {
-            //execute on move end
-            CreatureMoveBuilder creatureMoveBuilder = this.getCreatureMoves().getMoveBuilderCurrentMove();
-            if (creatureMoveBuilder != null && creatureMoveBuilder.getOnMoveEndEffect() != null) creatureMoveBuilder.getOnMoveEndEffect().accept(this);
-
-            //reset current move
-            this.resetCurrentMove();
-        }, Side.CLIENT, Side.SERVER));
     }
 
     private void initAnimControllerForPhase(AnimationDataEntity animationData, @NotNull String phase) {
@@ -555,8 +554,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
             //create state for move
             AnimationControllerState<AnimationDataEntity> moveState = new AnimationControllerState<AnimationDataEntity>(moveName)
-                    .addStateTransition("default", animData -> animData.allAnimationsFinished("moveUse"))
-                    .addExitEffect(animData -> animData.sendMessage("endMoveEffect"));
+                    .addStateTransition("default", animData -> animData.allAnimationsFinished("moveUse"));
 
             //if the move state has multiple animation names, make it so that upon entry it generates a random number
             //to then use

@@ -316,6 +316,15 @@
 						"1.84": [0, 0, 0]
 					}
 				}
+			},
+			"particle_effects": {
+				"0.64": {
+					"effect": "prift:flamethrower_fire",
+					"locator": "flameLocator"
+				}
+			},
+			"timeline": {
+				"0.64": "function.send_message('moveHitEffect');"
 			}
 		},
 		"animation.tyrannosaurus.power_roar": {

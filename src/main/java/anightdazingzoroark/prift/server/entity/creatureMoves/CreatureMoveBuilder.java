@@ -20,7 +20,6 @@ public class CreatureMoveBuilder {
     private boolean requireFindTargetToUse;
     private boolean makesContact;
     private Element element;
-    private double elementEffectChance;
     private int elementEffectStrength;
     private BiConsumer<RiftCreature, Entity> onTargetHitEffect;
     private BiConsumer<RiftCreature, BlockPos> onBlockHitEffect;
@@ -92,20 +91,15 @@ public class CreatureMoveBuilder {
      * as well as the strength of that effect
      * if not defined, physical damage will be used instead
      * */
-    public CreatureMoveBuilder setElemental(Element element, double elementEffectChance, int elementEffectStrength) {
+    public CreatureMoveBuilder setElemental(Element element, int elementEffectStrength) {
         this.moveType = CreatureMoveHelper.MoveType.ELEMENTAL;
         this.element = element;
-        this.elementEffectChance = elementEffectChance;
         this.elementEffectStrength = elementEffectStrength;
         return this;
     }
 
     public Element getElement() {
         return this.element;
-    }
-
-    public double getElementEffectChance() {
-        return this.elementEffectChance;
     }
 
     public int getElementEffectStrength() {
@@ -198,7 +192,6 @@ public class CreatureMoveBuilder {
         toReturn.requireFindTargetToUse = this.requireFindTargetToUse;
         toReturn.makesContact = this.makesContact;
         toReturn.element = this.element;
-        toReturn.elementEffectChance = this.elementEffectChance;
         toReturn.elementEffectStrength = this.elementEffectStrength;
         toReturn.onTargetHitEffect = this.onTargetHitEffect;
         toReturn.onBlockHitEffect = this.onBlockHitEffect;

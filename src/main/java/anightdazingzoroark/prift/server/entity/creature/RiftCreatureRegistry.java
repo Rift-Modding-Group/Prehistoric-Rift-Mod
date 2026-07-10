@@ -15,6 +15,7 @@ import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
 import anightdazingzoroark.riftlib.ray.rayShape.impact.RiftLibRayEllipsoidImpactShape;
 import anightdazingzoroark.riftlib.ray.rayShape.impact.RiftLibRaySphereImpactShape;
+import anightdazingzoroark.riftlib.ray.rayShape.motion.RiftLibRayConeMotionShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -112,7 +113,30 @@ public class RiftCreatureRegistry {
                                     }
                                 }
                         )
+                        .addUsableRay(
+                                "flamethrowerRay",
+                                new RiftLibRayBuilder()
+                                        .setMotionThenImpact()
+                                        .setMovementShape(() -> new RiftLibRayConeMotionShape(
+                                                0.1D,
+                                                0.35D,
+                                                0.25D,
+                                                3,
+                                                12,
+                                                false,
+                                                false
+                                        ))
+                                        .setMotionSpeed(1D)
+                                        .setMaxMotionDistance(16D),
+                                (creature, rayOrigin, rayHitResult) -> {
+                                    for (Entity hitEntity : rayHitResult.hitEntities()) {
+                                        if (!(hitEntity instanceof EntityLivingBase hitEntityLivingBase)) continue;
+                                        creature.attackEntityAsMob(hitEntityLivingBase);
+                                    }
+                                }
+                        )
                         //---moves---
+                        /*
                         .addMove("bite", CreatureMoveCommon.standardMeleeMove.copy()
                                 .setBasePower(50)
                                 .setAnimNames("bite")
@@ -131,7 +155,7 @@ public class RiftCreatureRegistry {
                         .addMove("power_roar", new CreatureMoveBuilder()
                                 .setBasePower(20)
                                 .setRequireFindTargetToUse()
-                                .setElemental(Element.SONIC, 1, 0)
+                                .setElemental(Element.SONIC, 0)
                                 .setOnMoveHitEffect(creature -> {
                                     if (!(creature instanceof IRayCreator<?> rayCreator)) return;
                                     RiftLibRayHelper.createRay(rayCreator, "roarRay", "roarOrigin");
@@ -143,8 +167,26 @@ public class RiftCreatureRegistry {
                                 .setAnimNames("power_roar")
                                 .setCooldown(1200)
                         )
+                         */
+                        .addMove("flamethrower", new CreatureMoveBuilder()
+                                .setBasePower(90)
+                                .setRequireFindTargetToUse()
+                                .setElemental(Element.FIRE, 0)
+                                .setOnMoveHitEffect(creature -> {
+                                    if (!(creature instanceof IRayCreator<?> rayCreator)) return;
+                                    RiftLibRayHelper.createRay(rayCreator, "flamethrowerRay", "flameLocator");
+                                })
+                                .setOnMoveEndEffect(creature -> {
+                                    if (!(creature instanceof IRayCreator<?> rayCreator)) return;
+                                    RiftLibRayHelper.killRay(rayCreator, "flamethrowerRay");
+                                    System.out.println("end ray");
+                                })
+                                .setAnimNames("flamethrower")
+                                //.setCooldown(1200)
+                        )
                         //---attack ai---
                         .setMoveSelector(new CreatureMoveSelector()
+                                /*
                                 .setMoveRule(
                                         "bite",
                                         (creature, target) -> target != null ? 3 : -1,
@@ -160,7 +202,13 @@ public class RiftCreatureRegistry {
                                         (creature, target) -> target != null ? 0 : -1,
                                         new CreatureMoveSelector.DistanceFromUserDetectionRule(12D)
                                 )
-                                .setCanSprintToAttack()
+                                 */
+                                .setMoveRule(
+                                        "flamethrower",
+                                        (creature, target) -> target != null ? 0 : -1,
+                                        new CreatureMoveSelector.DistanceFromUserDetectionRule(4D, 16D)
+                                )
+                                //.setCanSprintToAttack()
                         )
         );
         registerCreatureType(

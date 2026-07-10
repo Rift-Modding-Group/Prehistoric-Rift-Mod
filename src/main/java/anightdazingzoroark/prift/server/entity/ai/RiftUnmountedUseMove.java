@@ -109,6 +109,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
             this.creature.setSprinting(false);
         }
 
+        if (this.selectedMoveBuilder.getOnMoveEndEffect() != null) this.selectedMoveBuilder.getOnMoveEndEffect().accept(this.creature);
         this.selectedMoveName = null;
         this.selectedMoveBuilder = null;
         this.creature.resetCurrentMove();

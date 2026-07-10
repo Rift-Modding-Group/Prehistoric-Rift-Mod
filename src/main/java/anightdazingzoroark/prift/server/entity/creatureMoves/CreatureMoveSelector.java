@@ -123,16 +123,12 @@ public class CreatureMoveSelector {
         public boolean targetWithinRange(@NotNull RiftCreature user, @NotNull EntityLivingBase target) {
             //---check if the posVec is in range---
             //if minDistance is negative, it means only maxDistance matters
-            double distance = this.getDistanceFromUserPoint(user, target);
+            double distance = this.getUserPoint(user).distanceTo(target.getPositionVector()) + (this.locatorName.isEmpty() ? user.width : 0D);
             if (this.minDistance < 0) return distance <= this.maxDistance;
             else if (this.maxDistance >= this.minDistance) {
                 return distance >= this.minDistance && distance <= this.maxDistance;
             }
             throw new UnsupportedOperationException("Given maxDistance is smaller than minDistance!");
-        }
-
-        private double getDistanceFromUserPoint(@NotNull RiftCreature user, @NotNull EntityLivingBase target) {
-            return this.getUserPoint(user).distanceTo(target.getPositionVector());
         }
 
         @NotNull

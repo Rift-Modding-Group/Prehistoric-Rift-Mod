@@ -162,6 +162,9 @@
 					"cubes": [
 						{"origin": [-3.5, 15, -15], "size": [7, 9, 7], "uv": [32, 53]}
 					],
+					"locators": {
+						"flameLocator": [0, 18.5, -16]
+					},
 					"bounding_boxes": {
 						"head": {
 							"origin": [-3.75, 14.625, -15.25],
