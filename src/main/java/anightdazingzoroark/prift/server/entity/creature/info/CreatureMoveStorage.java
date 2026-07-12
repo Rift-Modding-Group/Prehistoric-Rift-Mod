@@ -3,8 +3,9 @@ package anightdazingzoroark.prift.server.entity.creature.info;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveSelector;
+import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelector;
 import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
+import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.MoveRuleBuilder;
 import anightdazingzoroark.prift.util.PriorityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -59,13 +60,12 @@ public class CreatureMoveStorage {
     public void updateUsableMoves(@NotNull RiftCreature creature, @Nullable EntityLivingBase target) {
         if (!this.isInitialized()) return;
 
-        Set<Map.Entry<CreatureMoveSelector.MoveRule, BiFunction<RiftCreature, EntityLivingBase, Integer>>> movePairSet = this.creatureType.getMoveSelector().getMoveRules().entrySet();
-        for (Map.Entry<CreatureMoveSelector.MoveRule, BiFunction<RiftCreature, EntityLivingBase, Integer>> movePair : movePairSet) {
-            CreatureMoveSelector.MoveRule moveRule = movePair.getKey();
-            int index = movePair.getValue().apply(creature, target);
+        for (CreatureMoveSelector.MoveRule moveRule : this.creatureType.getMoveSelector().getMoveRules()) {
+            MoveRuleBuilder moveRuleBuilder = moveRule.moveRuleBuilder();
 
+            int index = moveRuleBuilder.getPriorityPredicate().apply(creature, target);
             //being on cooldown forcibly changes the index to -1
-            if (this.moveCooldowns.containsKey(moveRule.name()) && this.moveCooldowns.get(moveRule.name()) > 0) {
+            if (this.moveCooldowns.containsKey(moveRuleBuilder.getMoveName()) && this.moveCooldowns.get(moveRuleBuilder.getMoveName()) > 0) {
                 index = -1;
             }
 

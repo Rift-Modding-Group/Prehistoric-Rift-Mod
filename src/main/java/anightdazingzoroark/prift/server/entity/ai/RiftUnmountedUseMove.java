@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveSelector;
+import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelector;
 import anightdazingzoroark.prift.util.MathUtil;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -69,7 +69,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     @Override
     public void startExecuting() {
         if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.USE_MOVE) {
-            this.selectedMoveName = this.moveRule.name();
+            this.selectedMoveName = this.moveRule.moveRuleBuilder().getMoveName();
             this.selectedMoveBuilder = this.creature.getCreatureMoves().getUsableMoveBuilder(this.selectedMoveName);
         }
         else if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.SPRINT) {
@@ -106,7 +106,9 @@ public class RiftUnmountedUseMove extends EntityAIBase {
             this.creature.setSprinting(false);
         }
 
-        if (this.selectedMoveBuilder.getOnMoveEndEffect() != null) this.selectedMoveBuilder.getOnMoveEndEffect().accept(this.creature);
+        if (this.selectedMoveBuilder != null && this.selectedMoveBuilder.getOnMoveEndEffect() != null) {
+            this.selectedMoveBuilder.getOnMoveEndEffect().accept(this.creature);
+        }
         this.selectedMoveName = null;
         this.selectedMoveBuilder = null;
         this.hasExecutedMove = false;
@@ -169,7 +171,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
                 this.lastPrevRotationPitch = this.creature.prevRotationPitch;
 
                 //execute move when target is in range
-                if (this.moveRule.detectionRule().targetWithinRange(this.creature, target)) {
+                if (this.moveRule.moveRuleBuilder().getDetectionRule().targetWithinRange(this.creature, target)) {
                     //forcibly stop rotation upon using a move
                     double targetX = target.posX - this.creature.posX;
                     double targetZ = target.posZ - this.creature.posZ;
@@ -203,7 +205,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
                     PathNavigate creatureNavigation = this.creature.getNavigator();
 
                     //---when target is way too close, move away---
-                    if (this.moveRule.detectionRule().targetTooClose(this.creature, target)) {
+                    if (this.moveRule.moveRuleBuilder().getDetectionRule().targetTooClose(this.creature, target)) {
                         this.directTargetMoveStallTicks = 0;
                         this.holdCloseTargetStrafe = false;
                         this.closeTargetStrafeTicks = CLOSE_TARGET_STRAFE_TICKS;

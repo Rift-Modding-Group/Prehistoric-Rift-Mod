@@ -7,9 +7,10 @@ import anightdazingzoroark.prift.server.entity.creature.built.Tyrannosaurus;
 import anightdazingzoroark.prift.server.entity.creature.info.Element;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCommon;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveSelector;
+import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelector;
 import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
+import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.MoveRuleBuilder;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
@@ -184,26 +185,26 @@ public class RiftCreatureRegistry {
                         //---attack ai---
                         .setMoveSelector(new CreatureMoveSelector()
                                 .setMoveRule(
-                                        "bite",
-                                        (creature, target) -> target != null ? 3 : -1,
-                                        new CreatureMoveSelector.BoundingBoxDetectionRule("jawHitZone")
+                                        new MoveRuleBuilder("bite")
+                                                .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
+                                                .setDetectionRule(new CreatureMoveSelector.BoundingBoxDetectionRule("jawHitZone"))
                                 )
                                 .setMoveRule(
-                                        "stomp",
-                                        (creature, target) -> target != null ? 3 : -1,
-                                        new CreatureMoveSelector.BoundingBoxDetectionRule("stompHitZone")
+                                        new MoveRuleBuilder("stomp")
+                                                .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
+                                                .setDetectionRule(new CreatureMoveSelector.BoundingBoxDetectionRule("stompHitZone"))
                                 )
                                 .setMoveRule(
-                                        "power_roar",
-                                        (creature, target) -> target != null ? 0 : -1,
-                                        new CreatureMoveSelector.DistanceFromUserDetectionRule(12D)
+                                        new MoveRuleBuilder("power_roar")
+                                                .setPriorityPredicate((creature, target) -> target != null ? 0 : -1)
+                                                .setDetectionRule(new CreatureMoveSelector.DistanceFromUserDetectionRule(12D))
                                 )
                                 .setMoveRule(
-                                        "flamethrower",
-                                        (creature, target) -> target != null ? 0 : -1,
-                                        new CreatureMoveSelector.DistanceFromUserDetectionRule(4D, 16D)
+                                        new MoveRuleBuilder("flamethrower")
+                                                .setPriorityPredicate((creature, target) -> target != null ? 0 : -1)
+                                                .setDetectionRule(new CreatureMoveSelector.DistanceFromUserDetectionRule(4D, 16D))
                                 )
-                                //.setCanSprintToAttack()
+                                .setCanSprintToAttack()
                         )
         );
         registerCreatureType(

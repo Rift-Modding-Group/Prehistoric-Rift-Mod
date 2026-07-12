@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature.builder;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveSelector;
+import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelector;
 import anightdazingzoroark.prift.util.TriConsumer;
 import anightdazingzoroark.riftlib.ray.RiftLibRay;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;

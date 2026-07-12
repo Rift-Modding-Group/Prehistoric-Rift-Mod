@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.server.entity.creatureMoves;
+package anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.riftlib.model.AnimatedLocator;
@@ -9,7 +9,9 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.lwjglx.util.vector.Quaternion;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -19,18 +21,10 @@ import java.util.function.BiFunction;
 //todo: add move combos
 public class CreatureMoveSelector {
     //general storage of move rules
-    private final Map<MoveRule, BiFunction<RiftCreature, EntityLivingBase, Integer>> moveRules = new HashMap<>();
+    private final List<MoveRule> moveRules = new ArrayList<>();
 
-    public CreatureMoveSelector setMoveRule(String name, BiFunction<RiftCreature, EntityLivingBase, Integer> priorityPredicate) {
-        return this.setMoveRule(name, priorityPredicate, new DistanceFromUserDetectionRule("", 8D));
-    }
-
-    public CreatureMoveSelector setMoveRule(
-            String name,
-            BiFunction<RiftCreature, EntityLivingBase, Integer> priorityPredicate,
-            DetectionRule detectionRule
-    ) {
-        this.moveRules.put(new MoveRule(MoveResult.USE_MOVE, name, detectionRule), priorityPredicate);
+    public CreatureMoveSelector setMoveRule(MoveRuleBuilder moveRuleBuilder) {
+        this.moveRules.add(new MoveRule(MoveResult.USE_MOVE, moveRuleBuilder));
         return this;
     }
 
@@ -40,22 +34,27 @@ public class CreatureMoveSelector {
      * it can spring to attack when commanded to (by simply sprinting lol)
      * */
     public CreatureMoveSelector setCanSprintToAttack() {
-        this.moveRules.put(new MoveRule(MoveResult.SPRINT, "", new DistanceFromUserDetectionRule("", 8D,16D)), (creature, target) -> {
-            if (target == null) return -1;
-            double distFromTarget = creature.getDistance(target);
-            double minReach = creature.width + 3; //is temporary
-            boolean sprintCondition = distFromTarget <= 16D && distFromTarget >= minReach && creature.sprintToAttackCooldown <= 0;
-            return sprintCondition ? 1 : -1;
-        });
+        this.moveRules.add(new MoveRule(MoveResult.SPRINT, new MoveRuleBuilder("")
+                .setPriorityPredicate((creature, target) -> {
+                    if (target == null) return -1;
+                    double distFromTarget = creature.getDistance(target);
+                    double minReach = creature.width + 3; //is temporary
+                    boolean sprintCondition = distFromTarget <= 16D && distFromTarget >= minReach && creature.sprintToAttackCooldown <= 0;
+                    return sprintCondition ? 1 : -1;
+                })
+                .setDetectionRule(new DistanceFromUserDetectionRule("", 8D,16D)))
+        );
         return this;
     }
 
-    public CreatureMoveSelector setCanLeapToAttack(BiFunction<RiftCreature, EntityLivingBase, Integer> predicate) {
-        this.moveRules.put(new MoveRule(MoveResult.LEAP, "", new DistanceFromUserDetectionRule("", 8D,16D)), predicate);
+    public CreatureMoveSelector setCanLeapToAttack() {
+        this.moveRules.add(new MoveRule(MoveResult.LEAP, new MoveRuleBuilder("")
+                .setDetectionRule(new DistanceFromUserDetectionRule("", 8D,16D)))
+        );
         return this;
     }
 
-    public Map<MoveRule, BiFunction<RiftCreature, EntityLivingBase, Integer>> getMoveRules() {
+    public List<MoveRule> getMoveRules() {
         return this.moveRules;
     }
 
@@ -66,13 +65,13 @@ public class CreatureMoveSelector {
         LEAP
     }
 
-    public record MoveRule(@NotNull MoveResult moveResult, @NotNull String name, @NotNull DetectionRule detectionRule) {
+    public record MoveRule(@NotNull MoveResult moveResult, @NotNull MoveRuleBuilder moveRuleBuilder) {
         @Override
         public boolean equals(Object object) {
-            if (!(object instanceof MoveRule(MoveResult otherResult, String otherName, DetectionRule detectionRule))) return false;
+            if (!(object instanceof MoveRule(MoveResult otherResult, MoveRuleBuilder otherMoveRuleBuilder))) return false;
 
             if (otherResult != MoveResult.USE_MOVE) return otherResult == this.moveResult;
-            else return otherName.equals(this.name);
+            else return otherMoveRuleBuilder.getMoveName().equals(this.moveRuleBuilder.getMoveName());
         }
     }
 
