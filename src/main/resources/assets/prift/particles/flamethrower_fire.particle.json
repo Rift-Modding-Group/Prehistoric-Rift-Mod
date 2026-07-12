@@ -14,19 +14,19 @@
 				"rotation": true
 			},
 			"minecraft:emitter_rate_steady": {
-				"spawn_rate": 32,
-				"max_particles": 100
+				"spawn_rate": 96,
+				"max_particles": 220
 			},
 			"minecraft:emitter_lifetime_once": {
-				"active_time": 1.25
+				"active_time": 1.2
 			},
 			"minecraft:emitter_shape_point": {
-				"direction": ["math.random(-0.25, 0.25)", "math.random(-0.5, 0.5)", -1]
+				"direction": ["math.random(-0.35, 0.35)", "math.random(-0.08, 0.08)", -1]
 			},
 			"minecraft:particle_lifetime_expression": {
-				"max_lifetime": "math.random(0.8, 1.2)"
+				"max_lifetime": "math.random(0.95, 1.15)"
 			},
-			"minecraft:particle_initial_speed": 8,
+			"minecraft:particle_initial_speed": 14,
 			"minecraft:particle_motion_dynamic": {},
 			"minecraft:particle_appearance_billboard": {
 				"size": [0.2, 0.2],

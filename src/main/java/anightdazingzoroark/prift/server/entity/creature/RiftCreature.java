@@ -533,6 +533,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
             if (creatureMoveBuilder == null) return;
             creatureMoveBuilder.getOnMoveHitEffect().accept(this);
         }, Side.SERVER));
+        animationData.addAnimationMessageEffect("moveFinished", new AnimatableRunValue(this::resetCurrentMove, Side.CLIENT, Side.SERVER));
     }
 
     private void initAnimControllerForPhase(AnimationDataEntity animationData, @NotNull String phase) {
@@ -554,7 +555,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
             //create state for move
             AnimationControllerState<AnimationDataEntity> moveState = new AnimationControllerState<AnimationDataEntity>(moveName)
-                    .addStateTransition("default", animData -> animData.allAnimationsFinished("moveUse"));
+                    .addStateTransition("default", animData -> animData.allAnimationsFinished("moveUse"))
+                    .addExitEffect(animData -> animData.sendMessage("moveFinished"));
 
             //if the move state has multiple animation names, make it so that upon entry it generates a random number
             //to then use

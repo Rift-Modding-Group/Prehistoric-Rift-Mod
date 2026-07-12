@@ -85,11 +85,8 @@ public class RiftUnmountedUseMove extends EntityAIBase {
         if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.USE_MOVE) {
             boolean moveBuilderTargetCondition = !this.selectedMoveBuilder.getRequireFindTargetToUse() || targetAvailability;
 
-            //move execution depends on if current move hasnt been reset and if target is gone (requires move to actually require targeting)
-            if (this.hasExecutedMove) {
-                boolean moveStillInUseCondition = !this.creature.getCurrentMove().isEmpty();
-                return moveStillInUseCondition && moveBuilderTargetCondition;
-            }
+            //move execution depends on if current move hasnt been reset
+            if (this.hasExecutedMove) return !this.creature.getCurrentMove().isEmpty();
             //if creature hasnt executed move yet, keep it true to keep it running
             //only thing stopping it is if target is gone (if said move requires it)
             else return moveBuilderTargetCondition;
@@ -112,7 +109,6 @@ public class RiftUnmountedUseMove extends EntityAIBase {
         if (this.selectedMoveBuilder.getOnMoveEndEffect() != null) this.selectedMoveBuilder.getOnMoveEndEffect().accept(this.creature);
         this.selectedMoveName = null;
         this.selectedMoveBuilder = null;
-        this.creature.resetCurrentMove();
         this.hasExecutedMove = false;
         this.repathCooldown = 0;
         this.hasLastTargetPos = false;
@@ -147,15 +143,23 @@ public class RiftUnmountedUseMove extends EntityAIBase {
         if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.USE_MOVE) {
             //---when move is already being used, stop pathing---
             if (this.hasExecutedMove && !this.creature.getCurrentMove().isEmpty()) {
+                if (this.hasLastLookDirection) {
+                    this.creature.rotationYaw = this.lastRotationYawHead;
+                    this.creature.prevRotationYaw = this.lastPrevRotationYawHead;
+                    this.creature.renderYawOffset = this.lastRotationYawHead;
+                    this.creature.prevRenderYawOffset = this.lastPrevRotationYawHead;
+                    this.creature.rotationYawHead = this.lastRotationYawHead;
+                    this.creature.prevRotationYawHead = this.lastPrevRotationYawHead;
+                    this.creature.rotationPitch = this.lastRotationPitch;
+                    this.creature.prevRotationPitch = this.lastPrevRotationPitch;
+                }
                 this.directTargetMoveStallTicks = 0;
                 this.holdCloseTargetStrafe = false;
                 this.closeTargetStrafeTicks = 0;
                 this.creature.getNavigator().clearPath();
-                return;
             }
-
-            //pathing to go to target is all dealt with here, if said move requires target
-            if (this.selectedMoveBuilder.getRequireFindTargetToUse() && target != null && target.isEntityAlive()) {
+            //---pathing to go to target is all dealt with here, if said move requires target---
+            else if (this.selectedMoveBuilder.getRequireFindTargetToUse() && target != null && target.isEntityAlive()) {
                 //set look at target
                 this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, 0f);
                 this.hasLastLookDirection = true;
@@ -197,6 +201,13 @@ public class RiftUnmountedUseMove extends EntityAIBase {
                     //tick down repath cooldown
                     if (this.repathCooldown > 0) this.repathCooldown--;
                     PathNavigate creatureNavigation = this.creature.getNavigator();
+
+                    //---when target is way too close, move away---
+                    if (this.moveRule.detectionRule().targetTooClose(this.creature, target)) {
+                        this.directTargetMoveStallTicks = 0;
+                        this.holdCloseTargetStrafe = false;
+                        this.closeTargetStrafeTicks = CLOSE_TARGET_STRAFE_TICKS;
+                    }
 
                     //---when held strafe should stop due to target movement---
                     if (this.holdCloseTargetStrafe && this.hasLastTargetPos && target.getDistanceSq(this.lastTargetX, this.lastTargetY, this.lastTargetZ) > TARGET_MOVED_REPATH_DISTANCE_SQ * 4D) {

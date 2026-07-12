@@ -79,6 +79,10 @@ public class CreatureMoveSelector {
     //-----target detection rules for moves-----
     public abstract static class DetectionRule {
         public abstract boolean targetWithinRange(@NotNull RiftCreature user, @NotNull EntityLivingBase target);
+
+        public boolean targetTooClose(@NotNull RiftCreature user, @NotNull EntityLivingBase target) {
+            return false;
+        }
     }
 
     public static class BoundingBoxDetectionRule extends DetectionRule {
@@ -123,12 +127,21 @@ public class CreatureMoveSelector {
         public boolean targetWithinRange(@NotNull RiftCreature user, @NotNull EntityLivingBase target) {
             //---check if the posVec is in range---
             //if minDistance is negative, it means only maxDistance matters
-            double distance = this.getUserPoint(user).distanceTo(target.getPositionVector()) + (this.locatorName.isEmpty() ? user.width : 0D);
+            double distance = this.getDistanceFromUserPoint(user, target);
             if (this.minDistance < 0) return distance <= this.maxDistance;
             else if (this.maxDistance >= this.minDistance) {
                 return distance >= this.minDistance && distance <= this.maxDistance;
             }
             throw new UnsupportedOperationException("Given maxDistance is smaller than minDistance!");
+        }
+
+        @Override
+        public boolean targetTooClose(@NotNull RiftCreature user, @NotNull EntityLivingBase target) {
+            return this.minDistance >= 0 && this.getDistanceFromUserPoint(user, target) < this.minDistance;
+        }
+
+        private double getDistanceFromUserPoint(@NotNull RiftCreature user, @NotNull EntityLivingBase target) {
+            return this.getUserPoint(user).distanceTo(target.getPositionVector());
         }
 
         @NotNull

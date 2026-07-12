@@ -116,7 +116,7 @@ public class RiftCreatureRegistry {
                         .addUsableRay(
                                 "flamethrowerRay",
                                 new RiftLibRayBuilder()
-                                        .setMotionThenImpact()
+                                        .setMotionOnly()
                                         .setMovementShape(() -> new RiftLibRayConeMotionShape(
                                                 0.1D,
                                                 0.35D,
@@ -136,7 +136,6 @@ public class RiftCreatureRegistry {
                                 }
                         )
                         //---moves---
-                        /*
                         .addMove("bite", CreatureMoveCommon.standardMeleeMove.copy()
                                 .setBasePower(50)
                                 .setAnimNames("bite")
@@ -167,7 +166,6 @@ public class RiftCreatureRegistry {
                                 .setAnimNames("power_roar")
                                 .setCooldown(1200)
                         )
-                         */
                         .addMove("flamethrower", new CreatureMoveBuilder()
                                 .setBasePower(90)
                                 .setRequireFindTargetToUse()
@@ -179,14 +177,12 @@ public class RiftCreatureRegistry {
                                 .setOnMoveEndEffect(creature -> {
                                     if (!(creature instanceof IRayCreator<?> rayCreator)) return;
                                     RiftLibRayHelper.killRay(rayCreator, "flamethrowerRay");
-                                    System.out.println("end ray");
                                 })
                                 .setAnimNames("flamethrower")
-                                //.setCooldown(1200)
+                                .setCooldown(1200)
                         )
                         //---attack ai---
                         .setMoveSelector(new CreatureMoveSelector()
-                                /*
                                 .setMoveRule(
                                         "bite",
                                         (creature, target) -> target != null ? 3 : -1,
@@ -202,7 +198,6 @@ public class RiftCreatureRegistry {
                                         (creature, target) -> target != null ? 0 : -1,
                                         new CreatureMoveSelector.DistanceFromUserDetectionRule(12D)
                                 )
-                                 */
                                 .setMoveRule(
                                         "flamethrower",
                                         (creature, target) -> target != null ? 0 : -1,
