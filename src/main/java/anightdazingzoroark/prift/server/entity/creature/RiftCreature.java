@@ -75,12 +75,18 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     private static final DataParameter<CreatureStatsStorage> CREATURE_STATS = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.CREATURE_STATS_STORAGE);
     private static final DataParameter<String> CREATURE_PHASE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.STRING);
 
-    //custom property values, which can be called and manipulated from a creature builder
+    //--custom property values, which can be called and manipulated from a creature builder--
+    @NotNull
     private final Map<String, AbstractPropertyValue<?>> propertyValueMap;
 
-    //server side primitive params
-    public int sprintToAttackCooldown; //manages a creature's ability to sprint based on whether or not it attacked before
-    public int timeSinceAggression; //how much time ever since it encountered a target
+    //--server side primitive params--
+    //manages a creature's ability to sprint based on whether or not it attacked before
+    public int sprintToAttackCooldown;
+    //how much time ever since it encountered a target
+    public int timeSinceAggression;
+    //when a creature fails to use a move or takes too long to pathfind for melee move,
+    //this counts up, which then makes them use a ranged move or their sprint move
+    private int frustration;
 
     //ray specific params
     protected Map<String, RiftLibRayBuilder> rayMap;
@@ -173,7 +179,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     protected void initEntityAI() {
         //temporary, will use the configs soon
-        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityCow.class, true));
+        //this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityCow.class, true));
+        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityPlayer.class, true));
 
         this.tasks.addTask(1, new RiftUnmountedUseMove(this));
         this.tasks.addTask(2, new EntityAIWander(this, 1D/*, 15*/));
@@ -349,6 +356,23 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
         propertyValue.setValue(value);
         //todo: make this able to sync to client as well
+    }
+
+    //-----frustration management-----
+    public boolean atFrustrationThreshold() {
+        return this.frustration >= 100;
+    }
+
+    public boolean atPathingFrustrationInterval(int pathingTicks) {
+        return pathingTicks >= 80;
+    }
+
+    public void resetFrustration() {
+        this.frustration = 0;
+    }
+
+    public void addFrustration(int frustrationToAdd) {
+        this.frustration = Math.min(100, this.frustration + frustrationToAdd);
     }
 
     //-----creature phase management-----
@@ -593,7 +617,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     //-----other useless events idk nor care about-----
     @Override
-    public @Nullable EntityAgeable createChild(EntityAgeable ageable) {
+    @Nullable
+    public EntityAgeable createChild(EntityAgeable ageable) {
         return null;
     }
 }

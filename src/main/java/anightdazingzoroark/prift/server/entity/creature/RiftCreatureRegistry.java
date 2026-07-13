@@ -196,13 +196,14 @@ public class RiftCreatureRegistry {
                                 )
                                 .setMoveRule(
                                         new MoveRuleBuilder("power_roar")
-                                                .setPriorityPredicate((creature, target) -> target != null ? 0 : -1)
                                                 .setDetectionRule(new CreatureMoveSelector.DistanceFromUserDetectionRule(12D))
+                                                .setUseWhenFrustrated()
                                 )
                                 .setMoveRule(
                                         new MoveRuleBuilder("flamethrower")
-                                                .setPriorityPredicate((creature, target) -> target != null ? 0 : -1)
+                                                .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
                                                 .setDetectionRule(new CreatureMoveSelector.DistanceFromUserDetectionRule(4D, 16D))
+                                                .setUseWhenFrustrated()
                                 )
                                 .setCanSprintToAttack()
                         )

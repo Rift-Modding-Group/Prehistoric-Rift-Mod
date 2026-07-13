@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelector;
 import anightdazingzoroark.prift.util.MathUtil;
 import net.minecraft.entity.EntityLivingBase;
@@ -38,6 +39,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     private double lastDirectTargetDistanceSq;
     private boolean holdCloseTargetStrafe;
     private int closeTargetStrafeTicks;
+    private int pathingFrustrationTicks;
 
     //---look direction preservation---
     private boolean hasLastLookDirection;
@@ -45,6 +47,11 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     private float lastPrevRotationYawHead;
     private float lastRotationPitch;
     private float lastPrevRotationPitch;
+
+    //---frustration related stuff---
+    private EntityLivingBase moveTarget;
+    private int lastAttackedEntityTimeAtMoveStart;
+    private boolean selectedMoveUsedDueToFrustration;
 
     public RiftUnmountedUseMove(@NotNull RiftCreature creature) {
         this.creature = creature;
@@ -68,11 +75,21 @@ public class RiftUnmountedUseMove extends EntityAIBase {
 
     @Override
     public void startExecuting() {
+        this.pathingFrustrationTicks = 0;
+        this.moveTarget = null;
+        this.selectedMoveUsedDueToFrustration = false;
+
         if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.USE_MOVE) {
             this.selectedMoveName = this.moveRule.moveRuleBuilder().getMoveName();
             this.selectedMoveBuilder = this.creature.getCreatureMoves().getUsableMoveBuilder(this.selectedMoveName);
+            this.selectedMoveUsedDueToFrustration = this.moveRule.moveRuleBuilder().getUseWhenFrustrated()
+                    && this.creature.atFrustrationThreshold();
         }
         else if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.SPRINT) {
+            if (this.creature.atFrustrationThreshold()) {
+                this.creature.sprintToAttackCooldown = 0;
+                this.creature.resetFrustration();
+            }
             this.creature.setSprinting(true);
         }
     }
@@ -87,6 +104,8 @@ public class RiftUnmountedUseMove extends EntityAIBase {
 
             //move execution depends on if current move hasnt been reset
             if (this.hasExecutedMove) return !this.creature.getCurrentMove().isEmpty();
+            //when frustration gets high enough, stop current pathing and pick a frustration option
+            else if (!this.selectedMoveUsedDueToFrustration && this.creature.atFrustrationThreshold()) return false;
             //if creature hasnt executed move yet, keep it true to keep it running
             //only thing stopping it is if target is gone (if said move requires it)
             else return moveBuilderTargetCondition;
@@ -106,6 +125,20 @@ public class RiftUnmountedUseMove extends EntityAIBase {
             this.creature.setSprinting(false);
         }
 
+        //when a target-required offensive move ends without hitting its intended target
+        if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.USE_MOVE
+                && this.hasExecutedMove
+                && this.selectedMoveBuilder != null
+                && this.selectedMoveBuilder.getRequireFindTargetToUse()
+                && this.selectedMoveBuilder.getMoveType() == CreatureMoveHelper.MoveType.PHYSICAL
+        ) {
+            boolean moveHitTarget = this.moveTarget != null
+                    && this.creature.getLastAttackedEntity() == this.moveTarget
+                    && this.creature.getLastAttackedEntityTime() > this.lastAttackedEntityTimeAtMoveStart;
+            if (moveHitTarget) this.creature.resetFrustration();
+            else this.creature.addFrustration(35);
+        }
+
         if (this.selectedMoveBuilder != null && this.selectedMoveBuilder.getOnMoveEndEffect() != null) {
             this.selectedMoveBuilder.getOnMoveEndEffect().accept(this.creature);
         }
@@ -117,6 +150,9 @@ public class RiftUnmountedUseMove extends EntityAIBase {
         this.directTargetMoveStallTicks = 0;
         this.holdCloseTargetStrafe = false;
         this.closeTargetStrafeTicks = 0;
+        this.pathingFrustrationTicks = 0;
+        this.moveTarget = null;
+        this.selectedMoveUsedDueToFrustration = false;
         this.creature.getNavigator().clearPath();
         this.creature.getAnimationData().clearAllWorldSpaceAABBs();
 
@@ -158,6 +194,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
                 this.directTargetMoveStallTicks = 0;
                 this.holdCloseTargetStrafe = false;
                 this.closeTargetStrafeTicks = 0;
+                this.pathingFrustrationTicks = 0;
                 this.creature.getNavigator().clearPath();
             }
             //---pathing to go to target is all dealt with here, if said move requires target---
@@ -171,7 +208,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
                 this.lastPrevRotationPitch = this.creature.prevRotationPitch;
 
                 //execute move when target is in range
-                if (this.moveRule.moveRuleBuilder().getDetectionRule().targetWithinRange(this.creature, target)) {
+                if (this.moveRule.moveRuleBuilder().getDetectionRule().targetWithinRange(this.creature, target) || this.selectedMoveUsedDueToFrustration) {
                     //forcibly stop rotation upon using a move
                     double targetX = target.posX - this.creature.posX;
                     double targetZ = target.posZ - this.creature.posZ;
@@ -190,16 +227,27 @@ public class RiftUnmountedUseMove extends EntityAIBase {
 
                     //execute move
                     this.hasExecutedMove = true;
+                    this.moveTarget = target;
+                    this.lastAttackedEntityTimeAtMoveStart = this.creature.getLastAttackedEntityTime();
+                    if (this.selectedMoveUsedDueToFrustration) this.creature.resetFrustration();
                     this.creature.setCurrentMove(this.selectedMoveName);
 
                     //stop pathing
                     this.directTargetMoveStallTicks = 0;
                     this.holdCloseTargetStrafe = false;
                     this.closeTargetStrafeTicks = 0;
+                    this.pathingFrustrationTicks = 0;
                     this.creature.getNavigator().clearPath();
                 }
                 //pathing to ensure target can be found by creature
                 else {
+                    //add frustration when pathing to the target takes too long
+                    this.pathingFrustrationTicks++;
+                    if (this.creature.atPathingFrustrationInterval(this.pathingFrustrationTicks)) {
+                        this.pathingFrustrationTicks = 0;
+                        this.creature.addFrustration(20);
+                    }
+
                     //tick down repath cooldown
                     if (this.repathCooldown > 0) this.repathCooldown--;
                     PathNavigate creatureNavigation = this.creature.getNavigator();

@@ -10,10 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjglx.util.vector.Quaternion;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
 
 /**
  * Creature-level AI policy for choosing moves.
@@ -39,8 +36,9 @@ public class CreatureMoveSelector {
                     if (target == null) return -1;
                     double distFromTarget = creature.getDistance(target);
                     double minReach = creature.width + 3; //is temporary
-                    boolean sprintCondition = distFromTarget <= 16D && distFromTarget >= minReach && creature.sprintToAttackCooldown <= 0;
-                    return sprintCondition ? 1 : -1;
+                    boolean canSprintNow = creature.sprintToAttackCooldown <= 0 || creature.atFrustrationThreshold();
+                    boolean sprintCondition = distFromTarget <= 16D && distFromTarget >= minReach && canSprintNow;
+                    return sprintCondition ? (creature.atFrustrationThreshold() ? 0 : 1) : -1;
                 })
                 .setDetectionRule(new DistanceFromUserDetectionRule("", 8D,16D)))
         );

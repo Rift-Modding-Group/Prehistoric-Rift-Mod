@@ -16,6 +16,7 @@ public class MoveRuleBuilder {
     private BiFunction<RiftCreature, EntityLivingBase, Integer> priorityPredicate = (creature, target) -> -1;
     @NotNull
     private CreatureMoveSelector.DetectionRule detectionRule = new CreatureMoveSelector.DistanceFromUserDetectionRule("", 8D);
+    private boolean canUseWhenFrustrated;
 
     public MoveRuleBuilder(@NotNull String moveName) {
         this.moveName = moveName;
@@ -56,5 +57,17 @@ public class MoveRuleBuilder {
     @NotNull
     public CreatureMoveSelector.DetectionRule getDetectionRule() {
         return this.detectionRule;
+    }
+
+    /**
+     * Allows a creature to instantly use this move when it's frustrated
+     * */
+    public MoveRuleBuilder setUseWhenFrustrated() {
+        this.canUseWhenFrustrated = true;
+        return this;
+    }
+
+    public boolean getUseWhenFrustrated() {
+        return this.canUseWhenFrustrated;
     }
 }

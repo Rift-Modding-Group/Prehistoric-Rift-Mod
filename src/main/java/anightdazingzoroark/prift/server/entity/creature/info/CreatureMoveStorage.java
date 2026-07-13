@@ -63,16 +63,20 @@ public class CreatureMoveStorage {
         for (CreatureMoveSelector.MoveRule moveRule : this.creatureType.getMoveSelector().getMoveRules()) {
             MoveRuleBuilder moveRuleBuilder = moveRule.moveRuleBuilder();
 
-            int index = moveRuleBuilder.getPriorityPredicate().apply(creature, target);
+            boolean useDueToFrustration = moveRule.moveResult() == CreatureMoveSelector.MoveResult.USE_MOVE
+                    && target != null
+                    && target.isEntityAlive()
+                    && creature.atFrustrationThreshold()
+                    && moveRuleBuilder.getUseWhenFrustrated();
+            int index = useDueToFrustration ? 0 : moveRuleBuilder.getPriorityPredicate().apply(creature, target);
             //being on cooldown forcibly changes the index to -1
-            if (this.moveCooldowns.containsKey(moveRuleBuilder.getMoveName()) && this.moveCooldowns.get(moveRuleBuilder.getMoveName()) > 0) {
+            if (!useDueToFrustration && this.moveCooldowns.containsKey(moveRuleBuilder.getMoveName()) && this.moveCooldowns.get(moveRuleBuilder.getMoveName()) > 0) {
                 index = -1;
             }
 
+            this.prioritizedUsableMoves.remove(moveRule);
             //positive indexes can be added
             if (index >= 0) this.prioritizedUsableMoves.add(index, moveRule);
-            //negative ones got to go
-            else this.prioritizedUsableMoves.remove(moveRule);
         }
     }
 
