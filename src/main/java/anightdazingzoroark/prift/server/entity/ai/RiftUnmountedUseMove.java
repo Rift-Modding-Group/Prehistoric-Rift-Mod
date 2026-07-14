@@ -104,6 +104,13 @@ public class RiftUnmountedUseMove extends EntityAIBase {
 
             //move execution depends on if current move hasnt been reset
             if (this.hasExecutedMove) return !this.creature.getCurrentMove().isEmpty();
+            //when move should not path to its target, stop if target is not already in range
+            else if (this.moveRule.moveRuleBuilder().getDontPathToTarget()
+                    && this.selectedMoveBuilder.getRequireFindTargetToUse()
+                    && targetAvailability
+                    && !this.selectedMoveUsedDueToFrustration
+                    && !this.moveRule.moveRuleBuilder().getDetectionRule().targetWithinRange(this.creature, target)
+            ) return false;
             //when frustration gets high enough, stop current pathing and pick a frustration option
             else if (!this.selectedMoveUsedDueToFrustration && this.creature.atFrustrationThreshold()) return false;
             //if creature hasnt executed move yet, keep it true to keep it running
@@ -154,20 +161,10 @@ public class RiftUnmountedUseMove extends EntityAIBase {
         this.moveTarget = null;
         this.selectedMoveUsedDueToFrustration = false;
         this.creature.getNavigator().clearPath();
-        this.creature.getAnimationData().clearAllWorldSpaceAABBs();
 
         //preserve last look direction after target is gone
         EntityLivingBase target = this.creature.getAttackTarget();
-        if ((target == null || !target.isEntityAlive()) && this.hasLastLookDirection) {
-            this.creature.rotationYaw = this.lastRotationYawHead;
-            this.creature.prevRotationYaw = this.lastPrevRotationYawHead;
-            this.creature.renderYawOffset = this.lastRotationYawHead;
-            this.creature.prevRenderYawOffset = this.lastPrevRotationYawHead;
-            this.creature.rotationYawHead = this.lastRotationYawHead;
-            this.creature.prevRotationYawHead = this.lastPrevRotationYawHead;
-            this.creature.rotationPitch = this.lastRotationPitch;
-            this.creature.prevRotationPitch = this.lastPrevRotationPitch;
-        }
+        if (target == null || !target.isEntityAlive()) this.preserveLastLookDirection();
     }
 
     /**
@@ -181,16 +178,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
         if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.USE_MOVE) {
             //---when move is already being used, stop pathing---
             if (this.hasExecutedMove && !this.creature.getCurrentMove().isEmpty()) {
-                if (this.hasLastLookDirection) {
-                    this.creature.rotationYaw = this.lastRotationYawHead;
-                    this.creature.prevRotationYaw = this.lastPrevRotationYawHead;
-                    this.creature.renderYawOffset = this.lastRotationYawHead;
-                    this.creature.prevRenderYawOffset = this.lastPrevRotationYawHead;
-                    this.creature.rotationYawHead = this.lastRotationYawHead;
-                    this.creature.prevRotationYawHead = this.lastPrevRotationYawHead;
-                    this.creature.rotationPitch = this.lastRotationPitch;
-                    this.creature.prevRotationPitch = this.lastPrevRotationPitch;
-                }
+                this.preserveLastLookDirection();
                 this.directTargetMoveStallTicks = 0;
                 this.holdCloseTargetStrafe = false;
                 this.closeTargetStrafeTicks = 0;
@@ -199,30 +187,45 @@ public class RiftUnmountedUseMove extends EntityAIBase {
             }
             //---pathing to go to target is all dealt with here, if said move requires target---
             else if (this.selectedMoveBuilder.getRequireFindTargetToUse() && target != null && target.isEntityAlive()) {
+                boolean dontPathToTarget = this.moveRule.moveRuleBuilder().getDontPathToTarget();
+
                 //set look at target
-                this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, 0f);
-                this.hasLastLookDirection = true;
-                this.lastRotationYawHead = this.creature.rotationYawHead;
-                this.lastPrevRotationYawHead = this.creature.prevRotationYawHead;
-                this.lastRotationPitch = this.creature.rotationPitch;
-                this.lastPrevRotationPitch = this.creature.prevRotationPitch;
+                if (!dontPathToTarget) {
+                    this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, 0f);
+                    this.hasLastLookDirection = true;
+                    this.lastRotationYawHead = this.creature.rotationYawHead;
+                    this.lastPrevRotationYawHead = this.creature.prevRotationYawHead;
+                    this.lastRotationPitch = this.creature.rotationPitch;
+                    this.lastPrevRotationPitch = this.creature.prevRotationPitch;
+                }
+
+                boolean targetWithinRange = this.moveRule.moveRuleBuilder().getDetectionRule().targetWithinRange(this.creature, target);
 
                 //execute move when target is in range
-                if (this.moveRule.moveRuleBuilder().getDetectionRule().targetWithinRange(this.creature, target) || this.selectedMoveUsedDueToFrustration) {
+                if (targetWithinRange || this.selectedMoveUsedDueToFrustration) {
                     //forcibly stop rotation upon using a move
-                    double targetX = target.posX - this.creature.posX;
-                    double targetZ = target.posZ - this.creature.posZ;
-                    //only rotate if target direction is usable
-                    if (targetX * targetX + targetZ * targetZ >= 1E-4D) {
-                        float targetYaw = (float)(Math.atan2(targetZ, targetX) * 180f / (float) Math.PI) - 90f;
-                        this.creature.rotationYaw = targetYaw;
-                        this.creature.prevRotationYaw = targetYaw;
-                        this.creature.renderYawOffset = targetYaw;
-                        this.creature.prevRenderYawOffset = targetYaw;
-                        this.creature.rotationYawHead = targetYaw;
-                        this.creature.prevRotationYawHead = targetYaw;
-                        this.lastRotationYawHead = targetYaw;
-                        this.lastPrevRotationYawHead = targetYaw;
+                    if (dontPathToTarget) {
+                        this.hasLastLookDirection = true;
+                        this.lastRotationYawHead = this.creature.rotationYaw;
+                        this.lastPrevRotationYawHead = this.creature.prevRotationYaw;
+                        this.lastRotationPitch = this.creature.rotationPitch;
+                        this.lastPrevRotationPitch = this.creature.prevRotationPitch;
+                    }
+                    else {
+                        double targetX = target.posX - this.creature.posX;
+                        double targetZ = target.posZ - this.creature.posZ;
+                        //only rotate if target direction is usable
+                        if (targetX * targetX + targetZ * targetZ >= 1E-4D) {
+                            float targetYaw = (float)(Math.atan2(targetZ, targetX) * 180f / (float) Math.PI) - 90f;
+                            this.creature.rotationYaw = targetYaw;
+                            this.creature.prevRotationYaw = targetYaw;
+                            this.creature.renderYawOffset = targetYaw;
+                            this.creature.prevRenderYawOffset = targetYaw;
+                            this.creature.rotationYawHead = targetYaw;
+                            this.creature.prevRotationYawHead = targetYaw;
+                            this.lastRotationYawHead = targetYaw;
+                            this.lastPrevRotationYawHead = targetYaw;
+                        }
                     }
 
                     //execute move
@@ -233,6 +236,15 @@ public class RiftUnmountedUseMove extends EntityAIBase {
                     this.creature.setCurrentMove(this.selectedMoveName);
 
                     //stop pathing
+                    this.directTargetMoveStallTicks = 0;
+                    this.holdCloseTargetStrafe = false;
+                    this.closeTargetStrafeTicks = 0;
+                    this.pathingFrustrationTicks = 0;
+                    this.creature.getNavigator().clearPath();
+                }
+                //---when move should not path to target, stop moving and wait for another move selection---
+                else if (dontPathToTarget) {
+                    this.repathCooldown = 0;
                     this.directTargetMoveStallTicks = 0;
                     this.holdCloseTargetStrafe = false;
                     this.closeTargetStrafeTicks = 0;
@@ -339,5 +351,17 @@ public class RiftUnmountedUseMove extends EntityAIBase {
         this.lastTargetX = target.posX;
         this.lastTargetY = target.posY;
         this.lastTargetZ = target.posZ;
+    }
+
+    private void preserveLastLookDirection() {
+        if (!this.hasLastLookDirection) return;
+        this.creature.rotationYaw = this.lastRotationYawHead;
+        this.creature.prevRotationYaw = this.lastPrevRotationYawHead;
+        this.creature.renderYawOffset = this.lastRotationYawHead;
+        this.creature.prevRenderYawOffset = this.lastPrevRotationYawHead;
+        this.creature.rotationYawHead = this.lastRotationYawHead;
+        this.creature.prevRotationYawHead = this.lastPrevRotationYawHead;
+        this.creature.rotationPitch = this.lastRotationPitch;
+        this.creature.prevRotationPitch = this.lastPrevRotationPitch;
     }
 }

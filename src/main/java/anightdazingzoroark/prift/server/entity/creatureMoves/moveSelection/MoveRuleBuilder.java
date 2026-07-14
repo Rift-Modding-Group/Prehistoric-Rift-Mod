@@ -17,6 +17,7 @@ public class MoveRuleBuilder {
     @NotNull
     private CreatureMoveSelector.DetectionRule detectionRule = new CreatureMoveSelector.DistanceFromUserDetectionRule("", 8D);
     private boolean canUseWhenFrustrated;
+    private boolean dontPathToTarget;
 
     public MoveRuleBuilder(@NotNull String moveName) {
         this.moveName = moveName;
@@ -69,5 +70,17 @@ public class MoveRuleBuilder {
 
     public boolean getUseWhenFrustrated() {
         return this.canUseWhenFrustrated;
+    }
+
+    /**
+     * Make it so creature will not path to target nor look at them when the move is selected
+     * */
+    public MoveRuleBuilder setDontPathToTarget() {
+        this.dontPathToTarget = true;
+        return this;
+    }
+
+    public boolean getDontPathToTarget() {
+        return this.dontPathToTarget;
     }
 }

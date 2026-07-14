@@ -179,8 +179,8 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     protected void initEntityAI() {
         //temporary, will use the configs soon
-        //this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityCow.class, true));
-        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityPlayer.class, true));
+        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityCow.class, true));
+        //this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityPlayer.class, true));
 
         this.tasks.addTask(1, new RiftUnmountedUseMove(this));
         this.tasks.addTask(2, new EntityAIWander(this, 1D/*, 15*/));
@@ -240,13 +240,13 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
      * Used to check if a given BlockPos is within the bounds of an AnimatedBoundingBox
      * */
     public boolean posWithinBoundingBox(@NotNull Vec3d posVec, @NotNull String boundingBoxName) {
-        AxisAlignedBB aabb = this.animData.getOrCreateWorldSpaceAABB(boundingBoxName);
+        AxisAlignedBB aabb = this.animData.getWorldSpaceAABB(boundingBoxName);
         if (aabb == null) return false;
         return aabb.grow(1e-5D).contains(posVec);
     }
 
     public boolean aabbIntersectsBoundingBox(@NotNull AxisAlignedBB otherAABB, @NotNull String boundingBoxName) {
-        AxisAlignedBB aabb = this.animData.getOrCreateWorldSpaceAABB(boundingBoxName);
+        AxisAlignedBB aabb = this.animData.getWorldSpaceAABB(boundingBoxName);
         if (aabb == null) return false;
         return aabb.intersects(otherAABB);
     }

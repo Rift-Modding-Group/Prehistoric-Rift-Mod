@@ -20,6 +20,7 @@ import anightdazingzoroark.riftlib.ray.rayShape.motion.RiftLibRayConeMotionShape
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.math.AxisAlignedBB;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.HashMap;
@@ -150,7 +151,6 @@ public class RiftCreatureRegistry {
                                     RiftLibRayHelper.createRay(rayCreator, "footStompRay", "stompOrigin");
                                 })
                                 .setAnimNames("stomp")
-                                .setCooldown(200)
                         )
                         .addMove("power_roar", new CreatureMoveBuilder()
                                 .setBasePower(20)
@@ -191,13 +191,20 @@ public class RiftCreatureRegistry {
                                 )
                                 .setMoveRule(
                                         new MoveRuleBuilder("stomp")
-                                                .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
+                                                .setPriorityPredicate((creature, target) -> {
+                                                    return target != null
+                                                            && target.isEntityAlive()
+                                                            && creature.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), "stompHitZone") ?
+                                                            0 : -1;
+                                                })
                                                 .setDetectionRule(new CreatureMoveSelector.BoundingBoxDetectionRule("stompHitZone"))
+                                                .setDontPathToTarget()
                                 )
                                 .setMoveRule(
                                         new MoveRuleBuilder("power_roar")
                                                 .setDetectionRule(new CreatureMoveSelector.DistanceFromUserDetectionRule(12D))
                                                 .setUseWhenFrustrated()
+                                                .setDontPathToTarget()
                                 )
                                 .setMoveRule(
                                         new MoveRuleBuilder("flamethrower")
