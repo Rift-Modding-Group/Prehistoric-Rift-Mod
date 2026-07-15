@@ -49,8 +49,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     private float lastPrevRotationPitch;
 
     //---frustration related stuff---
-    private EntityLivingBase moveTarget;
-    private int lastAttackedEntityTimeAtMoveStart;
+    private int attackTargetHitCountAtMoveStart;
     private boolean selectedMoveUsedDueToFrustration;
 
     public RiftUnmountedUseMove(@NotNull RiftCreature creature) {
@@ -76,7 +75,6 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     @Override
     public void startExecuting() {
         this.pathingFrustrationTicks = 0;
-        this.moveTarget = null;
         this.selectedMoveUsedDueToFrustration = false;
 
         if (this.moveRule.moveResult() == CreatureMoveSelector.MoveResult.USE_MOVE) {
@@ -139,9 +137,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
                 && this.selectedMoveBuilder.getRequireFindTargetToUse()
                 && this.selectedMoveBuilder.getMoveType() == CreatureMoveHelper.MoveType.PHYSICAL
         ) {
-            boolean moveHitTarget = this.moveTarget != null
-                    && this.creature.getLastAttackedEntity() == this.moveTarget
-                    && this.creature.getLastAttackedEntityTime() > this.lastAttackedEntityTimeAtMoveStart;
+            boolean moveHitTarget = this.creature.getAttackTargetHitCount() > this.attackTargetHitCountAtMoveStart;
             if (moveHitTarget) this.creature.resetFrustration();
             else this.creature.addFrustration(35);
         }
@@ -158,7 +154,6 @@ public class RiftUnmountedUseMove extends EntityAIBase {
         this.holdCloseTargetStrafe = false;
         this.closeTargetStrafeTicks = 0;
         this.pathingFrustrationTicks = 0;
-        this.moveTarget = null;
         this.selectedMoveUsedDueToFrustration = false;
         this.creature.getNavigator().clearPath();
 
@@ -230,8 +225,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
 
                     //execute move
                     this.hasExecutedMove = true;
-                    this.moveTarget = target;
-                    this.lastAttackedEntityTimeAtMoveStart = this.creature.getLastAttackedEntityTime();
+                    this.attackTargetHitCountAtMoveStart = this.creature.getAttackTargetHitCount();
                     if (this.selectedMoveUsedDueToFrustration) this.creature.resetFrustration();
                     this.creature.setCurrentMove(this.selectedMoveName);
 

@@ -87,6 +87,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     //when a creature fails to use a move or takes too long to pathfind for melee move,
     //this counts up, which then makes them use a ranged move or their sprint move
     private int frustration;
+    private int attackTargetHitCount;
 
     //ray specific params
     protected Map<String, RiftLibRayBuilder> rayMap;
@@ -307,6 +308,9 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         }
 
         //other stuff
+        Entity attackTarget = this.getAttackTarget();
+        Entity hitEntity = entityIn instanceof MultiPartEntityPart hitboxPart ? (Entity) hitboxPart.parent : entityIn;
+        if (attackTarget != null && hitEntity == attackTarget) this.attackTargetHitCount++;
         this.setLastAttackedEntity(entityIn);
         return flag;
     }
@@ -373,6 +377,10 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     public void addFrustration(int frustrationToAdd) {
         this.frustration = Math.min(100, this.frustration + frustrationToAdd);
+    }
+
+    public int getAttackTargetHitCount() {
+        return this.attackTargetHitCount;
     }
 
     //-----creature phase management-----
