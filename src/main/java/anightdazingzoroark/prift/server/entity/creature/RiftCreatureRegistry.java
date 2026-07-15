@@ -194,7 +194,7 @@ public class RiftCreatureRegistry {
 
                                     //get distance between the locator and the target
                                     Vec3d fireDistVec = creature.getLocatorWorldPos("fireDistPoint");
-                                    Vec3d targetCenter = target.getEntityBoundingBox().getCenter();
+                                    Vec3d targetCenter = target.getPositionVector();
                                     double distToTarget = fireDistVec.distanceTo(targetCenter);
                                     if (distToTarget <= 1E-4D) return;
 
@@ -203,7 +203,7 @@ public class RiftCreatureRegistry {
                                     double angle = Math.toDegrees(Math.asin(Math.clamp(verticalDist / distToTarget, -1D, 1D)));
 
                                     //now set variable
-                                    creature.getAnimationData().setVariable("flamethrower_head_bend", angle);
+                                    creature.getAnimationData().setVariable("flamethrower_head_bend", Math.clamp(angle, -35, 35));
                                 })
                                 .setOnMoveHitEffect(creature -> {
                                     if (!(creature instanceof IRayCreator<?> rayCreator)) return;
@@ -215,10 +215,11 @@ public class RiftCreatureRegistry {
                                     creature.getAnimationData().setVariable("flamethrower_head_bend", 0);
                                 })
                                 .setAnimNames("flamethrower")
-                                .setCooldown(1200)
+                                //.setCooldown(1200)
                         )
                         //---attack ai---
                         .setMoveSelector(new CreatureMoveSelector()
+                                /*
                                 .setMoveRule(
                                         new MoveRuleBuilder("bite")
                                                 .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
@@ -241,13 +242,14 @@ public class RiftCreatureRegistry {
                                                 .setUseWhenFrustrated()
                                                 .setDontPathToTarget()
                                 )
+                                 */
                                 .setMoveRule(
                                         new MoveRuleBuilder("flamethrower")
                                                 .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
                                                 .setDetectionRule(new CreatureMoveSelector.DistanceFromUserDetectionRule(4D, 16D))
                                                 .setUseWhenFrustrated()
                                 )
-                                .setCanSprintToAttack()
+                                //.setCanSprintToAttack()
                         )
         );
         /*

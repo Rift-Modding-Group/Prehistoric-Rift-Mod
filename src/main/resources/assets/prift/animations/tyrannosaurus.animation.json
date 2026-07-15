@@ -290,9 +290,9 @@
 					"rotation": {
 						"0.0": [0, 0, 0],
 						"0.32": [20, 0, 0],
-						"0.64": ["-15-math.clamp(flamethrower_head_bend, -35, 35)", 0, 0],
-						"0.8": ["-15-math.clamp(flamethrower_head_bend, -35, 35)", 0, 0],
-						"1.84": ["-15-math.clamp(flamethrower_head_bend, -35, 35)", 0, 0],
+						"0.64": ["-15-flamethrower_head_bend", 0, 0],
+						"0.8": ["-15-flamethrower_head_bend", 0, 0],
+						"1.84": ["-15-flamethrower_head_bend", 0, 0],
 						"2.0": [0, 0, 0]
 					}
 				},

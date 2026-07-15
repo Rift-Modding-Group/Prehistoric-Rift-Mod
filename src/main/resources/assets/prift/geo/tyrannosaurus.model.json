@@ -17,8 +17,7 @@
 					"locators": {
 						"roarOrigin": [0, 0, -14],
 						"stompOrigin": [-6, 0, -1],
-						"fireBreathNeckBasis": [0, 0, 0],
-						"fireDistPoint": [0, 16, -20.7]
+						"fireDistPoint": [0, 14, -30.4]
 					},
 					"bounding_boxes": {
 						"stompHitZone": {
