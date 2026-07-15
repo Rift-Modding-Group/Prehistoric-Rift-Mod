@@ -228,6 +228,9 @@ public class RiftUnmountedUseMove extends EntityAIBase {
                     this.attackTargetHitCountAtMoveStart = this.creature.getAttackTargetHitCount();
                     if (this.selectedMoveUsedDueToFrustration) this.creature.resetFrustration();
                     this.creature.setCurrentMove(this.selectedMoveName);
+                    if (this.selectedMoveBuilder.getOnMoveBeginEffect() != null) {
+                        this.selectedMoveBuilder.getOnMoveBeginEffect().accept(this.creature, target);
+                    }
 
                     //stop pathing
                     this.directTargetMoveStallTicks = 0;

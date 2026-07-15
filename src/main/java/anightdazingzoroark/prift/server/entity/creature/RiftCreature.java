@@ -643,7 +643,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @NotNull
     public Vec3d getLocatorWorldPos(@NotNull String name) {
         AnimatedLocator animatedLocator = this.animData.getAnimatedLocator(name);
-        if (animatedLocator == null) return Vec3d.ZERO;
+        if (animatedLocator == null) return this.getPositionVector();
 
         Vec3d modelSpacePos = animatedLocator.getModelSpacePosition();
         float parentScale = this.scale();

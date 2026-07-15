@@ -18,6 +18,7 @@ import anightdazingzoroark.riftlib.ray.rayShape.motion.RiftLibRayConeMotionShape
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -188,6 +189,22 @@ public class RiftCreatureRegistry {
                                 .setBasePower(90)
                                 .setRequireFindTargetToUse()
                                 .setElemental(Element.FIRE, 0)
+                                .setOnMoveBeginEffect((creature, target) -> {
+                                    if (target == null || !target.isEntityAlive()) return;
+
+                                    //get distance between the locator and the target
+                                    Vec3d fireDistVec = creature.getLocatorWorldPos("fireDistPoint");
+                                    Vec3d targetCenter = target.getEntityBoundingBox().getCenter();
+                                    double distToTarget = fireDistVec.distanceTo(targetCenter);
+                                    if (distToTarget <= 1E-4D) return;
+
+                                    //convert into angle using trig magic
+                                    double verticalDist = targetCenter.y - fireDistVec.y;
+                                    double angle = Math.toDegrees(Math.asin(Math.clamp(verticalDist / distToTarget, -1D, 1D)));
+
+                                    //now set variable
+                                    creature.getAnimationData().setVariable("flamethrower_head_bend", angle);
+                                })
                                 .setOnMoveHitEffect(creature -> {
                                     if (!(creature instanceof IRayCreator<?> rayCreator)) return;
                                     RiftLibRayHelper.createRay(rayCreator, "flamethrowerRay", "flameLocator");
@@ -195,6 +212,7 @@ public class RiftCreatureRegistry {
                                 .setOnMoveEndEffect(creature -> {
                                     if (!(creature instanceof IRayCreator<?> rayCreator)) return;
                                     RiftLibRayHelper.killRay(rayCreator, "flamethrowerRay");
+                                    creature.getAnimationData().setVariable("flamethrower_head_bend", 0);
                                 })
                                 .setAnimNames("flamethrower")
                                 .setCooldown(1200)

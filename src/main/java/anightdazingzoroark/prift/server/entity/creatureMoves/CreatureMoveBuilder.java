@@ -3,7 +3,9 @@ package anightdazingzoroark.prift.server.entity.creatureMoves;
 import anightdazingzoroark.prift.server.entity.creature.info.Element;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -11,6 +13,7 @@ import java.util.function.Consumer;
 public class CreatureMoveBuilder {
     //all the following variables are required and must not be null, validated in isValid()
     private CreatureMoveHelper.MoveType moveType;
+    private BiConsumer<RiftCreature, EntityLivingBase> onMoveBeginEffect;
     private Consumer<RiftCreature> onMoveHitEffect;
     private String[] animNames;
 
@@ -122,9 +125,21 @@ public class CreatureMoveBuilder {
     }
 
     /**
+     * Set what will happen when the creature starts using the move
+     * */
+    public CreatureMoveBuilder setOnMoveBeginEffect(@NotNull BiConsumer<RiftCreature, EntityLivingBase> onMoveBeginEffect) {
+        this.onMoveBeginEffect = onMoveBeginEffect;
+        return this;
+    }
+
+    public BiConsumer<RiftCreature, EntityLivingBase> getOnMoveBeginEffect() {
+        return this.onMoveBeginEffect;
+    }
+
+    /**
      * Set what will happen when the move's animation reaches the "hit" phase
      * */
-    public CreatureMoveBuilder setOnMoveHitEffect(Consumer<RiftCreature> onMoveHitEffect) {
+    public CreatureMoveBuilder setOnMoveHitEffect(@NotNull Consumer<RiftCreature> onMoveHitEffect) {
         this.onMoveHitEffect = onMoveHitEffect;
         return this;
     }
@@ -136,7 +151,7 @@ public class CreatureMoveBuilder {
     /**
      * Add additional effects for what will happen when the move ends.
      * */
-    public CreatureMoveBuilder setOnMoveEndEffect(Consumer<RiftCreature> onMoveEnd) {
+    public CreatureMoveBuilder setOnMoveEndEffect(@NotNull Consumer<RiftCreature> onMoveEnd) {
         this.onMoveEndEffect = onMoveEnd;
         return this;
     }
