@@ -215,11 +215,10 @@ public class RiftCreatureRegistry {
                                     creature.getAnimationData().setVariable("flamethrower_head_bend", 0);
                                 })
                                 .setAnimNames("flamethrower")
-                                //.setCooldown(1200)
+                                .setCooldown(1200)
                         )
                         //---attack ai---
                         .setMoveSelector(new CreatureMoveSelector()
-                                /*
                                 .setMoveRule(
                                         new MoveRuleBuilder("bite")
                                                 .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
@@ -242,14 +241,13 @@ public class RiftCreatureRegistry {
                                                 .setUseWhenFrustrated()
                                                 .setDontPathToTarget()
                                 )
-                                 */
                                 .setMoveRule(
                                         new MoveRuleBuilder("flamethrower")
                                                 .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
                                                 .setDetectionRule(new CreatureMoveSelector.DistanceFromUserDetectionRule(4D, 16D))
                                                 .setUseWhenFrustrated()
                                 )
-                                //.setCanSprintToAttack()
+                                .setCanSprintToAttack()
                         )
         );
         /*
