@@ -23,7 +23,6 @@ import java.util.List;
 
 public class RiftCreatureSpawnEggItem extends Item {
     private static final String CREATURE_KEY = "CreatureType";
-    private static final String DEFAULT_CREATURE = "tyrannosaurus";
 
     public RiftCreatureSpawnEggItem() {
         super();
@@ -34,13 +33,13 @@ public class RiftCreatureSpawnEggItem extends Item {
 
     //static helper class for creature name in use by stack
     public static String getCreatureName(ItemStack stack) {
-        if (!stack.hasTagCompound()) return DEFAULT_CREATURE;
+        if (!stack.hasTagCompound()) return RiftCreatureRegistry.DEFAULT_CREATURE;
 
         NBTTagCompound tag = stack.getTagCompound();
-        if (tag == null || !tag.hasKey(CREATURE_KEY)) return DEFAULT_CREATURE;
+        if (tag == null || !tag.hasKey(CREATURE_KEY)) return RiftCreatureRegistry.DEFAULT_CREATURE;
 
         String creatureName = tag.getString(CREATURE_KEY);
-        return RiftCreatureRegistry.creatureBuilderMap.containsKey(creatureName) ? creatureName : DEFAULT_CREATURE;
+        return RiftCreatureRegistry.creatureBuilderMap.containsKey(creatureName) ? creatureName : RiftCreatureRegistry.DEFAULT_CREATURE;
     }
 
     @Override
@@ -78,7 +77,7 @@ public class RiftCreatureSpawnEggItem extends Item {
         if (blocked) return EnumActionResult.FAIL;
 
         if (!world.isRemote) {
-            RiftCreature creature = this.createCreature(world, builder);
+            RiftCreature creature = RiftCreatureRegistry.createCreature(world, builder.getName());
 
             creature.setLocationAndAngles(spawnPos.getX() + 0.5D, spawnPos.getY(), spawnPos.getZ() + 0.5D, world.rand.nextFloat() * 360f, 0f);
             creature.onInitialSpawn(world.getDifficultyForLocation(new BlockPos(creature)), null);
@@ -89,14 +88,5 @@ public class RiftCreatureSpawnEggItem extends Item {
         if (!player.capabilities.isCreativeMode) stack.shrink(1);
 
         return EnumActionResult.SUCCESS;
-    }
-
-    private RiftCreature createCreature(World world, RiftCreatureBuilder builder) {
-        try {
-            return builder.getCreatureClass().getConstructor(World.class).newInstance(world);
-        }
-        catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }

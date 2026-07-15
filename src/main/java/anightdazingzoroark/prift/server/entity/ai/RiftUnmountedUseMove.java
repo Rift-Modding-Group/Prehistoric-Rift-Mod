@@ -259,11 +259,13 @@ public class RiftUnmountedUseMove extends EntityAIBase {
                     PathNavigate creatureNavigation = this.creature.getNavigator();
 
                     //---when target is way too close, move away---
+                    /*
                     if (this.moveRule.moveRuleBuilder().getDetectionRule().targetTooClose(this.creature, target)) {
                         this.directTargetMoveStallTicks = 0;
                         this.holdCloseTargetStrafe = false;
                         this.closeTargetStrafeTicks = CLOSE_TARGET_STRAFE_TICKS;
                     }
+                     */
 
                     //---when held strafe should stop due to target movement---
                     if (this.holdCloseTargetStrafe && this.hasLastTargetPos && target.getDistanceSq(this.lastTargetX, this.lastTargetY, this.lastTargetZ) > TARGET_MOVED_REPATH_DISTANCE_SQ * 4D) {

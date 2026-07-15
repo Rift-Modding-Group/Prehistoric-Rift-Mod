@@ -16,7 +16,9 @@
 					"pivot": [0, 0, -14],
 					"locators": {
 						"roarOrigin": [0, 0, -14],
-						"stompOrigin": [-6, 0, -1]
+						"stompOrigin": [-6, 0, -1],
+						"fireBreathNeckBasis": [0, 0, 0],
+						"fireDistPoint": [0, 16, -20.7]
 					},
 					"bounding_boxes": {
 						"stompHitZone": {

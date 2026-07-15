@@ -2,8 +2,6 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.creature.builder.CreaturePhaseBuilder;
-import anightdazingzoroark.prift.server.entity.creature.built.Stegosaurus;
-import anightdazingzoroark.prift.server.entity.creature.built.Tyrannosaurus;
 import anightdazingzoroark.prift.server.entity.creature.info.Element;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCommon;
@@ -20,7 +18,7 @@ import anightdazingzoroark.riftlib.ray.rayShape.motion.RiftLibRayConeMotionShape
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.HashMap;
@@ -28,11 +26,25 @@ import java.util.Map;
 
 //this registers creatures
 public class RiftCreatureRegistry {
+    public static final String DEFAULT_CREATURE = "tyrannosaurus";
+
     //all creatures are stored here
     public static final HashMap<String, RiftCreatureBuilder> creatureBuilderMap = new HashMap<>();
+    private static final HashMap<String, Class<? extends RiftCreature>> creatureRegistryClassMap = new HashMap<>();
 
     public static RiftCreatureBuilder getCreatureBuilder(String name) {
         return creatureBuilderMap.get(name);
+    }
+
+    public static Class<? extends RiftCreature> getCreatureRegistryClass(String name) {
+        return creatureRegistryClassMap.get(name);
+    }
+
+    public static RiftCreature createCreature(World world, String name) {
+        String resolvedName = creatureBuilderMap.containsKey(name) ? name : DEFAULT_CREATURE;
+        Class<? extends RiftCreature> registryClass = getCreatureRegistryClass(resolvedName);
+        if (registryClass == RiftCreatureHitboxed.class) return new RiftCreatureHitboxed(world, resolvedName);
+        return new RiftCreature(world, resolvedName);
     }
 
     public static void registerCreatureType(String name, RiftCreatureBuilder builder) {
@@ -60,16 +72,20 @@ public class RiftCreatureRegistry {
                 }
             }
         }
+        //-----set registry class-----
+        Class<? extends RiftCreature> registryClass = builder.getHitboxInformation() != null ? RiftCreatureHitboxed.class : RiftCreature.class;
+
         //-----finalize creature info and lock them-----
         builder.setName(name);
         builder.lock();
         creatureBuilderMap.put(name, builder);
+        creatureRegistryClassMap.put(name, registryClass);
     }
 
     public static void createCreatures() {
         registerCreatureType(
                 "tyrannosaurus",
-                new RiftCreatureBuilder(Tyrannosaurus.class)
+                new RiftCreatureBuilder()
                         .setCreatureCategory(RiftCreatureEnums.CreatureCategory.DINOSAUR)
                         .setCreatureDiet(RiftCreatureEnums.CreatureDiet.CARNIVORE)
                         .setStats(9, 7, 5, 7, 3)
@@ -79,6 +95,7 @@ public class RiftCreatureRegistry {
                         .setDaysUntilAdult(7)
                         .setHostileToHumans()
                         .setRetaliateWhenAttacked()
+                        .setHitboxInformation()
                         //---rays---
                         .addUsableRay(
                                 "footStompRay",
@@ -215,9 +232,11 @@ public class RiftCreatureRegistry {
                                 .setCanSprintToAttack()
                         )
         );
+        /*
         registerCreatureType(
                 "stegosaurus",
-                new RiftCreatureBuilder(Stegosaurus.class)
+                RiftCreature.class,
+                new RiftCreatureBuilder()
                         .setCreatureCategory(RiftCreatureEnums.CreatureCategory.DINOSAUR)
                         .setCreatureDiet(RiftCreatureEnums.CreatureDiet.HERBIVORE)
                         .setStats(5.5, 5, 2, 4, 2)
@@ -228,16 +247,14 @@ public class RiftCreatureRegistry {
                         .setIsHerder()
                         .setRetaliateWhenAttacked(true)
                         //.setCanSprintToAttack()
-                        /*
                         .setMoves(
                                 new CreatureMoveStorage.MoveHolder(CreatureMoveNew.THAGOMIZE, "tail_attack")
                         )
                         .setInitMainUsableMoves(CreatureMoveNew.THAGOMIZE)
-                         */
         );
-        /*
         registerCreatureType(
                 "dodo",
+                RiftCreature.class,
                 new RiftCreatureBuilder().setCreatureCategory(RiftCreatureEnums.CreatureCategory.BIRD)
                         .setCreatureDiet(RiftCreatureEnums.CreatureDiet.HERBIVORE)
                         .setMovementOptions(RiftCreatureEnums.Movement.SLOW_FALL)
@@ -248,6 +265,7 @@ public class RiftCreatureRegistry {
         );
         registerCreatureType(
                 "triceratops",
+                RiftCreature.class,
                 new RiftCreatureBuilder().setCreatureCategory(RiftCreatureEnums.CreatureCategory.DINOSAUR)
                         .setCreatureDiet(RiftCreatureEnums.CreatureDiet.HERBIVORE)
                         .setStats(120, 80, 30, 120)
@@ -259,6 +277,7 @@ public class RiftCreatureRegistry {
         );
         registerCreatureType(
                 "utahraptor",
+                RiftCreature.class,
                 new RiftCreatureBuilder().setCreatureCategory(RiftCreatureEnums.CreatureCategory.DINOSAUR)
                         .setCreatureDiet(RiftCreatureEnums.CreatureDiet.CARNIVORE)
                         .setStats(50, 40, 20, 60)

@@ -1,18 +1,16 @@
 package anightdazingzoroark.prift.server.entity.creature.builder;
 
-import anightdazingzoroark.prift.util.FixedSizeList;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.BooleanPropertyValue;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.IntegerPropertyValue;
 import net.minecraft.client.resources.I18n;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBuilder> {
     private String creatureName;
@@ -20,10 +18,7 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     private Map<String, AbstractPropertyValue<?>> propertyValueMap;
     @Nullable
     private Consumer<RiftCreature> updateEffect;
-
-    public RiftCreatureBuilder(Class<? extends RiftCreature> creatureClass) {
-        super(creatureClass);
-    }
+    private Map<String, Function<RiftCreature, Double>> hitboxTagDamageInfo;
 
     /**
      * Set the name of the species of the creature, is to be required
@@ -74,7 +69,9 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
         return this.propertyValueMap;
     }
     //-----additional values end here-----
-
+    /**
+     * Update effects are extra stuff that happens with the creature every tick
+     * */
     public RiftCreatureBuilder registerOnUpdateEffect(Consumer<RiftCreature> onUpdate) {
         this.updateEffect = onUpdate;
         return this;
@@ -83,5 +80,22 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     @Nullable
     public Consumer<RiftCreature> getUpdateEffect() {
         return this.updateEffect;
+    }
+
+    /**
+     * Set hitbox information on the creature
+     * */
+    public RiftCreatureBuilder setHitboxInformation() {
+        this.hitboxTagDamageInfo = Map.of();
+        return this;
+    }
+
+    public RiftCreatureBuilder setHitboxInformation(Map<String, Function<RiftCreature, Double>> hitboxTagDamageInfo) {
+        this.hitboxTagDamageInfo = hitboxTagDamageInfo;
+        return this;
+    }
+
+    public Map<String, Function<RiftCreature, Double>> getHitboxInformation() {
+        return this.hitboxTagDamageInfo;
     }
 }

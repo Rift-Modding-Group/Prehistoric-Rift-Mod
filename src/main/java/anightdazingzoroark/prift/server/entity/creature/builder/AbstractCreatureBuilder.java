@@ -23,7 +23,6 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     protected boolean locked;
 
     //all the following variables are required and must not be null, validated in isValid()
-    private final Class<? extends RiftCreature> creatureClass;
     private Map<RiftCreatureEnums.Stats, Double> stats;
     private RiftCreatureEnums.CreatureCategory creatureCategory;
     private RiftCreatureEnums.CreatureDiet creatureDiet;
@@ -48,17 +47,9 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private Map<String, RiftLibRayBuilder> rayMap;
     private Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
 
-    public AbstractCreatureBuilder(Class<? extends RiftCreature> creatureClass) {
-        this.creatureClass = creatureClass;
-    }
-
     @SuppressWarnings("unchecked")
     protected final T getThis() {
         return (T) this;
-    }
-
-    public Class<? extends RiftCreature> getCreatureClass() {
-        return this.creatureClass;
     }
 
     /**
@@ -386,8 +377,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Get validity based on if all params are not null
      * */
     public boolean isValid() {
-        return this.creatureClass != null
-                && this.stats != null
+        return this.stats != null
                 && this.creatureCategory != null
                 && this.creatureDiet != null
                 && this.spawnEggColors != null

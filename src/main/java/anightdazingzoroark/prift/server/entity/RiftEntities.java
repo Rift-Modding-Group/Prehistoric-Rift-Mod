@@ -1,11 +1,11 @@
 package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
-import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
+import net.minecraftforge.fml.common.registry.EntityEntryBuilder;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,22 +13,26 @@ import java.util.List;
 public class RiftEntities {
     public static void registerEntities() {
         //NEW CREATURE REGISTRY
-        List<RiftCreatureBuilder> builderList = new ArrayList<>(RiftCreatureRegistry.creatureBuilderMap.values());
-        for (int x = 0; x < builderList.size(); x++) {
-            RiftCreatureBuilder builder = builderList.get(x);
+        List<String> creatureNames = new ArrayList<>(RiftCreatureRegistry.creatureBuilderMap.keySet());
+        for (int x = 0; x < creatureNames.size(); x++) {
+            String creatureName = creatureNames.get(x);
             registerEntity(
-                    builder.getName(),
-                    builder.getCreatureClass(),
-                    x, RiftInitialize.instance
+                    creatureName,
+                    RiftCreatureRegistry.getCreatureRegistryClass(creatureName),
+                    x
             );
         }
     }
 
-    public static void registerEntity(String name, Class<? extends Entity> entityClass, int id, Object mod) {
-        EntityRegistry.registerModEntity(new ResourceLocation(RiftInitialize.MODID, name), entityClass, name, id, mod, 64, 1, true);
-    }
-
-    public static void registerEntity(String name, Class<? extends Entity> entityClass, int id, Object mod,  int eggPrimary, int eggSecondary) {
-        EntityRegistry.registerModEntity(new ResourceLocation(RiftInitialize.MODID, name), entityClass, name, id, mod, 64, 1, true, eggPrimary, eggSecondary);
+    public static void registerEntity(String name, Class<? extends RiftCreature> entityClass, int id) {
+        ResourceLocation registryName = new ResourceLocation(RiftInitialize.MODID, name);
+        ForgeRegistries.ENTITIES.register(EntityEntryBuilder.<RiftCreature>create()
+                .entity(entityClass)
+                .factory(world -> RiftCreatureRegistry.createCreature(world, name))
+                .id(registryName, id)
+                .name(name)
+                .tracker(64, 1, true)
+                .build()
+        );
     }
 }

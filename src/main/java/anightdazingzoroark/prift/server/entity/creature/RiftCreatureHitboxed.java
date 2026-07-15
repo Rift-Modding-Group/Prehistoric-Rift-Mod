@@ -2,16 +2,25 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.riftlib.hitbox.IMultiHitboxUser;
 import anightdazingzoroark.riftlib.hitbox.MultiHitboxList;
+import anightdazingzoroark.riftlib.hitbox.RiftLibCollisionHitbox;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Any creature that has hitboxes must extend this class
  * */
-public abstract class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUser<RiftCreatureHitboxed> {
+public class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUser<RiftCreatureHitboxed> {
     @NotNull
     private final MultiHitboxList<RiftCreatureHitboxed> multiHitboxList;
+
+    public RiftCreatureHitboxed(World worldIn) {
+        this(worldIn, RiftCreatureRegistry.DEFAULT_CREATURE);
+    }
 
     public RiftCreatureHitboxed(World worldIn, String creatureName) {
         super(worldIn, creatureName);
@@ -47,6 +56,17 @@ public abstract class RiftCreatureHitboxed extends RiftCreature implements IMult
     @NotNull
     public MultiHitboxList<RiftCreatureHitboxed> getMultiHitboxList() {
         return this.multiHitboxList;
+    }
+
+    @Override
+    public float hitboxDamageMultiplier(RiftLibCollisionHitbox<RiftCreatureHitboxed> collisionHitbox, DamageSource source) {
+        Map<String, Function<RiftCreature, Double>> hitboxHitInfo = this.getCreatureType().getHitboxInformation();
+        if (hitboxHitInfo == null) return 1f;
+        for (Map.Entry<String, Function<RiftCreature, Double>> hitEntry : hitboxHitInfo.entrySet()) {
+            if (!collisionHitbox.hasHitboxTag(hitEntry.getKey())) continue;
+            return hitEntry.getValue().apply(this).floatValue();
+        }
+        return 1f;
     }
 
     @Override

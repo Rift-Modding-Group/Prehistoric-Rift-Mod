@@ -1,13 +1,10 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.riftlib.model.AnimatedLocator;
-import anightdazingzoroark.riftlib.util.QuaternionUtils;
-import anightdazingzoroark.riftlib.util.VectorUtils;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
-import org.lwjglx.util.vector.Quaternion;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,10 +73,6 @@ public class CreatureMoveSelector {
     //-----target detection rules for moves-----
     public abstract static class DetectionRule {
         public abstract boolean targetWithinRange(@NotNull RiftCreature user, @NotNull EntityLivingBase target);
-
-        public boolean targetTooClose(@NotNull RiftCreature user, @NotNull EntityLivingBase target) {
-            return false;
-        }
     }
 
     public static class BoundingBoxDetectionRule extends DetectionRule {
@@ -122,50 +115,42 @@ public class CreatureMoveSelector {
 
         @Override
         public boolean targetWithinRange(@NotNull RiftCreature user, @NotNull EntityLivingBase target) {
-            //---check if the posVec is in range---
+            boolean outsideCreatureAABB = this.locatorName.isEmpty() || !this.withinCreatureAABB(user, target);
+
             //if minDistance is negative, it means only maxDistance matters
-            double distance = this.getDistanceFromUserPoint(user, target);
-            if (this.minDistance < 0) return distance <= this.maxDistance;
+            if (this.minDistance < 0) {
+                boolean withinBoundOfLocator = this.aabbFromLocator(user, this.maxDistance).grow(1e-5D).intersects(target.getEntityBoundingBox());
+                return withinBoundOfLocator && outsideCreatureAABB;
+            }
             else if (this.maxDistance >= this.minDistance) {
-                return distance >= this.minDistance && distance <= this.maxDistance;
+                boolean withinOuterBound = this.aabbFromLocator(user, this.maxDistance).grow(1e-5D).intersects(target.getEntityBoundingBox());
+                boolean outsideInnerBound = !this.aabbFromLocator(user, this.minDistance).grow(1e-5D).intersects(target.getEntityBoundingBox());
+                return withinOuterBound && outsideInnerBound && outsideCreatureAABB;
             }
             throw new UnsupportedOperationException("Given maxDistance is smaller than minDistance!");
         }
 
-        @Override
-        public boolean targetTooClose(@NotNull RiftCreature user, @NotNull EntityLivingBase target) {
-            return this.minDistance >= 0 && this.getDistanceFromUserPoint(user, target) < this.minDistance;
-        }
-
-        private double getDistanceFromUserPoint(@NotNull RiftCreature user, @NotNull EntityLivingBase target) {
-            return this.getUserPoint(user).distanceTo(target.getPositionVector());
-        }
-
         @NotNull
-        private Vec3d getUserPoint(@NotNull RiftCreature user) {
-            //turn locator into world space position
-            //note that if there's no locator, the creature's own position will be used instead
-            AnimatedLocator animatedLocator = user.getAnimationData().getAnimatedLocator(this.locatorName);
-            if (animatedLocator == null) return user.getPositionVector();
+        private AxisAlignedBB aabbFromLocator(@NotNull RiftCreature creature, double width) {
+            if (this.locatorName.isEmpty()) {
+                AxisAlignedBB creatureAABB = creature.getEntityBoundingBox();
+                return creatureAABB.grow(width);
+            }
+            else {
+                Vec3d worldSpaceLocator = creature.getLocatorWorldPos(this.locatorName);
+                return new AxisAlignedBB(
+                        worldSpaceLocator.x - width / 2D,
+                        worldSpaceLocator.y - width / 2D,
+                        worldSpaceLocator.z - width / 2D,
+                        worldSpaceLocator.x + width / 2D,
+                        worldSpaceLocator.y + width / 2D,
+                        worldSpaceLocator.z + width / 2D
+                );
+            }
+        }
 
-            Vec3d modelSpacePos = animatedLocator.getModelSpacePosition();
-            float parentScale = user.scale();
-            float locatorX = -(float) (modelSpacePos.x / 16f);
-            float locatorY = (float) (modelSpacePos.y / 16f);
-            float locatorZ = -(float) (modelSpacePos.z / 16f);
-            Vec3d locatorPos = new Vec3d(locatorX * parentScale, locatorY * parentScale, locatorZ * parentScale);
-
-            double yawHead = -Math.toRadians(user.rotationYawHead);
-            double yawBody = -Math.toRadians(user.rotationYaw);
-            double yaw = user.isBeingRidden() ? yawBody : yawHead;
-            Quaternion quaternion = QuaternionUtils.createXYZQuaternion(0f, yaw, 0f);
-            locatorPos = VectorUtils.rotateVectorWithQuaternion(locatorPos, quaternion);
-
-            return new Vec3d(
-                    user.posX + locatorPos.x,
-                    user.posY + locatorPos.y,
-                    user.posZ + locatorPos.z
-            );
+        private boolean withinCreatureAABB(@NotNull RiftCreature creature, EntityLivingBase target) {
+            return creature.getEntityBoundingBox().grow(1e-5D).intersects(target.getEntityBoundingBox());
         }
     }
 }

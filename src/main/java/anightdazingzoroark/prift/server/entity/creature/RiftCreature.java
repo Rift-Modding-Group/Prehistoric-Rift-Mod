@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import io.netty.buffer.ByteBuf;
 import anightdazingzoroark.prift.server.entity.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
@@ -20,6 +21,7 @@ import anightdazingzoroark.riftlib.core.manager.AbstractAnimationDataEntity;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
 import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
+import anightdazingzoroark.riftlib.model.AnimatedLocator;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
 import anightdazingzoroark.riftlib.ray.RiftLibRay;
@@ -56,13 +58,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, IRiftCreature {
+public class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, IRiftCreature, IRayCreator<RiftCreature> {
     @NotNull
-    private final RiftCreatureBuilder creatureType;
+    private RiftCreatureBuilder creatureType;
     @NotNull
     private final RiftLibInventoryHandler creatureInventory;
     @NotNull
-    private final AnimationDataEntity animData;
+    private AnimationDataEntity animData;
 
     public static final IAttribute ELEMENTAL_DAMAGE_ATTRIBUTE = new RangedAttribute(null, "rift.elementalDamage", 2.0, 0.0, 2048.0);
     public static final IAttribute STAMINA_ATTRIBUTE = new RangedAttribute(null, "rift.stamina", 2.0, 0.0, 2048.0);
@@ -77,7 +79,7 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
 
     //--custom property values, which can be called and manipulated from a creature builder--
     @NotNull
-    private final Map<String, AbstractPropertyValue<?>> propertyValueMap;
+    private Map<String, AbstractPropertyValue<?>> propertyValueMap = Map.of();
 
     //--server side primitive params--
     //manages a creature's ability to sprint based on whether or not it attacked before
@@ -93,32 +95,35 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     protected Map<String, RiftLibRayBuilder> rayMap;
     protected Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
 
+    public RiftCreature(World worldIn) {
+        this(worldIn, RiftCreatureRegistry.DEFAULT_CREATURE);
+    }
+
     public RiftCreature(World worldIn, String creatureName) {
         super(worldIn);
-        this.creatureType = RiftCreatureRegistry.getCreatureBuilder(creatureName);
-        this.animData = new AnimationDataEntity(this, holder -> this.scale());
         this.moveHelper = new RiftCreatureMoveHelper(this);
-        this.setSize(this.creatureType.getMainHitboxSize()[0], this.creatureType.getMainHitboxSize()[1]);
+        this.creatureType = resolveCreatureBuilder(creatureName);
         this.creatureInventory = new RiftLibInventoryHandler(this.creatureType.getInventorySize());
+        this.applyCreatureTypeSettings();
+        this.animData = new AnimationDataEntity(this, holder -> this.scale());
+    }
 
+    @NotNull
+    private static RiftCreatureBuilder resolveCreatureBuilder(String creatureName) {
+        RiftCreatureBuilder builder = RiftCreatureRegistry.getCreatureBuilder(creatureName);
+        if (builder == null) builder = RiftCreatureRegistry.getCreatureBuilder(RiftCreatureRegistry.DEFAULT_CREATURE);
+        if (builder == null) throw new IllegalStateException("Creature type " + creatureName + " is not registered!");
+        return builder;
+    }
+
+    private void applyCreatureTypeSettings() {
+        this.setSize(this.creatureType.getMainHitboxSize()[0], this.creatureType.getMainHitboxSize()[1]);
         if (this.creatureType.getPropertyValueMap() != null) this.propertyValueMap = new HashMap<>(this.creatureType.getPropertyValueMap());
         else this.propertyValueMap = Map.of();
 
-        if (!this.creatureType.getCanBeKnockedBack()) this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1D);
-
-        if (this instanceof IRayCreator<?> && this.creatureType.getRayMap() != null && this.creatureType.getRayHitEffectMap() != null) {
-            //todo: add exception if this creature is rayuser instance
-            //but !(this.creatureType.getRayMap() != null && this.creatureType.getRayHitEffectMap() != null) is true
-            //if (this.creatureType.getRayMap() == null)
-            this.rayMap = this.creatureType.getRayMap();
-            this.rayHitEffectMap = this.creatureType.getRayHitEffectMap();
-        }
-
-        /*
-        if (this.creatureType.getCanSprintToAttack()) {
-            this.sprintToAttackCooldown = RiftUtil.randomInRange(5, 10) * 20;
-        }
-         */
+        this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(this.creatureType.getCanBeKnockedBack() ? 0D : 1D);
+        this.rayMap = this.creatureType.getRayMap();
+        this.rayHitEffectMap = this.creatureType.getRayHitEffectMap();
     }
 
     @Override
@@ -505,6 +510,15 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
+        if (compound.hasKey("CreatureType")) {
+            RiftCreatureBuilder builder = resolveCreatureBuilder(compound.getString("CreatureType"));
+            if (this.creatureType != builder) {
+                this.creatureType = builder;
+                this.creatureInventory.setSize(this.creatureType.getInventorySize());
+                this.applyCreatureTypeSettings();
+                this.animData = new AnimationDataEntity(this, holder -> this.scale());
+            }
+        }
         this.readCreatureNBT(compound);
     }
 
@@ -514,14 +528,17 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
     }
 
     //-----ray related methods-----
+    @Override
     public RiftCreature getRayCreator() {
         return this;
     }
 
+    @Override
     public Map<String, RiftLibRayBuilder> getRayBuilders() {
         return this.rayMap;
     }
 
+    @Override
     public void applyRaySegments(String rayName, BlockPos rayOrigin, RiftLibRay.RayHitResult rayHitResult) {
         if (this.rayHitEffectMap == null) return;
         this.rayHitEffectMap.get(rayName).accept(this, rayOrigin, rayHitResult);
@@ -621,6 +638,31 @@ public abstract class RiftCreature extends EntityTameable implements IAnimatable
         animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "moveUse"+phase, "default",
                 creatureMovesStates.toArray(new AnimationControllerState[0])
         ));
+    }
+
+    @NotNull
+    public Vec3d getLocatorWorldPos(@NotNull String name) {
+        AnimatedLocator animatedLocator = this.animData.getAnimatedLocator(name);
+        if (animatedLocator == null) return Vec3d.ZERO;
+
+        Vec3d modelSpacePos = animatedLocator.getModelSpacePosition();
+        float parentScale = this.scale();
+        float locatorX = -(float) (modelSpacePos.x / 16f);
+        float locatorY = (float) (modelSpacePos.y / 16f);
+        float locatorZ = -(float) (modelSpacePos.z / 16f);
+        Vec3d locatorPos = new Vec3d(locatorX * parentScale, locatorY * parentScale, locatorZ * parentScale);
+
+        double yawHead = -Math.toRadians(this.rotationYawHead);
+        double yawBody = -Math.toRadians(this.rotationYaw);
+        double yaw = this.isBeingRidden() ? yawBody : yawHead;
+        Quaternion quaternion = QuaternionUtils.createXYZQuaternion(0f, yaw, 0f);
+        locatorPos = VectorUtils.rotateVectorWithQuaternion(locatorPos, quaternion);
+
+        return new Vec3d(
+                this.posX + locatorPos.x,
+                this.posY + locatorPos.y,
+                this.posZ + locatorPos.z
+        );
     }
 
     //-----other useless events idk nor care about-----
