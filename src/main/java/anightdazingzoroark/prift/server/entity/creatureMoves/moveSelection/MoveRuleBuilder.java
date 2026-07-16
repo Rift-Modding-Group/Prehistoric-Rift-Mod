@@ -15,7 +15,7 @@ public class MoveRuleBuilder {
     @NotNull
     private BiFunction<RiftCreature, EntityLivingBase, Integer> priorityPredicate = (creature, target) -> -1;
     @NotNull
-    private CreatureMoveSelector.DetectionRule detectionRule = new CreatureMoveSelector.DistanceFromUserDetectionRule("", 8D);
+    private CreatureMoveSelectorBuilder.DetectionRule detectionRule = new CreatureMoveSelectorBuilder.DistanceFromUserDetectionRule("", 8D);
     private boolean canUseWhenFrustrated;
     private boolean dontPathToTarget;
 
@@ -50,13 +50,13 @@ public class MoveRuleBuilder {
      * A detection rule defines when a creature can use its selected move on its target.
      * Mostly for determining range.
      * */
-    public MoveRuleBuilder setDetectionRule(@NotNull CreatureMoveSelector.DetectionRule detectionRule) {
+    public MoveRuleBuilder setDetectionRule(@NotNull CreatureMoveSelectorBuilder.DetectionRule detectionRule) {
         this.detectionRule = detectionRule;
         return this;
     }
 
     @NotNull
-    public CreatureMoveSelector.DetectionRule getDetectionRule() {
+    public CreatureMoveSelectorBuilder.DetectionRule getDetectionRule() {
         return this.detectionRule;
     }
 

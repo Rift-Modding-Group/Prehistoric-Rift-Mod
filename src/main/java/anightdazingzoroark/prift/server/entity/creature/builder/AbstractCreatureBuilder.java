@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature.builder;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelector;
+import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelectorBuilder;
 import anightdazingzoroark.prift.util.TriConsumer;
 import anightdazingzoroark.riftlib.ray.RiftLibRay;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
@@ -43,7 +43,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private boolean isHerder;
     private int inventorySize = 27;
     private int daysUntilAdult = 1;
-    private CreatureMoveSelector moveSelector = new CreatureMoveSelector();
+    private CreatureMoveSelectorBuilder moveSelector = new CreatureMoveSelectorBuilder();
     private Map<String, RiftLibRayBuilder> rayMap;
     private Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
 
@@ -336,7 +336,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     /**
      * Set how this creature chooses moves when it is not being controlled by a rider.
      * */
-    public T setMoveSelector(@NotNull CreatureMoveSelector moveSelector) {
+    public T setMoveSelector(@NotNull CreatureMoveSelectorBuilder moveSelector) {
         if (this.locked) return this.getThis();
 
         this.moveSelector = moveSelector;
@@ -344,7 +344,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     }
 
     @NotNull
-    public CreatureMoveSelector getMoveSelector() {
+    public CreatureMoveSelectorBuilder getMoveSelector() {
         return this.moveSelector;
     }
 

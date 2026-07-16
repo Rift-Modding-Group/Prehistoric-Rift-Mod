@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -13,11 +14,11 @@ import java.util.List;
  * Creature-level AI policy for choosing moves.
  * */
 //todo: add move combos
-public class CreatureMoveSelector {
+public class CreatureMoveSelectorBuilder {
     //general storage of move rules
     private final List<MoveRule> moveRules = new ArrayList<>();
 
-    public CreatureMoveSelector setMoveRule(MoveRuleBuilder moveRuleBuilder) {
+    public CreatureMoveSelectorBuilder setMoveRule(MoveRuleBuilder moveRuleBuilder) {
         this.moveRules.add(new MoveRule(MoveResult.USE_MOVE, moveRuleBuilder));
         return this;
     }
@@ -27,7 +28,7 @@ public class CreatureMoveSelector {
      * Note that its only for when its on its own, when controlled by a rider
      * it can spring to attack when commanded to (by simply sprinting lol)
      * */
-    public CreatureMoveSelector setCanSprintToAttack() {
+    public CreatureMoveSelectorBuilder setCanSprintToAttack() {
         this.moveRules.add(new MoveRule(MoveResult.SPRINT, new MoveRuleBuilder("")
                 .setPriorityPredicate((creature, target) -> {
                     if (target == null) return -1;
@@ -42,7 +43,7 @@ public class CreatureMoveSelector {
         return this;
     }
 
-    public CreatureMoveSelector setCanLeapToAttack() {
+    public CreatureMoveSelectorBuilder setCanLeapToAttack() {
         this.moveRules.add(new MoveRule(MoveResult.LEAP, new MoveRuleBuilder("")
                 .setDetectionRule(new DistanceFromUserDetectionRule("", 8D,16D)))
         );
@@ -51,13 +52,6 @@ public class CreatureMoveSelector {
 
     public List<MoveRule> getMoveRules() {
         return this.moveRules;
-    }
-
-    public enum MoveResult {
-        USE_MOVE,
-        USE_MOVE_COMBO,
-        SPRINT,
-        LEAP
     }
 
     public record MoveRule(@NotNull MoveResult moveResult, @NotNull MoveRuleBuilder moveRuleBuilder) {

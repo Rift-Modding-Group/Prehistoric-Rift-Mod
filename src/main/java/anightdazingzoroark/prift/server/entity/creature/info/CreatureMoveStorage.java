@@ -3,7 +3,8 @@ package anightdazingzoroark.prift.server.entity.creature.info;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelector;
+import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
+import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelectorBuilder;
 import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.MoveRuleBuilder;
 import anightdazingzoroark.prift.util.PriorityList;
@@ -14,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.BiFunction;
 
 /**
 * A creature's moves are to be stored and managed here
@@ -25,7 +25,7 @@ public class CreatureMoveStorage {
     //cooldowns of the moves that are used
     private final Map<String, Integer> moveCooldowns = new HashMap<>();
     //dynamically updated priority list for usable moves
-    private final PriorityList<CreatureMoveSelector.MoveRule> prioritizedUsableMoves = new PriorityList<>();
+    private final PriorityList<CreatureMoveSelectorBuilder.MoveRule> prioritizedUsableMoves = new PriorityList<>();
     //the phase of the creature that has this
     @NotNull
     private String creaturePhase = "";
@@ -60,10 +60,10 @@ public class CreatureMoveStorage {
     public void updateUsableMoves(@NotNull RiftCreature creature, @Nullable EntityLivingBase target) {
         if (!this.isInitialized()) return;
 
-        for (CreatureMoveSelector.MoveRule moveRule : this.creatureType.getMoveSelector().getMoveRules()) {
+        for (CreatureMoveSelectorBuilder.MoveRule moveRule : this.creatureType.getMoveSelector().getMoveRules()) {
             MoveRuleBuilder moveRuleBuilder = moveRule.moveRuleBuilder();
 
-            boolean useDueToFrustration = moveRule.moveResult() == CreatureMoveSelector.MoveResult.USE_MOVE
+            boolean useDueToFrustration = moveRule.moveResult() == MoveResult.USE_MOVE
                     && target != null
                     && target.isEntityAlive()
                     && creature.atFrustrationThreshold()
@@ -81,7 +81,7 @@ public class CreatureMoveStorage {
     }
 
     @Nullable
-    public CreatureMoveSelector.MoveRule getBestMoveRuleUnmounted() {
+    public CreatureMoveSelectorBuilder.MoveRule getBestMoveRuleUnmounted() {
         return this.prioritizedUsableMoves.next();
     }
 
