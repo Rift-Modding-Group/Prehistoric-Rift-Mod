@@ -28,6 +28,8 @@ public abstract class AbstractMoveResultTicker {
 
     public abstract void onEndTicker();
 
+    public abstract boolean isOverridableWhileUsed();
+
     protected void preserveLastLookDirection() {
         if (!this.hasLastLookDirection) return;
         this.creature.rotationYaw = this.lastRotationYawHead;

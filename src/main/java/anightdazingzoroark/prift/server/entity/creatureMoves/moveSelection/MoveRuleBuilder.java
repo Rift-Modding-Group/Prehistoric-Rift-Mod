@@ -83,4 +83,9 @@ public class MoveRuleBuilder {
     public boolean getDontPathToTarget() {
         return this.dontPathToTarget;
     }
+
+    @Override
+    public String toString() {
+        return "MoveBuilder:"+this.moveName;
+    }
 }

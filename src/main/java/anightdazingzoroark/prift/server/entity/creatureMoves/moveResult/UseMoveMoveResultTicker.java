@@ -239,16 +239,21 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
             boolean moveHitTarget = this.creature.getAttackTargetHitCount() > this.attackTargetHitCountAtMoveStart;
             if (moveHitTarget) this.creature.resetFrustration();
             else this.creature.addFrustration(35);
-        }
 
-        if (this.selectedMoveBuilder.getOnMoveEndEffect() != null) {
-            this.selectedMoveBuilder.getOnMoveEndEffect().accept(this.creature);
+            if (this.selectedMoveBuilder.getOnMoveEndEffect() != null) {
+                this.selectedMoveBuilder.getOnMoveEndEffect().accept(this.creature);
+            }
         }
         this.creature.getNavigator().clearPath();
 
         //preserve last look direction after target is gone
         EntityLivingBase target = this.creature.getAttackTarget();
         if (target == null || !target.isEntityAlive()) this.preserveLastLookDirection();
+    }
+
+    @Override
+    public boolean isOverridableWhileUsed() {
+        return !this.hasExecutedMove;
     }
 
     private void rememberTargetPos(@NotNull EntityLivingBase target) {

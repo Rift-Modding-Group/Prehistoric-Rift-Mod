@@ -81,8 +81,8 @@ public class CreatureMoveStorage {
     }
 
     @Nullable
-    public CreatureMoveSelectorBuilder.MoveRule getBestMoveRuleUnmounted() {
-        return this.prioritizedUsableMoves.next();
+    public ImmutablePair<CreatureMoveSelectorBuilder.MoveRule, Integer> getBestMoveRuleUnmounted() {
+        return this.prioritizedUsableMoves.nextWithPriority();
     }
 
 

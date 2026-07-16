@@ -38,4 +38,9 @@ public class SprintMoveResultTicker extends AbstractMoveResultTicker {
         EntityLivingBase target = this.creature.getAttackTarget();
         if (target == null || !target.isEntityAlive()) this.preserveLastLookDirection();
     }
+
+    @Override
+    public boolean isOverridableWhileUsed() {
+        return false;
+    }
 }

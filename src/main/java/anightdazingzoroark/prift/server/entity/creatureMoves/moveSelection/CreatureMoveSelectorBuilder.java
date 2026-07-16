@@ -28,7 +28,7 @@ public class CreatureMoveSelectorBuilder {
      * Note that its only for when its on its own, when controlled by a rider
      * it can spring to attack when commanded to (by simply sprinting lol)
      * */
-    public CreatureMoveSelectorBuilder setCanSprintToAttack() {
+    public CreatureMoveSelectorBuilder setCanSprintToAttack(int priority) {
         this.moveRules.add(new MoveRule(MoveResult.SPRINT, new MoveRuleBuilder("")
                 .setPriorityPredicate((creature, target) -> {
                     if (target == null) return -1;
@@ -36,7 +36,7 @@ public class CreatureMoveSelectorBuilder {
                     double minReach = creature.width + 3; //is temporary
                     boolean canSprintNow = creature.sprintToAttackCooldown <= 0 || creature.atFrustrationThreshold();
                     boolean sprintCondition = distFromTarget <= 16D && distFromTarget >= minReach && canSprintNow;
-                    return sprintCondition ? 1 : -1;
+                    return sprintCondition ? priority : -1;
                 })
                 .setDetectionRule(new DistanceFromUserDetectionRule("", 8D,16D)))
         );

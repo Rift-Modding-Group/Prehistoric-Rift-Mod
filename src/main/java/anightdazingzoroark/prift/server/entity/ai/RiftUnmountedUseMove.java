@@ -2,29 +2,21 @@ package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.AbstractMoveResultTicker;
-import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelectorBuilder;
-import anightdazingzoroark.prift.util.MathUtil;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.pathfinding.PathNavigate;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * This is for managing a creature being able to use moves as well as other offensive
  * actions that are not moves.
  * */
 public class RiftUnmountedUseMove extends EntityAIBase {
-    private static final double TARGET_MOVED_REPATH_DISTANCE_SQ = 1D;
-    private static final int DIRECT_TARGET_MOVE_STALL_TICKS = 8;
-    private static final int CLOSE_TARGET_STRAFE_TICKS = 10;
-
     @NotNull
     private final RiftCreature creature;
-    private CreatureMoveSelectorBuilder.MoveRule moveRule;
+    private ImmutablePair<CreatureMoveSelectorBuilder.MoveRule, Integer> moveRulePair;
     private AbstractMoveResultTicker moveResultTicker;
 
     public RiftUnmountedUseMove(@NotNull RiftCreature creature) {
@@ -42,13 +34,14 @@ public class RiftUnmountedUseMove extends EntityAIBase {
         if (!this.creature.getCurrentMove().isEmpty()) return false;
 
         //-----find and use a move from current list-----
-        this.moveRule = this.createMoveRule();
-        return this.moveRule != null;
+        this.moveRulePair = this.createMoveRule();
+        return this.moveRulePair != null;
     }
 
     @Override
     public void startExecuting() {
-        this.moveResultTicker = this.moveRule.moveResult().moveResultTicker.apply(this.creature, this.moveRule.moveRuleBuilder());
+        CreatureMoveSelectorBuilder.MoveRule moveRule = this.moveRulePair.getLeft();
+        this.moveResultTicker = moveRule.moveResult().moveResultTicker.apply(this.creature, moveRule.moveRuleBuilder());
     }
 
     @Override
@@ -67,10 +60,25 @@ public class RiftUnmountedUseMove extends EntityAIBase {
      * */
     @Override
     public void updateTask() {
+        //update move ticker
         if (this.moveResultTicker != null) this.moveResultTicker.onUpdate();
+
+        //continuously look for a moverule of higher priority than current
+        ImmutablePair<CreatureMoveSelectorBuilder.MoveRule, Integer> newMoveRulePair = this.createMoveRule();
+        if (newMoveRulePair != null
+                && (this.moveResultTicker == null || this.moveResultTicker.isOverridableWhileUsed())
+                && !newMoveRulePair.getLeft().equals(this.moveRulePair.getLeft())
+                && newMoveRulePair.getRight() <= this.moveRulePair.getRight()
+        ) {
+            if (this.moveResultTicker != null) this.moveResultTicker.onEndTicker();
+            this.moveResultTicker = newMoveRulePair.getLeft().moveResult().moveResultTicker.apply(
+                    this.creature, newMoveRulePair.getLeft().moveRuleBuilder()
+            );
+        }
     }
 
-    private CreatureMoveSelectorBuilder.MoveRule createMoveRule() {
+    @Nullable
+    private ImmutablePair<CreatureMoveSelectorBuilder.MoveRule, Integer> createMoveRule() {
         CreatureMoveStorage creatureMoves = this.creature.getCreatureMoves();
         return creatureMoves.getBestMoveRuleUnmounted();
     }

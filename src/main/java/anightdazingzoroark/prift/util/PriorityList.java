@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.util;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -49,6 +50,27 @@ public class PriorityList<T> {
         if (resultList == null || resultList.isEmpty()) return null;
 
         return resultList.get(this.random.nextInt(resultList.size()));
+    }
+
+    @Nullable
+    public ImmutablePair<T, Integer> nextWithPriority() {
+        //get next first
+        T next = this.next();
+        if (next == null) return null;
+
+        //get priority
+        int priority = -1;
+        outer: for (Map.Entry<Integer, List<T>> entry : this.map.entrySet()) {
+            for (T listFromEntry : entry.getValue()) {
+                if (listFromEntry == next) {
+                    priority = entry.getKey();
+                    break outer;
+                }
+            }
+        }
+
+        //return
+        return new ImmutablePair<>(next, priority);
     }
 
     @Override
