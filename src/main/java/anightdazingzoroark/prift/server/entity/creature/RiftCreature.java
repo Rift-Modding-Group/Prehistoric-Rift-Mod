@@ -222,20 +222,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
             //tick sprinting related stuff
             if (this.sprintToAttackCooldown > 0) this.sprintToAttackCooldown--;
-            if (this.isSprinting() && this.sprintToAttackCooldown <= 0) {
-                AxisAlignedBB frontAABB = this.getFrontAABB();
-                List<EntityLivingBase> hitEntities = this.world.getEntitiesWithinAABB(EntityLivingBase.class, frontAABB)
-                        .stream().filter(entity -> {
-                             return entity != null && !this.equals(entity) && !this.isRelatedToEntity(entity);
-                        }).toList();
-
-                if (!hitEntities.isEmpty()) {
-                    for (Entity hitEntity : hitEntities) this.attackEntityFromSprint(hitEntity);
-
-                    this.sprintToAttackCooldown = MathUtil.randomInRange(this.world.rand, 5, 10) * 20;
-                    this.setSprinting(false);
-                }
-            }
 
             //tick the creature on tick lambda
             if (this.creatureType.getUpdateEffect() != null) this.creatureType.getUpdateEffect().accept(this);
@@ -255,31 +241,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         AxisAlignedBB aabb = this.animData.getWorldSpaceAABB(boundingBoxName);
         if (aabb == null) return false;
         return aabb.intersects(otherAABB);
-    }
-
-    //this creates an AABB that is ahead of is center by 1.5 blocks + its width
-    public AxisAlignedBB getFrontAABB() {
-        double frontWidth = this.width / 2D + 1.5D;
-        double frontHeight = this.height;
-        Vec3d look = this.getLookVec().normalize();
-        double perpX = -look.z;
-        double perpZ = look.x;
-        double centerX = this.posX + look.x * this.width;
-        double centerZ = this.posZ + look.z * this.width;
-
-        double startX = centerX - perpX * frontWidth;
-        double startZ = centerZ - perpZ * frontWidth;
-        double endX = centerX + perpX * frontWidth;
-        double endZ = centerZ + perpZ * frontWidth;
-
-        return new AxisAlignedBB(
-                Math.min(startX, endX),
-                this.posY,
-                Math.min(startZ, endZ),
-                Math.max(startX, endX),
-                this.posY + frontHeight,
-                Math.max(startZ, endZ)
-        );
     }
 
     //this gets the scale of the model of the entity
@@ -322,7 +283,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //this method is to be used when attacking from sprinting. sprinting is considered
     //a physical move that makes contact
-    private void attackEntityFromSprint(Entity entityIn) {
+    public void attackEntityFromSprint(Entity entityIn) {
         if (entityIn == null) return;
 
         double attackStat = this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
