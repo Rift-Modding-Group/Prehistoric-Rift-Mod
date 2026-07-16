@@ -112,14 +112,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                     //only rotate if target direction is usable
                     if (targetX * targetX + targetZ * targetZ >= 1E-4D) {
                         float targetYaw = (float)(Math.atan2(targetZ, targetX) * 180f / (float) Math.PI) - 90f;
-                        this.creature.rotationYaw = targetYaw;
-                        this.creature.prevRotationYaw = targetYaw;
-                        this.creature.renderYawOffset = targetYaw;
-                        this.creature.prevRenderYawOffset = targetYaw;
-                        this.creature.rotationYawHead = targetYaw;
-                        this.creature.prevRotationYawHead = targetYaw;
-                        this.lastRotationYawHead = targetYaw;
-                        this.lastPrevRotationYawHead = targetYaw;
+                        this.setLookDirection(targetYaw);
                     }
                 }
 
