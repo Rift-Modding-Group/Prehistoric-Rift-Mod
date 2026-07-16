@@ -199,7 +199,7 @@ public class RiftCreatureRegistry {
                                     if (distToTarget <= 1E-4D) return;
 
                                     //convert into angle using trig magic
-                                    double verticalDist = targetCenter.y - fireDistVec.y;
+                                    double verticalDist = (targetCenter.y + target.height / 2D) - fireDistVec.y;
                                     double angle = Math.toDegrees(Math.asin(Math.clamp(verticalDist / distToTarget, -1D, 1D)));
 
                                     //now set variable
@@ -243,7 +243,7 @@ public class RiftCreatureRegistry {
                                 )
                                 .setMoveRule(
                                         new MoveRuleBuilder("flamethrower")
-                                                .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
+                                                .setPriorityPredicate((creature, target) -> target != null ? 0 : -1)
                                                 .setDetectionRule(new CreatureMoveSelector.DistanceFromUserDetectionRule(4D, 16D))
                                                 .setUseWhenFrustrated()
                                 )

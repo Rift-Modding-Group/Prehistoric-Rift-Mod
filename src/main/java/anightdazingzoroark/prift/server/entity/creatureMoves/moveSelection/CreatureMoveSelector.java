@@ -35,7 +35,7 @@ public class CreatureMoveSelector {
                     double minReach = creature.width + 3; //is temporary
                     boolean canSprintNow = creature.sprintToAttackCooldown <= 0 || creature.atFrustrationThreshold();
                     boolean sprintCondition = distFromTarget <= 16D && distFromTarget >= minReach && canSprintNow;
-                    return sprintCondition ? (creature.atFrustrationThreshold() ? 0 : 1) : -1;
+                    return sprintCondition ? 1 : -1;
                 })
                 .setDetectionRule(new DistanceFromUserDetectionRule("", 8D,16D)))
         );
