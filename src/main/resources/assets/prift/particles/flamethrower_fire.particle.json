@@ -17,8 +17,9 @@
 				"spawn_rate": 96,
 				"max_particles": 220
 			},
-			"minecraft:emitter_lifetime_once": {
-				"active_time": 1.2
+			"minecraft:emitter_lifetime_expression": {
+				"activation_expression": 1,
+				"expiration_expression": 0
 			},
 			"minecraft:emitter_shape_point": {
 				"direction": ["math.random(-0.35, 0.35)", "math.random(-0.08, 0.08)", -1]

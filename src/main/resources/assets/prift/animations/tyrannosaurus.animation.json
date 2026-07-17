@@ -274,7 +274,7 @@
 				}
 			}
 		},
-		"animation.tyrannosaurus.flamethrower": {
+		"animation.tyrannosaurus.flamethrower_windup": {
 			"animation_length": 2,
 			"bones": {
 				"body": {
@@ -317,14 +317,61 @@
 					}
 				}
 			},
-			"particle_effects": {
-				"0.64": {
-					"effect": "prift:flamethrower_fire",
-					"locator": "flameLocator"
-				}
-			},
 			"timeline": {
 				"0.64": "function.send_message('moveHitEffect');"
+			}
+		},
+		"animation.tyrannosaurus.flamethrower": {
+			"loop": true,
+			"animation_length": 0.64,
+			"bones": {
+				"body": {
+					"rotation": [15, 0, 0]
+				},
+				"neck": {
+					"rotation": ["-15-flamethrower_head_bend", 0, 0]
+				},
+				"head": {
+					"rotation": {
+						"0.0": [0, 0, -7.5],
+						"0.16": [0, 0, 7.5],
+						"0.32": [0, 0, -7.5],
+						"0.48": [0, 0, 7.5],
+						"0.64": [0, 0, -7.5]
+					}
+				},
+				"lowerJaw": {
+					"rotation": [22.5, 0, 0]
+				}
+			}
+		},
+		"animation.tyrannosaurus.flamethrower_release": {
+			"animation_length": 0.24,
+			"bones": {
+				"body": {
+					"rotation": {
+						"0.0": [15, 0, 0],
+						"0.24": [0, 0, 0]
+					}
+				},
+				"neck": {
+					"rotation": {
+						"0.0": ["-15-flamethrower_head_bend", 0, 0],
+						"0.24": [0, 0, 0]
+					}
+				},
+				"head": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.24": [0, 0, 0]
+					}
+				},
+				"lowerJaw": {
+					"rotation": {
+						"0.0": [22.5, 0, 0],
+						"0.24": [0, 0, 0]
+					}
+				}
 			}
 		},
 		"animation.tyrannosaurus.power_roar": {

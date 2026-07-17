@@ -11,7 +11,8 @@ import java.util.function.Function;
 public class CreatureMoveChargeupBuilder {
     private boolean chargeUpThenRelease;
     private boolean chargeUpWhileUse;
-    private Function<RiftCreature, Integer> buildup;
+    @NotNull
+    private Function<RiftCreature, Integer> buildup = creature -> 1;
     private int maxChargeUp = 100;
     @NotNull
     private Function<RiftCreature, Double> cooldownMultiplier = creature -> 2D;
@@ -52,6 +53,24 @@ public class CreatureMoveChargeupBuilder {
 
     public int getMaxChargeUp() {
         return this.maxChargeUp;
+    }
+
+    /**
+     * Set how much buildup this move gains per charge tick.
+     * */
+    public CreatureMoveChargeupBuilder setBuildup(int value) {
+        this.buildup = creature -> value;
+        return this;
+    }
+
+    public CreatureMoveChargeupBuilder setBuildup(@NotNull Function<RiftCreature, Integer> buildup) {
+        this.buildup = buildup;
+        return this;
+    }
+
+    @NotNull
+    public Function<RiftCreature, Integer> getBuildup() {
+        return this.buildup;
     }
 
     /**

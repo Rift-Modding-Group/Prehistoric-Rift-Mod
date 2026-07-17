@@ -232,10 +232,6 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
             boolean moveHitTarget = this.creature.getAttackTargetHitCount() > this.attackTargetHitCountAtMoveStart;
             if (moveHitTarget) this.creature.resetFrustration();
             else this.creature.addFrustration(35);
-
-            if (this.selectedMoveBuilder.getOnMoveEndEffect() != null) {
-                this.selectedMoveBuilder.getOnMoveEndEffect().accept(this.creature);
-            }
         }
         this.creature.getNavigator().clearPath();
 

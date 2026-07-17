@@ -28,7 +28,9 @@ public class CreatureMoveBuilder {
     private int elementEffectStrength;
     private BiConsumer<RiftCreature, Entity> onTargetHitEffect;
     private BiConsumer<RiftCreature, BlockPos> onBlockHitEffect;
+    private Consumer<RiftCreature> onMoveUseEndEffect;
     private Consumer<RiftCreature> onMoveEndEffect;
+    private MoveParticleEmitterDefinition releasingParticleEmitterDefinition;
     private boolean useCanStopMovement;
 
     /**
@@ -163,6 +165,18 @@ public class CreatureMoveBuilder {
     }
 
     /**
+     * Add additional effects for what will happen when the move stops being actively used.
+     * */
+    public CreatureMoveBuilder setOnMoveUseEndEffect(@NotNull Consumer<RiftCreature> onMoveUseEnd) {
+        this.onMoveUseEndEffect = onMoveUseEnd;
+        return this;
+    }
+
+    public Consumer<RiftCreature> getOnMoveUseEndEffect() {
+        return this.onMoveUseEndEffect;
+    }
+
+    /**
      * Add additional effects for what will happen when the move ends.
      * */
     public CreatureMoveBuilder setOnMoveEndEffect(@NotNull Consumer<RiftCreature> onMoveEnd) {
@@ -172,6 +186,19 @@ public class CreatureMoveBuilder {
 
     public Consumer<RiftCreature> getOnMoveEndEffect() {
         return this.onMoveEndEffect;
+    }
+
+    /**
+     * Attach this emitter to the animation state that represents the move's releasing phase.
+     * */
+    public CreatureMoveBuilder setReleasingParticleEmitter(@NotNull String particleIdentifier, @NotNull String locatorName) {
+        this.releasingParticleEmitterDefinition = new MoveParticleEmitterDefinition(particleIdentifier, locatorName);
+        return this;
+    }
+
+    @Nullable
+    public MoveParticleEmitterDefinition getReleasingParticleEmitterDefinition() {
+        return this.releasingParticleEmitterDefinition;
     }
 
     /**
@@ -205,7 +232,9 @@ public class CreatureMoveBuilder {
      * */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isValid() {
-        return this.moveType != null && this.onMoveHitEffect != null && this.animNames != null && this.animNames.length > 0;
+        return this.moveType != null
+                && this.onMoveHitEffect != null
+                && (this.moveChargeupBuilder != null || (this.animNames != null && this.animNames.length > 0));
     }
 
     /**
@@ -220,15 +249,40 @@ public class CreatureMoveBuilder {
 
         toReturn.movePower = this.movePower;
         toReturn.moveCooldown = this.moveCooldown;
-        toReturn.moveChargeupBuilder = this.moveChargeupBuilder.copy();
+        toReturn.moveChargeupBuilder = this.moveChargeupBuilder == null ? null : this.moveChargeupBuilder.copy();
         toReturn.requireFindTargetToUse = this.requireFindTargetToUse;
         toReturn.makesContact = this.makesContact;
         toReturn.element = this.element;
         toReturn.elementEffectStrength = this.elementEffectStrength;
         toReturn.onTargetHitEffect = this.onTargetHitEffect;
         toReturn.onBlockHitEffect = this.onBlockHitEffect;
+        toReturn.onMoveUseEndEffect = this.onMoveUseEndEffect;
+        toReturn.onMoveEndEffect = this.onMoveEndEffect;
+        toReturn.releasingParticleEmitterDefinition = this.releasingParticleEmitterDefinition;
         toReturn.useCanStopMovement = this.useCanStopMovement;
 
         return toReturn;
+    }
+
+    public static class MoveParticleEmitterDefinition {
+        @NotNull
+        private final String particleIdentifier;
+        @NotNull
+        private final String locatorName;
+
+        public MoveParticleEmitterDefinition(@NotNull String particleIdentifier, @NotNull String locatorName) {
+            this.particleIdentifier = particleIdentifier;
+            this.locatorName = locatorName;
+        }
+
+        @NotNull
+        public String getParticleIdentifier() {
+            return this.particleIdentifier;
+        }
+
+        @NotNull
+        public String getLocatorName() {
+            return this.locatorName;
+        }
     }
 }

@@ -2,10 +2,12 @@ package anightdazingzoroark.prift.server.entity.creature.info;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
+import anightdazingzoroark.prift.server.entity.creature.builder.CreaturePhaseBuilder;
+import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelectorBuilder;
-import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.MoveRuleBuilder;
 import anightdazingzoroark.prift.util.PriorityList;
 import net.minecraft.entity.EntityLivingBase;
@@ -14,7 +16,11 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
 * A creature's moves are to be stored and managed here
@@ -32,6 +38,14 @@ public class CreatureMoveStorage {
     //the name of the move that is currently being used
     @NotNull
     private String currentMove = "";
+    @NotNull
+    private MoveUsePhase currentMovePhase = MoveUsePhase.NONE;
+    private int currentMoveTicks;
+    private int currentMoveChargeUpTicks;
+    private int currentMoveBuildup;
+    private boolean currentMoveHitEffectFired;
+    private boolean currentMoveUseEndEffectFired;
+    private boolean currentMoveEndEffectFired;
     //flag for the current usable moves to use, from usableMovesByPhase. 0 is left, 1 is right
     //this only matters in player controlling creatures
     private byte currentUsableMoves = 0;
@@ -91,10 +105,14 @@ public class CreatureMoveStorage {
      * note that phase name has no use yet since no creatures have phases yet
      * */
     public List<ImmutablePair<String, CreatureMoveBuilder>> getUsableMoves() {
+        if (!this.isInitialized()) return Collections.emptyList();
         if (this.creaturePhase.isEmpty()) return this.creatureType.getMoves();
-        else return this.creatureType.getPhaseBuilderMaps().get(this.creaturePhase).getMoves();
+
+        CreaturePhaseBuilder phaseBuilder = this.creatureType.getPhaseBuilderMaps().get(this.creaturePhase);
+        return phaseBuilder == null ? Collections.emptyList() : phaseBuilder.getMoves();
     }
 
+    @Nullable
     public CreatureMoveBuilder getMoveBuilderCurrentMove() {
         return this.getUsableMoveBuilder(this.creaturePhase, this.currentMove);
     }
@@ -109,9 +127,15 @@ public class CreatureMoveStorage {
      * */
     @Nullable
     public CreatureMoveBuilder getUsableMoveBuilder(String phaseName, String moveName) {
+        if (!this.isInitialized()) return null;
+
         List<ImmutablePair<String, CreatureMoveBuilder>> moveMap;
         if (phaseName.isEmpty()) moveMap = this.creatureType.getMoves();
-        else moveMap = this.creatureType.getPhaseBuilderMaps().get(phaseName).getMoves();
+        else {
+            CreaturePhaseBuilder phaseBuilder = this.creatureType.getPhaseBuilderMaps().get(phaseName);
+            if (phaseBuilder == null) return null;
+            moveMap = phaseBuilder.getMoves();
+        }
 
         for (ImmutablePair<String, CreatureMoveBuilder> moveEntry : moveMap) {
             if (!moveEntry.getKey().equals(moveName)) continue;
@@ -132,7 +156,7 @@ public class CreatureMoveStorage {
         else if (this.currentUsableMoves == 1) {
             return movesFromCurrentPhase.subList(3, Math.min(6, movesFromCurrentPhase.size()));
         }
-        return null;
+        return Collections.emptyList();
     }
 
     //only matters when player is controlling the creature, allows to swap which moves they
@@ -148,19 +172,219 @@ public class CreatureMoveStorage {
         return this.currentMove;
     }
 
-    public void setCurrentMove(@NotNull String moveName) {
-        this.currentMove = moveName;
+    @NotNull
+    public MoveUsePhase getCurrentMovePhase() {
+        return this.currentMovePhase;
     }
 
-    public void resetCurrentMove() {
+    public int getCurrentMoveTicks() {
+        return this.currentMoveTicks;
+    }
+
+    public int getCurrentMoveChargeUpTicks() {
+        return this.currentMoveChargeUpTicks;
+    }
+
+    public int getCurrentMoveBuildup() {
+        return this.currentMoveBuildup;
+    }
+
+    public boolean currentMoveMatches(@NotNull String moveName) {
+        return this.currentMove.equals(moveName);
+    }
+
+    public boolean currentMoveMatches(@NotNull String moveName, @NotNull MoveUsePhase phase) {
+        return this.currentMoveMatches(moveName) && this.currentMovePhase == phase;
+    }
+
+    public boolean currentMovePastWindup(@NotNull String moveName) {
+        return this.currentMoveMatches(moveName) && this.currentMovePhase != MoveUsePhase.WINDUP && this.currentMovePhase != MoveUsePhase.NONE;
+    }
+
+    public void setCurrentMove(@NotNull String moveName) {
+        if (moveName.isEmpty()) {
+            this.clearCurrentMove();
+            return;
+        }
+
+        this.currentMove = moveName;
+        this.currentMoveTicks = 0;
+        this.currentMoveChargeUpTicks = 0;
+        this.currentMoveBuildup = 0;
+        this.currentMoveHitEffectFired = false;
+        this.currentMoveUseEndEffectFired = false;
+        this.currentMoveEndEffectFired = false;
+
+        CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
+        CreatureMoveChargeupBuilder chargeupBuilder = currentMoveBuilder == null ? null : currentMoveBuilder.getMoveChargeupBuilder();
+        this.currentMovePhase = chargeupBuilder == null ? MoveUsePhase.ACTIVE : MoveUsePhase.WINDUP;
+    }
+
+    public void tickCurrentMove(@NotNull RiftCreature creature) {
+        if (this.currentMove.isEmpty()) return;
+
+        CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
+        if (currentMoveBuilder == null) {
+            this.clearCurrentMove();
+            return;
+        }
+
+        this.currentMoveTicks++;
+
+        CreatureMoveChargeupBuilder chargeupBuilder = currentMoveBuilder.getMoveChargeupBuilder();
+        if (chargeupBuilder == null) return;
+
+        if (chargeupBuilder.getChargeUpThenRelease()) {
+            if (this.currentMovePhase == MoveUsePhase.WINDUP) {
+                this.addCurrentMoveBuildup(creature, chargeupBuilder);
+                if (this.currentMoveBuildup >= chargeupBuilder.getMaxChargeUp()) {
+                    this.requestCurrentMoveRelease();
+                }
+            }
+        }
+        else if (chargeupBuilder.getChargeUpWhileUse()) {
+            if (this.currentMovePhase == MoveUsePhase.RELEASING) {
+                this.addCurrentMoveBuildup(creature, chargeupBuilder);
+                if (this.currentMoveBuildup >= chargeupBuilder.getMaxChargeUp()) {
+                    this.finishCurrentMoveUse();
+                }
+            }
+            else if (this.currentMovePhase == MoveUsePhase.WINDUP && this.currentMoveTicks >= chargeupBuilder.getMaxChargeUp()) {
+                this.finishCurrentMoveUse();
+            }
+        }
+    }
+
+    public boolean shouldCancelCurrentMoveForMissingTarget(@NotNull RiftCreature creature) {
+        if (this.currentMove.isEmpty()) return false;
+        if (this.currentMovePhase == MoveUsePhase.FINISHING) return false;
+
+        CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
+        if (currentMoveBuilder == null) return true;
+        if (!currentMoveBuilder.getRequireFindTargetToUse()) return false;
+
+        EntityLivingBase target = creature.getAttackTarget();
+        return target == null || !target.isEntityAlive();
+    }
+
+    public void requestCurrentMoveRelease() {
+        if (this.currentMovePhase == MoveUsePhase.WINDUP) this.currentMovePhase = MoveUsePhase.RELEASING;
+    }
+
+    public void finishCurrentMoveUse() {
+        if (!this.currentMove.isEmpty()) this.currentMovePhase = MoveUsePhase.FINISHING;
+    }
+
+    public boolean hasCurrentMoveUseEndEffectFired() {
+        return this.currentMoveUseEndEffectFired;
+    }
+
+    public void markCurrentMoveUseEndEffectFired() {
+        this.currentMoveUseEndEffectFired = true;
+    }
+
+    public boolean hasCurrentMoveEndEffectFired() {
+        return this.currentMoveEndEffectFired;
+    }
+
+    public void markCurrentMoveEndEffectFired() {
+        this.currentMoveEndEffectFired = true;
+    }
+
+    public boolean canRunCurrentMoveHitEffect() {
+        if (this.currentMove.isEmpty()) return false;
+
+        CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
+        if (currentMoveBuilder == null) return false;
+
+        CreatureMoveChargeupBuilder chargeupBuilder = currentMoveBuilder.getMoveChargeupBuilder();
+        if (chargeupBuilder == null) return true;
+        if (this.currentMoveHitEffectFired) return false;
+
+        if (chargeupBuilder.getChargeUpThenRelease()) {
+            return this.currentMovePhase == MoveUsePhase.RELEASING || this.currentMovePhase == MoveUsePhase.ACTIVE;
+        }
+        else if (chargeupBuilder.getChargeUpWhileUse()) {
+            return this.currentMovePhase == MoveUsePhase.WINDUP || this.currentMovePhase == MoveUsePhase.RELEASING;
+        }
+        return true;
+    }
+
+    public void markCurrentMoveHitEffectFired() {
+        CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
+        CreatureMoveChargeupBuilder chargeupBuilder = currentMoveBuilder == null ? null : currentMoveBuilder.getMoveChargeupBuilder();
+
+        if (chargeupBuilder != null) this.currentMoveHitEffectFired = true;
+        if (chargeupBuilder != null && chargeupBuilder.getChargeUpWhileUse() && this.currentMovePhase == MoveUsePhase.WINDUP) {
+            this.currentMovePhase = MoveUsePhase.RELEASING;
+        }
+        else if (chargeupBuilder != null && chargeupBuilder.getChargeUpThenRelease() && this.currentMovePhase == MoveUsePhase.RELEASING) {
+            this.currentMovePhase = MoveUsePhase.ACTIVE;
+        }
+    }
+
+    public boolean canCurrentMoveAnimationExit() {
+        if (this.currentMove.isEmpty()) return true;
+
+        CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
+        if (currentMoveBuilder == null) return true;
+
+        CreatureMoveChargeupBuilder chargeupBuilder = currentMoveBuilder.getMoveChargeupBuilder();
+        if (chargeupBuilder == null) return true;
+
+        if (chargeupBuilder.getChargeUpThenRelease()) {
+            return this.currentMovePhase == MoveUsePhase.RELEASING
+                    || this.currentMovePhase == MoveUsePhase.ACTIVE
+                    || this.currentMovePhase == MoveUsePhase.FINISHING;
+        }
+        else if (chargeupBuilder.getChargeUpWhileUse()) {
+            return this.currentMovePhase == MoveUsePhase.FINISHING;
+        }
+        return true;
+    }
+
+    public void resetCurrentMove(@Nullable RiftCreature creature) {
         //put on cooldown first
         CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
-        if (currentMoveBuilder != null && currentMoveBuilder.getMoveCooldown() > 0) {
-            this.moveCooldowns.put(this.currentMove, currentMoveBuilder.getMoveCooldown());
+        if (currentMoveBuilder != null) {
+            int cooldown = this.calculateCurrentMoveCooldown(creature, currentMoveBuilder);
+            if (cooldown > 0) this.moveCooldowns.put(this.currentMove, cooldown);
         }
 
         //now reset
+        this.clearCurrentMove();
+    }
+
+    public void resetCurrentMove() {
+        this.resetCurrentMove(null);
+    }
+
+    private void addCurrentMoveBuildup(@NotNull RiftCreature creature, @NotNull CreatureMoveChargeupBuilder chargeupBuilder) {
+        Integer buildupToAdd = chargeupBuilder.getBuildup().apply(creature);
+        int resolvedBuildupToAdd = buildupToAdd == null ? 0 : Math.max(0, buildupToAdd);
+        this.currentMoveChargeUpTicks++;
+        this.currentMoveBuildup = Math.min(chargeupBuilder.getMaxChargeUp(), this.currentMoveBuildup + resolvedBuildupToAdd);
+    }
+
+    private int calculateCurrentMoveCooldown(@Nullable RiftCreature creature, @NotNull CreatureMoveBuilder currentMoveBuilder) {
+        CreatureMoveChargeupBuilder chargeupBuilder = currentMoveBuilder.getMoveChargeupBuilder();
+        if (creature != null && chargeupBuilder != null) {
+            Double cooldownMultiplier = chargeupBuilder.getCooldownMultiplier().apply(creature);
+            double resolvedCooldownMultiplier = cooldownMultiplier == null ? 0D : Math.max(0D, cooldownMultiplier);
+            return Math.max(0, (int) Math.ceil(this.currentMoveChargeUpTicks * resolvedCooldownMultiplier));
+        }
+        return Math.max(0, currentMoveBuilder.getMoveCooldown());
+    }
+
+    private void clearCurrentMove() {
         this.currentMove = "";
+        this.currentMovePhase = MoveUsePhase.NONE;
+        this.currentMoveTicks = 0;
+        this.currentMoveChargeUpTicks = 0;
+        this.currentMoveBuildup = 0;
+        this.currentMoveHitEffectFired = false;
+        this.currentMoveUseEndEffectFired = false;
+        this.currentMoveEndEffectFired = false;
     }
 
     //-------move cooldown management-------
@@ -186,10 +410,17 @@ public class CreatureMoveStorage {
         NBTTagCompound toReturn = new NBTTagCompound();
 
         //-----for creature move user-----
-        toReturn.setString("MoveUser", this.creatureType.getName());
+        toReturn.setString("MoveUser", this.creatureType == null ? "" : this.creatureType.getName());
 
         //-----for currently used move-----
         toReturn.setString("CurrentMove", this.currentMove);
+        toReturn.setString("CurrentMovePhase", this.currentMovePhase.name());
+        toReturn.setInteger("CurrentMoveTicks", this.currentMoveTicks);
+        toReturn.setInteger("CurrentMoveChargeUpTicks", this.currentMoveChargeUpTicks);
+        toReturn.setInteger("CurrentMoveBuildup", this.currentMoveBuildup);
+        toReturn.setBoolean("CurrentMoveHitEffectFired", this.currentMoveHitEffectFired);
+        toReturn.setBoolean("CurrentMoveUseEndEffectFired", this.currentMoveUseEndEffectFired);
+        toReturn.setBoolean("CurrentMoveEndEffectFired", this.currentMoveEndEffectFired);
 
         //-----for move cooldowns-----
 
@@ -201,11 +432,38 @@ public class CreatureMoveStorage {
         this.moveCooldowns.clear();
 
         //-----for creature move user-----
-        this.creatureType = RiftCreatureRegistry.getCreatureBuilder(nbtTagCompound.getString("MoveUser"));
+        String creatureTypeName = nbtTagCompound.getString("MoveUser");
+        this.creatureType = creatureTypeName.isEmpty() ? null : RiftCreatureRegistry.getCreatureBuilder(creatureTypeName);
 
         //-----for currently used move-----
         this.currentMove = nbtTagCompound.getString("CurrentMove");
+        this.currentMovePhase = this.currentMove.isEmpty() ? MoveUsePhase.NONE : this.readMoveUsePhase(nbtTagCompound.getString("CurrentMovePhase"));
+        this.currentMoveTicks = Math.max(0, nbtTagCompound.getInteger("CurrentMoveTicks"));
+        this.currentMoveChargeUpTicks = Math.max(0, nbtTagCompound.getInteger("CurrentMoveChargeUpTicks"));
+        this.currentMoveBuildup = Math.max(0, nbtTagCompound.getInteger("CurrentMoveBuildup"));
+        this.currentMoveHitEffectFired = nbtTagCompound.getBoolean("CurrentMoveHitEffectFired");
+        this.currentMoveUseEndEffectFired = nbtTagCompound.getBoolean("CurrentMoveUseEndEffectFired");
+        this.currentMoveEndEffectFired = nbtTagCompound.getBoolean("CurrentMoveEndEffectFired");
 
         //-----for move cooldowns-----
+    }
+
+    @NotNull
+    private MoveUsePhase readMoveUsePhase(@NotNull String phaseName) {
+        if (phaseName.isEmpty()) return MoveUsePhase.ACTIVE;
+        try {
+            return MoveUsePhase.valueOf(phaseName);
+        }
+        catch (IllegalArgumentException ignored) {
+            return MoveUsePhase.ACTIVE;
+        }
+    }
+
+    public enum MoveUsePhase {
+        NONE, //no move is being used
+        WINDUP, //winding up a chargeup move
+        RELEASING, //releasing a chargeup move
+        FINISHING, //recovering from using a chargeup move
+        ACTIVE //only matters for non chargeup moves
     }
 }

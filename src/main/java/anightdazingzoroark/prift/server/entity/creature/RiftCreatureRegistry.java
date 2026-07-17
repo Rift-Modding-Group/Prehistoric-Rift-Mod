@@ -210,13 +210,14 @@ public class RiftCreatureRegistry {
                                     if (!(creature instanceof IRayCreator<?> rayCreator)) return;
                                     RiftLibRayHelper.createRay(rayCreator, "flamethrowerRay", "flameLocator");
                                 })
-                                .setOnMoveEndEffect(creature -> {
+                                .setOnMoveUseEndEffect(creature -> {
                                     if (!(creature instanceof IRayCreator<?> rayCreator)) return;
                                     RiftLibRayHelper.killRay(rayCreator, "flamethrowerRay");
+                                })
+                                .setOnMoveEndEffect(creature -> {
                                     creature.getAnimationData().setVariable("flamethrower_head_bend", 0);
                                 })
-                                .setAnimNames("flamethrower")
-                                .setCooldown(1200)
+                                .setReleasingParticleEmitter("prift:flamethrower_fire", "flameLocator")
                                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                                         .setChargeUpWhileUse()
                                         .setMaxChargeUp(300)

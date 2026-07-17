@@ -8,9 +8,11 @@ import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.ai.RiftUnmountedUseMove;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage.MoveUsePhase;
 import anightdazingzoroark.prift.util.MathUtil;
 import anightdazingzoroark.prift.util.TriConsumer;
 import anightdazingzoroark.riftlib.core.AnimatableRunValue;
@@ -218,6 +220,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
             creatureMoveStorage.updateUsableMoves(this, this.getAttackTarget());
             creatureMoveStorage.tickCooldowns();
+            MoveUsePhase previousMovePhase = creatureMoveStorage.getCurrentMovePhase();
+            if (creatureMoveStorage.shouldCancelCurrentMoveForMissingTarget(this)) {
+                creatureMoveStorage.finishCurrentMoveUse();
+            }
+            else creatureMoveStorage.tickCurrentMove(this);
+            this.runCurrentMoveUseEndEffectIfFinishedUse(creatureMoveStorage, previousMovePhase);
             this.setCreatureMoves(creatureMoveStorage);
 
             //tick sprinting related stuff
@@ -372,7 +380,55 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     public void resetCurrentMove() {
         CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
-        creatureMoveStorage.resetCurrentMove();
+        this.endCurrentMove(creatureMoveStorage);
+        this.setCreatureMoves(creatureMoveStorage);
+    }
+
+    private void endCurrentMove(@NotNull CreatureMoveStorage creatureMoveStorage) {
+        this.runCurrentMoveEndEffect(creatureMoveStorage);
+        creatureMoveStorage.resetCurrentMove(this);
+    }
+
+    private void runCurrentMoveEndEffect(@NotNull CreatureMoveStorage creatureMoveStorage) {
+        if (creatureMoveStorage.hasCurrentMoveEndEffectFired()) return;
+
+        CreatureMoveBuilder creatureMoveBuilder = creatureMoveStorage.getMoveBuilderCurrentMove();
+        if (!this.world.isRemote && creatureMoveBuilder != null && creatureMoveBuilder.getOnMoveEndEffect() != null) {
+            creatureMoveBuilder.getOnMoveEndEffect().accept(this);
+        }
+        creatureMoveStorage.markCurrentMoveEndEffectFired();
+    }
+
+    private void runCurrentMoveUseEndEffect(@NotNull CreatureMoveStorage creatureMoveStorage) {
+        if (creatureMoveStorage.hasCurrentMoveUseEndEffectFired()) return;
+
+        CreatureMoveBuilder creatureMoveBuilder = creatureMoveStorage.getMoveBuilderCurrentMove();
+        if (!this.world.isRemote && creatureMoveBuilder != null && creatureMoveBuilder.getOnMoveUseEndEffect() != null) {
+            creatureMoveBuilder.getOnMoveUseEndEffect().accept(this);
+        }
+        creatureMoveStorage.markCurrentMoveUseEndEffectFired();
+    }
+
+    private void runCurrentMoveUseEndEffectIfFinishedUse(
+            @NotNull CreatureMoveStorage creatureMoveStorage,
+            @NotNull MoveUsePhase previousMovePhase
+    ) {
+        if (previousMovePhase != MoveUsePhase.FINISHING && creatureMoveStorage.getCurrentMovePhase() == MoveUsePhase.FINISHING) {
+            this.runCurrentMoveUseEndEffect(creatureMoveStorage);
+        }
+    }
+
+    public void requestCurrentMoveRelease() {
+        CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+        creatureMoveStorage.requestCurrentMoveRelease();
+        this.setCreatureMoves(creatureMoveStorage);
+    }
+
+    public void finishCurrentMoveUse() {
+        CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+        MoveUsePhase previousMovePhase = creatureMoveStorage.getCurrentMovePhase();
+        creatureMoveStorage.finishCurrentMoveUse();
+        this.runCurrentMoveUseEndEffectIfFinishedUse(creatureMoveStorage, previousMovePhase);
         this.setCreatureMoves(creatureMoveStorage);
     }
 
@@ -538,11 +594,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         }
 
         //-----create animation message effects-----
-        animationData.addAnimationMessageEffect("moveHitEffect", new AnimatableRunValue(() -> {
-            CreatureMoveBuilder creatureMoveBuilder = this.getCreatureMoves().getMoveBuilderCurrentMove();
-            if (creatureMoveBuilder == null) return;
-            creatureMoveBuilder.getOnMoveHitEffect().accept(this);
-        }, Side.SERVER));
+        animationData.addAnimationMessageEffect("moveHitEffect", new AnimatableRunValue(this::runCurrentMoveHitEffect, Side.SERVER));
         animationData.addAnimationMessageEffect("moveFinished", new AnimatableRunValue(this::resetCurrentMove, Side.CLIENT, Side.SERVER));
     }
 
@@ -556,49 +608,155 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         AnimationControllerState<AnimationDataEntity> initialState = new AnimationControllerState<>("default");
         creatureMovesStates.add(initialState);
 
+        final String controllerName = "moveUse" + phase;
+
         //add other anim states for each move
         for (ImmutablePair<String, CreatureMoveBuilder> moveEntry : moveBuilderMap) {
             final String moveName = moveEntry.getKey();
+            CreatureMoveBuilder moveBuilder = moveEntry.getValue();
+            CreatureMoveChargeupBuilder chargeupBuilder = moveBuilder.getMoveChargeupBuilder();
+
+            if (chargeupBuilder != null) {
+                this.initChargeupMoveAnimController(animationData, phase, moveName, moveBuilder, chargeupBuilder);
+                continue;
+            }
 
             //transition from initial state to a state associated with the move
             initialState.addStateTransition(moveName, animData -> this.getCurrentMove().equals(moveName));
 
             //create state for move
             AnimationControllerState<AnimationDataEntity> moveState = new AnimationControllerState<AnimationDataEntity>(moveName)
-                    .addStateTransition("default", animData -> animData.allAnimationsFinished("moveUse"))
+                    .addStateTransition("default", animData -> this.shouldCurrentMoveStateExit(animData, controllerName))
                     .addExitEffect(animData -> animData.sendMessage("moveFinished"));
 
             //if the move state has multiple animation names, make it so that upon entry it generates a random number
             //to then use
-            String[] moveAnimNames = moveEntry.getValue().getAnimNames();
-            if (moveAnimNames.length > 1) {
-                moveState.addEntryEffect(animData -> animData.setVariable("chosenMove", this.rand.nextInt(moveAnimNames.length)));
-            }
-
-            //iterate over each of the anim names and put them in the state for the move
-            for (int index = 0; index < moveAnimNames.length; index++) {
-                String moveAnimName = moveAnimNames[index];
-                moveAnimName = "animation." + this.creatureType.getName() + "." + moveAnimName;
-
-                //only 1 move, just add the move anim name
-                if (moveAnimNames.length == 1) moveState.addAnimation(moveAnimName);
-                    //multiple moves, add the move anim name and a predicate that uses the chosenMove molang variable above
-                else {
-                    int finalIndex = index;
-                    moveState.addAnimation(moveAnimName, animData -> {
-                        return animData.getVariable("chosenMove") == finalIndex;
-                    });
-                }
-            }
+            this.addMoveAnimationsToState(moveState, moveBuilder.getAnimNames());
 
             //now add the final state
             creatureMovesStates.add(moveState);
         }
 
         //now create animation controller for phase
-        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "moveUse"+phase, "default",
+        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, controllerName, "default",
                 creatureMovesStates.toArray(new AnimationControllerState[0])
         ));
+    }
+
+    private void initChargeupMoveAnimController(
+            @NotNull AnimationDataEntity animationData,
+            @NotNull String phase,
+            @NotNull String moveName,
+            @NotNull CreatureMoveBuilder moveBuilder,
+            @NotNull CreatureMoveChargeupBuilder chargeupBuilder
+    ) {
+        String controllerName = this.getChargeupMoveControllerName(phase, moveName);
+        CreatureMoveBuilder.MoveParticleEmitterDefinition emitterDefinition = moveBuilder.getReleasingParticleEmitterDefinition();
+        AnimationControllerState<AnimationDataEntity> defaultState = new AnimationControllerState<AnimationDataEntity>("default")
+                .addStateTransition("windup", animData -> this.getCreatureMoves().currentMoveMatches(moveName, MoveUsePhase.WINDUP));
+
+        AnimationControllerState<AnimationDataEntity> windupState = new AnimationControllerState<AnimationDataEntity>("windup")
+                .addAnimation(this.getMoveAnimationName(moveName + "_windup"));
+
+        AnimationControllerState<AnimationDataEntity> releaseState = new AnimationControllerState<AnimationDataEntity>("release")
+                .addAnimation(this.getMoveAnimationName(moveName + "_release"))
+                .addStateTransition("default", animData -> this.shouldCurrentMoveStateExit(animData, controllerName))
+                .addExitEffect(animData -> animData.sendMessage("moveFinished"));
+
+        if (chargeupBuilder.getChargeUpThenRelease()) {
+            this.addMoveParticleEffectToState(releaseState, emitterDefinition);
+            defaultState.addStateTransition("release", animData -> this.getCreatureMoves().currentMovePastWindup(moveName));
+            windupState.addStateTransition("release", animData -> this.getCreatureMoves().currentMovePastWindup(moveName));
+        }
+        else if (chargeupBuilder.getChargeUpWhileUse()) {
+            defaultState
+                    .addStateTransition("active", animData -> this.getCreatureMoves().currentMoveMatches(moveName, MoveUsePhase.RELEASING))
+                    .addStateTransition("release", animData -> this.getCreatureMoves().currentMoveMatches(moveName, MoveUsePhase.FINISHING));
+
+            windupState
+                    .addStateTransition("active", animData -> this.getCreatureMoves().currentMoveMatches(moveName, MoveUsePhase.RELEASING))
+                    .addStateTransition("release", animData -> this.getCreatureMoves().currentMoveMatches(moveName, MoveUsePhase.FINISHING));
+
+            AnimationControllerState<AnimationDataEntity> activeState = new AnimationControllerState<AnimationDataEntity>("active")
+                    .addAnimation(this.getMoveAnimationName(moveName))
+                    .addStateTransition("release", animData -> this.getCreatureMoves().currentMoveMatches(moveName, MoveUsePhase.FINISHING));
+            this.addMoveParticleEffectToState(activeState, emitterDefinition);
+
+            animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(
+                    this,
+                    controllerName,
+                    "default",
+                    defaultState,
+                    windupState,
+                    activeState,
+                    releaseState
+            ));
+            return;
+        }
+
+        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(
+                this,
+                controllerName,
+                "default",
+                defaultState,
+                windupState,
+                releaseState
+        ));
+    }
+
+    private void addMoveParticleEffectToState(
+            @NotNull AnimationControllerState<AnimationDataEntity> state,
+            CreatureMoveBuilder.MoveParticleEmitterDefinition emitterDefinition
+    ) {
+        if (emitterDefinition == null) return;
+        state.addParticleEffect(emitterDefinition.getParticleIdentifier(), emitterDefinition.getLocatorName());
+    }
+
+    private void runCurrentMoveHitEffect() {
+        CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+        if (!creatureMoveStorage.canRunCurrentMoveHitEffect()) return;
+
+        CreatureMoveBuilder creatureMoveBuilder = creatureMoveStorage.getMoveBuilderCurrentMove();
+        if (creatureMoveBuilder == null || creatureMoveBuilder.getOnMoveHitEffect() == null) return;
+
+        creatureMoveStorage.markCurrentMoveHitEffectFired();
+        this.setCreatureMoves(creatureMoveStorage);
+        creatureMoveBuilder.getOnMoveHitEffect().accept(this);
+    }
+
+    private boolean shouldCurrentMoveStateExit(@NotNull AnimationDataEntity animData, @NotNull String controllerName) {
+        return this.getCreatureMoves().canCurrentMoveAnimationExit() && animData.allAnimationsFinished(controllerName);
+    }
+
+    private String getChargeupMoveControllerName(@NotNull String phase, @NotNull String moveName) {
+        return phase.isEmpty() ? "moveUse_" + moveName : "moveUse_" + phase + "_" + moveName;
+    }
+
+    private String getMoveAnimationName(@NotNull String moveAnimName) {
+        return "animation." + this.creatureType.getName() + "." + moveAnimName;
+    }
+
+    private void addMoveAnimationsToState(@NotNull AnimationControllerState<AnimationDataEntity> moveState, @NotNull String[] moveAnimNames) {
+        //if the move state has multiple animation names, make it so that upon entry it generates a random number
+        //to then use
+        if (moveAnimNames.length > 1) {
+            moveState.addEntryEffect(animData -> animData.setVariable("chosenMove", this.rand.nextInt(moveAnimNames.length)));
+        }
+
+        //iterate over each of the anim names and put them in the state for the move
+        for (int index = 0; index < moveAnimNames.length; index++) {
+            String moveAnimName = this.getMoveAnimationName(moveAnimNames[index]);
+
+            //only 1 move, just add the move anim name
+            if (moveAnimNames.length == 1) moveState.addAnimation(moveAnimName);
+                //multiple moves, add the move anim name and a predicate that uses the chosenMove molang variable above
+            else {
+                int finalIndex = index;
+                moveState.addAnimation(moveAnimName, animData -> {
+                    return animData.getVariable("chosenMove") == finalIndex;
+                });
+            }
+        }
     }
 
     @NotNull
