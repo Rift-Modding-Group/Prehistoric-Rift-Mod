@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.server.entity.creature.info.Element;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCommon;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelectorBuilder;
 import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
@@ -216,6 +217,10 @@ public class RiftCreatureRegistry {
                                 })
                                 .setAnimNames("flamethrower")
                                 .setCooldown(1200)
+                                .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
+                                        .setChargeUpWhileUse()
+                                        .setMaxChargeUp(300)
+                                )
                         )
                         //---attack ai---
                         .setMoveSelector(new CreatureMoveSelectorBuilder()

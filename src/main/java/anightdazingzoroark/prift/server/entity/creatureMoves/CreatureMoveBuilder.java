@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -19,7 +20,8 @@ public class CreatureMoveBuilder {
 
     //the following can be left alone
     private int movePower;
-    private int moveCooldown;
+    private int moveCooldown; //will be overriden by chargeup builder cooldown
+    private CreatureMoveChargeupBuilder moveChargeupBuilder;
     private boolean requireFindTargetToUse;
     private boolean makesContact;
     private Element element;
@@ -28,7 +30,6 @@ public class CreatureMoveBuilder {
     private BiConsumer<RiftCreature, BlockPos> onBlockHitEffect;
     private Consumer<RiftCreature> onMoveEndEffect;
     private boolean useCanStopMovement;
-    private int cooldown;
 
     /**
      * Set the base power of a move.
@@ -54,6 +55,19 @@ public class CreatureMoveBuilder {
 
     public int getMoveCooldown() {
         return this.moveCooldown;
+    }
+
+    /**
+     * Set the chargeup information for this move
+     * */
+    public CreatureMoveBuilder setMoveChargeupBuilder(@NotNull CreatureMoveChargeupBuilder moveChargeupBuilder) {
+        this.moveChargeupBuilder = moveChargeupBuilder;
+        return this;
+    }
+
+    @Nullable
+    public CreatureMoveChargeupBuilder getMoveChargeupBuilder() {
+        return this.moveChargeupBuilder;
     }
 
     /**
@@ -189,6 +203,7 @@ public class CreatureMoveBuilder {
     /**
      * Get validity based on if some params are not null
      * */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isValid() {
         return this.moveType != null && this.onMoveHitEffect != null && this.animNames != null && this.animNames.length > 0;
     }
@@ -204,6 +219,8 @@ public class CreatureMoveBuilder {
         toReturn.animNames = this.animNames;
 
         toReturn.movePower = this.movePower;
+        toReturn.moveCooldown = this.moveCooldown;
+        toReturn.moveChargeupBuilder = this.moveChargeupBuilder.copy();
         toReturn.requireFindTargetToUse = this.requireFindTargetToUse;
         toReturn.makesContact = this.makesContact;
         toReturn.element = this.element;
