@@ -1,9 +1,11 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import net.minecraft.entity.EntityLivingBase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -21,6 +23,7 @@ public class CreatureMoveChargeupBuilder {
     private Consumer<RiftCreature> windupEndEffect;
     private Consumer<RiftCreature> prereleaseEndEffect;
     private Consumer<RiftCreature> releaseEndEffect;
+    private BiConsumer<RiftCreature, EntityLivingBase> releaseDuringUseEffect;
 
     /**
      * Make it so that the creature charges up the move, then releases it
@@ -135,6 +138,20 @@ public class CreatureMoveChargeupBuilder {
         return this.releaseEndEffect;
     }
 
+    /**
+     * Set what will happen while the move is being used in the release phase
+     * */
+    public CreatureMoveChargeupBuilder setReleaseDuringUseEffect(@NotNull BiConsumer<RiftCreature, EntityLivingBase> releaseDuringUseEffect) {
+        this.releaseDuringUseEffect = releaseDuringUseEffect;
+        return this;
+    }
+
+    @Nullable
+    public BiConsumer<RiftCreature, EntityLivingBase> getReleaseDuringUseEffect() {
+        return this.releaseDuringUseEffect;
+    }
+
+    @NotNull
     public CreatureMoveChargeupBuilder copy() {
         CreatureMoveChargeupBuilder toReturn = new CreatureMoveChargeupBuilder();
 
@@ -146,6 +163,7 @@ public class CreatureMoveChargeupBuilder {
         toReturn.windupEndEffect = this.windupEndEffect;
         toReturn.prereleaseEndEffect = this.prereleaseEndEffect;
         toReturn.releaseEndEffect = this.releaseEndEffect;
+        toReturn.releaseDuringUseEffect = this.releaseDuringUseEffect;
 
         return toReturn;
     }

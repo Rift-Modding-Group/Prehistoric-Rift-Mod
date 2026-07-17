@@ -214,6 +214,10 @@ public class CreatureMoveStorage {
             CreatureMoveChargeupBuilder chargeupBuilder = currentMoveBuilder.getMoveChargeupBuilder();
             if (chargeupBuilder == null || this.currentMoveChargeupPhase == null) return;
 
+            if (this.currentMoveChargeupPhase == ChargeupPhase.RELEASING && chargeupBuilder.getReleaseDuringUseEffect() != null) {
+                chargeupBuilder.getReleaseDuringUseEffect().accept(creature, creature.getAttackTarget());
+            }
+
             if (chargeupBuilder.getChargeUpThenRelease() && this.currentMoveChargeupPhase == ChargeupPhase.WINDUP) {
                 this.addCurrentMoveBuildup(chargeupBuilder);
                 if (this.currentMoveBuildup >= chargeupBuilder.getMaxChargeUp()) {

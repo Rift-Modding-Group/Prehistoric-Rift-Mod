@@ -215,6 +215,7 @@ public class CreatureMoveBuilder {
     /**
      * Create a copy of this builder
      * */
+    @NotNull
     public CreatureMoveBuilder copy() {
         CreatureMoveBuilder toReturn = new CreatureMoveBuilder();
 
