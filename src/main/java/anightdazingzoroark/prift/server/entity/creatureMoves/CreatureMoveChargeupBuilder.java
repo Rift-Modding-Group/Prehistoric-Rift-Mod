@@ -13,6 +13,7 @@ import java.util.function.Function;
 public class CreatureMoveChargeupBuilder {
     private boolean chargeUpThenRelease;
     private boolean chargeUpWhileUse;
+    private boolean canRotateWhileReleasing;
     private int maxChargeUp = 100;
     @NotNull
     private Function<RiftCreature, Double> cooldownMultiplier = creature -> 2D;
@@ -25,8 +26,13 @@ public class CreatureMoveChargeupBuilder {
      * Make it so that the creature charges up the move, then releases it
      * */
     public CreatureMoveChargeupBuilder setChargeUpThenRelease() {
+        return this.setChargeUpThenRelease(false);
+    }
+
+    public CreatureMoveChargeupBuilder setChargeUpThenRelease(boolean canRotateWhileReleasing) {
         if (this.chargeUpWhileUse) return this; //todo: add an exception
         this.chargeUpThenRelease = true;
+        this.canRotateWhileReleasing = canRotateWhileReleasing;
         return this;
     }
 
@@ -38,13 +44,25 @@ public class CreatureMoveChargeupBuilder {
      * Make it so that the creature charges up and uses the move at the same time
      * */
     public CreatureMoveChargeupBuilder setChargeUpWhileUse() {
+        return this.setChargeUpWhileUse(false);
+    }
+
+    public CreatureMoveChargeupBuilder setChargeUpWhileUse(boolean canRotateWhileReleasing) {
         if (this.chargeUpThenRelease) return this; //todo: add an exception here too
         this.chargeUpWhileUse = true;
+        this.canRotateWhileReleasing = canRotateWhileReleasing;
         return this;
     }
 
     public boolean getChargeUpWhileUse() {
         return this.chargeUpWhileUse;
+    }
+
+    /**
+     * Allows for rotation of the creature along yaw while releasing
+     * */
+    public boolean getCanRotateWhileReleasing() {
+        return this.canRotateWhileReleasing;
     }
 
     /**
@@ -122,6 +140,7 @@ public class CreatureMoveChargeupBuilder {
 
         toReturn.chargeUpThenRelease = this.chargeUpThenRelease;
         toReturn.chargeUpWhileUse = this.chargeUpWhileUse;
+        toReturn.canRotateWhileReleasing = this.canRotateWhileReleasing;
         toReturn.maxChargeUp = this.maxChargeUp;
         toReturn.cooldownMultiplier = this.cooldownMultiplier;
         toReturn.windupEndEffect = this.windupEndEffect;

@@ -28,7 +28,6 @@ public class CreatureMoveBuilder {
     private int elementEffectStrength;
     private BiConsumer<RiftCreature, Entity> onTargetHitEffect;
     private BiConsumer<RiftCreature, BlockPos> onBlockHitEffect;
-    private Consumer<RiftCreature> onMoveUseEndEffect;
     private Consumer<RiftCreature> onMoveEndEffect;
     private boolean useCanStopMovement;
 
@@ -164,18 +163,6 @@ public class CreatureMoveBuilder {
     }
 
     /**
-     * Add additional effects for what will happen when the move stops being actively used.
-     * */
-    public CreatureMoveBuilder setOnMoveUseEndEffect(@NotNull Consumer<RiftCreature> onMoveUseEnd) {
-        this.onMoveUseEndEffect = onMoveUseEnd;
-        return this;
-    }
-
-    public Consumer<RiftCreature> getOnMoveUseEndEffect() {
-        return this.onMoveUseEndEffect;
-    }
-
-    /**
      * Add additional effects for what will happen when the move ends.
      * */
     public CreatureMoveBuilder setOnMoveEndEffect(@NotNull Consumer<RiftCreature> onMoveEnd) {
@@ -244,7 +231,6 @@ public class CreatureMoveBuilder {
         toReturn.elementEffectStrength = this.elementEffectStrength;
         toReturn.onTargetHitEffect = this.onTargetHitEffect;
         toReturn.onBlockHitEffect = this.onBlockHitEffect;
-        toReturn.onMoveUseEndEffect = this.onMoveUseEndEffect;
         toReturn.onMoveEndEffect = this.onMoveEndEffect;
         toReturn.useCanStopMovement = this.useCanStopMovement;
 

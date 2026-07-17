@@ -68,7 +68,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
         if (newMoveRulePair != null
                 && (this.moveResultTicker == null || this.moveResultTicker.isOverridableWhileUsed())
                 && !newMoveRulePair.getLeft().equals(this.moveRulePair.getLeft())
-                && newMoveRulePair.getRight() <= this.moveRulePair.getRight()
+                && newMoveRulePair.getRight() < this.moveRulePair.getRight()
         ) {
             if (this.moveResultTicker != null) this.moveResultTicker.onEndTicker();
             this.moveResultTicker = newMoveRulePair.getLeft().moveResult().moveResultTicker.apply(

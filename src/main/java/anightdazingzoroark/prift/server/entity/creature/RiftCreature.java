@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorag
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.ai.RiftUnmountedUseMove;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelper;
+import anightdazingzoroark.prift.server.entity.creature.info.Element;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveChargeupBuilder.ChargeupPhase;
@@ -55,7 +56,6 @@ import org.lwjglx.util.vector.Quaternion;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, IRiftCreature, IRayCreator<RiftCreature> {
@@ -84,12 +84,15 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //--server side primitive params--
     //manages a creature's ability to sprint based on whether or not it attacked before
     public int sprintToAttackCooldown;
-    //how much time ever since it encountered a target
-    public int timeSinceAggression;
     //when a creature fails to use a move or takes too long to pathfind for melee move,
     //this counts up, which then makes them use a ranged move or their sprint move
     private int frustration;
     private int attackTargetHitCount;
+    //when a creature uses offensive moves on its target and it still stays alive,
+    //this counts up, which can then be used in priority predicate
+    private int rage;
+    private int currentRageThreshold;
+    private int rageEndCountdown;
 
     //ray specific params
     protected Map<String, RiftLibRayBuilder> rayMap;
@@ -185,8 +188,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Override
     protected void initEntityAI() {
         //temporary, will use the configs soon
-        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityCow.class, true));
-        //this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityPlayer.class, true));
+        //this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityCow.class, true));
+        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityPlayer.class, true));
 
         this.tasks.addTask(1, new RiftUnmountedUseMove(this));
         this.tasks.addTask(2, new EntityAIWander(this, 1D/*, 15*/));
@@ -210,10 +213,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             //set age
             this.setAgeInTicks(this.getAgeInTicks() + 1);
 
-            //tick time since aggression
-            if (this.getAttackTarget() != null) this.timeSinceAggression++;
-            else this.timeSinceAggression = 0;
-
             //tick creature move storage
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
             creatureMoveStorage.updateUsableMoves(this, this.getAttackTarget());
@@ -226,6 +225,24 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
             //tick sprinting related stuff
             if (this.sprintToAttackCooldown > 0) this.sprintToAttackCooldown--;
+
+            //tick creature rage
+            if (this.getAttackTarget() != null) {
+                //set rage threshold to between 1 - 2 minutes
+                if (this.currentRageThreshold <= 0) this.currentRageThreshold = MathUtil.randomInRange(this.world.rand, 1200, 2400);
+                this.rage = Math.min(this.currentRageThreshold, this.rage + 1);
+
+                //set rage end countdown to max, which is 3 minutes
+                this.rageEndCountdown = 3600;
+            }
+            //when target is gone, it will take a while for that rage to subside
+            else {
+                this.rageEndCountdown = Math.max(0, this.rageEndCountdown - 1);
+                if (this.rageEndCountdown == 0) {
+                    this.rage = 0;
+                    this.currentRageThreshold = 0;
+                }
+            }
 
             //tick the creature on tick lambda
             if (this.creatureType.getUpdateEffect() != null) this.creatureType.getUpdateEffect().accept(this);
@@ -265,9 +282,13 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         CreatureMoveBuilder creatureMoveBuilder = this.getCreatureMoves().getMoveBuilderCurrentMove();
         if (creatureMoveBuilder == null) return false;
 
+        //get damagesource and modify based on some stuff, like element
+        DamageSource damageSource = DamageSource.causeMobDamage(this);
+        if (creatureMoveBuilder.getElement() == Element.FIRE) damageSource.setFireDamage();
+
         //apply damage
         double damage = CreatureMoveHelper.calculateDamage(this);
-        boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float) damage);
+        boolean flag = entityIn.attackEntityFrom(damageSource, (float) damage);
         if (creatureMoveBuilder.getOnTargetHitEffect() != null && creatureMoveBuilder.getMakesContact()) {
             creatureMoveBuilder.getOnTargetHitEffect().accept(this, entityIn);
         }
@@ -333,6 +354,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     //-----frustration management-----
+    //todo: move all this to usemoveunmounted?
     public boolean atFrustrationThreshold() {
         return this.frustration >= 100;
     }
@@ -351,6 +373,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     public int getAttackTargetHitCount() {
         return this.attackTargetHitCount;
+    }
+
+    //-----rage management-----
+    public boolean atRageThreshold() {
+        return this.rage >= this.currentRageThreshold;
     }
 
     //-----creature phase management-----

@@ -210,7 +210,7 @@ public class RiftCreatureRegistry {
                                     creature.getAnimationData().setVariable("flamethrower_head_bend", 0);
                                 })
                                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
-                                        .setChargeUpWhileUse()
+                                        .setChargeUpWhileUse(true)
                                         .setMaxChargeUp(300)
                                         .setPrereleaseEndEffect(creature -> {
                                             RiftLibRayHelper.createRay(creature, "flamethrowerRay", "flameLocator");
@@ -246,7 +246,9 @@ public class RiftCreatureRegistry {
                                 )
                                 .setMoveRule(
                                         new MoveRuleBuilder("flamethrower")
-                                                .setPriorityPredicate((creature, target) -> target != null ? 0 : -1)
+                                                .setPriorityPredicate((creature, target) -> {
+                                                    return (target != null && target.isEntityAlive() && creature.atRageThreshold()) ? 0 : -1;
+                                                })
                                                 .setDetectionRule(new CreatureMoveSelectorBuilder.DistanceFromUserDetectionRule(4D, 16D))
                                                 .setUseWhenFrustrated()
                                 )

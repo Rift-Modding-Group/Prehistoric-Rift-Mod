@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creatureMoves.moveResult;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveChargeupBuilder.ChargeupPhase;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.MoveRuleBuilder;
 import net.minecraft.entity.EntityLivingBase;
@@ -73,7 +74,20 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
 
         //---when move is already being used, stop pathing---
         if (this.hasExecutedMove && !this.creature.getCurrentMove().isEmpty()) {
-            this.preserveLastLookDirection();
+            if (target != null
+                    && target.isEntityAlive()
+                    && this.selectedMoveBuilder.getMoveChargeupBuilder() != null
+                    && this.selectedMoveBuilder.getMoveChargeupBuilder().getCanRotateWhileReleasing()
+                    && this.creature.getCreatureMoves().currentMoveMatches(this.selectedMoveName, ChargeupPhase.RELEASING)
+            ) {
+                double targetX = target.posX - this.creature.posX;
+                double targetZ = target.posZ - this.creature.posZ;
+                if (targetX * targetX + targetZ * targetZ >= 1E-4D) {
+                    float targetYaw = (float)(Math.atan2(targetZ, targetX) * 180f / (float) Math.PI) - 90f;
+                    this.setLookDirection(targetYaw);
+                }
+            }
+            else this.preserveLastLookDirection();
             this.directTargetMoveStallTicks = 0;
             this.holdCloseTargetStrafe = false;
             this.closeTargetStrafeTicks = 0;
