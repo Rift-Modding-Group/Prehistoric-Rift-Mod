@@ -167,6 +167,7 @@ public class CreatureMoveStorage {
     }
 
     //-----currently used move management-----
+    //---general moves---
     @NotNull
     public String getCurrentMove() {
         return this.currentMove;
@@ -180,48 +181,50 @@ public class CreatureMoveStorage {
         return this.currentMoveMatches(moveName) && this.currentMoveChargeupPhase == phase;
     }
 
+    /**
+     * Set the move that the creature holding this class will use
+     * */
     public void setCurrentMove(@NotNull String moveName) {
-        if (moveName.isEmpty()) {
-            this.clearCurrentMove();
-            return;
+        if (moveName.isEmpty()) this.clearCurrentMove();
+        else {
+            this.currentMove = moveName;
+            this.currentMoveTicks = 0;
+            this.currentMoveChargeUpTicks = 0;
+            this.currentMoveBuildup = 0;
+            this.currentMoveHitEffectFired = false;
+            this.currentMoveEndEffectFired = false;
+
+            CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
+            CreatureMoveChargeupBuilder chargeupBuilder = currentMoveBuilder == null ? null : currentMoveBuilder.getMoveChargeupBuilder();
+            this.currentMoveChargeupPhase = chargeupBuilder == null ? null : ChargeupPhase.PREWINDUP;
         }
-
-        this.currentMove = moveName;
-        this.currentMoveTicks = 0;
-        this.currentMoveChargeUpTicks = 0;
-        this.currentMoveBuildup = 0;
-        this.currentMoveHitEffectFired = false;
-        this.currentMoveEndEffectFired = false;
-
-        CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
-        CreatureMoveChargeupBuilder chargeupBuilder = currentMoveBuilder == null ? null : currentMoveBuilder.getMoveChargeupBuilder();
-        this.currentMoveChargeupPhase = chargeupBuilder == null ? null : ChargeupPhase.PREWINDUP;
     }
 
+    /**
+     * Used to update the move as it's being used
+     * */
     public void tickCurrentMove(@NotNull RiftCreature creature) {
         if (this.currentMove.isEmpty()) return;
 
         CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
-        if (currentMoveBuilder == null) {
-            this.clearCurrentMove();
-            return;
-        }
+        if (currentMoveBuilder == null) this.clearCurrentMove();
+        else {
+            this.currentMoveTicks++;
 
-        this.currentMoveTicks++;
+            CreatureMoveChargeupBuilder chargeupBuilder = currentMoveBuilder.getMoveChargeupBuilder();
+            if (chargeupBuilder == null || this.currentMoveChargeupPhase == null) return;
 
-        CreatureMoveChargeupBuilder chargeupBuilder = currentMoveBuilder.getMoveChargeupBuilder();
-        if (chargeupBuilder == null || this.currentMoveChargeupPhase == null) return;
-
-        if (chargeupBuilder.getChargeUpThenRelease() && this.currentMoveChargeupPhase == ChargeupPhase.WINDUP) {
-            this.addCurrentMoveBuildup(creature, chargeupBuilder);
-            if (this.currentMoveBuildup >= chargeupBuilder.getMaxChargeUp()) {
-                this.finishCurrentMoveChargeupPhase(creature);
+            if (chargeupBuilder.getChargeUpThenRelease() && this.currentMoveChargeupPhase == ChargeupPhase.WINDUP) {
+                this.addCurrentMoveBuildup(chargeupBuilder);
+                if (this.currentMoveBuildup >= chargeupBuilder.getMaxChargeUp()) {
+                    this.finishCurrentMoveChargeupPhase(creature);
+                }
             }
-        }
-        else if (chargeupBuilder.getChargeUpWhileUse() && this.currentMoveChargeupPhase == ChargeupPhase.RELEASING) {
-            this.addCurrentMoveBuildup(creature, chargeupBuilder);
-            if (this.currentMoveBuildup >= chargeupBuilder.getMaxChargeUp()) {
-                this.finishCurrentMoveUse(creature);
+            else if (chargeupBuilder.getChargeUpWhileUse() && this.currentMoveChargeupPhase == ChargeupPhase.RELEASING) {
+                this.addCurrentMoveBuildup(chargeupBuilder);
+                if (this.currentMoveBuildup >= chargeupBuilder.getMaxChargeUp()) {
+                    this.finishCurrentMoveUse(creature);
+                }
             }
         }
     }
@@ -255,6 +258,7 @@ public class CreatureMoveStorage {
         }
     }
 
+    //---specifically for chargeup moves---
     public void finishCurrentMoveChargeupPhase(@NotNull RiftCreature creature) {
         if (this.currentMove.isEmpty() || this.currentMoveChargeupPhase == null) return;
 
@@ -331,18 +335,11 @@ public class CreatureMoveStorage {
         if (currentMoveBuilder.getOnMoveHitEffect() != null) currentMoveBuilder.getOnMoveHitEffect().accept(creature);
     }
 
-    public boolean canCurrentMoveAnimationExit() {
-        if (this.currentMove.isEmpty()) return true;
-
-        CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
-        if (currentMoveBuilder == null) return true;
-        return currentMoveBuilder.getMoveChargeupBuilder() == null;
-    }
-
-    public void resetCurrentMove(@Nullable RiftCreature creature) {
+    public void resetCurrentMove(@NotNull RiftCreature creature) {
         //put on cooldown first
         CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
         if (currentMoveBuilder != null) {
+            //calculate the cooldown first
             int cooldown = this.calculateCurrentMoveCooldown(creature, currentMoveBuilder);
             if (cooldown > 0) this.moveCooldowns.put(this.currentMove, cooldown);
         }
@@ -351,23 +348,16 @@ public class CreatureMoveStorage {
         this.clearCurrentMove();
     }
 
-    public void resetCurrentMove() {
-        this.resetCurrentMove(null);
-    }
-
-    private void addCurrentMoveBuildup(@NotNull RiftCreature creature, @NotNull CreatureMoveChargeupBuilder chargeupBuilder) {
-        Integer buildupToAdd = chargeupBuilder.getBuildup().apply(creature);
-        int resolvedBuildupToAdd = buildupToAdd == null ? 0 : Math.max(0, buildupToAdd);
+    private void addCurrentMoveBuildup(@NotNull CreatureMoveChargeupBuilder chargeupBuilder) {
         this.currentMoveChargeUpTicks++;
-        this.currentMoveBuildup = Math.min(chargeupBuilder.getMaxChargeUp(), this.currentMoveBuildup + resolvedBuildupToAdd);
+        this.currentMoveBuildup = Math.min(chargeupBuilder.getMaxChargeUp(), this.currentMoveBuildup + 1);
     }
 
-    private int calculateCurrentMoveCooldown(@Nullable RiftCreature creature, @NotNull CreatureMoveBuilder currentMoveBuilder) {
+    private int calculateCurrentMoveCooldown(@NotNull RiftCreature creature, @NotNull CreatureMoveBuilder currentMoveBuilder) {
         CreatureMoveChargeupBuilder chargeupBuilder = currentMoveBuilder.getMoveChargeupBuilder();
-        if (creature != null && chargeupBuilder != null) {
-            Double cooldownMultiplier = chargeupBuilder.getCooldownMultiplier().apply(creature);
-            double resolvedCooldownMultiplier = cooldownMultiplier == null ? 0D : Math.max(0D, cooldownMultiplier);
-            return Math.max(0, (int) Math.ceil(this.currentMoveChargeUpTicks * resolvedCooldownMultiplier));
+        if (chargeupBuilder != null) {
+            double cooldownMultiplier = Math.max(0D, chargeupBuilder.getCooldownMultiplier().apply(creature));
+            return (int) Math.ceil(this.currentMoveChargeUpTicks * cooldownMultiplier);
         }
         return Math.max(0, currentMoveBuilder.getMoveCooldown());
     }
