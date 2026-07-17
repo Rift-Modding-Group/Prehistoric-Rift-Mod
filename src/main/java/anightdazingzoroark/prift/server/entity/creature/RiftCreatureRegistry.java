@@ -206,21 +206,18 @@ public class RiftCreatureRegistry {
                                     //now set variable
                                     creature.getAnimationData().setVariable("flamethrower_head_bend", Math.clamp(angle, -35, 35));
                                 })
-                                .setOnMoveHitEffect(creature -> {
-                                    if (!(creature instanceof IRayCreator<?> rayCreator)) return;
-                                    RiftLibRayHelper.createRay(rayCreator, "flamethrowerRay", "flameLocator");
-                                })
-                                .setOnMoveUseEndEffect(creature -> {
-                                    if (!(creature instanceof IRayCreator<?> rayCreator)) return;
-                                    RiftLibRayHelper.killRay(rayCreator, "flamethrowerRay");
-                                })
                                 .setOnMoveEndEffect(creature -> {
                                     creature.getAnimationData().setVariable("flamethrower_head_bend", 0);
                                 })
-                                .setReleasingParticleEmitter("prift:flamethrower_fire", "flameLocator")
                                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                                         .setChargeUpWhileUse()
                                         .setMaxChargeUp(300)
+                                        .setPrereleaseEndEffect(creature -> {
+                                            RiftLibRayHelper.createRay(creature, "flamethrowerRay", "flameLocator");
+                                        })
+                                        .setReleaseEndEffect(creature -> {
+                                            RiftLibRayHelper.killRay(creature, "flamethrowerRay");
+                                        })
                                 )
                         )
                         //---attack ai---

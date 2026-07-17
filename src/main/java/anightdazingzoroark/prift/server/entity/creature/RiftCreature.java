@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
-import io.netty.buffer.ByteBuf;
 import anightdazingzoroark.prift.server.entity.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
@@ -9,20 +8,18 @@ import anightdazingzoroark.prift.server.entity.ai.RiftUnmountedUseMove;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveChargeupBuilder;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveChargeupBuilder.ChargeupPhase;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
-import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage.MoveUsePhase;
 import anightdazingzoroark.prift.util.MathUtil;
 import anightdazingzoroark.prift.util.TriConsumer;
 import anightdazingzoroark.riftlib.core.AnimatableRunValue;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
-import anightdazingzoroark.riftlib.core.manager.AbstractAnimationDataEntity;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
-import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
 import anightdazingzoroark.riftlib.model.AnimatedLocator;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
@@ -58,6 +55,7 @@ import org.lwjglx.util.vector.Quaternion;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, IRiftCreature, IRayCreator<RiftCreature> {
@@ -220,12 +218,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
             creatureMoveStorage.updateUsableMoves(this, this.getAttackTarget());
             creatureMoveStorage.tickCooldowns();
-            MoveUsePhase previousMovePhase = creatureMoveStorage.getCurrentMovePhase();
             if (creatureMoveStorage.shouldCancelCurrentMoveForMissingTarget(this)) {
-                creatureMoveStorage.finishCurrentMoveUse();
+                creatureMoveStorage.finishCurrentMoveUse(this);
             }
             else creatureMoveStorage.tickCurrentMove(this);
-            this.runCurrentMoveUseEndEffectIfFinishedUse(creatureMoveStorage, previousMovePhase);
             this.setCreatureMoves(creatureMoveStorage);
 
             //tick sprinting related stuff
@@ -380,55 +376,15 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     public void resetCurrentMove() {
         CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
-        this.endCurrentMove(creatureMoveStorage);
-        this.setCreatureMoves(creatureMoveStorage);
-    }
+        if (!creatureMoveStorage.hasCurrentMoveEndEffectFired()) {
+            CreatureMoveBuilder creatureMoveBuilder = creatureMoveStorage.getMoveBuilderCurrentMove();
+            if (!this.world.isRemote && creatureMoveBuilder != null && creatureMoveBuilder.getOnMoveEndEffect() != null) {
+                creatureMoveBuilder.getOnMoveEndEffect().accept(this);
+            }
+            creatureMoveStorage.markCurrentMoveEndEffectFired();
+        }
 
-    private void endCurrentMove(@NotNull CreatureMoveStorage creatureMoveStorage) {
-        this.runCurrentMoveEndEffect(creatureMoveStorage);
         creatureMoveStorage.resetCurrentMove(this);
-    }
-
-    private void runCurrentMoveEndEffect(@NotNull CreatureMoveStorage creatureMoveStorage) {
-        if (creatureMoveStorage.hasCurrentMoveEndEffectFired()) return;
-
-        CreatureMoveBuilder creatureMoveBuilder = creatureMoveStorage.getMoveBuilderCurrentMove();
-        if (!this.world.isRemote && creatureMoveBuilder != null && creatureMoveBuilder.getOnMoveEndEffect() != null) {
-            creatureMoveBuilder.getOnMoveEndEffect().accept(this);
-        }
-        creatureMoveStorage.markCurrentMoveEndEffectFired();
-    }
-
-    private void runCurrentMoveUseEndEffect(@NotNull CreatureMoveStorage creatureMoveStorage) {
-        if (creatureMoveStorage.hasCurrentMoveUseEndEffectFired()) return;
-
-        CreatureMoveBuilder creatureMoveBuilder = creatureMoveStorage.getMoveBuilderCurrentMove();
-        if (!this.world.isRemote && creatureMoveBuilder != null && creatureMoveBuilder.getOnMoveUseEndEffect() != null) {
-            creatureMoveBuilder.getOnMoveUseEndEffect().accept(this);
-        }
-        creatureMoveStorage.markCurrentMoveUseEndEffectFired();
-    }
-
-    private void runCurrentMoveUseEndEffectIfFinishedUse(
-            @NotNull CreatureMoveStorage creatureMoveStorage,
-            @NotNull MoveUsePhase previousMovePhase
-    ) {
-        if (previousMovePhase != MoveUsePhase.FINISHING && creatureMoveStorage.getCurrentMovePhase() == MoveUsePhase.FINISHING) {
-            this.runCurrentMoveUseEndEffect(creatureMoveStorage);
-        }
-    }
-
-    public void requestCurrentMoveRelease() {
-        CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
-        creatureMoveStorage.requestCurrentMoveRelease();
-        this.setCreatureMoves(creatureMoveStorage);
-    }
-
-    public void finishCurrentMoveUse() {
-        CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
-        MoveUsePhase previousMovePhase = creatureMoveStorage.getCurrentMovePhase();
-        creatureMoveStorage.finishCurrentMoveUse();
-        this.runCurrentMoveUseEndEffectIfFinishedUse(creatureMoveStorage, previousMovePhase);
         this.setCreatureMoves(creatureMoveStorage);
     }
 
@@ -573,17 +529,17 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         //---for normal stuff---
         animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "movement", "default",
                 new AnimationControllerState<AnimationDataEntity>("default")
-                        .addStateTransition("moving", AbstractAnimationDataEntity::isMoving),
+                        .addStateTransition("moving", animData -> this.getCurrentMove().isEmpty() && animData.isMoving()),
                 new AnimationControllerState<AnimationDataEntity>("moving", 0.1)
                         .addAnimation("animation."+this.creatureType.getName()+".walk")
-                        .addStateTransition("default", animData -> !animData.isMoving())
+                        .addStateTransition("default", animData -> !this.getCurrentMove().isEmpty() || !animData.isMoving())
         ));
         animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "sprintPosing", "default",
                 new AnimationControllerState<AnimationDataEntity>("default", 0.2)
-                        .addStateTransition("sprint", animData -> this.isSprinting()),
+                        .addStateTransition("sprint", animData -> this.getCurrentMove().isEmpty() && this.isSprinting()),
                 new AnimationControllerState<AnimationDataEntity>("sprint", 0.2)
                         .addAnimation("animation."+this.creatureType.getName()+".sprint_pose")
-                        .addStateTransition("default", animData -> !this.isSprinting())
+                        .addStateTransition("default", animData -> !this.getCurrentMove().isEmpty() || !this.isSprinting())
         ));
         //---for moves---
         //start with default
@@ -594,7 +550,39 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         }
 
         //-----create animation message effects-----
-        animationData.addAnimationMessageEffect("moveHitEffect", new AnimatableRunValue(this::runCurrentMoveHitEffect, Side.SERVER));
+        animationData.addAnimationMessageEffect("moveHitEffect", new AnimatableRunValue(() -> {
+            CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+            if (creatureMoveStorage.canRunCurrentMoveHitEffect()) creatureMoveStorage.runCurrentMoveHitEffect(this);
+            this.setCreatureMoves(creatureMoveStorage);
+        }, Side.SERVER));
+        animationData.addAnimationMessageEffect("moveChargeupPrewindupFinished", new AnimatableRunValue(() -> {
+            CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+            creatureMoveStorage.finishCurrentMoveChargeupPhase(this, ChargeupPhase.PREWINDUP);
+            this.setCreatureMoves(creatureMoveStorage);
+        }, Side.SERVER));
+        animationData.addAnimationMessageEffect("moveChargeupWindupFinished", new AnimatableRunValue(() -> {
+            CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+            CreatureMoveBuilder creatureMoveBuilder = creatureMoveStorage.getMoveBuilderCurrentMove();
+            CreatureMoveChargeupBuilder chargeupBuilder = creatureMoveBuilder == null ? null : creatureMoveBuilder.getMoveChargeupBuilder();
+            if (chargeupBuilder != null && chargeupBuilder.getChargeUpWhileUse()) {
+                creatureMoveStorage.finishCurrentMoveChargeupPhase(this, ChargeupPhase.WINDUP);
+            }
+            this.setCreatureMoves(creatureMoveStorage);
+        }, Side.SERVER));
+        animationData.addAnimationMessageEffect("moveChargeupPrereleasingFinished", new AnimatableRunValue(() -> {
+            CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+            creatureMoveStorage.finishCurrentMoveChargeupPhase(this, ChargeupPhase.PRERELEASING);
+            this.setCreatureMoves(creatureMoveStorage);
+        }, Side.SERVER));
+        animationData.addAnimationMessageEffect("moveChargeupReleasingFinished", new AnimatableRunValue(() -> {
+            CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+            CreatureMoveBuilder creatureMoveBuilder = creatureMoveStorage.getMoveBuilderCurrentMove();
+            CreatureMoveChargeupBuilder chargeupBuilder = creatureMoveBuilder == null ? null : creatureMoveBuilder.getMoveChargeupBuilder();
+            if (chargeupBuilder != null && chargeupBuilder.getChargeUpThenRelease()) {
+                creatureMoveStorage.finishCurrentMoveChargeupPhase(this, ChargeupPhase.RELEASING);
+            }
+            this.setCreatureMoves(creatureMoveStorage);
+        }, Side.SERVER));
         animationData.addAnimationMessageEffect("moveFinished", new AnimatableRunValue(this::resetCurrentMove, Side.CLIENT, Side.SERVER));
     }
 
@@ -610,153 +598,104 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         final String controllerName = "moveUse" + phase;
 
-        //add other anim states for each move
+        //iterate over each move
         for (ImmutablePair<String, CreatureMoveBuilder> moveEntry : moveBuilderMap) {
             final String moveName = moveEntry.getKey();
             CreatureMoveBuilder moveBuilder = moveEntry.getValue();
             CreatureMoveChargeupBuilder chargeupBuilder = moveBuilder.getMoveChargeupBuilder();
 
+            //create the states corresponding to the chargeup move
             if (chargeupBuilder != null) {
-                this.initChargeupMoveAnimController(animationData, phase, moveName, moveBuilder, chargeupBuilder);
-                continue;
+                String prewindupStateName = ChargeupPhase.PREWINDUP.name().toLowerCase(Locale.ROOT);
+                String windupStateName = ChargeupPhase.WINDUP.name().toLowerCase(Locale.ROOT);
+                String prereleasingStateName = ChargeupPhase.PRERELEASING.name().toLowerCase(Locale.ROOT);
+                String releasingStateName = ChargeupPhase.RELEASING.name().toLowerCase(Locale.ROOT);
+                String finishingStateName = ChargeupPhase.FINISHING.name().toLowerCase(Locale.ROOT);
+
+                String prewindupControllerStateName = moveName + "_" + prewindupStateName;
+                String windupControllerStateName = moveName + "_" + windupStateName;
+                String prereleasingControllerStateName = moveName + "_" + prereleasingStateName;
+                String releasingControllerStateName = moveName + "_" + releasingStateName;
+                String finishingControllerStateName = moveName + "_" + finishingStateName;
+
+                String animationPrefix = "animation." + this.creatureType.getName() + "." + moveName + "_";
+
+                initialState.addStateTransition(prewindupControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.PREWINDUP))
+                        .addStateTransition(windupControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.WINDUP))
+                        .addStateTransition(prereleasingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.PRERELEASING))
+                        .addStateTransition(releasingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.RELEASING))
+                        .addStateTransition(finishingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.FINISHING));
+
+                AnimationControllerState<AnimationDataEntity> prewindupState = new AnimationControllerState<AnimationDataEntity>(prewindupControllerStateName)
+                        .addAnimation(animationPrefix + prewindupStateName)
+                        .addStateTransition(finishingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.FINISHING))
+                        .addStateTransition(windupControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.WINDUP));
+
+                AnimationControllerState<AnimationDataEntity> windupState = new AnimationControllerState<AnimationDataEntity>(windupControllerStateName)
+                        .addAnimation(animationPrefix + windupStateName)
+                        .addStateTransition(finishingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.FINISHING))
+                        .addStateTransition(prereleasingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.PRERELEASING));
+
+                AnimationControllerState<AnimationDataEntity> prereleasingState = new AnimationControllerState<AnimationDataEntity>(prereleasingControllerStateName)
+                        .addAnimation(animationPrefix + prereleasingStateName)
+                        .addStateTransition(finishingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.FINISHING))
+                        .addStateTransition(releasingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.RELEASING));
+
+                AnimationControllerState<AnimationDataEntity> releasingState = new AnimationControllerState<AnimationDataEntity>(releasingControllerStateName)
+                        .addAnimation(animationPrefix + releasingStateName)
+                        .addStateTransition(finishingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.FINISHING));
+
+                AnimationControllerState<AnimationDataEntity> finishingState = new AnimationControllerState<AnimationDataEntity>(finishingControllerStateName)
+                        .addAnimation(animationPrefix + finishingStateName)
+                        .addStateTransition("default", animData -> !this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.FINISHING));
+
+                creatureMovesStates.add(prewindupState);
+                creatureMovesStates.add(windupState);
+                creatureMovesStates.add(prereleasingState);
+                creatureMovesStates.add(releasingState);
+                creatureMovesStates.add(finishingState);
             }
+            //add other anim states for each move to a single anim controller
+            else {
+                //transition from initial state to a state associated with the move
+                initialState.addStateTransition(moveName, animData -> this.getCurrentMove().equals(moveName));
 
-            //transition from initial state to a state associated with the move
-            initialState.addStateTransition(moveName, animData -> this.getCurrentMove().equals(moveName));
+                //create state for move
+                AnimationControllerState<AnimationDataEntity> moveState = new AnimationControllerState<AnimationDataEntity>(moveName)
+                        .addStateTransition("default", animData -> this.getCreatureMoves().canCurrentMoveAnimationExit() && animData.allAnimationsFinished(controllerName))
+                        .addExitEffect(animData -> animData.sendMessage("moveFinished"));
 
-            //create state for move
-            AnimationControllerState<AnimationDataEntity> moveState = new AnimationControllerState<AnimationDataEntity>(moveName)
-                    .addStateTransition("default", animData -> this.shouldCurrentMoveStateExit(animData, controllerName))
-                    .addExitEffect(animData -> animData.sendMessage("moveFinished"));
+                //if the move state has multiple animation names, make it so that upon entry it generates a random number
+                //to then use
+                String[] moveAnimNames = moveBuilder.getAnimNames();
+                if (moveAnimNames.length > 1) {
+                    moveState.addEntryEffect(animData -> animData.setVariable("chosenMove", this.rand.nextInt(moveAnimNames.length)));
+                }
 
-            //if the move state has multiple animation names, make it so that upon entry it generates a random number
-            //to then use
-            this.addMoveAnimationsToState(moveState, moveBuilder.getAnimNames());
+                //iterate over each of the anim names and put them in the state for the move
+                for (int index = 0; index < moveAnimNames.length; index++) {
+                    String moveAnimName = "animation." + this.creatureType.getName() + "." + moveAnimNames[index];
 
-            //now add the final state
-            creatureMovesStates.add(moveState);
+                    //only 1 move, just add the move anim name
+                    if (moveAnimNames.length == 1) moveState.addAnimation(moveAnimName);
+                        //multiple moves, add the move anim name and a predicate that uses the chosenMove molang variable above
+                    else {
+                        int finalIndex = index;
+                        moveState.addAnimation(moveAnimName, animData -> {
+                            return animData.getVariable("chosenMove") == finalIndex;
+                        });
+                    }
+                }
+
+                //now add the final state
+                creatureMovesStates.add(moveState);
+            }
         }
 
         //now create animation controller for phase
         animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, controllerName, "default",
                 creatureMovesStates.toArray(new AnimationControllerState[0])
         ));
-    }
-
-    private void initChargeupMoveAnimController(
-            @NotNull AnimationDataEntity animationData,
-            @NotNull String phase,
-            @NotNull String moveName,
-            @NotNull CreatureMoveBuilder moveBuilder,
-            @NotNull CreatureMoveChargeupBuilder chargeupBuilder
-    ) {
-        String controllerName = this.getChargeupMoveControllerName(phase, moveName);
-        CreatureMoveBuilder.MoveParticleEmitterDefinition emitterDefinition = moveBuilder.getReleasingParticleEmitterDefinition();
-        AnimationControllerState<AnimationDataEntity> defaultState = new AnimationControllerState<AnimationDataEntity>("default")
-                .addStateTransition("windup", animData -> this.getCreatureMoves().currentMoveMatches(moveName, MoveUsePhase.WINDUP));
-
-        AnimationControllerState<AnimationDataEntity> windupState = new AnimationControllerState<AnimationDataEntity>("windup")
-                .addAnimation(this.getMoveAnimationName(moveName + "_windup"));
-
-        AnimationControllerState<AnimationDataEntity> releaseState = new AnimationControllerState<AnimationDataEntity>("release")
-                .addAnimation(this.getMoveAnimationName(moveName + "_release"))
-                .addStateTransition("default", animData -> this.shouldCurrentMoveStateExit(animData, controllerName))
-                .addExitEffect(animData -> animData.sendMessage("moveFinished"));
-
-        if (chargeupBuilder.getChargeUpThenRelease()) {
-            this.addMoveParticleEffectToState(releaseState, emitterDefinition);
-            defaultState.addStateTransition("release", animData -> this.getCreatureMoves().currentMovePastWindup(moveName));
-            windupState.addStateTransition("release", animData -> this.getCreatureMoves().currentMovePastWindup(moveName));
-        }
-        else if (chargeupBuilder.getChargeUpWhileUse()) {
-            defaultState
-                    .addStateTransition("active", animData -> this.getCreatureMoves().currentMoveMatches(moveName, MoveUsePhase.RELEASING))
-                    .addStateTransition("release", animData -> this.getCreatureMoves().currentMoveMatches(moveName, MoveUsePhase.FINISHING));
-
-            windupState
-                    .addStateTransition("active", animData -> this.getCreatureMoves().currentMoveMatches(moveName, MoveUsePhase.RELEASING))
-                    .addStateTransition("release", animData -> this.getCreatureMoves().currentMoveMatches(moveName, MoveUsePhase.FINISHING));
-
-            AnimationControllerState<AnimationDataEntity> activeState = new AnimationControllerState<AnimationDataEntity>("active")
-                    .addAnimation(this.getMoveAnimationName(moveName))
-                    .addStateTransition("release", animData -> this.getCreatureMoves().currentMoveMatches(moveName, MoveUsePhase.FINISHING));
-            this.addMoveParticleEffectToState(activeState, emitterDefinition);
-
-            animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(
-                    this,
-                    controllerName,
-                    "default",
-                    defaultState,
-                    windupState,
-                    activeState,
-                    releaseState
-            ));
-            return;
-        }
-
-        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(
-                this,
-                controllerName,
-                "default",
-                defaultState,
-                windupState,
-                releaseState
-        ));
-    }
-
-    private void addMoveParticleEffectToState(
-            @NotNull AnimationControllerState<AnimationDataEntity> state,
-            CreatureMoveBuilder.MoveParticleEmitterDefinition emitterDefinition
-    ) {
-        if (emitterDefinition == null) return;
-        state.addParticleEffect(emitterDefinition.getParticleIdentifier(), emitterDefinition.getLocatorName());
-    }
-
-    private void runCurrentMoveHitEffect() {
-        CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
-        if (!creatureMoveStorage.canRunCurrentMoveHitEffect()) return;
-
-        CreatureMoveBuilder creatureMoveBuilder = creatureMoveStorage.getMoveBuilderCurrentMove();
-        if (creatureMoveBuilder == null || creatureMoveBuilder.getOnMoveHitEffect() == null) return;
-
-        creatureMoveStorage.markCurrentMoveHitEffectFired();
-        this.setCreatureMoves(creatureMoveStorage);
-        creatureMoveBuilder.getOnMoveHitEffect().accept(this);
-    }
-
-    private boolean shouldCurrentMoveStateExit(@NotNull AnimationDataEntity animData, @NotNull String controllerName) {
-        return this.getCreatureMoves().canCurrentMoveAnimationExit() && animData.allAnimationsFinished(controllerName);
-    }
-
-    private String getChargeupMoveControllerName(@NotNull String phase, @NotNull String moveName) {
-        return phase.isEmpty() ? "moveUse_" + moveName : "moveUse_" + phase + "_" + moveName;
-    }
-
-    private String getMoveAnimationName(@NotNull String moveAnimName) {
-        return "animation." + this.creatureType.getName() + "." + moveAnimName;
-    }
-
-    private void addMoveAnimationsToState(@NotNull AnimationControllerState<AnimationDataEntity> moveState, @NotNull String[] moveAnimNames) {
-        //if the move state has multiple animation names, make it so that upon entry it generates a random number
-        //to then use
-        if (moveAnimNames.length > 1) {
-            moveState.addEntryEffect(animData -> animData.setVariable("chosenMove", this.rand.nextInt(moveAnimNames.length)));
-        }
-
-        //iterate over each of the anim names and put them in the state for the move
-        for (int index = 0; index < moveAnimNames.length; index++) {
-            String moveAnimName = this.getMoveAnimationName(moveAnimNames[index]);
-
-            //only 1 move, just add the move anim name
-            if (moveAnimNames.length == 1) moveState.addAnimation(moveAnimName);
-                //multiple moves, add the move anim name and a predicate that uses the chosenMove molang variable above
-            else {
-                int finalIndex = index;
-                moveState.addAnimation(moveAnimName, animData -> {
-                    return animData.getVariable("chosenMove") == finalIndex;
-                });
-            }
-        }
     }
 
     @NotNull

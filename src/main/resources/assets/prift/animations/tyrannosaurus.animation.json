@@ -274,54 +274,73 @@
 				}
 			}
 		},
+		"animation.tyrannosaurus.flamethrower_prewindup": {
+			"loop": true,
+			"timeline": {
+				"0.0": "function.send_message('moveChargeupPrewindupFinished');"
+			}
+		},
 		"animation.tyrannosaurus.flamethrower_windup": {
-			"animation_length": 2,
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.32,
 			"bones": {
 				"body": {
 					"rotation": {
 						"0.0": [0, 0, 0],
-						"0.32": [-20, 0, 0],
-						"0.64": [15, 0, 0],
-						"1.84": [15, 0, 0],
-						"2.0": [0, 0, 0]
+						"0.32": [-20, 0, 0]
 					}
 				},
 				"neck": {
 					"rotation": {
 						"0.0": [0, 0, 0],
-						"0.32": [20, 0, 0],
-						"0.64": ["-15-flamethrower_head_bend", 0, 0],
-						"0.8": ["-15-flamethrower_head_bend", 0, 0],
-						"1.84": ["-15-flamethrower_head_bend", 0, 0],
-						"2.0": [0, 0, 0]
-					}
-				},
-				"head": {
-					"rotation": {
-						"0.64": [0, 0, 0],
-						"0.8": [0, 0, -7.5],
-						"0.96": [0, 0, 7.5],
-						"1.12": [0, 0, -7.5],
-						"1.28": [0, 0, 7.5],
-						"1.44": [0, 0, -7.5],
-						"1.6": [0, 0, 7.5],
-						"1.76": [0, 0, 0]
+						"0.32": [20, 0, 0]
 					}
 				},
 				"lowerJaw": {
 					"rotation": {
-						"0.36": [0, 0, 0],
-						"0.64": [22.5, 0, 0],
-						"1.76": [22.5, 0, 0],
-						"1.84": [0, 0, 0]
+						"0.0": [0, 0, 0],
+						"0.32": [0, 0, 0]
 					}
 				}
 			},
 			"timeline": {
-				"0.64": "function.send_message('moveHitEffect');"
+				"0.32": "function.send_message('moveChargeupWindupFinished');"
 			}
 		},
-		"animation.tyrannosaurus.flamethrower": {
+		"animation.tyrannosaurus.flamethrower_prereleasing": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.32,
+			"bones": {
+				"body": {
+					"rotation": {
+						"0.0": [-20, 0, 0],
+						"0.32": [15, 0, 0]
+					}
+				},
+				"neck": {
+					"rotation": {
+						"0.0": [20, 0, 0],
+						"0.32": ["-15-flamethrower_head_bend", 0, 0]
+					}
+				},
+				"lowerJaw": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.32": [22.5, 0, 0]
+					}
+				},
+				"head": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.32": [0, 0, -7.5]
+					}
+				}
+			},
+			"timeline": {
+				"0.32": "function.send_message('moveChargeupPrereleasingFinished');"
+			}
+		},
+		"animation.tyrannosaurus.flamethrower_releasing": {
 			"loop": true,
 			"animation_length": 0.64,
 			"bones": {
@@ -343,9 +362,16 @@
 				"lowerJaw": {
 					"rotation": [22.5, 0, 0]
 				}
+			},
+			"particle_effects": {
+				"0.0": {
+					"effect": "prift:flamethrower_fire",
+					"locator": "flameLocator"
+				}
 			}
 		},
-		"animation.tyrannosaurus.flamethrower_release": {
+		"animation.tyrannosaurus.flamethrower_finishing": {
+			"loop": "hold_on_last_frame",
 			"animation_length": 0.24,
 			"bones": {
 				"body": {
@@ -372,6 +398,9 @@
 						"0.24": [0, 0, 0]
 					}
 				}
+			},
+			"timeline": {
+				"0.24": "function.send_message('moveFinished');"
 			}
 		},
 		"animation.tyrannosaurus.power_roar": {
