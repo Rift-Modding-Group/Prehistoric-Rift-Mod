@@ -84,7 +84,7 @@ public class CreatureMoveStorage {
                     && moveRuleBuilder.getUseWhenFrustrated();
             int index = useDueToFrustration ? 0 : moveRuleBuilder.getPriorityPredicate().apply(creature, target);
             //being on cooldown forcibly changes the index to -1
-            if (!useDueToFrustration && this.moveCooldowns.containsKey(moveRuleBuilder.getMoveName()) && this.moveCooldowns.get(moveRuleBuilder.getMoveName()) > 0) {
+            if (this.moveCurrentCooldown(moveRuleBuilder.getMoveName()) > 0) {
                 index = -1;
             }
 

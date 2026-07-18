@@ -252,7 +252,7 @@ public class RiftCreatureRegistry {
                                                 .setDetectionRule(new CreatureMoveSelectorBuilder.DistanceFromUserDetectionRule(4D, 16D))
                                                 .setUseWhenFrustrated()
                                 )
-                                .setCanSprintToAttack(1)
+                                .setCanSprintToAttack(1, 8D, 16D)
                         )
         );
         /*

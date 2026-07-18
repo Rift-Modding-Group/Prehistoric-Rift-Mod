@@ -28,17 +28,20 @@ public class CreatureMoveSelectorBuilder {
      * Note that its only for when its on its own, when controlled by a rider
      * it can spring to attack when commanded to (by simply sprinting lol)
      * */
-    public CreatureMoveSelectorBuilder setCanSprintToAttack(int priority) {
+    public CreatureMoveSelectorBuilder setCanSprintToAttack(int priority, double minDist, double maxDist) {
+        if (minDist > maxDist) {
+            throw new IllegalArgumentException(minDist+" is greater than "+maxDist+"!");
+        }
         this.moveRules.add(new MoveRule(MoveResult.SPRINT, new MoveRuleBuilder("")
                 .setPriorityPredicate((creature, target) -> {
-                    if (target == null) return -1;
-                    double distFromTarget = creature.getDistance(target);
-                    double minReach = creature.width + 3; //is temporary
-                    boolean canSprintNow = creature.sprintToAttackCooldown <= 0 || creature.atFrustrationThreshold();
-                    boolean sprintCondition = distFromTarget <= 16D && distFromTarget >= minReach && canSprintNow;
-                    return sprintCondition ? priority : -1;
+                    if (target == null || !target.isEntityAlive()) return -1;
+                    boolean outsideCreatureAABB = !creature.getEntityBoundingBox().grow(1e-5D).intersects(target.getEntityBoundingBox());
+                    boolean outsideInnerBound = !creature.getEntityBoundingBox().grow(minDist).grow(1e-5D).intersects(target.getEntityBoundingBox());
+                    boolean withinOuterBound = creature.getEntityBoundingBox().grow(maxDist).grow(1e-5D).intersects(target.getEntityBoundingBox());
+                    return outsideCreatureAABB && withinOuterBound && outsideInnerBound ? priority : -1;
                 })
-                .setDetectionRule(new DistanceFromUserDetectionRule("", 8D,16D)))
+                .setDetectionRule(new DistanceFromUserDetectionRule("", minDist, maxDist))
+                .setUseWhenFrustrated())
         );
         return this;
     }
@@ -121,7 +124,7 @@ public class CreatureMoveSelectorBuilder {
                 boolean outsideInnerBound = !this.aabbFromLocator(user, this.minDistance).grow(1e-5D).intersects(target.getEntityBoundingBox());
                 return withinOuterBound && outsideInnerBound && outsideCreatureAABB;
             }
-            throw new UnsupportedOperationException("Given maxDistance is smaller than minDistance!");
+            throw new IllegalArgumentException("Given maxDistance is smaller than minDistance!");
         }
 
         @NotNull
