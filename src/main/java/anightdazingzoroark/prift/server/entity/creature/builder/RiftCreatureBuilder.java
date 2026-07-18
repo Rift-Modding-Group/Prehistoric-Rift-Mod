@@ -5,6 +5,7 @@ import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractProperty
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.BooleanPropertyValue;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.IntegerPropertyValue;
 import net.minecraft.client.resources.I18n;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import java.util.function.Function;
 public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBuilder> {
     private String creatureName;
     private final Map<String, CreaturePhaseBuilder> creaturePhaseBuilderMap = new HashMap<>();
+    @Nullable
     private Map<String, AbstractPropertyValue<?>> propertyValueMap;
     @Nullable
     private Consumer<RiftCreature> updateEffect;
@@ -41,7 +43,8 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
      * The builder that is used to define the creature is treated as a phase called ""
      * */
     public RiftCreatureBuilder addPhase(String phaseName, CreaturePhaseBuilder phaseBuilder) {
-        if (this.locked) return this;
+        this.checkIfLocked();
+
         this.creaturePhaseBuilderMap.put(phaseName, phaseBuilder.setPhaseName(phaseName));
         return this;
     }
@@ -51,20 +54,23 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     }
 
     //-----for additional values to this creature. they do sync from server to client, but they do not persist.-----
-    public RiftCreatureBuilder registerIntegerValue(String name, int initVal) {
-        if (this.locked) return this;
+    public RiftCreatureBuilder registerIntegerValue(@NotNull String name, int initVal) {
+        this.checkIfLocked();
+
         if (this.propertyValueMap == null) this.propertyValueMap = new HashMap<>();
         this.propertyValueMap.put(name, new IntegerPropertyValue(name, initVal));
         return this;
     }
 
-    public RiftCreatureBuilder registerBooleanValue(String name, boolean initVal) {
-        if (this.locked) return this;
+    public RiftCreatureBuilder registerBooleanValue(@NotNull String name, boolean initVal) {
+        this.checkIfLocked();
+
         if (this.propertyValueMap == null) this.propertyValueMap = new HashMap<>();
         this.propertyValueMap.put(name, new BooleanPropertyValue(name, initVal));
         return this;
     }
 
+    @Nullable
     public Map<String, AbstractPropertyValue<?>> getPropertyValueMap() {
         return this.propertyValueMap;
     }
@@ -72,7 +78,9 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     /**
      * Update effects are extra stuff that happens with the creature every tick
      * */
-    public RiftCreatureBuilder registerOnUpdateEffect(Consumer<RiftCreature> onUpdate) {
+    public RiftCreatureBuilder registerOnUpdateEffect(@NotNull Consumer<RiftCreature> onUpdate) {
+        this.checkIfLocked();
+
         this.updateEffect = onUpdate;
         return this;
     }
@@ -86,15 +94,20 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
      * Set hitbox information on the creature
      * */
     public RiftCreatureBuilder setHitboxInformation() {
+        this.checkIfLocked();
+
         this.hitboxTagDamageInfo = Map.of();
         return this;
     }
 
-    public RiftCreatureBuilder setHitboxInformation(Map<String, Function<RiftCreature, Double>> hitboxTagDamageInfo) {
+    public RiftCreatureBuilder setHitboxInformation(@NotNull Map<String, Function<RiftCreature, Double>> hitboxTagDamageInfo) {
+        this.checkIfLocked();
+
         this.hitboxTagDamageInfo = hitboxTagDamageInfo;
         return this;
     }
 
+    @Nullable
     public Map<String, Function<RiftCreature, Double>> getHitboxInformation() {
         return this.hitboxTagDamageInfo;
     }

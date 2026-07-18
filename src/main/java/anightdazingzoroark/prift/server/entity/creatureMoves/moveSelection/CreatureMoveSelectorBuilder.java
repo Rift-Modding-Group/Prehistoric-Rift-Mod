@@ -15,10 +15,23 @@ import java.util.List;
  * */
 //todo: add move combos
 public class CreatureMoveSelectorBuilder {
+    //extremely important
+    protected boolean locked;
+
     //general storage of move rules
     private final List<MoveRule> moveRules = new ArrayList<>();
 
+    /**
+     * This locks this object so that when accessing any instances of this, it can never be modified ever
+     * */
+    public void lock() {
+        this.locked = true;
+    }
+
     public CreatureMoveSelectorBuilder setMoveRule(MoveRuleBuilder moveRuleBuilder) {
+        this.checkIfLocked();
+
+        moveRuleBuilder.lock();
         this.moveRules.add(new MoveRule(MoveResult.USE_MOVE, moveRuleBuilder));
         return this;
     }
@@ -29,9 +42,9 @@ public class CreatureMoveSelectorBuilder {
      * it can spring to attack when commanded to (by simply sprinting lol)
      * */
     public CreatureMoveSelectorBuilder setCanSprintToAttack(int priority, double minDist, double maxDist) {
-        if (minDist > maxDist) {
-            throw new IllegalArgumentException(minDist+" is greater than "+maxDist+"!");
-        }
+        this.checkIfLocked();
+        if (minDist > maxDist) throw new IllegalArgumentException(minDist+" is greater than "+maxDist+"!");
+
         this.moveRules.add(new MoveRule(MoveResult.SPRINT, new MoveRuleBuilder("")
                 .setPriorityPredicate((creature, target) -> {
                     if (target == null || !target.isEntityAlive()) return -1;
@@ -47,14 +60,24 @@ public class CreatureMoveSelectorBuilder {
     }
 
     public CreatureMoveSelectorBuilder setCanLeapToAttack() {
+        this.checkIfLocked();
+
         this.moveRules.add(new MoveRule(MoveResult.LEAP, new MoveRuleBuilder("")
                 .setDetectionRule(new DistanceFromUserDetectionRule("", 8D,16D)))
         );
         return this;
     }
 
+    @NotNull
     public List<MoveRule> getMoveRules() {
         return this.moveRules;
+    }
+
+    /**
+     * Put this on every setter in builder to protect from post-creation editing
+     * */
+    protected void checkIfLocked() {
+        if (this.locked) throw new IllegalCallerException("A setter for a move selector builder cannot be called after the move selector is registered!");
     }
 
     public record MoveRule(@NotNull MoveResult moveResult, @NotNull MoveRuleBuilder moveRuleBuilder) {

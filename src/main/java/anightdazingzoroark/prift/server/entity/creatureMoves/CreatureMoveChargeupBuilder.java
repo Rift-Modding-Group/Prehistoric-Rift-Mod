@@ -33,7 +33,9 @@ public class CreatureMoveChargeupBuilder {
     }
 
     public CreatureMoveChargeupBuilder setChargeUpThenRelease(boolean canRotateWhileReleasing) {
-        if (this.chargeUpWhileUse) return this; //todo: add an exception
+        if (this.chargeUpWhileUse) {
+            throw new IllegalStateException("A chargeup builder can only have one of chargeUpThenRelease and chargeUpWhileUse and not both!");
+        }
         this.chargeUpThenRelease = true;
         this.canRotateWhileReleasing = canRotateWhileReleasing;
         return this;
@@ -51,7 +53,9 @@ public class CreatureMoveChargeupBuilder {
     }
 
     public CreatureMoveChargeupBuilder setChargeUpWhileUse(boolean canRotateWhileReleasing) {
-        if (this.chargeUpThenRelease) return this; //todo: add an exception here too
+        if (this.chargeUpThenRelease) {
+            throw new IllegalStateException("A chargeup builder can only have one of chargeUpThenRelease and chargeUpWhileUse and not both!");
+        }
         this.chargeUpWhileUse = true;
         this.canRotateWhileReleasing = canRotateWhileReleasing;
         return this;

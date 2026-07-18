@@ -10,6 +10,9 @@ import java.util.function.BiFunction;
  * A move rule defines how moves are executed by creature AI
  * */
 public class MoveRuleBuilder {
+    //extremely important
+    protected boolean locked;
+
     @NotNull
     private final String moveName;
     @NotNull
@@ -23,6 +26,13 @@ public class MoveRuleBuilder {
         this.moveName = moveName;
     }
 
+    /**
+     * This locks this object so that when accessing any instances of this, it can never be modified ever
+     * */
+    public void lock() {
+        this.locked = true;
+    }
+
     @NotNull
     public String getMoveName() {
         return this.moveName;
@@ -33,10 +43,14 @@ public class MoveRuleBuilder {
      * the creature currently has with the target.
      * */
     public MoveRuleBuilder setPriorityPredicate(int priority) {
+        this.checkIfLocked();
+
         return this.setPriorityPredicate(((creature, target) -> (target != null && target.isEntityAlive()) ? priority : -1));
     }
 
     public MoveRuleBuilder setPriorityPredicate(@NotNull BiFunction<RiftCreature, EntityLivingBase, Integer> priorityPredicate) {
+        this.checkIfLocked();
+
         this.priorityPredicate = priorityPredicate;
         return this;
     }
@@ -51,6 +65,8 @@ public class MoveRuleBuilder {
      * Mostly for determining range.
      * */
     public MoveRuleBuilder setDetectionRule(@NotNull CreatureMoveSelectorBuilder.DetectionRule detectionRule) {
+        this.checkIfLocked();
+
         this.detectionRule = detectionRule;
         return this;
     }
@@ -64,6 +80,8 @@ public class MoveRuleBuilder {
      * Allows a creature to instantly use this move when it's frustrated
      * */
     public MoveRuleBuilder setUseWhenFrustrated() {
+        this.checkIfLocked();
+
         this.canUseWhenFrustrated = true;
         return this;
     }
@@ -76,6 +94,8 @@ public class MoveRuleBuilder {
      * Make it so creature will not path to target nor look at them when the move is selected
      * */
     public MoveRuleBuilder setDontPathToTarget() {
+        this.checkIfLocked();
+
         this.dontPathToTarget = true;
         return this;
     }
@@ -84,8 +104,18 @@ public class MoveRuleBuilder {
         return this.dontPathToTarget;
     }
 
+    /**
+     * for debugging lol
+     * */
     @Override
     public String toString() {
         return "MoveBuilder:"+this.moveName;
+    }
+
+    /**
+     * Put this on every setter in builder to protect from post-creation editing
+     * */
+    protected void checkIfLocked() {
+        if (this.locked) throw new IllegalCallerException("A setter for a move rule builder cannot be called after the move rule is registered!");
     }
 }

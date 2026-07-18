@@ -188,8 +188,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Override
     protected void initEntityAI() {
         //temporary, will use the configs soon
-        //this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityCow.class, true));
-        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityPlayer.class, true));
+        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityCow.class, true));
+        //this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityPlayer.class, true));
 
         this.tasks.addTask(1, new RiftUnmountedUseMove(this));
         this.tasks.addTask(2, new EntityAIWander(this, 1D/*, 15*/));

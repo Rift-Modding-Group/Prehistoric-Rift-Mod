@@ -12,6 +12,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class CreatureMoveBuilder {
+    //extremely important
+    protected boolean locked;
+
     //all the following variables are required and must not be null, validated in isValid()
     private CreatureMoveHelper.MoveType moveType;
     private BiConsumer<RiftCreature, EntityLivingBase> onMoveBeginEffect;
@@ -32,11 +35,20 @@ public class CreatureMoveBuilder {
     private boolean useCanStopMovement;
 
     /**
+     * This locks this object so that when accessing any instances of this, it can never be modified ever
+     * */
+    public void lock() {
+        this.locked = true;
+    }
+
+    /**
      * Set the base power of a move.
      * This is involved in damage calculation in addition to the users attack stats.
      * Is completely ignored if the move is a status move.
      * */
     public CreatureMoveBuilder setBasePower(int value) {
+        this.checkIfLocked();
+
         this.movePower = value;
         return this;
     }
@@ -49,6 +61,8 @@ public class CreatureMoveBuilder {
      * Set the cooldown in ticks for a move.
      * */
     public CreatureMoveBuilder setCooldown(int value) {
+        this.checkIfLocked();
+
         this.moveCooldown = value;
         return this;
     }
@@ -61,6 +75,8 @@ public class CreatureMoveBuilder {
      * Set the chargeup information for this move
      * */
     public CreatureMoveBuilder setMoveChargeupBuilder(@NotNull CreatureMoveChargeupBuilder moveChargeupBuilder) {
+        this.checkIfLocked();
+
         this.moveChargeupBuilder = moveChargeupBuilder;
         return this;
     }
@@ -74,6 +90,8 @@ public class CreatureMoveBuilder {
      * Set that this move will be used only if the creature has encountered a target
      * */
     public CreatureMoveBuilder setRequireFindTargetToUse() {
+        this.checkIfLocked();
+
         this.requireFindTargetToUse = true;
         return this;
     }
@@ -87,6 +105,8 @@ public class CreatureMoveBuilder {
      * so this one is to be used to define whether or not a move makes contact with the target
      * */
     public CreatureMoveBuilder setMakesContact() {
+        this.checkIfLocked();
+
         this.makesContact = true;
         return this;
     }
@@ -99,6 +119,9 @@ public class CreatureMoveBuilder {
      *set move to be physical
      * */
     public CreatureMoveBuilder setPhysical() {
+        this.checkIfLocked();
+        if (this.moveType != null) throw new IllegalCallerException("This move builder already has a move type!");
+
         this.moveType = CreatureMoveHelper.MoveType.PHYSICAL;
         return this;
     }
@@ -109,6 +132,9 @@ public class CreatureMoveBuilder {
      * if not defined, physical damage will be used instead
      * */
     public CreatureMoveBuilder setElemental(Element element, int elementEffectStrength) {
+        this.checkIfLocked();
+        if (this.moveType != null) throw new IllegalCallerException("This move builder already has a move type!");
+
         this.moveType = CreatureMoveHelper.MoveType.ELEMENTAL;
         this.element = element;
         this.elementEffectStrength = elementEffectStrength;
@@ -127,6 +153,9 @@ public class CreatureMoveBuilder {
      * Set move to be status
      * */
     public CreatureMoveBuilder setStatus() {
+        this.checkIfLocked();
+        if (this.moveType != null) throw new IllegalCallerException("This move builder already has a move type!");
+
         this.moveType = CreatureMoveHelper.MoveType.STATUS;
         return this;
     }
@@ -142,6 +171,8 @@ public class CreatureMoveBuilder {
      * Set what will happen when the creature starts using the move
      * */
     public CreatureMoveBuilder setOnMoveBeginEffect(@NotNull BiConsumer<RiftCreature, EntityLivingBase> onMoveBeginEffect) {
+        this.checkIfLocked();
+
         this.onMoveBeginEffect = onMoveBeginEffect;
         return this;
     }
@@ -154,6 +185,8 @@ public class CreatureMoveBuilder {
      * Set what will happen when the move's animation reaches the "hit" phase
      * */
     public CreatureMoveBuilder setOnMoveHitEffect(@NotNull Consumer<RiftCreature> onMoveHitEffect) {
+        this.checkIfLocked();
+
         this.onMoveHitEffect = onMoveHitEffect;
         return this;
     }
@@ -166,6 +199,8 @@ public class CreatureMoveBuilder {
      * Add additional effects for what will happen when the move ends.
      * */
     public CreatureMoveBuilder setOnMoveEndEffect(@NotNull Consumer<RiftCreature> onMoveEnd) {
+        this.checkIfLocked();
+
         this.onMoveEndEffect = onMoveEnd;
         return this;
     }
@@ -178,8 +213,9 @@ public class CreatureMoveBuilder {
      * Sets the name of the animations to use when using this move.
      * If multiple names are provided, it will randomly switch between the animations.s
      * */
-    public CreatureMoveBuilder setAnimNames(String... animNames) {
-        if (this.animNames != null) return this;
+    public CreatureMoveBuilder setAnimNames(@NotNull String... animNames) {
+        this.checkIfLocked();
+
         this.animNames = animNames;
         return this;
     }
@@ -191,7 +227,9 @@ public class CreatureMoveBuilder {
     /**
      * Set any additional effects that will happen when attacking an entity
      * */
-    public CreatureMoveBuilder setOnHitTargetEffect(BiConsumer<RiftCreature, Entity> onTargetHitEffect) {
+    public CreatureMoveBuilder setOnHitTargetEffect(@NotNull BiConsumer<RiftCreature, Entity> onTargetHitEffect) {
+        this.checkIfLocked();
+
         this.onTargetHitEffect = onTargetHitEffect;
         return this;
     }
@@ -236,5 +274,12 @@ public class CreatureMoveBuilder {
         toReturn.useCanStopMovement = this.useCanStopMovement;
 
         return toReturn;
+    }
+
+    /**
+     * Put this on every setter in builder to protect from post-creation editing
+     * */
+    protected void checkIfLocked() {
+        if (this.locked) throw new IllegalCallerException("A setter for a move builder cannot be called after the move is registered!");
     }
 }
