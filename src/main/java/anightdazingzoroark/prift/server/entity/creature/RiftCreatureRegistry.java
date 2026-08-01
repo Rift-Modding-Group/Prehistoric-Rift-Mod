@@ -198,27 +198,27 @@ public class RiftCreatureRegistry {
                                 .setBasePower(90)
                                 .setRequireFindTargetToUse()
                                 .setElemental(Element.FIRE, 0)
+                                .setWhileMoveUseEffect((creature, target) -> {
+                                    if (target == null || !target.isEntityAlive()) return;
+
+                                    //get distance between the locator and the target
+                                    Vec3d fireDistVec = creature.getLocatorWorldPos("fireDistPoint");
+                                    Vec3d targetCenter = target.getPositionVector();
+                                    double distToTarget = fireDistVec.distanceTo(targetCenter);
+                                    if (distToTarget <= 1E-4D) return;
+
+                                    //convert into angle using trig magic
+                                    double verticalDist = (targetCenter.y + target.height / 2D) - fireDistVec.y;
+                                    double angle = Math.toDegrees(Math.asin(Math.clamp(verticalDist / distToTarget, -1D, 1D)));
+
+                                    //now set variable
+                                    creature.getAnimationData().setVariable("flamethrower_head_bend", Math.clamp(angle, -35, 35));
+                                })
                                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                                         .setChargeUpWhileUse(true)
                                         .setMaxChargeUp(300)
                                         .setPrereleaseEndEffect(creature -> {
                                             RiftLibRayHelper.createRay(creature, "flamethrowerRay", "flameLocator");
-                                        })
-                                        .setReleaseDuringUseEffect((creature, target) -> {
-                                            if (target == null || !target.isEntityAlive()) return;
-
-                                            //get distance between the locator and the target
-                                            Vec3d fireDistVec = creature.getLocatorWorldPos("fireDistPoint");
-                                            Vec3d targetCenter = target.getPositionVector();
-                                            double distToTarget = fireDistVec.distanceTo(targetCenter);
-                                            if (distToTarget <= 1E-4D) return;
-
-                                            //convert into angle using trig magic
-                                            double verticalDist = (targetCenter.y + target.height / 2D) - fireDistVec.y;
-                                            double angle = Math.toDegrees(Math.asin(Math.clamp(verticalDist / distToTarget, -1D, 1D)));
-
-                                            //now set variable
-                                            creature.getAnimationData().setVariable("flamethrower_head_bend", Math.clamp(angle, -35, 35));
                                         })
                                         .setReleaseEndEffect(creature -> {
                                             RiftLibRayHelper.killRay(creature, "flamethrowerRay");

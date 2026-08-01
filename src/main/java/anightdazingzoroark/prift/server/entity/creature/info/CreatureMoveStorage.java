@@ -203,7 +203,7 @@ public class CreatureMoveStorage {
     /**
      * Used to update the move as it's being used
      * */
-    public void tickCurrentMove(@NotNull RiftCreature creature) {
+    public void tickCurrentMove(@NotNull RiftCreature creature, @Nullable EntityLivingBase target) {
         if (this.currentMove.isEmpty()) return;
 
         CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
@@ -211,6 +211,10 @@ public class CreatureMoveStorage {
         else {
             this.currentMoveTicks++;
 
+            //well
+            if (currentMoveBuilder.getWhileMoveUseEffect() != null) currentMoveBuilder.getWhileMoveUseEffect().accept(creature, target);
+
+            //chargeup stuff
             CreatureMoveChargeupBuilder chargeupBuilder = currentMoveBuilder.getMoveChargeupBuilder();
             if (chargeupBuilder == null || this.currentMoveChargeupPhase == null) return;
 

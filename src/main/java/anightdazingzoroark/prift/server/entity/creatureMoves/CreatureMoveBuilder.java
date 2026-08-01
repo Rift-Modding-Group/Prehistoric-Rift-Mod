@@ -29,8 +29,13 @@ public class CreatureMoveBuilder {
     private boolean makesContact;
     private Element element;
     private int elementEffectStrength;
+    @Nullable
+    private BiConsumer<RiftCreature, Entity> whileMoveUseEffect;
+    @Nullable
     private BiConsumer<RiftCreature, Entity> onTargetHitEffect;
+    @Nullable
     private BiConsumer<RiftCreature, BlockPos> onBlockHitEffect;
+    @Nullable
     private Consumer<RiftCreature> onMoveEndEffect;
     private boolean useCanStopMovement;
 
@@ -205,6 +210,7 @@ public class CreatureMoveBuilder {
         return this;
     }
 
+    @Nullable
     public Consumer<RiftCreature> getOnMoveEndEffect() {
         return this.onMoveEndEffect;
     }
@@ -225,6 +231,19 @@ public class CreatureMoveBuilder {
     }
 
     /**
+     * Set what will happen exclusively while the move is being used, start to end
+     * */
+    public CreatureMoveBuilder setWhileMoveUseEffect(@NotNull BiConsumer<RiftCreature, Entity> whileMoveUseEffect) {
+        this.whileMoveUseEffect = whileMoveUseEffect;
+        return this;
+    }
+
+    @Nullable
+    public BiConsumer<RiftCreature, Entity> getWhileMoveUseEffect() {
+        return this.whileMoveUseEffect;
+    }
+
+    /**
      * Set any additional effects that will happen when attacking an entity
      * */
     public CreatureMoveBuilder setOnHitTargetEffect(@NotNull BiConsumer<RiftCreature, Entity> onTargetHitEffect) {
@@ -234,6 +253,7 @@ public class CreatureMoveBuilder {
         return this;
     }
 
+    @Nullable
     public BiConsumer<RiftCreature, Entity> getOnTargetHitEffect() {
         return this.onTargetHitEffect;
     }
@@ -268,6 +288,7 @@ public class CreatureMoveBuilder {
         toReturn.makesContact = this.makesContact;
         toReturn.element = this.element;
         toReturn.elementEffectStrength = this.elementEffectStrength;
+        toReturn.whileMoveUseEffect = this.whileMoveUseEffect;
         toReturn.onTargetHitEffect = this.onTargetHitEffect;
         toReturn.onBlockHitEffect = this.onBlockHitEffect;
         toReturn.onMoveEndEffect = this.onMoveEndEffect;

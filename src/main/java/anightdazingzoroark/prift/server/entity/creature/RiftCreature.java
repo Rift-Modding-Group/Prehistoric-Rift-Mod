@@ -220,7 +220,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             if (creatureMoveStorage.shouldCancelCurrentMoveForMissingTarget(this)) {
                 creatureMoveStorage.finishCurrentMoveUse(this);
             }
-            else creatureMoveStorage.tickCurrentMove(this);
+            else creatureMoveStorage.tickCurrentMove(this, this.getAttackTarget());
             this.setCreatureMoves(creatureMoveStorage);
 
             //tick sprinting related stuff
