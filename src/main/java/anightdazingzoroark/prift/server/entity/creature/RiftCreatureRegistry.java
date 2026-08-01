@@ -19,6 +19,7 @@ import anightdazingzoroark.riftlib.ray.rayShape.motion.RiftLibRayConeMotionShape
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -148,7 +149,14 @@ public class RiftCreatureRegistry {
                                                 false
                                         ))
                                         .setMotionSpeed(1D)
-                                        .setMaxMotionDistance(16D),
+                                        .setMaxMotionDistance(16D)
+                                        /*
+                                        .setBlockBreakCheck(((rayCreator, pos) -> {
+                                            World world = rayCreator.getRayCreator().world;
+                                            IBlockState blockState = world.getBlockState(pos);
+                                            return blockState.getBlock().isFlammable(world, pos, EnumFacing.UP);
+                                        }))
+                                         */,
                                 (creature, rayOrigin, rayHitResult) -> {
                                     for (Entity hitEntity : rayHitResult.hitEntities()) {
                                         if (!(hitEntity instanceof EntityLivingBase hitEntityLivingBase)) continue;
@@ -230,9 +238,8 @@ public class RiftCreatureRegistry {
                                 .setMoveRule(
                                         new MoveRuleBuilder("stomp")
                                                 .setPriorityPredicate((creature, target) -> {
-                                                    return target != null
-                                                            && target.isEntityAlive()
-                                                            && creature.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), "stompHitZone") ?
+                                                    return (target != null && target.isEntityAlive()
+                                                            && creature.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), "stompHitZone")) ?
                                                             0 : -1;
                                                 })
                                                 .setDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("stompHitZone"))
