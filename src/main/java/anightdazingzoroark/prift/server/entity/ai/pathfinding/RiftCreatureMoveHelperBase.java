@@ -44,6 +44,7 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
         this.posY = y;
         this.posZ = z;
         this.creatureAction = CreatureAction.LEAP;
+        this.creature.setUnableToPathToTarget(false);
         return true;
     }
 

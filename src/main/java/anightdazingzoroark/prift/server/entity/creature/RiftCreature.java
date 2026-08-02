@@ -98,6 +98,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private int currentRageThreshold;
     private int rageEndCountdown;
 
+    //target pathing state
+    private boolean unableToPathToTarget;
+
     //ray specific params
     protected Map<String, RiftLibRayBuilder> rayMap;
     protected Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
@@ -418,6 +421,22 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     public boolean isLeaping() {
         return this.world.isRemote ? this.dataManager.get(LEAPING) : this.isMoveHelperLeaping();
+    }
+
+    public boolean isUnableToPathToTarget() {
+        EntityLivingBase target = this.getAttackTarget();
+        return target != null && target.isEntityAlive() && this.unableToPathToTarget;
+    }
+
+    public void setUnableToPathToTarget(boolean unableToPathToTarget) {
+        EntityLivingBase target = this.getAttackTarget();
+        this.unableToPathToTarget = unableToPathToTarget && target != null && target.isEntityAlive();
+    }
+
+    @Override
+    public void setAttackTarget(@Nullable EntityLivingBase target) {
+        if (target != this.getAttackTarget()) this.unableToPathToTarget = false;
+        super.setAttackTarget(target);
     }
 
     private boolean isMoveHelperLeaping() {

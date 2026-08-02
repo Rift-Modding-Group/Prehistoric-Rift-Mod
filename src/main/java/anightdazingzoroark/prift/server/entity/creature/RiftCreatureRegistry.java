@@ -259,12 +259,12 @@ public class RiftCreatureRegistry {
                                 .setMoveRule(
                                         new MoveRuleBuilder("flamethrower")
                                                 .setPriorityPredicate((creature, target) -> {
-                                                    return (target != null && target.isEntityAlive() && creature.atRageThreshold()) ? 0 : -1;
+                                                    return (target != null && target.isEntityAlive() && (creature.atRageThreshold() || creature.isUnableToPathToTarget())) ? 0 : -1;
                                                 })
                                                 .setDetectionRule(new CreatureMoveSelectorBuilder.DistanceFromUserDetectionRule(4D, 16D))
                                                 .setUseWhenFrustrated()
                                 )
-                                //.setCanSprintToAttack(1, 8D, 16D)
+                                .setCanSprintToAttack(1, 8D, 16D)
                         )
         );
         /*
