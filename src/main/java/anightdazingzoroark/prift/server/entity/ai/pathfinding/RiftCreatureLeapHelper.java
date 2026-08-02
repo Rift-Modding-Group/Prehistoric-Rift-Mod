@@ -34,6 +34,7 @@ public class RiftCreatureLeapHelper {
     private double leapMotionX;
     private double leapMotionZ;
     private double leapTargetX;
+    private double leapTargetY;
     private double leapTargetZ;
     private double leapStartY;
     private float leapYaw;
@@ -72,6 +73,7 @@ public class RiftCreatureLeapHelper {
         }
 
         this.leapTargetX = x;
+        this.leapTargetY = y;
         this.leapTargetZ = z;
         this.leapObstacleHeight = obstacleHeight;
         this.leapYaw = (float)(Math.atan2(displacementZ, displacementX) * 180D / Math.PI) - 90F;
@@ -79,6 +81,11 @@ public class RiftCreatureLeapHelper {
         this.leapStarted = false;
         this.clearedVerticalObstacle = false;
         this.leapTicks = 0;
+        double upwardMotion = this.upwardVelocityForHeight(navigation.getLeapHeight() + LEAP_CLEARANCE);
+        if (!this.hasClearLeapPath(upwardMotion)) {
+            this.resetDelay();
+            return false;
+        }
         return true;
     }
 
@@ -104,6 +111,7 @@ public class RiftCreatureLeapHelper {
         this.leapMotionX = that.leapMotionX;
         this.leapMotionZ = that.leapMotionZ;
         this.leapTargetX = that.leapTargetX;
+        this.leapTargetY = that.leapTargetY;
         this.leapTargetZ = that.leapTargetZ;
         this.leapStartY = that.leapStartY;
         this.leapYaw = that.leapYaw;
@@ -174,6 +182,11 @@ public class RiftCreatureLeapHelper {
         if (this.walkingBeforeLeapTicks <= navigation.getLeapDelay()) return false;
 
         double upwardMotion = this.upwardVelocityForHeight(navigation.getLeapHeight() + LEAP_CLEARANCE);
+        if (!this.hasClearLeapPath(upwardMotion)) {
+            this.creature.getNavigator().clearPath();
+            this.cancelLeap();
+            return false;
+        }
         if (this.verticalLeap) {
             this.leapMotionX = 0D;
             this.leapMotionZ = 0D;
@@ -514,6 +527,125 @@ public class RiftCreatureLeapHelper {
     private boolean collidesWithObstacleProbe(@Nullable AxisAlignedBB xProbe, @Nullable AxisAlignedBB zProbe, double verticalOffset) {
         return xProbe != null && this.creature.world.collidesWithAnyBlock(xProbe.offset(0D, verticalOffset, 0D))
                 || zProbe != null && this.creature.world.collidesWithAnyBlock(zProbe.offset(0D, verticalOffset, 0D));
+    }
+
+    /**
+     * Check if leap path is clear. Good for making sure it don't bump into a ceiling
+     * */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private boolean hasClearLeapPath(double upwardMotion) {
+        AxisAlignedBB startingBounds = this.creature.getEntityBoundingBox();
+        double targetOffsetX = this.leapTargetX - this.creature.posX;
+        double targetOffsetZ = this.leapTargetZ - this.creature.posZ;
+        double horizontalDistance = Math.sqrt(targetOffsetX * targetOffsetX + targetOffsetZ * targetOffsetZ);
+        if (horizontalDistance < 1E-6D) return false;
+
+        AxisAlignedBB landingBounds = startingBounds.offset(
+                targetOffsetX,
+                this.leapTargetY - startingBounds.minY + 1E-3D,
+                targetOffsetZ
+        );
+        if (this.creature.world.collidesWithAnyBlock(landingBounds)) return false;
+
+        double fixedMotionX = 0D;
+        double fixedMotionZ = 0D;
+        if (!this.verticalLeap) {
+            int crossingTicks = Math.max(1, this.ticksAboveHeight(upwardMotion, this.leapObstacleHeight));
+            double horizontalMotion = horizontalDistance / crossingTicks;
+            fixedMotionX = targetOffsetX / horizontalDistance * horizontalMotion;
+            fixedMotionZ = targetOffsetZ / horizontalDistance * horizontalMotion;
+        }
+
+        double simulatedX = 0D;
+        double simulatedZ = 0D;
+        double simulatedHeight = 0D;
+        double simulatedVerticalMotion = upwardMotion;
+        boolean simulatedObstacleCleared = !this.verticalLeap;
+        double clearanceFloor = Math.min(startingBounds.minY, this.leapTargetY)
+                + this.leapObstacleHeight + VERTICAL_EDGE_CLEARANCE;
+
+        for (int tick = 0; tick < 80; tick++) {
+            if (!simulatedObstacleCleared
+                    && simulatedHeight >= this.leapObstacleHeight + VERTICAL_EDGE_CLEARANCE) {
+                simulatedObstacleCleared = true;
+            }
+
+            double remainingX = targetOffsetX - simulatedX;
+            double remainingZ = targetOffsetZ - simulatedZ;
+            double horizontalMotionX = 0D;
+            double horizontalMotionZ = 0D;
+            if (simulatedObstacleCleared) {
+                if (this.verticalLeap) {
+                    double remainingDistance = Math.sqrt(remainingX * remainingX + remainingZ * remainingZ);
+                    if (remainingDistance >= 1E-6D) {
+                        int crossingTicks = this.ticksUntilDescendingBelowHeight(
+                                simulatedHeight,
+                                simulatedVerticalMotion,
+                                this.leapObstacleHeight + VERTICAL_EDGE_CLEARANCE
+                        );
+                        double horizontalMotion = remainingDistance / crossingTicks;
+                        horizontalMotionX = remainingX / remainingDistance * horizontalMotion;
+                        horizontalMotionZ = remainingZ / remainingDistance * horizontalMotion;
+                    }
+                }
+                else {
+                    horizontalMotionX = fixedMotionX;
+                    horizontalMotionZ = fixedMotionZ;
+                }
+
+                double remainingDistanceSq = remainingX * remainingX + remainingZ * remainingZ;
+                double motionDistanceSq = horizontalMotionX * horizontalMotionX + horizontalMotionZ * horizontalMotionZ;
+                if (remainingDistanceSq <= motionDistanceSq) {
+                    horizontalMotionX = remainingX;
+                    horizontalMotionZ = remainingZ;
+                }
+            }
+
+            double nextX = simulatedX + horizontalMotionX;
+            double nextZ = simulatedZ + horizontalMotionZ;
+            double nextHeight = simulatedHeight + simulatedVerticalMotion;
+            int sampleCount = Math.max(1, (int)Math.ceil(Math.max(
+                    Math.max(Math.abs(horizontalMotionX), Math.abs(horizontalMotionZ)),
+                    Math.abs(simulatedVerticalMotion)
+            ) / OBSTACLE_SCAN_STEP));
+
+            for (int sample = 1; sample <= sampleCount; sample++) {
+                double progress = (double)sample / sampleCount;
+                double sampleX = simulatedX + horizontalMotionX * progress;
+                double sampleZ = simulatedZ + horizontalMotionZ * progress;
+                double sampleHeight = simulatedHeight + simulatedVerticalMotion * progress;
+                double sampleFeetY = startingBounds.minY + sampleHeight;
+                double sampleRemainingX = targetOffsetX - sampleX;
+                double sampleRemainingZ = targetOffsetZ - sampleZ;
+                boolean reachedLandingHeight = simulatedVerticalMotion <= 0D
+                        && sampleFeetY <= this.leapTargetY + 1E-3D;
+                if (reachedLandingHeight) {
+                    double remainingDistanceSq = sampleRemainingX * sampleRemainingX
+                            + sampleRemainingZ * sampleRemainingZ;
+                    return remainingDistanceSq <= OBSTACLE_LOOKAHEAD_DISTANCE * OBSTACLE_LOOKAHEAD_DISTANCE;
+                }
+
+                AxisAlignedBB sampleBounds = startingBounds.offset(sampleX, sampleHeight, sampleZ);
+                double overheadMinimumY = Math.max(sampleBounds.minY, clearanceFloor);
+                if (sampleBounds.maxY > overheadMinimumY + 1E-6D) {
+                    AxisAlignedBB overheadBounds = new AxisAlignedBB(
+                            sampleBounds.minX,
+                            overheadMinimumY,
+                            sampleBounds.minZ,
+                            sampleBounds.maxX,
+                            sampleBounds.maxY,
+                            sampleBounds.maxZ
+                    );
+                    if (this.creature.world.collidesWithAnyBlock(overheadBounds)) return false;
+                }
+            }
+
+            simulatedX = nextX;
+            simulatedZ = nextZ;
+            simulatedHeight = nextHeight;
+            simulatedVerticalMotion = (simulatedVerticalMotion - GRAVITY) * VERTICAL_DRAG;
+        }
+        return false;
     }
 
     /**
