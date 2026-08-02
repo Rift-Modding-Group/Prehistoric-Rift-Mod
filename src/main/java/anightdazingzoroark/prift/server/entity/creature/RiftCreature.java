@@ -219,7 +219,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //server only operations
         if (!this.world.isRemote) {
-            this.dataManager.set(LEAPING, this.isMoveHelperLeaping());
+            this.setLeaping(this.getCreatureMoveHelper().isLeaping());
 
             //set age
             this.setAgeInTicks(this.getAgeInTicks() + 1);
@@ -346,6 +346,23 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         return false;
     }
 
+    @Override
+    public void setAttackTarget(@Nullable EntityLivingBase target) {
+        if (target != this.getAttackTarget()) this.unableToPathToTarget = false;
+        super.setAttackTarget(target);
+    }
+
+    @Override
+    public int getMaxFallHeight() {
+        return this.creatureType.getMaxFallHeight();
+    }
+
+    @Override
+    public void fall(float distance, float damageMultiplier) {
+        float adjustedDistance = distance - this.getMaxFallHeight() + 3f;
+        super.fall(adjustedDistance, damageMultiplier);
+    }
+
     //-----properties management-----
     @SuppressWarnings("unchecked")
     public <I> I getProperty(String key) {
@@ -424,8 +441,20 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         return (RiftCreaturePathNavigate) this.navigator;
     }
 
+    @NotNull
+    public RiftCreatureMoveHelperBase getCreatureMoveHelper() {
+        return (RiftCreatureMoveHelperBase) this.moveHelper;
+    }
+
+    //mostly here just to sync leaping to client
+    //and of course is private
+    private void setLeaping(boolean value) {
+        this.dataManager.set(LEAPING, value);
+    }
+
+    //client friendly query for leaping
     public boolean isLeaping() {
-        return this.world.isRemote ? this.dataManager.get(LEAPING) : this.isMoveHelperLeaping();
+        return this.dataManager.get(LEAPING);
     }
 
     public boolean isUnableToPathToTarget() {
@@ -436,27 +465,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     public void setUnableToPathToTarget(boolean unableToPathToTarget) {
         EntityLivingBase target = this.getAttackTarget();
         this.unableToPathToTarget = unableToPathToTarget && target != null && target.isEntityAlive();
-    }
-
-    @Override
-    public void setAttackTarget(@Nullable EntityLivingBase target) {
-        if (target != this.getAttackTarget()) this.unableToPathToTarget = false;
-        super.setAttackTarget(target);
-    }
-
-    private boolean isMoveHelperLeaping() {
-        return this.moveHelper instanceof RiftCreatureMoveHelperBase riftMoveHelper && riftMoveHelper.isLeaping();
-    }
-
-    @Override
-    public int getMaxFallHeight() {
-        return this.creatureType.getMaxFallHeight();
-    }
-
-    @Override
-    public void fall(float distance, float damageMultiplier) {
-        float adjustedDistance = distance - this.getMaxFallHeight() + 3F;
-        super.fall(adjustedDistance, damageMultiplier);
     }
 
     //-----IRiftCreature boilerplate stuff-----
