@@ -79,6 +79,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private static final DataParameter<CreatureMoveStorage> CREATURE_MOVES = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.CREATURE_MOVE_STORAGE);
     private static final DataParameter<CreatureStatsStorage> CREATURE_STATS = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.CREATURE_STATS_STORAGE);
     private static final DataParameter<String> CREATURE_PHASE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.STRING);
+    private static final DataParameter<Boolean> LEAPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     //--custom property values, which can be called and manipulated from a creature builder--
     @NotNull
@@ -143,6 +144,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.dataManager.register(CREATURE_MOVES, new CreatureMoveStorage());
         this.dataManager.register(CREATURE_STATS, new CreatureStatsStorage());
         this.dataManager.register(CREATURE_PHASE, "");
+        this.dataManager.register(LEAPING, false);
     }
 
     //this is gonna be mostly for registering the custom attributes
@@ -214,6 +216,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //server only operations
         if (!this.world.isRemote) {
+            this.dataManager.set(LEAPING, this.isMoveHelperLeaping());
+
             //set age
             this.setAgeInTicks(this.getAgeInTicks() + 1);
 
@@ -413,6 +417,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     public boolean isLeaping() {
+        return this.world.isRemote ? this.dataManager.get(LEAPING) : this.isMoveHelperLeaping();
+    }
+
+    private boolean isMoveHelperLeaping() {
         return this.moveHelper instanceof RiftCreatureMoveHelperBase riftMoveHelper && riftMoveHelper.isLeaping();
     }
 
@@ -568,18 +576,27 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         //---for normal stuff---
         animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "movement", "default",
                 new AnimationControllerState<AnimationDataEntity>("default")
-                        .addStateTransition("moving", animData -> this.getCurrentMove().isEmpty() && animData.isMoving()),
+                        .addStateTransition("moving", animData -> this.getCurrentMove().isEmpty() && !this.isLeaping() && animData.isMoving()),
                 new AnimationControllerState<AnimationDataEntity>("moving", 0.1)
                         .addAnimation("animation."+this.creatureType.getName()+".walk")
-                        .addStateTransition("default", animData -> !this.getCurrentMove().isEmpty() || !animData.isMoving())
+                        .addStateTransition("default", animData -> !this.getCurrentMove().isEmpty() || this.isLeaping() || !animData.isMoving())
         ));
         animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "sprintPosing", "default",
                 new AnimationControllerState<AnimationDataEntity>("default", 0.2)
-                        .addStateTransition("sprint", animData -> this.getCurrentMove().isEmpty() && this.isSprinting()),
+                        .addStateTransition("sprint", animData -> this.getCurrentMove().isEmpty() && !this.isLeaping() && this.isSprinting()),
                 new AnimationControllerState<AnimationDataEntity>("sprint", 0.2)
                         .addAnimation("animation."+this.creatureType.getName()+".sprint_pose")
-                        .addStateTransition("default", animData -> !this.getCurrentMove().isEmpty() || !this.isSprinting())
+                        .addStateTransition("default", animData -> !this.getCurrentMove().isEmpty() || this.isLeaping() || !this.isSprinting())
         ));
+        if (this.creatureType.getNavigation().getCanLeap()) {
+            animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "leaping", "default",
+                    new AnimationControllerState<AnimationDataEntity>("default", 0.1)
+                            .addStateTransition("leaping", animData -> this.isLeaping()),
+                    new AnimationControllerState<AnimationDataEntity>("leaping", 0.1)
+                            .addAnimation("animation."+this.creatureType.getName()+".leap")
+                            .addStateTransition("default", animData -> !this.isLeaping())
+            ));
+        }
         //---for moves---
         //start with default
         this.initAnimControllerForPhase(animationData, "");

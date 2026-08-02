@@ -485,6 +485,41 @@
 			"timeline": {
 				"0.5": "function.send_message('moveHitEffect');"
 			}
+		},
+		"animation.tyrannosaurus.leap": {
+			"loop": true,
+			"bones": {
+				"body": {
+					"rotation": [-15, 0, 0]
+				},
+				"tail0": {
+					"rotation": [-5, 0, 0]
+				},
+				"tail1": {
+					"rotation": [5, 0, 0]
+				},
+				"neck": {
+					"rotation": [15, 0, 0]
+				},
+				"leftArm": {
+					"rotation": [35, 0, 0]
+				},
+				"leftClaw": {
+					"rotation": [25, 0, 0]
+				},
+				"rightArm": {
+					"rotation": [35, 0, 0]
+				},
+				"rightClaw": {
+					"rotation": [25, 0, 0]
+				},
+				"leftLeg": {
+					"rotation": [30, 0, 0]
+				},
+				"rightLeg": {
+					"rotation": [30, 0, 0]
+				}
+			}
 		}
 	}
 }
