@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.entity.creature.builder.CreatureNavigationBuilder;
 import anightdazingzoroark.prift.server.entity.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.server.entity.creature.info.Element;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
@@ -95,10 +96,14 @@ public class RiftCreatureRegistry {
                         .setScaleRangeForAge(0.5f, 3.25f)
                         .setSpawnEggColors(3670016, 2428687)
                         .setMainHitboxSize(3.25f, 4f)
+                        .setMaxFallHeight(4)
                         .setDaysUntilAdult(7)
                         .setHostileToHumans()
                         .setRetaliateWhenAttacked()
                         .setHitboxInformation()
+                        .setNavigation(new CreatureNavigationBuilder().setCanWalk()
+                                .setCanLeap(4D, 0, 12D)
+                        )
                         //---rays---
                         .addUsableRay(
                                 "footStompRay",
@@ -259,7 +264,7 @@ public class RiftCreatureRegistry {
                                                 .setDetectionRule(new CreatureMoveSelectorBuilder.DistanceFromUserDetectionRule(4D, 16D))
                                                 .setUseWhenFrustrated()
                                 )
-                                .setCanSprintToAttack(1, 8D, 16D)
+                                //.setCanSprintToAttack(1, 8D, 16D)
                         )
         );
         /*

@@ -5,7 +5,10 @@ import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.ai.RiftUnmountedUseMove;
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelperBase;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelper;
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreaturePathNavigate;
+import anightdazingzoroark.prift.server.entity.creature.builder.CreatureNavigationBuilder;
 import anightdazingzoroark.prift.server.entity.creature.info.Element;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveChargeupBuilder;
@@ -104,9 +107,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     public RiftCreature(World worldIn, String creatureName) {
         super(worldIn);
-        this.moveHelper = new RiftCreatureMoveHelper(this);
         this.creatureType = resolveCreatureBuilder(creatureName);
         this.creatureInventory = new RiftLibInventoryHandler(this.creatureType.getInventorySize());
+        this.moveHelper = new RiftCreatureMoveHelper(this);
+        this.navigator = new RiftCreaturePathNavigate(this, worldIn);
         this.applyCreatureTypeSettings();
         this.animData = new AnimationDataEntity(this, holder -> this.scale());
     }
@@ -396,9 +400,31 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     public void setCurrentMove(String name) {
+        if (this.isLeaping() && name != null && !name.isEmpty()) return;
         CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
         creatureMoveStorage.setCurrentMove(name);
         this.setCreatureMoves(creatureMoveStorage);
+    }
+
+    //-----navigation management-----
+    @NotNull
+    public CreatureNavigationBuilder getNavigation() {
+        return this.creatureType.getNavigation();
+    }
+
+    public boolean isLeaping() {
+        return this.moveHelper instanceof RiftCreatureMoveHelperBase riftMoveHelper && riftMoveHelper.isLeaping();
+    }
+
+    @Override
+    public int getMaxFallHeight() {
+        return this.creatureType.getMaxFallHeight();
+    }
+
+    @Override
+    public void fall(float distance, float damageMultiplier) {
+        float adjustedDistance = distance - this.getMaxFallHeight() + 3F;
+        super.fall(adjustedDistance, damageMultiplier);
     }
 
     //-----IRiftCreature boilerplate stuff-----

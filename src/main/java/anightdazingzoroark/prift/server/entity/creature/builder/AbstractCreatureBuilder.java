@@ -32,6 +32,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     //the following can be left alone
     private float[] mainHitboxSize = new float[]{1f, 1f};
+    private int maxFallHeight = 3;
     private boolean hostileToHumans;
     private boolean retaliateWhenAttacked, broadcastRetaliation;
     private boolean isNocturnal;
@@ -43,6 +44,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private boolean isHerder;
     private int inventorySize = 27;
     private int daysUntilAdult = 1;
+    @NotNull
+    private CreatureNavigationBuilder navigation = new CreatureNavigationBuilder().setCanWalk();
     private CreatureMoveSelectorBuilder moveSelector = new CreatureMoveSelectorBuilder();
     private Map<String, RiftLibRayBuilder> rayMap;
     private Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
@@ -168,6 +171,22 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
         return this.mainHitboxSize;
     }
 
+    /**
+     * Set how many blocks this creature can safely fall. Any further and
+     * it will take standard minecraft fall damage
+     * */
+    public T setMaxFallHeight(int maxFallHeight) {
+        this.checkIfLocked();
+        if (maxFallHeight < 0) throw new IllegalArgumentException("Maximum fall height cannot be negative!");
+
+        this.maxFallHeight = maxFallHeight;
+        return this.getThis();
+    }
+
+    public int getMaxFallHeight() {
+        return this.maxFallHeight;
+    }
+
     /***
      * Make creature attack humans. Humans include players, villagers, pillagers, and witches
      * */
@@ -264,21 +283,6 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     }
 
     /**
-     * Set movement options for creature. Note that walking isn't here because all creatures
-     * must have some kind of land movement no matter what
-     * */
-    public T setMovementOptions(RiftCreatureEnums.Movement... options) {
-        this.checkIfLocked();
-
-        this.movementOptions = options;
-        return this.getThis();
-    }
-
-    public RiftCreatureEnums.Movement[] getMovementOptions() {
-        return this.movementOptions;
-    }
-
-    /**
      * Most land creatures can float on water, this disables that
      * Creatures that swim ignore this
      * */
@@ -336,6 +340,22 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     }
 
     /**
+     * Set how the creature can navigate in the world. By default its just walking.
+     * */
+    public T setNavigation(@NotNull CreatureNavigationBuilder navigation) {
+        this.checkIfLocked();
+
+        navigation.lock();
+        this.navigation = navigation;
+        return this.getThis();
+    }
+
+    @NotNull
+    public CreatureNavigationBuilder getNavigation() {
+        return this.navigation;
+    }
+
+    /**
      * Set how this creature chooses moves when it is not being controlled by a rider.
      * */
     public T setMoveSelector(@NotNull CreatureMoveSelectorBuilder moveSelector) {
@@ -385,6 +405,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
                 && this.creatureDiet != null
                 && this.spawnEggColors != null
                 && this.scaleRangeForAge != null
+                && this.navigation.isValid()
                 && this.moveSelector != null
                 && !this.moveList.isEmpty();
     }

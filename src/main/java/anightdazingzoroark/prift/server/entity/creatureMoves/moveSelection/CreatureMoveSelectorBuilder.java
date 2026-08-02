@@ -59,6 +59,7 @@ public class CreatureMoveSelectorBuilder {
         return this;
     }
 
+    //still wip... might wait till i add utahraptors or smth to fully add
     public CreatureMoveSelectorBuilder setCanLeapToAttack() {
         this.checkIfLocked();
 

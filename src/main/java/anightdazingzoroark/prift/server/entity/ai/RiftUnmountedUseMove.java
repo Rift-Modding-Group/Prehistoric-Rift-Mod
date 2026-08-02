@@ -33,6 +33,9 @@ public class RiftUnmountedUseMove extends EntityAIBase {
         //cannot execute if the creature is using a move
         if (!this.creature.getCurrentMove().isEmpty()) return false;
 
+        //cannot use moves when leaping
+        if (this.creature.isLeaping()) return false;
+
         //-----find and use a move from current list-----
         this.moveRulePair = this.createMoveRule();
         return this.moveRulePair != null;
@@ -46,7 +49,9 @@ public class RiftUnmountedUseMove extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.moveResultTicker != null && this.moveResultTicker.canContinueTicking();
+        return !this.creature.isLeaping()
+                && this.moveResultTicker != null
+                && this.moveResultTicker.canContinueTicking();
     }
 
     @Override
@@ -60,6 +65,8 @@ public class RiftUnmountedUseMove extends EntityAIBase {
      * */
     @Override
     public void updateTask() {
+        if (this.creature.isLeaping()) return;
+
         //update move ticker
         if (this.moveResultTicker != null) this.moveResultTicker.onUpdate();
 
