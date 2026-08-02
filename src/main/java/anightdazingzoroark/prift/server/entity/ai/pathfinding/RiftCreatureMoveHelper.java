@@ -74,7 +74,7 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
                     (float)(this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue())
             );
 
-            CreatureNavigationBuilder navigation = this.creature.getNavigation();
+            CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
             double maximumClearance = navigation.getCanLeap() ?
                     navigation.getLeapHeight() : STANDARD_JUMP_HEIGHT + 0.125D;
             double obstacleClearance = this.leapHelper.getObstacleClearance(this.posX, this.posZ, maximumClearance);

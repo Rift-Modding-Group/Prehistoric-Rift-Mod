@@ -92,7 +92,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
             this.holdCloseTargetStrafe = false;
             this.closeTargetStrafeTicks = 0;
             this.pathingFrustrationTicks = 0;
-            this.creature.getNavigator().clearPath();
+            this.creature.getCreaturePathNavigate().clearPath();
         }
         //---pathing to go to target is all dealt with here, if said move requires target---
         else if (this.selectedMoveBuilder.getRequireFindTargetToUse() && target != null && target.isEntityAlive()) {
@@ -144,7 +144,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 this.holdCloseTargetStrafe = false;
                 this.closeTargetStrafeTicks = 0;
                 this.pathingFrustrationTicks = 0;
-                this.creature.getNavigator().clearPath();
+                this.creature.getCreaturePathNavigate().clearPath();
             }
             //---when move should not path to target, stop moving and wait for another move selection---
             else if (dontPathToTarget) {
@@ -153,7 +153,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 this.holdCloseTargetStrafe = false;
                 this.closeTargetStrafeTicks = 0;
                 this.pathingFrustrationTicks = 0;
-                this.creature.getNavigator().clearPath();
+                this.creature.getCreaturePathNavigate().clearPath();
             }
             //pathing to ensure target can be found by creature
             else {
@@ -166,7 +166,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
 
                 //tick down repath cooldown
                 if (this.repathCooldown > 0) this.repathCooldown--;
-                PathNavigate creatureNavigation = this.creature.getNavigator();
+                PathNavigate creatureNavigation = this.creature.getCreaturePathNavigate();
 
                 //---when held strafe should stop due to target movement---
                 if (this.holdCloseTargetStrafe && this.hasLastTargetPos && target.getDistanceSq(this.lastTargetX, this.lastTargetY, this.lastTargetZ) > TARGET_MOVED_REPATH_DISTANCE_SQ * 4D) {
@@ -247,7 +247,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
             if (moveHitTarget) this.creature.resetFrustration();
             else this.creature.addFrustration(35);
         }
-        this.creature.getNavigator().clearPath();
+        this.creature.getCreaturePathNavigate().clearPath();
 
         //preserve last look direction after target is gone
         EntityLivingBase target = this.creature.getAttackTarget();

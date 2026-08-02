@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection;
 
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreaturePathNavigate;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
 import net.minecraft.entity.EntityLivingBase;
@@ -48,10 +49,13 @@ public class CreatureMoveSelectorBuilder {
         this.moveRules.add(new MoveRule(MoveResult.SPRINT, new MoveRuleBuilder("")
                 .setPriorityPredicate((creature, target) -> {
                     if (target == null || !target.isEntityAlive()) return -1;
+                    if (creature.sprintToAttackCooldown > 0 && !creature.atFrustrationThreshold()) return -1;
                     boolean outsideCreatureAABB = !creature.getEntityBoundingBox().grow(1e-5D).intersects(target.getEntityBoundingBox());
                     boolean outsideInnerBound = !creature.getEntityBoundingBox().grow(minDist).grow(1e-5D).intersects(target.getEntityBoundingBox());
                     boolean withinOuterBound = creature.getEntityBoundingBox().grow(maxDist).grow(1e-5D).intersects(target.getEntityBoundingBox());
-                    return outsideCreatureAABB && withinOuterBound && outsideInnerBound ? priority : -1;
+
+                    if (!outsideCreatureAABB || !withinOuterBound || !outsideInnerBound) return -1;
+                    return creature.getCreaturePathNavigate().hasStraightWalkingPathTo(target) ? priority : -1;
                 })
                 .setDetectionRule(new DistanceFromUserDetectionRule("", minDist, maxDist))
                 .setUseWhenFrustrated())

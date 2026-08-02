@@ -51,7 +51,7 @@ public class RiftCreatureLeapHelper {
      * */
     public boolean prepareLeapTo(double x, double y, double z) {
         if (this.isLeaping()) return false;
-        CreatureNavigationBuilder navigation = this.creature.getNavigation();
+        CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
         if (!navigation.getCanLeap() || !this.creature.onGround) {
             this.resetDelay();
             return false;
@@ -127,7 +127,7 @@ public class RiftCreatureLeapHelper {
             double targetX, double targetY, double targetZ,
             double obstacleClearance, RiftCreatureMoveHelperBase.CreatureAction requestedAction
     ) {
-        CreatureNavigationBuilder navigation = this.creature.getNavigation();
+        CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
         if (!navigation.getCanLeap()) return false;
 
         double displacementY = targetY - this.creature.posY;
@@ -164,7 +164,7 @@ public class RiftCreatureLeapHelper {
     public boolean tryStartLeap() {
         if (this.leapStarted) return true;
 
-        CreatureNavigationBuilder navigation = this.creature.getNavigation();
+        CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
         if (!navigation.getCanLeap() || !this.creature.onGround) {
             this.cancelLeap();
             return false;
@@ -185,7 +185,7 @@ public class RiftCreatureLeapHelper {
         double upwardMotion = this.upwardVelocityForHeight(navigation.getLeapHeight() + LEAP_CLEARANCE);
         if (!this.hasClearLeapPath(upwardMotion)) {
             this.creature.setUnableToPathToTarget(true);
-            this.creature.getNavigator().clearPath();
+            this.creature.getCreaturePathNavigate().clearPath();
             this.cancelLeap();
             return false;
         }
@@ -204,9 +204,9 @@ public class RiftCreatureLeapHelper {
         this.creature.motionX = this.leapMotionX;
         this.creature.motionY = upwardMotion;
         this.creature.motionZ = this.leapMotionZ;
-        this.creature.fallDistance = 0F;
+        this.creature.fallDistance = 0f;
         this.creature.isAirBorne = true;
-        this.creature.getNavigator().clearPath();
+        this.creature.getCreaturePathNavigate().clearPath();
         this.creature.setSprinting(false);
         this.moveHelper.stopWalkingControls();
         this.leapStarted = true;
@@ -316,7 +316,7 @@ public class RiftCreatureLeapHelper {
      * */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean isWithinLeapDistance(double horizontalDistance) {
-        return horizontalDistance > 1E-6D && horizontalDistance <= this.creature.getNavigation().getLeapDistance();
+        return horizontalDistance > 1E-6D && horizontalDistance <= this.creature.getNavigationBuilder().getLeapDistance();
     }
 
     /**
@@ -331,7 +331,7 @@ public class RiftCreatureLeapHelper {
 
         double directionX = displacementX / horizontalDistance;
         double directionZ = displacementZ / horizontalDistance;
-        double leapDistance = this.creature.getNavigation().getLeapDistance();
+        double leapDistance = this.creature.getNavigationBuilder().getLeapDistance();
         GapLeapTarget directTarget = this.scanGapRay(
                 directionX,
                 directionZ,

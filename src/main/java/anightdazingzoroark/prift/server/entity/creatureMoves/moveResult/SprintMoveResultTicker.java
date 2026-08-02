@@ -1,5 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves.moveResult;
 
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelperBase;
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreaturePathNavigate;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.MoveRuleBuilder;
 import anightdazingzoroark.prift.util.MathUtil;
@@ -13,27 +15,41 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SprintMoveResultTicker extends AbstractMoveResultTicker {
+    private static final int MAX_SPRINT_TICKS = 100;
+
+    private final double destinationX;
+    private final double destinationY;
+    private final double destinationZ;
+    private final boolean hasDestination;
     private boolean hasHitWhileSprinting;
+    private int sprintTicks;
 
     public SprintMoveResultTicker(@NotNull RiftCreature creature, @NotNull MoveRuleBuilder moveRuleBuilder) {
         super(creature, moveRuleBuilder);
-        if (creature.atFrustrationThreshold()) {
+        EntityLivingBase target = creature.getAttackTarget();
+        this.hasDestination = target != null && target.isEntityAlive() && creature.getCreaturePathNavigate().hasStraightWalkingPathTo(target);
+        this.destinationX = this.hasDestination ? target.posX : creature.posX;
+        this.destinationY = this.hasDestination ? target.posY : creature.posY;
+        this.destinationZ = this.hasDestination ? target.posZ : creature.posZ;
+        if (this.hasDestination && creature.atFrustrationThreshold()) {
             creature.sprintToAttackCooldown = 0;
             creature.resetFrustration();
         }
-        creature.setSprinting(true);
+        creature.getCreaturePathNavigate().clearPath();
+        creature.setSprinting(this.hasDestination);
     }
 
     @Override
     public boolean canContinueTicking() {
-        EntityLivingBase target = this.creature.getAttackTarget();
-        return target != null && target.isEntityAlive() && !this.hasHitWhileSprinting;
+        return this.hasDestination && !this.hasHitWhileSprinting && this.sprintTicks < MAX_SPRINT_TICKS && !this.hasReachedDestination();
     }
 
     @Override
     public void onUpdate() {
-        EntityLivingBase target = this.creature.getAttackTarget();
-        if (target != null && target.isEntityAlive()) this.creature.getMoveHelper().setMoveTo(target.posX, target.posY, target.posZ, 1D);
+        this.sprintTicks++;
+        if (this.creature.getMoveHelper() instanceof RiftCreatureMoveHelperBase moveHelper) {
+            moveHelper.setChargeTo(this.destinationX, this.destinationY, this.destinationZ, 1D);
+        }
 
         //check for anything inside front AABBs
         List<AnimatedBoundingBox> frontZoneAnimatedBBs = this.creature.getAnimationData().getAnimatedBoundingBoxesByTag().get("frontZone");
@@ -59,9 +75,11 @@ public class SprintMoveResultTicker extends AbstractMoveResultTicker {
 
     @Override
     public void onEndTicker() {
-        this.creature.sprintToAttackCooldown = MathUtil.randomInRange(this.creature.world.rand, 5, 10) * 20;
+        if (this.hasDestination) {
+            this.creature.sprintToAttackCooldown = MathUtil.randomInRange(this.creature.world.rand, 5, 10) * 20;
+        }
         this.creature.setSprinting(false);
-        this.creature.getNavigator().clearPath();
+        this.creature.getCreaturePathNavigate().clearPath();
 
         //preserve last look direction after target is gone
         EntityLivingBase target = this.creature.getAttackTarget();
@@ -71,5 +89,13 @@ public class SprintMoveResultTicker extends AbstractMoveResultTicker {
     @Override
     public boolean isOverridableWhileUsed() {
         return false;
+    }
+
+    private boolean hasReachedDestination() {
+        double displacementX = this.destinationX - this.creature.posX;
+        double displacementY = this.destinationY - this.creature.posY;
+        double displacementZ = this.destinationZ - this.creature.posZ;
+        double stoppingDistance = Math.max(0.5D, this.creature.width * 0.5D);
+        return displacementX * displacementX + displacementZ * displacementZ <= stoppingDistance * stoppingDistance && Math.abs(displacementY) <= 0.25D;
     }
 }

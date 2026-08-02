@@ -20,7 +20,9 @@ import anightdazingzoroark.riftlib.ray.rayShape.motion.RiftLibRayConeMotionShape
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -155,17 +157,30 @@ public class RiftCreatureRegistry {
                                         ))
                                         .setMotionSpeed(1D)
                                         .setMaxMotionDistance(16D)
-                                        /*
                                         .setBlockBreakCheck(((rayCreator, pos) -> {
                                             World world = rayCreator.getRayCreator().world;
                                             IBlockState blockState = world.getBlockState(pos);
                                             return blockState.getBlock().isFlammable(world, pos, EnumFacing.UP);
-                                        }))
-                                         */,
+                                        })),
                                 (creature, rayOrigin, rayHitResult) -> {
                                     for (Entity hitEntity : rayHitResult.hitEntities()) {
                                         if (!(hitEntity instanceof EntityLivingBase hitEntityLivingBase)) continue;
                                         creature.attackEntityAsMob(hitEntityLivingBase);
+                                    }
+                                    for (BlockPos hitBlockPos : rayHitResult.hitBlockPositions()) {
+                                        //allow for snow
+                                        if (creature.world.getBlockState(hitBlockPos).getBlock() == Blocks.SNOW_LAYER
+                                                && Blocks.FIRE.canPlaceBlockAt(creature.world, hitBlockPos)
+                                                && creature.getRNG().nextInt(4) == 0) {
+                                            creature.world.setBlockState(hitBlockPos, Blocks.FIRE.getDefaultState(), 3);
+                                        }
+                                        //allow for well almost anything else
+                                        else if (!creature.world.isAirBlock(hitBlockPos)
+                                                && creature.world.isAirBlock(hitBlockPos.up())
+                                                && Blocks.FIRE.canPlaceBlockAt(creature.world, hitBlockPos.up())
+                                                && creature.getRNG().nextInt(4) == 0) {
+                                            creature.world.setBlockState(hitBlockPos.up(), Blocks.FIRE.getDefaultState(), 3);
+                                        }
                                     }
                                 }
                         )

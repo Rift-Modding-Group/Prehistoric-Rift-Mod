@@ -8,19 +8,23 @@ import net.minecraft.pathfinding.WalkNodeProcessor;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
+    @NotNull
     private final RiftCreature creature;
+    private final boolean allowLeaps;
 
-    public RiftCreatureWalkNodeProcessor(RiftCreature creature) {
+    public RiftCreatureWalkNodeProcessor(@NotNull RiftCreature creature, boolean allowLeaps) {
         this.creature = creature;
+        this.allowLeaps = allowLeaps;
     }
 
     @Override
     public int findPathOptions(PathPoint[] pathOptions, PathPoint currentPoint, PathPoint targetPoint, float maxDistance) {
         int count = super.findPathOptions(pathOptions, currentPoint, targetPoint, maxDistance);
-        if (!this.creature.getNavigation().getCanLeap()) return count;
+        if (!this.allowLeaps || !this.creature.getNavigationBuilder().getCanLeap()) return count;
 
         int walkingOptionCount = count;
 
@@ -57,11 +61,8 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
         return false;
     }
 
-    private int addLeapOption(PathPoint[] pathOptions, int count, @Nullable PathPoint leapPoint,
-            PathPoint targetPoint, float maxDistance) {
-        if (leapPoint != null && !leapPoint.visited
-                && leapPoint.distanceTo(targetPoint) < maxDistance
-                && !this.contains(pathOptions, count, leapPoint)) {
+    private int addLeapOption(PathPoint[] pathOptions, int count, @Nullable PathPoint leapPoint, PathPoint targetPoint, float maxDistance) {
+        if (leapPoint != null && !leapPoint.visited && leapPoint.distanceTo(targetPoint) < maxDistance && !this.contains(pathOptions, count, leapPoint)) {
             pathOptions[count++] = leapPoint;
         }
         return count;
@@ -70,13 +71,13 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
     @Nullable
     private PathPoint findUpwardLeapLanding(PathPoint currentPoint, EnumFacing facing, float maxPathDistance) {
         double ledgeHeight = this.getLeadingObstacleHeight(currentPoint, facing);
-        if (ledgeHeight <= RiftCreatureMoveHelper.STANDARD_JUMP_HEIGHT + 1E-3D || ledgeHeight > this.creature.getNavigation().getLeapHeight() + 1E-3D) {
+        if (ledgeHeight <= RiftCreatureMoveHelper.STANDARD_JUMP_HEIGHT + 1E-3D || ledgeHeight > this.creature.getNavigationBuilder().getLeapHeight() + 1E-3D) {
             return null;
         }
 
         int landingY = currentPoint.y + (int)Math.ceil(ledgeHeight - 1E-3D);
         int maximumDistance = (int)Math.floor(Math.min(
-                this.creature.getNavigation().getLeapDistance(),
+                this.creature.getNavigationBuilder().getLeapDistance(),
                 maxPathDistance
         ));
         for (int distance = 1; distance <= maximumDistance; distance++) {
@@ -132,16 +133,15 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
 
     private PathPoint findLevelLeapLanding(PathPoint currentPoint, EnumFacing facing, float maxPathDistance) {
         PathPoint obstacleLanding = this.findObstacleLeapLanding(currentPoint, facing, maxPathDistance);
-        return obstacleLanding != null
-                ? obstacleLanding
-                : this.findGapLeapLanding(currentPoint, facing, maxPathDistance);
+        return obstacleLanding != null ? obstacleLanding : this.findGapLeapLanding(currentPoint, facing, maxPathDistance);
     }
 
+    @Nullable
     private PathPoint findObstacleLeapLanding(PathPoint currentPoint, EnumFacing facing, float maxPathDistance) {
         int obstacleX = currentPoint.x + facing.getXOffset();
         int obstacleZ = currentPoint.z + facing.getZOffset();
         double obstacleHeight = this.getObstacleHeight(obstacleX, currentPoint.y, obstacleZ);
-        if (obstacleHeight <= 1D || obstacleHeight > this.creature.getNavigation().getLeapHeight()) return null;
+        if (obstacleHeight <= 1D || obstacleHeight > this.creature.getNavigationBuilder().getLeapHeight()) return null;
         AxisAlignedBB overheadClearance = new AxisAlignedBB(
                 obstacleX,
                 currentPoint.y + obstacleHeight + 1E-3D,
@@ -153,7 +153,7 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
         if (this.creature.world.collidesWithAnyBlock(overheadClearance)) return null;
 
         int maximumDistance = (int)Math.floor(Math.min(
-                this.creature.getNavigation().getLeapDistance(),
+                this.creature.getNavigationBuilder().getLeapDistance(),
                 maxPathDistance
         ));
         for (int distance = 2; distance <= maximumDistance; distance++) {
@@ -174,7 +174,7 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
     @Nullable
     private PathPoint findGapLeapLanding(PathPoint currentPoint, EnumFacing facing, float maxPathDistance) {
         int maximumDistance = (int)Math.floor(Math.min(
-                this.creature.getNavigation().getLeapDistance(),
+                this.creature.getNavigationBuilder().getLeapDistance(),
                 maxPathDistance
         ));
         boolean foundGap = false;
@@ -203,7 +203,7 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
 
     private double getObstacleHeight(int x, int baseY, int z) {
         double top = baseY;
-        int maximumY = baseY + (int)Math.ceil(this.creature.getNavigation().getLeapHeight());
+        int maximumY = baseY + (int)Math.ceil(this.creature.getNavigationBuilder().getLeapHeight());
         for (int y = baseY; y <= maximumY; y++) {
             BlockPos pos = new BlockPos(x, y, z);
             IBlockState state = this.blockaccess.getBlockState(pos);

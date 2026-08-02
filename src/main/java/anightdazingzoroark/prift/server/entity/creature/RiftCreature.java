@@ -415,8 +415,13 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //-----navigation management-----
     @NotNull
-    public CreatureNavigationBuilder getNavigation() {
+    public CreatureNavigationBuilder getNavigationBuilder() {
         return this.creatureType.getNavigation();
+    }
+
+    @NotNull
+    public RiftCreaturePathNavigate getCreaturePathNavigate() {
+        return (RiftCreaturePathNavigate) this.navigator;
     }
 
     public boolean isLeaping() {
