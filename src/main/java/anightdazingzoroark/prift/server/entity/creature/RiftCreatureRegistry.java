@@ -134,7 +134,7 @@ public class RiftCreatureRegistry {
                                             float hardness = blockState.getBlockHardness(rayCreator.getRayCreator().world, blockPos);
                                             return hardness <= 1f && hardness >= 0f;
                                         })
-                                        /*.setImpactCreationSpeed(0.25D)*/,
+                                        .setImpactCreationInterval(5),
                                 (creature, rayOrigin, rayHitResult) -> {
                                     for (Entity hitEntity : rayHitResult.hitEntities()) {
                                         if (!(hitEntity instanceof EntityLivingBase hitEntityLivingBase)) continue;
@@ -147,13 +147,8 @@ public class RiftCreatureRegistry {
                                 new RiftLibRayBuilder()
                                         .setMotionOnly()
                                         .setMovementShape(() -> new RiftLibRayConeMotionShape(
-                                                0.1D,
-                                                0.35D,
-                                                0.25D,
-                                                3,
-                                                12,
-                                                false,
-                                                false
+                                                0.1D, 0.35D, 0.25D,
+                                                3, 12, false, false
                                         ))
                                         .setMotionSpeed(1D)
                                         .setMaxMotionDistance(16D)
@@ -209,6 +204,7 @@ public class RiftCreatureRegistry {
                                 })
                                 .setOnMoveEndEffect(creature -> {
                                     if (!(creature instanceof IRayCreator<?> rayCreator)) return;
+                                    System.out.println("end roar ray!");
                                     RiftLibRayHelper.killRay(rayCreator, "roarRay");
                                 })
                                 .setAnimNames("power_roar")
@@ -267,6 +263,9 @@ public class RiftCreatureRegistry {
                                 )
                                 .setMoveRule(
                                         new MoveRuleBuilder("power_roar")
+                                                .setPriorityPredicate((creature, target) -> {
+                                                    return target != null && target.isEntityAlive() ? 0 : -1;
+                                                })
                                                 .setDetectionRule(new CreatureMoveSelectorBuilder.DistanceFromUserDetectionRule(12D))
                                                 .setUseWhenFrustrated()
                                                 .setDontPathToTarget()

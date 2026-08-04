@@ -371,7 +371,7 @@
 			}
 		},
 		"animation.tyrannosaurus.flamethrower_finishing": {
-			"loop": "hold_on_last_frame",
+			"loop": false,
 			"animation_length": 0.24,
 			"bones": {
 				"body": {
@@ -398,9 +398,6 @@
 						"0.24": [0, 0, 0]
 					}
 				}
-			},
-			"timeline": {
-				"0.24": "function.send_message('moveFinished');"
 			}
 		},
 		"animation.tyrannosaurus.power_roar": {

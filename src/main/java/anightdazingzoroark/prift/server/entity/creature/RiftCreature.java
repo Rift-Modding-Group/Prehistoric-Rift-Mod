@@ -186,7 +186,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         //initialize creature moves
         CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
         creatureMoveStorage.setCreatureUser(this.creatureType);
-        this.setCreatureMoves(creatureMoveStorage);
 
         //return value
         return super.onInitialSpawn(difficulty, livingdata);
@@ -232,7 +231,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 creatureMoveStorage.finishCurrentMoveUse(this);
             }
             else creatureMoveStorage.tickCurrentMove(this, this.getAttackTarget());
-            this.setCreatureMoves(creatureMoveStorage);
 
             //tick sprinting related stuff
             if (this.sprintToAttackCooldown > 0) this.sprintToAttackCooldown--;
@@ -423,11 +421,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         return this.getCreatureMoves().getCurrentMove();
     }
 
-    public void setCurrentMove(String name) {
-        if (this.isLeaping() && name != null && !name.isEmpty()) return;
+    public void setCurrentMove(@NotNull String name) {
+        if (this.isLeaping() && !name.isEmpty()) return;
         CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
         creatureMoveStorage.setCurrentMove(name);
-        this.setCreatureMoves(creatureMoveStorage);
     }
 
     //-----navigation management-----
@@ -641,12 +638,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         animationData.addAnimationMessageEffect("moveHitEffect", new AnimatableRunValue(() -> {
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
             if (creatureMoveStorage.canRunCurrentMoveHitEffect()) creatureMoveStorage.runCurrentMoveHitEffect(this);
-            this.setCreatureMoves(creatureMoveStorage);
         }, Side.SERVER));
         animationData.addAnimationMessageEffect("moveChargeupPrewindupFinished", new AnimatableRunValue(() -> {
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
             creatureMoveStorage.finishCurrentMoveChargeupPhase(this, ChargeupPhase.PREWINDUP);
-            this.setCreatureMoves(creatureMoveStorage);
         }, Side.SERVER));
         animationData.addAnimationMessageEffect("moveChargeupWindupFinished", new AnimatableRunValue(() -> {
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
@@ -655,12 +650,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             if (chargeupBuilder != null && chargeupBuilder.getChargeUpWhileUse()) {
                 creatureMoveStorage.finishCurrentMoveChargeupPhase(this, ChargeupPhase.WINDUP);
             }
-            this.setCreatureMoves(creatureMoveStorage);
         }, Side.SERVER));
         animationData.addAnimationMessageEffect("moveChargeupPrereleasingFinished", new AnimatableRunValue(() -> {
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
             creatureMoveStorage.finishCurrentMoveChargeupPhase(this, ChargeupPhase.PRERELEASING);
-            this.setCreatureMoves(creatureMoveStorage);
         }, Side.SERVER));
         animationData.addAnimationMessageEffect("moveChargeupReleasingFinished", new AnimatableRunValue(() -> {
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
@@ -669,21 +662,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             if (chargeupBuilder != null && chargeupBuilder.getChargeUpThenRelease()) {
                 creatureMoveStorage.finishCurrentMoveChargeupPhase(this, ChargeupPhase.RELEASING);
             }
-            this.setCreatureMoves(creatureMoveStorage);
         }, Side.SERVER));
-        animationData.addAnimationMessageEffect("moveFinished", new AnimatableRunValue(() -> {
-            CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
-            if (!creatureMoveStorage.hasCurrentMoveEndEffectFired()) {
-                CreatureMoveBuilder creatureMoveBuilder = creatureMoveStorage.getMoveBuilderCurrentMove();
-                if (!this.world.isRemote && creatureMoveBuilder != null && creatureMoveBuilder.getOnMoveEndEffect() != null) {
-                    creatureMoveBuilder.getOnMoveEndEffect().accept(this);
-                }
-                creatureMoveStorage.markCurrentMoveEndEffectFired();
-            }
-
-            creatureMoveStorage.resetCurrentMove(this);
-            this.setCreatureMoves(creatureMoveStorage);
-        }, Side.CLIENT, Side.SERVER));
     }
 
     private void initAnimControllerForPhase(AnimationDataEntity animationData, @NotNull String phase) {
@@ -746,7 +725,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
                 AnimationControllerState<AnimationDataEntity> finishingState = new AnimationControllerState<AnimationDataEntity>(finishingControllerStateName)
                         .addAnimation("animation."+this.creatureType.getName()+"."+moveName+"_"+finishingStateName)
-                        .addStateTransition("default", animData -> !this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.FINISHING));
+                        .addStateTransition("default", animData -> animData.allAnimationsFinished(controllerName))
+                        .addExitEffect(animData -> this.onMoveFinish(moveName));
 
                 creatureMovesStates.add(prewindupState);
                 creatureMovesStates.add(windupState);
@@ -762,7 +742,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 //create state for move
                 AnimationControllerState<AnimationDataEntity> moveState = new AnimationControllerState<AnimationDataEntity>(moveName)
                         .addStateTransition("default", animData -> animData.allAnimationsFinished(controllerName))
-                        .addExitEffect(animData -> animData.sendMessage("moveFinished"));
+                        .addExitEffect(animData -> this.onMoveFinish(moveName));
 
                 //if the move state has multiple animation names, make it so that upon entry it
                 //generates a random number to then use
@@ -795,6 +775,20 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, controllerName, "default",
                 creatureMovesStates.toArray(new AnimationControllerState[0])
         ));
+    }
+
+    //small helper method for defining what happens when a move finishes
+    private void onMoveFinish(@NotNull String moveName) {
+        CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+        if (!creatureMoveStorage.hasCurrentMoveEndEffectFired()) {
+            //use moveName, as it might have been erased on server after being cleared on client
+            CreatureMoveBuilder creatureMoveBuilder = creatureMoveStorage.getUsableMoveBuilder(moveName);
+            if (!this.world.isRemote && creatureMoveBuilder != null && creatureMoveBuilder.getOnMoveEndEffect() != null) {
+                creatureMoveBuilder.getOnMoveEndEffect().accept(this);
+            }
+            creatureMoveStorage.markCurrentMoveEndEffectFired();
+        }
+        creatureMoveStorage.resetCurrentMove(this);
     }
 
     @NotNull
