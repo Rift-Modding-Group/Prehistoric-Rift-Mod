@@ -686,53 +686,40 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
             //for chargeup moves, create states for each phase
             if (chargeupBuilder != null) {
-                String prewindupStateName = ChargeupPhase.PREWINDUP.name().toLowerCase();
-                String windupStateName = ChargeupPhase.WINDUP.name().toLowerCase();
-                String prereleasingStateName = ChargeupPhase.PRERELEASING.name().toLowerCase();
-                String releasingStateName = ChargeupPhase.RELEASING.name().toLowerCase();
-                String finishingStateName = ChargeupPhase.FINISHING.name().toLowerCase();
+                for (ChargeupPhase currentChargeupPhase : ChargeupPhase.values()) {
+                    String phaseName = currentChargeupPhase.name().toLowerCase();
+                    String controllerStateName = moveName + "_" + phaseName;
 
-                String prewindupControllerStateName = moveName + "_" + prewindupStateName;
-                String windupControllerStateName = moveName + "_" + windupStateName;
-                String prereleasingControllerStateName = moveName + "_" + prereleasingStateName;
-                String releasingControllerStateName = moveName + "_" + releasingStateName;
-                String finishingControllerStateName = moveName + "_" + finishingStateName;
+                    //---add transition in initial state---
+                    initialState.addStateTransition(controllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, currentChargeupPhase));
 
-                initialState.addStateTransition(prewindupControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.PREWINDUP))
-                        .addStateTransition(windupControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.WINDUP))
-                        .addStateTransition(prereleasingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.PRERELEASING))
-                        .addStateTransition(releasingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.RELEASING))
-                        .addStateTransition(finishingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.FINISHING));
+                    //---define corresponding state---
+                    AnimationControllerState<AnimationDataEntity> stateToAdd = new AnimationControllerState<AnimationDataEntity>(controllerStateName)
+                            .addAnimation("animation."+this.creatureType.getName()+"."+controllerStateName);
 
-                AnimationControllerState<AnimationDataEntity> prewindupState = new AnimationControllerState<AnimationDataEntity>(prewindupControllerStateName)
-                        .addAnimation("animation."+this.creatureType.getName()+"."+moveName+"_"+prewindupStateName)
-                        .addStateTransition(finishingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.FINISHING))
-                        .addStateTransition(windupControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.WINDUP));
+                    //and loop again xd
+                    for (ChargeupPhase otherChargeupPhase : ChargeupPhase.values()) {
+                        if (otherChargeupPhase == currentChargeupPhase) continue;
 
-                AnimationControllerState<AnimationDataEntity> windupState = new AnimationControllerState<AnimationDataEntity>(windupControllerStateName)
-                        .addAnimation("animation."+this.creatureType.getName()+"."+moveName+"_"+windupStateName)
-                        .addStateTransition(finishingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.FINISHING))
-                        .addStateTransition(prereleasingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.PRERELEASING));
+                        String otherChargeupPhaseName = otherChargeupPhase.name().toLowerCase();
+                        String otherControllerStateName = moveName + "_" + otherChargeupPhaseName;
 
-                AnimationControllerState<AnimationDataEntity> prereleasingState = new AnimationControllerState<AnimationDataEntity>(prereleasingControllerStateName)
-                        .addAnimation("animation."+this.creatureType.getName()+"."+moveName+"_"+prereleasingStateName)
-                        .addStateTransition(finishingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.FINISHING))
-                        .addStateTransition(releasingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.RELEASING));
+                        stateToAdd.addStateTransition(
+                                otherControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, otherChargeupPhase)
+                        );
+                    }
 
-                AnimationControllerState<AnimationDataEntity> releasingState = new AnimationControllerState<AnimationDataEntity>(releasingControllerStateName)
-                        .addAnimation("animation."+this.creatureType.getName()+"."+moveName+"_"+releasingStateName)
-                        .addStateTransition(finishingControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, ChargeupPhase.FINISHING));
+                    //exclusive for finish, to transition back to default
+                    if (currentChargeupPhase == ChargeupPhase.FINISHING) {
+                        stateToAdd.addStateTransition("default", animData -> animData.allAnimationsFinished(controllerName))
+                                .addExitEffect(animData -> this.onMoveFinish(moveName));
+                    }
+                    //emergency exit condition for other phases, mostly for client
+                    else stateToAdd.addStateTransition("default", animData -> this.getCreatureMoves().getCurrentMove().isEmpty());
 
-                AnimationControllerState<AnimationDataEntity> finishingState = new AnimationControllerState<AnimationDataEntity>(finishingControllerStateName)
-                        .addAnimation("animation."+this.creatureType.getName()+"."+moveName+"_"+finishingStateName)
-                        .addStateTransition("default", animData -> animData.allAnimationsFinished(controllerName))
-                        .addExitEffect(animData -> this.onMoveFinish(moveName));
-
-                creatureMovesStates.add(prewindupState);
-                creatureMovesStates.add(windupState);
-                creatureMovesStates.add(prereleasingState);
-                creatureMovesStates.add(releasingState);
-                creatureMovesStates.add(finishingState);
+                    //add the state
+                    creatureMovesStates.add(stateToAdd);
+                }
             }
             //for non chargeup moves, add other anim states for each move to a single anim controller
             else {

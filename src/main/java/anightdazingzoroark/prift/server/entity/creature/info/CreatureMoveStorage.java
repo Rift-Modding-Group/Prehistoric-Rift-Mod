@@ -174,11 +174,11 @@ public class CreatureMoveStorage {
     }
 
     public boolean currentMoveMatches(@NotNull String moveName) {
-        return this.currentMove.equals(moveName);
+        return this.currentMoveMatches(moveName, null);
     }
 
-    public boolean currentMoveMatches(@NotNull String moveName, @NotNull ChargeupPhase phase) {
-        return this.currentMoveMatches(moveName) && this.currentMoveChargeupPhase == phase;
+    public boolean currentMoveMatches(@NotNull String moveName, @Nullable ChargeupPhase phase) {
+        return this.currentMove.equals(moveName) && this.currentMoveChargeupPhase == phase;
     }
 
     /**
