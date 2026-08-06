@@ -31,25 +31,17 @@ public class RiftInitialize {
     public static final String MODULAR_UI_ID = "modularui";
     public static final String JEI_MOD_ID = "jei";
     public static final String MODNAME = "Prehistoric Rift";
-    public static final String MODVERSION= "0.0.16";
+    public static final String MODVERSION= "0.1.0";
     @SidedProxy(clientSide = "anightdazingzoroark.prift.client.ClientProxy", serverSide = "anightdazingzoroark.prift.server.ServerProxy")
     public static ServerProxy PROXY;
     @Mod.Instance(MODID)
     public static RiftInitialize instance;
     public static Logger logger;
-    //public static Configuration configMain;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         //init logger
         logger = event.getModLog();
-
-        //init directory
-        //File directory = event.getModConfigurationDirectory();
-
-        //for general config
-        //configMain = new Configuration(new File(directory.getPath(), "prift/general.cfg"));
-        //GeneralConfig.readConfig();
 
         //init mod content
         PROXY.preInit(event);
@@ -69,9 +61,6 @@ public class RiftInitialize {
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         PROXY.postInit(event);
-
-        //for general config
-        //if (configMain.hasChanged()) configMain.save();
     }
 
     /*
