@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server;
 
+import anightdazingzoroark.prift.server.config.RiftGeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityTameable;
@@ -14,7 +15,7 @@ public class ServerEvents {
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         //make people join le discord
-        //todo: make this configurable again
+        if (!RiftGeneralConfig.other.showJoinDiscordMessage) return;
         TextComponentString message = new TextComponentString("Click here to join the Discord server for this mod to hang out and receive updates! We beg you!");
         message.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/JnjQtkVt8R"));
         message.getStyle().setUnderlined(true);
@@ -24,8 +25,7 @@ public class ServerEvents {
     @SubscribeEvent
     public void livingDropsEvent(LivingDropsEvent event) {
         //to reduce potential lag, mobs killed by wild creatures will not drop items
-        //todo: make this configurable again
-        if (event.getSource().getTrueSource() instanceof RiftCreature) {
+        if (event.getSource().getTrueSource() instanceof RiftCreature && RiftGeneralConfig.creatures.creatureKillNoLoot) {
             Entity attacked = event.getEntity();
             boolean tameableFlag = attacked instanceof EntityTameable tameable && !tameable.isTamed();
             boolean playerFlag = attacked instanceof EntityPlayer;
