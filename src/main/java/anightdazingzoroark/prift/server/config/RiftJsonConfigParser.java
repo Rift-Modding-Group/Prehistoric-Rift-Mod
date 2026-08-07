@@ -106,7 +106,7 @@ public class RiftJsonConfigParser {
                         "minecraft:villager",
                         "minecraft:witch",
                         "minecraft:evocation_illager",
-                        "minecraft:vindicator",
+                        "minecraft:vindication_illager",
                         "minecraft:illusioner"
                 )
         );

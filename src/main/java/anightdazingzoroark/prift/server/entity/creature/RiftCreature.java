@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.server.entity.creature.builder.CreaturePhaseBui
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
+import anightdazingzoroark.prift.server.entity.ai.RiftFindTarget;
 import anightdazingzoroark.prift.server.entity.ai.RiftUnmountedUseMove;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelperBase;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelper;
@@ -32,12 +33,11 @@ import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import anightdazingzoroark.riftlib.util.QuaternionUtils;
 import anightdazingzoroark.riftlib.util.VectorUtils;
 import net.minecraft.entity.*;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.ai.EntityAILookIdle;
-import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
-import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -195,12 +195,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //after being developed further
     @Override
     protected void initEntityAI() {
-        //temporary, will use the configs soon
-        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityCow.class, true));
-        //this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityPlayer.class, true));
+        this.targetTasks.addTask(2, new RiftFindTarget(this, true));
 
         this.tasks.addTask(1, new RiftUnmountedUseMove(this));
-        this.tasks.addTask(2, new EntityAIWander(this, 1D/*, 15*/));
+        this.tasks.addTask(2, new EntityAIWander(this, 1D));
         this.tasks.addTask(3, new EntityAILookIdle(this) {
             @Override
             public void resetTask() {
