@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server;
 
+import anightdazingzoroark.prift.server.config.RiftJsonConfigParser;
 import anightdazingzoroark.prift.server.dataSerializers.InternalRegistryPrimer;
 import anightdazingzoroark.prift.server.dataSerializers.PrimerEventHandler;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
@@ -19,6 +20,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 @Mod.EventBusSubscriber
 public class ServerProxy {
     public static InternalRegistryPrimer registryPrimer;
+    public static RiftJsonConfigParser jsonConfigParser;
 
     public void preInit(FMLPreInitializationEvent e) {
         registryPrimer = new InternalRegistryPrimer();
@@ -30,6 +32,9 @@ public class ServerProxy {
         //register entities
         RiftCreatureRegistry.createCreatures();
         RiftEntities.registerEntities();
+
+        //register configs
+        jsonConfigParser = new RiftJsonConfigParser(e.getModConfigurationDirectory().toPath());
 
         //register items
         RiftItems.registerItems();

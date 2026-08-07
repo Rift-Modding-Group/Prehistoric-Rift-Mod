@@ -4,7 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import net.minecraftforge.common.config.Config;
 
 @SuppressWarnings("WeakerAccess")
-@Config(modid = RiftInitialize.MODID, name = "prift/general")
+@Config(modid = RiftInitialize.MODID, name = RiftInitialize.MODID+"/general")
 public class RiftGeneralConfig {
     @Config.Name("Creature Settings")
     @Config.Comment("Settings specific to creatures from the mod")
