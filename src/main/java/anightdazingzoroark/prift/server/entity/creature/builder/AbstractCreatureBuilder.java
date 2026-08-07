@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature.builder;
 
+import anightdazingzoroark.prift.server.config.RiftCreatureFood;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
@@ -33,14 +34,11 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     //the following can be left alone
     private float[] mainHitboxSize = new float[]{1f, 1f};
     private int maxFallHeight = 3;
-    private boolean hostileToHumans;
     private boolean retaliateWhenAttacked, broadcastRetaliation;
     private boolean isNocturnal;
     private boolean canBeKnockedBack;
     private boolean flopOnLand;
     private String[] breathableBlocks = new String[]{"minecraft:air"};
-    private RiftCreatureEnums.Movement[] movementOptions;
-    private boolean cannotFloatOnWater = true;
     private boolean isHerder;
     private int inventorySize = 27;
     private int daysUntilAdult = 1;
@@ -49,6 +47,10 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private CreatureMoveSelectorBuilder moveSelector = new CreatureMoveSelectorBuilder();
     private Map<String, RiftLibRayBuilder> rayMap;
     private Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
+    private List<String> defaultTargetWhitelist;
+    private List<String> defaultTargetBlacklist;
+    private List<RiftCreatureFood> defaultFoodItemWhitelist;
+    private List<String> defaultFoodItemBlacklist;
 
     @SuppressWarnings("unchecked")
     protected final T getThis() {
@@ -168,7 +170,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     }
 
     public float[] getMainHitboxSize() {
-        return this.mainHitboxSize;
+        return this.mainHitboxSize.clone();
     }
 
     /**
@@ -185,20 +187,6 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     public int getMaxFallHeight() {
         return this.maxFallHeight;
-    }
-
-    /***
-     * Make creature attack humans. Humans include players, villagers, pillagers, and witches
-     * */
-    public T setHostileToHumans() {
-        this.checkIfLocked();
-
-        this.hostileToHumans = true;
-        return this.getThis();
-    }
-
-    public boolean getHostileToHumans() {
-        return this.hostileToHumans;
     }
 
     /**
@@ -279,22 +267,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     }
 
     public String[] getBreathableBlocks() {
-        return this.breathableBlocks;
-    }
-
-    /**
-     * Most land creatures can float on water, this disables that
-     * Creatures that swim ignore this
-     * */
-    public T setCannotFloatOnWater() {
-        this.checkIfLocked();
-
-        this.cannotFloatOnWater = false;
-        return this.getThis();
-    }
-
-    public boolean getCannotFloatOnWater() {
-        return this.cannotFloatOnWater;
+        return this.breathableBlocks.clone();
     }
 
     /**
@@ -394,6 +367,102 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     @Nullable
     public Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> getRayHitEffectMap() {
         return this.rayHitEffectMap;
+    }
+
+    /**
+     * Put a new entry in the whitelist for entities to attack or
+     * a list defined in lists.json. This will be the default
+     * value in the associated config.
+     * */
+    public T addDefaultTargetWhitelistEntry(@NotNull String entry) {
+        this.checkIfLocked();
+
+        if (this.defaultTargetWhitelist == null) this.defaultTargetWhitelist = new ArrayList<>();
+        this.defaultTargetWhitelist.add(entry);
+
+        return this.getThis();
+    }
+
+    public boolean hasDefaultTargetWhitelist() {
+        return this.defaultTargetWhitelist != null;
+    }
+
+    @Nullable
+    public List<String> getDefaultTargetWhitelist() {
+        if (this.defaultTargetWhitelist == null) return null;
+        return List.copyOf(this.defaultTargetWhitelist);
+    }
+
+    /**
+     * Put a new entry in the blacklist for entities to attack or
+     * a list defined in lists.json. This will be the default
+     * value in the associated config.
+     * */
+    public T addDefaultTargetBlacklistEntry(@NotNull String entry) {
+        this.checkIfLocked();
+
+        if (this.defaultTargetBlacklist == null) this.defaultTargetBlacklist = new ArrayList<>();
+        this.defaultTargetBlacklist.add(entry);
+
+        return this.getThis();
+    }
+
+    public boolean hasDefaultTargetBlacklist() {
+        return this.defaultTargetBlacklist != null;
+    }
+
+    @Nullable
+    public List<String> getDefaultTargetBlacklist() {
+        if (this.defaultTargetBlacklist == null) return null;
+        return List.copyOf(this.defaultTargetBlacklist);
+    }
+
+    /**
+     * Put a new entry in the whitelist for food items to consume or
+     * a list defined in lists.json. This will be the default value
+     * in the associated config.
+     * */
+    public T addDefaultFoodItemWhitelistEntry(@NotNull RiftCreatureFood entry) {
+        this.checkIfLocked();
+
+        if (this.defaultFoodItemWhitelist == null) this.defaultFoodItemWhitelist = new ArrayList<>();
+        this.defaultFoodItemWhitelist.add(entry);
+
+        return this.getThis();
+    }
+
+    public boolean hasDefaultFoodItemWhitelist() {
+        return this.defaultFoodItemWhitelist != null;
+    }
+
+    @Nullable
+    public List<RiftCreatureFood> getDefaultFoodItemWhitelist() {
+        if (this.defaultFoodItemWhitelist == null) return null;
+        return List.copyOf(this.defaultFoodItemWhitelist);
+    }
+
+    /**
+     * Put a new entry in the blacklist for food items to consume or
+     * a list defined in lists.json. This will be the default value
+     * in the associated config.
+     * */
+    public T addDefaultFoodItemBlacklistEntry(@NotNull String entry) {
+        this.checkIfLocked();
+
+        if (this.defaultFoodItemBlacklist == null) this.defaultFoodItemBlacklist = new ArrayList<>();
+        this.defaultFoodItemBlacklist.add(entry);
+
+        return this.getThis();
+    }
+
+    public boolean hasDefaultFoodItemBlacklist() {
+        return this.defaultFoodItemBlacklist != null;
+    }
+
+    @Nullable
+    public List<String> getDefaultFoodItemBlacklist() {
+        if (this.defaultFoodItemBlacklist == null) return null;
+        return List.copyOf(this.defaultFoodItemBlacklist);
     }
 
     /**

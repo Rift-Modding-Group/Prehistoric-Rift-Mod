@@ -100,7 +100,6 @@ public class RiftCreatureRegistry {
                         .setMainHitboxSize(3.25f, 4f)
                         .setMaxFallHeight(4)
                         .setDaysUntilAdult(7)
-                        .setHostileToHumans()
                         .setRetaliateWhenAttacked()
                         .setHitboxInformation()
                         .setNavigation(new CreatureNavigationBuilder().setCanWalk()
@@ -280,6 +279,9 @@ public class RiftCreatureRegistry {
                                 )
                                 .setCanSprintToAttack(1, 8D, 16D)
                         )
+                        //---targeting---
+                        .addDefaultTargetWhitelistEntry("animal")
+                        .addDefaultTargetWhitelistEntry("human")
         );
         /*
         registerCreatureType(

@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.config;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
+import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
@@ -59,9 +60,20 @@ public class RiftJsonConfigParser {
     public void loadCreatureConfigs() {
         this.creatureConfigs.clear();
 
-        for (String creatureName : RiftCreatureRegistry.creatureBuilderMap.keySet()) {
-            Path path = creatureConfigDirectory.resolve(creatureName + ".json");
-            RiftCreatureConfig config = load(path, RiftCreatureConfig.class, new RiftCreatureConfig());
+        for (Map.Entry<String, RiftCreatureBuilder> builderEntry : RiftCreatureRegistry.creatureBuilderMap.entrySet()) {
+            String creatureName = builderEntry.getKey();
+            RiftCreatureBuilder builder = builderEntry.getValue();
+
+            //define default riftcreatureconfig
+            RiftCreatureConfig defaultValue = new RiftCreatureConfig();
+            if (builder.hasDefaultTargetWhitelist()) defaultValue.targetWhitelist = builder.getDefaultTargetWhitelist();
+            if (builder.hasDefaultTargetBlacklist()) defaultValue.targetBlacklist = builder.getDefaultTargetBlacklist();
+            if (builder.hasDefaultFoodItemWhitelist()) defaultValue.foodItemWhitelist = builder.getDefaultFoodItemWhitelist();
+            if (builder.hasDefaultFoodItemBlacklist()) defaultValue.foodItemBlacklist = builder.getDefaultFoodItemBlacklist();
+
+            //now load and put in creature config map
+            Path path = this.creatureConfigDirectory.resolve(creatureName + ".json");
+            RiftCreatureConfig config = this.load(path, RiftCreatureConfig.class, defaultValue);
             this.creatureConfigs.put(creatureName, config);
         }
     }
@@ -284,7 +296,7 @@ public class RiftJsonConfigParser {
             return;
         }
 
-        save(this.creatureConfigDirectory.resolve(creatureName + ".json"), config);
+        this.save(this.creatureConfigDirectory.resolve(creatureName + ".json"), config);
     }
 
     public void saveLists() {
