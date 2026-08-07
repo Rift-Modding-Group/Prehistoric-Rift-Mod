@@ -61,6 +61,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * le heart and soul of this mod
+ * */
 public class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, IRiftCreature, IRayCreator<RiftCreature> {
     @NotNull
     private RiftCreatureBuilder creatureType;

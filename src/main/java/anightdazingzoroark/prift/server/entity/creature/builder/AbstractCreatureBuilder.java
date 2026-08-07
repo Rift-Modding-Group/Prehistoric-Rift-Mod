@@ -125,7 +125,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     }
 
     public int[] getSpawnEggColors() {
-        return this.spawnEggColors;
+        return this.spawnEggColors.clone();
     }
 
     /**
@@ -140,7 +140,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     }
 
     public float[] getScaleRangeForAge() {
-        return this.scaleRangeForAge;
+        return this.scaleRangeForAge.clone();
     }
 
     /**
@@ -156,7 +156,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     }
 
     public List<ImmutablePair<String, CreatureMoveBuilder>> getMoves() {
-        return this.moveList;
+        return List.copyOf(this.moveList);
     }
 
     /**
@@ -361,12 +361,14 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     @Nullable
     public Map<String, RiftLibRayBuilder> getRayMap() {
-        return this.rayMap;
+        if (this.rayMap == null) return null;
+        return Map.copyOf(this.rayMap);
     }
 
     @Nullable
     public Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> getRayHitEffectMap() {
-        return this.rayHitEffectMap;
+        if (this.rayHitEffectMap == null) return null;
+        return Map.copyOf(this.rayHitEffectMap);
     }
 
     /**
