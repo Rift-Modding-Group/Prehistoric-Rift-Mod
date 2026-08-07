@@ -22,6 +22,7 @@ public class RiftFindTarget extends EntityAITarget {
     public RiftFindTarget(@NotNull RiftCreature creature, boolean checkSight) {
         super(creature, checkSight);
         this.creature = creature;
+        this.setMutexBits(1);
     }
 
     @Override

@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.Creat
 import anightdazingzoroark.prift.util.TriConsumer;
 import anightdazingzoroark.riftlib.ray.RiftLibRay;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 //this class defines creature information
 public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<T>> {
@@ -34,7 +36,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     //the following can be left alone
     private float[] mainHitboxSize = new float[]{1f, 1f};
     private int maxFallHeight = 3;
-    private boolean retaliateWhenAttacked, broadcastRetaliation;
+    private BiFunction<RiftCreature, EntityLivingBase, Boolean> retaliateWhenAttacked;
     private boolean isNocturnal;
     private boolean canBeKnockedBack;
     private boolean flopOnLand;
@@ -195,23 +197,18 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     public T setRetaliateWhenAttacked() {
         this.checkIfLocked();
 
-        return this.setRetaliateWhenAttacked(false);
+        return this.setRetaliateWhenAttacked((creature, target) -> true);
     }
 
-    /**
-     * Similar to above, but has additional option where, if the creature is a herder and is in a herd,
-     * the herdmates will help it
-     * */
-    public T setRetaliateWhenAttacked(boolean broadcastRetaliation) {
+    public T setRetaliateWhenAttacked(@NotNull BiFunction<RiftCreature, EntityLivingBase, Boolean> retaliateWhenAttacked) {
         this.checkIfLocked();
-
-        this.retaliateWhenAttacked = true;
-        this.broadcastRetaliation = broadcastRetaliation;
+        this.retaliateWhenAttacked = retaliateWhenAttacked;
         return this.getThis();
     }
 
-    public boolean[] getRetaliateWhenAttacked() {
-        return new boolean[]{this.retaliateWhenAttacked, this.broadcastRetaliation};
+    @Nullable
+    public BiFunction<RiftCreature, EntityLivingBase, Boolean> getRetaliateWhenAttacked() {
+        return this.retaliateWhenAttacked;
     }
 
     /**

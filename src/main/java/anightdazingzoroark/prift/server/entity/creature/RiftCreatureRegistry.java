@@ -278,6 +278,7 @@ public class RiftCreatureRegistry {
                         //---targeting---
                         .addDefaultTargetWhitelistEntry("animal")
                         .addDefaultTargetWhitelistEntry("human")
+                        .setRetaliateWhenAttacked()
         );
         /*
         registerCreatureType(

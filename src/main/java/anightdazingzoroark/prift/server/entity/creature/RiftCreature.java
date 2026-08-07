@@ -194,10 +194,19 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         return super.onInitialSpawn(difficulty, livingdata);
     }
 
-    //this is temporary for testing purposes, will be replaced w something more dynamic
-    //after being developed further
     @Override
     protected void initEntityAI() {
+        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false) {
+            @Override
+            public boolean shouldExecute() {
+                if (creatureType.getRetaliateWhenAttacked() != null
+                        && !creatureType.getRetaliateWhenAttacked().apply((RiftCreature) this.taskOwner, this.taskOwner.getRevengeTarget())
+                ) {
+                    return false;
+                }
+                return super.shouldExecute();
+            }
+        });
         this.targetTasks.addTask(2, new RiftFindTarget(this, true));
 
         this.tasks.addTask(1, new RiftUnmountedUseMove(this));
