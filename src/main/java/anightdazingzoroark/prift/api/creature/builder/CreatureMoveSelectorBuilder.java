@@ -1,7 +1,7 @@
-package anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection;
+package anightdazingzoroark.prift.api.creature.builder;
 
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
+import anightdazingzoroark.prift.api.creature.ICreature;
+import anightdazingzoroark.prift.api.creature.CreatureMoveResult;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
@@ -32,7 +32,7 @@ public class CreatureMoveSelectorBuilder {
         this.checkIfLocked();
 
         moveRuleBuilder.lock();
-        this.moveRules.add(new MoveRule(MoveResult.USE_MOVE, moveRuleBuilder));
+        this.moveRules.add(new MoveRule(CreatureMoveResult.USE_MOVE, moveRuleBuilder));
         return this;
     }
 
@@ -45,16 +45,16 @@ public class CreatureMoveSelectorBuilder {
         this.checkIfLocked();
         if (minDist > maxDist) throw new IllegalArgumentException(minDist+" is greater than "+maxDist+"!");
 
-        this.moveRules.add(new MoveRule(MoveResult.SPRINT, new MoveRuleBuilder("")
+        this.moveRules.add(new MoveRule(CreatureMoveResult.SPRINT, new MoveRuleBuilder("")
                 .setPriorityPredicate((creature, target) -> {
                     if (target == null || !target.isEntityAlive()) return -1;
-                    if (creature.sprintToAttackCooldown > 0 && !creature.atFrustrationThreshold()) return -1;
+                    if (creature.getSprintToAttackCooldown() > 0 && !creature.atFrustrationThreshold()) return -1;
                     boolean outsideCreatureAABB = !creature.getEntityBoundingBox().grow(1e-5D).intersects(target.getEntityBoundingBox());
                     boolean outsideInnerBound = !creature.getEntityBoundingBox().grow(minDist).grow(1e-5D).intersects(target.getEntityBoundingBox());
                     boolean withinOuterBound = creature.getEntityBoundingBox().grow(maxDist).grow(1e-5D).intersects(target.getEntityBoundingBox());
 
                     if (!outsideCreatureAABB || !withinOuterBound || !outsideInnerBound) return -1;
-                    return creature.getCreaturePathNavigate().hasStraightWalkingPathTo(target) ? priority : -1;
+                    return creature.hasStraightWalkingPathTo(target) ? priority : -1;
                 })
                 .setDetectionRule(new DistanceFromUserDetectionRule("", minDist, maxDist))
                 .setUseWhenFrustrated())
@@ -77,7 +77,7 @@ public class CreatureMoveSelectorBuilder {
         leapMoveRuleBuilder.setUseWhenFrustrated();
         leapMoveRuleBuilder.lock();
 
-        this.moveRules.add(new MoveRule(MoveResult.LEAP, leapMoveRuleBuilder));
+        this.moveRules.add(new MoveRule(CreatureMoveResult.LEAP, leapMoveRuleBuilder));
         return this;
     }
 
@@ -93,12 +93,12 @@ public class CreatureMoveSelectorBuilder {
         if (this.locked) throw new IllegalCallerException("A setter for a move selector builder cannot be called after the move selector is registered!");
     }
 
-    public record MoveRule(@NotNull MoveResult moveResult, @NotNull MoveRuleBuilder moveRuleBuilder) {
+    public record MoveRule(@NotNull CreatureMoveResult moveResult, @NotNull MoveRuleBuilder moveRuleBuilder) {
         @Override
         public boolean equals(Object object) {
-            if (!(object instanceof MoveRule(MoveResult otherResult, MoveRuleBuilder otherMoveRuleBuilder))) return false;
+            if (!(object instanceof MoveRule(CreatureMoveResult otherResult, MoveRuleBuilder otherMoveRuleBuilder))) return false;
 
-            if (otherResult != MoveResult.USE_MOVE) return otherResult == this.moveResult;
+            if (otherResult != CreatureMoveResult.USE_MOVE) return otherResult == this.moveResult;
             else return otherMoveRuleBuilder.getMoveName().equals(this.moveRuleBuilder.getMoveName());
         }
     }
@@ -117,8 +117,8 @@ public class CreatureMoveSelectorBuilder {
         private LeapMoveRuleBuilder setLeapPriorityPredicate(int priority, @NotNull DetectionRule detectionRule) {
             this.setPriorityPredicate((creature, target) -> {
                 if (target == null || !target.isEntityAlive()) return -1;
-                if (!creature.onGround || !creature.getNavigationBuilder().getCanLeap()) return -1;
-                if (creature.leapToAttackCooldown > 0 && !creature.atFrustrationThreshold()) return -1;
+                if (!creature.isOnGround() || !creature.getNavigationBuilder().getCanLeap()) return -1;
+                if (creature.getLeapToAttackCooldown() > 0 && !creature.atFrustrationThreshold()) return -1;
                 return detectionRule.targetWithinRange(creature, target) ? priority : -1;
             });
             this.setDetectionRule(detectionRule);
@@ -132,7 +132,7 @@ public class CreatureMoveSelectorBuilder {
 
     //-----target detection rules for moves-----
     public abstract static class DetectionRule {
-        public abstract boolean targetWithinRange(@NotNull RiftCreature user, @NotNull EntityLivingBase target);
+        public abstract boolean targetWithinRange(@NotNull ICreature user, @NotNull EntityLivingBase target);
     }
 
     public static class BoundingBoxDetectionRule extends DetectionRule {
@@ -144,7 +144,7 @@ public class CreatureMoveSelectorBuilder {
         }
 
         @Override
-        public boolean targetWithinRange(@NotNull RiftCreature user, @NotNull EntityLivingBase target) {
+        public boolean targetWithinRange(@NotNull ICreature user, @NotNull EntityLivingBase target) {
             return user.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), this.boundingBoxName);
         }
     }
@@ -174,7 +174,7 @@ public class CreatureMoveSelectorBuilder {
         }
 
         @Override
-        public boolean targetWithinRange(@NotNull RiftCreature user, @NotNull EntityLivingBase target) {
+        public boolean targetWithinRange(@NotNull ICreature user, @NotNull EntityLivingBase target) {
             boolean outsideCreatureAABB = this.locatorName.isEmpty() || !this.withinCreatureAABB(user, target);
 
             //if minDistance is negative, it means only maxDistance matters
@@ -191,7 +191,7 @@ public class CreatureMoveSelectorBuilder {
         }
 
         @NotNull
-        private AxisAlignedBB aabbFromLocator(@NotNull RiftCreature creature, double width) {
+        private AxisAlignedBB aabbFromLocator(@NotNull ICreature creature, double width) {
             if (this.locatorName.isEmpty()) {
                 AxisAlignedBB creatureAABB = creature.getEntityBoundingBox();
                 return creatureAABB.grow(width);
@@ -209,7 +209,7 @@ public class CreatureMoveSelectorBuilder {
             }
         }
 
-        private boolean withinCreatureAABB(@NotNull RiftCreature creature, EntityLivingBase target) {
+        private boolean withinCreatureAABB(@NotNull ICreature creature, EntityLivingBase target) {
             return creature.getEntityBoundingBox().grow(1e-5D).intersects(target.getEntityBoundingBox());
         }
     }

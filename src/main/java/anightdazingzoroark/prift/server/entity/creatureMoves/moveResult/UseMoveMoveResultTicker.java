@@ -1,10 +1,9 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves.moveResult;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveChargeupBuilder.ChargeupPhase;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
-import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.MoveRuleBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
+import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.pathfinding.PathNavigate;
 import org.jetbrains.annotations.NotNull;
@@ -241,7 +240,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
     @Override
     public void onEndTicker() {
         if (this.hasExecutedMove && this.selectedMoveBuilder.getRequireFindTargetToUse()
-                && this.selectedMoveBuilder.getMoveType() == CreatureMoveHelper.MoveType.PHYSICAL
+                && this.selectedMoveBuilder.getMoveType() == CreatureMoveBuilder.MoveType.PHYSICAL
         ) {
             boolean moveHitTarget = this.creature.getAttackTargetHitCount() > this.attackTargetHitCountAtMoveStart;
             if (moveHitTarget) this.creature.resetFrustration();

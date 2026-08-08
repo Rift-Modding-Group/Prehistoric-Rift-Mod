@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.server.item;
 import anightdazingzoroark.prift.client.RiftCreativeTabs;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
-import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
+import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -39,7 +39,7 @@ public class RiftCreatureSpawnEggItem extends Item {
         if (tag == null || !tag.hasKey(CREATURE_KEY)) return RiftCreatureRegistry.DEFAULT_CREATURE;
 
         String creatureName = tag.getString(CREATURE_KEY);
-        return RiftCreatureRegistry.creatureBuilderMap.containsKey(creatureName) ? creatureName : RiftCreatureRegistry.DEFAULT_CREATURE;
+        return RiftCreatureRegistry.hasCreatureBuilder(creatureName) ? creatureName : RiftCreatureRegistry.DEFAULT_CREATURE;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class RiftCreatureSpawnEggItem extends Item {
     public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
         if (!this.isInCreativeTab(tab)) return;
 
-        List<String> creatureNames = new ArrayList<>(RiftCreatureRegistry.creatureBuilderMap.keySet());
+        List<String> creatureNames = new ArrayList<>(RiftCreatureRegistry.getCreatureNames());
         Collections.sort(creatureNames);
 
         for (String creatureName : creatureNames) {

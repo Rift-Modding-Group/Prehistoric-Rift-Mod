@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves.moveResult;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.MoveRuleBuilder;
+import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class AbstractMoveResultTicker {

@@ -1,22 +1,21 @@
-package anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection;
+package anightdazingzoroark.prift.api.creature.builder;
 
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.api.creature.ICreature;
 import net.minecraft.entity.EntityLivingBase;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiFunction;
 
 /**
- * A move rule defines how moves are executed by creature AI
- * */
+ * A move rule defines how moves are executed by creature AI.
+ */
 public class MoveRuleBuilder {
-    //extremely important
     protected boolean locked;
 
     @NotNull
     private final String moveName;
     @NotNull
-    private BiFunction<RiftCreature, EntityLivingBase, Integer> priorityPredicate = (creature, target) -> -1;
+    private BiFunction<ICreature, EntityLivingBase, Integer> priorityPredicate = (creature, target) -> -1;
     @NotNull
     private CreatureMoveSelectorBuilder.DetectionRule detectionRule = new CreatureMoveSelectorBuilder.DistanceFromUserDetectionRule("", 8D);
     private boolean canUseWhenFrustrated;
@@ -26,9 +25,6 @@ public class MoveRuleBuilder {
         this.moveName = moveName;
     }
 
-    /**
-     * This locks this object so that when accessing any instances of this, it can never be modified ever
-     * */
     public void lock() {
         this.locked = true;
     }
@@ -38,35 +34,24 @@ public class MoveRuleBuilder {
         return this.moveName;
     }
 
-    /**
-     * A priority predicate represents the priority depending on whatever relationship
-     * the creature currently has with the target.
-     * */
     public MoveRuleBuilder setPriorityPredicate(int priority) {
         this.checkIfLocked();
-
-        return this.setPriorityPredicate(((creature, target) -> (target != null && target.isEntityAlive()) ? priority : -1));
+        return this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive() ? priority : -1);
     }
 
-    public MoveRuleBuilder setPriorityPredicate(@NotNull BiFunction<RiftCreature, EntityLivingBase, Integer> priorityPredicate) {
+    public MoveRuleBuilder setPriorityPredicate(@NotNull BiFunction<ICreature, EntityLivingBase, Integer> priorityPredicate) {
         this.checkIfLocked();
-
         this.priorityPredicate = priorityPredicate;
         return this;
     }
 
     @NotNull
-    public BiFunction<RiftCreature, EntityLivingBase, Integer> getPriorityPredicate() {
+    public BiFunction<ICreature, EntityLivingBase, Integer> getPriorityPredicate() {
         return this.priorityPredicate;
     }
 
-    /**
-     * A detection rule defines when a creature can use its selected move on its target.
-     * Mostly for determining range.
-     * */
     public MoveRuleBuilder setDetectionRule(@NotNull CreatureMoveSelectorBuilder.DetectionRule detectionRule) {
         this.checkIfLocked();
-
         this.detectionRule = detectionRule;
         return this;
     }
@@ -76,12 +61,8 @@ public class MoveRuleBuilder {
         return this.detectionRule;
     }
 
-    /**
-     * Allows a creature to instantly use this move when it's frustrated
-     * */
     public MoveRuleBuilder setUseWhenFrustrated() {
         this.checkIfLocked();
-
         this.canUseWhenFrustrated = true;
         return this;
     }
@@ -90,12 +71,8 @@ public class MoveRuleBuilder {
         return this.canUseWhenFrustrated;
     }
 
-    /**
-     * Make it so creature will not path to target nor look at them when the move is selected
-     * */
     public MoveRuleBuilder setDontPathToTarget() {
         this.checkIfLocked();
-
         this.dontPathToTarget = true;
         return this;
     }
@@ -104,18 +81,14 @@ public class MoveRuleBuilder {
         return this.dontPathToTarget;
     }
 
-    /**
-     * for debugging lol
-     * */
     @Override
     public String toString() {
         return "MoveBuilder:"+this.moveName;
     }
 
-    /**
-     * Put this on every setter in builder to protect from post-creation editing
-     * */
     protected void checkIfLocked() {
-        if (this.locked) throw new IllegalCallerException("A setter for a move rule builder cannot be called after the move rule is registered!");
+        if (this.locked) {
+            throw new IllegalCallerException("A setter for a move rule builder cannot be called after the move rule is registered!");
+        }
     }
 }

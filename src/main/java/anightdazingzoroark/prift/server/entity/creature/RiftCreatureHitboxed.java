@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.riftlib.hitbox.IMultiHitboxUser;
 import anightdazingzoroark.riftlib.hitbox.MultiHitboxList;
 import anightdazingzoroark.riftlib.hitbox.RiftLibCollisionHitbox;
@@ -60,9 +61,9 @@ public class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUs
 
     @Override
     public float hitboxDamageMultiplier(RiftLibCollisionHitbox<RiftCreatureHitboxed> collisionHitbox, DamageSource source) {
-        Map<String, Function<RiftCreature, Double>> hitboxHitInfo = this.getCreatureType().getHitboxInformation();
+        Map<String, Function<ICreature, Double>> hitboxHitInfo = this.getCreatureType().getHitboxInformation();
         if (hitboxHitInfo == null) return 1f;
-        for (Map.Entry<String, Function<RiftCreature, Double>> hitEntry : hitboxHitInfo.entrySet()) {
+        for (Map.Entry<String, Function<ICreature, Double>> hitEntry : hitboxHitInfo.entrySet()) {
             if (!collisionHitbox.hasHitboxTag(hitEntry.getKey())) continue;
             return hitEntry.getValue().apply(this).floatValue();
         }

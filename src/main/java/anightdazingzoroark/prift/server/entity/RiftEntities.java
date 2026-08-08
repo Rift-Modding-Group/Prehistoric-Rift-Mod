@@ -7,13 +7,12 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.EntityEntryBuilder;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class RiftEntities {
     public static void registerEntities() {
         //NEW CREATURE REGISTRY
-        List<String> creatureNames = new ArrayList<>(RiftCreatureRegistry.creatureBuilderMap.keySet());
+        List<String> creatureNames = RiftCreatureRegistry.getCreatureNames();
         for (int x = 0; x < creatureNames.size(); x++) {
             String creatureName = creatureNames.get(x);
             registerEntity(

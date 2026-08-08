@@ -1,7 +1,7 @@
-package anightdazingzoroark.prift.server.entity.creatureMoves;
+package anightdazingzoroark.prift.api.creature.builder;
 
-import anightdazingzoroark.prift.server.entity.creature.info.Element;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.api.creature.Element;
+import anightdazingzoroark.prift.api.creature.ICreature;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.BlockPos;
@@ -16,9 +16,9 @@ public class CreatureMoveBuilder {
     protected boolean locked;
 
     //all the following variables are required and must not be null, validated in isValid()
-    private CreatureMoveHelper.MoveType moveType;
-    private BiConsumer<RiftCreature, EntityLivingBase> onMoveBeginEffect;
-    private Consumer<RiftCreature> onMoveHitEffect;
+    private MoveType moveType;
+    private BiConsumer<ICreature, EntityLivingBase> onMoveBeginEffect;
+    private Consumer<ICreature> onMoveHitEffect;
     private String[] animNames;
 
     //the following can be left alone
@@ -30,13 +30,13 @@ public class CreatureMoveBuilder {
     private Element element;
     private int elementEffectStrength;
     @Nullable
-    private BiConsumer<RiftCreature, Entity> whileMoveUseEffect;
+    private BiConsumer<ICreature, Entity> whileMoveUseEffect;
     @Nullable
-    private BiConsumer<RiftCreature, Entity> onTargetHitEffect;
+    private BiConsumer<ICreature, Entity> onTargetHitEffect;
     @Nullable
-    private BiConsumer<RiftCreature, BlockPos> onBlockHitEffect;
+    private BiConsumer<ICreature, BlockPos> onBlockHitEffect;
     @Nullable
-    private Consumer<RiftCreature> onMoveEndEffect;
+    private Consumer<ICreature> onMoveEndEffect;
     private boolean useCanStopMovement;
 
     /**
@@ -127,7 +127,7 @@ public class CreatureMoveBuilder {
         this.checkIfLocked();
         if (this.moveType != null) throw new IllegalCallerException("This move builder already has a move type!");
 
-        this.moveType = CreatureMoveHelper.MoveType.PHYSICAL;
+        this.moveType = MoveType.PHYSICAL;
         return this;
     }
 
@@ -140,7 +140,7 @@ public class CreatureMoveBuilder {
         this.checkIfLocked();
         if (this.moveType != null) throw new IllegalCallerException("This move builder already has a move type!");
 
-        this.moveType = CreatureMoveHelper.MoveType.ELEMENTAL;
+        this.moveType = MoveType.ELEMENTAL;
         this.element = element;
         this.elementEffectStrength = elementEffectStrength;
         return this;
@@ -161,49 +161,49 @@ public class CreatureMoveBuilder {
         this.checkIfLocked();
         if (this.moveType != null) throw new IllegalCallerException("This move builder already has a move type!");
 
-        this.moveType = CreatureMoveHelper.MoveType.STATUS;
+        this.moveType = MoveType.STATUS;
         return this;
     }
 
     /**
      * general getter for move type
      * */
-    public CreatureMoveHelper.MoveType getMoveType() {
+    public MoveType getMoveType() {
         return this.moveType;
     }
 
     /**
      * Set what will happen when the creature starts using the move
      * */
-    public CreatureMoveBuilder setOnMoveBeginEffect(@NotNull BiConsumer<RiftCreature, EntityLivingBase> onMoveBeginEffect) {
+    public CreatureMoveBuilder setOnMoveBeginEffect(@NotNull BiConsumer<ICreature, EntityLivingBase> onMoveBeginEffect) {
         this.checkIfLocked();
 
         this.onMoveBeginEffect = onMoveBeginEffect;
         return this;
     }
 
-    public BiConsumer<RiftCreature, EntityLivingBase> getOnMoveBeginEffect() {
+    public BiConsumer<ICreature, EntityLivingBase> getOnMoveBeginEffect() {
         return this.onMoveBeginEffect;
     }
 
     /**
      * Set what will happen when the move's animation reaches the "hit" phase
      * */
-    public CreatureMoveBuilder setOnMoveHitEffect(@NotNull Consumer<RiftCreature> onMoveHitEffect) {
+    public CreatureMoveBuilder setOnMoveHitEffect(@NotNull Consumer<ICreature> onMoveHitEffect) {
         this.checkIfLocked();
 
         this.onMoveHitEffect = onMoveHitEffect;
         return this;
     }
 
-    public Consumer<RiftCreature> getOnMoveHitEffect() {
+    public Consumer<ICreature> getOnMoveHitEffect() {
         return this.onMoveHitEffect;
     }
 
     /**
      * Add additional effects for what will happen when the move ends.
      * */
-    public CreatureMoveBuilder setOnMoveEndEffect(@NotNull Consumer<RiftCreature> onMoveEnd) {
+    public CreatureMoveBuilder setOnMoveEndEffect(@NotNull Consumer<ICreature> onMoveEnd) {
         this.checkIfLocked();
 
         this.onMoveEndEffect = onMoveEnd;
@@ -211,7 +211,7 @@ public class CreatureMoveBuilder {
     }
 
     @Nullable
-    public Consumer<RiftCreature> getOnMoveEndEffect() {
+    public Consumer<ICreature> getOnMoveEndEffect() {
         return this.onMoveEndEffect;
     }
 
@@ -233,20 +233,20 @@ public class CreatureMoveBuilder {
     /**
      * Set what will happen exclusively while the move is being used, start to end
      * */
-    public CreatureMoveBuilder setWhileMoveUseEffect(@NotNull BiConsumer<RiftCreature, Entity> whileMoveUseEffect) {
+    public CreatureMoveBuilder setWhileMoveUseEffect(@NotNull BiConsumer<ICreature, Entity> whileMoveUseEffect) {
         this.whileMoveUseEffect = whileMoveUseEffect;
         return this;
     }
 
     @Nullable
-    public BiConsumer<RiftCreature, Entity> getWhileMoveUseEffect() {
+    public BiConsumer<ICreature, Entity> getWhileMoveUseEffect() {
         return this.whileMoveUseEffect;
     }
 
     /**
      * Set any additional effects that will happen when attacking an entity
      * */
-    public CreatureMoveBuilder setOnHitTargetEffect(@NotNull BiConsumer<RiftCreature, Entity> onTargetHitEffect) {
+    public CreatureMoveBuilder setOnHitTargetEffect(@NotNull BiConsumer<ICreature, Entity> onTargetHitEffect) {
         this.checkIfLocked();
 
         this.onTargetHitEffect = onTargetHitEffect;
@@ -254,7 +254,7 @@ public class CreatureMoveBuilder {
     }
 
     @Nullable
-    public BiConsumer<RiftCreature, Entity> getOnTargetHitEffect() {
+    public BiConsumer<ICreature, Entity> getOnTargetHitEffect() {
         return this.onTargetHitEffect;
     }
 
@@ -302,5 +302,11 @@ public class CreatureMoveBuilder {
      * */
     protected void checkIfLocked() {
         if (this.locked) throw new IllegalCallerException("A setter for a move builder cannot be called after the move is registered!");
+    }
+
+    public enum MoveType {
+        PHYSICAL,
+        ELEMENTAL,
+        STATUS
     }
 }

@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.server.config;
+package anightdazingzoroark.prift.api.creature.config;
 
 import com.google.gson.annotations.SerializedName;
 import org.jetbrains.annotations.NotNull;

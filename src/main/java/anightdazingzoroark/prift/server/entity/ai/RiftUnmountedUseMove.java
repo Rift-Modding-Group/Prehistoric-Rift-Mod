@@ -1,10 +1,11 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
+import anightdazingzoroark.prift.api.creature.CreatureMoveResult;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.AbstractMoveResultTicker;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
-import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelectorBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder;
 import net.minecraft.entity.ai.EntityAIBase;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +46,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     @Override
     public void startExecuting() {
         CreatureMoveSelectorBuilder.MoveRule moveRule = this.moveRulePair.getLeft();
-        this.moveResultTicker = moveRule.moveResult().moveResultTicker.apply(this.creature, moveRule.moveRuleBuilder());
+        this.moveResultTicker = MoveResult.createTicker(moveRule.moveResult(), this.creature, moveRule.moveRuleBuilder());
     }
 
     @Override
@@ -86,8 +87,8 @@ public class RiftUnmountedUseMove extends EntityAIBase {
         if (this.moveResultTicker != null) this.moveResultTicker.onEndTicker();
         this.moveRulePair = newMoveRulePair;
         CreatureMoveSelectorBuilder.MoveRule moveRule = this.moveRulePair.getLeft();
-        this.moveResultTicker = moveRule.moveResult().moveResultTicker.apply(
-                this.creature, moveRule.moveRuleBuilder()
+        this.moveResultTicker = MoveResult.createTicker(
+                moveRule.moveResult(), this.creature, moveRule.moveRuleBuilder()
         );
     }
 
@@ -98,6 +99,6 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     }
 
     private boolean isUsingLeapAttack() {
-        return this.moveRulePair != null && this.moveRulePair.getLeft().moveResult() == MoveResult.LEAP;
+        return this.moveRulePair != null && this.moveRulePair.getLeft().moveResult() == CreatureMoveResult.LEAP;
     }
 }

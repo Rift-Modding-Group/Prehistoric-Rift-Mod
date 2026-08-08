@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.config;
 
+import anightdazingzoroark.prift.api.creature.config.RiftCreatureFood;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.LinkedHashMap;

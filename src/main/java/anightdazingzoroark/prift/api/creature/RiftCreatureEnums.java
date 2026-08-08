@@ -1,10 +1,10 @@
-package anightdazingzoroark.prift.server.entity.creature.info;
+package anightdazingzoroark.prift.api.creature;
 
 import net.minecraft.client.resources.I18n;
 import org.jetbrains.annotations.NotNull;
 
 public class RiftCreatureEnums {
-    public static enum InventoryGearType {
+    public enum InventoryGearType {
         SADDLE,
         LARGE_WEAPON
     }
@@ -38,16 +38,6 @@ public class RiftCreatureEnums {
         }
     }
 
-    //additional movement options in addition to walking
-    public enum Movement {
-        JUMP,
-        CLIMB,
-        SWIM,
-        FLY,
-        SLOW_FALL,
-        BURROW
-    }
-
     //Stats are to be on a scale of 0.5-10 with steps of 0.5
     //and will be represented as stars on most UIs
     public enum Stats {
@@ -65,7 +55,7 @@ public class RiftCreatureEnums {
         SPEED;
     }
 
-    public static enum LevelupRate {
+    public enum LevelupRate {
         VERY_SLOW(1.6D),
         SLOW(1.4D),
         NORMAL(1.2D),

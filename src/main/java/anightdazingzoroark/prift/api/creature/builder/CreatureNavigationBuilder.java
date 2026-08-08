@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.server.entity.creature.builder;
+package anightdazingzoroark.prift.api.creature.builder;
 
 import org.jetbrains.annotations.NotNull;
 

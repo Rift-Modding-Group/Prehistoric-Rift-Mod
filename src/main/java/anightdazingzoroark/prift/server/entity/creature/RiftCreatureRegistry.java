@@ -1,16 +1,16 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.server.entity.creature.builder.CreatureNavigationBuilder;
-import anightdazingzoroark.prift.server.entity.creature.builder.CreaturePhaseBuilder;
-import anightdazingzoroark.prift.server.entity.creature.info.Element;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveChargeupBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
+import anightdazingzoroark.prift.api.creature.Element;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCommon;
-import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelectorBuilder;
-import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
-import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
-import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.MoveRuleBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder;
+import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
+import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
+import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
@@ -27,7 +27,9 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 //this registers creatures
@@ -35,11 +37,27 @@ public class RiftCreatureRegistry {
     public static final String DEFAULT_CREATURE = "tyrannosaurus";
 
     //all creatures are stored here
-    public static final HashMap<String, RiftCreatureBuilder> creatureBuilderMap = new HashMap<>();
-    private static final HashMap<String, Class<? extends RiftCreature>> creatureRegistryClassMap = new HashMap<>();
+    private static final LinkedHashMap<String, RiftCreatureBuilder> creatureBuilderMap = new LinkedHashMap<>();
+    private static final LinkedHashMap<String, Class<? extends RiftCreature>> creatureRegistryClassMap = new LinkedHashMap<>();
+    private static final LinkedHashMap<String, RiftCreatureBuilder> pendingAddonCreatures = new LinkedHashMap<>();
+    private static boolean registeringBuiltInCreatures;
+    private static boolean builtInCreaturesRegistered;
+    private static boolean registrationFinished;
 
     public static RiftCreatureBuilder getCreatureBuilder(String name) {
         return creatureBuilderMap.get(name);
+    }
+
+    public static boolean hasCreatureBuilder(String name) {
+        return creatureBuilderMap.containsKey(name);
+    }
+
+    public static List<String> getCreatureNames() {
+        return List.copyOf(creatureBuilderMap.keySet());
+    }
+
+    public static Map<String, RiftCreatureBuilder> getCreatureBuilders() {
+        return Collections.unmodifiableMap(creatureBuilderMap);
     }
 
     public static Class<? extends RiftCreature> getCreatureRegistryClass(String name) {
@@ -54,6 +72,17 @@ public class RiftCreatureRegistry {
     }
 
     public static void registerCreatureType(String name, RiftCreatureBuilder builder) {
+        if (registrationFinished) {
+            RiftInitialize.logger.warn("Creature type {} was registered after creature registration finished!", name);
+            return;
+        }
+        if (!builtInCreaturesRegistered && !registeringBuiltInCreatures) {
+            if (pendingAddonCreatures.putIfAbsent(name, builder) != null) {
+                RiftInitialize.logger.warn("Builder for addon creature type {} already exists!", name);
+            }
+            return;
+        }
+
         //-----verify creature builder first-----
         if (creatureBuilderMap.containsKey(name)) {
             RiftInitialize.logger.warn("Builder for creature type {} already exists!", name);
@@ -89,6 +118,9 @@ public class RiftCreatureRegistry {
     }
 
     public static void createCreatures() {
+        if (builtInCreaturesRegistered || registeringBuiltInCreatures) return;
+        registeringBuiltInCreatures = true;
+
         registerCreatureType(
                 "tyrannosaurus",
                 new RiftCreatureBuilder()
@@ -164,17 +196,18 @@ public class RiftCreatureRegistry {
                                     }
                                     for (BlockPos hitBlockPos : rayHitResult.hitBlockPositions()) {
                                         //allow for snow
-                                        if (creature.world.getBlockState(hitBlockPos).getBlock() == Blocks.SNOW_LAYER
-                                                && Blocks.FIRE.canPlaceBlockAt(creature.world, hitBlockPos)
+                                        World world = creature.getEntityWorld();
+                                        if (world.getBlockState(hitBlockPos).getBlock() == Blocks.SNOW_LAYER
+                                                && Blocks.FIRE.canPlaceBlockAt(world, hitBlockPos)
                                                 && creature.getRNG().nextInt(4) == 0) {
-                                            creature.world.setBlockState(hitBlockPos, Blocks.FIRE.getDefaultState(), 3);
+                                            world.setBlockState(hitBlockPos, Blocks.FIRE.getDefaultState(), 3);
                                         }
                                         //allow for well almost anything else
-                                        else if (!creature.world.isAirBlock(hitBlockPos)
-                                                && creature.world.isAirBlock(hitBlockPos.up())
-                                                && Blocks.FIRE.canPlaceBlockAt(creature.world, hitBlockPos.up())
+                                        else if (!world.isAirBlock(hitBlockPos)
+                                                && world.isAirBlock(hitBlockPos.up())
+                                                && Blocks.FIRE.canPlaceBlockAt(world, hitBlockPos.up())
                                                 && creature.getRNG().nextInt(4) == 0) {
-                                            creature.world.setBlockState(hitBlockPos.up(), Blocks.FIRE.getDefaultState(), 3);
+                                            world.setBlockState(hitBlockPos.up(), Blocks.FIRE.getDefaultState(), 3);
                                         }
                                     }
                                 }
@@ -233,10 +266,10 @@ public class RiftCreatureRegistry {
                                         .setChargeUpWhileUse(true)
                                         .setMaxChargeUp(300)
                                         .setPrereleaseEndEffect(creature -> {
-                                            RiftLibRayHelper.createRay(creature, "flamethrowerRay", "flameLocator");
+                                            RiftLibRayHelper.createRay(creature.asRayCreator(), "flamethrowerRay", "flameLocator");
                                         })
                                         .setReleaseEndEffect(creature -> {
-                                            RiftLibRayHelper.killRay(creature, "flamethrowerRay");
+                                            RiftLibRayHelper.killRay(creature.asRayCreator(), "flamethrowerRay");
                                         })
                                 )
                                 .setOnMoveEndEffect(creature -> {
@@ -339,5 +372,22 @@ public class RiftCreatureRegistry {
                         .setRetaliateWhenAttacked(true)
         );
          */
+
+        registeringBuiltInCreatures = false;
+        builtInCreaturesRegistered = true;
+        for (Map.Entry<String, RiftCreatureBuilder> entry : pendingAddonCreatures.entrySet()) {
+            registerCreatureType(entry.getKey(), entry.getValue());
+        }
+        pendingAddonCreatures.clear();
+    }
+
+    /**
+     * Closes the registration window after addon registration listeners have run.
+     */
+    public static void finishCreatureRegistration() {
+        if (!builtInCreaturesRegistered) {
+            throw new IllegalStateException("Built-in creatures must be registered before addon registration can finish");
+        }
+        registrationFinished = true;
     }
 }

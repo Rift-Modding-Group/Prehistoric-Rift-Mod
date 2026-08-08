@@ -1,5 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+
 /**
  * Common stuff for use among creature moves
  * */

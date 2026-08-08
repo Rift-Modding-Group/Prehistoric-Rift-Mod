@@ -1,8 +1,9 @@
 package anightdazingzoroark.prift.server.entity.creature.info;
 
+import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.server.entity.creature.IRiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
-import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
+import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.function.BiConsumer;

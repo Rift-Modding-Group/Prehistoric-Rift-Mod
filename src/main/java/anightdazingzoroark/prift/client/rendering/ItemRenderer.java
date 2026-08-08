@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.client.rendering;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
-import anightdazingzoroark.prift.server.entity.creature.builder.AbstractCreatureBuilder;
+import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.server.item.RiftCreatureSpawnEggItem;
 import anightdazingzoroark.prift.server.item.RiftItems;
 import net.minecraft.client.Minecraft;

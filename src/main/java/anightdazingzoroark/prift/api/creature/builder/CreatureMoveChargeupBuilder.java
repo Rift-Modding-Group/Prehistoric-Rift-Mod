@@ -1,6 +1,6 @@
-package anightdazingzoroark.prift.server.entity.creatureMoves;
+package anightdazingzoroark.prift.api.creature.builder;
 
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.api.creature.ICreature;
 import net.minecraft.entity.EntityLivingBase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,23 +11,20 @@ import java.util.function.Function;
 
 /**
  * Contains information about a move's windup.
- * */
+ */
 public class CreatureMoveChargeupBuilder {
     private boolean chargeUpThenRelease;
     private boolean chargeUpWhileUse;
     private boolean canRotateWhileReleasing;
     private int maxChargeUp = 100;
     @NotNull
-    private Function<RiftCreature, Double> cooldownMultiplier = creature -> 2D;
+    private Function<ICreature, Double> cooldownMultiplier = creature -> 2D;
 
-    private Consumer<RiftCreature> windupEndEffect;
-    private Consumer<RiftCreature> prereleaseEndEffect;
-    private Consumer<RiftCreature> releaseEndEffect;
-    private BiConsumer<RiftCreature, EntityLivingBase> releaseDuringUseEffect;
+    private Consumer<ICreature> windupEndEffect;
+    private Consumer<ICreature> prereleaseEndEffect;
+    private Consumer<ICreature> releaseEndEffect;
+    private BiConsumer<ICreature, EntityLivingBase> releaseDuringUseEffect;
 
-    /**
-     * Make it so that the creature charges up the move, then releases it
-     * */
     public CreatureMoveChargeupBuilder setChargeUpThenRelease() {
         return this.setChargeUpThenRelease(false);
     }
@@ -45,9 +42,6 @@ public class CreatureMoveChargeupBuilder {
         return this.chargeUpThenRelease;
     }
 
-    /**
-     * Make it so that the creature charges up and uses the move at the same time
-     * */
     public CreatureMoveChargeupBuilder setChargeUpWhileUse() {
         return this.setChargeUpWhileUse(false);
     }
@@ -65,16 +59,10 @@ public class CreatureMoveChargeupBuilder {
         return this.chargeUpWhileUse;
     }
 
-    /**
-     * Allows for rotation of the creature along yaw while releasing
-     * */
     public boolean getCanRotateWhileReleasing() {
         return this.canRotateWhileReleasing;
     }
 
-    /**
-     * Set max charge up in ticks
-     * */
     public CreatureMoveChargeupBuilder setMaxChargeUp(int value) {
         this.maxChargeUp = value;
         return this;
@@ -84,81 +72,64 @@ public class CreatureMoveChargeupBuilder {
         return this.maxChargeUp;
     }
 
-    /**
-     * Set cooldown multiplier. This refers to how long in ticks a move cools down
-     * after it gets used.
-     * */
     public CreatureMoveChargeupBuilder setCooldownMultiplier(double value) {
         this.cooldownMultiplier = creature -> value;
         return this;
     }
 
-    public CreatureMoveChargeupBuilder setCooldownMultiplier(@NotNull Function<RiftCreature, Double> cooldownMultiplier) {
+    public CreatureMoveChargeupBuilder setCooldownMultiplier(@NotNull Function<ICreature, Double> cooldownMultiplier) {
         this.cooldownMultiplier = cooldownMultiplier;
         return this;
     }
 
     @NotNull
-    public Function<RiftCreature, Double> getCooldownMultiplier() {
+    public Function<ICreature, Double> getCooldownMultiplier() {
         return this.cooldownMultiplier;
     }
 
-    /**
-     * Set what will happen when ending the windup of a move
-     * */
-    public CreatureMoveChargeupBuilder setWindupEndEffect(@NotNull Consumer<RiftCreature> windupEndEffect) {
+    public CreatureMoveChargeupBuilder setWindupEndEffect(@NotNull Consumer<ICreature> windupEndEffect) {
         this.windupEndEffect = windupEndEffect;
         return this;
     }
 
     @Nullable
-    public Consumer<RiftCreature> getWindupEndEffect() {
+    public Consumer<ICreature> getWindupEndEffect() {
         return this.windupEndEffect;
     }
 
-    /**
-     * Set what will happen in the end of the transition of the windup and release phases
-     * */
-    public CreatureMoveChargeupBuilder setPrereleaseEndEffect(@NotNull Consumer<RiftCreature> prereleaseEndEffect) {
+    public CreatureMoveChargeupBuilder setPrereleaseEndEffect(@NotNull Consumer<ICreature> prereleaseEndEffect) {
         this.prereleaseEndEffect = prereleaseEndEffect;
         return this;
     }
 
     @Nullable
-    public Consumer<RiftCreature> getPrereleaseEndEffect() {
+    public Consumer<ICreature> getPrereleaseEndEffect() {
         return this.prereleaseEndEffect;
     }
 
-    /**
-     * Set what will happen in the end of the release phase
-     * */
-    public CreatureMoveChargeupBuilder setReleaseEndEffect(@NotNull Consumer<RiftCreature> releaseEndEffect) {
+    public CreatureMoveChargeupBuilder setReleaseEndEffect(@NotNull Consumer<ICreature> releaseEndEffect) {
         this.releaseEndEffect = releaseEndEffect;
         return this;
     }
 
     @Nullable
-    public Consumer<RiftCreature> getReleaseEndEffect() {
+    public Consumer<ICreature> getReleaseEndEffect() {
         return this.releaseEndEffect;
     }
 
-    /**
-     * Set what will happen while the move is being used in the release phase
-     * */
-    public CreatureMoveChargeupBuilder setReleaseDuringUseEffect(@NotNull BiConsumer<RiftCreature, EntityLivingBase> releaseDuringUseEffect) {
+    public CreatureMoveChargeupBuilder setReleaseDuringUseEffect(@NotNull BiConsumer<ICreature, EntityLivingBase> releaseDuringUseEffect) {
         this.releaseDuringUseEffect = releaseDuringUseEffect;
         return this;
     }
 
     @Nullable
-    public BiConsumer<RiftCreature, EntityLivingBase> getReleaseDuringUseEffect() {
+    public BiConsumer<ICreature, EntityLivingBase> getReleaseDuringUseEffect() {
         return this.releaseDuringUseEffect;
     }
 
     @NotNull
     public CreatureMoveChargeupBuilder copy() {
         CreatureMoveChargeupBuilder toReturn = new CreatureMoveChargeupBuilder();
-
         toReturn.chargeUpThenRelease = this.chargeUpThenRelease;
         toReturn.chargeUpWhileUse = this.chargeUpWhileUse;
         toReturn.canRotateWhileReleasing = this.canRotateWhileReleasing;
@@ -168,15 +139,14 @@ public class CreatureMoveChargeupBuilder {
         toReturn.prereleaseEndEffect = this.prereleaseEndEffect;
         toReturn.releaseEndEffect = this.releaseEndEffect;
         toReturn.releaseDuringUseEffect = this.releaseDuringUseEffect;
-
         return toReturn;
     }
 
     public enum ChargeupPhase {
-        PREWINDUP, //before proper windup
-        WINDUP, //winding up a chargeup move
-        PRERELEASING, //between windup and releasing. the end of this phase is when the move hit starts
-        RELEASING, //releasing a chargeup move
-        FINISHING //recovering from using a chargeup move
+        PREWINDUP,
+        WINDUP,
+        PRERELEASING,
+        RELEASING,
+        FINISHING
     }
 }

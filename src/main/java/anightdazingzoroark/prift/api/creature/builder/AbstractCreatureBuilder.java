@@ -1,11 +1,9 @@
-package anightdazingzoroark.prift.server.entity.creature.builder;
+package anightdazingzoroark.prift.api.creature.builder;
 
-import anightdazingzoroark.prift.server.config.RiftCreatureFood;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelectorBuilder;
-import anightdazingzoroark.prift.util.TriConsumer;
+import anightdazingzoroark.prift.api.creature.config.RiftCreatureFood;
+import anightdazingzoroark.prift.api.creature.ICreature;
+import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
+import anightdazingzoroark.prift.api.util.TriConsumer;
 import anightdazingzoroark.riftlib.ray.RiftLibRay;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import net.minecraft.entity.EntityLivingBase;
@@ -36,7 +34,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     //the following can be left alone
     private float[] mainHitboxSize = new float[]{1f, 1f};
     private int maxFallHeight = 3;
-    private BiFunction<RiftCreature, EntityLivingBase, Boolean> retaliateWhenAttacked;
+    private BiFunction<ICreature, EntityLivingBase, Boolean> retaliateWhenAttacked;
     private boolean isNocturnal;
     private boolean canBeKnockedBack;
     private boolean flopOnLand;
@@ -49,7 +47,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private CreatureNavigationBuilder navigation = new CreatureNavigationBuilder().setCanWalk();
     private CreatureMoveSelectorBuilder moveSelector = new CreatureMoveSelectorBuilder();
     private Map<String, RiftLibRayBuilder> rayMap;
-    private Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
+    private Map<String, TriConsumer<ICreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
     private List<String> defaultTargetWhitelist;
     private List<String> defaultTargetBlacklist;
     private List<RiftCreatureFood> defaultFoodItemWhitelist;
@@ -215,14 +213,14 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
         return this.setRetaliateWhenAttacked((creature, target) -> true);
     }
 
-    public T setRetaliateWhenAttacked(@NotNull BiFunction<RiftCreature, EntityLivingBase, Boolean> retaliateWhenAttacked) {
+    public T setRetaliateWhenAttacked(@NotNull BiFunction<ICreature, EntityLivingBase, Boolean> retaliateWhenAttacked) {
         this.checkIfLocked();
         this.retaliateWhenAttacked = retaliateWhenAttacked;
         return this.getThis();
     }
 
     @Nullable
-    public BiFunction<RiftCreature, EntityLivingBase, Boolean> getRetaliateWhenAttacked() {
+    public BiFunction<ICreature, EntityLivingBase, Boolean> getRetaliateWhenAttacked() {
         return this.retaliateWhenAttacked;
     }
 
@@ -359,7 +357,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     /**
      * Create a map of RiftLibrary rays that this creature will use.
      * */
-    public T addUsableRay(@NotNull String name, @NotNull RiftLibRayBuilder builder, @NotNull TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult> rayHitEffect) {
+    public T addUsableRay(@NotNull String name, @NotNull RiftLibRayBuilder builder, @NotNull TriConsumer<ICreature, BlockPos, RiftLibRay.RayHitResult> rayHitEffect) {
         this.checkIfLocked();
 
         if (this.rayMap == null || this.rayHitEffectMap == null) {
@@ -378,7 +376,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     }
 
     @Nullable
-    public Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> getRayHitEffectMap() {
+    public Map<String, TriConsumer<ICreature, BlockPos, RiftLibRay.RayHitResult>> getRayHitEffectMap() {
         if (this.rayHitEffectMap == null) return null;
         return Map.copyOf(this.rayHitEffectMap);
     }

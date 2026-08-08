@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
-import anightdazingzoroark.prift.server.entity.creature.builder.CreaturePhaseBuilder;
+import anightdazingzoroark.prift.api.creature.config.RiftCreatureConfig;
+import anightdazingzoroark.prift.api.creature.ICreature;
+import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
@@ -9,16 +11,16 @@ import anightdazingzoroark.prift.server.entity.ai.RiftUnmountedUseMove;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelperBase;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreaturePathNavigate;
-import anightdazingzoroark.prift.server.entity.creature.builder.CreatureNavigationBuilder;
-import anightdazingzoroark.prift.server.entity.creature.info.Element;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveChargeupBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveChargeupBuilder.ChargeupPhase;
+import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
+import anightdazingzoroark.prift.api.creature.Element;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
-import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
-import anightdazingzoroark.prift.server.entity.creature.info.RiftCreatureEnums;
+import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
+import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.util.MathUtil;
-import anightdazingzoroark.prift.util.TriConsumer;
+import anightdazingzoroark.prift.api.util.TriConsumer;
 import anightdazingzoroark.riftlib.core.AnimatableRunValue;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
@@ -55,6 +57,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.lwjglx.util.vector.Quaternion;
 
@@ -66,7 +69,7 @@ import java.util.Map;
 /**
  * le heart and soul of this mod
  * */
-public class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, IRiftCreature, IRayCreator<RiftCreature> {
+public class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, IRiftCreature, ICreature, IRayCreator<RiftCreature> {
     @NotNull
     private RiftCreatureBuilder creatureType;
     @NotNull
@@ -115,7 +118,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //ray specific params
     protected Map<String, RiftLibRayBuilder> rayMap;
-    protected Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
+    protected Map<String, TriConsumer<ICreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
 
     public RiftCreature(World worldIn) {
         this(worldIn, RiftCreatureRegistry.DEFAULT_CREATURE);
@@ -147,7 +150,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(this.creatureType.getCanBeKnockedBack() ? 0D : 1D);
         Map<String, RiftLibRayBuilder> configuredRays = this.creatureType.getRayMap();
         this.rayMap = configuredRays == null ? new HashMap<>() : new HashMap<>(configuredRays);
-        Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> configuredRayEffects = this.creatureType.getRayHitEffectMap();
+        Map<String, TriConsumer<ICreature, BlockPos, RiftLibRay.RayHitResult>> configuredRayEffects = this.creatureType.getRayHitEffectMap();
         this.rayHitEffectMap = configuredRayEffects == null ? new HashMap<>() : new HashMap<>(configuredRayEffects);
 
         this.trackingFallImpact = false;
@@ -161,10 +164,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                     .setMotionSpeed(1.5D)
             );
             this.rayHitEffectMap.put("fallImpactRay", (creature, rayOrigin, rayHitResult) -> {
-                if (creature.world.isRemote) return;
+                if (creature.getEntityWorld().isRemote) return;
                 for (Entity hitEntity : rayHitResult.hitEntities()) {
                     if (hitEntity instanceof EntityLivingBase) {
-                        creature.attackEntityFromFallImpact(hitEntity, creature.lastFallImpactYDelta);
+                        this.attackEntityFromFallImpact(hitEntity, this.lastFallImpactYDelta);
                     }
                 }
             });
@@ -336,6 +339,34 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (aabb == null) return false;
         return aabb.intersects(otherAABB);
     }
+
+    //---ICreature implementations from the api starts here---
+    @Override
+    @NotNull
+    public RiftCreatureConfig getCreatureConfig() {
+        return IRiftCreature.super.getCreatureConfig();
+    }
+
+    @Override
+    public boolean isOnGround() {
+        return this.onGround;
+    }
+
+    @Override
+    public int getSprintToAttackCooldown() {
+        return this.sprintToAttackCooldown;
+    }
+
+    @Override
+    public int getLeapToAttackCooldown() {
+        return this.leapToAttackCooldown;
+    }
+
+    @Override
+    public boolean hasStraightWalkingPathTo(@NotNull EntityLivingBase target) {
+        return this.getCreaturePathNavigate().hasStraightWalkingPathTo(target);
+    }
+    //---ICreature implementations from the api ends here---
 
     //this gets the scale of the model of the entity
     public float scale() {
@@ -672,6 +703,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //-----animation related methods-----
     @Override
+    @NonNull
     public AnimationDataEntity getAnimationData() {
         return this.animData;
     }

@@ -2,8 +2,8 @@ package anightdazingzoroark.prift.server.entity.creatureMoves.moveResult;
 
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelperBase;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelectorBuilder.LeapMoveRuleBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.MoveRuleBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder.LeapMoveRuleBuilder;
+import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.util.MathUtil;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.Vec3d;

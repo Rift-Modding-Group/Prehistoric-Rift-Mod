@@ -1,8 +1,10 @@
 package anightdazingzoroark.prift.server.config;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.api.creature.config.RiftCreatureConfig;
+import anightdazingzoroark.prift.api.creature.config.RiftCreatureFood;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
-import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
+import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
@@ -60,7 +62,7 @@ public class RiftJsonConfigParser {
     public void loadCreatureConfigs() {
         this.creatureConfigs.clear();
 
-        for (Map.Entry<String, RiftCreatureBuilder> builderEntry : RiftCreatureRegistry.creatureBuilderMap.entrySet()) {
+        for (Map.Entry<String, RiftCreatureBuilder> builderEntry : RiftCreatureRegistry.getCreatureBuilders().entrySet()) {
             String creatureName = builderEntry.getKey();
             RiftCreatureBuilder builder = builderEntry.getValue();
 

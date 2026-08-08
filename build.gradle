@@ -56,7 +56,37 @@ configurations {
     runtimeOnly.extendsFrom(modRuntimeOnly)
 }
 
+String apiPackagePath = "${propertyString('root_package').replace('.', '/')}/api/**"
+def apiSourceFiles = fileTree('src/main/java') {
+    include(apiPackagePath)
+}
+
+def compileApiJavaTask = tasks.register('compileApiJava', JavaCompile) {
+    group = 'build'
+    description = 'Compiles only the public addon API.'
+    source(apiSourceFiles)
+    classpath = sourceSets.main.compileClasspath
+    destinationDirectory = layout.buildDirectory.dir('classes/java/api')
+    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_21
+}
+
+def apiDevJarTask = tasks.register('apiDevJar', Jar) {
+    group = 'build'
+    description = 'Assembles the development (MCP-named) addon API jar.'
+    archiveClassifier = 'api-dev'
+    from(compileApiJavaTask.flatMap { it.destinationDirectory })
+    dependsOn(compileApiJavaTask)
+}
+
+def apiSourcesJarTask = tasks.register('apiSourcesJar', Jar) {
+    group = 'build'
+    description = 'Assembles the addon API sources jar.'
+    archiveClassifier = 'api-sources'
+    from(apiSourceFiles)
+}
+
 String remapTaskName = propertyBool('enable_shadow') ? "remapShadowJar" : "remapJar"
+def apiJarTask
 
 unimined.minecraft {
     version "1.12.2"
@@ -100,10 +130,22 @@ unimined.minecraft {
         }
     }
 
+    apiJarTask = remap(apiDevJarTask.get(), 'apiJar') {
+        group = 'build'
+        description = 'Remaps the addon API jar for use outside a development environment.'
+        archiveClassifier = 'api'
+    }
+
     mods {
         remap(configurations.modCompileOnly)
         remap(configurations.modRuntimeOnly)
     }
+}
+
+tasks.register('buildApi') {
+    group = 'build'
+    description = 'Builds only the addon API binary and sources jars.'
+    dependsOn(apiJarTask, apiSourcesJarTask)
 }
 
 dependencies {

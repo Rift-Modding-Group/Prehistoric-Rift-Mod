@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server;
 
+import anightdazingzoroark.prift.api.creature.RiftCreatureRegistrationEvent;
 import anightdazingzoroark.prift.server.config.RiftJsonConfigParser;
 import anightdazingzoroark.prift.server.dataSerializers.InternalRegistryPrimer;
 import anightdazingzoroark.prift.server.dataSerializers.PrimerEventHandler;
@@ -31,6 +32,8 @@ public class ServerProxy {
 
         //register entities
         RiftCreatureRegistry.createCreatures();
+        MinecraftForge.EVENT_BUS.post(new RiftCreatureRegistrationEvent(RiftCreatureRegistry::registerCreatureType));
+        RiftCreatureRegistry.finishCreatureRegistration();
         RiftEntities.registerEntities();
 
         //register configs

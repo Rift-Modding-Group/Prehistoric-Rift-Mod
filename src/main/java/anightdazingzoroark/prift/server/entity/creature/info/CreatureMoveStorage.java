@@ -1,15 +1,15 @@
 package anightdazingzoroark.prift.server.entity.creature.info;
 
+import anightdazingzoroark.prift.api.creature.CreatureMoveResult;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
-import anightdazingzoroark.prift.server.entity.creature.builder.CreaturePhaseBuilder;
-import anightdazingzoroark.prift.server.entity.creature.builder.RiftCreatureBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveChargeupBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveChargeupBuilder.ChargeupPhase;
-import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
-import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelectorBuilder;
-import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.MoveRuleBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
+import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder;
+import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.util.PriorityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -77,7 +77,7 @@ public class CreatureMoveStorage {
         for (CreatureMoveSelectorBuilder.MoveRule moveRule : this.creatureType.getMoveSelector().getMoveRules()) {
             MoveRuleBuilder moveRuleBuilder = moveRule.moveRuleBuilder();
 
-            boolean useDueToFrustration = moveRule.moveResult() == MoveResult.USE_MOVE
+            boolean useDueToFrustration = moveRule.moveResult() == CreatureMoveResult.USE_MOVE
                     && target != null
                     && target.isEntityAlive()
                     && creature.atFrustrationThreshold()

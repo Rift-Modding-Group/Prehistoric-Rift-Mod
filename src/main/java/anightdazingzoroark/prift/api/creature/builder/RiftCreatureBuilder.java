@@ -1,6 +1,6 @@
-package anightdazingzoroark.prift.server.entity.creature.builder;
+package anightdazingzoroark.prift.api.creature.builder;
 
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.BooleanPropertyValue;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.IntegerPropertyValue;
@@ -19,8 +19,8 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     @Nullable
     private Map<String, AbstractPropertyValue<?>> propertyValueMap;
     @Nullable
-    private Consumer<RiftCreature> updateEffect;
-    private Map<String, Function<RiftCreature, Double>> hitboxTagDamageInfo;
+    private Consumer<ICreature> updateEffect;
+    private Map<String, Function<ICreature, Double>> hitboxTagDamageInfo;
 
     /**
      * Set the name of the species of the creature, is to be required
@@ -78,7 +78,7 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     /**
      * Update effects are extra stuff that happens with the creature every tick
      * */
-    public RiftCreatureBuilder registerOnUpdateEffect(@NotNull Consumer<RiftCreature> onUpdate) {
+    public RiftCreatureBuilder registerOnUpdateEffect(@NotNull Consumer<ICreature> onUpdate) {
         this.checkIfLocked();
 
         this.updateEffect = onUpdate;
@@ -86,7 +86,7 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     }
 
     @Nullable
-    public Consumer<RiftCreature> getUpdateEffect() {
+    public Consumer<ICreature> getUpdateEffect() {
         return this.updateEffect;
     }
 
@@ -100,7 +100,7 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
         return this;
     }
 
-    public RiftCreatureBuilder setHitboxInformation(@NotNull Map<String, Function<RiftCreature, Double>> hitboxTagDamageInfo) {
+    public RiftCreatureBuilder setHitboxInformation(@NotNull Map<String, Function<ICreature, Double>> hitboxTagDamageInfo) {
         this.checkIfLocked();
 
         this.hitboxTagDamageInfo = hitboxTagDamageInfo;
@@ -108,7 +108,7 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     }
 
     @Nullable
-    public Map<String, Function<RiftCreature, Double>> getHitboxInformation() {
+    public Map<String, Function<ICreature, Double>> getHitboxInformation() {
         return this.hitboxTagDamageInfo;
     }
 }

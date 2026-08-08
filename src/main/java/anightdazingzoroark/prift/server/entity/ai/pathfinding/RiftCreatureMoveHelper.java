@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.builder.CreatureNavigationBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.util.math.MathHelper;
 

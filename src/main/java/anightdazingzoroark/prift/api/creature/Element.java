@@ -1,12 +1,14 @@
-package anightdazingzoroark.prift.server.entity.creature.info;
+package anightdazingzoroark.prift.api.creature;
 
 import net.minecraft.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiConsumer;
 
-//elemental damage is too obvious to explain
-//they also have special effects attached to them
+/**
+ * elemental damage is too obvious to explain
+ * they also have special effects attached to them
+ * */
 public enum Element {
     FIRE((target, strength) -> {
         target.setFire((strength + 1) * 5 * 20);
