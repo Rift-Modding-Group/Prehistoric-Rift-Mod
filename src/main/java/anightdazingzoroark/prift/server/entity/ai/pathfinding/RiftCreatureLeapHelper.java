@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.builder.CreatureNavigationBuilder;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.ForgeHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -317,6 +318,18 @@ public class RiftCreatureLeapHelper {
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean isWithinLeapDistance(double horizontalDistance) {
         return horizontalDistance > 1E-6D && horizontalDistance <= this.creature.getNavigationBuilder().getLeapDistance();
+    }
+
+    /**
+     * Finds a safe landing across a gap in the direction of a target. This lets
+     * attack leaps move toward distant targets without making the target's exact
+     * position the required landing point.
+     * */
+    @Nullable
+    public Vec3d findGapLeapLandingToward(double targetX, double targetY, double targetZ) {
+        GapLeapTarget gapLeapTarget = this.findGapLeapTarget(targetX, targetZ);
+        if (gapLeapTarget == null || !gapLeapTarget.safe()) return null;
+        return new Vec3d(gapLeapTarget.x(), targetY, gapLeapTarget.z());
     }
 
     /**

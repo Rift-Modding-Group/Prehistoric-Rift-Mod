@@ -44,6 +44,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private boolean isHerder;
     private int inventorySize = 27;
     private int daysUntilAdult = 1;
+    private boolean fallCreatesImpact;
     @NotNull
     private CreatureNavigationBuilder navigation = new CreatureNavigationBuilder().setCanWalk();
     private CreatureMoveSelectorBuilder moveSelector = new CreatureMoveSelectorBuilder();
@@ -189,6 +190,20 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     public int getMaxFallHeight() {
         return this.maxFallHeight;
+    }
+
+    /**
+     * Makes this creature create a damaging impact ray when it lands after falling.
+     * */
+    public T setFallCreatesImpact() {
+        this.checkIfLocked();
+
+        this.fallCreatesImpact = true;
+        return this.getThis();
+    }
+
+    public boolean getFallCreatesImpact() {
+        return this.fallCreatesImpact;
     }
 
     /**

@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection;
 
-import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreaturePathNavigate;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
 import net.minecraft.entity.EntityLivingBase;
@@ -63,13 +62,22 @@ public class CreatureMoveSelectorBuilder {
         return this;
     }
 
-    //still wip... might wait till i add utahraptors or smth to fully add
-    public CreatureMoveSelectorBuilder setCanLeapToAttack() {
+    /**
+     * Make it so that leaping can be used as an attack by this creature.
+     * setting requiresTargetContact to true makes it so that it deals
+     * damage upon touching the target when leaping. Otherwise it just
+     * jumps to the target.
+     * */
+    public CreatureMoveSelectorBuilder setCanLeapToAttack(int priority, double minDist, double maxDist, boolean requiresTargetContact) {
         this.checkIfLocked();
+        if (minDist > maxDist) throw new IllegalArgumentException(minDist+" is greater than "+maxDist+"!");
 
-        this.moveRules.add(new MoveRule(MoveResult.LEAP, new MoveRuleBuilder("")
-                .setDetectionRule(new DistanceFromUserDetectionRule("", 8D,16D)))
-        );
+        DistanceFromUserDetectionRule detectionRule = new DistanceFromUserDetectionRule("", minDist, maxDist);
+        LeapMoveRuleBuilder leapMoveRuleBuilder = new LeapMoveRuleBuilder(requiresTargetContact).setLeapPriorityPredicate(priority, detectionRule);
+        leapMoveRuleBuilder.setUseWhenFrustrated();
+        leapMoveRuleBuilder.lock();
+
+        this.moveRules.add(new MoveRule(MoveResult.LEAP, leapMoveRuleBuilder));
         return this;
     }
 
@@ -92,6 +100,33 @@ public class CreatureMoveSelectorBuilder {
 
             if (otherResult != MoveResult.USE_MOVE) return otherResult == this.moveResult;
             else return otherMoveRuleBuilder.getMoveName().equals(this.moveRuleBuilder.getMoveName());
+        }
+    }
+
+    /**
+     * Leap-specific move rule data selecting whether target contact deals damage.
+     * */
+    public static final class LeapMoveRuleBuilder extends MoveRuleBuilder {
+        private final boolean requiresTargetContact;
+
+        private LeapMoveRuleBuilder(boolean requiresTargetContact) {
+            super("");
+            this.requiresTargetContact = requiresTargetContact;
+        }
+
+        private LeapMoveRuleBuilder setLeapPriorityPredicate(int priority, @NotNull DetectionRule detectionRule) {
+            this.setPriorityPredicate((creature, target) -> {
+                if (target == null || !target.isEntityAlive()) return -1;
+                if (!creature.onGround || !creature.getNavigationBuilder().getCanLeap()) return -1;
+                if (creature.leapToAttackCooldown > 0 && !creature.atFrustrationThreshold()) return -1;
+                return detectionRule.targetWithinRange(creature, target) ? priority : -1;
+            });
+            this.setDetectionRule(detectionRule);
+            return this;
+        }
+
+        public boolean requiresTargetContact() {
+            return this.requiresTargetContact;
         }
     }
 

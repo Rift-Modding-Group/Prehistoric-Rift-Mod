@@ -30,6 +30,8 @@ import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractProperty
 import anightdazingzoroark.riftlib.ray.IRayCreator;
 import anightdazingzoroark.riftlib.ray.RiftLibRay;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
+import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
+import anightdazingzoroark.riftlib.ray.rayShape.impact.RiftLibRayEllipsoidImpactShape;
 import anightdazingzoroark.riftlib.util.QuaternionUtils;
 import anightdazingzoroark.riftlib.util.VectorUtils;
 import net.minecraft.entity.*;
@@ -91,6 +93,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //--server side primitive params--
     //manages a creature's ability to sprint based on whether or not it attacked before
     public int sprintToAttackCooldown;
+    //manages a creature's ability to leap based on whether it attacked before
+    public int leapToAttackCooldown;
     //when a creature fails to use a move or takes too long to pathfind for melee move,
     //this counts up, which then makes them use a ranged move or their sprint move
     private int frustration;
@@ -103,6 +107,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //target pathing state
     private boolean unableToPathToTarget;
+
+    //fall impact state
+    private boolean trackingFallImpact;
+    private double highestAirborneY;
+    private double lastFallImpactYDelta;
 
     //ray specific params
     protected Map<String, RiftLibRayBuilder> rayMap;
@@ -136,8 +145,30 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         else this.propertyValueMap = Map.of();
 
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(this.creatureType.getCanBeKnockedBack() ? 0D : 1D);
-        this.rayMap = this.creatureType.getRayMap();
-        this.rayHitEffectMap = this.creatureType.getRayHitEffectMap();
+        Map<String, RiftLibRayBuilder> configuredRays = this.creatureType.getRayMap();
+        this.rayMap = configuredRays == null ? new HashMap<>() : new HashMap<>(configuredRays);
+        Map<String, TriConsumer<RiftCreature, BlockPos, RiftLibRay.RayHitResult>> configuredRayEffects = this.creatureType.getRayHitEffectMap();
+        this.rayHitEffectMap = configuredRayEffects == null ? new HashMap<>() : new HashMap<>(configuredRayEffects);
+
+        this.trackingFallImpact = false;
+        this.lastFallImpactYDelta = 0D;
+        if (this.creatureType.getFallCreatesImpact()) {
+            this.rayMap.put("fallImpactRay", new RiftLibRayBuilder()
+                    .setImpactOnly()
+                    .setImpactShape(() -> new RiftLibRayEllipsoidImpactShape(1D, 0.2D, 1D).topOnly())
+                    .setMaxMotionDistance(Math.max(1D, this.width * 1.5D))
+                    .setOnlyOneSegment()
+                    .setMotionSpeed(1.5D)
+            );
+            this.rayHitEffectMap.put("fallImpactRay", (creature, rayOrigin, rayHitResult) -> {
+                if (creature.world.isRemote) return;
+                for (Entity hitEntity : rayHitResult.hitEntities()) {
+                    if (hitEntity instanceof EntityLivingBase) {
+                        creature.attackEntityFromFallImpact(hitEntity, creature.lastFallImpactYDelta);
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -196,6 +227,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     protected void initEntityAI() {
+        //aint makin a new class again for this shit
         this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false) {
             @Override
             public boolean shouldExecute() {
@@ -228,7 +260,26 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //server only operations
         if (!this.world.isRemote) {
+            //sync leaping from server to client
             this.setLeaping(this.getCreatureMoveHelper().isLeaping());
+
+            //tick fall impacts
+            if (!this.creatureType.getFallCreatesImpact()) {
+                this.trackingFallImpact = false;
+            }
+            else if (!this.onGround) {
+                if (!this.trackingFallImpact) this.highestAirborneY = this.posY;
+                else this.highestAirborneY = Math.max(this.highestAirborneY, this.posY);
+                this.trackingFallImpact = true;
+            }
+            else if (this.trackingFallImpact) {
+                this.trackingFallImpact = false;
+                double landingYDelta = this.highestAirborneY - this.posY;
+                if (landingYDelta > 1E-3D) {
+                    this.lastFallImpactYDelta = landingYDelta;
+                    RiftLibRayHelper.createRay(this, "fallImpactRay", "centerPoint");
+                }
+            }
 
             //set age
             this.setAgeInTicks(this.getAgeInTicks() + 1);
@@ -244,6 +295,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
             //tick sprinting related stuff
             if (this.sprintToAttackCooldown > 0) this.sprintToAttackCooldown--;
+            if (this.leapToAttackCooldown > 0) this.leapToAttackCooldown--;
 
             //tick creature rage
             if (this.getAttackTarget() != null) {
@@ -328,13 +380,26 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //this method is to be used when attacking from sprinting. sprinting is considered
     //a physical move that makes contact
     public void attackEntityFromSprint(Entity entityIn) {
+        this.attackEntityFromMovement(entityIn, 10);
+    }
+
+    //this method is to be used when a leap attack makes contact with its target
+    public void attackEntityFromLeap(Entity entityIn) {
+        this.attackEntityFromMovement(entityIn, 10);
+    }
+
+    //this method is to be used by a configured fall impact
+    public void attackEntityFromFallImpact(Entity entityIn, double landingYDelta) {
+        double basePower = 10D * Math.max(0D, landingYDelta);
+        this.attackEntityFromMovement(entityIn, basePower);
+    }
+
+    private void attackEntityFromMovement(Entity entityIn, double basePower) {
         if (entityIn == null) return;
-
         double attackStat = this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
-        int sprintBasePower = 10; //is like this so that i can adjust whenever i need to
-        double sprintDamage = attackStat * sprintBasePower * 0.005D;
+        double movementDamage = attackStat * basePower * 0.005D;
 
-        entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float) sprintDamage);
+        entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), (float) movementDamage);
         this.setLastAttackedEntity(entityIn);
     }
 

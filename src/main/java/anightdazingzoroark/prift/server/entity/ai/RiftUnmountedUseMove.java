@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.ai;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.AbstractMoveResultTicker;
+import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveSelection.CreatureMoveSelectorBuilder;
 import net.minecraft.entity.ai.EntityAIBase;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -49,7 +50,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return !this.creature.isLeaping()
+        return (!this.creature.isLeaping() || this.isUsingLeapAttack())
                 && this.moveResultTicker != null
                 && this.moveResultTicker.canContinueTicking();
     }
@@ -65,28 +66,38 @@ public class RiftUnmountedUseMove extends EntityAIBase {
      * */
     @Override
     public void updateTask() {
-        if (this.creature.isLeaping()) return;
+        if (this.creature.isLeaping() && !this.isUsingLeapAttack()) return;
 
-        //update move ticker
+        //switch before the current ticker can request a pathfinding leap
+        if (!this.creature.isLeaping()) this.trySwitchToHigherPriorityMove();
+
         if (this.moveResultTicker != null) this.moveResultTicker.onUpdate();
+    }
 
-        //continuously look for a moverule of higher priority than current
+    private void trySwitchToHigherPriorityMove() {
         ImmutablePair<CreatureMoveSelectorBuilder.MoveRule, Integer> newMoveRulePair = this.createMoveRule();
-        if (newMoveRulePair != null
-                && (this.moveResultTicker == null || this.moveResultTicker.isOverridableWhileUsed())
-                && !newMoveRulePair.getLeft().equals(this.moveRulePair.getLeft())
-                && newMoveRulePair.getRight() < this.moveRulePair.getRight()
-        ) {
-            if (this.moveResultTicker != null) this.moveResultTicker.onEndTicker();
-            this.moveResultTicker = newMoveRulePair.getLeft().moveResult().moveResultTicker.apply(
-                    this.creature, newMoveRulePair.getLeft().moveRuleBuilder()
-            );
+        if (newMoveRulePair == null
+                || (this.moveResultTicker != null && !this.moveResultTicker.isOverridableWhileUsed())
+                || newMoveRulePair.getLeft().equals(this.moveRulePair.getLeft())
+                || newMoveRulePair.getRight() >= this.moveRulePair.getRight()) {
+            return;
         }
+
+        if (this.moveResultTicker != null) this.moveResultTicker.onEndTicker();
+        this.moveRulePair = newMoveRulePair;
+        CreatureMoveSelectorBuilder.MoveRule moveRule = this.moveRulePair.getLeft();
+        this.moveResultTicker = moveRule.moveResult().moveResultTicker.apply(
+                this.creature, moveRule.moveRuleBuilder()
+        );
     }
 
     @Nullable
     private ImmutablePair<CreatureMoveSelectorBuilder.MoveRule, Integer> createMoveRule() {
         CreatureMoveStorage creatureMoves = this.creature.getCreatureMoves();
         return creatureMoves.getBestMoveRuleUnmounted();
+    }
+
+    private boolean isUsingLeapAttack() {
+        return this.moveRulePair != null && this.moveRulePair.getLeft().moveResult() == MoveResult.LEAP;
     }
 }

@@ -9,7 +9,7 @@ public enum MoveResult {
     USE_MOVE(UseMoveMoveResultTicker::new),
     USE_MOVE_COMBO(null),
     SPRINT(SprintMoveResultTicker::new),
-    LEAP(null);
+    LEAP(LeapMoveResultTicker::new);
 
     public final BiFunction<RiftCreature, MoveRuleBuilder, AbstractMoveResultTicker> moveResultTicker;
 

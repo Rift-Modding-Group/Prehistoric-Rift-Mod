@@ -99,6 +99,7 @@ public class RiftCreatureRegistry {
                         .setSpawnEggColors(3670016, 2428687)
                         .setMainHitboxSize(3.25f, 4f)
                         .setMaxFallHeight(4)
+                        .setFallCreatesImpact()
                         .setDaysUntilAdult(7)
                         .setRetaliateWhenAttacked()
                         .setHitboxInformation()
@@ -199,7 +200,7 @@ public class RiftCreatureRegistry {
                                 .setElemental(Element.SONIC, 0)
                                 .setOnMoveHitEffect(creature -> {
                                     if (!(creature instanceof IRayCreator<?> rayCreator)) return;
-                                    RiftLibRayHelper.createRay(rayCreator, "roarRay", "roarOrigin");
+                                    RiftLibRayHelper.createRay(rayCreator, "roarRay", "centerPoint");
                                 })
                                 .setOnMoveEndEffect(creature -> {
                                     if (!(creature instanceof IRayCreator<?> rayCreator)) return;
@@ -274,6 +275,7 @@ public class RiftCreatureRegistry {
                                                 .setUseWhenFrustrated()
                                 )
                                 .setCanSprintToAttack(1, 8D, 16D)
+                                .setCanLeapToAttack(1, 6D, 12D, false)
                         )
                         //---targeting---
                         .addDefaultTargetWhitelistEntry("animal")
