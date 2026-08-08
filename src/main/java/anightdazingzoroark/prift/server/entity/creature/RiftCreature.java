@@ -260,8 +260,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //server only operations
         if (!this.world.isRemote) {
-            //sync leaping from server to client
-            this.setLeaping(this.getCreatureMoveHelper().isLeaping());
+            //keep the pose active for the full airborne portion even if pathing
+            //relinquishes its leap action before the creature reaches the ground
+            boolean continueLeapPose = this.dataManager.get(LEAPING) && !this.onGround;
+            this.setLeaping(this.getCreatureMoveHelper().isLeaping() || continueLeapPose);
 
             //tick fall impacts
             if (!this.creatureType.getFallCreatesImpact()) {
@@ -526,7 +528,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //client friendly query for leaping
     public boolean isLeaping() {
-        return this.dataManager.get(LEAPING);
+        return this.world.isRemote ? this.dataManager.get(LEAPING) : this.getCreatureMoveHelper().isLeaping();
     }
 
     public boolean isUnableToPathToTarget() {
