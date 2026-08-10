@@ -34,6 +34,7 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
     public RiftCreaturePathNavigate(RiftCreature creature, World world) {
         super(creature, world);
         this.creature = creature;
+        this.setCanSwim(true);
     }
 
     @Override
@@ -45,7 +46,8 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
 
     @Override
     protected boolean canNavigate() {
-        return this.creature.getNavigationBuilder().getCanWalk() && super.canNavigate();
+        return this.creature.getNavigationBuilder().getCanWalk()
+                && (super.canNavigate() || this.creature.bodyTouchingLiquid());
     }
 
     @Override

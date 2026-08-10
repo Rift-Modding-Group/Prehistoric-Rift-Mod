@@ -56,7 +56,7 @@ public class RiftCreatureLeapHelper {
     public boolean prepareLeapTo(double x, double y, double z) {
         if (this.isLeaping()) return false;
         CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
-        if (!navigation.getCanLeap() || !this.creature.onGround) {
+        if (!navigation.getCanLeap() || !this.creature.onGround || this.creature.bodyTouchingLiquid()) {
             this.resetDelay();
             return false;
         }
@@ -137,7 +137,7 @@ public class RiftCreatureLeapHelper {
             double obstacleClearance, RiftCreatureMoveHelperBase.CreatureAction requestedAction
     ) {
         CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
-        if (!navigation.getCanLeap()) return false;
+        if (!navigation.getCanLeap() || this.creature.bodyTouchingLiquid()) return false;
 
         double displacementY = targetY - this.creature.posY;
         double standardJumpClearance = RiftCreatureMoveHelper.STANDARD_JUMP_HEIGHT + 0.125D;
@@ -174,7 +174,7 @@ public class RiftCreatureLeapHelper {
         if (this.leapStarted) return true;
 
         CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
-        if (!navigation.getCanLeap() || !this.creature.onGround) {
+        if (!navigation.getCanLeap() || !this.creature.onGround || this.creature.bodyTouchingLiquid()) {
             this.cancelLeap();
             return false;
         }
@@ -229,6 +229,10 @@ public class RiftCreatureLeapHelper {
      * Keeps the creature aimed and moving through the rest of its leap.
      * */
     public void continueLeap() {
+        if (this.creature.bodyTouchingLiquid()) {
+            this.cancelLeap();
+            return;
+        }
         this.faceLeapTarget();
         this.moveHelper.stopWalkingControls();
         this.creature.fallDistance = 0F;
@@ -291,6 +295,8 @@ public class RiftCreatureLeapHelper {
     private void cancelLeap() {
         this.moveHelper.creatureAction = RiftCreatureMoveHelperBase.CreatureAction.WAIT;
         this.resetDelay();
+        this.leapStarted = false;
+        this.leapTicks = 0;
     }
 
     /**

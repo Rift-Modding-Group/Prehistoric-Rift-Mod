@@ -25,6 +25,10 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
     public int findPathOptions(PathPoint[] pathOptions, PathPoint currentPoint, PathPoint targetPoint, float maxDistance) {
         int count = super.findPathOptions(pathOptions, currentPoint, targetPoint, maxDistance);
         if (!this.allowLeaps || !this.creature.getNavigationBuilder().getCanLeap()) return count;
+        if (this.creature.bodyTouchingLiquid()
+                || this.getPathNodeType(this.blockaccess, currentPoint.x, currentPoint.y, currentPoint.z) == PathNodeType.WATER) {
+            return count;
+        }
 
         int walkingOptionCount = count;
 

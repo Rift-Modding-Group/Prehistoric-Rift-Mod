@@ -117,7 +117,7 @@ public class CreatureMoveSelectorBuilder {
         private LeapMoveRuleBuilder setLeapPriorityPredicate(int priority, @NotNull DetectionRule detectionRule) {
             this.setPriorityPredicate((creature, target) -> {
                 if (target == null || !target.isEntityAlive()) return -1;
-                if (!creature.isOnGround() || !creature.getNavigationBuilder().getCanLeap()) return -1;
+                if (!creature.isOnGround() || creature.bodyTouchingLiquid() || !creature.getNavigationBuilder().getCanLeap()) return -1;
                 if (creature.getLeapToAttackCooldown() > 0 && !creature.atFrustrationThreshold()) return -1;
                 return detectionRule.targetWithinRange(creature, target) ? priority : -1;
             });

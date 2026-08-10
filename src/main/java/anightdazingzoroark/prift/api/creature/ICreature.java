@@ -18,13 +18,10 @@ import java.util.Random;
  * api version of RiftCreature
  */
 public interface ICreature {
-    @NotNull
     World getEntityWorld();
 
-    @NotNull
     Random getRNG();
 
-    @NotNull
     AxisAlignedBB getEntityBoundingBox();
 
     EntityLivingBase getAttackTarget();
@@ -34,6 +31,8 @@ public interface ICreature {
     boolean isEntityAlive();
 
     boolean isOnGround();
+
+    boolean bodyTouchingLiquid();
 
     boolean aabbIntersectsBoundingBox(@NotNull AxisAlignedBB otherAABB, @NotNull String boundingBoxName);
 

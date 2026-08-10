@@ -269,7 +269,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             this.setLeaping(this.getCreatureMoveHelper().isLeaping() || continueLeapPose);
 
             //tick fall impacts
-            if (!this.creatureType.getFallCreatesImpact()) {
+            if (!this.creatureType.getFallCreatesImpact() || this.bodyTouchingLiquid()) {
                 this.trackingFallImpact = false;
             }
             else if (!this.onGround) {
@@ -570,6 +570,50 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     public void setUnableToPathToTarget(boolean unableToPathToTarget) {
         EntityLivingBase target = this.getAttackTarget();
         this.unableToPathToTarget = unableToPathToTarget && target != null && target.isEntityAlive();
+    }
+
+    @Override
+    public void travel(float strafe, float vertical, float forward) {
+        this.stepHeight = 0.5f;
+        this.jumpMovementFactor = 0.02f;
+
+        //get out of 2 block or more deep water pits
+        if (forward > 0) {
+            double highestWaterPos = this.highestWaterPos();
+            if (this.bodyTouchingLiquid() && this.posY >= highestWaterPos - 2 && this.posY <= highestWaterPos + 2) {
+                double xMove = this.width * Math.sin(-Math.toRadians(this.rotationYaw));
+                double zMove = this.width * Math.cos(Math.toRadians(this.rotationYaw));
+                BlockPos ahead = new BlockPos(this.posX + xMove, highestWaterPos, this.posZ + zMove);
+                BlockPos above = ahead.up();
+                if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid() && !this.world.isRemote) {
+                    this.setPosition(this.posX + xMove, highestWaterPos + 1D, this.posZ + zMove);
+                }
+            }
+        }
+
+        //float above water
+        if (this.bodyTouchingLiquid()) this.motionY += 0.1D;
+
+        super.travel(strafe, vertical, forward);
+    }
+
+    private double highestWaterPos() {
+        double maxHeight = this.world.getActualHeight() - this.getPosition().getY();
+        if (this.bodyTouchingLiquid()) {
+            if (!this.world.getBlockState(this.getPosition()).getMaterial().isLiquid()) return 0D;
+            for (int i = 0; i <= maxHeight; i++) {
+                BlockPos pos = this.getPosition().add(0, i, 0);
+                if (!this.world.getBlockState(pos).getMaterial().isLiquid()) return this.getPosition().getY() + i - 1;
+            }
+        }
+        return 0D;
+    }
+
+    /**
+     * hitboxed creatures use their main body
+     * */
+    public boolean bodyTouchingLiquid() {
+        return this.isInWater();
     }
 
     //-----IRiftCreature boilerplate stuff-----

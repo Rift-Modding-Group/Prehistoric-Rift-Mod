@@ -46,6 +46,16 @@ public class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUs
     @Override
     protected void collideWithEntity(Entity entityIn) {}
 
+    /**
+     * hitboxed creatures use their main body
+     * */
+    @Override
+    public boolean bodyTouchingLiquid() {
+        if (!this.multiHitboxList.hasCollisionHitboxes()) return false;
+        RiftLibCollisionHitbox<RiftCreatureHitboxed> bodyHitbox = this.multiHitboxList.getCollisionHitboxByName("body");
+        return bodyHitbox.isInWater();
+    }
+
     //-----methods from IMultiHitboxUser start here-----
     @Override
     @NotNull
