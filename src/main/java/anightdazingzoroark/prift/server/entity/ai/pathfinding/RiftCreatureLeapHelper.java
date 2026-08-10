@@ -2,7 +2,10 @@ package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
+import net.minecraft.pathfinding.PathNodeType;
+import net.minecraft.pathfinding.WalkNodeProcessor;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.ForgeHooks;
 import org.jetbrains.annotations.NotNull;
@@ -62,6 +65,11 @@ public class RiftCreatureLeapHelper {
         double displacementZ = z - this.creature.posZ;
         double horizontalDistance = Math.sqrt(displacementX * displacementX + displacementZ * displacementZ);
         if (!this.isWithinLeapDistance(horizontalDistance)) {
+            this.resetDelay();
+            return false;
+        }
+        if (!this.hasSafeLandingNode(x, y, z)) {
+            this.creature.setUnableToPathToTarget(true);
             this.resetDelay();
             return false;
         }
@@ -468,6 +476,26 @@ public class RiftCreatureLeapHelper {
                 centerZ - this.creature.posZ
         );
         return !this.creature.world.collidesWithAnyBlock(landingBounds);
+    }
+
+    /**
+     * make sure creature doesn't jump into a dangerous space
+     * */
+    private boolean hasSafeLandingNode(double x, double y, double z) {
+        WalkNodeProcessor nodeProcessor = new WalkNodeProcessor();
+        PathNodeType landingType = nodeProcessor.getPathNodeType(
+                this.creature.world,
+                MathHelper.floor(x),
+                MathHelper.floor(y),
+                MathHelper.floor(z),
+                this.creature,
+                MathHelper.ceil(this.creature.width / 2),
+                MathHelper.ceil(this.creature.height),
+                MathHelper.ceil(this.creature.width / 2),
+                false,
+                false
+        );
+        return landingType == PathNodeType.WALKABLE && this.creature.getPathPriority(landingType) >= 0f;
     }
 
     /**
