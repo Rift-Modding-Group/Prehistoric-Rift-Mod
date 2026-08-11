@@ -47,7 +47,7 @@ public class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUs
     protected void collideWithEntity(Entity entityIn) {}
 
     /**
-     * hitboxed creatures use their main body
+     * hitboxed creatures use their main body hitbox
      * */
     @Override
     public boolean bodyTouchingLiquid() {

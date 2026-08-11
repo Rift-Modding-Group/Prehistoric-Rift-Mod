@@ -291,7 +291,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             else if (this.trackingFallImpact) {
                 this.trackingFallImpact = false;
                 double landingYDelta = this.highestAirborneY - this.posY;
-                if (landingYDelta > 1E-3D) {
+                if (landingYDelta > 2D) { //falling down more than 2 blocks should create fall impacts
                     this.lastFallImpactYDelta = landingYDelta;
                     RiftLibRayHelper.createRay(this, "fallImpactRay", "centerPoint");
                 }
@@ -621,7 +621,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     /**
-     * hitboxed creatures use their main body
+     * nonhitboxed creatures use their main body
      * */
     public boolean bodyTouchingLiquid() {
         return this.isInWater() || this.isInLava();
