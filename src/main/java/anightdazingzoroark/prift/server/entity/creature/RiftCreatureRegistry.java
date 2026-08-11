@@ -286,7 +286,7 @@ public class RiftCreatureRegistry {
                                 .setMoveRule(
                                         new MoveRuleBuilder("stomp")
                                                 .setPriorityPredicate((creature, target) -> {
-                                                    return (target != null && target.isEntityAlive()
+                                                    return (target != null && target.isEntityAlive() && !creature.bodyTouchingLiquid()
                                                             && creature.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), "stompHitZone")) ?
                                                             0 : -1;
                                                 })

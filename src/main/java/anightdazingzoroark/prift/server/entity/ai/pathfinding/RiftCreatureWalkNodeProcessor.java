@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.PathPoint;
@@ -8,10 +9,16 @@ import net.minecraft.pathfinding.WalkNodeProcessor;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.IBlockAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
+    private static final int WATER_SURFACE_SEARCH_DEPTH = 4;
+    private static final float WATER_PATH_COST = 2F;
+    private static final double LEAP_ARC_SCAN_STEP = 0.25D;
+
     @NotNull
     private final RiftCreature creature;
     private final boolean allowLeaps;
@@ -22,11 +29,74 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
     }
 
     @Override
+    public PathPoint getStart() {
+        double nodeCenterOffsetX = this.entitySizeX * 0.5D;
+        double nodeCenterOffsetZ = this.entitySizeZ * 0.5D;
+        int x = MathHelper.floor(this.creature.posX - nodeCenterOffsetX);
+        int z = MathHelper.floor(this.creature.posZ - nodeCenterOffsetZ);
+
+        if (this.creature.bodyTouchingLiquid()) {
+            int surfaceY = this.findWaterSurfaceY(
+                    MathHelper.floor(this.creature.posX),
+                    MathHelper.floor(this.creature.posY),
+                    MathHelper.floor(this.creature.posZ)
+            );
+            if (surfaceY != Integer.MIN_VALUE) {
+                PathPoint start = this.openPoint(x, surfaceY, z);
+                start.nodeType = PathNodeType.WATER;
+                start.costMalus = WATER_PATH_COST;
+                return start;
+            }
+        }
+
+        PathPoint vanillaStart = super.getStart();
+        PathNodeType startType = this.getNodeType(x, vanillaStart.y, z);
+        float priority = this.creature.getPathPriority(startType);
+        if (priority < 0F) return vanillaStart;
+
+        PathPoint centeredStart = this.openPoint(x, vanillaStart.y, z);
+        centeredStart.nodeType = startType;
+        centeredStart.costMalus = Math.max(centeredStart.costMalus, priority);
+        return centeredStart;
+    }
+
+    @Override
+    public PathPoint getPathPointToCoords(double x, double y, double z) {
+        int targetCenterX = MathHelper.floor(x);
+        int targetY = MathHelper.floor(y);
+        int targetCenterZ = MathHelper.floor(z);
+        int targetX = MathHelper.floor(x - this.entitySizeX * 0.5D);
+        int targetZ = MathHelper.floor(z - this.entitySizeZ * 0.5D);
+        int surfaceY = this.findWaterSurfaceY(targetCenterX, targetY, targetCenterZ);
+        if (surfaceY == Integer.MIN_VALUE) return this.openPoint(targetX, targetY, targetZ);
+
+        PathPoint target = this.openPoint(targetX, surfaceY, targetZ);
+        target.nodeType = PathNodeType.WATER;
+        target.costMalus = WATER_PATH_COST;
+        return target;
+    }
+
+    @Override
+    public PathNodeType getPathNodeType(IBlockAccess blockAccess, int x, int y, int z) {
+        PathNodeType nodeType = super.getPathNodeType(blockAccess, x, y, z);
+        return nodeType == PathNodeType.OPEN && this.isWaterSurface(blockAccess, x, y, z)
+                ? PathNodeType.WATER
+                : nodeType;
+    }
+
+    @Override
     public int findPathOptions(PathPoint[] pathOptions, PathPoint currentPoint, PathPoint targetPoint, float maxDistance) {
         int count = super.findPathOptions(pathOptions, currentPoint, targetPoint, maxDistance);
+        for (int index = 0; index < count; index++) {
+            if (pathOptions[index].nodeType == PathNodeType.WATER) {
+                pathOptions[index].costMalus = WATER_PATH_COST;
+            }
+        }
+        count = this.addWaterSurfaceOptions(pathOptions, count, currentPoint, targetPoint, maxDistance);
         if (!this.allowLeaps || !this.creature.getNavigationBuilder().getCanLeap()) return count;
         if (this.creature.bodyTouchingLiquid()
-                || this.getPathNodeType(this.blockaccess, currentPoint.x, currentPoint.y, currentPoint.z) == PathNodeType.WATER) {
+                || currentPoint.nodeType == PathNodeType.WATER
+                || this.isWaterSurfaceNode(currentPoint.x, currentPoint.y, currentPoint.z)) {
             return count;
         }
 
@@ -60,9 +130,42 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
         int adjacentZ = currentPoint.z + facing.getZOffset();
         for (int index = 0; index < count; index++) {
             PathPoint point = points[index];
-            if (point.x == adjacentX && point.z == adjacentZ) return true;
+            if (point.x == adjacentX && point.z == adjacentZ && point.nodeType != PathNodeType.WATER) return true;
         }
         return false;
+    }
+
+    private int addWaterSurfaceOptions(
+            PathPoint[] pathOptions,
+            int count,
+            PathPoint currentPoint,
+            PathPoint targetPoint,
+            float maxDistance
+    ) {
+        for (EnumFacing facing : EnumFacing.Plane.HORIZONTAL) {
+            int x = currentPoint.x + facing.getXOffset();
+            int z = currentPoint.z + facing.getZOffset();
+            int surfaceY = this.findWaterSurfaceY(
+                    x + this.entitySizeX / 2,
+                    currentPoint.y,
+                    z + this.entitySizeZ / 2
+            );
+            if (surfaceY == Integer.MIN_VALUE || Math.abs(surfaceY - currentPoint.y) > 1) continue;
+
+            PathNodeType nodeType = this.getNodeType(x, surfaceY, z);
+            float priority = this.creature.getPathPriority(nodeType);
+            if (nodeType != PathNodeType.WATER || priority < 0F) continue;
+
+            PathPoint waterPoint = this.openPoint(x, surfaceY, z);
+            waterPoint.nodeType = PathNodeType.WATER;
+            waterPoint.costMalus = WATER_PATH_COST;
+            if (!waterPoint.visited
+                    && waterPoint.distanceTo(targetPoint) < maxDistance
+                    && !this.contains(pathOptions, count, waterPoint)) {
+                pathOptions[count++] = waterPoint;
+            }
+        }
+        return count;
     }
 
     private int addLeapOption(PathPoint[] pathOptions, int count, @Nullable PathPoint leapPoint, PathPoint targetPoint, float maxDistance) {
@@ -137,7 +240,77 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
 
     private PathPoint findLevelLeapLanding(PathPoint currentPoint, EnumFacing facing, float maxPathDistance) {
         PathPoint obstacleLanding = this.findObstacleLeapLanding(currentPoint, facing, maxPathDistance);
-        return obstacleLanding != null ? obstacleLanding : this.findGapLeapLanding(currentPoint, facing, maxPathDistance);
+        if (obstacleLanding != null) return obstacleLanding;
+
+        PathPoint waterLanding = this.findWaterLeapLanding(currentPoint, facing, maxPathDistance);
+        return waterLanding != null ? waterLanding : this.findGapLeapLanding(currentPoint, facing, maxPathDistance);
+    }
+
+    @Nullable
+    private PathPoint findWaterLeapLanding(PathPoint currentPoint, EnumFacing facing, float maxPathDistance) {
+        int maximumDistance = (int)Math.floor(Math.min(
+                this.creature.getNavigationBuilder().getLeapDistance(),
+                maxPathDistance
+        ));
+        boolean foundWater = false;
+
+        for (int distance = 1; distance <= maximumDistance; distance++) {
+            int x = currentPoint.x + facing.getXOffset() * distance;
+            int z = currentPoint.z + facing.getZOffset() * distance;
+            if (this.isWaterSurfaceNode(x, currentPoint.y, z)) {
+                foundWater = true;
+                continue;
+            }
+            if (!foundWater) return null;
+
+            PathNodeType landingType = this.getNodeType(x, currentPoint.y, z);
+            float priority = this.creature.getPathPriority(landingType);
+            if (landingType != PathNodeType.WALKABLE || priority < 0F
+                    || !this.hasFullLandingSupport(x, currentPoint.y, z)) {
+                return null;
+            }
+
+            PathPoint landing = this.openPoint(x, currentPoint.y, z);
+            //Only water leaps are rejected during path construction. Ordinary leap edges must
+            //reach RiftCreatureLeapHelper so a blocked ceiling records unable-to-path state.
+            if (!this.hasClearLeapArc(currentPoint, landing)) return null;
+            landing.nodeType = landingType;
+            landing.costMalus = Math.max(landing.costMalus, priority + distance);
+            return landing;
+        }
+        return null;
+    }
+
+    private boolean hasClearLeapArc(PathPoint start, PathPoint landing) {
+        double nodeCenterOffsetX = this.entitySizeX * 0.5D;
+        double nodeCenterOffsetZ = this.entitySizeZ * 0.5D;
+        double startX = start.x + nodeCenterOffsetX;
+        double startZ = start.z + nodeCenterOffsetZ;
+        double landingX = landing.x + nodeCenterOffsetX;
+        double landingZ = landing.z + nodeCenterOffsetZ;
+        double displacementX = landingX - startX;
+        double displacementZ = landingZ - startZ;
+        double horizontalDistance = Math.sqrt(displacementX * displacementX + displacementZ * displacementZ);
+        int samples = Math.max(2, (int)Math.ceil(horizontalDistance / LEAP_ARC_SCAN_STEP));
+
+        AxisAlignedBB creatureBounds = this.creature.getEntityBoundingBox();
+        AxisAlignedBB startBounds = creatureBounds.offset(
+                startX - this.creature.posX,
+                start.y - creatureBounds.minY + 1E-3D,
+                startZ - this.creature.posZ
+        );
+        double landingHeight = landing.y - start.y;
+        double arcHeight = this.creature.getNavigationBuilder().getLeapHeight() + 0.25D;
+
+        for (int sample = 1; sample < samples; sample++) {
+            double progress = (double)sample / samples;
+            double horizontalX = displacementX * progress;
+            double horizontalZ = displacementZ * progress;
+            double verticalOffset = landingHeight * progress + 4D * arcHeight * progress * (1D - progress);
+            AxisAlignedBB sampleBounds = startBounds.offset(horizontalX, verticalOffset, horizontalZ);
+            if (this.creature.world.collidesWithAnyBlock(sampleBounds)) return false;
+        }
+        return true;
     }
 
     @Nullable
@@ -186,6 +359,7 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
         for (int distance = 1; distance <= maximumDistance; distance++) {
             int x = currentPoint.x + facing.getXOffset() * distance;
             int z = currentPoint.z + facing.getZOffset() * distance;
+            if (this.isWaterSurfaceNode(x, currentPoint.y, z)) return null;
             PathNodeType columnType = this.getPathNodeType(this.blockaccess, x, currentPoint.y, z);
 
             if (columnType == PathNodeType.OPEN) {
@@ -227,6 +401,40 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
                 this.entitySizeZ,
                 this.getCanOpenDoors(),
                 this.getCanEnterDoors()
+        );
+    }
+
+    private int findWaterSurfaceY(int x, int referenceY, int z) {
+        int minimumY = Math.max(0, referenceY - WATER_SURFACE_SEARCH_DEPTH);
+        int maximumY = Math.min(this.creature.world.getActualHeight() - 1, referenceY + 1);
+        for (int y = maximumY; y >= minimumY; y--) {
+            if (this.blockaccess.getBlockState(new BlockPos(x, y, z)).getMaterial() != Material.WATER) continue;
+
+            int surfaceY = y + 1;
+            while (surfaceY < this.creature.world.getActualHeight()
+                    && this.blockaccess.getBlockState(new BlockPos(x, surfaceY, z)).getMaterial() == Material.WATER) {
+                surfaceY++;
+            }
+            BlockPos surface = new BlockPos(x, surfaceY, z);
+            if (this.blockaccess.getBlockState(surface).getMaterial() != Material.AIR) return Integer.MIN_VALUE;
+            return surfaceY;
+        }
+        return Integer.MIN_VALUE;
+    }
+
+    private boolean isWaterSurface(IBlockAccess blockAccess, int x, int y, int z) {
+        if (y <= 0) return false;
+        BlockPos surface = new BlockPos(x, y, z);
+        return blockAccess.getBlockState(surface).getMaterial() == Material.AIR
+                && blockAccess.getBlockState(surface.down()).getMaterial() == Material.WATER;
+    }
+
+    private boolean isWaterSurfaceNode(int x, int y, int z) {
+        return this.isWaterSurface(
+                this.blockaccess,
+                x + this.entitySizeX / 2,
+                y,
+                z + this.entitySizeZ / 2
         );
     }
 

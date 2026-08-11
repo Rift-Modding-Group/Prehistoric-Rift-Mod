@@ -33,7 +33,12 @@ public class LeapMoveResultTicker extends AbstractMoveResultTicker {
             creature.leapToAttackCooldown = 0;
             creature.resetFrustration();
         }
-        creature.getCreaturePathNavigate().clearPath();
+        else if (!this.leapPrepared
+                && this.target != null
+                && creature.getCreaturePathNavigate().tryMoveToEntityLivingUsingWater(this.target, 1D)) {
+            creature.leapToAttackCooldown = MathUtil.randomInRange(creature.world.rand, 5, 10) * 20;
+        }
+        if (this.leapPrepared) creature.getCreaturePathNavigate().clearPath();
     }
 
     @Override

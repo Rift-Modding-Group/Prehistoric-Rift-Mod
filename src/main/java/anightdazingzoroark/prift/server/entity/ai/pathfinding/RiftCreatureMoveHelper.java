@@ -70,10 +70,17 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
         double displacementY = this.posY - this.entity.posY;
         double horizontalDisplacementSq = displacementX * displacementX + displacementZ * displacementZ;
         double totalDisplacementSq = horizontalDisplacementSq + displacementY * displacementY;
+        boolean inLiquid = this.creature.bodyTouchingLiquid();
+        boolean followingWaterPath = this.creature.getCreaturePathNavigate().isFollowingWaterPath();
+        double relevantDisplacementSq = inLiquid || followingWaterPath
+                ? horizontalDisplacementSq
+                : totalDisplacementSq;
 
-        if (totalDisplacementSq >= 2.5E-7D) {
-            float targetYaw = (float)(MathHelper.atan2(displacementZ, displacementX) * 180D / Math.PI) - 90f;
-            this.creature.rotationYaw = this.limitAngle(this.creature.rotationYaw, targetYaw, 90f);
+        if (relevantDisplacementSq >= 2.5E-7D) {
+            if (horizontalDisplacementSq >= 2.5E-7D) {
+                float targetYaw = (float)(MathHelper.atan2(displacementZ, displacementX) * 180D / Math.PI) - 90f;
+                this.creature.rotationYaw = this.limitAngle(this.creature.rotationYaw, targetYaw, 90f);
+            }
             this.creature.setMoveStrafing(0f);
             this.creature.setAIMoveSpeed(
                     (float)(this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue())
@@ -83,8 +90,7 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
             double maximumClearance = navigation.getCanLeap() ?
                     navigation.getLeapHeight() : STANDARD_JUMP_HEIGHT + 0.125D;
             double obstacleClearance = this.leapHelper.getObstacleClearance(this.posX, this.posZ, maximumClearance);
-            boolean inLiquid = this.creature.bodyTouchingLiquid();
-            boolean leapHandled = !inLiquid && this.leapHelper.tryHandleLeap(
+            boolean leapHandled = !inLiquid && !followingWaterPath && this.leapHelper.tryHandleLeap(
                     this.posX, this.posY, this.posZ,
                     obstacleClearance, requestedAction
             );
@@ -98,7 +104,8 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
                         || (closeToWaypoint
                         && displacementY > this.creature.stepHeight
                         && displacementY <= STANDARD_JUMP_HEIGHT + 0.125D);
-                if (!inLiquid && navigation.getCanWalk() && this.creature.onGround && standardJumpTransition) {
+                if (!inLiquid && !followingWaterPath
+                        && navigation.getCanWalk() && this.creature.onGround && standardJumpTransition) {
                     this.creature.getJumpHelper().setJumping();
                     this.creatureAction = CreatureAction.JUMPING;
                 }

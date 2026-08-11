@@ -5,9 +5,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathFinder;
 import net.minecraft.pathfinding.PathNavigateGround;
+import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.ChunkCache;
 
@@ -51,6 +53,45 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
     }
 
     @Override
+    protected Vec3d getEntityPosition() {
+        if (this.creature.bodyTouchingLiquid()) {
+            return new Vec3d(this.creature.posX, this.creature.posY, this.creature.posZ);
+        }
+        return super.getEntityPosition();
+    }
+
+    @Override
+    protected void pathFollow() {
+        if (!this.creature.bodyTouchingLiquid() && !this.isFollowingWaterPath()) {
+            super.pathFollow();
+            return;
+        }
+
+        Vec3d creaturePosition = this.getEntityPosition();
+        this.maxDistanceToWaypoint = Math.max(0.75F, this.creature.width * 0.5F);
+        double waypointDistanceSq = this.maxDistanceToWaypoint * this.maxDistanceToWaypoint;
+
+        while (this.currentPath != null && !this.currentPath.isFinished()) {
+            Vec3d waypoint = this.currentPath.getVectorFromIndex(
+                    this.creature,
+                    this.currentPath.getCurrentPathIndex()
+            );
+            double displacementX = waypoint.x - this.creature.posX;
+            double displacementZ = waypoint.z - this.creature.posZ;
+            if (displacementX * displacementX + displacementZ * displacementZ > waypointDistanceSq) break;
+            this.currentPath.incrementPathIndex();
+        }
+
+        this.checkForStuck(creaturePosition);
+    }
+
+    public boolean isFollowingWaterPath() {
+        if (this.currentPath == null || this.currentPath.isFinished()) return false;
+        PathPoint currentPoint = this.currentPath.getPathPointFromIndex(this.currentPath.getCurrentPathIndex());
+        return currentPoint.nodeType == PathNodeType.WATER;
+    }
+
+    @Override
     public boolean tryMoveToEntityLiving(Entity target, double speed) {
         Path path = this.getPathToEntityLiving(target);
         boolean startedPath = path != null && this.setPath(path, speed);
@@ -58,6 +99,24 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
             this.creature.setUnableToPathToTarget(!startedPath);
         }
         return startedPath;
+    }
+
+    public boolean tryMoveToEntityLivingUsingWater(Entity target, double speed) {
+        Path path = this.getPathToEntityLiving(target);
+        if (path == null || !this.pathUsesWater(path)) return false;
+
+        boolean startedPath = this.setPath(path, speed);
+        if (target == this.creature.getAttackTarget()) {
+            this.creature.setUnableToPathToTarget(!startedPath);
+        }
+        return startedPath;
+    }
+
+    private boolean pathUsesWater(Path path) {
+        for (int index = 0; index < path.getCurrentPathLength(); index++) {
+            if (path.getPathPointFromIndex(index).nodeType == PathNodeType.WATER) return true;
+        }
+        return false;
     }
 
     public boolean hasStraightWalkingPathTo(Entity target) {

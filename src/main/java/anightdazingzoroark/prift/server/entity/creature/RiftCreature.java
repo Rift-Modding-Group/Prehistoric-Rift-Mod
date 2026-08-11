@@ -195,6 +195,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
         this.getAttributeMap().registerAttribute(ELEMENTAL_DAMAGE_ATTRIBUTE);
         this.getAttributeMap().registerAttribute(STAMINA_ATTRIBUTE);
+        this.getAttributeMap().getAttributeInstance(EntityLivingBase.SWIM_SPEED).setBaseValue(1.5D);
     }
 
     @Override
