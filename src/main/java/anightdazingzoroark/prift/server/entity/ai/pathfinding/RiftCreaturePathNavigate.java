@@ -57,6 +57,13 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
         return path;
     }
 
+    public boolean tryMoveToPositionUsingWater(BlockPos target, double speed) {
+        this.riftNodeProcessor.setWaterPathingAllowed(true);
+        Path path = super.getPathToPos(target);
+        this.riftNodeProcessor.setWaterPathingAllowed(false);
+        return path != null && this.setPath(path, speed);
+    }
+
     @Override
     protected boolean canNavigate() {
         return this.creature.getNavigationBuilder().getCanWalk()

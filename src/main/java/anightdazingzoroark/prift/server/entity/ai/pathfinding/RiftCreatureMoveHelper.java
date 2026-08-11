@@ -2,11 +2,16 @@ package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
 public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
     public static final double STANDARD_JUMP_HEIGHT = 1D;
+    private static final int WATER_LAND_PATH_RETRY_TICKS = 10;
+
+    private int waterLandPathRetryTicks;
 
     public RiftCreatureMoveHelper(RiftCreature creature) {
         super(creature);
@@ -72,6 +77,26 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
         double totalDisplacementSq = horizontalDisplacementSq + displacementY * displacementY;
         boolean inLiquid = this.creature.bodyTouchingLiquid();
         boolean followingWaterPath = this.creature.getCreaturePathNavigate().isFollowingWaterPath();
+        if (!inLiquid) this.waterLandPathRetryTicks = 0;
+        else if (this.waterLandPathRetryTicks > 0) this.waterLandPathRetryTicks--;
+
+        if (inLiquid && requestedAction == CreatureAction.MOVE_TO
+                && this.creature.getCreaturePathNavigate().noPath()
+                && this.waterLandPathRetryTicks <= 0
+        ) {
+            BlockPos requestedBlock = new BlockPos(this.posX, this.posY, this.posZ);
+            if (this.creature.world.getBlockState(requestedBlock).getMaterial() == Material.AIR
+                    && this.creature.world.getBlockState(requestedBlock.down()).getMaterial().isSolid()
+            ) {
+                this.waterLandPathRetryTicks = WATER_LAND_PATH_RETRY_TICKS;
+                if (this.creature.getCreaturePathNavigate().tryMoveToPositionUsingWater(requestedBlock, this.speed)) {
+                    this.stopWalkingControls();
+                    this.leapHelper.resetDelay();
+                    return;
+                }
+            }
+        }
+
         double relevantDisplacementSq = inLiquid || followingWaterPath
                 ? horizontalDisplacementSq
                 : totalDisplacementSq;

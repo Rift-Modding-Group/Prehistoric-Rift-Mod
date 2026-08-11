@@ -53,7 +53,7 @@ public class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUs
     public boolean bodyTouchingLiquid() {
         if (!this.multiHitboxList.hasCollisionHitboxes()) return false;
         RiftLibCollisionHitbox<RiftCreatureHitboxed> bodyHitbox = this.multiHitboxList.getCollisionHitboxByName("body");
-        return bodyHitbox.isInWater();
+        return bodyHitbox.isInWater() || bodyHitbox.isInLava();
     }
 
     //-----methods from IMultiHitboxUser start here-----

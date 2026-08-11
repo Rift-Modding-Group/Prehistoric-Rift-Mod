@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.api.creature.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
+import anightdazingzoroark.prift.server.entity.ai.RiftGoToLandFromWater;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
@@ -132,6 +133,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.navigator = new RiftCreaturePathNavigate(this, worldIn);
         this.applyCreatureTypeSettings();
         this.animData = new AnimationDataEntity(this, holder -> this.scale());
+
+        if (worldIn != null && !worldIn.isRemote) this.initCreatureAI();
     }
 
     @NotNull
@@ -229,25 +232,32 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         return super.onInitialSpawn(difficulty, livingdata);
     }
 
-    @Override
-    protected void initEntityAI() {
+    /**
+     * better than EntityLiving.initEntityAI() :tm:
+     * */
+    private void initCreatureAI() {
         //aint makin a new class again for this shit
-        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false) {
-            @Override
-            public boolean shouldExecute() {
-                if (creatureType.getRetaliateWhenAttacked() != null
-                        && !creatureType.getRetaliateWhenAttacked().apply((RiftCreature) this.taskOwner, this.taskOwner.getRevengeTarget())
-                ) {
-                    return false;
+        if (this.creatureType.getRetaliateWhenAttacked() != null) {
+            this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false) {
+                @Override
+                public boolean shouldExecute() {
+                    if (creatureType.getRetaliateWhenAttacked() != null
+                            && !creatureType.getRetaliateWhenAttacked().apply((RiftCreature) this.taskOwner, this.taskOwner.getRevengeTarget())
+                    ) {
+                        return false;
+                    }
+                    return super.shouldExecute();
                 }
-                return super.shouldExecute();
-            }
-        });
+            });
+        }
         this.targetTasks.addTask(2, new RiftFindTarget(this, true));
 
         this.tasks.addTask(1, new RiftUnmountedUseMove(this));
-        this.tasks.addTask(2, new EntityAIWander(this, 1D));
-        this.tasks.addTask(3, new EntityAILookIdle(this) {
+        if (!this.creatureType.getNavigation().getCanSwim()) {
+            this.tasks.addTask(2, new RiftGoToLandFromWater(this));
+        }
+        this.tasks.addTask(3, new EntityAIWander(this, 1D));
+        this.tasks.addTask(4, new EntityAILookIdle(this) {
             @Override
             public void resetTask() {
                 this.idleTime = 0;
@@ -614,7 +624,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
      * hitboxed creatures use their main body
      * */
     public boolean bodyTouchingLiquid() {
-        return this.isInWater();
+        return this.isInWater() || this.isInLava();
     }
 
     //-----IRiftCreature boilerplate stuff-----
