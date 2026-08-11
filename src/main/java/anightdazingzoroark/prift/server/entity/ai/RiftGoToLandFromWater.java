@@ -47,6 +47,25 @@ public class RiftGoToLandFromWater extends EntityAIBase {
     @Override
     public void updateTask() {
         if (this.landBlockPos == null) return;
+
+        double displacementX = this.landBlockPos.getX() - this.creature.posX;
+        double displacementZ = this.landBlockPos.getZ() - this.creature.posZ;
+        double shoreTransferDistanceSq = this.creature.width * this.creature.width;
+        if (displacementX * displacementX + displacementZ * displacementZ <= shoreTransferDistanceSq) {
+            this.creature.setPosition(
+                    this.landBlockPos.getX(),
+                    this.landBlockPos.getY(),
+                    this.landBlockPos.getZ()
+            );
+            this.creature.getNavigator().clearPath();
+            this.creature.getMoveHelper().setMoveTo(
+                    this.creature.posX,
+                    this.creature.posY,
+                    this.creature.posZ,
+                    0D
+            );
+            return;
+        }
         this.creature.getMoveHelper().setMoveTo(this.landBlockPos.getX(), this.landBlockPos.getY(), this.landBlockPos.getZ(), 1D);
     }
 
