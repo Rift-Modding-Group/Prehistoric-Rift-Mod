@@ -25,6 +25,7 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
     private static final double DIRECT_SUPPORT_PROBE_RADIUS = 0.05D;
     private static final double DIRECT_SUPPORT_VERTICAL_RANGE = RiftCreatureMoveHelper.STANDARD_JUMP_HEIGHT + 0.125D;
 
+    private RiftCreatureWalkNodeProcessor riftNodeProcessor;
     private final RiftCreature creature;
     @Nullable
     private BlockPos cachedWalkingPathOrigin;
@@ -41,9 +42,19 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
 
     @Override
     protected PathFinder getPathFinder() {
-        this.nodeProcessor = new RiftCreatureWalkNodeProcessor((RiftCreature) this.entity, true);
+        this.riftNodeProcessor = new RiftCreatureWalkNodeProcessor((RiftCreature) this.entity, true);
+        this.nodeProcessor = this.riftNodeProcessor;
         this.nodeProcessor.setCanEnterDoors(true);
         return new PathFinder(this.nodeProcessor);
+    }
+
+    @Override
+    @Nullable
+    public Path getPathToEntityLiving(Entity target) {
+        this.riftNodeProcessor.setWaterPathingAllowed(true);
+        Path path = super.getPathToEntityLiving(target);
+        this.riftNodeProcessor.setWaterPathingAllowed(false);
+        return path;
     }
 
     @Override
