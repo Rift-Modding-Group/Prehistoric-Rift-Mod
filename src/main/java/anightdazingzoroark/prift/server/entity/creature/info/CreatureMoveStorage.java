@@ -83,6 +83,16 @@ public class CreatureMoveStorage {
                     && creature.atFrustrationThreshold()
                     && moveRuleBuilder.getUseWhenFrustrated();
             int index = useDueToFrustration ? 0 : moveRuleBuilder.getPriorityPredicate().apply(creature, target);
+
+            //let ordinary move pathing take a survivable route down instead of repeatedly
+            //selecting a leap attack across the opening.
+            if (index >= 0 && moveRule.moveResult() == CreatureMoveResult.LEAP
+                    && target != null
+                    && target.isEntityAlive()
+                    && creature.getCreaturePathNavigate().hasSafeDownwardWalkingPathTo(target)) {
+                index = -1;
+            }
+
             //being on cooldown forcibly changes the index to -1
             if (this.moveCurrentCooldown(moveRuleBuilder.getMoveName()) > 0) {
                 index = -1;

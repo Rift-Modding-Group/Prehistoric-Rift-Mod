@@ -260,7 +260,7 @@ public class RiftCreatureRegistry {
                                     double angle = Math.toDegrees(Math.asin(Math.clamp(verticalDist / distToTarget, -1D, 1D)));
 
                                     //now set variable
-                                    creature.getAnimationData().setVariable("flamethrower_head_bend", Math.clamp(angle, -35, 35));
+                                    creature.getAnimationData().setVariable("flamethrower_head_bend", Math.clamp(angle, -60, 35));
                                 })
                                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                                         .setChargeUpWhileUse(true)

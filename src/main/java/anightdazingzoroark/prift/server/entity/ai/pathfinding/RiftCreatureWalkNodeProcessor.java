@@ -117,8 +117,8 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
         int walkingOptionCount = count;
 
         for (EnumFacing facing : EnumFacing.Plane.HORIZONTAL) {
-            //A leap is a fallback edge. Adding one beside a valid walking edge can make a wide
-            //creature interpret the successive levels of a staircase as one tall ledge.
+            //a leap is a fallback edge. prefer every valid walking edge, including a survivable
+            //drop, so creatures walk off safe ledges instead of leaping over them.
             if (this.containsWalkingOption(pathOptions, walkingOptionCount, currentPoint, facing)) continue;
 
             count = this.addLeapOption(

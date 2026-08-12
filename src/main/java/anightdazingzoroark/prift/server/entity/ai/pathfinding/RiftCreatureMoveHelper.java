@@ -45,12 +45,11 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
         if (this.creature.bodyTouchingLiquid()) {
             this.creatureAction = CreatureAction.WAIT;
             this.leapHelper.resetDelay();
-            return;
         }
-        this.creature.setAIMoveSpeed((float)(this.speed * this.creature
-                .getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED)
-                .getAttributeValue()));
-        if (this.creature.onGround) this.creatureAction = CreatureAction.WAIT;
+        else {
+            this.creature.setAIMoveSpeed((float)(this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()));
+            if (this.creature.onGround) this.creatureAction = CreatureAction.WAIT;
+        }
     }
 
     @Override
@@ -80,8 +79,7 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
         if (!inLiquid) this.waterLandPathRetryTicks = 0;
         else if (this.waterLandPathRetryTicks > 0) this.waterLandPathRetryTicks--;
 
-        if (inLiquid && requestedAction == CreatureAction.MOVE_TO
-                && this.creature.getCreaturePathNavigate().noPath()
+        if (inLiquid && requestedAction == CreatureAction.MOVE_TO && this.creature.getCreaturePathNavigate().noPath()
                 && this.waterLandPathRetryTicks <= 0
         ) {
             BlockPos requestedBlock = new BlockPos(this.posX, this.posY, this.posZ);
@@ -97,9 +95,7 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
             }
         }
 
-        double relevantDisplacementSq = inLiquid || followingWaterPath
-                ? horizontalDisplacementSq
-                : totalDisplacementSq;
+        double relevantDisplacementSq = inLiquid || followingWaterPath ? horizontalDisplacementSq : totalDisplacementSq;
 
         if (relevantDisplacementSq >= 2.5E-7D) {
             if (horizontalDisplacementSq >= 2.5E-7D) {
@@ -115,22 +111,18 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
             double maximumClearance = navigation.getCanLeap() ?
                     navigation.getLeapHeight() : STANDARD_JUMP_HEIGHT + 0.125D;
             double obstacleClearance = this.leapHelper.getObstacleClearance(this.posX, this.posZ, maximumClearance);
-            boolean leapHandled = !inLiquid && !followingWaterPath && this.leapHelper.tryHandleLeap(
-                    this.posX, this.posY, this.posZ,
-                    obstacleClearance, requestedAction
-            );
+            boolean approachingSafeDownwardTransition = requestedAction == CreatureAction.MOVE_TO
+                    && this.creature.getCreaturePathNavigate().isApproachingSafeDownwardPathTransition();
+            boolean leapHandled = !inLiquid && !followingWaterPath && !approachingSafeDownwardTransition
+                    && this.leapHelper.tryHandleLeap(this.posX, this.posY, this.posZ, obstacleClearance, requestedAction);
 
             if (!leapHandled) {
                 this.leapHelper.resetDelay();
 
                 boolean closeToWaypoint = horizontalDisplacementSq < Math.max(1f, this.creature.width * this.creature.width);
-                boolean standardJumpTransition = (obstacleClearance > this.creature.stepHeight
-                        && obstacleClearance <= STANDARD_JUMP_HEIGHT + 0.125D)
-                        || (closeToWaypoint
-                        && displacementY > this.creature.stepHeight
-                        && displacementY <= STANDARD_JUMP_HEIGHT + 0.125D);
-                if (!inLiquid && !followingWaterPath
-                        && navigation.getCanWalk() && this.creature.onGround && standardJumpTransition) {
+                boolean standardJumpTransition = (obstacleClearance > this.creature.stepHeight && obstacleClearance <= STANDARD_JUMP_HEIGHT + 0.125D)
+                        || (closeToWaypoint && displacementY > this.creature.stepHeight && displacementY <= STANDARD_JUMP_HEIGHT + 0.125D);
+                if (!inLiquid && !followingWaterPath && navigation.getCanWalk() && this.creature.onGround && standardJumpTransition) {
                     this.creature.getJumpHelper().setJumping();
                     this.creatureAction = CreatureAction.JUMPING;
                 }

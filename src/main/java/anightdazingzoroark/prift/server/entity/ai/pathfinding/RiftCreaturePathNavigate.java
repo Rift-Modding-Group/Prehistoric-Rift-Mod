@@ -9,6 +9,7 @@ import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.ChunkCache;
@@ -33,6 +34,7 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
     private BlockPos cachedWalkingPathTarget;
     private long cachedWalkingPathTime = Long.MIN_VALUE;
     private boolean cachedWalkingPathResult;
+    private boolean cachedSafeDownwardWalkingPathResult;
 
     public RiftCreaturePathNavigate(RiftCreature creature, World world) {
         super(creature, world);
@@ -137,7 +139,46 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
         return false;
     }
 
+    /**
+     * Returns whether the current walking waypoint is immediately followed by a survivable
+     * lower waypoint. The move helper uses this to avoid treating the ledge between them as a
+     * blocked gap before the creature can reach the downward part of its path.
+     */
+    boolean isApproachingSafeDownwardPathTransition() {
+        if (this.currentPath == null || this.currentPath.isFinished()) return false;
+
+        int currentIndex = this.currentPath.getCurrentPathIndex();
+        int nextIndex = currentIndex + 1;
+        if (nextIndex >= this.currentPath.getCurrentPathLength()) return false;
+
+        PathPoint currentPoint = this.currentPath.getPathPointFromIndex(currentIndex);
+        PathPoint nextPoint = this.currentPath.getPathPointFromIndex(nextIndex);
+        int downwardDistance = currentPoint.y - nextPoint.y;
+        return downwardDistance > 0
+                && downwardDistance <= this.creature.getMaxFallHeight()
+                && nextPoint.nodeType == PathNodeType.WALKABLE;
+    }
+
     public boolean hasStraightWalkingPathTo(Entity target) {
+        this.updateWalkingPathCache(target);
+        return this.cachedWalkingPathResult;
+    }
+
+    public boolean hasSafeDownwardWalkingPathTo(Entity target) {
+        double creatureY = this.creature.getEntityBoundingBox().minY;
+        double targetY = target.getEntityBoundingBox().minY;
+        double downwardDistance = creatureY - targetY;
+        int creatureLevel = MathHelper.floor(creatureY + 1E-3D);
+        int targetLevel = MathHelper.floor(targetY + 1E-3D);
+        if (creatureLevel <= targetLevel || downwardDistance > this.creature.getMaxFallHeight() + 1E-3D) {
+            return false;
+        }
+
+        this.updateWalkingPathCache(target);
+        return this.cachedSafeDownwardWalkingPathResult;
+    }
+
+    private void updateWalkingPathCache(Entity target) {
         BlockPos origin = new BlockPos(this.creature);
         BlockPos destination = new BlockPos(target);
         long worldTime = this.world.getTotalWorldTime();
@@ -146,13 +187,14 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
             this.cachedWalkingPathOrigin = origin;
             this.cachedWalkingPathTarget = destination;
             this.cachedWalkingPathTime = worldTime;
-            this.cachedWalkingPathResult = this.findWalkingPath(target, destination);
+            this.updateWalkingPathResults(target);
         }
-        return this.cachedWalkingPathResult;
     }
 
-    private boolean findWalkingPath(Entity target, BlockPos destination) {
-        if (!this.canNavigate()) return false;
+    private void updateWalkingPathResults(Entity target) {
+        this.cachedWalkingPathResult = false;
+        this.cachedSafeDownwardWalkingPathResult = false;
+        if (!this.canNavigate()) return;
 
         RiftCreatureWalkNodeProcessor walkingProcessor = new RiftCreatureWalkNodeProcessor(this.creature, false);
         walkingProcessor.setCanEnterDoors(this.nodeProcessor.getCanEnterDoors());
@@ -168,14 +210,19 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
                 cacheCenter.add(cacheRadius, cacheRadius, cacheRadius),
                 0
         );
-        Path path = walkingPathFinder.findPath(chunkCache, this.creature, destination, searchRange);
+        Path path = walkingPathFinder.findPath(chunkCache, this.creature, target, searchRange);
         PathPoint finalPoint = path == null ? null : path.getFinalPathPoint();
-        return finalPoint != null
-                && finalPoint.x == destination.getX()
-                && finalPoint.y == destination.getY()
-                && finalPoint.z == destination.getZ()
-                && this.pathIsStraight(path)
-                && this.directRouteHasSupport(target);
+        if (finalPoint == null) return;
+
+        int targetY = MathHelper.floor(target.getEntityBoundingBox().minY);
+        int nodeSize = MathHelper.floor(this.creature.width + 1F);
+        int targetX = MathHelper.floor(target.posX - nodeSize * 0.5D);
+        int targetZ = MathHelper.floor(target.posZ - nodeSize * 0.5D);
+        boolean reachesTarget = finalPoint.x == targetX && finalPoint.y == targetY && finalPoint.z == targetZ;
+        //a partial walking path ending at the same height can merely be the near edge of a gap
+        //only a path that reaches the target node proves that walking down is possible
+        this.cachedSafeDownwardWalkingPathResult = reachesTarget;
+        this.cachedWalkingPathResult = reachesTarget && this.pathIsStraight(path) && this.directRouteHasSupport(target);
     }
 
     private boolean pathIsStraight(Path path) {
@@ -201,8 +248,7 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
             double closestZ = directionZ * Math.clamp(progress, 0D, 1D);
             double deviationX = pointX - closestX;
             double deviationZ = pointZ - closestZ;
-            if (deviationX * deviationX + deviationZ * deviationZ
-                    > MAXIMUM_STRAIGHT_PATH_DEVIATION * MAXIMUM_STRAIGHT_PATH_DEVIATION) {
+            if (deviationX * deviationX + deviationZ * deviationZ > MAXIMUM_STRAIGHT_PATH_DEVIATION * MAXIMUM_STRAIGHT_PATH_DEVIATION) {
                 return false;
             }
             lastProgress = progress;

@@ -25,7 +25,7 @@ public class RiftCreatureLeapHelper {
     private static final double GAP_SEARCH_ANGLE_STEP = Math.toRadians(5D);
     private static final int GAP_SEARCH_ANGLE_STEPS = 12;
     private static final double SUPPORT_PROBE_RADIUS = 0.05D;
-    private static final double MINIMUM_SUPPORT_PROBE_DEPTH = 0.3D;
+    private static final double MAXIMUM_NON_GAP_DROP = RiftCreatureMoveHelper.STANDARD_JUMP_HEIGHT + 1E-3D;
 
     @NotNull
     private final RiftCreatureMoveHelperBase moveHelper;
@@ -439,16 +439,13 @@ public class RiftCreatureLeapHelper {
     }
 
     /**
-     * Checks whether there is safe ground close enough below this little sample point.
+     * Checks whether the sample is still on ordinary walking terrain. A deeper floor may make a
+     * fall survivable, but it must still count as a gap so a leap across it remains possible.
      * */
     private boolean hasSupportAt(double x, double z, double feetY) {
-        double supportProbeDepth = Math.max(
-                MINIMUM_SUPPORT_PROBE_DEPTH,
-                this.creature.getMaxFallHeight() + 1E-3D
-        );
         AxisAlignedBB supportProbe = new AxisAlignedBB(
                 x - SUPPORT_PROBE_RADIUS,
-                feetY - supportProbeDepth,
+                feetY - MAXIMUM_NON_GAP_DROP,
                 z - SUPPORT_PROBE_RADIUS,
                 x + SUPPORT_PROBE_RADIUS,
                 feetY - 1E-3D,
