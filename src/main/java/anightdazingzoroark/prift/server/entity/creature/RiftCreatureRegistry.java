@@ -138,6 +138,9 @@ public class RiftCreatureRegistry {
                         .setNavigation(new CreatureNavigationBuilder().setCanWalk()
                                 .setCanLeap(4D, 0, 12D)
                         )
+                        .addBlockBreakLevel("pickaxe", 2)
+                        .addBlockBreakLevel("shovel", 2)
+                        .addBlockBreakLevel("axe", 2)
                         //---rays---
                         .addUsableRay(
                                 "footStompRay",

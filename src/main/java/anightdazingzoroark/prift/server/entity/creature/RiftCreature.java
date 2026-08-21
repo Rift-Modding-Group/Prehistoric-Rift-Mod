@@ -89,6 +89,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private static final DataParameter<CreatureStatsStorage> CREATURE_STATS = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.CREATURE_STATS_STORAGE);
     private static final DataParameter<String> CREATURE_PHASE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.STRING);
     private static final DataParameter<Boolean> LEAPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> USE_BLOCK_BREAK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     //--custom property values, which can be called and manipulated from a creature builder--
     @NotNull
@@ -188,6 +189,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.dataManager.register(CREATURE_STATS, new CreatureStatsStorage());
         this.dataManager.register(CREATURE_PHASE, "");
         this.dataManager.register(LEAPING, false);
+        this.dataManager.register(USE_BLOCK_BREAK, false);
     }
 
     //this is gonna be mostly for registering the custom attributes
@@ -533,6 +535,15 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     public void setPhase(String value) {
         if (value == null) return;
         this.dataManager.set(CREATURE_PHASE, value);
+    }
+
+    //-----block break management-----
+    public boolean getUseBlockBreak() {
+        return this.dataManager.get(USE_BLOCK_BREAK);
+    }
+
+    public void setUseBlockBreak(boolean value) {
+        this.dataManager.set(USE_BLOCK_BREAK, value);
     }
 
     //-----move use management-----

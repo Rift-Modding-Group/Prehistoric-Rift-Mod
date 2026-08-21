@@ -46,6 +46,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     @NotNull
     private CreatureNavigationBuilder navigation = new CreatureNavigationBuilder().setCanWalk();
     private CreatureMoveSelectorBuilder moveSelector = new CreatureMoveSelectorBuilder();
+    @Nullable
+    private Map<String, Integer> blockBreakLevelMap;
     private Map<String, RiftLibRayBuilder> rayMap;
     private Map<String, TriConsumer<ICreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
     private List<String> defaultTargetWhitelist;
@@ -354,6 +356,21 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
         return this.moveSelector;
     }
 
+    public T addBlockBreakLevel(@NotNull String tool, int level) {
+        this.checkIfLocked();
+
+        if (level < 0) throw new IllegalArgumentException("Block Harvest level cannot be negative!");
+
+        if (this.blockBreakLevelMap == null) this.blockBreakLevelMap = new HashMap<>();
+        this.blockBreakLevelMap.put(tool, level);
+        return this.getThis();
+    }
+
+    @Nullable
+    public Map<String, Integer> getBlockBreakLevelMap() {
+        return this.blockBreakLevelMap;
+    }
+
     /**
      * Create a map of RiftLibrary rays that this creature will use.
      * */
@@ -487,7 +504,6 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
                 && this.spawnEggColors != null
                 && this.scaleRangeForAge != null
                 && this.navigation.isValid()
-                && this.moveSelector != null
                 && !this.moveList.isEmpty();
     }
 
