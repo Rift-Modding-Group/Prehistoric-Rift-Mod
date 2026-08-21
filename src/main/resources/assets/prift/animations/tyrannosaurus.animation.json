@@ -484,7 +484,8 @@
 			}
 		},
 		"animation.tyrannosaurus.leap": {
-			"loop": true,
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.05,
 			"bones": {
 				"body": {
 					"rotation": [-15, 0, 0]

@@ -574,13 +574,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     public boolean isUnableToPathToTarget() {
-        EntityLivingBase target = this.getAttackTarget();
-        return target != null && target.isEntityAlive() && this.unableToPathToTarget;
+        return this.unableToPathToTarget;
     }
 
     public void setUnableToPathToTarget(boolean unableToPathToTarget) {
-        EntityLivingBase target = this.getAttackTarget();
-        this.unableToPathToTarget = unableToPathToTarget && target != null && target.isEntityAlive();
+        this.unableToPathToTarget = unableToPathToTarget;
     }
 
     @Override
