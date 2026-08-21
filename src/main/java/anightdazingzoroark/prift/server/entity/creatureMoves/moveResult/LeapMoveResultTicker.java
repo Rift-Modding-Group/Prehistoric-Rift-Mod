@@ -83,6 +83,8 @@ public class LeapMoveResultTicker extends AbstractMoveResultTicker {
 
         if (moveHelper.setLeapTo(this.target.posX, this.target.posY, this.target.posZ)) return true;
 
+        if (this.creature.isUnableToPathToTarget()) return false;
+
         Vec3d gapLanding = moveHelper.getLeapHelper().findGapLeapLandingToward(
                 this.target.posX,
                 this.target.posY,

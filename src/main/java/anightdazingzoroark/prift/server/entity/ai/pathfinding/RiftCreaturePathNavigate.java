@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
  * */
 public class RiftCreaturePathNavigate extends PathNavigateGround {
     private static final int WALKING_PATH_CACHE_TICKS = 10;
-    private static final double MAXIMUM_STRAIGHT_PATH_DEVIATION = 1D;
+    private static final double MAXIMUM_STRAIGHT_PATH_DEVIATION_SQUARED = 1D;
     private static final double DIRECT_SUPPORT_SCAN_STEP = 0.25D;
     private static final double DIRECT_SUPPORT_PROBE_RADIUS = 0.05D;
     private static final double DIRECT_SUPPORT_VERTICAL_RANGE = RiftCreatureMoveHelper.STANDARD_JUMP_HEIGHT + 0.125D;
@@ -68,8 +68,7 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
 
     @Override
     protected boolean canNavigate() {
-        return this.creature.getNavigationBuilder().getCanWalk()
-                && (super.canNavigate() || this.creature.bodyTouchingLiquid());
+        return this.creature.getNavigationBuilder().getCanWalk() && (super.canNavigate() || this.creature.bodyTouchingLiquid());
     }
 
     @Override
@@ -116,7 +115,7 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
         Path path = this.getPathToEntityLiving(target);
         boolean startedPath = path != null && this.setPath(path, speed);
         if (target == this.creature.getAttackTarget()) {
-            this.creature.setUnableToPathToTarget(!startedPath);
+            this.creature.setUnableToPathToTarget(!startedPath || !this.pathReachesSafeTarget(path, target));
         }
         return startedPath;
     }
@@ -137,6 +136,35 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
             if (path.getPathPointFromIndex(index).nodeType == PathNodeType.WATER) return true;
         }
         return false;
+    }
+
+    private boolean pathReachesSafeTarget(@Nullable Path path, Entity target) {
+        return path != null && this.pathReachesTarget(path, target) && this.pathIsSafe(path);
+    }
+
+    private boolean pathReachesTarget(@Nullable Path path, Entity target) {
+        PathPoint finalPoint = path == null ? null : path.getFinalPathPoint();
+        if (finalPoint == null) return false;
+
+        int nodeSize = MathHelper.floor(this.creature.width + 1F);
+        return finalPoint.x == MathHelper.floor(target.posX - nodeSize * 0.5D)
+                && finalPoint.y == MathHelper.floor(target.getEntityBoundingBox().minY)
+                && finalPoint.z == MathHelper.floor(target.posZ - nodeSize * 0.5D);
+    }
+
+    private boolean pathIsSafe(Path path) {
+        for (int index = 0; index < path.getCurrentPathLength(); index++) {
+            PathNodeType nodeType = path.getPathPointFromIndex(index).nodeType;
+            if (nodeType == PathNodeType.DANGER_FIRE
+                    || nodeType == PathNodeType.DAMAGE_FIRE
+                    || nodeType == PathNodeType.DANGER_CACTUS
+                    || nodeType == PathNodeType.DAMAGE_CACTUS
+                    || nodeType == PathNodeType.DANGER_OTHER
+                    || nodeType == PathNodeType.DAMAGE_OTHER) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -167,10 +195,8 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
     public boolean hasSafeDownwardWalkingPathTo(Entity target) {
         double creatureY = this.creature.getEntityBoundingBox().minY;
         double targetY = target.getEntityBoundingBox().minY;
-        double downwardDistance = creatureY - targetY;
-        int creatureLevel = MathHelper.floor(creatureY + 1E-3D);
-        int targetLevel = MathHelper.floor(targetY + 1E-3D);
-        if (creatureLevel <= targetLevel || downwardDistance > this.creature.getMaxFallHeight() + 1E-3D) {
+        if (MathHelper.floor(creatureY + 1E-3D) <= MathHelper.floor(targetY + 1E-3D)
+                || creatureY - targetY > this.creature.getMaxFallHeight() + 1E-3D) {
             return false;
         }
 
@@ -211,18 +237,12 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
                 0
         );
         Path path = walkingPathFinder.findPath(chunkCache, this.creature, target, searchRange);
-        PathPoint finalPoint = path == null ? null : path.getFinalPathPoint();
-        if (finalPoint == null) return;
+        if (!this.pathReachesTarget(path, target)) return;
 
-        int targetY = MathHelper.floor(target.getEntityBoundingBox().minY);
-        int nodeSize = MathHelper.floor(this.creature.width + 1F);
-        int targetX = MathHelper.floor(target.posX - nodeSize * 0.5D);
-        int targetZ = MathHelper.floor(target.posZ - nodeSize * 0.5D);
-        boolean reachesTarget = finalPoint.x == targetX && finalPoint.y == targetY && finalPoint.z == targetZ;
         //a partial walking path ending at the same height can merely be the near edge of a gap
         //only a path that reaches the target node proves that walking down is possible
-        this.cachedSafeDownwardWalkingPathResult = reachesTarget;
-        this.cachedWalkingPathResult = reachesTarget && this.pathIsStraight(path) && this.directRouteHasSupport(target);
+        this.cachedSafeDownwardWalkingPathResult = this.pathIsSafe(path);
+        this.cachedWalkingPathResult = this.pathIsStraight(path) && this.directRouteHasSupport(target);
     }
 
     private boolean pathIsStraight(Path path) {
@@ -248,7 +268,7 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
             double closestZ = directionZ * Math.clamp(progress, 0D, 1D);
             double deviationX = pointX - closestX;
             double deviationZ = pointZ - closestZ;
-            if (deviationX * deviationX + deviationZ * deviationZ > MAXIMUM_STRAIGHT_PATH_DEVIATION * MAXIMUM_STRAIGHT_PATH_DEVIATION) {
+            if (deviationX * deviationX + deviationZ * deviationZ > MAXIMUM_STRAIGHT_PATH_DEVIATION_SQUARED) {
                 return false;
             }
             lastProgress = progress;

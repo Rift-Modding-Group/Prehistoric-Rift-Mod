@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.PathPoint;
@@ -38,10 +37,8 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
 
     @Override
     public PathPoint getStart() {
-        double nodeCenterOffsetX = this.entitySizeX * 0.5D;
-        double nodeCenterOffsetZ = this.entitySizeZ * 0.5D;
-        int x = MathHelper.floor(this.creature.posX - nodeCenterOffsetX);
-        int z = MathHelper.floor(this.creature.posZ - nodeCenterOffsetZ);
+        int x = MathHelper.floor(this.creature.posX - this.entitySizeX * 0.5D);
+        int z = MathHelper.floor(this.creature.posZ - this.entitySizeZ * 0.5D);
 
         if (this.waterPathingAllowed && this.creature.bodyTouchingLiquid()) {
             int surfaceY = this.findWaterSurfaceY(
@@ -70,13 +67,11 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
 
     @Override
     public PathPoint getPathPointToCoords(double x, double y, double z) {
-        int targetCenterX = MathHelper.floor(x);
         int targetY = MathHelper.floor(y);
-        int targetCenterZ = MathHelper.floor(z);
         int targetX = MathHelper.floor(x - this.entitySizeX * 0.5D);
         int targetZ = MathHelper.floor(z - this.entitySizeZ * 0.5D);
         int surfaceY = this.waterPathingAllowed
-                ? this.findWaterSurfaceY(targetCenterX, targetY, targetCenterZ)
+                ? this.findWaterSurfaceY(MathHelper.floor(x), targetY, MathHelper.floor(z))
                 : Integer.MIN_VALUE;
         if (surfaceY == Integer.MIN_VALUE) return this.openPoint(targetX, targetY, targetZ);
 
@@ -101,14 +96,13 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
         int count = super.findPathOptions(pathOptions, currentPoint, targetPoint, maxDistance);
         if (this.waterPathingAllowed) {
             for (int index = 0; index < count; index++) {
-                if (pathOptions[index].nodeType == PathNodeType.WATER) {
-                    pathOptions[index].costMalus = WATER_PATH_COST;
-                }
+                if (pathOptions[index].nodeType == PathNodeType.WATER) pathOptions[index].costMalus = WATER_PATH_COST;
             }
             count = this.addWaterSurfaceOptions(pathOptions, count, currentPoint, targetPoint, maxDistance);
         }
-        if (!this.allowLeaps || !this.creature.getNavigationBuilder().getCanLeap()) return count;
-        if (this.creature.bodyTouchingLiquid()
+        if (!this.allowLeaps
+                || !this.creature.getNavigationBuilder().getCanLeap()
+                || this.creature.bodyTouchingLiquid()
                 || currentPoint.nodeType == PathNodeType.WATER
                 || this.isWaterSurfaceNode(currentPoint.x, currentPoint.y, currentPoint.z)) {
             return count;
@@ -121,20 +115,10 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
             //drop, so creatures walk off safe ledges instead of leaping over them.
             if (this.containsWalkingOption(pathOptions, walkingOptionCount, currentPoint, facing)) continue;
 
-            count = this.addLeapOption(
-                    pathOptions,
-                    count,
-                    this.findUpwardLeapLanding(currentPoint, facing, maxDistance),
-                    targetPoint,
-                    maxDistance
-            );
-            count = this.addLeapOption(
-                    pathOptions,
-                    count,
-                    this.findLevelLeapLanding(currentPoint, facing, maxDistance),
-                    targetPoint,
-                    maxDistance
-            );
+            count = this.addLeapOption(pathOptions, count,
+                    this.findUpwardLeapLanding(currentPoint, facing, maxDistance), targetPoint, maxDistance);
+            count = this.addLeapOption(pathOptions, count,
+                    this.findLevelLeapLanding(currentPoint, facing, maxDistance), targetPoint, maxDistance);
         }
         return count;
     }
@@ -159,11 +143,7 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
         for (EnumFacing facing : EnumFacing.Plane.HORIZONTAL) {
             int x = currentPoint.x + facing.getXOffset();
             int z = currentPoint.z + facing.getZOffset();
-            int surfaceY = this.findWaterSurfaceY(
-                    x + this.entitySizeX / 2,
-                    currentPoint.y,
-                    z + this.entitySizeZ / 2
-            );
+            int surfaceY = this.findWaterSurfaceY(x + this.entitySizeX / 2, currentPoint.y, z + this.entitySizeZ / 2);
             if (surfaceY == Integer.MIN_VALUE || Math.abs(surfaceY - currentPoint.y) > 1) continue;
 
             PathNodeType nodeType = this.getNodeType(x, surfaceY, z);
@@ -197,51 +177,50 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
         }
 
         int landingY = currentPoint.y + (int)Math.ceil(ledgeHeight - 1E-3D);
-        int maximumDistance = (int)Math.floor(Math.min(
-                this.creature.getNavigationBuilder().getLeapDistance(),
-                maxPathDistance
-        ));
+        int maximumDistance = this.getMaximumLeapDistance(maxPathDistance);
         for (int distance = 1; distance <= maximumDistance; distance++) {
             int landingX = currentPoint.x + facing.getXOffset() * distance;
             int landingZ = currentPoint.z + facing.getZOffset() * distance;
-            PathNodeType landingType = this.getNodeType(landingX, landingY, landingZ);
-            float priority = this.creature.getPathPriority(landingType);
-            if (landingType != PathNodeType.WALKABLE || priority < 0F
-                    || !this.hasFullLandingSupport(landingX, landingY, landingZ)) {
-                continue;
-            }
-
-            PathPoint landing = this.openPoint(landingX, landingY, landingZ);
-            landing.nodeType = landingType;
-            landing.costMalus = Math.max(landing.costMalus, priority + (float)ledgeHeight + distance);
-            return landing;
+            PathPoint landing = this.getWalkableLanding(
+                    landingX, landingY, landingZ, (float)ledgeHeight + distance, true
+            );
+            if (landing != null) return landing;
         }
         return null;
     }
 
+    @Nullable
+    private PathPoint getWalkableLanding(int x, int y, int z, float extraCost, boolean requireFullSupport) {
+        PathNodeType nodeType = this.getNodeType(x, y, z);
+        float priority = this.creature.getPathPriority(nodeType);
+        if (nodeType != PathNodeType.WALKABLE || priority < 0F
+                || requireFullSupport && !this.hasFullLandingSupport(x, y, z)) {
+            return null;
+        }
+
+        PathPoint landing = this.openPoint(x, y, z);
+        landing.nodeType = nodeType;
+        landing.costMalus = Math.max(landing.costMalus, priority + extraCost);
+        return landing;
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean hasFullLandingSupport(int landingX, int landingY, int landingZ) {
         for (int x = landingX; x < landingX + this.entitySizeX; x++) {
             for (int z = landingZ; z < landingZ + this.entitySizeZ; z++) {
-                if (this.getPathNodeType(this.blockaccess, x, landingY, z) != PathNodeType.WALKABLE) {
-                    return false;
-                }
+                if (this.getPathNodeType(this.blockaccess, x, landingY, z) != PathNodeType.WALKABLE) return false;
             }
         }
         return true;
     }
 
     private double getLeadingObstacleHeight(PathPoint currentPoint, EnumFacing facing) {
-        int candidateX = currentPoint.x + facing.getXOffset();
-        int candidateZ = currentPoint.z + facing.getZOffset();
-        int minimumX = candidateX;
-        int maximumX = candidateX + this.entitySizeX - 1;
-        int minimumZ = candidateZ;
-        int maximumZ = candidateZ + this.entitySizeZ - 1;
-
-        if (facing.getXOffset() > 0) minimumX = maximumX;
-        else if (facing.getXOffset() < 0) maximumX = minimumX;
-        if (facing.getZOffset() > 0) minimumZ = maximumZ;
-        else if (facing.getZOffset() < 0) maximumZ = minimumZ;
+        int offsetX = facing.getXOffset();
+        int offsetZ = facing.getZOffset();
+        int minimumX = currentPoint.x + (offsetX > 0 ? this.entitySizeX : offsetX);
+        int maximumX = minimumX + (offsetX == 0 ? this.entitySizeX - 1 : 0);
+        int minimumZ = currentPoint.z + (offsetZ > 0 ? this.entitySizeZ : offsetZ);
+        int maximumZ = minimumZ + (offsetZ == 0 ? this.entitySizeZ - 1 : 0);
 
         double obstacleHeight = 0D;
         for (int x = minimumX; x <= maximumX; x++) {
@@ -253,21 +232,16 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
     }
 
     private PathPoint findLevelLeapLanding(PathPoint currentPoint, EnumFacing facing, float maxPathDistance) {
-        PathPoint obstacleLanding = this.findObstacleLeapLanding(currentPoint, facing, maxPathDistance);
-        if (obstacleLanding != null) return obstacleLanding;
-
-        PathPoint waterLanding = this.waterPathingAllowed
-                ? this.findWaterLeapLanding(currentPoint, facing, maxPathDistance)
-                : null;
-        return waterLanding != null ? waterLanding : this.findGapLeapLanding(currentPoint, facing, maxPathDistance);
+        PathPoint landing = this.findObstacleLeapLanding(currentPoint, facing, maxPathDistance);
+        if (landing == null && this.waterPathingAllowed) {
+            landing = this.findWaterLeapLanding(currentPoint, facing, maxPathDistance);
+        }
+        return landing != null ? landing : this.findGapLeapLanding(currentPoint, facing, maxPathDistance);
     }
 
     @Nullable
     private PathPoint findWaterLeapLanding(PathPoint currentPoint, EnumFacing facing, float maxPathDistance) {
-        int maximumDistance = (int)Math.floor(Math.min(
-                this.creature.getNavigationBuilder().getLeapDistance(),
-                maxPathDistance
-        ));
+        int maximumDistance = this.getMaximumLeapDistance(maxPathDistance);
         boolean foundWater = false;
 
         for (int distance = 1; distance <= maximumDistance; distance++) {
@@ -302,12 +276,11 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
         double nodeCenterOffsetZ = this.entitySizeZ * 0.5D;
         double startX = start.x + nodeCenterOffsetX;
         double startZ = start.z + nodeCenterOffsetZ;
-        double landingX = landing.x + nodeCenterOffsetX;
-        double landingZ = landing.z + nodeCenterOffsetZ;
-        double displacementX = landingX - startX;
-        double displacementZ = landingZ - startZ;
-        double horizontalDistance = Math.sqrt(displacementX * displacementX + displacementZ * displacementZ);
-        int samples = Math.max(2, (int)Math.ceil(horizontalDistance / LEAP_ARC_SCAN_STEP));
+        double displacementX = landing.x - start.x;
+        double displacementZ = landing.z - start.z;
+        int samples = Math.max(2, (int)Math.ceil(
+                Math.sqrt(displacementX * displacementX + displacementZ * displacementZ) / LEAP_ARC_SCAN_STEP
+        ));
 
         AxisAlignedBB creatureBounds = this.creature.getEntityBoundingBox();
         AxisAlignedBB startBounds = creatureBounds.offset(
@@ -320,10 +293,8 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
 
         for (int sample = 1; sample < samples; sample++) {
             double progress = (double)sample / samples;
-            double horizontalX = displacementX * progress;
-            double horizontalZ = displacementZ * progress;
             double verticalOffset = landingHeight * progress + 4D * arcHeight * progress * (1D - progress);
-            AxisAlignedBB sampleBounds = startBounds.offset(horizontalX, verticalOffset, horizontalZ);
+            AxisAlignedBB sampleBounds = startBounds.offset(displacementX * progress, verticalOffset, displacementZ * progress);
             if (this.creature.world.collidesWithAnyBlock(sampleBounds)) return false;
         }
         return true;
@@ -345,31 +316,21 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
         );
         if (this.creature.world.collidesWithAnyBlock(overheadClearance)) return null;
 
-        int maximumDistance = (int)Math.floor(Math.min(
-                this.creature.getNavigationBuilder().getLeapDistance(),
-                maxPathDistance
-        ));
+        int maximumDistance = this.getMaximumLeapDistance(maxPathDistance);
         for (int distance = 2; distance <= maximumDistance; distance++) {
             int landingX = currentPoint.x + facing.getXOffset() * distance;
             int landingZ = currentPoint.z + facing.getZOffset() * distance;
-            PathNodeType landingType = this.getNodeType(landingX, currentPoint.y, landingZ);
-            float priority = this.creature.getPathPriority(landingType);
-            if (landingType != PathNodeType.WALKABLE || priority < 0F) continue;
-
-            PathPoint landing = this.openPoint(landingX, currentPoint.y, landingZ);
-            landing.nodeType = landingType;
-            landing.costMalus = Math.max(landing.costMalus, priority + (float)obstacleHeight + distance);
-            return landing;
+            PathPoint landing = this.getWalkableLanding(
+                    landingX, currentPoint.y, landingZ, (float)obstacleHeight + distance, false
+            );
+            if (landing != null) return landing;
         }
         return null;
     }
 
     @Nullable
     private PathPoint findGapLeapLanding(PathPoint currentPoint, EnumFacing facing, float maxPathDistance) {
-        int maximumDistance = (int)Math.floor(Math.min(
-                this.creature.getNavigationBuilder().getLeapDistance(),
-                maxPathDistance
-        ));
+        int maximumDistance = this.getMaximumLeapDistance(maxPathDistance);
         boolean foundGap = false;
 
         for (int distance = 1; distance <= maximumDistance; distance++) {
@@ -384,15 +345,14 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
             }
             if (!foundGap || columnType != PathNodeType.WALKABLE) return null;
 
-            PathNodeType landingType = this.getNodeType(x, currentPoint.y, z);
-            float priority = this.creature.getPathPriority(landingType);
-            if (landingType != PathNodeType.WALKABLE || priority < 0F) continue;
-            PathPoint landing = this.openPoint(x, currentPoint.y, z);
-            landing.nodeType = landingType;
-            landing.costMalus = Math.max(landing.costMalus, priority + distance);
-            return landing;
+            PathPoint landing = this.getWalkableLanding(x, currentPoint.y, z, distance, false);
+            if (landing != null) return landing;
         }
         return null;
+    }
+
+    private int getMaximumLeapDistance(float maxPathDistance) {
+        return (int)Math.floor(Math.min(this.creature.getNavigationBuilder().getLeapDistance(), maxPathDistance));
     }
 
     private double getObstacleHeight(int x, int baseY, int z) {
@@ -400,8 +360,7 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
         int maximumY = baseY + (int)Math.ceil(this.creature.getNavigationBuilder().getLeapHeight());
         for (int y = baseY; y <= maximumY; y++) {
             BlockPos pos = new BlockPos(x, y, z);
-            IBlockState state = this.blockaccess.getBlockState(pos);
-            AxisAlignedBB collisionBox = state.getCollisionBoundingBox(this.blockaccess, pos);
+            AxisAlignedBB collisionBox = this.blockaccess.getBlockState(pos).getCollisionBoundingBox(this.blockaccess, pos);
             if (collisionBox != null) top = Math.max(top, y + collisionBox.maxY);
         }
         return top - baseY;
@@ -458,7 +417,8 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
         );
     }
 
-    private boolean contains(PathPoint[] points, int count, PathPoint candidate) {
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private boolean contains(@NotNull PathPoint[] points, int count, PathPoint candidate) {
         for (int index = 0; index < count; index++) {
             if (candidate.equals(points[index])) return true;
         }
