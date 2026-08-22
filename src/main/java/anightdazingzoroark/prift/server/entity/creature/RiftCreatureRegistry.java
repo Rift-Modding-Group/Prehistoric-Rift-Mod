@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCommon;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
@@ -321,26 +322,55 @@ public class RiftCreatureRegistry {
                         .addDefaultTargetWhitelistEntry("human")
                         .setRetaliateWhenAttacked()
         );
-        /*
         registerCreatureType(
                 "stegosaurus",
-                RiftCreature.class,
                 new RiftCreatureBuilder()
                         .setCreatureCategory(RiftCreatureEnums.CreatureCategory.DINOSAUR)
                         .setCreatureDiet(RiftCreatureEnums.CreatureDiet.HERBIVORE)
+                        .setTributeItemPartName("plate")
                         .setStats(5.5, 5, 2, 4, 2)
                         .setScaleRangeForAge(0.3f, 2.125f)
                         .setSpawnEggColors(1731840, 16743424)
                         .setMainHitboxSize(2.125f, 2.5f)
+                        .setMaxFallHeight(4)
+                        .setFallCreatesImpact()
                         .setDaysUntilAdult(3)
+                        .setRetaliateWhenAttacked()
+                        .setHitboxInformation()
                         .setIsHerder()
-                        .setRetaliateWhenAttacked(true)
-                        //.setCanSprintToAttack()
-                        .setMoves(
-                                new CreatureMoveStorage.MoveHolder(CreatureMoveNew.THAGOMIZE, "tail_attack")
+                        .addBlockBreakLevel("axe", 2)
+                        //---moves---
+                        .addMove("tail_stab", CreatureMoveCommon.standardMeleeMove.copy()
+                                .setBasePower(50)
+                                .setAnimNames("tail_stab")
                         )
-                        .setInitMainUsableMoves(CreatureMoveNew.THAGOMIZE)
+                        .addMove("tail_sweep", CreatureMoveCommon.standardMeleeMove.copy()
+                                .setBasePower(30)
+                                .setAnimNames("tail_sweep")
+                        )
+                        //---attack ai---
+                        .setMoveSelector(new CreatureMoveSelectorBuilder()
+                                .setMoveRule(
+                                        new MoveRuleBuilder("tail_stab")
+                                                .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
+                                                .setDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("tailHitZone"))
+                                                .setUseBlockBreak()
+                                )
+                                .setMoveRule(
+                                        new MoveRuleBuilder("tail_sweep")
+                                                .setPriorityPredicate((creature, target) -> {
+                                                    return (target != null && target.isEntityAlive() && !creature.bodyTouchingLiquid()
+                                                            && creature.isOnGround()
+                                                            && creature.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), "spinHitZone")) ?
+                                                            0 : -1;
+                                                })
+                                                .setDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("spinHitZone"))
+                                                .setDontPathToTarget()
+                                )
+                                .setCanSprintToAttack(1, 8D, 16D)
+                        )
         );
+        /*
         registerCreatureType(
                 "dodo",
                 RiftCreature.class,

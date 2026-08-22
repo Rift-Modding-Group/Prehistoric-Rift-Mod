@@ -1,4 +1,5 @@
 entity.tyrannosaurus.name=Tyrannosaurus
+entity.stegosaurus.name=Stegosaurus
 
 item.spawn_egg.name=Spawn %s
 item.raw_exotic_meat.name=Raw Exotic Meat
@@ -7,6 +8,7 @@ item.creative_meal.name=Creative Meal
 item.creative_meal.tooltip=Instantly tames any wild creature and can be used to breed any tamed creature.
 
 item.tyrannosaurus_arm.name=Tyrannosaurus Arm
+item.stegosaurus_plate.name=Stegosaurus Plate
 
 itemGroup.prift_items=Prehistoric Rift Items
 itemGroup.prift_spawn_eggs=Prehistoric Rift Spawn Eggs
