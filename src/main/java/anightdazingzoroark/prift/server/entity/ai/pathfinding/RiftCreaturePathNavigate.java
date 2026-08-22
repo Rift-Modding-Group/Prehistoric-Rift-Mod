@@ -139,6 +139,8 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
 
     @Override
     public boolean tryMoveToEntityLiving(Entity target, double speed) {
+        if (target.isInWater()) return this.tryMoveToEntityLivingUsingWater(target, speed);
+
         Path path = this.getPathToEntityLiving(target);
         boolean startedPath = path != null && this.setPath(path, speed);
         if (target == this.creature.getAttackTarget()) {
@@ -149,9 +151,7 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
 
     public boolean tryMoveToEntityLivingUsingWater(Entity target, double speed) {
         Path path = this.getPathToEntityLiving(target);
-        if (path == null || !this.pathUsesWater(path)) return false;
-
-        boolean startedPath = this.setPath(path, speed);
+        boolean startedPath = path != null && this.pathUsesWater(path) && this.setPath(path, speed);
         if (target == this.creature.getAttackTarget()) {
             this.creature.setUnableToPathToTarget(!startedPath);
         }
