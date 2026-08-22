@@ -2,7 +2,10 @@ package anightdazingzoroark.prift.api.creature.builder;
 
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.CreatureMoveResult;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IEntityMultiPart;
+import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
@@ -145,6 +148,15 @@ public class CreatureMoveSelectorBuilder {
 
         @Override
         public boolean targetWithinRange(@NotNull ICreature user, @NotNull EntityLivingBase target) {
+            //test hitboxes first
+            if (target instanceof IEntityMultiPart) {
+                for (Entity part : target.getParts()) {
+                    if (!(part instanceof MultiPartEntityPart multiPartEntityPart)) continue;
+                    if (user.aabbIntersectsBoundingBox(multiPartEntityPart.getEntityBoundingBox(), this.boundingBoxName)) return true;
+                }
+            }
+
+            //back to entity
             return user.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), this.boundingBoxName);
         }
     }

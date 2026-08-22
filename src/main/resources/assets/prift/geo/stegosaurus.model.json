@@ -28,8 +28,8 @@
 							"tags": ["frontZone"]
 						},
 						"spinHitZone": {
-							"origin": [-24, 0, -24],
-							"size": [48, 24],
+							"origin": [-28, 0, -28],
+							"size": [56, 24],
 							"collision": false
 						},
 						"tailHitZone": {
@@ -313,8 +313,8 @@
 							"tags": ["tail"]
 						},
 						"thagomizerZone": {
-							"origin": [-12, 8.6, 28.5],
-							"size": [24, 16],
+							"origin": [-14, 8.6, 26.5],
+							"size": [28, 22],
 							"collision": false,
 							"tags": ["thagomizer"]
 						}

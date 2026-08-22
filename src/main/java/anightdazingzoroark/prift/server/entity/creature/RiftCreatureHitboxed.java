@@ -5,7 +5,10 @@ import anightdazingzoroark.riftlib.hitbox.IMultiHitboxUser;
 import anightdazingzoroark.riftlib.hitbox.MultiHitboxList;
 import anightdazingzoroark.riftlib.hitbox.RiftLibCollisionHitbox;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,22 +37,39 @@ public class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUs
     }
 
     /**
-     * disable vanilla raytraces and entity collisions
-     * hitboxes will take care of those instead
-     * */
-    @Override
-    public boolean canBeCollidedWith() {
-        return false;
-    }
-
-    /**
-     * This override just makes it so that this creature doesn't get dislocated when pushed
+     * dumass override
      * */
     @Override
     public void applyEntityCollision(Entity entityIn) {}
 
+    /**
+     * only push back whatever is colliding with this entity
+     * */
     @Override
-    protected void collideWithEntity(Entity entityIn) {}
+    protected void collideWithEntity(Entity entityIn) {
+        if (entityIn == null || entityIn.equals(this) || this.isRidingSameEntity(entityIn) || entityIn.noClip) return;
+
+        double dispX = entityIn.posX - this.posX;
+        double dispZ = entityIn.posZ - this.posZ;
+        double maxDisp = MathHelper.absMax(dispX, dispZ);
+
+        maxDisp = MathHelper.sqrt(maxDisp);
+        dispX /= maxDisp;
+        dispZ /= maxDisp;
+        double d3 = Math.min(1D / maxDisp, 1D);
+
+        dispX *= d3;
+        dispZ *= d3;
+        dispX *= 0.05f;
+        dispZ *= 0.05f;
+        dispX *= 1f - this.entityCollisionReduction;
+        dispZ *= 1f - this.entityCollisionReduction;
+
+        entityIn.addVelocity(dispX, 0D, dispZ);
+
+        //mark dirty to force push on players
+        if (entityIn instanceof EntityPlayer) entityIn.velocityChanged = true;
+    }
 
     /**
      * hitboxed creatures use their main body hitbox
@@ -87,7 +107,7 @@ public class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUs
 
     @Override
     public boolean hitboxCanCollideWithEntities() {
-        return true;
+        return false;
     }
 
     @Override
