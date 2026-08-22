@@ -126,6 +126,7 @@ public class RiftCreatureRegistry {
                 new RiftCreatureBuilder()
                         .setCreatureCategory(RiftCreatureEnums.CreatureCategory.DINOSAUR)
                         .setCreatureDiet(RiftCreatureEnums.CreatureDiet.CARNIVORE)
+                        .setTributeItemPartName("arm")
                         .setStats(9, 7, 5, 7, 3)
                         .setScaleRangeForAge(0.5f, 3.25f)
                         .setSpawnEggColors(3670016, 2428687)

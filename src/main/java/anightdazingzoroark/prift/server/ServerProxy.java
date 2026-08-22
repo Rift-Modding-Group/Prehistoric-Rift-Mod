@@ -42,6 +42,8 @@ public class ServerProxy {
         //register items
         RiftItems.registerItems();
         MinecraftForge.EVENT_BUS.register(new RiftItems());
+        //RiftItems.registerOreDictionaryTags();
+        RiftItems.registerFurnaceRecipes();
 
         //register server models
         ServerModelRegistry.registerServerModel(RiftCreature.class, CreatureModel::new);

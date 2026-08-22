@@ -29,6 +29,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private RiftCreatureEnums.CreatureDiet creatureDiet;
     private int[] spawnEggColors;
     private float[] scaleRangeForAge;
+    private String tributeItemPartName;
     private final List<ImmutablePair<String, CreatureMoveBuilder>> moveList = new ArrayList<>();
 
     //the following can be left alone
@@ -144,6 +145,21 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     public float[] getScaleRangeForAge() {
         return this.scaleRangeForAge.clone();
+    }
+
+    /**
+     * "Tribute" items are simply body parts of a creature
+     * They're mostly trophies as of now, but will be useful soon...
+     * */
+    public T setTributeItemPartName(@NotNull String name) {
+        this.checkIfLocked();
+
+        this.tributeItemPartName = name;
+        return this.getThis();
+    }
+
+    public String getTributeItemPartName() {
+        return this.tributeItemPartName;
     }
 
     /**
@@ -505,6 +521,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
                 && this.spawnEggColors != null
                 && this.scaleRangeForAge != null
                 && this.navigation.isValid()
+                && this.tributeItemPartName != null
                 && !this.moveList.isEmpty();
     }
 

@@ -109,7 +109,7 @@ fluid.cryoberry_juice=Cryoberry Juice
 inventory.gear=%s Gear
 inventory.inventory=%s Inventory
 
-item.spawn_egg.name= Spawn %s
+item.spawn_egg.name=Spawn %s
 item.raw_exotic_meat.name=Raw Exotic Meat
 item.raw_fibrous_meat.name=Raw Fibrous Meat
 item.raw_hemolymph.name=Raw Hemolymph
@@ -183,6 +183,7 @@ item.gallimimus_foot.name=Gallimimus Foot
 item.tenontosaurus_feather.name=Tenontosaurus Feather
 
 itemGroup.prift_items=Prehistoric Rift Items
+itemGroup.prift_spawn_eggs=Prehistoric Rift Spawn Eggs
 
 item.tyrannosaurus_egg.name=Tyrannosaurus Egg
 item.stegosaurus_egg.name=Stegosaurus Egg
