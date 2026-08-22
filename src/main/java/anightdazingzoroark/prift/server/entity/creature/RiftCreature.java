@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.api.creature.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
@@ -57,6 +58,7 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -798,6 +800,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
      * */
     public boolean bodyTouchingLiquid() {
         return this.isInWater() || this.isInLava();
+    }
+
+    @Override
+    @NotNull
+    protected ResourceLocation getLootTable() {
+        return new ResourceLocation(RiftInitialize.MODID, "entities/" + this.creatureType.getName());
     }
 
     //-----IRiftCreature boilerplate stuff-----
