@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -15,7 +16,10 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,6 +51,14 @@ public class RiftCreatureSpawnEggItem extends Item {
         RiftCreatureBuilder builder = RiftCreatureRegistry.getCreatureBuilder(getCreatureName(stack));
         String creatureName = builder != null ? builder.getLocalizedName() : "???";
         return I18n.format("item.spawn_egg.name", creatureName);
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void addInformation(ItemStack stack, World world, List<String> tooltip, ITooltipFlag tooltipFlag) {
+        RiftCreatureBuilder builder = RiftCreatureRegistry.getCreatureBuilder(getCreatureName(stack));
+        String creatureName = builder != null ? builder.getName() : "unknown";
+        tooltip.add(TextFormatting.GRAY + I18n.format("entity."+creatureName+".spawn_description"));
     }
 
     @Override

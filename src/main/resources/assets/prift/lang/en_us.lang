@@ -1,5 +1,8 @@
+entity.unknown.spawn_description=???
 entity.tyrannosaurus.name=Tyrannosaurus
+entity.tyrannosaurus.spawn_description=A colossal apex predator possessing immense physical strength, athleticism, and breaths of fire.
 entity.stegosaurus.name=Stegosaurus
+entity.stegosaurus.spawn_description=A herding grazer with protective plates on its back and tail and sharp thagomizers on the tip of its tail. The plates on its tail can be thrown at potential threats.
 
 item.spawn_egg.name=Spawn %s
 item.raw_exotic_meat.name=Raw Exotic Meat

@@ -113,6 +113,7 @@ public class RiftCreatureRegistry {
         creatureBuilderMap.put(name, builder);
     }
 
+    //default creatures
     public static void createCreatures() {
         if (builtInCreaturesRegistered || registeringBuiltInCreatures) return;
         registeringBuiltInCreatures = true;
@@ -315,6 +316,7 @@ public class RiftCreatureRegistry {
                         //---targeting---
                         .addDefaultTargetWhitelistEntry("animal")
                         .addDefaultTargetWhitelistEntry("human")
+                        .addDefaultTargetWhitelistEntry("herbivoreCreature")
                         .setRetaliateWhenAttacked()
         );
         registerCreatureType(
@@ -330,7 +332,6 @@ public class RiftCreatureRegistry {
                         .setMaxFallHeight(4)
                         .setFallCreatesImpact()
                         .setDaysUntilAdult(3)
-                        .setRetaliateWhenAttacked()
                         .setHitboxInformation()
                         .setIsHerder()
                         .addBlockBreakLevel("axe", 2)
@@ -364,6 +365,8 @@ public class RiftCreatureRegistry {
                                 )
                                 .setCanSprintToAttack(1, 8D, 16D)
                         )
+                        //---targeting---
+                        .setRetaliateWhenAttacked()
         );
         /*
         registerCreatureType(
