@@ -13,7 +13,6 @@ import java.util.List;
 /**
  * Creature-level AI policy for choosing moves.
  * */
-//todo: add move combos
 public class CreatureMoveSelectorBuilder {
     //extremely important
     protected boolean locked;
