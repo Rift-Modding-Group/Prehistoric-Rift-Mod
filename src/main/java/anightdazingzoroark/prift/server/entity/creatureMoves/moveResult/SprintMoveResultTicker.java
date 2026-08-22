@@ -32,7 +32,7 @@ public class SprintMoveResultTicker extends AbstractMoveResultTicker {
         this.destinationY = this.hasDestination ? target.posY : creature.posY;
         this.destinationZ = this.hasDestination ? target.posZ : creature.posZ;
         if (this.hasDestination && creature.atFrustrationThreshold()) {
-            creature.sprintToAttackCooldown = 0;
+            creature.removeSprintToAttackCooldown();
             creature.resetFrustration();
         }
         creature.getCreaturePathNavigate().clearPath();
@@ -75,9 +75,7 @@ public class SprintMoveResultTicker extends AbstractMoveResultTicker {
 
     @Override
     public void onEndTicker() {
-        if (this.hasDestination) {
-            this.creature.sprintToAttackCooldown = MathUtil.randomInRange(this.creature.world.rand, 5, 10) * 20;
-        }
+        if (this.hasDestination) this.creature.resetSprintToAttackCooldown();
         this.creature.setSprinting(false);
         this.creature.getCreaturePathNavigate().clearPath();
 

@@ -52,7 +52,7 @@ public interface ICreature {
 
     int getSprintToAttackCooldown();
 
-    int getLeapToAttackCooldown();
+    boolean canLeapToAttack();
 
     boolean atFrustrationThreshold();
 

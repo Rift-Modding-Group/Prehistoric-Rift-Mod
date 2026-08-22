@@ -30,13 +30,13 @@ public class LeapMoveResultTicker extends AbstractMoveResultTicker {
         this.target = attackTarget != null && attackTarget.isEntityAlive() ? attackTarget : null;
         this.leapPrepared = this.prepareLeap();
         if (this.leapPrepared && creature.atFrustrationThreshold()) {
-            creature.leapToAttackCooldown = 0;
+            creature.removeLeapToAttackCooldown();
             creature.resetFrustration();
         }
-        else if (!this.leapPrepared
-                && this.target != null
-                && creature.getCreaturePathNavigate().tryMoveToEntityLivingUsingWater(this.target, 1D)) {
-            creature.leapToAttackCooldown = MathUtil.randomInRange(creature.world.rand, 5, 10) * 20;
+        else if (!this.leapPrepared && this.target != null
+                && creature.getCreaturePathNavigate().tryMoveToEntityLivingUsingWater(this.target, 1D)
+        ) {
+            creature.resetLeapToAttackCooldown();
         }
         if (this.leapPrepared) creature.getCreaturePathNavigate().clearPath();
     }
@@ -59,9 +59,7 @@ public class LeapMoveResultTicker extends AbstractMoveResultTicker {
         if (this.leapPrepared && this.hasLeftGround && this.creature.onGround) {
             if (this.leapMoveRuleBuilder.requiresTargetContact()) this.tryDamageTargetOnContact();
         }
-        if (this.leapPrepared) {
-            this.creature.leapToAttackCooldown = MathUtil.randomInRange(this.creature.world.rand, 5, 10) * 20;
-        }
+        if (this.leapPrepared) this.creature.resetLeapToAttackCooldown();
         this.creature.getCreaturePathNavigate().clearPath();
     }
 

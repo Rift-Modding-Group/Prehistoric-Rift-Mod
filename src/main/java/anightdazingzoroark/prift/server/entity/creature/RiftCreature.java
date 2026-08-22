@@ -107,9 +107,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //--server side primitive params--
     //manages a creature's ability to sprint based on whether or not it attacked before
-    public int sprintToAttackCooldown;
+    private int sprintToAttackCooldown;
     //manages a creature's ability to leap based on whether it attacked before
-    public int leapToAttackCooldown;
+    private int leapToAttackCooldown;
     //when a creature fails to use a move or takes too long to pathfind for melee move,
     //this counts up, which then makes them use a ranged move or their sprint move
     private int frustration;
@@ -384,11 +384,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     @Override
-    public int getLeapToAttackCooldown() {
-        return this.leapToAttackCooldown;
-    }
-
-    @Override
     public boolean hasStraightWalkingPathTo(@NotNull EntityLivingBase target) {
         return this.getCreaturePathNavigate().hasStraightWalkingPathTo(target);
     }
@@ -511,6 +506,28 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         }
         propertyValue.setValue(value);
         //todo: make this able to sync to client as well
+    }
+
+    //-----sprint to attack management-----
+    public void removeSprintToAttackCooldown() {
+        this.sprintToAttackCooldown = 0;
+    }
+
+    public void resetSprintToAttackCooldown() {
+        this.sprintToAttackCooldown = MathUtil.randomInRange(this.world.rand, 5, 10) * 20;
+    }
+
+    //-----leap to attack management-----
+    public boolean canLeapToAttack() {
+        return this.leapToAttackCooldown == 0;
+    }
+
+    public void removeLeapToAttackCooldown() {
+        this.leapToAttackCooldown = 0;
+    }
+
+    public void resetLeapToAttackCooldown() {
+        this.leapToAttackCooldown = MathUtil.randomInRange(this.world.rand, 5, 10) * 20;
     }
 
     //-----frustration management-----
@@ -688,6 +705,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             this.world.destroyBlock(blockPos, true);
         }
         this.getCreaturePathNavigate().invalidateBlockBreakPathCache();
+
+        //reset some timers
+        this.resetLeapToAttackCooldown();
     }
 
     //-----move use management-----
