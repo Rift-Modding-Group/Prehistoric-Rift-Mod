@@ -39,7 +39,6 @@ public class RiftCreatureRegistry {
 
     //all creatures are stored here
     private static final LinkedHashMap<String, RiftCreatureBuilder> creatureBuilderMap = new LinkedHashMap<>();
-    private static final LinkedHashMap<String, Class<? extends RiftCreature>> creatureRegistryClassMap = new LinkedHashMap<>();
     private static final LinkedHashMap<String, RiftCreatureBuilder> pendingAddonCreatures = new LinkedHashMap<>();
     private static boolean registeringBuiltInCreatures;
     private static boolean builtInCreaturesRegistered;
@@ -61,14 +60,14 @@ public class RiftCreatureRegistry {
         return Collections.unmodifiableMap(creatureBuilderMap);
     }
 
-    public static Class<? extends RiftCreature> getCreatureRegistryClass(String name) {
-        return creatureRegistryClassMap.get(name);
+    public static boolean creatureUsesHitboxes(String name) {
+        RiftCreatureBuilder builder = creatureBuilderMap.get(name);
+        return builder != null && builder.getHitboxInformation() != null;
     }
 
     public static RiftCreature createCreature(World world, String name) {
         String resolvedName = creatureBuilderMap.containsKey(name) ? name : DEFAULT_CREATURE;
-        Class<? extends RiftCreature> registryClass = getCreatureRegistryClass(resolvedName);
-        if (registryClass == RiftCreatureHitboxed.class) return new RiftCreatureHitboxed(world, resolvedName);
+        if (creatureUsesHitboxes(resolvedName)) return new RiftCreatureHitboxed(world, resolvedName);
         return new RiftCreature(world, resolvedName);
     }
 
@@ -108,14 +107,10 @@ public class RiftCreatureRegistry {
                 }
             }
         }
-        //-----set registry class-----
-        Class<? extends RiftCreature> registryClass = builder.getHitboxInformation() != null ? RiftCreatureHitboxed.class : RiftCreature.class;
-
         //-----finalize creature info and lock them-----
         builder.setName(name);
         builder.lock();
         creatureBuilderMap.put(name, builder);
-        creatureRegistryClassMap.put(name, registryClass);
     }
 
     public static void createCreatures() {

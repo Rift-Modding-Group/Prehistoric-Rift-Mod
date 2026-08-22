@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import io.netty.buffer.ByteBuf;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.api.creature.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.api.creature.ICreature;
@@ -59,12 +60,15 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.relauncher.Side;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
@@ -82,7 +86,7 @@ import java.util.Set;
 /**
  * le heart and soul of this mod
  * */
-public class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, IRiftCreature, ICreature, IRayCreator<RiftCreature> {
+public class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, IRiftCreature, ICreature, IRayCreator<RiftCreature>, IEntityAdditionalSpawnData {
     @NotNull
     private RiftCreatureBuilder creatureType;
     @NotNull
@@ -192,6 +196,24 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             });
         }
     }
+
+    private void changeCreatureType(RiftCreatureBuilder builder) {
+        if (this.creatureType == builder) return;
+
+        this.creatureType = builder;
+        this.creatureInventory.setSize(this.creatureType.getInventorySize());
+        this.applyCreatureTypeSettings();
+        this.animData = new AnimationDataEntity(this, holder -> this.scale());
+        this.onCreatureTypeChanged();
+
+        if (this.world != null && !this.world.isRemote) {
+            this.tasks.taskEntries.clear();
+            this.targetTasks.taskEntries.clear();
+            this.initCreatureAI();
+        }
+    }
+
+    protected void onCreatureTypeChanged() {}
 
     @Override
     protected void entityInit() {
@@ -808,6 +830,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         return new ResourceLocation(RiftInitialize.MODID, "entities/" + this.creatureType.getName());
     }
 
+    @Override
+    public String getName() {
+        if (this.hasCustomName()) return this.getCustomNameTag();
+        return I18n.translateToLocal("entity." + this.creatureType.getName() + ".name");
+    }
+
     //-----IRiftCreature boilerplate stuff-----
     @Override
     @NotNull
@@ -905,14 +933,19 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         super.readEntityFromNBT(compound);
         if (compound.hasKey("CreatureType")) {
             RiftCreatureBuilder builder = resolveCreatureBuilder(compound.getString("CreatureType"));
-            if (this.creatureType != builder) {
-                this.creatureType = builder;
-                this.creatureInventory.setSize(this.creatureType.getInventorySize());
-                this.applyCreatureTypeSettings();
-                this.animData = new AnimationDataEntity(this, holder -> this.scale());
-            }
+            this.changeCreatureType(builder);
         }
         this.readCreatureNBT(compound);
+    }
+
+    @Override
+    public void writeSpawnData(ByteBuf buffer) {
+        ByteBufUtils.writeUTF8String(buffer, this.creatureType.getName());
+    }
+
+    @Override
+    public void readSpawnData(ByteBuf additionalData) {
+        this.changeCreatureType(resolveCreatureBuilder(ByteBufUtils.readUTF8String(additionalData)));
     }
 
     //-----dynamic ride pos related methods-----

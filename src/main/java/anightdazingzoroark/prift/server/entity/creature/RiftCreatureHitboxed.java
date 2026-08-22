@@ -17,7 +17,7 @@ import java.util.function.Function;
  * */
 public class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUser<RiftCreatureHitboxed> {
     @NotNull
-    private final MultiHitboxList<RiftCreatureHitboxed> multiHitboxList;
+    private MultiHitboxList<RiftCreatureHitboxed> multiHitboxList;
 
     public RiftCreatureHitboxed(World worldIn) {
         this(worldIn, RiftCreatureRegistry.DEFAULT_CREATURE);
@@ -25,6 +25,11 @@ public class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUs
 
     public RiftCreatureHitboxed(World worldIn, String creatureName) {
         super(worldIn, creatureName);
+        this.multiHitboxList = new MultiHitboxList<>(this, this.getAnimationData());
+    }
+
+    @Override
+    protected void onCreatureTypeChanged() {
         this.multiHitboxList = new MultiHitboxList<>(this, this.getAnimationData());
     }
 

@@ -30,12 +30,12 @@
 						"spinHitZone": {
 							"origin": [-24, 0, -24],
 							"size": [48, 24],
-							"collision": true
+							"collision": false
 						},
 						"tailHitZone": {
 							"origin": [-1, 0, -34],
 							"size": [2, 16],
-							"collision": true
+							"collision": false
 						}
 					}
 				},

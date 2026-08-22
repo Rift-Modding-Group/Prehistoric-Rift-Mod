@@ -1,5 +1,7 @@
 package anightdazingzoroark.prift.util;
 
+import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
@@ -26,6 +28,11 @@ public class RiftUtil {
     public static boolean entityMatchesID(@NotNull Entity entity, @NotNull String id) {
         //special case for players
         if (entity instanceof EntityPlayer && id.equals("minecraft:player")) return true;
+
+        //special case for creatures
+        if (entity instanceof RiftCreature creature) {
+            return id.equals(new ResourceLocation(RiftInitialize.MODID, creature.getCreatureType().getName()).toString());
+        }
 
         //normal case
         ResourceLocation entityResource = EntityList.getKey(entity);
