@@ -3,6 +3,8 @@ entity.tyrannosaurus.name=Tyrannosaurus
 item.spawn_egg.name=Spawn %s
 item.raw_exotic_meat.name=Raw Exotic Meat
 item.cooked_exotic_meat.name=Cooked Exotic Meat
+item.creative_meal.name=Creative Meal
+item.creative_meal.tooltip=Instantly tames any wild creature and can be used to breed any tamed creature.
 
 item.tyrannosaurus_arm.name=Tyrannosaurus Arm
 

@@ -38,6 +38,11 @@ public class RiftCreatureEnums {
         }
     }
 
+    public enum TamingMethod {
+        FEED,
+        WEAKEN_THEN_FEED;
+    }
+
     //Stats are to be on a scale of 0.5-10 with steps of 0.5
     //and will be represented as stars on most UIs
     public enum Stats {
