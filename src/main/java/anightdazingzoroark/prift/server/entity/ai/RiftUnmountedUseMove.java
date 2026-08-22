@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.AbstractMoveResultTicker;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
@@ -77,10 +78,20 @@ public class RiftUnmountedUseMove extends EntityAIBase {
 
     private void trySwitchToHigherPriorityMove() {
         ImmutablePair<CreatureMoveSelectorBuilder.MoveRule, Integer> newMoveRulePair = this.createMoveRule();
+        EntityLivingBase target = this.creature.getAttackTarget();
+        boolean blockBreakPreemptsCurrentMove = newMoveRulePair != null
+                && this.moveRulePair != null
+                && newMoveRulePair.getLeft().moveRuleBuilder().getUseBlockBreak()
+                && !this.moveRulePair.getLeft().moveRuleBuilder().getUseBlockBreak()
+                && target != null
+                && target.isEntityAlive()
+                && this.creature.getCreaturePathNavigate().shouldUseBlockBreakPath(target);
         if (newMoveRulePair == null
                 || (this.moveResultTicker != null && !this.moveResultTicker.isOverridableWhileUsed())
                 || newMoveRulePair.getLeft().equals(this.moveRulePair.getLeft())
-                || newMoveRulePair.getRight() >= this.moveRulePair.getRight()) {
+                || newMoveRulePair.getRight() >= this.moveRulePair.getRight()
+                && !blockBreakPreemptsCurrentMove
+        ) {
             return;
         }
 

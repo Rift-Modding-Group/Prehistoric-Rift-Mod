@@ -20,6 +20,7 @@ public class MoveRuleBuilder {
     private CreatureMoveSelectorBuilder.DetectionRule detectionRule = new CreatureMoveSelectorBuilder.DistanceFromUserDetectionRule("", 8D);
     private boolean canUseWhenFrustrated;
     private boolean dontPathToTarget;
+    private boolean useBlockBreak;
 
     public MoveRuleBuilder(@NotNull String moveName) {
         this.moveName = moveName;
@@ -79,6 +80,19 @@ public class MoveRuleBuilder {
 
     public boolean getDontPathToTarget() {
         return this.dontPathToTarget;
+    }
+
+    /**
+     * Make it so this move can be used in clearing paths
+     */
+    public MoveRuleBuilder setUseBlockBreak() {
+        this.checkIfLocked();
+        this.useBlockBreak = true;
+        return this;
+    }
+
+    public boolean getUseBlockBreak() {
+        return this.useBlockBreak;
     }
 
     @Override

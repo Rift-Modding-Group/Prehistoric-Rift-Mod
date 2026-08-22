@@ -14,10 +14,12 @@ import net.minecraft.world.IBlockAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
     private static final int WATER_SURFACE_SEARCH_DEPTH = 4;
-    private static final float WATER_PATH_COST = 2F;
-    private static final double LEAP_ARC_SCAN_STEP = 0.25D;
+    private static final float WATER_PATH_COST = 2f;
 
     @NotNull
     private final RiftCreature creature;
@@ -33,6 +35,17 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
     public void init(IBlockAccess source, EntityLiving mob) {
         super.init(source, mob);
         if (!this.waterPathingAllowed) mob.setPathPriority(PathNodeType.WATER, -1f);
+    }
+
+    @Override
+    protected PathPoint openPoint(int x, int y, int z) {
+        int hash = PathPoint.makeHash(x, y, z);
+        PathPoint pathPoint = this.pointMap.lookup(hash);
+        if (pathPoint == null) {
+            pathPoint = new LeapAwarePathPoint(x, y, z);
+            this.pointMap.addKey(hash, pathPoint);
+        }
+        return pathPoint;
     }
 
     @Override
@@ -115,9 +128,9 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
             //drop, so creatures walk off safe ledges instead of leaping over them.
             if (this.containsWalkingOption(pathOptions, walkingOptionCount, currentPoint, facing)) continue;
 
-            count = this.addLeapOption(pathOptions, count,
+            count = this.addLeapOption(pathOptions, count, currentPoint,
                     this.findUpwardLeapLanding(currentPoint, facing, maxDistance), targetPoint, maxDistance);
-            count = this.addLeapOption(pathOptions, count,
+            count = this.addLeapOption(pathOptions, count, currentPoint,
                     this.findLevelLeapLanding(currentPoint, facing, maxDistance), targetPoint, maxDistance);
         }
         return count;
@@ -162,21 +175,39 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
         return count;
     }
 
-    private int addLeapOption(PathPoint[] pathOptions, int count, @Nullable PathPoint leapPoint, PathPoint targetPoint, float maxDistance) {
+    private int addLeapOption(
+            PathPoint[] pathOptions,
+            int count,
+            PathPoint currentPoint,
+            @Nullable PathPoint leapPoint,
+            PathPoint targetPoint,
+            float maxDistance
+    ) {
         if (leapPoint != null && !leapPoint.visited && leapPoint.distanceTo(targetPoint) < maxDistance && !this.contains(pathOptions, count, leapPoint)) {
             pathOptions[count++] = leapPoint;
+            if (leapPoint instanceof LeapAwarePathPoint leapAwarePathPoint) {
+                leapAwarePathPoint.addLeapPredecessor(currentPoint);
+            }
         }
         return count;
+    }
+
+    boolean isLeapEdge(@NotNull PathPoint from, @NotNull PathPoint to) {
+        return to instanceof LeapAwarePathPoint leapAwarePathPoint
+                && leapAwarePathPoint.hasLeapPredecessor(from);
     }
 
     @Nullable
     private PathPoint findUpwardLeapLanding(PathPoint currentPoint, EnumFacing facing, float maxPathDistance) {
         double ledgeHeight = this.getLeadingObstacleHeight(currentPoint, facing);
-        if (ledgeHeight <= RiftCreatureMoveHelper.STANDARD_JUMP_HEIGHT + 1E-3D || ledgeHeight > this.creature.getNavigationBuilder().getLeapHeight() + 1E-3D) {
+        if (ledgeHeight <= RiftCreatureMoveHelper.STANDARD_JUMP_CLEARANCE + 1E-3D || ledgeHeight > this.creature.getNavigationBuilder().getLeapHeight() + 1E-3D) {
             return null;
         }
 
         int landingY = currentPoint.y + (int)Math.ceil(ledgeHeight - 1E-3D);
+        if (landingY - currentPoint.y > this.creature.getNavigationBuilder().getLeapHeight() + 1E-3D) {
+            return null;
+        }
         int maximumDistance = this.getMaximumLeapDistance(maxPathDistance);
         for (int distance = 1; distance <= maximumDistance; distance++) {
             int landingX = currentPoint.x + facing.getXOffset() * distance;
@@ -215,6 +246,14 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
     }
 
     private double getLeadingObstacleHeight(PathPoint currentPoint, EnumFacing facing) {
+        return this.getLeadingObstacleHeight(currentPoint, facing, this.blockaccess);
+    }
+
+    private double getLeadingObstacleHeight(
+            PathPoint currentPoint,
+            EnumFacing facing,
+            IBlockAccess blockAccess
+    ) {
         int offsetX = facing.getXOffset();
         int offsetZ = facing.getZOffset();
         int minimumX = currentPoint.x + (offsetX > 0 ? this.entitySizeX : offsetX);
@@ -225,7 +264,10 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
         double obstacleHeight = 0D;
         for (int x = minimumX; x <= maximumX; x++) {
             for (int z = minimumZ; z <= maximumZ; z++) {
-                obstacleHeight = Math.max(obstacleHeight, this.getObstacleHeight(x, currentPoint.y, z));
+                obstacleHeight = Math.max(
+                        obstacleHeight,
+                        this.getObstacleHeight(blockAccess, x, currentPoint.y, z)
+                );
             }
         }
         return obstacleHeight;
@@ -271,33 +313,43 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
         return null;
     }
 
-    private boolean hasClearLeapArc(PathPoint start, PathPoint landing) {
+    public boolean hasClearLeapArc(@NotNull PathPoint start, @NotNull PathPoint landing) {
         double nodeCenterOffsetX = this.entitySizeX * 0.5D;
         double nodeCenterOffsetZ = this.entitySizeZ * 0.5D;
         double startX = start.x + nodeCenterOffsetX;
         double startZ = start.z + nodeCenterOffsetZ;
-        double displacementX = landing.x - start.x;
-        double displacementZ = landing.z - start.z;
-        int samples = Math.max(2, (int)Math.ceil(
-                Math.sqrt(displacementX * displacementX + displacementZ * displacementZ) / LEAP_ARC_SCAN_STEP
-        ));
+        double landingX = landing.x + nodeCenterOffsetX;
+        double landingZ = landing.z + nodeCenterOffsetZ;
 
         AxisAlignedBB creatureBounds = this.creature.getEntityBoundingBox();
         AxisAlignedBB startBounds = creatureBounds.offset(
                 startX - this.creature.posX,
-                start.y - creatureBounds.minY + 1E-3D,
+                start.y - creatureBounds.minY,
                 startZ - this.creature.posZ
         );
-        double landingHeight = landing.y - start.y;
-        double arcHeight = this.creature.getNavigationBuilder().getLeapHeight() + 0.25D;
-
-        for (int sample = 1; sample < samples; sample++) {
-            double progress = (double)sample / samples;
-            double verticalOffset = landingHeight * progress + 4D * arcHeight * progress * (1D - progress);
-            AxisAlignedBB sampleBounds = startBounds.offset(displacementX * progress, verticalOffset, displacementZ * progress);
-            if (this.creature.world.collidesWithAnyBlock(sampleBounds)) return false;
-        }
-        return true;
+        RiftCreatureLeapHelper leapHelper = this.creature.getCreatureMoveHelper().getLeapHelper();
+        double targetHeight = Math.max(0D, landing.y - start.y);
+        int directionX = Integer.compare(landing.x, start.x);
+        int directionZ = Integer.compare(landing.z, start.z);
+        EnumFacing facing = directionX > 0 ? EnumFacing.EAST
+                : directionX < 0 ? EnumFacing.WEST
+                : directionZ > 0 ? EnumFacing.SOUTH
+                : EnumFacing.NORTH;
+        double obstacleHeight = Math.max(
+                Math.max(targetHeight, this.getLeadingObstacleHeight(start, facing, this.creature.world)),
+                leapHelper.getPlannedObstacleClearance(
+                        startBounds, landingX, landingZ,
+                        this.creature.getNavigationBuilder().getLeapHeight()
+                )
+        );
+        return obstacleHeight <= this.creature.getNavigationBuilder().getLeapHeight() + 1E-3D
+                && leapHelper.hasClearPlannedLeap(
+                        startBounds,
+                        landingX,
+                        landing.y,
+                        landingZ,
+                        obstacleHeight
+                );
     }
 
     @Nullable
@@ -305,7 +357,10 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
         int obstacleX = currentPoint.x + facing.getXOffset();
         int obstacleZ = currentPoint.z + facing.getZOffset();
         double obstacleHeight = this.getObstacleHeight(obstacleX, currentPoint.y, obstacleZ);
-        if (obstacleHeight <= 1D || obstacleHeight > this.creature.getNavigationBuilder().getLeapHeight()) return null;
+        if (obstacleHeight <= RiftCreatureMoveHelper.STANDARD_JUMP_CLEARANCE + 1E-3D
+                || obstacleHeight > this.creature.getNavigationBuilder().getLeapHeight()) {
+            return null;
+        }
         AxisAlignedBB overheadClearance = new AxisAlignedBB(
                 obstacleX,
                 currentPoint.y + obstacleHeight + 1E-3D,
@@ -356,11 +411,15 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
     }
 
     private double getObstacleHeight(int x, int baseY, int z) {
+        return this.getObstacleHeight(this.blockaccess, x, baseY, z);
+    }
+
+    private double getObstacleHeight(IBlockAccess blockAccess, int x, int baseY, int z) {
         double top = baseY;
         int maximumY = baseY + (int)Math.ceil(this.creature.getNavigationBuilder().getLeapHeight());
         for (int y = baseY; y <= maximumY; y++) {
             BlockPos pos = new BlockPos(x, y, z);
-            AxisAlignedBB collisionBox = this.blockaccess.getBlockState(pos).getCollisionBoundingBox(this.blockaccess, pos);
+            AxisAlignedBB collisionBox = blockAccess.getBlockState(pos).getCollisionBoundingBox(blockAccess, pos);
             if (collisionBox != null) top = Math.max(top, y + collisionBox.maxY);
         }
         return top - baseY;
@@ -423,5 +482,51 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
             if (candidate.equals(points[index])) return true;
         }
         return false;
+    }
+
+    private static final class LeapAwarePathPoint extends PathPoint {
+        private final Object logicalIdentity;
+        private final Set<Object> leapPredecessorIdentities = new HashSet<>();
+
+        private LeapAwarePathPoint(int x, int y, int z) {
+            this(x, y, z, new Object());
+        }
+
+        private LeapAwarePathPoint(int x, int y, int z, @NotNull Object logicalIdentity) {
+            super(x, y, z);
+            this.logicalIdentity = logicalIdentity;
+        }
+
+        private void addLeapPredecessor(PathPoint predecessor) {
+            this.leapPredecessorIdentities.add(this.logicalIdentity(predecessor));
+        }
+
+        private boolean hasLeapPredecessor(PathPoint predecessor) {
+            return this.leapPredecessorIdentities.contains(this.logicalIdentity(predecessor));
+        }
+
+        @NotNull
+        private Object logicalIdentity(PathPoint pathPoint) {
+            return pathPoint instanceof LeapAwarePathPoint leapAwarePathPoint
+                    ? leapAwarePathPoint.logicalIdentity
+                    : pathPoint;
+        }
+
+        @Override
+        public PathPoint cloneMove(int x, int y, int z) {
+            LeapAwarePathPoint pathPoint = new LeapAwarePathPoint(x, y, z, this.logicalIdentity);
+            pathPoint.index = this.index;
+            pathPoint.totalPathDistance = this.totalPathDistance;
+            pathPoint.distanceToNext = this.distanceToNext;
+            pathPoint.distanceToTarget = this.distanceToTarget;
+            pathPoint.previous = this.previous;
+            pathPoint.visited = this.visited;
+            pathPoint.distanceFromOrigin = this.distanceFromOrigin;
+            pathPoint.cost = this.cost;
+            pathPoint.costMalus = this.costMalus;
+            pathPoint.nodeType = this.nodeType;
+            pathPoint.leapPredecessorIdentities.addAll(this.leapPredecessorIdentities);
+            return pathPoint;
+        }
     }
 }

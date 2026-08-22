@@ -74,6 +74,7 @@ public class CreatureMoveStorage {
     public void updateUsableMoves(@NotNull RiftCreature creature, @Nullable EntityLivingBase target) {
         if (!this.isInitialized()) return;
 
+        CreatureMoveSelectorBuilder.MoveRule blockBreakMoveRule = this.getBlockBreakMoveRule(creature, target);
         for (CreatureMoveSelectorBuilder.MoveRule moveRule : this.creatureType.getMoveSelector().getMoveRules()) {
             MoveRuleBuilder moveRuleBuilder = moveRule.moveRuleBuilder();
 
@@ -83,6 +84,10 @@ public class CreatureMoveStorage {
                     && creature.atFrustrationThreshold()
                     && moveRuleBuilder.getUseWhenFrustrated();
             int index = useDueToFrustration ? 0 : moveRuleBuilder.getPriorityPredicate().apply(creature, target);
+
+            //block-breaking moves r prioritized over attack leaps, ranged
+            //fallbacks, and ordinary attacks until it has opened the shorter corridor
+            if (blockBreakMoveRule != null && !moveRule.equals(blockBreakMoveRule)) index = -1;
 
             //let ordinary move pathing take a survivable route down instead of repeatedly
             //selecting a leap attack across the opening.
@@ -102,6 +107,47 @@ public class CreatureMoveStorage {
             //positive indexes can be added
             if (index >= 0) this.prioritizedUsableMoves.add(index, moveRule);
         }
+    }
+
+    @Nullable
+    private CreatureMoveSelectorBuilder.MoveRule getBlockBreakMoveRule(
+            @NotNull RiftCreature creature,
+            @Nullable EntityLivingBase target
+    ) {
+        if (target == null || !target.isEntityAlive() || !creature.hasBlockBreakZone()) return null;
+
+        CreatureMoveSelectorBuilder.MoveRule bestRule = null;
+        int bestPriority = Integer.MAX_VALUE;
+        for (CreatureMoveSelectorBuilder.MoveRule moveRule : this.creatureType.getMoveSelector().getMoveRules()) {
+            if (moveRule.moveResult() != CreatureMoveResult.USE_MOVE) continue;
+
+            MoveRuleBuilder ruleBuilder = moveRule.moveRuleBuilder();
+            if (!ruleBuilder.getUseBlockBreak()
+                    || ruleBuilder.getDontPathToTarget()
+                    || this.moveCurrentCooldown(ruleBuilder.getMoveName()) > 0) {
+                continue;
+            }
+
+            CreatureMoveBuilder moveBuilder = this.getUsableMoveBuilder(this.creaturePhase, ruleBuilder.getMoveName());
+            if (moveBuilder == null
+                    || !moveBuilder.getRequireFindTargetToUse()
+                    || moveBuilder.getMoveType() == CreatureMoveBuilder.MoveType.STATUS
+                    || !moveBuilder.getMakesContact()) {
+                continue;
+            }
+
+            int priority = creature.atFrustrationThreshold() && ruleBuilder.getUseWhenFrustrated()
+                    ? 0
+                    : ruleBuilder.getPriorityPredicate().apply(creature, target);
+            if (priority >= 0 && priority < bestPriority) {
+                bestRule = moveRule;
+                bestPriority = priority;
+            }
+        }
+
+        return bestRule != null && creature.getCreaturePathNavigate().shouldUseBlockBreakPath(target)
+                ? bestRule
+                : null;
     }
 
     @Nullable
@@ -350,7 +396,11 @@ public class CreatureMoveStorage {
         if (this.currentMoveHitEffectFired) return;
 
         this.currentMoveHitEffectFired = true;
-        if (currentMoveBuilder.getOnMoveHitEffect() != null) currentMoveBuilder.getOnMoveHitEffect().accept(creature);
+        if (creature.getUseBlockBreak()) {
+            creature.recordBlockBreakEffectAttempt();
+            creature.breakBlocksInFrontInPathing();
+        }
+        else if (currentMoveBuilder.getOnMoveHitEffect() != null) currentMoveBuilder.getOnMoveHitEffect().accept(creature);
     }
 
     public void resetCurrentMove(@NotNull RiftCreature creature) {

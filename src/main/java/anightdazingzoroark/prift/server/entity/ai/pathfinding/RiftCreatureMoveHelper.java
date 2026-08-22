@@ -9,6 +9,7 @@ import net.minecraft.util.math.MathHelper;
 
 public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
     public static final double STANDARD_JUMP_HEIGHT = 1D;
+    public static final double STANDARD_JUMP_CLEARANCE = STANDARD_JUMP_HEIGHT + 0.125D;
     private static final int WATER_LAND_PATH_RETRY_TICKS = 10;
 
     private int waterLandPathRetryTicks;
@@ -109,19 +110,22 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
 
             CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
             double maximumClearance = navigation.getCanLeap() ?
-                    navigation.getLeapHeight() : STANDARD_JUMP_HEIGHT + 0.125D;
+                    navigation.getLeapHeight() : STANDARD_JUMP_CLEARANCE;
             double obstacleClearance = this.leapHelper.getObstacleClearance(this.posX, this.posZ, maximumClearance);
             boolean approachingSafeDownwardTransition = requestedAction == CreatureAction.MOVE_TO
                     && this.creature.getCreaturePathNavigate().isApproachingSafeDownwardPathTransition();
-            boolean leapHandled = !inLiquid && !followingWaterPath && !approachingSafeDownwardTransition
+            boolean approachingPlannedBlockBreak = this.creature.getUseBlockBreak()
+                    && this.creature.hasBreakableBlocksInFront();
+            boolean leapHandled = !approachingPlannedBlockBreak
+                    && !inLiquid && !followingWaterPath && !approachingSafeDownwardTransition
                     && this.leapHelper.tryHandleLeap(this.posX, this.posY, this.posZ, obstacleClearance, requestedAction);
 
             if (!leapHandled) {
                 this.leapHelper.resetDelay();
 
                 boolean closeToWaypoint = horizontalDisplacementSq < Math.max(1f, this.creature.width * this.creature.width);
-                boolean standardJumpTransition = (obstacleClearance > this.creature.stepHeight && obstacleClearance <= STANDARD_JUMP_HEIGHT + 0.125D)
-                        || (closeToWaypoint && displacementY > this.creature.stepHeight && displacementY <= STANDARD_JUMP_HEIGHT + 0.125D);
+                boolean standardJumpTransition = (obstacleClearance > this.creature.stepHeight && obstacleClearance <= STANDARD_JUMP_CLEARANCE)
+                        || (closeToWaypoint && displacementY > this.creature.stepHeight && displacementY <= STANDARD_JUMP_CLEARANCE);
                 if (!inLiquid && !followingWaterPath && navigation.getCanWalk() && this.creature.onGround && standardJumpTransition) {
                     this.creature.getJumpHelper().setJumping();
                     this.creatureAction = CreatureAction.JUMPING;

@@ -121,7 +121,7 @@
 				}
 			},
 			"timeline": {
-				"0.15": "function.create_offense_hitbox_by_tag('jaw');",
+				"0.15": "function.create_offense_hitbox_by_tag('jaw');function.send_message('moveBlockBreakEffect');",
 				"0.25": "function.destroy_offense_hitbox_by_tag('jaw');"
 			}
 		},

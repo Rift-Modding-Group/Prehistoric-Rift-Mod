@@ -285,6 +285,7 @@ public class RiftCreatureRegistry {
                                         new MoveRuleBuilder("bite")
                                                 .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
                                                 .setDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("jawHitZone"))
+                                                .setUseBlockBreak()
                                 )
                                 .setMoveRule(
                                         new MoveRuleBuilder("stomp")

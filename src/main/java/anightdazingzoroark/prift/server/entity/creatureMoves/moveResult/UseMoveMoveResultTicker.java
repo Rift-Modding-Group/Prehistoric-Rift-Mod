@@ -1,11 +1,13 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves.moveResult;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreaturePathNavigate;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.pathfinding.PathNavigate;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -19,7 +21,12 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
     private final String selectedMoveName;
     @NotNull
     private final CreatureMoveBuilder selectedMoveBuilder;
+    private final boolean canUseBlockBreak;
     private boolean hasExecutedMove; //flag to set to true when a move is currently being used by a creature
+    private boolean executingBlockBreak;
+    private boolean blockBreakApplied;
+    private int blockBreakEffectAttemptCountAtMoveStart;
+    private int moveFinishCountAtMoveStart;
 
     //---pathing related stuff---
     private int repathCooldown;
@@ -41,7 +48,14 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
         super(creature, moveRuleBuilder);
         this.selectedMoveName = moveRuleBuilder.getMoveName();
         this.selectedMoveBuilder = Objects.requireNonNull(this.creature.getCreatureMoves().getUsableMoveBuilder(moveRuleBuilder.getMoveName()));
+        this.canUseBlockBreak = creature.hasBlockBreakZone()
+                && moveRuleBuilder.getUseBlockBreak()
+                && !moveRuleBuilder.getDontPathToTarget()
+                && this.selectedMoveBuilder.getRequireFindTargetToUse()
+                && this.selectedMoveBuilder.getMoveType() != CreatureMoveBuilder.MoveType.STATUS
+                && this.selectedMoveBuilder.getMakesContact();
         this.selectedMoveUsedDueToFrustration = this.moveRuleBuilder.getUseWhenFrustrated() && this.creature.atFrustrationThreshold();
+        this.creature.setUseBlockBreak(false);
     }
 
     @Override
@@ -61,7 +75,11 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 && !this.moveRuleBuilder.getDetectionRule().targetWithinRange(this.creature, target)
         ) return false;
         //when frustration gets high enough, stop current pathing and pick a frustration option
-        else if (!this.selectedMoveUsedDueToFrustration && this.creature.atFrustrationThreshold()) return false;
+        else if (!this.selectedMoveUsedDueToFrustration
+                && !this.creature.getUseBlockBreak()
+                && this.creature.atFrustrationThreshold()) {
+            return false;
+        }
         //if creature hasnt executed move yet, keep it true to keep it running
         //only thing stopping it is if target is gone (if said move requires it)
         else return moveBuilderTargetCondition;
@@ -73,6 +91,13 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
 
         //---when move is already being used, stop pathing---
         if (this.hasExecutedMove && !this.creature.getCurrentMove().isEmpty()) {
+            //Offense-hitbox moves do not necessarily emit moveHitEffect. Non-charge moves
+            //therefore use an end fallback; charged moves use their normal release lifecycle.
+            if (this.executingBlockBreak && !this.blockBreakApplied) {
+                if (this.creature.getBlockBreakEffectAttemptCount() != this.blockBreakEffectAttemptCountAtMoveStart) {
+                    this.blockBreakApplied = true;
+                }
+            }
             if (target != null
                     && target.isEntityAlive()
                     && this.selectedMoveBuilder.getMoveChargeupBuilder() != null
@@ -108,9 +133,23 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
             }
 
             boolean targetWithinRange = this.moveRuleBuilder.getDetectionRule().targetWithinRange(this.creature, target);
+            RiftCreaturePathNavigate blockBreakNavigation = this.creature.getCreaturePathNavigate();
+            boolean useBlockBreakPath = this.canUseBlockBreak
+                    && blockBreakNavigation.shouldUseBlockBreakPath(target);
+            this.creature.setUseBlockBreak(useBlockBreakPath);
+            if (useBlockBreakPath) {
+                this.creature.setUnableToPathToTarget(false);
+                Vec3d approachPosition = blockBreakNavigation.getBlockBreakApproachPosition();
+                this.faceBlockBreakDirection(
+                        approachPosition == null ? target.posX : approachPosition.x,
+                        approachPosition == null ? target.posZ : approachPosition.z
+                );
+            }
+            boolean breakableBlocksInFront = useBlockBreakPath && this.creature.hasBreakableBlocksInFront();
 
             //execute move when target is in range
-            if (targetWithinRange || this.selectedMoveUsedDueToFrustration) {
+            if (breakableBlocksInFront
+                    || !useBlockBreakPath && (targetWithinRange || this.selectedMoveUsedDueToFrustration)) {
                 //forcibly stop rotation upon using a move
                 if (dontPathToTarget) {
                     this.hasLastLookDirection = true;
@@ -131,6 +170,11 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
 
                 //execute move
                 this.hasExecutedMove = true;
+                this.executingBlockBreak = breakableBlocksInFront;
+                if (this.executingBlockBreak) this.creature.snapshotBlockBreakPlan();
+                this.blockBreakEffectAttemptCountAtMoveStart = this.creature.getBlockBreakEffectAttemptCount();
+                this.moveFinishCountAtMoveStart = this.creature.getMoveFinishCount();
+                this.creature.setUseBlockBreak(this.executingBlockBreak);
                 this.attackTargetHitCountAtMoveStart = this.creature.getAttackTargetHitCount();
                 if (this.selectedMoveUsedDueToFrustration) this.creature.resetFrustration();
                 this.creature.setCurrentMove(this.selectedMoveName);
@@ -157,15 +201,33 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
             //pathing to ensure target can be found by creature
             else {
                 //add frustration when pathing to the target takes too long
-                this.pathingFrustrationTicks++;
-                if (this.creature.atPathingFrustrationInterval(this.pathingFrustrationTicks)) {
-                    this.pathingFrustrationTicks = 0;
-                    this.creature.addFrustration(20);
+                if (!useBlockBreakPath) {
+                    this.pathingFrustrationTicks++;
+                    if (this.creature.atPathingFrustrationInterval(this.pathingFrustrationTicks)) {
+                        this.pathingFrustrationTicks = 0;
+                        this.creature.addFrustration(20);
+                    }
                 }
 
                 //tick down repath cooldown
                 if (this.repathCooldown > 0) this.repathCooldown--;
                 PathNavigate creatureNavigation = this.creature.getCreaturePathNavigate();
+
+                //Follow any validated local leap needed before the wall, then approach the
+                //remaining obstruction directly. The move is not fired until an animated
+                //frontZone overlaps a planned block which this creature can break.
+                if (useBlockBreakPath) {
+                    this.repathCooldown = 0;
+                    this.directTargetMoveStallTicks = 0;
+                    this.holdCloseTargetStrafe = false;
+                    this.closeTargetStrafeTicks = 0;
+                    if (!blockBreakNavigation.tryMoveAlongBlockBreakApproach(1D)) {
+                        creatureNavigation.clearPath();
+                        this.creature.getMoveHelper().setMoveTo(target.posX, target.posY, target.posZ, 1D);
+                    }
+                    this.rememberTargetPos(target);
+                    return;
+                }
 
                 //---when held strafe should stop due to target movement---
                 if (this.holdCloseTargetStrafe && this.hasLastTargetPos && target.getDistanceSq(this.lastTargetX, this.lastTargetY, this.lastTargetZ) > TARGET_MOVED_REPATH_DISTANCE_SQ * 4D) {
@@ -239,13 +301,21 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
 
     @Override
     public void onEndTicker() {
-        if (this.hasExecutedMove && this.selectedMoveBuilder.getRequireFindTargetToUse()
+        if (this.executingBlockBreak && !this.blockBreakApplied && this.selectedMoveBuilder.getMoveChargeupBuilder() == null
+                && this.creature.getMoveFinishCount() != this.moveFinishCountAtMoveStart
+                && this.creature.getBlockBreakEffectAttemptCount() == this.blockBreakEffectAttemptCountAtMoveStart
+        ) {
+            this.creature.breakBlocksInFrontInPathing();
+            this.blockBreakApplied = true;
+        }
+        if (this.hasExecutedMove && !this.executingBlockBreak && this.selectedMoveBuilder.getRequireFindTargetToUse()
                 && this.selectedMoveBuilder.getMoveType() == CreatureMoveBuilder.MoveType.PHYSICAL
         ) {
             boolean moveHitTarget = this.creature.getAttackTargetHitCount() > this.attackTargetHitCountAtMoveStart;
             if (moveHitTarget) this.creature.resetFrustration();
             else this.creature.addFrustration(35);
         }
+        this.creature.setUseBlockBreak(false);
         this.creature.getCreaturePathNavigate().clearPath();
 
         //preserve last look direction after target is gone
@@ -263,5 +333,14 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
         this.lastTargetX = target.posX;
         this.lastTargetY = target.posY;
         this.lastTargetZ = target.posZ;
+    }
+
+    private void faceBlockBreakDirection(double x, double z) {
+        double targetX = x - this.creature.posX;
+        double targetZ = z - this.creature.posZ;
+        if (targetX * targetX + targetZ * targetZ < 1E-4D) return;
+
+        float targetYaw = (float)(Math.atan2(targetZ, targetX) * 180F / (float)Math.PI) - 90F;
+        this.setLookDirection(targetYaw);
     }
 }

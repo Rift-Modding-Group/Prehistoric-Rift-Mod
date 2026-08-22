@@ -368,7 +368,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     @Nullable
     public Map<String, Integer> getBlockBreakLevelMap() {
-        return this.blockBreakLevelMap;
+        if (this.blockBreakLevelMap == null) return null;
+        return Map.copyOf(this.blockBreakLevelMap);
     }
 
     /**

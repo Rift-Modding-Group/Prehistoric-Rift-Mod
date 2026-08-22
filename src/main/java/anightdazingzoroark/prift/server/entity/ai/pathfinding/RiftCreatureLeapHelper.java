@@ -140,7 +140,7 @@ public class RiftCreatureLeapHelper {
         if (!navigation.getCanLeap() || this.creature.bodyTouchingLiquid()) return false;
 
         double displacementY = targetY - this.creature.posY;
-        double standardJumpClearance = RiftCreatureMoveHelper.STANDARD_JUMP_HEIGHT + 0.125D;
+        double standardJumpClearance = RiftCreatureMoveHelper.STANDARD_JUMP_CLEARANCE;
         boolean standardUpwardTransition = displacementY > 1E-3D && displacementY <= standardJumpClearance + 1E-3D;
         boolean standardObstacleTransition = obstacleClearance > this.creature.stepHeight + 1E-3D && obstacleClearance <= standardJumpClearance + 1E-3D;
         if (standardUpwardTransition || standardObstacleTransition) return false;
@@ -463,7 +463,7 @@ public class RiftCreatureLeapHelper {
                 feetY + 1E-3D,
                 z - SUPPORT_PROBE_RADIUS,
                 x + SUPPORT_PROBE_RADIUS,
-                feetY + RiftCreatureMoveHelper.STANDARD_JUMP_HEIGHT + 0.125D,
+                feetY + RiftCreatureMoveHelper.STANDARD_JUMP_CLEARANCE,
                 z + SUPPORT_PROBE_RADIUS
         );
         return this.creature.world.collidesWithAnyBlock(terrainProbe);
@@ -505,22 +505,36 @@ public class RiftCreatureLeapHelper {
      * This checks how high the creature needs to go to clear whatever is in front of it.
      * */
     public double getObstacleClearance(double targetX, double targetZ, double maximumHeight) {
-        double displacementX = targetX - this.creature.posX;
-        double displacementZ = targetZ - this.creature.posZ;
+        return this.getObstacleClearance(this.creature.getEntityBoundingBox(), targetX, targetZ, maximumHeight
+        );
+    }
+
+    public double getPlannedObstacleClearance(
+            @NotNull AxisAlignedBB startingBounds,
+            double targetX, double targetZ, double maximumHeight
+    ) {
+        return this.getObstacleClearance(startingBounds, targetX, targetZ, maximumHeight);
+    }
+
+    private double getObstacleClearance(
+            @NotNull AxisAlignedBB startingBounds,
+            double targetX, double targetZ, double maximumHeight
+    ) {
+        double startingCenterX = (startingBounds.minX + startingBounds.maxX) * 0.5D;
+        double startingCenterZ = (startingBounds.minZ + startingBounds.maxZ) * 0.5D;
+        double displacementX = targetX - startingCenterX;
+        double displacementZ = targetZ - startingCenterZ;
         double horizontalDistance = Math.sqrt(displacementX * displacementX + displacementZ * displacementZ);
         if (horizontalDistance < 1E-6D) return 0D;
 
         double probeDistance = Math.min(horizontalDistance, OBSTACLE_LOOKAHEAD_DISTANCE);
         double offsetX = displacementX / horizontalDistance * probeDistance;
         double offsetZ = displacementZ / horizontalDistance * probeDistance;
-        AxisAlignedBB creatureBounds = this.creature.getEntityBoundingBox();
-        AxisAlignedBB xProbe = this.createXObstacleProbe(creatureBounds, offsetX, offsetZ);
-        AxisAlignedBB zProbe = this.createZObstacleProbe(creatureBounds, offsetX, offsetZ);
+        AxisAlignedBB xProbe = this.createXObstacleProbe(startingBounds, offsetX, offsetZ);
+        AxisAlignedBB zProbe = this.createZObstacleProbe(startingBounds, offsetX, offsetZ);
         if (!this.collidesWithObstacleProbe(xProbe, zProbe, 0D)) return 0D;
 
-        for (double clearance = OBSTACLE_SCAN_STEP;
-                clearance <= maximumHeight + 1E-6D;
-                clearance += OBSTACLE_SCAN_STEP) {
+        for (double clearance = OBSTACLE_SCAN_STEP; clearance <= maximumHeight + 1E-6D; clearance += OBSTACLE_SCAN_STEP) {
             if (!this.collidesWithObstacleProbe(xProbe, zProbe, clearance + 1E-3D)) {
                 return clearance;
             }
@@ -580,23 +594,65 @@ public class RiftCreatureLeapHelper {
      * */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean hasClearLeapPath(double upwardMotion) {
-        AxisAlignedBB startingBounds = this.creature.getEntityBoundingBox();
-        double targetOffsetX = this.leapTargetX - this.creature.posX;
-        double targetOffsetZ = this.leapTargetZ - this.creature.posZ;
+        return this.hasClearLeapPath(
+                this.creature.getEntityBoundingBox(),
+                this.leapTargetX,
+                this.leapTargetY,
+                this.leapTargetZ,
+                this.leapObstacleHeight,
+                this.verticalLeap,
+                upwardMotion
+        );
+    }
+
+    boolean hasClearPlannedLeap(
+            @NotNull AxisAlignedBB startingBounds,
+            double targetX,
+            double targetY,
+            double targetZ,
+            double obstacleHeight
+    ) {
+        double upwardMotion = this.upwardVelocityForHeight(
+                this.creature.getNavigationBuilder().getLeapHeight() + LEAP_CLEARANCE
+        );
+        return this.hasClearLeapPath(
+                startingBounds,
+                targetX,
+                targetY,
+                targetZ,
+                obstacleHeight,
+                targetY - startingBounds.minY > 1E-3D,
+                upwardMotion
+        );
+    }
+
+    private boolean hasClearLeapPath(
+            @NotNull AxisAlignedBB startingBounds,
+            double targetX,
+            double targetY,
+            double targetZ,
+            double obstacleHeight,
+            boolean verticalLeap,
+            double upwardMotion
+    ) {
+        double startingCenterX = (startingBounds.minX + startingBounds.maxX) * 0.5D;
+        double startingCenterZ = (startingBounds.minZ + startingBounds.maxZ) * 0.5D;
+        double targetOffsetX = targetX - startingCenterX;
+        double targetOffsetZ = targetZ - startingCenterZ;
         double horizontalDistance = Math.sqrt(targetOffsetX * targetOffsetX + targetOffsetZ * targetOffsetZ);
         if (horizontalDistance < 1E-6D) return false;
 
         AxisAlignedBB landingBounds = startingBounds.offset(
                 targetOffsetX,
-                this.leapTargetY - startingBounds.minY + 1E-3D,
+                targetY - startingBounds.minY + 1E-3D,
                 targetOffsetZ
         );
         if (this.creature.world.collidesWithAnyBlock(landingBounds)) return false;
 
         double fixedMotionX = 0D;
         double fixedMotionZ = 0D;
-        if (!this.verticalLeap) {
-            int crossingTicks = Math.max(1, this.ticksAboveHeight(upwardMotion, this.leapObstacleHeight));
+        if (!verticalLeap) {
+            int crossingTicks = Math.max(1, this.ticksAboveHeight(upwardMotion, obstacleHeight));
             double horizontalMotion = horizontalDistance / crossingTicks;
             fixedMotionX = targetOffsetX / horizontalDistance * horizontalMotion;
             fixedMotionZ = targetOffsetZ / horizontalDistance * horizontalMotion;
@@ -606,13 +662,13 @@ public class RiftCreatureLeapHelper {
         double simulatedZ = 0D;
         double simulatedHeight = 0D;
         double simulatedVerticalMotion = upwardMotion;
-        boolean simulatedObstacleCleared = !this.verticalLeap;
-        double clearanceFloor = Math.min(startingBounds.minY, this.leapTargetY)
-                + this.leapObstacleHeight + VERTICAL_EDGE_CLEARANCE;
+        boolean simulatedObstacleCleared = !verticalLeap;
+        double clearanceFloor = Math.min(startingBounds.minY, targetY)
+                + obstacleHeight + VERTICAL_EDGE_CLEARANCE;
 
         for (int tick = 0; tick < 80; tick++) {
             if (!simulatedObstacleCleared
-                    && simulatedHeight >= this.leapObstacleHeight + VERTICAL_EDGE_CLEARANCE) {
+                    && simulatedHeight >= obstacleHeight + VERTICAL_EDGE_CLEARANCE) {
                 simulatedObstacleCleared = true;
             }
 
@@ -621,13 +677,13 @@ public class RiftCreatureLeapHelper {
             double horizontalMotionX = 0D;
             double horizontalMotionZ = 0D;
             if (simulatedObstacleCleared) {
-                if (this.verticalLeap) {
+                if (verticalLeap) {
                     double remainingDistance = Math.sqrt(remainingX * remainingX + remainingZ * remainingZ);
                     if (remainingDistance >= 1E-6D) {
                         int crossingTicks = this.ticksUntilDescendingBelowHeight(
                                 simulatedHeight,
                                 simulatedVerticalMotion,
-                                this.leapObstacleHeight + VERTICAL_EDGE_CLEARANCE
+                                obstacleHeight + VERTICAL_EDGE_CLEARANCE
                         );
                         double horizontalMotion = remainingDistance / crossingTicks;
                         horizontalMotionX = remainingX / remainingDistance * horizontalMotion;
@@ -664,7 +720,7 @@ public class RiftCreatureLeapHelper {
                 double sampleRemainingX = targetOffsetX - sampleX;
                 double sampleRemainingZ = targetOffsetZ - sampleZ;
                 boolean reachedLandingHeight = simulatedVerticalMotion <= 0D
-                        && sampleFeetY <= this.leapTargetY + 1E-3D;
+                        && sampleFeetY <= targetY + 1E-3D;
                 if (reachedLandingHeight) {
                     double remainingDistanceSq = sampleRemainingX * sampleRemainingX
                             + sampleRemainingZ * sampleRemainingZ;

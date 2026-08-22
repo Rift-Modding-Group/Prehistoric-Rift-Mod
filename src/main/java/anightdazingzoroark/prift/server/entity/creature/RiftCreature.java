@@ -12,6 +12,7 @@ import anightdazingzoroark.prift.server.entity.ai.RiftUnmountedUseMove;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelperBase;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreaturePathNavigate;
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreaturePathNavigate.BlockBreakPlanEntry;
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
@@ -28,6 +29,7 @@ import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
+import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
 import anightdazingzoroark.riftlib.model.AnimatedLocator;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
@@ -37,6 +39,10 @@ import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
 import anightdazingzoroark.riftlib.ray.rayShape.impact.RiftLibRayEllipsoidImpactShape;
 import anightdazingzoroark.riftlib.util.QuaternionUtils;
 import anightdazingzoroark.riftlib.util.VectorUtils;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockFence;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.ai.EntityAILookIdle;
@@ -45,6 +51,7 @@ import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -55,6 +62,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
@@ -64,8 +72,10 @@ import org.lwjglx.util.vector.Quaternion;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * le heart and soul of this mod
@@ -112,6 +122,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //target pathing state
     private boolean unableToPathToTarget;
+    private int blockBreakEffectAttemptCount;
+    private int moveFinishCount;
+    private final Map<BlockPos, BlockBreakPlanEntry> activeBlockBreakPlan = new HashMap<>();
 
     //fall impact state
     private boolean trackingFallImpact;
@@ -394,7 +407,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //use this when attacking an entity
     @Override
     public boolean attackEntityAsMob(Entity entityIn) {
-        if (entityIn == null) return false;
+        if (entityIn == null || this.getUseBlockBreak()) return false;
 
         CreatureMoveBuilder creatureMoveBuilder = this.getCreatureMoves().getMoveBuilderCurrentMove();
         if (creatureMoveBuilder == null) return false;
@@ -544,6 +557,137 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     public void setUseBlockBreak(boolean value) {
         this.dataManager.set(USE_BLOCK_BREAK, value);
+
+        //clear block break plans when set false
+        if (!value) this.activeBlockBreakPlan.clear();
+    }
+
+    /**
+     * check block-breaking rules against this creature's configured tool levels.
+     */
+    public boolean canBreakBlock(@NotNull BlockPos blockPos) {
+        IBlockState blockState = this.world.getBlockState(blockPos);
+        Block block = blockState.getBlock();
+        if (!block.canEntityDestroy(blockState, this.world, blockPos, this)) return false;
+
+        //negative harvest level assumes anything can break it
+        //so make sure that it got low hardness when breakin
+        float hardness = blockState.getBlockHardness(this.world, blockPos);
+        int harvestLevel = block.getHarvestLevel(blockState);
+        if (harvestLevel < 0 && hardness >= 0f && hardness <= 1f) return true;
+
+        //search in block break level map
+        Map<String, Integer> blockBreakLevels = this.creatureType.getBlockBreakLevelMap();
+        if (blockBreakLevels == null) return false;
+
+        for (Map.Entry<String, Integer> blockBreakEntry : blockBreakLevels.entrySet()) {
+            //fences r strange
+            boolean woodenFenceCheck = hardness >= 0f && blockBreakEntry.getKey().equals("axe")
+                    && blockState.getMaterial() == Material.WOOD && blockState.getBlock() instanceof BlockFence;
+            if ((block.isToolEffective(blockBreakEntry.getKey(), blockState) || woodenFenceCheck)
+                    && blockBreakEntry.getValue() >= Math.max(0, harvestLevel)
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @NotNull
+    private Set<BlockPos> getBreakableBlocksInFront() {
+        Set<BlockPos> blocks = new HashSet<>();
+        List<AnimatedBoundingBox> frontZones = this.animData.getAnimatedBoundingBoxesByTag().get("frontZone");
+        if (frontZones == null) return blocks;
+
+        for (AnimatedBoundingBox frontZone : frontZones) {
+            AxisAlignedBB frontBounds = this.animData.getWorldSpaceAABB(frontZone.getName());
+            if (frontBounds == null) continue;
+
+            BlockPos minimum = new BlockPos(Math.floor(frontBounds.minX), Math.floor(frontBounds.minY), Math.floor(frontBounds.minZ));
+            BlockPos maximum = new BlockPos(
+                    Math.ceil(frontBounds.maxX) - 1D,
+                    Math.ceil(frontBounds.maxY) - 1D,
+                    Math.ceil(frontBounds.maxZ) - 1D
+            );
+            for (BlockPos blockPos : BlockPos.getAllInBoxMutable(minimum, maximum)) {
+                BlockPos immutablePos = blockPos.toImmutable();
+                IBlockState blockState = this.world.getBlockState(immutablePos);
+                AxisAlignedBB collisionBounds = blockState.getCollisionBoundingBox(this.world, immutablePos);
+                if (collisionBounds == null) continue;
+
+                AxisAlignedBB worldCollisionBounds = collisionBounds.offset(immutablePos);
+                BlockBreakPlanEntry planEntry = this.getBlockBreakPlan(immutablePos);
+                if (planEntry == null) continue;
+
+                boolean ordinaryJumpable = this.getCreaturePathNavigate().isStandardJumpable(planEntry, worldCollisionBounds);
+                if (!ordinaryJumpable && worldCollisionBounds.intersects(frontBounds) && this.canBreakBlock(immutablePos)) {
+                    blocks.add(immutablePos);
+                }
+            }
+        }
+        return blocks;
+    }
+
+    //---block break methods for ai use---
+    public int getBlockBreakEffectAttemptCount() {
+        return this.blockBreakEffectAttemptCount;
+    }
+
+    public void recordBlockBreakEffectAttempt() {
+        this.blockBreakEffectAttemptCount++;
+    }
+
+    public int getMoveFinishCount() {
+        return this.moveFinishCount;
+    }
+
+    public void snapshotBlockBreakPlan() {
+        this.activeBlockBreakPlan.clear();
+        this.activeBlockBreakPlan.putAll(this.getCreaturePathNavigate().copyPlannedBlockBreaks());
+    }
+
+    @Nullable
+    private BlockBreakPlanEntry getBlockBreakPlan(@NotNull BlockPos blockPos) {
+        return !this.activeBlockBreakPlan.isEmpty() ? this.activeBlockBreakPlan.get(blockPos) : this.getCreaturePathNavigate().getPlannedBlockBreak(blockPos);
+    }
+
+    public boolean hasBreakableBlocksInFront() {
+        return !this.getBreakableBlocksInFront().isEmpty();
+    }
+
+    public boolean hasBlockBreakZone() {
+        List<AnimatedBoundingBox> frontZones = this.animData.getAnimatedBoundingBoxesByTag().get("frontZone");
+        return frontZones != null && !frontZones.isEmpty();
+    }
+
+    /**
+     * breaks blocks in collision boxes with "frontZone" tag, meant for use while pathing
+     */
+    public void breakBlocksInFrontInPathing() {
+        if (this.world.isRemote) return;
+
+        if ((this.bodyTouchingLiquid() && !this.getNavigationBuilder().getCanSwim()) || !ForgeEventFactory.getMobGriefingEvent(this.world, this)) {
+            return;
+        }
+
+        Set<BlockPos> breakableBlocks = this.getBreakableBlocksInFront();
+        if (breakableBlocks.isEmpty()) return;
+
+        for (BlockPos blockPos : breakableBlocks) {
+            IBlockState blockState = this.world.getBlockState(blockPos);
+
+            //hmmm
+            if (this.getCreaturePathNavigate().isBlockBreakTemporarilyDenied(blockPos) || !this.canBreakBlock(blockPos)) continue;
+
+            //event block lol
+            if (!ForgeEventFactory.onEntityDestroyBlock(this, blockPos, blockState)) {
+                this.getCreaturePathNavigate().markBlockBreakDenied(blockPos);
+                continue;
+            }
+
+            this.world.destroyBlock(blockPos, true);
+        }
+        this.getCreaturePathNavigate().invalidateBlockBreakPathCache();
     }
 
     //-----move use management-----
@@ -812,6 +956,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
             if (creatureMoveStorage.canRunCurrentMoveHitEffect()) creatureMoveStorage.runCurrentMoveHitEffect(this);
         }, Side.SERVER));
+        animationData.addAnimationMessageEffect("moveBlockBreakEffect", new AnimatableRunValue(() -> {
+            CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+            if (this.getUseBlockBreak() && creatureMoveStorage.canRunCurrentMoveHitEffect()) {
+                creatureMoveStorage.runCurrentMoveHitEffect(this);
+            }
+        }, Side.SERVER));
         animationData.addAnimationMessageEffect("moveChargeupPrewindupFinished", new AnimatableRunValue(() -> {
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
             creatureMoveStorage.finishCurrentMoveChargeupPhase(this, ChargeupPhase.PREWINDUP);
@@ -940,6 +1090,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //small helper method for defining what happens when a move finishes
     private void onMoveFinish(@NotNull String moveName) {
         CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+        if (!this.world.isRemote) this.moveFinishCount++;
         if (!creatureMoveStorage.hasCurrentMoveEndEffectFired()) {
             //use moveName, as it might have been erased on server after being cleared on client
             CreatureMoveBuilder creatureMoveBuilder = creatureMoveStorage.getUsableMoveBuilder(moveName);
