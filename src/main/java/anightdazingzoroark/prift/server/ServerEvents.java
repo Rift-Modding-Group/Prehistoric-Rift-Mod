@@ -27,7 +27,7 @@ public class ServerEvents {
         //to reduce potential lag, mobs killed by wild creatures will not drop items
         if (event.getSource().getTrueSource() instanceof RiftCreature && RiftGeneralConfig.creatures.creatureKillNoLoot) {
             Entity attacked = event.getEntity();
-            boolean tameableFlag = attacked instanceof EntityTameable tameable && !tameable.isTamed();
+            boolean tameableFlag = attacked instanceof EntityTameable tameable && tameable.isTamed();
             boolean playerFlag = attacked instanceof EntityPlayer;
             event.setCanceled(!tameableFlag && !playerFlag);
         }
