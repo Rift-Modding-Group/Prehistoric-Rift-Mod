@@ -403,11 +403,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     @Override
-    public int getSprintToAttackCooldown() {
-        return this.sprintToAttackCooldown;
-    }
-
-    @Override
     public boolean hasStraightWalkingPathTo(@NotNull EntityLivingBase target) {
         return this.getCreaturePathNavigate().hasStraightWalkingPathTo(target);
     }
@@ -614,6 +609,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     //-----sprint to attack management-----
+    public boolean canSprintToAttack() {
+        return this.sprintToAttackCooldown == 0;
+    }
+
     public void removeSprintToAttackCooldown() {
         this.sprintToAttackCooldown = 0;
     }

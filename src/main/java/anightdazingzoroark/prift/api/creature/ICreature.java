@@ -50,7 +50,7 @@ public interface ICreature {
         throw new IllegalStateException("This creature does not support rays");
     }
 
-    int getSprintToAttackCooldown();
+    boolean canSprintToAttack();
 
     boolean canLeapToAttack();
 

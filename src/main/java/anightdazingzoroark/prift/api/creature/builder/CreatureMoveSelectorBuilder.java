@@ -50,7 +50,7 @@ public class CreatureMoveSelectorBuilder {
         this.moveRules.add(new MoveRule(CreatureMoveResult.SPRINT, new MoveRuleBuilder("")
                 .setPriorityPredicate((creature, target) -> {
                     if (target == null || !target.isEntityAlive()) return -1;
-                    if (creature.getSprintToAttackCooldown() > 0 && !creature.atFrustrationThreshold()) return -1;
+                    if (!creature.canSprintToAttack() && !creature.atFrustrationThreshold()) return -1;
                     boolean outsideCreatureAABB = !creature.getEntityBoundingBox().grow(1e-5D).intersects(target.getEntityBoundingBox());
                     boolean outsideInnerBound = !creature.getEntityBoundingBox().grow(minDist).grow(1e-5D).intersects(target.getEntityBoundingBox());
                     boolean withinOuterBound = creature.getEntityBoundingBox().grow(maxDist).grow(1e-5D).intersects(target.getEntityBoundingBox());
