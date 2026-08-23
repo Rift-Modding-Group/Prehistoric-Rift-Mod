@@ -4,18 +4,27 @@ import anightdazingzoroark.prift.client.RiftCreativeTabs;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemMonsterPlacer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.NonNullList;
+import net.minecraft.stats.StatList;
+import net.minecraft.tileentity.MobSpawnerBaseLogic;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityMobSpawner;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -25,11 +34,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class RiftCreatureSpawnEggItem extends Item {
+//note to self: use ItemMonsterPlacer as reference
+public class RiftCreatureSpawnEggItem extends ItemMonsterPlacer {
     private static final String CREATURE_KEY = "CreatureType";
 
     public RiftCreatureSpawnEggItem() {
-        super();
         this.setCreativeTab(RiftCreativeTabs.spawnEggsTab);
         this.setHasSubtypes(true);
         this.setMaxDamage(0);
@@ -79,26 +88,78 @@ public class RiftCreatureSpawnEggItem extends Item {
     }
 
     @Override
-    public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        ItemStack stack = player.getHeldItem(hand);
-        RiftCreatureBuilder builder = RiftCreatureRegistry.getCreatureBuilder(getCreatureName(stack));
-        if (builder == null) return EnumActionResult.FAIL;
+    public EnumActionResult onItemUse(
+            EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing,
+            float hitX, float hitY, float hitZ
+    ) {
+        if (worldIn.isRemote) return EnumActionResult.SUCCESS;
+
+        ItemStack itemstack = player.getHeldItem(hand);
+        if (!player.canPlayerEdit(pos.offset(facing), facing, itemstack)) return EnumActionResult.FAIL;
+
+        /*
+        note to self: idk if this should be implemented lmao
+        IBlockState iblockstate = worldIn.getBlockState(pos);
+        Block block = iblockstate.getBlock();
+
+        if (block == Blocks.MOB_SPAWNER) {
+            TileEntity tileentity = worldIn.getTileEntity(pos);
+
+            if (tileentity instanceof TileEntityMobSpawner) {
+                MobSpawnerBaseLogic mobspawnerbaselogic = ((TileEntityMobSpawner)tileentity).getSpawnerBaseLogic();
+                mobspawnerbaselogic.setEntityId(getNamedIdFrom(itemstack));
+                tileentity.markDirty();
+                worldIn.notifyBlockUpdate(pos, iblockstate, iblockstate, 3);
+
+                if (!player.capabilities.isCreativeMode) itemstack.shrink(1);
+
+                return EnumActionResult.SUCCESS;
+            }
+        }
+         */
 
         BlockPos spawnPos = pos.offset(facing);
-        boolean blocked = !world.isAirBlock(spawnPos) && !world.getBlockState(spawnPos).getBlock().isReplaceable(world, spawnPos);
-        if (blocked) return EnumActionResult.FAIL;
-
-        if (!world.isRemote) {
-            RiftCreature creature = RiftCreatureRegistry.createCreature(world, builder.getName());
-
-            creature.setLocationAndAngles(spawnPos.getX() + 0.5D, spawnPos.getY(), spawnPos.getZ() + 0.5D, world.rand.nextFloat() * 360f, 0f);
-            creature.onInitialSpawn(world.getDifficultyForLocation(new BlockPos(creature)), null);
-            creature.enablePersistence();
-            world.spawnEntity(creature);
-        }
-
-        if (!player.capabilities.isCreativeMode) stack.shrink(1);
+        this.spawnCreature(worldIn, player, itemstack, spawnPos.getX() + 0.5D, spawnPos.getY() + this.getYOffset(worldIn, spawnPos), spawnPos.getZ() + 0.5D);
 
         return EnumActionResult.SUCCESS;
+    }
+
+    @Override
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
+        ItemStack itemstack = playerIn.getHeldItem(handIn);
+        if (worldIn.isRemote) return new ActionResult<>(EnumActionResult.PASS, itemstack);
+
+        RiftCreatureBuilder builder = RiftCreatureRegistry.getCreatureBuilder(getCreatureName(itemstack));
+        if (builder == null) return new ActionResult<>(EnumActionResult.FAIL, itemstack);
+
+        RayTraceResult raytraceresult = this.rayTrace(worldIn, playerIn, true);
+
+        if (raytraceresult != null && raytraceresult.typeOfHit == RayTraceResult.Type.BLOCK) {
+            BlockPos spawnPos = raytraceresult.getBlockPos();
+
+            if (!(worldIn.getBlockState(spawnPos).getBlock() instanceof BlockLiquid)) {
+                return new ActionResult<>(EnumActionResult.PASS, itemstack);
+            }
+            else if (worldIn.isBlockModifiable(playerIn, spawnPos) && playerIn.canPlayerEdit(spawnPos, raytraceresult.sideHit, itemstack)) {
+                this.spawnCreature(worldIn, playerIn, itemstack, spawnPos.getX() + 0.5D, spawnPos.getY() + 0.5D, spawnPos.getZ() + 0.5D);
+                playerIn.addStat(StatList.getObjectUseStats(this));
+                return new ActionResult<>(EnumActionResult.SUCCESS, itemstack);
+            }
+            else return new ActionResult<>(EnumActionResult.FAIL, itemstack);
+        }
+        else return new ActionResult<>(EnumActionResult.PASS, itemstack);
+    }
+
+    private void spawnCreature(World worldIn, EntityPlayer player, ItemStack itemstack, double x, double y, double z) {
+        RiftCreatureBuilder builder = RiftCreatureRegistry.getCreatureBuilder(getCreatureName(itemstack));
+        if (builder == null) return;
+
+        RiftCreature creature = RiftCreatureRegistry.createCreature(worldIn, builder.getName());
+        creature.setLocationAndAngles(x, y, z, MathHelper.wrapDegrees(worldIn.rand.nextFloat() * 360f), 0f);
+        creature.onInitialSpawn(worldIn.getDifficultyForLocation(new BlockPos(creature)), null);
+        creature.enablePersistence();
+        worldIn.spawnEntity(creature);
+        if (itemstack.hasDisplayName()) creature.setCustomNameTag(itemstack.getDisplayName());
+        if (!player.capabilities.isCreativeMode) itemstack.shrink(1);
     }
 }

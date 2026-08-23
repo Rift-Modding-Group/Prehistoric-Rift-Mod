@@ -12,9 +12,7 @@ import net.minecraft.item.ItemBlock;
 public class ItemRenderer {
     public static void registerItemRenderer() {
         for (Item item : RiftItems.ITEMS) register(item);
-        /*
-        for (ItemBlock itemBlock : RiftBlocks.ITEM_BLOCKS) register(itemBlock);
-         */
+
         //special case for creature spawn eggs
         Minecraft.getMinecraft().getItemColors().registerItemColorHandler(
                 (stack, tintIndex) -> {
