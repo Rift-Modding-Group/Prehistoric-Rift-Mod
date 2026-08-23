@@ -333,7 +333,7 @@ public class RiftCreatureRegistry {
                         .setFallCreatesImpact()
                         .setDaysUntilAdult(3)
                         .setHitboxInformation()
-                        .setIsHerder()
+                        .setIsHerder(8)
                         .addBlockBreakLevel("axe", 2)
                         //---moves---
                         .addMove("tail_stab", CreatureMoveCommon.standardMeleeMove.copy()

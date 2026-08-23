@@ -41,6 +41,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private boolean flopOnLand;
     private String[] breathableBlocks = new String[]{"minecraft:air"};
     private boolean isHerder;
+    private int maxHerdSize;
     private int inventorySize = 27;
     private int daysUntilAdult = 1;
     private boolean fallCreatesImpact;
@@ -302,14 +303,27 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Allows creature to perform herding
      * */
     public T setIsHerder() {
+        return this.setIsHerder(4);
+    }
+
+    /**
+     * Similar to above, but maximum total herd size, including the leader, is defined.
+     * */
+    public T setIsHerder(int herdSize) {
         this.checkIfLocked();
+        if (herdSize < 2) throw new IllegalArgumentException("Maximum herd size must be at least 2!");
 
         this.isHerder = true;
+        this.maxHerdSize = herdSize;
         return this.getThis();
     }
 
     public boolean isHerder() {
         return this.isHerder;
+    }
+
+    public int getMaxHerdSize() {
+        return this.maxHerdSize;
     }
 
     /**

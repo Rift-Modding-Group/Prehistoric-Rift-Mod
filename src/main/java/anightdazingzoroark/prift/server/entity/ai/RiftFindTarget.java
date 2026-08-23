@@ -27,6 +27,15 @@ public class RiftFindTarget extends EntityAITarget {
 
     @Override
     public boolean shouldExecute() {
+        //for herders, only herd leaders can find targets
+        if (!this.creature.canLeadHerdBehavior()) return false;
+
+        EntityLivingBase existingTarget = this.creature.getAttackTarget();
+        if (this.creature.isInHerd() && existingTarget != null && existingTarget.isEntityAlive()) {
+            this.targetEntity = existingTarget;
+            return true;
+        }
+
         List<EntityLivingBase> list = this.taskOwner.world.getEntitiesWithinAABB(
                 EntityLivingBase.class, this.getTargetableArea(this.getTargetDistance()),
                 entity -> {
@@ -50,19 +59,41 @@ public class RiftFindTarget extends EntityAITarget {
     }
 
     @Override
+    public boolean shouldContinueExecuting() {
+        if (!this.creature.canLeadHerdBehavior()) return false;
+
+        EntityLivingBase existingTarget = this.creature.getAttackTarget();
+        if (this.creature.isInHerd() && existingTarget != null && existingTarget != this.targetEntity) {
+            this.targetEntity = existingTarget;
+        }
+        return super.shouldContinueExecuting();
+    }
+
+    @Override
     public void startExecuting() {
         this.creature.setAttackTarget(this.targetEntity);
         super.startExecuting();
+    }
+
+    @Override
+    public void resetTask() {
+        if (this.creature.canLeadHerdBehavior() && this.creature.getAttackTarget() == this.targetEntity) {
+            super.resetTask();
+        }
+        else this.target = null;
+        this.targetEntity = null;
     }
 
     protected AxisAlignedBB getTargetableArea(double targetDistance) {
         return this.creature.getEntityBoundingBox().grow(targetDistance, 4D, targetDistance);
     }
 
-    //will use creature config info to determine target suitability then return super of this method
+    //will use creature config info and relation to user to determine target suitability then return super of this method
     @Override
     protected boolean isSuitableTarget(@Nullable EntityLivingBase target, boolean includeInvincibles) {
         if (target == null) return false;
+
+        if (this.creature.isRelatedToEntity(target)) return false;
 
         if (!this.isAllowedByConfig(target)) return false;
 

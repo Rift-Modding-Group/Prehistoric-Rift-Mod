@@ -62,6 +62,13 @@ public interface ICreature {
 
     boolean hasStraightWalkingPathTo(@NotNull EntityLivingBase target);
 
+    boolean canDoHerding();
+
+    boolean isInHerd();
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    boolean isHerdLeader();
+
     @NotNull
     CreatureNavigationBuilder getNavigationBuilder();
 

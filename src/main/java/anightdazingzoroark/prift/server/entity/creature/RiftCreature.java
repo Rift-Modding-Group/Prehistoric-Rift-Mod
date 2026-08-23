@@ -5,7 +5,10 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.api.creature.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
+import anightdazingzoroark.prift.server.entity.ai.RiftFollowHerdLeader;
 import anightdazingzoroark.prift.server.entity.ai.RiftGoToLandFromWater;
+import anightdazingzoroark.prift.server.entity.ai.RiftHurtByTarget;
+import anightdazingzoroark.prift.server.entity.ai.RiftWander;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
@@ -45,22 +48,19 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockFence;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.*;
-import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.ai.EntityAILookIdle;
-import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -111,7 +111,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @NotNull
     private Map<String, AbstractPropertyValue<?>> propertyValueMap = Map.of();
 
-    //--server side primitive params--
+    //--server side primitive params and objects--
     //manages a creature's ability to sprint based on whether or not it attacked before
     private int sprintToAttackCooldown;
     //manages a creature's ability to leap based on whether it attacked before
@@ -125,6 +125,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private int rage;
     private int currentRageThreshold;
     private int rageEndCountdown;
+    @Nullable
+    private RiftCreatureHerdHelper herdHelper;
 
     //target pathing state
     private boolean unableToPathToTarget;
@@ -154,7 +156,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.applyCreatureTypeSettings();
         this.animData = new AnimationDataEntity(this, holder -> this.scale());
 
-        if (worldIn != null && !worldIn.isRemote) this.initCreatureAI();
+        if (worldIn != null && !worldIn.isRemote) {
+            this.herdHelper = this.canDoHerding() ? new RiftCreatureHerdHelper(this) : null;
+            this.initCreatureAI();
+        }
     }
 
     @NotNull
@@ -200,6 +205,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private void changeCreatureType(RiftCreatureBuilder builder) {
         if (this.creatureType == builder) return;
 
+        this.leaveHerd();
         this.creatureType = builder;
         this.creatureInventory.setSize(this.creatureType.getInventorySize());
         this.applyCreatureTypeSettings();
@@ -209,6 +215,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (this.world != null && !this.world.isRemote) {
             this.tasks.taskEntries.clear();
             this.targetTasks.taskEntries.clear();
+            this.herdHelper = this.canDoHerding() ? new RiftCreatureHerdHelper(this) : null;
             this.initCreatureAI();
         }
     }
@@ -275,19 +282,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
      * better than EntityLiving.initEntityAI() :tm:
      * */
     private void initCreatureAI() {
-        //aint makin a new class again for this shit
         if (this.creatureType.getRetaliateWhenAttacked() != null) {
-            this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false) {
-                @Override
-                public boolean shouldExecute() {
-                    if (creatureType.getRetaliateWhenAttacked() != null
-                            && !creatureType.getRetaliateWhenAttacked().apply((RiftCreature) this.taskOwner, this.taskOwner.getRevengeTarget())
-                    ) {
-                        return false;
-                    }
-                    return super.shouldExecute();
-                }
-            });
+            this.targetTasks.addTask(1, new RiftHurtByTarget(this));
         }
         this.targetTasks.addTask(2, new RiftFindTarget(this, true));
 
@@ -295,8 +291,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (!this.creatureType.getNavigation().getCanSwim()) {
             this.tasks.addTask(2, new RiftGoToLandFromWater(this));
         }
-        this.tasks.addTask(3, new EntityAIWander(this, 1D));
-        this.tasks.addTask(4, new EntityAILookIdle(this) {
+        this.tasks.addTask(3, new RiftFollowHerdLeader(this));
+        this.tasks.addTask(4, new RiftWander(this));
+        this.tasks.addTask(5, new EntityAILookIdle(this) {
             @Override
             public void resetTask() {
                 this.idleTime = 0;
@@ -313,6 +310,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //server only operations
         if (!this.world.isRemote) {
+            //tick herding
+            if (this.herdHelper != null) this.herdHelper.onUpdate();
+
             //keep the pose active for the full airborne portion even if pathing
             //relinquishes its leap action before the creature reaches the ground
             boolean continueLeapPose = this.dataManager.get(LEAPING) && !this.onGround;
@@ -422,12 +422,24 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         );
     }
 
-    //the vanilla attack entity method. is now used for damage calculations
-    //use this when attacking an entity
+    /**
+     * the vanilla receive damage method. for blocking damage from related entities.
+     * */
+    @Override
+    public boolean attackEntityFrom(DamageSource source, float amount) {
+        if (source != null && (this.isRelatedToEntity(source.getTrueSource()) || this.isRelatedToEntity(source.getImmediateSource()))) {
+            return false;
+        }
+
+        return super.attackEntityFrom(source, amount);
+    }
+
+    /**
+     * the vanilla attack entity method. is now used for damage calculations
+     * use this when attacking an entity
+     * */
     @Override
     public boolean attackEntityAsMob(Entity entityIn) {
-        if (entityIn == null || this.getUseBlockBreak()) return false;
-
         CreatureMoveBuilder creatureMoveBuilder = this.getCreatureMoves().getMoveBuilderCurrentMove();
         if (creatureMoveBuilder == null) return false;
 
@@ -481,15 +493,20 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.setLastAttackedEntity(entityIn);
     }
 
-    //test if another entity is related to this creature
-    //such as if its tamed to its owner
+    /**
+     * this is for testing if another entity is related to this creature
+     * such as if its tamed to its owner or if it is a herdmate
+     * */
     public boolean isRelatedToEntity(Entity entity) {
         if (entity instanceof MultiPartEntityPart hitboxPart) {
             Entity hitboxParent = (Entity) hitboxPart.parent;
             return this.isRelatedToEntity(hitboxParent);
         }
+        else if (entity instanceof RiftCreature otherCreature && this.isHerdmate(otherCreature)) {
+            return true;
+        }
         else if (entity instanceof EntityTameable entityTameable) {
-            return entityTameable.isTamed() && entityTameable.getOwner() != null && entityTameable.getOwner().equals(this.getOwner());
+            return entityTameable.isTamed() && this.isTamed() && entityTameable.getOwner() != null && entityTameable.getOwner().equals(this.getOwner());
         }
         else if (entity instanceof EntityPlayer entityPlayer) {
             return this.isTamed() && this.getOwner() != null && this.getOwner().equals(entityPlayer);
@@ -499,8 +516,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void setAttackTarget(@Nullable EntityLivingBase target) {
-        if (target != this.getAttackTarget()) this.unableToPathToTarget = false;
+        boolean targetChanged = target != this.getAttackTarget();
+        if (targetChanged) this.unableToPathToTarget = false;
         super.setAttackTarget(target);
+        if (targetChanged && this.herdHelper != null && this.herdHelper.getLeader() == this) {
+            this.herdHelper.updateLeaderTarget(this, target);
+        }
     }
 
     @Override
@@ -512,6 +533,66 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     public void fall(float distance, float damageMultiplier) {
         float adjustedDistance = distance - this.getMaxFallHeight() + 3f;
         super.fall(adjustedDistance, damageMultiplier);
+    }
+
+    @Override
+    @NotNull
+    protected ResourceLocation getLootTable() {
+        return new ResourceLocation(RiftInitialize.MODID, "entities/" + this.creatureType.getName());
+    }
+
+    @Override
+    public String getName() {
+        if (this.hasCustomName()) return this.getCustomNameTag();
+        return I18n.format("entity." + this.creatureType.getName() + ".name");
+    }
+
+    @Override
+    public void onRemovedFromWorld() {
+        this.leaveHerd();
+        super.onRemovedFromWorld();
+    }
+
+    //-----herding management-----
+    public boolean canDoHerding() {
+        return this.creatureType.isHerder() && this.creatureType.getMaxHerdSize() >= 2;
+    }
+
+    public boolean isInHerd() {
+        return this.herdHelper != null && this.herdHelper.getSize() > 1;
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public boolean isHerdLeader() {
+        return this.herdHelper != null && this.herdHelper.getLeader() == this;
+    }
+
+    /**
+     * solitary creatures retain normal behavior until they form a herd.
+     */
+    public boolean canLeadHerdBehavior() {
+        return this.herdHelper == null || this.herdHelper.getLeader() == this;
+    }
+
+    @Nullable
+    public RiftCreature getHerdLeader() {
+        return this.herdHelper == null ? null : this.herdHelper.getLeader();
+    }
+
+    public boolean isHerdmate(@Nullable RiftCreature otherCreature) {
+        if (otherCreature == null || otherCreature == this || this.herdHelper == null) {
+            return false;
+        }
+        return this.herdHelper.contains(otherCreature);
+    }
+
+    public void leaveHerd() {
+        if (this.herdHelper != null) this.herdHelper.removeMember(this);
+    }
+
+    @Nullable
+    public RiftCreatureHerdHelper getHerd() {
+        return this.herdHelper;
     }
 
     //-----properties management-----
@@ -822,18 +903,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
      * */
     public boolean bodyTouchingLiquid() {
         return this.isInWater() || this.isInLava();
-    }
-
-    @Override
-    @NotNull
-    protected ResourceLocation getLootTable() {
-        return new ResourceLocation(RiftInitialize.MODID, "entities/" + this.creatureType.getName());
-    }
-
-    @Override
-    public String getName() {
-        if (this.hasCustomName()) return this.getCustomNameTag();
-        return I18n.translateToLocal("entity." + this.creatureType.getName() + ".name");
     }
 
     //-----IRiftCreature boilerplate stuff-----
