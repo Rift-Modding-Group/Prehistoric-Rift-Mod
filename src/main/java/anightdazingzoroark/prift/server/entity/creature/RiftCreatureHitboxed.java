@@ -40,13 +40,7 @@ public class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUs
      * dumass override
      * */
     @Override
-    public void applyEntityCollision(Entity entityIn) {}
-
-    /**
-     * only push back whatever is colliding with this entity
-     * */
-    @Override
-    protected void collideWithEntity(Entity entityIn) {
+    public void applyEntityCollision(Entity entityIn) {
         if (entityIn == null || entityIn.equals(this) || this.isRidingSameEntity(entityIn) || entityIn.noClip) return;
 
         double dispX = entityIn.posX - this.posX;
