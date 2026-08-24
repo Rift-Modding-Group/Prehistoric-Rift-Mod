@@ -140,20 +140,25 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
     @Override
     public boolean tryMoveToEntityLiving(Entity target, double speed) {
         if (target.isInWater()) return this.tryMoveToEntityLivingUsingWater(target, speed);
+        if (!this.canNavigate()) return false;
 
         Path path = this.getPathToEntityLiving(target);
         boolean startedPath = path != null && this.setPath(path, speed);
         if (target == this.creature.getAttackTarget()) {
-            this.creature.setUnableToPathToTarget(!startedPath || !this.pathReachesSafeTarget(path, target));
+            this.creature.setUnableToPathToTarget(!startedPath
+                    || path.getCurrentPathLength() <= 1
+                    || !this.pathIsSafe(path));
         }
         return startedPath;
     }
 
     public boolean tryMoveToEntityLivingUsingWater(Entity target, double speed) {
+        if (!this.canNavigate()) return false;
+
         Path path = this.getPathToEntityLiving(target);
         boolean startedPath = path != null && this.pathUsesWater(path) && this.setPath(path, speed);
         if (target == this.creature.getAttackTarget()) {
-            this.creature.setUnableToPathToTarget(!startedPath);
+            this.creature.setUnableToPathToTarget(!startedPath || path.getCurrentPathLength() <= 1);
         }
         return startedPath;
     }
@@ -163,10 +168,6 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
             if (path.getPathPointFromIndex(index).nodeType == PathNodeType.WATER) return true;
         }
         return false;
-    }
-
-    private boolean pathReachesSafeTarget(@Nullable Path path, Entity target) {
-        return this.pathReachesTarget(path, target) && this.pathIsSafe(path);
     }
 
     private boolean pathReachesTarget(@Nullable Path path, Entity target) {

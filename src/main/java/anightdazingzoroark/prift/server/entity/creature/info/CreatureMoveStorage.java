@@ -84,6 +84,20 @@ public class CreatureMoveStorage {
                     && creature.atFrustrationThreshold()
                     && moveRuleBuilder.getUseWhenFrustrated();
             int index = useDueToFrustration ? 0 : moveRuleBuilder.getPriorityPredicate().apply(creature, target);
+            CreatureMoveBuilder moveBuilder = moveRule.moveResult() == CreatureMoveResult.USE_MOVE
+                    ? this.getUsableMoveBuilder(this.creaturePhase, moveRuleBuilder.getMoveName())
+                    : null;
+            boolean canPathIntoDetectionRange = moveBuilder != null
+                    && moveBuilder.getRequireFindTargetToUse()
+                    && moveBuilder.getMakesContact()
+                    && !moveRuleBuilder.getDontPathToTarget();
+
+            if (index >= 0 && (target == null
+                    || !target.isEntityAlive()
+                    || (!canPathIntoDetectionRange
+                        && !moveRuleBuilder.getDetectionRule().targetWithinRange(creature, target)))) {
+                index = -1;
+            }
 
             //block-breaking moves r prioritized over attack leaps, ranged
             //fallbacks, and ordinary attacks until it has opened the shorter corridor
@@ -151,8 +165,10 @@ public class CreatureMoveStorage {
     }
 
     @Nullable
-    public ImmutablePair<CreatureMoveSelectorBuilder.MoveRule, Integer> getBestMoveRuleUnmounted() {
-        return this.prioritizedUsableMoves.nextWithPriority();
+    public ImmutablePair<CreatureMoveSelectorBuilder.MoveRule, Integer> getBestMoveRuleUnmounted(
+            @Nullable CreatureMoveSelectorBuilder.MoveRule preferredMoveRule
+    ) {
+        return this.prioritizedUsableMoves.nextWithPriority(preferredMoveRule);
     }
 
 

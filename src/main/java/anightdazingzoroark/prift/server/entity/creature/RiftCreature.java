@@ -126,8 +126,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //this counts up, which then makes them use a ranged move or their sprint move
     private int frustration;
     private int attackTargetHitCount;
-    //when a creature uses offensive moves on its target and it still stays alive,
-    //this counts up, which can then be used in priority predicate
+    //when a creature is targeting this counts up, which can then be used in priority predicate
     private int rage;
     private int currentRageThreshold;
     private int rageEndCountdown;
@@ -362,8 +361,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
             //tick creature rage
             if (this.getAttackTarget() != null) {
-                //set rage threshold to between 1 - 2 minutes
-                if (this.currentRageThreshold <= 0) this.currentRageThreshold = MathUtil.randomInRange(this.world.rand, 1200, 2400);
+                //set rage threshold to between 1.5 - 2.5 minutes
+                if (this.currentRageThreshold <= 0) this.currentRageThreshold = this.world.rand.nextInt(1800, 3001);
                 this.rage = Math.min(this.currentRageThreshold, this.rage + 1);
 
                 //set rage end countdown to max, which is 3 minutes
@@ -679,7 +678,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //-----rage management-----
     public boolean atRageThreshold() {
-        return this.rage >= this.currentRageThreshold;
+        return this.currentRageThreshold > 0 && this.rage >= this.currentRageThreshold;
     }
 
     //-----creature phase management-----

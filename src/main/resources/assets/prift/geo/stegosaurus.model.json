@@ -28,8 +28,8 @@
 							"tags": ["frontZone"]
 						},
 						"spinHitZone": {
-							"origin": [-28, 0, -28],
-							"size": [56, 24],
+							"origin": [-24, 0, -24],
+							"size": [48, 24],
 							"collision": false
 						},
 						"tailHitZone": {

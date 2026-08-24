@@ -6,8 +6,6 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.projectile.IProjectile;
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
-import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataProjectile;
 import anightdazingzoroark.riftlib.projectile.RiftLibProjectile;

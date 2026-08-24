@@ -34,7 +34,7 @@ public class LeapMoveResultTicker extends AbstractMoveResultTicker {
             creature.resetFrustration();
         }
         else if (!this.leapPrepared && this.target != null
-                && creature.getCreaturePathNavigate().tryMoveToEntityLivingUsingWater(this.target, 1D)
+                && creature.getCreaturePathNavigate().tryMoveToEntityLiving(this.target, 1D)
         ) {
             creature.resetLeapToAttackCooldown();
         }

@@ -6,7 +6,6 @@ import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.AbstractMoveResultTicker;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
@@ -54,6 +53,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     public boolean shouldContinueExecuting() {
         return (!this.creature.isLeaping() || this.isUsingLeapAttack())
                 && this.moveResultTicker != null
+                && (!this.moveResultTicker.isOverridableWhileUsed() || this.createMoveRule() != null)
                 && this.moveResultTicker.canContinueTicking();
     }
 
@@ -71,26 +71,16 @@ public class RiftUnmountedUseMove extends EntityAIBase {
         if (this.creature.isLeaping() && !this.isUsingLeapAttack()) return;
 
         //switch before the current ticker can request a pathfinding leap
-        if (!this.creature.isLeaping()) this.trySwitchToHigherPriorityMove();
+        if (!this.creature.isLeaping()) this.trySwitchToBestMove();
 
         if (this.moveResultTicker != null) this.moveResultTicker.onUpdate();
     }
 
-    private void trySwitchToHigherPriorityMove() {
+    private void trySwitchToBestMove() {
         ImmutablePair<CreatureMoveSelectorBuilder.MoveRule, Integer> newMoveRulePair = this.createMoveRule();
-        EntityLivingBase target = this.creature.getAttackTarget();
-        boolean blockBreakPreemptsCurrentMove = newMoveRulePair != null
-                && this.moveRulePair != null
-                && newMoveRulePair.getLeft().moveRuleBuilder().getUseBlockBreak()
-                && !this.moveRulePair.getLeft().moveRuleBuilder().getUseBlockBreak()
-                && target != null
-                && target.isEntityAlive()
-                && this.creature.getCreaturePathNavigate().shouldUseBlockBreakPath(target);
         if (newMoveRulePair == null
                 || (this.moveResultTicker != null && !this.moveResultTicker.isOverridableWhileUsed())
                 || newMoveRulePair.getLeft().equals(this.moveRulePair.getLeft())
-                || newMoveRulePair.getRight() >= this.moveRulePair.getRight()
-                && !blockBreakPreemptsCurrentMove
         ) {
             return;
         }
@@ -106,7 +96,8 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     @Nullable
     private ImmutablePair<CreatureMoveSelectorBuilder.MoveRule, Integer> createMoveRule() {
         CreatureMoveStorage creatureMoves = this.creature.getCreatureMoves();
-        return creatureMoves.getBestMoveRuleUnmounted();
+        CreatureMoveSelectorBuilder.MoveRule preferredMoveRule = this.moveRulePair == null ? null : this.moveRulePair.getLeft();
+        return creatureMoves.getBestMoveRuleUnmounted(preferredMoveRule);
     }
 
     private boolean isUsingLeapAttack() {

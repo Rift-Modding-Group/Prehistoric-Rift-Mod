@@ -53,24 +53,19 @@ public class PriorityList<T> {
     }
 
     @Nullable
-    public ImmutablePair<T, Integer> nextWithPriority() {
-        //get next first
-        T next = this.next();
-        if (next == null) return null;
-
-        //get priority
-        int priority = -1;
-        outer: for (Map.Entry<Integer, List<T>> entry : this.map.entrySet()) {
-            for (T listFromEntry : entry.getValue()) {
-                if (listFromEntry == next) {
-                    priority = entry.getKey();
-                    break outer;
-                }
-            }
+    public ImmutablePair<T, Integer> nextWithPriority(@Nullable T preferred) {
+        int highestPriority = Integer.MAX_VALUE;
+        for (int priority : this.map.keySet()) {
+            if (priority < highestPriority) highestPriority = priority;
         }
 
-        //return
-        return new ImmutablePair<>(next, priority);
+        List<T> resultList = this.map.get(highestPriority);
+        if (resultList == null || resultList.isEmpty()) return null;
+
+        T next = preferred != null && resultList.contains(preferred)
+                ? preferred
+                : resultList.get(this.random.nextInt(resultList.size()));
+        return new ImmutablePair<>(next, highestPriority);
     }
 
     @Override

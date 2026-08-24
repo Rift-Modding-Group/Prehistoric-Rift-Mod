@@ -306,6 +306,9 @@ public class RiftCreatureRegistry {
                                 .setMoveRule(
                                         new MoveRuleBuilder("flamethrower")
                                                 .setPriorityPredicate((creature, target) -> {
+                                                    System.out.println("creature.atRageThreshold(): "+creature.atRageThreshold());
+                                                    System.out.println("creature.isUnableToPathToTarget(): "+creature.isUnableToPathToTarget());
+
                                                     return (target != null && target.isEntityAlive() && (creature.atRageThreshold() || creature.isUnableToPathToTarget())) ? 0 : -1;
                                                 })
                                                 .setDetectionRule(new CreatureMoveSelectorBuilder.DistanceFromUserDetectionRule(4D, 16D))
@@ -371,8 +374,7 @@ public class RiftCreatureRegistry {
                                 .setMoveRule(
                                         new MoveRuleBuilder("tail_sweep")
                                                 .setPriorityPredicate((creature, target) -> {
-                                                    return (target != null && target.isEntityAlive() && !creature.bodyTouchingLiquid()
-                                                            && creature.isOnGround()
+                                                    return (target != null && target.isEntityAlive()
                                                             && creature.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), "spinHitZone")) ?
                                                             0 : -1;
                                                 })

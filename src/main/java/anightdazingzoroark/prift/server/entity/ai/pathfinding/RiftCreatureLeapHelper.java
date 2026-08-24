@@ -69,7 +69,6 @@ public class RiftCreatureLeapHelper {
             return false;
         }
         if (!this.hasSafeLandingNode(x, y, z)) {
-            this.creature.setUnableToPathToTarget(true);
             this.resetDelay();
             return false;
         }
@@ -92,7 +91,6 @@ public class RiftCreatureLeapHelper {
         this.leapTicks = 0;
         double upwardMotion = this.upwardVelocityForHeight(navigation.getLeapHeight() + LEAP_CLEARANCE);
         if (!this.hasClearLeapPath(upwardMotion)) {
-            this.creature.setUnableToPathToTarget(true);
             this.resetDelay();
             return false;
         }
@@ -193,7 +191,6 @@ public class RiftCreatureLeapHelper {
 
         double upwardMotion = this.upwardVelocityForHeight(navigation.getLeapHeight() + LEAP_CLEARANCE);
         if (!this.hasClearLeapPath(upwardMotion)) {
-            this.creature.setUnableToPathToTarget(true);
             this.creature.getCreaturePathNavigate().clearPath();
             this.cancelLeap();
             return false;
