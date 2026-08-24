@@ -3,25 +3,31 @@ package anightdazingzoroark.prift.server.entity.serverModel;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.riftlib.model.AnimatedGeoModel;
-import net.minecraft.util.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class CreatureModel extends AnimatedGeoModel<RiftCreature> {
     @Override
-    public ResourceLocation getModelLocation(RiftCreature riftCreature) {
-        String name = riftCreature.getCreatureType().getName();
-        return new ResourceLocation(RiftInitialize.MODID, "geo/"+name+".model.json");
+    @NotNull
+    public String getModId() {
+        return RiftInitialize.MODID;
     }
 
     @Override
-    public ResourceLocation getTextureLocation(RiftCreature riftCreature) {
+    public String getModelIdentifier(RiftCreature riftCreature) {
+        return "geometry."+riftCreature.getCreatureType().getName();
+    }
+
+    @Override
+    public String getTextureLocation(RiftCreature riftCreature) {
         String name = riftCreature.getCreatureType().getName();
         //note: is like this as color variants will be removed soon
-        return new ResourceLocation(RiftInitialize.MODID, "textures/entities/"+name+"/"+name+"_1.png");
+        return "entities/"+name+"/"+name+"_1.png";
     }
-
     @Override
-    public ResourceLocation getAnimationFileLocation(RiftCreature riftCreature) {
-        String name = riftCreature.getCreatureType().getName();
-        return new ResourceLocation(RiftInitialize.MODID, "animations/"+name+".animation.json");
+    @NotNull
+    public List<String> getAnimationIdentifiers(RiftCreature creature) {
+        return creature.getAnimationNames();
     }
 }

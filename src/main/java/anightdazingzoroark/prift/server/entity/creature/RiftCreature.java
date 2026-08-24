@@ -111,6 +111,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @NotNull
     private Map<String, AbstractPropertyValue<?>> propertyValueMap = Map.of();
 
+    //---anim names, for use in model classes---
+    @NotNull
+    private final List<String> animationNames = new ArrayList<>();
+
     //--server side primitive params and objects--
     //manages a creature's ability to sprint based on whether or not it attacked before
     private int sprintToAttackCooldown;
@@ -154,6 +158,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.moveHelper = new RiftCreatureMoveHelper(this);
         this.navigator = new RiftCreaturePathNavigate(this, worldIn);
         this.applyCreatureTypeSettings();
+        this.createAnimationNames();
         this.animData = new AnimationDataEntity(this, holder -> this.scale());
 
         if (worldIn != null && !worldIn.isRemote) {
@@ -209,6 +214,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.creatureType = builder;
         this.creatureInventory.setSize(this.creatureType.getInventorySize());
         this.applyCreatureTypeSettings();
+        this.createAnimationNames();
         this.animData = new AnimationDataEntity(this, holder -> this.scale());
         this.onCreatureTypeChanged();
 
@@ -1038,6 +1044,46 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.rayHitEffectMap.get(rayName).accept(this, rayOrigin, rayHitResult);
     }
 
+    //-----for animation names meant for use in model classes-----
+    private void createAnimationNames() {
+        this.animationNames.clear();
+
+        System.out.println("create anim names!");
+
+        //---set normal stuff names---
+        this.animationNames.add("animation."+this.creatureType.getName()+".walk");
+        this.animationNames.add("animation."+this.creatureType.getName()+".sprint_pose");
+        if (this.creatureType.getNavigation().getCanLeap()) this.animationNames.add("animation."+this.creatureType.getName()+".leap");
+
+        //---for moves (for now phases arent supported so there)---
+        for (ImmutablePair<String, CreatureMoveBuilder> moveEntry : this.creatureType.getMoves()) {
+            String moveName = moveEntry.getKey();
+            CreatureMoveBuilder moveBuilder = moveEntry.getValue();
+            CreatureMoveChargeupBuilder chargeupBuilder = moveBuilder.getMoveChargeupBuilder();
+
+            //for chargeup moves
+            if (chargeupBuilder != null) {
+                for (ChargeupPhase currentChargeupPhase : ChargeupPhase.values()) {
+                    String chargeupPhaseName = currentChargeupPhase.name().toLowerCase();
+                    String controllerStateName = moveName + "_" + chargeupPhaseName;
+                    this.animationNames.add("animation."+this.creatureType.getName()+"."+controllerStateName);
+                }
+            }
+            else {
+                for (String animName : moveBuilder.getAnimNames()) {
+                    String moveAnimName = "animation." + this.creatureType.getName() + "." + animName;
+                    this.animationNames.add(moveAnimName);
+                }
+            }
+        }
+    }
+
+    //mostly for use in model classes to make anim identification easier lol
+    @NotNull
+    public List<String> getAnimationNames() {
+        return this.animationNames;
+    }
+
     //-----animation related methods-----
     @Override
     @NonNull
@@ -1139,8 +1185,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             //for chargeup moves, create states for each phase
             if (chargeupBuilder != null) {
                 for (ChargeupPhase currentChargeupPhase : ChargeupPhase.values()) {
-                    String phaseName = currentChargeupPhase.name().toLowerCase();
-                    String controllerStateName = moveName + "_" + phaseName;
+                    String chargeupPhaseName = currentChargeupPhase.name().toLowerCase();
+                    String controllerStateName = moveName + "_" + chargeupPhaseName;
 
                     //---add transition in initial state---
                     initialState.addStateTransition(controllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, currentChargeupPhase));

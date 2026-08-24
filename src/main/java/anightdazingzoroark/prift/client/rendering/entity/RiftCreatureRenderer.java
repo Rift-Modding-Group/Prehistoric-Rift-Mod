@@ -17,9 +17,9 @@ public class RiftCreatureRenderer extends GeoEntityRenderer<RiftCreature> {
     @Override
     public void render(GeoModel model, RiftCreature animatable, float partialTicks, float red, float green, float blue, float alpha) {
         //hide saddle stuff
-        if (model.allBones.get("saddle") != null) model.allBones.get("saddle").setHidden(true);
-        if (model.allBones.get("headSaddle") != null) model.allBones.get("headSaddle").setHidden(true);
-        if (model.allBones.get("hiddenBySaddle") != null) model.allBones.get("hiddenBySaddle").setHidden(true);
+        if (model.getAllBones().get("saddle") != null) model.getAllBones().get("saddle").setHidden(true);
+        if (model.getAllBones().get("headSaddle") != null) model.getAllBones().get("headSaddle").setHidden(true);
+        if (model.getAllBones().get("hiddenBySaddle") != null) model.getAllBones().get("hiddenBySaddle").setHidden(true);
 
         super.render(model, animatable, partialTicks, red, green, blue, alpha);
     }
