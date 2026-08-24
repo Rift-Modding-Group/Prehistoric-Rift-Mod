@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.client.rendering.entity;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.serverModel.CreatureModel;
+import anightdazingzoroark.prift.server.entity.model.CreatureModel;
 import anightdazingzoroark.riftlib.geo.GeoModel;
 import anightdazingzoroark.riftlib.renderers.geo.GeoEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderManager;

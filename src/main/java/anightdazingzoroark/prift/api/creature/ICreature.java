@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.api.creature;
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.config.RiftCreatureConfig;
+import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
 import net.minecraft.entity.Entity;
@@ -99,4 +100,6 @@ public interface ICreature {
     float getStamina();
 
     float getMaxStamina();
+
+    void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, @NotNull EntityLivingBase target, float velocity, float inaccuracy);
 }

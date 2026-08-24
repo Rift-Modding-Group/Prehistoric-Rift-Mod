@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureHitboxed;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
+import anightdazingzoroark.prift.server.entity.projectile.RiftProjectile;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.EntityEntry;
@@ -36,6 +37,16 @@ public class RiftEntities {
                 .factory(RiftCreatureHitboxed::new)
                 .id(hitboxedCreatureRegistryName, 1)
                 .name("rift_creature_hitboxed")
+                .tracker(64, 1, true)
+                .build()
+        );
+
+        ResourceLocation projectileRegistryName = new ResourceLocation(RiftInitialize.MODID, "internal/projectile");
+        ForgeRegistries.ENTITIES.register(EntityEntryBuilder.<RiftProjectile>create()
+                .entity(RiftProjectile.class)
+                .factory(RiftProjectile::new)
+                .id(projectileRegistryName, 2)
+                .name("rift_projectile")
                 .tracker(64, 1, true)
                 .build()
         );

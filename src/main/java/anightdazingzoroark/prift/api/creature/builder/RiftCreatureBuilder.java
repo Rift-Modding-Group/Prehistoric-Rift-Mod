@@ -26,6 +26,8 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
      * Set the name of the species of the creature, is to be required
      * */
     public RiftCreatureBuilder setName(String name) {
+        this.checkIfLocked();
+
         this.creatureName = name;
         return this;
     }

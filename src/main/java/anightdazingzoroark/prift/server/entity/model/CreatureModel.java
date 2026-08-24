@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.server.entity.serverModel;
+package anightdazingzoroark.prift.server.entity.model;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;

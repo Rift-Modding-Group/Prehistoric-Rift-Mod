@@ -1,5 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
+import anightdazingzoroark.prift.server.entity.projectile.RiftProjectile;
 import io.netty.buffer.ByteBuf;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.api.creature.config.RiftCreatureConfig;
@@ -612,6 +614,16 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         }
         propertyValue.setValue(value);
         //todo: make this able to sync to client as well
+    }
+
+    //-----projectile management-----
+    public void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, @NotNull EntityLivingBase target, float velocity, float inaccuracy) {
+        CreatureMoveBuilder moveBuilder = this.getCreatureMoves().getUsableMoveBuilder(this.getCurrentMove());
+        if (moveBuilder == null) return;
+
+        RiftProjectile projectile = new RiftProjectile(this, projectileBuilder, moveBuilder);
+        projectile.shoot(target.posX, target.posY + target.height / 2D, target.posZ, velocity, inaccuracy);
+        this.world.spawnEntity(projectile);
     }
 
     //-----sprint to attack management-----

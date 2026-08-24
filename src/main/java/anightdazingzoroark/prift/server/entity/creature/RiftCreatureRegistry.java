@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
+import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCommon;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder;
@@ -344,6 +345,21 @@ public class RiftCreatureRegistry {
                                 .setBasePower(30)
                                 .setAnimNames("tail_sweep")
                         )
+                        .addMove("plate_fling", new CreatureMoveBuilder()
+                                .setPhysical()
+                                .setBasePower(30)
+                                .setRequireFindTargetToUse()
+                                .setOnMoveHitEffect(creature -> {
+                                    EntityLivingBase target = creature.getAttackTarget();
+                                    if (target == null || !target.isEntityAlive()) return;
+
+                                    creature.launchProjectile(
+                                            new ProjectileBuilder().setName("thrown_stegosaurus_plate").setRotateAlongPitch(),
+                                            target, 1, 0.3f
+                                    );
+                                })
+                                .setAnimNames("plate_fling")
+                        )
                         //---attack ai---
                         .setMoveSelector(new CreatureMoveSelectorBuilder()
                                 .setMoveRule(
@@ -362,6 +378,13 @@ public class RiftCreatureRegistry {
                                                 })
                                                 .setDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("spinHitZone"))
                                                 .setDontPathToTarget()
+                                )
+                                .setMoveRule(
+                                        new MoveRuleBuilder("plate_fling")
+                                                .setPriorityPredicate((creature, target) -> {
+                                                    return (target != null && target.isEntityAlive() && creature.isUnableToPathToTarget()) ? 0 : -1;
+                                                })
+                                                .setDetectionRule(new CreatureMoveSelectorBuilder.DistanceFromUserDetectionRule(8D, 16D))
                                 )
                                 .setCanSprintToAttack(1, 8D, 16D)
                         )
