@@ -9,19 +9,7 @@ import org.jetbrains.annotations.Nullable;
 public class CreatureMoveHelper {
     //calculate the damage a move will do to hit targets
     public static double calculateDamage(@NotNull RiftCreature attackingCreature) {
-        //get move
-        CreatureMoveBuilder moveBuilder = attackingCreature.getCreatureMoves().getMoveBuilderCurrentMove();
-        if (moveBuilder == null || !moveBuilder.isValid()) return 0D;
-
-        double statValueToUse = 0D;
-        if (moveBuilder.getMoveType() == CreatureMoveBuilder.MoveType.PHYSICAL) {
-            statValueToUse = attackingCreature.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
-        }
-        else if (moveBuilder.getMoveType() == CreatureMoveBuilder.MoveType.ELEMENTAL) {
-            statValueToUse = attackingCreature.getEntityAttribute(RiftCreature.ELEMENTAL_DAMAGE_ATTRIBUTE).getAttributeValue();
-        }
-
-        return statValueToUse * moveBuilder.getBasePower() * 0.005;
+        return calculateDamage(attackingCreature, attackingCreature.getCreatureMoves().getMoveBuilderCurrentMove());
     }
 
     public static double calculateDamage(@NotNull RiftCreature attackingCreature, @Nullable CreatureMoveBuilder moveBuilder) {

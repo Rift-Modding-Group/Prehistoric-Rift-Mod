@@ -16,12 +16,12 @@ public class ProjectileModel extends AnimatedGeoModel<RiftProjectile> {
 
     @Override
     public String getModelIdentifier(RiftProjectile riftProjectile) {
-        return "geometry."+riftProjectile.getBuilder().getName();
+        return "geometry."+riftProjectile.getName();
     }
 
     @Override
     public String getTextureLocation(RiftProjectile riftProjectile) {
-        return "entities/projectiles/"+riftProjectile.getBuilder().getName()+".png";
+        return "entities/projectiles/"+riftProjectile.getName()+".png";
     }
 
     @Override

@@ -622,7 +622,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (moveBuilder == null) return;
 
         RiftProjectile projectile = new RiftProjectile(this, projectileBuilder, moveBuilder);
-        projectile.shoot(target.posX, target.posY + target.height / 2D, target.posZ, velocity, inaccuracy);
+        double directionX = target.posX - projectile.posX;
+        double directionY = (target.posY + target.height / 2D) - projectile.posY;
+        double directionZ = target.posZ - projectile.posZ;
+        projectile.shoot(directionX, directionY, directionZ, velocity, inaccuracy);
         this.world.spawnEntity(projectile);
     }
 

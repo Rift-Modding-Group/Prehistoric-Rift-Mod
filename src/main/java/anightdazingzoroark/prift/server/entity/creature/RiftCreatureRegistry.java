@@ -355,7 +355,7 @@ public class RiftCreatureRegistry {
 
                                     creature.launchProjectile(
                                             new ProjectileBuilder().setName("thrown_stegosaurus_plate").setRotateAlongPitch(),
-                                            target, 1, 0.3f
+                                            target, 3f, 0f
                                     );
                                 })
                                 .setAnimNames("plate_fling")
@@ -382,11 +382,10 @@ public class RiftCreatureRegistry {
                                 .setMoveRule(
                                         new MoveRuleBuilder("plate_fling")
                                                 .setPriorityPredicate((creature, target) -> {
-                                                    return (target != null && target.isEntityAlive() && creature.isUnableToPathToTarget()) ? 0 : -1;
+                                                    return (target != null && target.isEntityAlive()) ? 0 : -1;
                                                 })
                                                 .setDetectionRule(new CreatureMoveSelectorBuilder.DistanceFromUserDetectionRule(8D, 16D))
                                 )
-                                .setCanSprintToAttack(1, 8D, 16D)
                         )
                         //---targeting---
                         .setRetaliateWhenAttacked()

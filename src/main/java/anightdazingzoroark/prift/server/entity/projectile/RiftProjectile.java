@@ -1,14 +1,21 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
+import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.projectile.IProjectile;
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataProjectile;
 import anightdazingzoroark.riftlib.projectile.RiftLibProjectile;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Random;
 
 public class RiftProjectile extends RiftLibProjectile implements IProjectile {
+    private static final DataParameter<String> NAME = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.STRING);
     @NotNull
     private final ProjectileBuilder projectileBuilder;
     @NotNull
@@ -31,6 +39,13 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
         super(shooter.world, shooter);
         this.projectileBuilder = builder;
         this.creatureMoveBuilder = creatureMoveBuilder;
+        this.setPosition(shooter.posX, shooter.posY + shooter.height / 2D, shooter.posZ);
+        this.dataManager.set(NAME, builder.getName());
+    }
+    @Override
+    protected void entityInit() {
+        super.entityInit();
+        this.dataManager.register(NAME, "");
     }
 
     public void onUpdate() {
@@ -41,8 +56,8 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
     }
 
     @NotNull
-    public ProjectileBuilder getBuilder() {
-        return this.projectileBuilder;
+    public String getName() {
+        return this.dataManager.get(NAME);
     }
 
     //-----from RiftLibProjectile-----
@@ -52,6 +67,19 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
         if (this.projectileBuilder.getOnImpactEffect() != null) {
             this.projectileBuilder.getOnImpactEffect().accept(this.getShooter(), this, entityLivingBase);
         }
+    }
+
+    @Override
+    @NotNull
+    public DamageSource getDamageSource() {
+        DamageSource toReturn = super.getDamageSource();
+
+        //apply element effects from move
+        if (this.creatureMoveBuilder.getElement() != null) {
+            if (this.creatureMoveBuilder.getElement() == Element.FIRE) toReturn.setFireDamage();
+        }
+
+        return toReturn;
     }
 
     @Override
@@ -65,9 +93,7 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
     }
 
     @Override
-    public void initializeAnimationData(AnimationDataProjectile animationDataProjectile) {
-
-    }
+    public void initializeAnimationData(AnimationDataProjectile animationDataProjectile) {}
 
     @Override
     public SoundEvent getOnProjectileHitSound() {

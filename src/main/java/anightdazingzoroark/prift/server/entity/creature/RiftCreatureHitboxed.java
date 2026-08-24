@@ -6,7 +6,9 @@ import anightdazingzoroark.riftlib.hitbox.MultiHitboxList;
 import anightdazingzoroark.riftlib.hitbox.RiftLibCollisionHitbox;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -41,7 +43,9 @@ public class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUs
      * */
     @Override
     public void applyEntityCollision(Entity entityIn) {
-        if (entityIn == null || entityIn.equals(this) || this.isRidingSameEntity(entityIn) || entityIn.noClip) return;
+        if (entityIn == null || entityIn instanceof IProjectile || entityIn instanceof EntityFireball
+                || entityIn.equals(this) || this.isRidingSameEntity(entityIn) || entityIn.noClip
+        ) return;
 
         double dispX = entityIn.posX - this.posX;
         double dispZ = entityIn.posZ - this.posZ;
