@@ -9,6 +9,7 @@ import anightdazingzoroark.riftlib.ray.IRayCreator;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +33,10 @@ public interface ICreature {
     boolean isEntityAlive();
 
     boolean isOnGround();
+
+    BlockPos getPosition();
+
+    Vec3d getPositionVector();
 
     boolean bodyTouchingLiquid();
 
