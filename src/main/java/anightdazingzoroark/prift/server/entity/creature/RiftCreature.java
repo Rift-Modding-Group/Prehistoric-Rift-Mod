@@ -351,16 +351,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             //set age
             this.setAgeInTicks(this.getAgeInTicks() + 1);
 
-            //tick creature move storage
+            //-----tick creature move storage-----
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
             creatureMoveStorage.updateUsableMoves(this, this.getAttackTarget());
             creatureMoveStorage.tickCooldowns();
             boolean cancelCurrentMoveForMissingTarget = creatureMoveStorage.shouldCancelCurrentMoveForMissingTarget(this);
-            if (cancelCurrentMoveForMissingTarget) {
-                creatureMoveStorage.finishCurrentMoveUse(this);
-            }
+            if (cancelCurrentMoveForMissingTarget) creatureMoveStorage.finishCurrentMoveUse(this);
 
-            //---stamina consumption---
+            //-----stamina consumption-----
             float staminaDrainPerSecond = 0f;
             int staminaConsumptionInterval = 0;
             if (this.isSprinting()) {
@@ -721,7 +719,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     public void resetSprintToAttackCooldown() {
-        this.sprintToAttackCooldown = MathUtil.randomInRange(this.world.rand, 5, 10) * 20;
+        this.sprintToAttackCooldown = this.world.rand.nextInt(5, 11) * 20;
     }
 
     //-----leap to attack management-----
@@ -734,7 +732,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     public void resetLeapToAttackCooldown() {
-        this.leapToAttackCooldown = MathUtil.randomInRange(this.world.rand, 5, 10) * 20;
+        this.leapToAttackCooldown = this.world.rand.nextInt(5, 11) * 20;
     }
 
     //-----frustration management-----
