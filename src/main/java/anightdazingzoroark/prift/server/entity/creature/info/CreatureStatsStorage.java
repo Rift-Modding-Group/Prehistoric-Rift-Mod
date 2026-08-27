@@ -3,11 +3,12 @@ package anightdazingzoroark.prift.server.entity.creature.info;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
-import anightdazingzoroark.prift.util.MathUtil;
+import anightdazingzoroark.prift.api.util.MathUtil;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,155 +19,135 @@ import java.util.Random;
  * */
 public class CreatureStatsStorage {
     //the final stats of a creature
-    private final Map<RiftCreatureEnums.Stats, Double> stats = new HashMap<>();
-    //individual values are random stat incrementors, they are randomly generated for each creature
-    private final Map<RiftCreatureEnums.Stats, Integer> individualValues = new HashMap<>();
+    @NotNull
+    private final Map<RiftCreatureEnums.Stats, StatValueHolder> stats = Map.of(
+            RiftCreatureEnums.Stats.HEALTH, new StatValueHolder(RiftCreatureEnums.Stats.HEALTH),
+            RiftCreatureEnums.Stats.MELEE_DAMAGE, new StatValueHolder(RiftCreatureEnums.Stats.MELEE_DAMAGE),
+            RiftCreatureEnums.Stats.ELEMENTAL_DAMAGE, new StatValueHolder(RiftCreatureEnums.Stats.ELEMENTAL_DAMAGE),
+            RiftCreatureEnums.Stats.STAMINA, new StatValueHolder(RiftCreatureEnums.Stats.STAMINA),
+            RiftCreatureEnums.Stats.SPEED, new StatValueHolder(RiftCreatureEnums.Stats.SPEED)
+    );
 
     //individual values are to be created here
-    public void initializeIndividualValues() {
-        Random random = new Random();
-
-        this.individualValues.put(RiftCreatureEnums.Stats.HEALTH, random.nextInt(0, 20));
-        this.individualValues.put(RiftCreatureEnums.Stats.MELEE_DAMAGE, random.nextInt(0, 20));
-        this.individualValues.put(RiftCreatureEnums.Stats.ELEMENTAL_DAMAGE, random.nextInt(0, 20));
-        this.individualValues.put(RiftCreatureEnums.Stats.STAMINA, random.nextInt(0, 20));
-        this.individualValues.put(RiftCreatureEnums.Stats.SPEED, random.nextInt(0, 20));
+    public void initializeIndividualValues(@NotNull Random random) {
+        for (StatValueHolder statValueHolder : this.stats.values()) {
+            statValueHolder.individualValue = random.nextInt(0, 20);
+        }
     }
 
     //is to be run once, no need to repeatedly execute
-    public void parseStats(RiftCreatureBuilder creatureType, int creatureLevel, RiftCreatureEnums.Nature nature) {
-        Map<RiftCreatureEnums.Stats, Double> baseStats = creatureType.getStats();
-
-        //-----parse health-----
-        double baseHealth = baseStats.get(RiftCreatureEnums.Stats.HEALTH);
-        double parsedHealth = MathUtil.slopeResult(baseHealth, false, 0, 10, 0, 200);
-        parsedHealth += parsedHealth * 0.1D * (creatureLevel - 1);
-        parsedHealth += parsedHealth * nature.getStatModifier(RiftCreatureEnums.Stats.HEALTH);
-        parsedHealth = Math.round(parsedHealth);
-        parsedHealth += individualValues.get(RiftCreatureEnums.Stats.HEALTH);
-        this.stats.put(RiftCreatureEnums.Stats.HEALTH, parsedHealth);
-
-        //-----parse melee damage-----
-        //note: dont worry, this isnt its real melee damage. the base power of the move it will use will
-        //be the final determinant in the melee damage this creature will deal
-        double baseMeleeDamage = baseStats.get(RiftCreatureEnums.Stats.MELEE_DAMAGE);
-        double parsedMeleeDamage = MathUtil.slopeResult(baseMeleeDamage, false, 0, 10, 0, 200);
-        parsedMeleeDamage += parsedMeleeDamage * 0.1D * (creatureLevel - 1);
-        parsedMeleeDamage += parsedMeleeDamage * nature.getStatModifier(RiftCreatureEnums.Stats.MELEE_DAMAGE);
-        parsedMeleeDamage = Math.round(parsedMeleeDamage);
-        parsedMeleeDamage += individualValues.get(RiftCreatureEnums.Stats.MELEE_DAMAGE);
-        this.stats.put(RiftCreatureEnums.Stats.MELEE_DAMAGE, parsedMeleeDamage);
-
-        //-----parse elemental damage-----
-        //similar to melee damage, the base power of the move it will use will be
-        //the final determinant in the elemental damage this creature will deal
-        double baseElementalDamage = baseStats.get(RiftCreatureEnums.Stats.ELEMENTAL_DAMAGE);
-        double parsedElementalDamage = MathUtil.slopeResult(baseElementalDamage, false, 0, 10, 0, 200);
-        parsedElementalDamage += parsedElementalDamage * 0.1D * (creatureLevel - 1);
-        parsedElementalDamage += parsedElementalDamage * nature.getStatModifier(RiftCreatureEnums.Stats.ELEMENTAL_DAMAGE);
-        parsedElementalDamage = Math.round(parsedElementalDamage);
-        parsedElementalDamage += individualValues.get(RiftCreatureEnums.Stats.ELEMENTAL_DAMAGE);
-        this.stats.put(RiftCreatureEnums.Stats.ELEMENTAL_DAMAGE, parsedElementalDamage);
-
-        //-----parse stamina-----
-        double baseStamina = baseStats.get(RiftCreatureEnums.Stats.STAMINA);
-        double parsedStamina = MathUtil.slopeResult(baseStamina, false, 0, 10, 0, 80);
-        parsedStamina += parsedStamina * 0.1D * (creatureLevel - 1);
-        parsedStamina += parsedStamina * nature.getStatModifier(RiftCreatureEnums.Stats.STAMINA);
-        parsedStamina += Math.floor(individualValues.get(RiftCreatureEnums.Stats.STAMINA) / 2D);
-        parsedStamina = Math.round(parsedStamina);
-        this.stats.put(RiftCreatureEnums.Stats.STAMINA, parsedStamina);
-
-        //-----parse speed-----
-        double baseSpeed = baseStats.get(RiftCreatureEnums.Stats.SPEED);
-        //speed isn't affected by leveling but other factors can manipulate it
-        double parsedSpeed = MathUtil.slopeResult(baseSpeed, false, 1, 5, 20, 100);
-        parsedSpeed += parsedSpeed * nature.getStatModifier(RiftCreatureEnums.Stats.SPEED);
-        parsedSpeed += Math.floor(individualValues.get(RiftCreatureEnums.Stats.SPEED) / 2D);
-        parsedSpeed = Math.round(parsedSpeed);
-        parsedSpeed = MathUtil.slopeResult(parsedSpeed, false, 20, 100, 0.15, 0.35);
-        this.stats.put(RiftCreatureEnums.Stats.SPEED, parsedSpeed);
+    public void parseStats(@NotNull Map<RiftCreatureEnums.Stats, Double> creatureBaseStats) {
+        for (Map.Entry<RiftCreatureEnums.Stats, Double> statBaseEntry : creatureBaseStats.entrySet()) {
+            StatValueHolder valueHolder = this.stats.get(statBaseEntry.getKey());
+            valueHolder.baseValue = statBaseEntry.getValue();
+        }
     }
 
     //also to be run once, but for applying the stats to a creature
-    public void applyStatsToCreature(RiftCreature creature) {
+    public void applyStatsToCreature(@NotNull RiftCreature creature) {
         //-----apply health-----
-        double finalHealth = this.getValueForStat(RiftCreatureEnums.Stats.HEALTH);
+        double finalHealth = this.getValueForStat(RiftCreatureEnums.Stats.HEALTH, creature.getLevel(), creature.getNature(), true);
         creature.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(finalHealth);
         creature.heal((float) finalHealth);
 
         //-----apply melee attack-----
-        creature.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(this.getValueForStat(RiftCreatureEnums.Stats.MELEE_DAMAGE));
+        double finalMeleeAttack = this.getValueForStat(RiftCreatureEnums.Stats.MELEE_DAMAGE, creature.getLevel(), creature.getNature(), true);
+        creature.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(finalMeleeAttack);
 
         //-----apply elemental attack-----
-        creature.getEntityAttribute(RiftCreature.ELEMENTAL_DAMAGE_ATTRIBUTE).setBaseValue(this.getValueForStat(RiftCreatureEnums.Stats.ELEMENTAL_DAMAGE));
+        double finalElementalAttack = this.getValueForStat(RiftCreatureEnums.Stats.ELEMENTAL_DAMAGE, creature.getLevel(), creature.getNature(), true);
+        creature.getEntityAttribute(RiftCreature.ELEMENTAL_DAMAGE_ATTRIBUTE).setBaseValue(finalElementalAttack);
 
         //-----apply stamina-----
-        double finalStamina = this.getValueForStat(RiftCreatureEnums.Stats.STAMINA);
-        System.out.println("finalStamina: "+finalStamina);
+        double finalStamina = this.getValueForStat(RiftCreatureEnums.Stats.STAMINA, creature.getLevel(), creature.getNature(), true);
         creature.getEntityAttribute(RiftCreature.STAMINA_ATTRIBUTE).setBaseValue(finalStamina);
         creature.setStamina((float) finalStamina);
 
         //-----apply speed-----
-        creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(this.getValueForStat(RiftCreatureEnums.Stats.SPEED));
+        double finalSpeed = this.getValueForStat(RiftCreatureEnums.Stats.SPEED, creature.getLevel(), creature.getNature(), true);
+        creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(finalSpeed);
     }
 
-    public double getValueForStat(RiftCreatureEnums.Stats stat) {
-        return this.stats.get(stat);
+    public double getValueForStat(@NotNull RiftCreatureEnums.Stats stat, int creatureLevel, @Nullable RiftCreatureEnums.Nature nature, boolean includeIV) {
+        return this.stats.get(stat).getValue(creatureLevel, nature, includeIV);
     }
 
-    public double getIndividualValueForStat(RiftCreatureEnums.Stats stat) {
-        return this.individualValues.get(stat);
+    public double getValueForStatUnmodified(@NotNull RiftCreatureEnums.Stats stat) {
+        return this.getValueForStat(stat, 0, null, false);
     }
 
+    public double getIndividualValueForStat(@NotNull RiftCreatureEnums.Stats stat) {
+        return this.stats.get(stat).individualValue;
+    }
+
+    @NotNull
     public NBTTagCompound getAsNBT() {
         NBTTagCompound toReturn = new NBTTagCompound();
 
         //store stats
         NBTTagList statTagList = new NBTTagList();
-        for (Map.Entry<RiftCreatureEnums.Stats, Double> entry : this.stats.entrySet()) {
+        for (Map.Entry<RiftCreatureEnums.Stats, StatValueHolder> entry : this.stats.entrySet()) {
             NBTTagCompound toAppend = new NBTTagCompound();
             toAppend.setByte("Stat", (byte) entry.getKey().ordinal());
-            toAppend.setDouble("Value", entry.getValue());
+            toAppend.setDouble("BaseValue", entry.getValue().baseValue);
+            toAppend.setInteger("IndividualValue", entry.getValue().individualValue);
             statTagList.appendTag(toAppend);
         }
         toReturn.setTag("Stats", statTagList);
-
-        //store individual values
-        NBTTagList individualValuesTagList = new NBTTagList();
-        for (Map.Entry<RiftCreatureEnums.Stats, Integer> entry : this.individualValues.entrySet()) {
-            NBTTagCompound toAppend = new NBTTagCompound();
-            toAppend.setByte("Stat", (byte) entry.getKey().ordinal());
-            toAppend.setInteger("Value", entry.getValue());
-            individualValuesTagList.appendTag(toAppend);
-        }
-        toReturn.setTag("IndividualValues", individualValuesTagList);
 
         return toReturn;
     }
 
     public void readFromNBT(@NotNull NBTTagCompound nbtTagCompound) {
-        this.stats.clear();
-        this.individualValues.clear();
-
         NBTTagList statTagList = nbtTagCompound.getTagList("Stats", 10);
         for (int index = 0; index < statTagList.tagCount(); index++) {
             NBTTagCompound statNBT = statTagList.getCompoundTagAt(index);
+
             int statOrdinal = statNBT.getByte("Stat");
             if (statOrdinal < 0 || statOrdinal >= RiftCreatureEnums.Stats.values().length) continue;
-
             RiftCreatureEnums.Stats stat = RiftCreatureEnums.Stats.values()[statOrdinal];
-            this.stats.put(stat, statNBT.getDouble("Value"));
+            double baseValue = statNBT.getDouble("BaseValue");
+            int individualValue = statNBT.getInteger("IndividualValue");
+
+            CreatureStatsStorage.StatValueHolder statValueHolder = this.stats.get(stat);
+            statValueHolder.baseValue = baseValue;
+            statValueHolder.individualValue = individualValue;
+        }
+    }
+
+    private static class StatValueHolder {
+        @NotNull
+        private final RiftCreatureEnums.Stats stat;
+        private double baseValue;
+        private int individualValue;
+
+        private StatValueHolder(@NotNull RiftCreatureEnums.Stats stat) {
+            this.stat = stat;
         }
 
-        NBTTagList individualValuesTagList = nbtTagCompound.getTagList("IndividualValues", 10);
-        for (int index = 0; index < individualValuesTagList.tagCount(); index++) {
-            NBTTagCompound individualValueNBT = individualValuesTagList.getCompoundTagAt(index);
-            int statOrdinal = individualValueNBT.getByte("Stat");
-            if (statOrdinal < 0 || statOrdinal >= RiftCreatureEnums.Stats.values().length) continue;
+        private double getValue(int level, @Nullable RiftCreatureEnums.Nature nature, boolean includeIV) {
+            double toReturn = this.stat.parseBaseValue(this.baseValue);
 
-            RiftCreatureEnums.Stats stat = RiftCreatureEnums.Stats.values()[statOrdinal];
-            this.individualValues.put(stat, individualValueNBT.getInteger("Value"));
+            //level modification
+            if (level > 0 && this.stat.getAffectedByLeveling()) {
+                toReturn += toReturn * 0.1D * (level - 1);
+            }
+
+            //nature modification
+            if (nature != null) toReturn += toReturn * nature.getStatModifier(this.stat);
+
+            //rounding
+            toReturn = Math.round(toReturn);
+
+            //individual value
+            if (includeIV) toReturn += this.individualValue;
+
+            //special case for speed
+            if (this.stat == RiftCreatureEnums.Stats.SPEED) {
+                toReturn = MathUtil.slopeResult(toReturn, false, 20, 100, 0.15, 0.35);
+            }
+
+            return toReturn;
         }
     }
 }

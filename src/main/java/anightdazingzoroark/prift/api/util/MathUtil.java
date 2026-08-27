@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.util;
+package anightdazingzoroark.prift.api.util;
 
 import java.util.Random;
 
@@ -25,7 +25,7 @@ public class MathUtil {
         return slope * (x - xMin) + yMin;
     }
 
-
+    @Deprecated //new java 25 rand features replaces this
     public static int randomInRange(Random random, int min, int max) {
         return random.nextInt(max - min + 1) + min;
     }

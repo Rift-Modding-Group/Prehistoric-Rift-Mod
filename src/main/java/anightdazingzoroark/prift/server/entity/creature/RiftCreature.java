@@ -29,7 +29,7 @@ import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
-import anightdazingzoroark.prift.util.MathUtil;
+import anightdazingzoroark.prift.api.util.MathUtil;
 import anightdazingzoroark.prift.api.util.TriConsumer;
 import anightdazingzoroark.riftlib.core.AnimatableRunValue;
 import anightdazingzoroark.riftlib.core.IAnimatable;
@@ -277,8 +277,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //initialize creature stats
         CreatureStatsStorage creatureStatsStorage = this.getCreatureStats();
-        creatureStatsStorage.initializeIndividualValues();
-        creatureStatsStorage.parseStats(this.creatureType, this.getLevel(), this.getNature());
+        creatureStatsStorage.initializeIndividualValues(this.world.rand);
+        creatureStatsStorage.parseStats(this.creatureType.getStats());
         creatureStatsStorage.applyStatsToCreature(this);
         this.setCreatureStats(creatureStatsStorage);
 
@@ -933,8 +933,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //getting stamina cost excempts special modifiers: only base stamina stat matters
     private float getStaminaCost(float nominalMaximumFraction) {
         if (nominalMaximumFraction <= 0f) return 0f;
-        double baseStamina = this.creatureType.getStats().get(RiftCreatureEnums.Stats.STAMINA);
-        double nominalMaximum = MathUtil.slopeResult(baseStamina, true, 0D, 10D, 0D, 80D);
+        double nominalMaximum = this.getCreatureStats().getValueForStatUnmodified(RiftCreatureEnums.Stats.STAMINA);
         return (float)(nominalMaximum * nominalMaximumFraction);
     }
 
@@ -1176,8 +1175,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //-----for animation names meant for use in model classes-----
     private void createAnimationNames() {
         this.animationNames.clear();
-
-        System.out.println("create anim names!");
 
         //---set normal stuff names---
         this.animationNames.add("animation."+this.creatureType.getName()+".walk");

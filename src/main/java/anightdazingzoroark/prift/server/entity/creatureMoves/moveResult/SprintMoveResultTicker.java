@@ -1,10 +1,8 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves.moveResult;
 
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelperBase;
-import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreaturePathNavigate;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
-import anightdazingzoroark.prift.util.MathUtil;
 import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;

@@ -1,7 +1,10 @@
 package anightdazingzoroark.prift.api.creature;
 
+import anightdazingzoroark.prift.api.util.MathUtil;
 import net.minecraft.client.resources.I18n;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Function;
 
 public class RiftCreatureEnums {
     public enum InventoryGearType {
@@ -47,17 +50,34 @@ public class RiftCreatureEnums {
     //and will be represented as stars on most UIs
     public enum Stats {
         //health is well health
-        HEALTH,
+        HEALTH(base -> MathUtil.slopeResult(base, false, 0, 10, 0, 200), true),
         //melee damage is damage from charge attacks, physical moves, and physical projectiles
-        MELEE_DAMAGE,
+        MELEE_DAMAGE(base -> MathUtil.slopeResult(base, false, 0, 10, 0, 200), true),
         //elemental damage is damage from attacks with elemental properties, like breathing fire or exploding
-        ELEMENTAL_DAMAGE,
+        ELEMENTAL_DAMAGE(base -> MathUtil.slopeResult(base, false, 0, 10, 0, 200), true),
         //stamina limits exertion such as special moves, leaps, and sprinting
-        STAMINA,
+        STAMINA(base -> MathUtil.slopeResult(base, false, 0, 10, 0, 80), true),
         //speed is movement speed, specifically on land. in water and air movement,
         //all creatures have different movement speeds that factor this in and their own individual fly and swim multipliers.
         //its unique among other stats in that it is on a scale of 1-5, has steps of 1, and is unaffected by leveling
-        SPEED;
+        SPEED(base -> MathUtil.slopeResult(base, false, 1, 5, 20, 100), true);
+
+        @NotNull
+        private final Function<Double, Double> baseToParsedValue;
+        private final boolean affectedByLeveling;
+
+        Stats(@NotNull Function<Double, Double> baseToParsedValue, boolean affectedByLeveling) {
+            this.baseToParsedValue = baseToParsedValue;
+            this.affectedByLeveling = affectedByLeveling;
+        }
+
+        public double parseBaseValue(double baseValue) {
+            return this.baseToParsedValue.apply(baseValue);
+        }
+
+        public boolean getAffectedByLeveling() {
+            return this.affectedByLeveling;
+        }
     }
 
     public enum LevelupRate {

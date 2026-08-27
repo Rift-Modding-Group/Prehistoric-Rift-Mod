@@ -4,7 +4,6 @@ import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHe
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder.LeapMoveRuleBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
-import anightdazingzoroark.prift.util.MathUtil;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
