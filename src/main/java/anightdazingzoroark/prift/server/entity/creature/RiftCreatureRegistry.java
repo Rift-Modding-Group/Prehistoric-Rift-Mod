@@ -216,10 +216,12 @@ public class RiftCreatureRegistry {
                         )
                         //---moves---
                         .addMove("bite", CreatureMoveCommon.standardMeleeMove.copy()
+                                .setStaminaCost(0f)
                                 .setBasePower(50)
                                 .setAnimNames("bite")
                         )
                         .addMove("stomp", new CreatureMoveBuilder()
+                                .setStaminaCost(0f)
                                 .setBasePower(30)
                                 .setRequireFindTargetToUse()
                                 .setPhysical()
@@ -230,6 +232,7 @@ public class RiftCreatureRegistry {
                                 .setAnimNames("stomp")
                         )
                         .addMove("power_roar", new CreatureMoveBuilder()
+                                .setStaminaCost(0.15f)
                                 .setBasePower(20)
                                 .setRequireFindTargetToUse()
                                 .setElemental(Element.SONIC, 0)
@@ -245,6 +248,8 @@ public class RiftCreatureRegistry {
                                 .setCooldown(1200)
                         )
                         .addMove("flamethrower", new CreatureMoveBuilder()
+                                .setStaminaCost(0.08f)
+                                .setStaminaDrainPerSecond(0.0125f)
                                 .setBasePower(90)
                                 .setRequireFindTargetToUse()
                                 .setElemental(Element.FIRE, 0)
@@ -306,9 +311,6 @@ public class RiftCreatureRegistry {
                                 .setMoveRule(
                                         new MoveRuleBuilder("flamethrower")
                                                 .setPriorityPredicate((creature, target) -> {
-                                                    System.out.println("creature.atRageThreshold(): "+creature.atRageThreshold());
-                                                    System.out.println("creature.isUnableToPathToTarget(): "+creature.isUnableToPathToTarget());
-
                                                     return (target != null && target.isEntityAlive() && (creature.atRageThreshold() || creature.isUnableToPathToTarget())) ? 0 : -1;
                                                 })
                                                 .setDetectionRule(new CreatureMoveSelectorBuilder.DistanceFromUserDetectionRule(4D, 16D))
@@ -341,14 +343,17 @@ public class RiftCreatureRegistry {
                         .addBlockBreakLevel("axe", 2)
                         //---moves---
                         .addMove("tail_stab", CreatureMoveCommon.standardMeleeMove.copy()
+                                .setStaminaCost(0f)
                                 .setBasePower(50)
                                 .setAnimNames("tail_stab")
                         )
                         .addMove("tail_sweep", CreatureMoveCommon.standardMeleeMove.copy()
+                                .setStaminaCost(0f)
                                 .setBasePower(30)
                                 .setAnimNames("tail_sweep")
                         )
                         .addMove("plate_fling", new CreatureMoveBuilder()
+                                .setStaminaCost(0.12f)
                                 .setPhysical()
                                 .setBasePower(30)
                                 .setRequireFindTargetToUse()

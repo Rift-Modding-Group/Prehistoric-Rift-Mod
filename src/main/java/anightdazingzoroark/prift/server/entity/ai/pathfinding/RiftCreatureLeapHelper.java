@@ -56,7 +56,10 @@ public class RiftCreatureLeapHelper {
     public boolean prepareLeapTo(double x, double y, double z) {
         if (this.isLeaping()) return false;
         CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
-        if (!navigation.getCanLeap() || !this.creature.onGround || this.creature.bodyTouchingLiquid()) {
+        if (!navigation.getCanLeap()
+                || !this.creature.canUseStamina(RiftCreature.LEAP_STAMINA_COST)
+                || !this.creature.onGround
+                || this.creature.bodyTouchingLiquid()) {
             this.resetDelay();
             return false;
         }
@@ -192,6 +195,11 @@ public class RiftCreatureLeapHelper {
         double upwardMotion = this.upwardVelocityForHeight(navigation.getLeapHeight() + LEAP_CLEARANCE);
         if (!this.hasClearLeapPath(upwardMotion)) {
             this.creature.getCreaturePathNavigate().clearPath();
+            this.cancelLeap();
+            return false;
+        }
+        if (!this.creature.canUseStamina(RiftCreature.LEAP_STAMINA_COST)
+                || !this.creature.useStamina(RiftCreature.LEAP_STAMINA_COST)) {
             this.cancelLeap();
             return false;
         }

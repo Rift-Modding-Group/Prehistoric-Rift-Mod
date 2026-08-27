@@ -88,6 +88,12 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
     @Override
     public void onUpdate() {
         EntityLivingBase target = this.creature.getAttackTarget();
+        float requiredStamina = this.selectedMoveBuilder.getStaminaCost() + this.selectedMoveBuilder.getStaminaDrainPerSecond() * RiftCreature.STAMINA_DRAIN_INTERVAL_TICKS / 20f;
+        if (!this.hasExecutedMove && !this.creature.canUseStamina(requiredStamina)) {
+            this.creature.setUseBlockBreak(false);
+            this.creature.getCreaturePathNavigate().clearPath();
+            return;
+        }
 
         //---when move is already being used, stop pathing---
         if (this.hasExecutedMove && !this.creature.getCurrentMove().isEmpty()) {
@@ -169,6 +175,17 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 }
 
                 //execute move
+                this.creature.setCurrentMove(this.selectedMoveName);
+                if (!this.creature.getCurrentMove().equals(this.selectedMoveName)) {
+                    this.creature.setUseBlockBreak(false);
+                    return;
+                }
+                if (!this.creature.useStamina(this.selectedMoveBuilder.getStaminaCost())) {
+                    this.creature.setCurrentMove("");
+                    this.creature.setUseBlockBreak(false);
+                    return;
+                }
+
                 this.hasExecutedMove = true;
                 this.executingBlockBreak = breakableBlocksInFront;
                 if (this.executingBlockBreak) this.creature.snapshotBlockBreakPlan();
@@ -177,7 +194,6 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 this.creature.setUseBlockBreak(this.executingBlockBreak);
                 this.attackTargetHitCountAtMoveStart = this.creature.getAttackTargetHitCount();
                 if (this.selectedMoveUsedDueToFrustration) this.creature.resetFrustration();
-                this.creature.setCurrentMove(this.selectedMoveName);
                 if (this.selectedMoveBuilder.getOnMoveBeginEffect() != null) {
                     this.selectedMoveBuilder.getOnMoveBeginEffect().accept(this.creature, target);
                 }

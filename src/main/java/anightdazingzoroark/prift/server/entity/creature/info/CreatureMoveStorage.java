@@ -117,6 +117,10 @@ public class CreatureMoveStorage {
                 index = -1;
             }
 
+            if (index >= 0 && !creature.canUseStamina(this.getRequiredStaminaFraction(moveRule))) {
+                index = -1;
+            }
+
             this.prioritizedUsableMoves.remove(moveRule);
             //positive indexes can be added
             if (index >= 0) this.prioritizedUsableMoves.add(index, moveRule);
@@ -146,7 +150,8 @@ public class CreatureMoveStorage {
             if (moveBuilder == null
                     || !moveBuilder.getRequireFindTargetToUse()
                     || moveBuilder.getMoveType() == CreatureMoveBuilder.MoveType.STATUS
-                    || !moveBuilder.getMakesContact()) {
+                    || !moveBuilder.getMakesContact()
+                    || !creature.canUseStamina(this.getRequiredStaminaFraction(moveRule))) {
                 continue;
             }
 
@@ -162,6 +167,20 @@ public class CreatureMoveStorage {
         return bestRule != null && creature.getCreaturePathNavigate().shouldUseBlockBreakPath(target)
                 ? bestRule
                 : null;
+    }
+
+    private float getRequiredStaminaFraction(@NotNull CreatureMoveSelectorBuilder.MoveRule moveRule) {
+        return switch (moveRule.moveResult()) {
+            case USE_MOVE -> {
+                CreatureMoveBuilder moveBuilder = this.getUsableMoveBuilder(
+                        this.creaturePhase, moveRule.moveRuleBuilder().getMoveName()
+                );
+                if (moveBuilder == null) yield -1f;
+                yield moveBuilder.getStaminaCost() + moveBuilder.getStaminaDrainPerSecond() * RiftCreature.STAMINA_DRAIN_INTERVAL_TICKS / 20f;
+            }
+            case SPRINT -> RiftCreature.SPRINT_STAMINA_DRAIN_PER_SECOND;
+            case LEAP -> RiftCreature.LEAP_STAMINA_COST;
+        };
     }
 
     @Nullable

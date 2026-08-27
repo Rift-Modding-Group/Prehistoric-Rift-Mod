@@ -27,7 +27,10 @@ public class SprintMoveResultTicker extends AbstractMoveResultTicker {
     public SprintMoveResultTicker(@NotNull RiftCreature creature, @NotNull MoveRuleBuilder moveRuleBuilder) {
         super(creature, moveRuleBuilder);
         EntityLivingBase target = creature.getAttackTarget();
-        this.hasDestination = target != null && target.isEntityAlive() && creature.getCreaturePathNavigate().hasStraightWalkingPathTo(target);
+        this.hasDestination = target != null
+                && target.isEntityAlive()
+                && creature.canUseStamina(RiftCreature.SPRINT_STAMINA_DRAIN_PER_SECOND)
+                && creature.getCreaturePathNavigate().hasStraightWalkingPathTo(target);
         this.destinationX = this.hasDestination ? target.posX : creature.posX;
         this.destinationY = this.hasDestination ? target.posY : creature.posY;
         this.destinationZ = this.hasDestination ? target.posZ : creature.posZ;
@@ -41,7 +44,13 @@ public class SprintMoveResultTicker extends AbstractMoveResultTicker {
 
     @Override
     public boolean canContinueTicking() {
-        return this.hasDestination && !this.hasHitWhileSprinting && this.sprintTicks < MAX_SPRINT_TICKS && !this.hasReachedDestination();
+        float staminaDrain = RiftCreature.SPRINT_STAMINA_DRAIN_PER_SECOND / 20f;
+        return this.hasDestination
+                && this.creature.isSprinting()
+                && this.creature.canUseStamina(staminaDrain)
+                && !this.hasHitWhileSprinting
+                && this.sprintTicks < MAX_SPRINT_TICKS
+                && !this.hasReachedDestination();
     }
 
     @Override

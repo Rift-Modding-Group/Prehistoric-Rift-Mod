@@ -71,7 +71,7 @@ public class CreatureStatsStorage {
         //-----parse stamina-----
         double baseStamina = baseStats.get(RiftCreatureEnums.Stats.STAMINA);
         double parsedStamina = MathUtil.slopeResult(baseStamina, false, 0, 10, 0, 80);
-        parsedStamina += parsedStamina * 0.1 * (parsedStamina - 1);
+        parsedStamina += parsedStamina * 0.1D * (creatureLevel - 1);
         parsedStamina += parsedStamina * nature.getStatModifier(RiftCreatureEnums.Stats.STAMINA);
         parsedStamina += Math.floor(individualValues.get(RiftCreatureEnums.Stats.STAMINA) / 2D);
         parsedStamina = Math.round(parsedStamina);
@@ -103,6 +103,7 @@ public class CreatureStatsStorage {
 
         //-----apply stamina-----
         double finalStamina = this.getValueForStat(RiftCreatureEnums.Stats.STAMINA);
+        System.out.println("finalStamina: "+finalStamina);
         creature.getEntityAttribute(RiftCreature.STAMINA_ATTRIBUTE).setBaseValue(finalStamina);
         creature.setStamina((float) finalStamina);
 

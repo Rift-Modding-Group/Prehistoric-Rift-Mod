@@ -113,11 +113,12 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
             }
             count = this.addWaterSurfaceOptions(pathOptions, count, currentPoint, targetPoint, maxDistance);
         }
-        if (!this.allowLeaps
-                || !this.creature.getNavigationBuilder().getCanLeap()
+        if (!this.allowLeaps || !this.creature.getNavigationBuilder().getCanLeap()
+                || !this.creature.canUseStamina(RiftCreature.LEAP_STAMINA_COST)
                 || this.creature.bodyTouchingLiquid()
                 || currentPoint.nodeType == PathNodeType.WATER
-                || this.isWaterSurfaceNode(currentPoint.x, currentPoint.y, currentPoint.z)) {
+                || this.isWaterSurfaceNode(currentPoint.x, currentPoint.y, currentPoint.z)
+        ) {
             return count;
         }
 

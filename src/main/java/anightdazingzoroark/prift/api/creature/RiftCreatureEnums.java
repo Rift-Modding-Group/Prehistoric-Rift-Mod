@@ -52,7 +52,7 @@ public class RiftCreatureEnums {
         MELEE_DAMAGE,
         //elemental damage is damage from attacks with elemental properties, like breathing fire or exploding
         ELEMENTAL_DAMAGE,
-        //stamina is required to perform actions (movement, using moves) and recharges at the same rate for each creature
+        //stamina limits exertion such as special moves, leaps, and sprinting
         STAMINA,
         //speed is movement speed, specifically on land. in water and air movement,
         //all creatures have different movement speeds that factor this in and their own individual fly and swim multipliers.

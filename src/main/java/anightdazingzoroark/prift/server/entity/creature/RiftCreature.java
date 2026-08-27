@@ -96,8 +96,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @NotNull
     private AnimationDataEntity animData;
 
-    public static final IAttribute ELEMENTAL_DAMAGE_ATTRIBUTE = new RangedAttribute(null, "rift.elementalDamage", 2.0, 0.0, 2048.0);
-    public static final IAttribute STAMINA_ATTRIBUTE = new RangedAttribute(null, "rift.stamina", 2.0, 0.0, 2048.0);
+    public static final IAttribute ELEMENTAL_DAMAGE_ATTRIBUTE = new RangedAttribute(null, "rift.elementalDamage", 2.0, 0.0, 2048.0).setShouldWatch(true);
+    public static final IAttribute STAMINA_ATTRIBUTE = new RangedAttribute(null, "rift.stamina", 2.0, 0.0, 2048.0).setShouldWatch(true);
+    public static final float LEAP_STAMINA_COST = 0.1f;
+    public static final float SPRINT_STAMINA_DRAIN_PER_SECOND = 0.01f;
+    public static final int STAMINA_DRAIN_INTERVAL_TICKS = 5;
 
     private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> NATURE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
@@ -122,6 +125,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private int sprintToAttackCooldown;
     //manages a creature's ability to leap based on whether it attacked before
     private int leapToAttackCooldown;
+    private int staminaDrainTicks;
+    private float pendingStaminaDrain;
+    private int staminaRegenerationDelay;
+    private int staminaRegenerationTicks;
     //when a creature fails to use a move or takes too long to pathfind for melee move,
     //this counts up, which then makes them use a ranged move or their sprint move
     private int frustration;
@@ -350,10 +357,81 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
             creatureMoveStorage.updateUsableMoves(this, this.getAttackTarget());
             creatureMoveStorage.tickCooldowns();
-            if (creatureMoveStorage.shouldCancelCurrentMoveForMissingTarget(this)) {
+            boolean cancelCurrentMoveForMissingTarget = creatureMoveStorage.shouldCancelCurrentMoveForMissingTarget(this);
+            if (cancelCurrentMoveForMissingTarget) {
                 creatureMoveStorage.finishCurrentMoveUse(this);
             }
-            else creatureMoveStorage.tickCurrentMove(this, this.getAttackTarget());
+
+            //---stamina consumption---
+            float staminaDrainPerSecond = this.isSprinting() ? SPRINT_STAMINA_DRAIN_PER_SECOND : 0f;
+            CreatureMoveBuilder currentMoveBuilder = creatureMoveStorage.getMoveBuilderCurrentMove();
+            boolean currentMoveDrainsStamina = currentMoveBuilder != null && currentMoveBuilder.getStaminaDrainPerSecond() > 0f
+                    && creatureMoveStorage.currentMoveMatches(this.getCurrentMove(), ChargeupPhase.RELEASING);
+            if (currentMoveDrainsStamina) staminaDrainPerSecond += currentMoveBuilder.getStaminaDrainPerSecond();
+
+            boolean staminaStoppedCurrentMove = false;
+            if (staminaDrainPerSecond > 0f) {
+                float staminaDrainThisTick = staminaDrainPerSecond / 20f;
+                if (this.canUseStamina(staminaDrainThisTick)) {
+                    this.pendingStaminaDrain += staminaDrainThisTick;
+                    this.staminaDrainTicks++;
+                    if (this.staminaDrainTicks >= STAMINA_DRAIN_INTERVAL_TICKS) {
+                        if (!this.useStamina(this.pendingStaminaDrain)) {
+                            this.setSprinting(false);
+                            if (currentMoveDrainsStamina) {
+                                creatureMoveStorage.finishCurrentMoveUse(this);
+                                staminaStoppedCurrentMove = true;
+                            }
+                        }
+                        this.pendingStaminaDrain = 0f;
+                        this.staminaDrainTicks = 0;
+                    }
+                }
+                else {
+                    if (this.pendingStaminaDrain > 0f) this.useStamina(this.pendingStaminaDrain);
+                    this.pendingStaminaDrain = 0f;
+                    this.staminaDrainTicks = 0;
+                    this.setSprinting(false);
+                    if (currentMoveDrainsStamina) {
+                        creatureMoveStorage.finishCurrentMoveUse(this);
+                        staminaStoppedCurrentMove = true;
+                    }
+                }
+            }
+            else {
+                if (this.pendingStaminaDrain > 0f) this.useStamina(this.pendingStaminaDrain);
+                this.pendingStaminaDrain = 0f;
+                this.staminaDrainTicks = 0;
+            }
+
+            if (!cancelCurrentMoveForMissingTarget && !staminaStoppedCurrentMove) {
+                creatureMoveStorage.tickCurrentMove(this, this.getAttackTarget());
+            }
+
+            //-----stamina regen-----
+            if (this.staminaRegenerationDelay > 0) {
+                this.staminaRegenerationDelay--;
+                this.staminaRegenerationTicks = 0;
+            }
+            //fighting and walking regenerate slowly
+            //safely resting regenerates four times as quickly.
+            else if (this.getStamina() < this.getMaxStamina()) {
+                this.staminaRegenerationTicks++;
+                if (this.staminaRegenerationTicks >= STAMINA_DRAIN_INTERVAL_TICKS) {
+                    boolean resting = this.getAttackTarget() == null
+                            && this.getCurrentMove().isEmpty()
+                            && !this.isSprinting()
+                            && !this.isLeaping()
+                            && this.getCreaturePathNavigate().noPath()
+                            && this.motionX * this.motionX + this.motionZ * this.motionZ < 1E-4D;
+                    float staminaRegenerationPerSecond = resting ? 0.02f : 0.005f;
+                    this.setStamina(this.getStamina() + this.getStaminaCost(
+                            staminaRegenerationPerSecond * STAMINA_DRAIN_INTERVAL_TICKS / 20f
+                    ));
+                    this.staminaRegenerationTicks = 0;
+                }
+            }
+            else this.staminaRegenerationTicks = 0;
 
             //tick sprinting related stuff
             if (this.sprintToAttackCooldown > 0) this.sprintToAttackCooldown--;
@@ -845,6 +923,37 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         creatureMoveStorage.setCurrentMove(name);
     }
 
+    /**
+     * Convert a species-relative stamina fraction into the stamina units used by
+     * this creature. Individual level, nature, and IV bonuses increase capacity
+     * without also increasing action costs.
+     */
+    public float getStaminaCost(float nominalMaximumFraction) {
+        if (!(nominalMaximumFraction > 0f)) return 0f;
+        double baseStamina = this.creatureType.getStats().get(RiftCreatureEnums.Stats.STAMINA);
+        double nominalMaximum = MathUtil.slopeResult(baseStamina, true, 0D, 10D, 0D, 80D);
+        return (float)(nominalMaximum * nominalMaximumFraction);
+    }
+
+    public boolean canUseStamina(float nominalMaximumFraction) {
+        if (!(nominalMaximumFraction >= 0f)) return false;
+        if (nominalMaximumFraction == 0f) return true;
+        float requiredStamina = this.getStaminaCost(nominalMaximumFraction + this.pendingStaminaDrain) + this.getMaxStamina() * 0.1f;
+        return this.getStamina() + 1E-4f >= requiredStamina;
+    }
+
+    public boolean useStamina(float nominalMaximumFraction) {
+        if (!(nominalMaximumFraction >= 0f)) return false;
+        float staminaCost = this.getStaminaCost(nominalMaximumFraction);
+        if (staminaCost <= 0f) return true;
+        if (this.getStamina() + 1E-4f < staminaCost) return false;
+
+        this.setStamina(this.getStamina() - staminaCost);
+        this.staminaRegenerationDelay = 30;
+        this.staminaRegenerationTicks = 0;
+        return true;
+    }
+
     //-----navigation management-----
     @NotNull
     public CreatureNavigationBuilder getNavigationBuilder() {
@@ -975,6 +1084,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void setStamina(float value) {
+        float maximumStamina = Math.max(0f, this.getMaxStamina());
+        if (!(value >= 0f)) value = 0f;
+        else if (value > maximumStamina) value = maximumStamina;
         this.dataManager.set(STAMINA_CURRENT, value);
     }
 

@@ -24,6 +24,8 @@ public class CreatureMoveBuilder {
     //the following can be left alone
     private int movePower;
     private int moveCooldown; //will be overriden by chargeup builder cooldown
+    private float staminaCost;
+    private float staminaDrainPerSecond;
     private CreatureMoveChargeupBuilder moveChargeupBuilder;
     private boolean requireFindTargetToUse;
     private boolean makesContact;
@@ -74,6 +76,41 @@ public class CreatureMoveBuilder {
 
     public int getMoveCooldown() {
         return this.moveCooldown;
+    }
+
+    /**
+     * How much stamina (in percentage of the creature's max stamina) this move uses
+     * */
+    public CreatureMoveBuilder setStaminaCost(float value) {
+        this.checkIfLocked();
+        if (value < 0f || value > 1f) {
+            throw new IllegalArgumentException("Stamina cost must be a percentage between 0 and 1!");
+        }
+
+        this.staminaCost = value;
+        return this;
+    }
+
+    public float getStaminaCost() {
+        return this.staminaCost;
+    }
+
+    /**
+     * How much stamina (in percentage of the creature's max stamina) this move uses
+     * when releasing. Mostly for moves with a chargeup feature.
+     * */
+    public CreatureMoveBuilder setStaminaDrainPerSecond(float value) {
+        this.checkIfLocked();
+        if (value < 0f || value > 1f) {
+            throw new IllegalArgumentException("Stamina drain must be a percentage between 0 and 1!");
+        }
+
+        this.staminaDrainPerSecond = value;
+        return this;
+    }
+
+    public float getStaminaDrainPerSecond() {
+        return this.staminaDrainPerSecond;
     }
 
     /**
@@ -264,6 +301,7 @@ public class CreatureMoveBuilder {
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isValid() {
         if (this.moveType == null) return false;
+        if (this.staminaDrainPerSecond > 0f && this.moveChargeupBuilder == null) return false;
         if (this.moveChargeupBuilder != null) {
             return this.moveChargeupBuilder.getChargeUpThenRelease() || this.moveChargeupBuilder.getChargeUpWhileUse();
         }
@@ -283,6 +321,8 @@ public class CreatureMoveBuilder {
 
         toReturn.movePower = this.movePower;
         toReturn.moveCooldown = this.moveCooldown;
+        toReturn.staminaCost = this.staminaCost;
+        toReturn.staminaDrainPerSecond = this.staminaDrainPerSecond;
         toReturn.moveChargeupBuilder = this.moveChargeupBuilder == null ? null : this.moveChargeupBuilder.copy();
         toReturn.requireFindTargetToUse = this.requireFindTargetToUse;
         toReturn.makesContact = this.makesContact;
