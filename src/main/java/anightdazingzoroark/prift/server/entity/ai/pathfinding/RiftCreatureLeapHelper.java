@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
+import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.WalkNodeProcessor;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -57,7 +58,7 @@ public class RiftCreatureLeapHelper {
         if (this.isLeaping()) return false;
         CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
         if (!navigation.getCanLeap()
-                || !this.creature.canUseStamina(RiftCreature.LEAP_STAMINA_COST)
+                || !this.creature.canUseStamina(MoveResult.LEAP.staminaConsumption())
                 || !this.creature.onGround
                 || this.creature.bodyTouchingLiquid()) {
             this.resetDelay();
@@ -198,8 +199,10 @@ public class RiftCreatureLeapHelper {
             this.cancelLeap();
             return false;
         }
-        if (!this.creature.canUseStamina(RiftCreature.LEAP_STAMINA_COST)
-                || !this.creature.useStamina(RiftCreature.LEAP_STAMINA_COST)) {
+        float leapStaminaConsumption = MoveResult.LEAP.staminaConsumption();
+        if (!this.creature.canUseStamina(leapStaminaConsumption)
+                || !this.creature.useStamina(leapStaminaConsumption)
+        ) {
             this.cancelLeap();
             return false;
         }

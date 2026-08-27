@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.pathfinding.PathNodeType;
@@ -114,7 +115,7 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
             count = this.addWaterSurfaceOptions(pathOptions, count, currentPoint, targetPoint, maxDistance);
         }
         if (!this.allowLeaps || !this.creature.getNavigationBuilder().getCanLeap()
-                || !this.creature.canUseStamina(RiftCreature.LEAP_STAMINA_COST)
+                || !this.creature.canUseStamina(MoveResult.LEAP.staminaConsumption())
                 || this.creature.bodyTouchingLiquid()
                 || currentPoint.nodeType == PathNodeType.WATER
                 || this.isWaterSurfaceNode(currentPoint.x, currentPoint.y, currentPoint.z)

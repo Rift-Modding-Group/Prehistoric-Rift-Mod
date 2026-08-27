@@ -29,7 +29,7 @@ public class SprintMoveResultTicker extends AbstractMoveResultTicker {
         EntityLivingBase target = creature.getAttackTarget();
         this.hasDestination = target != null
                 && target.isEntityAlive()
-                && creature.canUseStamina(RiftCreature.SPRINT_STAMINA_DRAIN_PER_SECOND)
+                && creature.canUseStamina(MoveResult.SPRINT.staminaConsumption())
                 && creature.getCreaturePathNavigate().hasStraightWalkingPathTo(target);
         this.destinationX = this.hasDestination ? target.posX : creature.posX;
         this.destinationY = this.hasDestination ? target.posY : creature.posY;
@@ -44,7 +44,7 @@ public class SprintMoveResultTicker extends AbstractMoveResultTicker {
 
     @Override
     public boolean canContinueTicking() {
-        float staminaDrain = RiftCreature.SPRINT_STAMINA_DRAIN_PER_SECOND / 20f;
+        float staminaDrain = MoveResult.SPRINT.staminaConsumption() / 20f;
         return this.hasDestination
                 && this.creature.isSprinting()
                 && this.creature.canUseStamina(staminaDrain)

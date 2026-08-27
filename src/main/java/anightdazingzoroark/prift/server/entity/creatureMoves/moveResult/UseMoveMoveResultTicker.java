@@ -88,7 +88,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
     @Override
     public void onUpdate() {
         EntityLivingBase target = this.creature.getAttackTarget();
-        float requiredStamina = this.selectedMoveBuilder.getStaminaCost() + this.selectedMoveBuilder.getStaminaDrainPerSecond() * RiftCreature.STAMINA_DRAIN_INTERVAL_TICKS / 20f;
+        float requiredStamina = MoveResult.USE_MOVE.staminaConsumption(this.selectedMoveBuilder);
         if (!this.hasExecutedMove && !this.creature.canUseStamina(requiredStamina)) {
             this.creature.setUseBlockBreak(false);
             this.creature.getCreaturePathNavigate().clearPath();

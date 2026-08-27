@@ -10,6 +10,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilde
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
+import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
 import anightdazingzoroark.prift.util.PriorityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -117,7 +118,8 @@ public class CreatureMoveStorage {
                 index = -1;
             }
 
-            if (index >= 0 && !creature.canUseStamina(this.getRequiredStaminaFraction(moveRule))) {
+            float requiredStaminaFraction = MoveResult.valueOf(moveRule.moveResult().name()).staminaConsumption(moveBuilder);
+            if (index >= 0 && !creature.canUseStamina(requiredStaminaFraction)) {
                 index = -1;
             }
 
@@ -151,7 +153,7 @@ public class CreatureMoveStorage {
                     || !moveBuilder.getRequireFindTargetToUse()
                     || moveBuilder.getMoveType() == CreatureMoveBuilder.MoveType.STATUS
                     || !moveBuilder.getMakesContact()
-                    || !creature.canUseStamina(this.getRequiredStaminaFraction(moveRule))) {
+                    || !creature.canUseStamina(MoveResult.USE_MOVE.staminaConsumption(moveBuilder))) {
                 continue;
             }
 
@@ -165,22 +167,7 @@ public class CreatureMoveStorage {
         }
 
         return bestRule != null && creature.getCreaturePathNavigate().shouldUseBlockBreakPath(target)
-                ? bestRule
-                : null;
-    }
-
-    private float getRequiredStaminaFraction(@NotNull CreatureMoveSelectorBuilder.MoveRule moveRule) {
-        return switch (moveRule.moveResult()) {
-            case USE_MOVE -> {
-                CreatureMoveBuilder moveBuilder = this.getUsableMoveBuilder(
-                        this.creaturePhase, moveRule.moveRuleBuilder().getMoveName()
-                );
-                if (moveBuilder == null) yield -1f;
-                yield moveBuilder.getStaminaCost() + moveBuilder.getStaminaDrainPerSecond() * RiftCreature.STAMINA_DRAIN_INTERVAL_TICKS / 20f;
-            }
-            case SPRINT -> RiftCreature.SPRINT_STAMINA_DRAIN_PER_SECOND;
-            case LEAP -> RiftCreature.LEAP_STAMINA_COST;
-        };
+                ? bestRule : null;
     }
 
     @Nullable
