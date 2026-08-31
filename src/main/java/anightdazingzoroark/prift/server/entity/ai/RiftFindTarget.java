@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.util.RiftUtil;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAITarget;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.math.AxisAlignedBB;
 import org.jetbrains.annotations.NotNull;
@@ -94,6 +95,8 @@ public class RiftFindTarget extends EntityAITarget {
         if (target == null) return false;
 
         if (this.creature.isRelatedToEntity(target)) return false;
+
+        if (target instanceof EntityPlayer player && this.creature.isRememberedPlayerTarget(player)) return true;
 
         if (!this.isAllowedByConfig(target)) return false;
 

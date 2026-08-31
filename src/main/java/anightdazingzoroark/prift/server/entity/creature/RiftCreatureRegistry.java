@@ -321,9 +321,9 @@ public class RiftCreatureRegistry {
                         )
                         //---targeting---
                         .addDefaultTargetWhitelistEntry("animal")
-                        .addDefaultTargetWhitelistEntry("human")
                         .addDefaultTargetWhitelistEntry("herbivoreCreature")
                         .setRetaliateWhenAttacked()
+                        .setRememberPlayerAttacker()
         );
         registerCreatureType(
                 "stegosaurus",
@@ -396,6 +396,7 @@ public class RiftCreatureRegistry {
                         )
                         //---targeting---
                         .setRetaliateWhenAttacked()
+                        .setRememberPlayerAttacker()
         );
         /*
         registerCreatureType(

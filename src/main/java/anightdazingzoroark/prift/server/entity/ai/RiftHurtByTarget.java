@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.ai.EntityAITarget;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +40,11 @@ public class RiftHurtByTarget extends EntityAIHurtByTarget {
     @Override
     public void startExecuting() {
         super.startExecuting();
+
+        //remember target if its a player
+        if (this.creature.getCreatureType().getRememberPlayerAttacker()
+                && this.creature.getRevengeTarget() instanceof EntityPlayer player
+        ) this.creature.rememberPlayerTarget(player);
 
         //broadcast revenge target to herdmates
         if (this.creature.getHerd() != null) this.creature.getHerd().retaliate(this.creature, this.creature.getRevengeTarget());

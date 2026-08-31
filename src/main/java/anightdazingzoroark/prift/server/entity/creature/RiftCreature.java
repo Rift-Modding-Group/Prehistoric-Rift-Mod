@@ -59,6 +59,7 @@ import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -79,12 +80,7 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.lwjglx.util.vector.Quaternion;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * le heart and soul of this mod
@@ -117,6 +113,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //---anim names, for use in model classes---
     @NotNull
     private final List<String> animationNames = new ArrayList<>();
+
+    //---remembered player targets (server only)---
+    @NotNull
+    private final List<UUID> rememberedPlayerTargetUUIDs = new ArrayList<>();
 
     //--server side primitive params and objects--
     //manages a creature's ability to sprint based on whether or not it attacked before
@@ -697,6 +697,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     //-----projectile management-----
+    @Override
     public void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, @NotNull EntityLivingBase target, float velocity, float inaccuracy) {
         CreatureMoveBuilder moveBuilder = this.getCreatureMoves().getUsableMoveBuilder(this.getCurrentMove());
         if (moveBuilder == null) return;
@@ -707,6 +708,21 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         double directionZ = target.posZ - projectile.posZ;
         projectile.shoot(directionX, directionY, directionZ, velocity, inaccuracy);
         this.world.spawnEntity(projectile);
+    }
+
+    //-----remembered player target management-----
+    public void rememberPlayerTarget(@NotNull EntityPlayer player) {
+        if (player.world.isRemote || this.rememberedPlayerTargetUUIDs.contains(player.getUniqueID())) return;
+        this.rememberedPlayerTargetUUIDs.add(player.getUniqueID());
+    }
+
+    @NotNull
+    public List<UUID> getRememberedPlayerTargetUUIDs() {
+        return List.copyOf(this.rememberedPlayerTargetUUIDs);
+    }
+
+    public boolean isRememberedPlayerTarget(@NotNull EntityPlayer player) {
+        return this.rememberedPlayerTargetUUIDs.stream().anyMatch(uuid -> player.getUniqueID().equals(uuid));
     }
 
     //-----sprint to attack management-----
@@ -1125,16 +1141,39 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
+
+        //remembered player targets
+        NBTTagList rememberedPlayerTargetsNBT = new NBTTagList();
+        for (UUID rememberedUUID : this.rememberedPlayerTargetUUIDs) {
+            NBTTagCompound nbtToAdd = new NBTTagCompound();
+            nbtToAdd.setUniqueId("UUID", rememberedUUID);
+            rememberedPlayerTargetsNBT.appendTag(nbtToAdd);
+        }
+        compound.setTag("RememberedPlayerTargets", rememberedPlayerTargetsNBT);
+
+        //other nbt tags
         this.writeCreatureNBT(compound);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
+
+        //remembered player targets
+        NBTTagList rememberedPlayerTargetsNBT = compound.getTagList("RememberedPlayerTargets", 10);
+        for (int i = 0; i < rememberedPlayerTargetsNBT.tagCount(); i++) {
+            NBTTagCompound nbtFromList = rememberedPlayerTargetsNBT.getCompoundTagAt(i);
+            UUID playerUUID = nbtFromList.getUniqueId("UUID");
+            if (!this.rememberedPlayerTargetUUIDs.contains(playerUUID)) this.rememberedPlayerTargetUUIDs.add(playerUUID);
+        }
+
+        //creature types
         if (compound.hasKey("CreatureType")) {
             RiftCreatureBuilder builder = resolveCreatureBuilder(compound.getString("CreatureType"));
             this.changeCreatureType(builder);
         }
+
+        //other nbt tags
         this.readCreatureNBT(compound);
     }
 

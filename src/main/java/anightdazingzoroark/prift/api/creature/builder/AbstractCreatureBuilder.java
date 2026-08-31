@@ -36,6 +36,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private float[] mainHitboxSize = new float[]{1f, 1f};
     private int maxFallHeight = 3;
     private BiFunction<ICreature, EntityLivingBase, Boolean> retaliateWhenAttacked;
+    private boolean rememberPlayerAttacker;
     private boolean isNocturnal;
     private boolean canBeKnockedBack;
     private boolean flopOnLand;
@@ -241,6 +242,19 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     @Nullable
     public BiFunction<ICreature, EntityLivingBase, Boolean> getRetaliateWhenAttacked() {
         return this.retaliateWhenAttacked;
+    }
+
+    /**
+     * If this creature retaliates when attacked, setting this will make it so that when a player
+     * attacks this, they will remember that player and always be hostile to them.
+     * */
+    public T setRememberPlayerAttacker() {
+        this.rememberPlayerAttacker = true;
+        return this.getThis();
+    }
+
+    public boolean getRememberPlayerAttacker() {
+        return this.rememberPlayerAttacker;
     }
 
     /**
