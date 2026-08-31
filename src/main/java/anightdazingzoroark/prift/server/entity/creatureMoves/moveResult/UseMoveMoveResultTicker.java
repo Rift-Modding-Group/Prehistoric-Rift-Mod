@@ -87,10 +87,13 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
     @Override
     public void onUpdate() {
         EntityLivingBase target = this.creature.getAttackTarget();
+        RiftCreaturePathNavigate blockBreakNavigation = this.creature.getCreaturePathNavigate();
+        boolean useBlockBreakPath = target != null && target.isEntityAlive() && this.canUseBlockBreak
+                && blockBreakNavigation.shouldUseBlockBreakPath(target);
         float requiredStamina = MoveResult.USE_MOVE.staminaConsumption(this.selectedMoveBuilder);
-        if (!this.hasExecutedMove && !this.creature.canUseStamina(requiredStamina)) {
+        if (!this.hasExecutedMove && !useBlockBreakPath && !this.creature.canUseStamina(requiredStamina)) {
             this.creature.setUseBlockBreak(false);
-            this.creature.getCreaturePathNavigate().clearPath();
+            blockBreakNavigation.clearPath();
             return;
         }
 
@@ -137,9 +140,6 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
             }
 
             boolean targetWithinRange = this.moveRuleBuilder.getDetectionRule().targetWithinRange(this.creature, target);
-            RiftCreaturePathNavigate blockBreakNavigation = this.creature.getCreaturePathNavigate();
-            boolean useBlockBreakPath = this.canUseBlockBreak
-                    && blockBreakNavigation.shouldUseBlockBreakPath(target);
             this.creature.setUseBlockBreak(useBlockBreakPath);
             if (useBlockBreakPath) {
                 this.creature.setUnableToPathToTarget(false);
@@ -178,7 +178,8 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                     this.creature.setUseBlockBreak(false);
                     return;
                 }
-                if (!this.creature.useStamina(this.selectedMoveBuilder.getStaminaCost())) {
+                //offensive use pays the move cost; clearing planned route obstructions does not
+                if (!breakableBlocksInFront && !this.creature.useStamina(this.selectedMoveBuilder.getStaminaCost())) {
                     this.creature.setCurrentMove("");
                     this.creature.setUseBlockBreak(false);
                     return;

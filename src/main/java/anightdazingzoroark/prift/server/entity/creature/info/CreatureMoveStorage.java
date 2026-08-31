@@ -119,7 +119,8 @@ public class CreatureMoveStorage {
             }
 
             float requiredStaminaFraction = MoveResult.valueOf(moveRule.moveResult().name()).staminaConsumption(moveBuilder);
-            if (index >= 0 && !creature.canUseStamina(requiredStaminaFraction)) {
+            //moves selected to open a planned route are navigation work and remain usable without stamina
+            if (index >= 0 && !moveRule.equals(blockBreakMoveRule) && !creature.canUseStamina(requiredStaminaFraction)) {
                 index = -1;
             }
 
@@ -152,8 +153,7 @@ public class CreatureMoveStorage {
             if (moveBuilder == null
                     || !moveBuilder.getRequireFindTargetToUse()
                     || moveBuilder.getMoveType() == CreatureMoveBuilder.MoveType.STATUS
-                    || !moveBuilder.getMakesContact()
-                    || !creature.canUseStamina(MoveResult.USE_MOVE.staminaConsumption(moveBuilder))) {
+                    || !moveBuilder.getMakesContact()) {
                 continue;
             }
 

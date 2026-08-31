@@ -43,6 +43,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private String[] breathableBlocks = new String[]{"minecraft:air"};
     private boolean isHerder;
     private int maxHerdSize;
+    private boolean canRetreat;
     private int inventorySize = 27;
     private int daysUntilAdult = 1;
     private boolean fallCreatesImpact;
@@ -338,6 +339,20 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     public int getMaxHerdSize() {
         return this.maxHerdSize;
+    }
+
+    /**
+     * Make it so that the creature retreats during combat when its stamina reaches the configured threshold.
+     */
+    public T setCanRetreat() {
+        this.checkIfLocked();
+
+        this.canRetreat = true;
+        return this.getThis();
+    }
+
+    public boolean getCanRetreat() {
+        return this.canRetreat;
     }
 
     /**

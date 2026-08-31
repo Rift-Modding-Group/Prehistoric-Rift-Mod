@@ -56,7 +56,7 @@ public class RiftCreatureEnums {
         //elemental damage is damage from attacks with elemental properties, like breathing fire or exploding
         ELEMENTAL_DAMAGE(base -> MathUtil.slopeResult(base, false, 0, 10, 0, 200), true),
         //stamina limits exertion such as special moves, leaps, and sprinting
-        STAMINA(base -> MathUtil.slopeResult(base, false, 0, 10, 0, 80), true),
+        STAMINA(base -> MathUtil.slopeResult(base, false, 0, 10, 0, 100), true),
         //speed is movement speed, specifically on land. in water and air movement,
         //all creatures have different movement speeds that factor this in and their own individual fly and swim multipliers.
         //its unique among other stats in that it is on a scale of 1-5, has steps of 1, and is unaffected by leveling

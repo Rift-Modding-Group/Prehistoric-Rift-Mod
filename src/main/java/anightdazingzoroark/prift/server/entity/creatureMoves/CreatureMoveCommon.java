@@ -8,7 +8,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 public class CreatureMoveCommon {
     //-----templates for common creature moves-----
     public static final CreatureMoveBuilder standardMeleeMove = new CreatureMoveBuilder()
-            .setStaminaCost(0f)
+            .setStaminaCost(0.02f)
             .setMakesContact()
             .setPhysical()
             .setRequireFindTargetToUse()

@@ -10,6 +10,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.server.entity.ai.RiftFollowHerdLeader;
 import anightdazingzoroark.prift.server.entity.ai.RiftGoToLandFromWater;
 import anightdazingzoroark.prift.server.entity.ai.RiftHurtByTarget;
+import anightdazingzoroark.prift.server.entity.ai.RiftRetreatFromCombat;
 import anightdazingzoroark.prift.server.entity.ai.RiftWander;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
@@ -138,6 +139,15 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Nullable
     private RiftCreatureHerdHelper herdHelper;
 
+    //retreat related stuff
+    private boolean retreating;
+    @Nullable
+    private Vec3d retreatThreatPosition;
+    @Nullable
+    private Vec3d retreatOriginPosition;
+    @Nullable
+    private Vec3d retreatDestination;
+
     //target pathing state
     private boolean unableToPathToTarget;
     private int blockBreakEffectAttemptCount;
@@ -194,6 +204,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         this.trackingFallImpact = false;
         this.lastFallImpactYDelta = 0D;
+        this.retreating = false;
+        this.retreatThreatPosition = null;
+        this.retreatOriginPosition = null;
+        this.retreatDestination = null;
         if (this.creatureType.getFallCreatesImpact()) {
             this.rayMap.put("fallImpactRay", new RiftLibRayBuilder()
                     .setImpactOnly()
@@ -299,6 +313,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         }
         this.targetTasks.addTask(2, new RiftFindTarget(this, true));
 
+        if (this.creatureType.getCanRetreat()) this.tasks.addTask(0, new RiftRetreatFromCombat(this));
         this.tasks.addTask(1, new RiftUnmountedUseMove(this));
         if (!this.creatureType.getNavigation().getCanSwim()) {
             this.tasks.addTask(2, new RiftGoToLandFromWater(this));
@@ -324,6 +339,26 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (!this.world.isRemote) {
             //tick herding
             if (this.herdHelper != null) this.herdHelper.onUpdate();
+
+            //tick combat retreats
+            //for herders, herd followers inherit the leader's retreat state and
+            //keep formation. only the current leader decides when the group relocates.
+            if (this.creatureType.getCanRetreat() && this.canLeadHerdBehavior() && !this.isRetreating()) {
+                EntityLivingBase retreatTarget = this.getAttackTarget();
+                //retreat when out of stamina
+                float staminaAmntForRetreat = (float) Math.floor(this.getMaxStamina() * 0.03f); //ideally at 0, but due to how this works... well
+                if (retreatTarget != null && retreatTarget.isEntityAlive() && !this.isUnableToPathToTarget() && this.getStamina() <= staminaAmntForRetreat) {
+                    Vec3d threatPosition = retreatTarget.getPositionVector();
+                    if (this.herdHelper != null) this.herdHelper.beginRetreat(this, threatPosition);
+                    else {
+                        this.retreating = true;
+                        this.retreatThreatPosition = threatPosition;
+                        this.retreatOriginPosition = this.getPositionVector();
+                        this.retreatDestination = null;
+                    }
+                    this.setAttackTarget(null);
+                }
+            }
 
             //keep the pose active for the full airborne portion even if pathing
             //relinquishes its leap action before the creature reaches the ground
@@ -366,7 +401,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 staminaConsumptionInterval = MoveResult.SPRINT.staminaConsumptionInterval();
             }
             CreatureMoveBuilder currentMoveBuilder = creatureMoveStorage.getMoveBuilderCurrentMove();
-            boolean currentMoveDrainsStamina = currentMoveBuilder != null && currentMoveBuilder.getStaminaDrainPerSecond() > 0f
+            boolean currentMoveDrainsStamina = currentMoveBuilder != null && !this.getUseBlockBreak()
+                    && currentMoveBuilder.getStaminaDrainPerSecond() > 0f
                     && creatureMoveStorage.currentMoveMatches(this.getCurrentMove(), ChargeupPhase.RELEASING);
             if (currentMoveDrainsStamina) {
                 staminaDrainPerSecond += currentMoveBuilder.getStaminaDrainPerSecond();
@@ -420,15 +456,13 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 this.staminaRegenerationDelay--;
                 this.staminaRegenerationTicks = 0;
             }
-            //fighting and walking regenerate slowly
-            //safely resting regenerates four times as quickly.
+            //fighting and exertion slow down regen
             else if (this.getStamina() < this.getMaxStamina()) {
                 this.staminaRegenerationTicks++;
                 if (this.staminaRegenerationTicks >= MoveResult.USE_MOVE.staminaConsumptionInterval()) {
-                    boolean resting = this.getAttackTarget() == null && this.getCurrentMove().isEmpty()
-                            && !this.isSprinting() && !this.isLeaping() && this.getCreaturePathNavigate().noPath()
-                            && this.motionX * this.motionX + this.motionZ * this.motionZ < 1E-4D;
-                    float staminaRegenerationPerSecond = resting ? 0.02f : 0.005f;
+                    boolean rapidlyRegenerating = this.getAttackTarget() == null && this.getCurrentMove().isEmpty()
+                            && !this.isSprinting() && !this.isLeaping();
+                    float staminaRegenerationPerSecond = rapidlyRegenerating ? 0.02f : 0.005f;
                     float staminaToAdd = this.getStaminaCost(staminaRegenerationPerSecond * MoveResult.USE_MOVE.staminaConsumptionInterval() / 20f);
                     this.setStamina(this.getStamina() + staminaToAdd);
                     this.staminaRegenerationTicks = 0;
@@ -599,6 +633,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void setAttackTarget(@Nullable EntityLivingBase target) {
+        if (target != null && this.isRetreating()) target = null;
         boolean targetChanged = target != this.getAttackTarget();
         if (targetChanged) this.unableToPathToTarget = false;
         super.setAttackTarget(target);
@@ -676,6 +711,51 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Nullable
     public RiftCreatureHerdHelper getHerd() {
         return this.herdHelper;
+    }
+
+    //-----combat retreat management-----
+    public boolean isRetreating() {
+        return this.herdHelper == null ? this.retreating : this.herdHelper.isRetreating();
+    }
+
+    @Nullable
+    public Vec3d getRetreatThreatPosition() {
+        return this.herdHelper == null ? this.retreatThreatPosition : this.herdHelper.getRetreatThreatPosition();
+    }
+
+    @Nullable
+    public Vec3d getRetreatOriginPosition() {
+        return this.herdHelper == null ? this.retreatOriginPosition : this.herdHelper.getRetreatOriginPosition();
+    }
+
+    @Nullable
+    public Vec3d getRetreatDestination() {
+        return this.herdHelper == null ? this.retreatDestination : this.herdHelper.getRetreatDestination();
+    }
+
+    public void setRetreatDestination(@NotNull Vec3d destination) {
+        if (this.herdHelper != null) this.herdHelper.setRetreatDestination(this, destination);
+        else if (this.retreating) this.retreatDestination = destination;
+    }
+
+    public void clearRetreatDestination() {
+        if (this.herdHelper != null) this.herdHelper.clearRetreatDestination(this);
+        else if (this.retreating) this.retreatDestination = null;
+    }
+
+    public boolean isRetreatGroupAssembled() {
+        return this.herdHelper == null || this.herdHelper.isAssembledForRetreat();
+    }
+
+    public void finishRetreat() {
+        if (this.herdHelper != null) this.herdHelper.finishRetreat(this);
+        else if (this.retreating) {
+            this.retreating = false;
+            this.retreatThreatPosition = null;
+            this.retreatOriginPosition = null;
+            this.retreatDestination = null;
+            this.setAttackTarget(null);
+        }
     }
 
     //-----properties management-----
@@ -954,7 +1034,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     public boolean canUseStamina(float nominalMaximumFraction) {
         if (nominalMaximumFraction < 0f) return false;
         if (nominalMaximumFraction == 0f) return true;
-        float requiredStamina = this.getStaminaCost(nominalMaximumFraction + this.pendingStaminaDrain) + this.getMaxStamina() * 0.1f;
+        float requiredStamina = this.getStaminaCost(nominalMaximumFraction + this.pendingStaminaDrain);
         return this.getStamina() + 1E-4f >= requiredStamina;
     }
 
@@ -1100,10 +1180,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void setStamina(float value) {
-        float maximumStamina = Math.max(0f, this.getMaxStamina());
-        if (!(value >= 0f)) value = 0f;
-        else if (value > maximumStamina) value = maximumStamina;
-        this.dataManager.set(STAMINA_CURRENT, value);
+        this.dataManager.set(STAMINA_CURRENT, Math.clamp(value, 0f, this.getMaxStamina()));
     }
 
     @Override

@@ -20,6 +20,7 @@ public class RiftCreatureHerdHelper {
     private static final double HERD_DISCOVERY_RANGE = 12D;
     private static final double MAXIMUM_JOIN_DISTANCE_SQ = HERD_DISCOVERY_RANGE * HERD_DISCOVERY_RANGE;
     private static final double MAXIMUM_LEADER_DISTANCE_SQ = 16D * 16D;
+    private static final double MAXIMUM_RETREAT_LEADER_DISTANCE_SQ = 32D * 32D;
     private static final double FORMATION_DIRECTION_UPDATE_DISTANCE_SQ = 1D;
     private static final double MINIMUM_FORMATION_SPACING = 2D;
     private static final double FORMATION_MEMBER_PADDING = 2D;
@@ -44,7 +45,8 @@ public class RiftCreatureHerdHelper {
         for (RiftCreature member : memberSnapshot) {
             if (member == updatingState.leader) continue;
 
-            double maximumLeaderDistanceSq = MAXIMUM_LEADER_DISTANCE_SQ;
+            double maximumLeaderDistanceSq = updatingState.retreating
+                    ? MAXIMUM_RETREAT_LEADER_DISTANCE_SQ : MAXIMUM_LEADER_DISTANCE_SQ;
             RiftCreatureHerdHelper memberHerd = member.getHerd();
             Vec3d followPosition = memberHerd == null ? null : memberHerd.getFollowPosition(member);
             if (followPosition != null) {
@@ -122,6 +124,7 @@ public class RiftCreatureHerdHelper {
         if (firstState == secondState || firstState.leader == null || secondState.leader == null
                 || firstState.world != secondState.world
                 || firstState.creatureType != secondState.creatureType
+                || firstState.retreating || secondState.retreating
         ) {
             return;
         }
@@ -171,6 +174,68 @@ public class RiftCreatureHerdHelper {
 
     public int getSize() {
         return this.state.members.size();
+    }
+
+    public boolean isRetreating() {
+        return this.state.retreating;
+    }
+
+    @Nullable
+    public Vec3d getRetreatThreatPosition() {
+        return this.state.retreatThreatPosition;
+    }
+
+    @Nullable
+    public Vec3d getRetreatOriginPosition() {
+        return this.state.retreatOriginPosition;
+    }
+
+    @Nullable
+    public Vec3d getRetreatDestination() {
+        return this.state.retreatDestination;
+    }
+
+    public void beginRetreat(@NotNull RiftCreature source, @NotNull Vec3d threatPosition) {
+        HerdState currentState = this.state;
+        if (source != currentState.leader || !currentState.members.contains(source) || currentState.retreating) return;
+
+        currentState.retreating = true;
+        currentState.retreatThreatPosition = threatPosition;
+        currentState.retreatOriginPosition = source.getPositionVector();
+        currentState.retreatDestination = null;
+        this.setAllAttackTargets(currentState, null);
+    }
+
+    public void setRetreatDestination(@NotNull RiftCreature source, @NotNull Vec3d destination) {
+        HerdState currentState = this.state;
+        if (source == currentState.leader && currentState.retreating) currentState.retreatDestination = destination;
+    }
+
+    public void clearRetreatDestination(@NotNull RiftCreature source) {
+        HerdState currentState = this.state;
+        if (source == currentState.leader && currentState.retreating) currentState.retreatDestination = null;
+    }
+
+    public void finishRetreat(@NotNull RiftCreature source) {
+        HerdState currentState = this.state;
+        if (source != currentState.leader || !currentState.retreating) return;
+
+        currentState.retreating = false;
+        currentState.retreatThreatPosition = null;
+        currentState.retreatOriginPosition = null;
+        currentState.retreatDestination = null;
+        this.setAllAttackTargets(currentState, null);
+    }
+
+    public boolean isAssembledForRetreat() {
+        HerdState currentState = this.state;
+        RiftCreature currentLeader = currentState.leader;
+        if (currentLeader == null) return true;
+
+        for (RiftCreature member : currentState.members) {
+            if (member != currentLeader && member.getDistanceSq(currentLeader) > MAXIMUM_LEADER_DISTANCE_SQ) return false;
+        }
+        return true;
     }
 
     /**
@@ -319,7 +384,7 @@ public class RiftCreatureHerdHelper {
     }
 
     private void setAllAttackTargets(@NotNull HerdState targetState, @Nullable EntityLivingBase target) {
-        EntityLivingBase resolvedTarget = target != null && target.world == targetState.world
+        EntityLivingBase resolvedTarget = !targetState.retreating && target != null && target.world == targetState.world
                 && target.isAddedToWorld() && target.isEntityAlive()
                 && (!(target instanceof RiftCreature targetCreature) || !targetState.members.contains(targetCreature))
                 ? target : null;
@@ -348,6 +413,13 @@ public class RiftCreatureHerdHelper {
         private double formationYaw;
         private long lastDiscoveryUpdateWorldTime = Long.MIN_VALUE;
         private boolean settingAttackTargets;
+        private boolean retreating;
+        @Nullable
+        private Vec3d retreatThreatPosition;
+        @Nullable
+        private Vec3d retreatOriginPosition;
+        @Nullable
+        private Vec3d retreatDestination;
 
         private HerdState(@NotNull RiftCreature initialMember) {
             this.world = initialMember.world;
