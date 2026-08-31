@@ -36,7 +36,6 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
     private double lastTargetZ;
     private int directTargetMoveStallTicks;
     private double lastDirectTargetDistanceSq;
-    private boolean holdCloseTargetStrafe;
     private int closeTargetStrafeTicks;
     private int pathingFrustrationTicks;
 
@@ -119,7 +118,6 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
             }
             else this.preserveLastLookDirection();
             this.directTargetMoveStallTicks = 0;
-            this.holdCloseTargetStrafe = false;
             this.closeTargetStrafeTicks = 0;
             this.pathingFrustrationTicks = 0;
             this.creature.getCreaturePathNavigate().clearPath();
@@ -200,7 +198,6 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
 
                 //stop pathing
                 this.directTargetMoveStallTicks = 0;
-                this.holdCloseTargetStrafe = false;
                 this.closeTargetStrafeTicks = 0;
                 this.pathingFrustrationTicks = 0;
                 this.creature.getCreaturePathNavigate().clearPath();
@@ -209,7 +206,6 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
             else if (dontPathToTarget) {
                 this.repathCooldown = 0;
                 this.directTargetMoveStallTicks = 0;
-                this.holdCloseTargetStrafe = false;
                 this.closeTargetStrafeTicks = 0;
                 this.pathingFrustrationTicks = 0;
                 this.creature.getCreaturePathNavigate().clearPath();
@@ -235,7 +231,6 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 if (useBlockBreakPath) {
                     this.repathCooldown = 0;
                     this.directTargetMoveStallTicks = 0;
-                    this.holdCloseTargetStrafe = false;
                     this.closeTargetStrafeTicks = 0;
                     if (!blockBreakNavigation.tryMoveAlongBlockBreakApproach(1D)) {
                         creatureNavigation.clearPath();
@@ -245,17 +240,10 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                     return;
                 }
 
-                //---when held strafe should stop due to target movement---
-                if (this.holdCloseTargetStrafe && this.hasLastTargetPos && target.getDistanceSq(this.lastTargetX, this.lastTargetY, this.lastTargetZ) > TARGET_MOVED_REPATH_DISTANCE_SQ * 4D) {
-                    this.directTargetMoveStallTicks = 0;
-                    this.holdCloseTargetStrafe = false;
-                    this.closeTargetStrafeTicks = 0;
-                }
-
                 //---when creature is strafing away from close target---
-                if (this.closeTargetStrafeTicks > 0 || this.holdCloseTargetStrafe) {
+                if (this.closeTargetStrafeTicks > 0) {
                     //tick down temporary strafe
-                    if (this.closeTargetStrafeTicks > 0) this.closeTargetStrafeTicks--;
+                    this.closeTargetStrafeTicks--;
 
                     //face close target
                     double targetX = target.posX - this.creature.posX;
@@ -268,7 +256,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                     creatureNavigation.clearPath();
                     this.directTargetMoveStallTicks = 0;
                     this.creature.getMoveHelper().strafe(-1f, 0f);
-                    if (!this.holdCloseTargetStrafe) this.rememberTargetPos(target);
+                    this.rememberTargetPos(target);
                 }
                 //---normal pathing---
                 else {
@@ -282,7 +270,6 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                         //when pathing succeeds, reset direct movement fallback
                         if (creatureNavigation.tryMoveToEntityLiving(target, 1D)) {
                             this.directTargetMoveStallTicks = 0;
-                            this.holdCloseTargetStrafe = false;
                         }
                     }
 
@@ -300,7 +287,6 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                         //when direct movement stalls, strafe away instead
                         if (this.directTargetMoveStallTicks >= DIRECT_TARGET_MOVE_STALL_TICKS) {
                             this.directTargetMoveStallTicks = 0;
-                            this.holdCloseTargetStrafe = true;
                             this.closeTargetStrafeTicks = CLOSE_TARGET_STRAFE_TICKS;
                             this.rememberTargetPos(target);
                         }
