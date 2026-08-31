@@ -45,6 +45,7 @@ public class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUs
     public void applyEntityCollision(Entity entityIn) {
         if (entityIn == null || entityIn instanceof IProjectile || entityIn instanceof EntityFireball
                 || entityIn.equals(this) || this.isRidingSameEntity(entityIn) || entityIn.noClip
+                || (this.getCreatureMoveHelper().isLeaping() && entityIn.onGround)
         ) return;
 
         double dispX = entityIn.posX - this.posX;
