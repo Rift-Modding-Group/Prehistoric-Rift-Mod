@@ -2,36 +2,26 @@ package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.ai.EntityMoveHelper;
-import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
+    @NotNull
     protected final RiftCreature creature;
+    @NotNull
+    protected final RiftCreatureLeapHelper leapHelper;
+    @NotNull
     protected CreatureAction creatureAction = CreatureAction.WAIT;
 
-    //for angle based moveTo
-    protected Float angleToMoveTo; //class version of float is used for angle in angle-based moveTo
-    protected boolean moveUpwards;
-    protected VerticalMoveOption verticalMoveOption = VerticalMoveOption.NONE;
-
-    //charge related stuff
-    public double oldChargeDistNoY = Double.MAX_VALUE;
-    public double oldChargeDistWithY = Double.MAX_VALUE;
-
-    //leap related stuff
-    protected double maxLeapHeight;
-    protected Vec3d leapStartPoint;
-    protected Vec3d leapMidPoint; //this should contain the coordinates for the leap midpoint for the creature
-    protected int leapTime;
-
-    public RiftCreatureMoveHelperBase(RiftCreature creature) {
+    public RiftCreatureMoveHelperBase(@NotNull RiftCreature creature) {
         super(creature);
         this.creature = creature;
+        this.leapHelper = new RiftCreatureLeapHelper(this, creature);
     }
 
-    //reminder to getThis that this is meant to be executed every tick
+    //-----for setting actions-----
     @Override
     public void setMoveTo(double x, double y, double z, double speedIn) {
-        this.angleToMoveTo = null;
+        if (this.isLeaping()) return;
         this.posX = x;
         this.posY = y;
         this.posZ = z;
@@ -39,25 +29,8 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
         this.creatureAction = CreatureAction.MOVE_TO;
     }
 
-    public void setMoveTo(float angle, VerticalMoveOption verticalMoveOption, double speed) {
-        this.angleToMoveTo = angle;
-        this.verticalMoveOption = verticalMoveOption;
-        this.speed = speed;
-        this.creatureAction = CreatureAction.MOVE_TO;
-    }
-
-    @Override
-    public void strafe(float forward, float strafe) {
-        this.creatureAction = CreatureAction.STRAFE;
-        this.moveForward = forward;
-        this.moveStrafe = strafe;
-        this.speed = 0.25D;
-    }
-
-    //this is meant to be executed every tick too
     public void setChargeTo(double x, double y, double z, double speedIn) {
-        if (this.creature.stopChargeFlag) return;
-
+        if (this.isLeaping()) return;
         this.posX = x;
         this.posY = y;
         this.posZ = z;
@@ -65,47 +38,97 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
         this.creatureAction = CreatureAction.CHARGE;
     }
 
-    public void setLeapTo(double x, double y, double z, double maxLeapHeight) {
-        if (this.creature.stopLeapFlag) return;
-
+    public boolean setLeapTo(double x, double y, double z) {
+        if (!this.leapHelper.prepareLeapTo(x, y, z)) return false;
         this.posX = x;
         this.posY = y;
         this.posZ = z;
-        this.speed = 8D; //leap speed is always gonna be fixed to 8,
-        this.maxLeapHeight = maxLeapHeight;
         this.creatureAction = CreatureAction.LEAP;
+        this.creature.setUnableToPathToTarget(false);
+        return true;
+    }
 
-        //create leap startpoint if its null
-        if (this.leapStartPoint == null) this.leapStartPoint = this.creature.getPositionVector();
+    @Override
+    public void strafe(float forward, float strafe) {
+        if (this.isLeaping()) return;
+        this.creatureAction = CreatureAction.STRAFE;
+        this.moveForward = forward;
+        this.moveStrafe = strafe;
+        this.speed = 0.25f;
+    }
 
-        //create leap midpoint if its null
-        if (this.leapMidPoint == null) {
-            this.leapMidPoint = new Vec3d(
-                    (x - this.creature.posX) / 2 + this.creature.posX,
-                    this.creature.posY + maxLeapHeight,
-                    (z - this.creature.posZ) / 2 + this.creature.posZ
-            );
+    //-----for describing what this move helper will do for each CreatureAction-----
+    protected abstract void onWait();
+
+    protected abstract void onMoveTo();
+
+    protected abstract void onStrafe();
+
+    protected abstract void onJumping();
+
+    protected abstract void onCharge();
+
+    protected abstract void onLeap();
+
+    @Override
+    public final void onUpdateMoveHelper() {
+        if (this.creatureAction != CreatureAction.LEAP && !this.creature.getCurrentMove().isEmpty()) {
+            this.creatureAction = CreatureAction.WAIT;
+        }
+
+        switch (this.creatureAction) {
+            case WAIT -> this.onWait();
+            case MOVE_TO -> this.onMoveTo();
+            case STRAFE -> this.onStrafe();
+            case JUMPING -> this.onJumping();
+            case CHARGE -> this.onCharge();
+            case LEAP -> this.onLeap();
         }
     }
 
-    public void eraseLeapInformation() {
-        this.leapStartPoint = null;
-        this.leapMidPoint = null;
-        this.leapTime = 0;
+    //-----everything else-----
+    @Override
+    public boolean isUpdating() {
+        return this.creatureAction == CreatureAction.MOVE_TO
+                || this.creatureAction == CreatureAction.CHARGE
+                || this.creatureAction == CreatureAction.LEAP;
+    }
+
+    @Override
+    public void read(EntityMoveHelper that) {
+        this.posX = that.getX();
+        this.posY = that.getY();
+        this.posZ = that.getZ();
+        this.speed = Math.max(that.getSpeed(), 1);
+        this.moveForward = that.moveForward;
+        this.moveStrafe = that.moveStrafe;
+        if (that instanceof RiftCreatureMoveHelperBase helper) {
+            this.creatureAction = helper.creatureAction;
+            this.leapHelper.read(helper.leapHelper);
+        }
+    }
+
+    public boolean isLeaping() {
+        return this.leapHelper.isLeaping();
+    }
+
+    @NotNull
+    public RiftCreatureLeapHelper getLeapHelper() {
+        return this.leapHelper;
+    }
+
+    protected void stopWalkingControls() {
+        this.creature.setAIMoveSpeed(0f);
+        this.creature.setMoveForward(0f);
+        this.creature.setMoveStrafing(0f);
     }
 
     public enum CreatureAction {
         WAIT,
         MOVE_TO,
         STRAFE,
-        JUMP, //classic jump upwards to move upwards
+        JUMPING, //classic jump upwards to move upwards. is strictly vertical movement
         CHARGE, //charge
-        LEAP;
-    }
-
-    public enum VerticalMoveOption {
-        UPWARDS,
-        DOWNWARDS,
-        NONE
+        LEAP; //jumping with verticality and horizontality
     }
 }

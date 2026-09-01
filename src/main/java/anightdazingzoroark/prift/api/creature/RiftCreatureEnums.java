@@ -1,0 +1,175 @@
+package anightdazingzoroark.prift.api.creature;
+
+import anightdazingzoroark.prift.api.util.MathUtil;
+import net.minecraft.client.resources.I18n;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Function;
+
+public class RiftCreatureEnums {
+    public enum InventoryGearType {
+        SADDLE,
+        LARGE_WEAPON
+    }
+
+    public enum CreatureCategory {
+        ALL,
+        DINOSAUR,
+        MAMMAL,
+        REPTILE,
+        BIRD,
+        FISH,
+        INVERTEBRATE;
+
+        public String getTranslatedName(boolean plural) {
+            String pluralAdd = (plural && !this.equals(ALL)) ? "_plural" : "";
+            return I18n.format("type.creature."+this.name().toLowerCase()+pluralAdd);
+        }
+    }
+
+    public enum CreatureDiet {
+        HERBIVORE,
+        FUNGIVORE,
+        CARNIVORE,
+        PISCIVORE,
+        INSECTIVORE,
+        OMNIVORE,
+        SAXUMAVORE;
+
+        public String getTranslatedName() {
+            return I18n.format("diet.creature."+this.name().toLowerCase());
+        }
+    }
+
+    public enum TamingMethod {
+        FEED,
+        WEAKEN_THEN_FEED;
+    }
+
+    //Stats are to be on a scale of 0.5-10 with steps of 0.5
+    //and will be represented as stars on most UIs
+    public enum Stats {
+        //health is well health
+        HEALTH(base -> MathUtil.slopeResult(base, false, 0, 10, 0, 200), true),
+        //melee damage is damage from charge attacks, physical moves, and physical projectiles
+        MELEE_DAMAGE(base -> MathUtil.slopeResult(base, false, 0, 10, 0, 200), true),
+        //elemental damage is damage from attacks with elemental properties, like breathing fire or exploding
+        ELEMENTAL_DAMAGE(base -> MathUtil.slopeResult(base, false, 0, 10, 0, 200), true),
+        //stamina limits exertion such as special moves, leaps, and sprinting
+        STAMINA(base -> MathUtil.slopeResult(base, false, 0, 10, 150, 400), true),
+        //speed is movement speed, specifically on land. in water and air movement,
+        //all creatures have different movement speeds that factor this in and their own individual fly and swim multipliers.
+        //its unique among other stats in that it is on a scale of 1-5, has steps of 1, and is unaffected by leveling
+        SPEED(base -> MathUtil.slopeResult(base, false, 1, 5, 20, 100), true);
+
+        @NotNull
+        private final Function<Double, Double> baseToParsedValue;
+        private final boolean affectedByLeveling;
+
+        Stats(@NotNull Function<Double, Double> baseToParsedValue, boolean affectedByLeveling) {
+            this.baseToParsedValue = baseToParsedValue;
+            this.affectedByLeveling = affectedByLeveling;
+        }
+
+        public double parseBaseValue(double baseValue) {
+            return this.baseToParsedValue.apply(baseValue);
+        }
+
+        public boolean getAffectedByLeveling() {
+            return this.affectedByLeveling;
+        }
+    }
+
+    public enum LevelupRate {
+        VERY_SLOW(1.6D),
+        SLOW(1.4D),
+        NORMAL(1.2D),
+        FAST(1D),
+        VERY_FAST(0.8D);
+
+        private final double rate;
+
+        LevelupRate(double rate) {
+            this.rate = rate;
+        }
+
+        public double getRate() {
+            return this.rate;
+        }
+
+        public String getTranslatedName() {
+            return I18n.format("levelup_rate.creature."+this.name().toLowerCase());
+        }
+    }
+
+    //just like how it works in pokemon, some creatures have a nature that
+    //boosts one stat but lowers another, and some natures do nothing
+    //soon this will be used to affect creature ai when tamed or wild
+    public enum Nature {
+        STEADY(Stats.HEALTH, Stats.HEALTH),
+        COMPOSED(Stats.MELEE_DAMAGE, Stats.MELEE_DAMAGE),
+        TEMPERATE(Stats.ELEMENTAL_DAMAGE, Stats.ELEMENTAL_DAMAGE),
+        PATIENT(Stats.STAMINA, Stats.STAMINA),
+        ADAPTABLE(Stats.SPEED, Stats.SPEED),
+
+        GUARDED(Stats.HEALTH, Stats.MELEE_DAMAGE),
+        GROUNDED(Stats.HEALTH, Stats.ELEMENTAL_DAMAGE),
+        STOUT(Stats.HEALTH, Stats.STAMINA),
+        CAREFUL(Stats.HEALTH, Stats.SPEED),
+
+        RECKLESS(Stats.MELEE_DAMAGE, Stats.HEALTH),
+        BLUNT(Stats.MELEE_DAMAGE, Stats.ELEMENTAL_DAMAGE),
+        IMPETUOUS(Stats.MELEE_DAMAGE, Stats.STAMINA),
+        BRUTISH(Stats.MELEE_DAMAGE, Stats.SPEED),
+
+        FERVID(Stats.ELEMENTAL_DAMAGE, Stats.HEALTH),
+        SPIRITUAL(Stats.ELEMENTAL_DAMAGE, Stats.MELEE_DAMAGE),
+        INTENSE(Stats.ELEMENTAL_DAMAGE, Stats.STAMINA),
+        FOCUSED(Stats.ELEMENTAL_DAMAGE, Stats.SPEED),
+
+        TENACIOUS(Stats.STAMINA, Stats.HEALTH),
+        DISCIPLINED(Stats.STAMINA, Stats.MELEE_DAMAGE),
+        RESERVED(Stats.STAMINA, Stats.ELEMENTAL_DAMAGE),
+        CALM(Stats.STAMINA, Stats.SPEED),
+
+        SKITTISH(Stats.SPEED, Stats.HEALTH),
+        NIMBLE(Stats.SPEED, Stats.MELEE_DAMAGE),
+        RESTLESS(Stats.SPEED, Stats.ELEMENTAL_DAMAGE),
+        HASTY(Stats.SPEED, Stats.STAMINA);
+
+        @NotNull
+        private final Stats statToBoost;
+        @NotNull
+        private final Stats statToWeaken;
+
+        Nature(@NotNull Stats statToBoost, @NotNull Stats statToWeaken) {
+            this.statToBoost = statToBoost;
+            this.statToWeaken = statToWeaken;
+        }
+
+        @NotNull
+        public Stats getStatToBoost() {
+            return this.statToBoost;
+        }
+
+        @NotNull
+        public Stats getStatToWeaken() {
+            return this.statToWeaken;
+        }
+
+        public boolean isNeutral() {
+            return this.statToBoost == this.statToWeaken;
+        }
+
+        public double getStatModifier(@NotNull Stats stat) {
+            if (this.isNeutral()) return 0D;
+            else if (stat == this.statToBoost) return 0.20D;
+            else if (stat == this.statToWeaken) return -0.20D;
+            return 0D;
+        }
+
+        public String getTranslatedName() {
+            return I18n.format("nature.creature."+this.name().toLowerCase());
+        }
+    }
+}

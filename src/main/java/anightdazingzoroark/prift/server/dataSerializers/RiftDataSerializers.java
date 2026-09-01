@@ -1,49 +1,18 @@
 package anightdazingzoroark.prift.server.dataSerializers;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.helper.FixedSizeList;
-import anightdazingzoroark.prift.helper.RiftUtil;
 import anightdazingzoroark.prift.server.ServerProxy;
-import anightdazingzoroark.prift.server.entity.CreatureAcquisitionInfo;
-import anightdazingzoroark.prift.server.entity.MoveListUtil;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMove;
-import anightdazingzoroark.prift.server.entity.creaturenew.CreatureMoveStorage;
-import anightdazingzoroark.prift.server.entity.creaturenew.CreatureStatsStorage;
-import anightdazingzoroark.prift.server.entity.creaturenew.info.RiftCreatureEnums;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureAcquisitionInfo;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializer;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.registries.DataSerializerEntry;
 
-import java.io.IOException;
-import java.util.*;
-
 public class RiftDataSerializers {
-    @Deprecated
-    public static final DataSerializer<List<CreatureMove>> LIST_CREATURE_MOVE = new DataSerializer<List<CreatureMove>>() {
-        public void write(PacketBuffer buf, List<CreatureMove> value) {
-            NBTTagCompound listNBT = MoveListUtil.getNBTFromListCreatureMove(value);
-            ByteBufUtils.writeTag(buf, listNBT);
-        }
-
-        public List<CreatureMove> read(PacketBuffer buf) {
-            NBTTagCompound listNBT = ByteBufUtils.readTag(buf);
-            if (listNBT == null) return new ArrayList<>();
-            return MoveListUtil.getListCreatureMoveFromNBT(listNBT);
-        }
-
-        public DataParameter<List<CreatureMove>> createKey(int id) {
-            return new DataParameter<>(id, this);
-        }
-
-        public List<CreatureMove> copyValue(List<CreatureMove> value) {
-            return value;
-        }
-    };
-
     public static final DataSerializer<CreatureMoveStorage> CREATURE_MOVE_STORAGE = new DataSerializer<CreatureMoveStorage>() {
         @Override
         public void write(PacketBuffer buf, CreatureMoveStorage value) {
@@ -98,32 +67,6 @@ public class RiftDataSerializers {
         }
     };
 
-    @Deprecated
-    public static final DataSerializer<FixedSizeList<CreatureMove>> FIXED_SIZE_LIST_CREATURE_MOVE = new DataSerializer<FixedSizeList<CreatureMove>>() {
-        @Override
-        public void write(PacketBuffer buf, FixedSizeList<CreatureMove> value) {
-            NBTTagCompound fixedSizeListNBT = MoveListUtil.getNBTFromFixedSizeListCreatureMove(value);
-            ByteBufUtils.writeTag(buf, fixedSizeListNBT);
-        }
-
-        @Override
-        public FixedSizeList<CreatureMove> read(PacketBuffer buf) {
-            NBTTagCompound fixedSizeListNBT = ByteBufUtils.readTag(buf);
-            if (fixedSizeListNBT == null) return new FixedSizeList<>(0);
-            return MoveListUtil.getFixedSizeListCreatureMoveFromNBT(fixedSizeListNBT);
-        }
-
-        @Override
-        public DataParameter<FixedSizeList<CreatureMove>> createKey(int id) {
-            return new DataParameter<>(id, this);
-        }
-
-        @Override
-        public FixedSizeList<CreatureMove> copyValue(FixedSizeList<CreatureMove> value) {
-            return value;
-        }
-    };
-
     public static final DataSerializer<CreatureAcquisitionInfo> ACQUISITION_INFO = new DataSerializer<CreatureAcquisitionInfo>() {
         @Override
         public void write(PacketBuffer buf, CreatureAcquisitionInfo value) {
@@ -160,10 +103,8 @@ public class RiftDataSerializers {
     };
 
     public static void registerSerializers() {
-        ServerProxy.registryPrimer.register(new DataSerializerEntry(LIST_CREATURE_MOVE).setRegistryName(RiftInitialize.MODID, "move_list"));
         ServerProxy.registryPrimer.register(new DataSerializerEntry(CREATURE_MOVE_STORAGE).setRegistryName(RiftInitialize.MODID, "move_storage"));
         ServerProxy.registryPrimer.register(new DataSerializerEntry(CREATURE_STATS_STORAGE)).setRegistryName(RiftInitialize.MODID, "stats_storage");
-        ServerProxy.registryPrimer.register(new DataSerializerEntry(FIXED_SIZE_LIST_CREATURE_MOVE).setRegistryName(RiftInitialize.MODID, "fixed_size_move_list"));
         ServerProxy.registryPrimer.register(new DataSerializerEntry(ACQUISITION_INFO).setRegistryName(RiftInitialize.MODID, "acquisition_info"));
     }
 }

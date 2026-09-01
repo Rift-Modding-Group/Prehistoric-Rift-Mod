@@ -1,0 +1,17 @@
+entity.unknown.spawn_description=???
+entity.tyrannosaurus.name=Tyrannosaurus
+entity.tyrannosaurus.spawn_description=Un depredador alfa colosal que posee fuerza física inmensa, atletismo, y aliento de fuego.
+entity.stegosaurus.name=Stegosaurus
+entity.stegosaurus.spawn_description=Dedicado al pastoreo y va en manadas, lleva placas protectoras en el lomo y la cola y afilados thagomizadores en la punta de la cola. Las placas de su cola se pueden lanzar contra posibles amenazas.
+
+item.spawn_egg.name=Generar - %s
+item.raw_exotic_meat.name=Carne cruda exótica
+item.cooked_exotic_meat.name=Carne cocinada exótica
+item.creative_meal.name=Alimentación creativa
+item.creative_meal.tooltip=Automáticamente tamea cualquiera criatura salvaje y se puede usar en criar cualquiera criatura tameada.
+
+item.tyrannosaurus_arm.name=Brazo de Tyrannosaurus
+item.stegosaurus_plate.name=Placa de Stegosaurus
+
+itemGroup.prift_items=Items de Prehistoric Rift
+itemGroup.prift_spawn_eggs=Generadores de Prehistoric Rift
