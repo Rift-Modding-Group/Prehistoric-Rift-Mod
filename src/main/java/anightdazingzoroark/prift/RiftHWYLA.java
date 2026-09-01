@@ -19,7 +19,7 @@ public class RiftHWYLA implements IWailaPlugin {
             @Override
             public List<String> getWailaBody(Entity entity, List<String> currenttip, IWailaEntityAccessor accessor, IWailaConfigHandler config) {
                 RiftCreature creature = (RiftCreature) entity;
-                currenttip.add("Stamina: "+creature.getStamina()+"/"+creature.getMaxStamina());
+                currenttip.add("Stamina: "+String.format("%.1f", creature.getStamina())+"/"+creature.getMaxStamina());
                 return currenttip;
             }
         }, RiftCreature.class);

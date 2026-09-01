@@ -1027,8 +1027,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //getting stamina cost excempts special modifiers: only base stamina stat matters
     private float getStaminaCost(float nominalMaximumFraction) {
         if (nominalMaximumFraction <= 0f) return 0f;
-        double nominalMaximum = this.getCreatureStats().getValueForStatUnmodified(RiftCreatureEnums.Stats.STAMINA);
-        return (float)(nominalMaximum * nominalMaximumFraction);
+        return nominalMaximumFraction * 100f;
     }
 
     public boolean canUseStamina(float nominalMaximumFraction) {
