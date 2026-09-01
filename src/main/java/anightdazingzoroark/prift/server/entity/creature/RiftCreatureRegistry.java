@@ -131,10 +131,16 @@ public class RiftCreatureRegistry {
                         .setMainHitboxSize(3.25f, 4f)
                         .setMaxFallHeight(4)
                         .setFallCreatesImpact()
+                        .setCannotBePushed()
                         .setDaysUntilAdult(7)
                         .setRetaliateWhenAttacked()
                         .setCanRetreat()
-                        .setHitboxInformation()
+                        .setHitboxInformation(Map.of(
+                                "leg", creature -> 0.25D,
+                                "body", creature -> 0.75D,
+                                "head", creature -> 1.25D,
+                                "tail", creature -> 0.5D
+                        ))
                         .setNavigation(new CreatureNavigationBuilder().setCanWalk()
                                 .setCanLeap(4D, 0, 12D)
                         )
@@ -337,8 +343,14 @@ public class RiftCreatureRegistry {
                         .setMainHitboxSize(2.125f, 2.5f)
                         .setMaxFallHeight(4)
                         .setFallCreatesImpact()
+                        .setCannotBePushed()
                         .setDaysUntilAdult(3)
-                        .setHitboxInformation()
+                        .setHitboxInformation(Map.of(
+                                "leg", creature -> 0.25D,
+                                "body", creature -> 0.75D,
+                                "head", creature -> 1.25D,
+                                "tail", creature -> 0.25D
+                        ))
                         .setIsHerder(8)
                         .setCanRetreat()
                         .addBlockBreakLevel("axe", 2)

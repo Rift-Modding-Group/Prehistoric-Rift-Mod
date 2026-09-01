@@ -59,6 +59,7 @@ import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.datasync.DataParameter;
@@ -68,6 +69,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
@@ -669,6 +671,54 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     public void onRemovedFromWorld() {
         this.leaveHerd();
         super.onRemovedFromWorld();
+    }
+
+    /**
+     * make sure this creature doesn't get dislocated when pushed
+     * */
+    @Override
+    public void applyEntityCollision(Entity entityIn) {
+        if (!this.creatureType.getCannotBePushed()) super.applyEntityCollision(entityIn);
+    }
+
+    /**
+     * push other entities
+     * */
+    @Override
+    public void collideWithEntity(Entity entityIn) {
+        if (!this.creatureType.getCannotBePushed()) {
+            super.collideWithEntity(entityIn);
+            return;
+        }
+
+        //special cases where given entity cannot be pushed back
+        if (entityIn == null || entityIn instanceof IProjectile || entityIn instanceof EntityFireball
+                || entityIn.equals(this) || this.isRidingSameEntity(entityIn) || entityIn.noClip
+                || (this.getCreatureMoveHelper().isLeaping() && entityIn.onGround)
+        ) return;
+
+        double dispX = entityIn.posX - this.posX;
+        double dispZ = entityIn.posZ - this.posZ;
+        double maxDisp = MathHelper.absMax(dispX, dispZ);
+
+        maxDisp = MathHelper.sqrt(Math.max(maxDisp, 0.01D));
+        dispX /= maxDisp;
+        dispZ /= maxDisp;
+        double d3 = Math.min(1D / maxDisp, 1D);
+
+        dispX *= d3;
+        dispZ *= d3;
+        dispX *= 0.05f;
+        dispZ *= 0.05f;
+        dispX *= 1f - this.entityCollisionReduction;
+        dispZ *= 1f - this.entityCollisionReduction;
+        dispX = MathHelper.clamp(dispX, -0.05D, 0.05D);
+        dispZ = MathHelper.clamp(dispZ, -0.05D, 0.05D);
+
+        entityIn.addVelocity(dispX, 0D, dispZ);
+
+        //mark dirty to force push on players
+        if (entityIn instanceof EntityPlayer) entityIn.velocityChanged = true;
     }
 
     //-----herding management-----

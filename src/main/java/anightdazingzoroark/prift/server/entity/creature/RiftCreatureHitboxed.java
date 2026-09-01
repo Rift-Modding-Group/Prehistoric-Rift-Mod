@@ -5,7 +5,6 @@ import anightdazingzoroark.riftlib.hitbox.IMultiHitboxUser;
 import anightdazingzoroark.riftlib.hitbox.MultiHitboxList;
 import anightdazingzoroark.riftlib.hitbox.RiftLibCollisionHitbox;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityFireball;
@@ -36,38 +35,6 @@ public class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUs
     @Override
     protected void onCreatureTypeChanged() {
         this.multiHitboxList = new MultiHitboxList<>(this, this.getAnimationData());
-    }
-
-    /**
-     * dumass override
-     * */
-    @Override
-    public void applyEntityCollision(Entity entityIn) {
-        if (entityIn == null || entityIn instanceof IProjectile || entityIn instanceof EntityFireball
-                || entityIn.equals(this) || this.isRidingSameEntity(entityIn) || entityIn.noClip
-                || (this.getCreatureMoveHelper().isLeaping() && entityIn.onGround)
-        ) return;
-
-        double dispX = entityIn.posX - this.posX;
-        double dispZ = entityIn.posZ - this.posZ;
-        double maxDisp = MathHelper.absMax(dispX, dispZ);
-
-        maxDisp = MathHelper.sqrt(maxDisp);
-        dispX /= maxDisp;
-        dispZ /= maxDisp;
-        double d3 = Math.min(1D / maxDisp, 1D);
-
-        dispX *= d3;
-        dispZ *= d3;
-        dispX *= 0.05f;
-        dispZ *= 0.05f;
-        dispX *= 1f - this.entityCollisionReduction;
-        dispZ *= 1f - this.entityCollisionReduction;
-
-        entityIn.addVelocity(dispX, 0D, dispZ);
-
-        //mark dirty to force push on players
-        if (entityIn instanceof EntityPlayer) entityIn.velocityChanged = true;
     }
 
     /**
