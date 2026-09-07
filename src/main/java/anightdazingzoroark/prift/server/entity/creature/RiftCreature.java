@@ -442,8 +442,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
             //tick creature rage
             if (this.getAttackTarget() != null) {
-                //set rage threshold to between 1.5 - 2.5 minutes
-                if (this.currentRageThreshold <= 0) this.currentRageThreshold = this.world.rand.nextInt(1800, 3001);
+                //set rage threshold to between 1 - 1.5 minutes
+                if (this.currentRageThreshold <= 0) this.currentRageThreshold = this.world.rand.nextInt(1200, 1801);
                 this.rage = Math.min(this.currentRageThreshold, this.rage + 1);
 
                 //set rage end countdown to max, which is 3 minutes

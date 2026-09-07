@@ -3,7 +3,9 @@ package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.pathfinding.Path;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
@@ -13,6 +15,7 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
     private static final int WATER_LAND_PATH_RETRY_TICKS = 10;
 
     private int waterLandPathRetryTicks;
+    private boolean continuePathMovementThroughControlGap;
 
     public RiftCreatureMoveHelper(RiftCreature creature) {
         super(creature);
@@ -20,6 +23,14 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
 
     @Override
     protected void onWait() {
+        EntityLivingBase attackTarget = this.creature.getAttackTarget();
+        if (this.creature.getCurrentMove().isEmpty() && attackTarget != null && attackTarget.isEntityAlive()
+                && this.continuePathMovementThroughControlGap
+        ) {
+            this.continuePathMovementThroughControlGap = false;
+            this.leapHelper.resetDelay();
+            return;
+        }
         this.leapHelper.resetDelay();
         this.stopWalkingControls();
     }
@@ -37,12 +48,14 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
         this.creature.setAIMoveSpeed(finalSpeed);
         this.creature.setMoveForward(this.moveForward);
         this.creature.setMoveStrafing(this.moveStrafe);
+        this.continuePathMovementThroughControlGap = false;
         this.creatureAction = CreatureAction.WAIT;
         this.leapHelper.resetDelay();
     }
 
     @Override
     protected void onJumping() {
+        this.continuePathMovementThroughControlGap = false;
         if (this.creature.bodyTouchingLiquid()) {
             this.creatureAction = CreatureAction.WAIT;
             this.leapHelper.resetDelay();
@@ -60,6 +73,7 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
 
     @Override
     protected void onLeap() {
+        this.continuePathMovementThroughControlGap = false;
         if (this.leapHelper.tryStartLeap()) this.leapHelper.continueLeap();
     }
 
@@ -70,9 +84,27 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
     private void updateMoveTo(CreatureAction requestedAction) {
         this.creatureAction = CreatureAction.WAIT;
 
+        EntityLivingBase attackTarget = this.creature.getAttackTarget();
+        boolean directlyApproachingAttackTarget = false;
+        if (requestedAction == CreatureAction.MOVE_TO && !this.creature.getUseBlockBreak()
+                && attackTarget != null && attackTarget.isEntityAlive()
+        ) {
+            Path currentPath = this.creature.getCreaturePathNavigate().getPath();
+            boolean finalPathApproach = currentPath != null
+                    && currentPath.getCurrentPathIndex() >= currentPath.getCurrentPathLength() - 1;
+            boolean moveTargetIsAttackTarget = Math.abs(this.posX - attackTarget.posX) < 1E-4D
+                    && Math.abs(this.posY - attackTarget.posY) < 1E-4D
+                    && Math.abs(this.posZ - attackTarget.posZ) < 1E-4D;
+            directlyApproachingAttackTarget = finalPathApproach || moveTargetIsAttackTarget;
+        }
+
         double displacementX = this.posX - this.entity.posX;
         double displacementZ = this.posZ - this.entity.posZ;
         double displacementY = this.posY - this.entity.posY;
+        if (directlyApproachingAttackTarget) {
+            displacementX = attackTarget.posX - this.entity.posX;
+            displacementZ = attackTarget.posZ - this.entity.posZ;
+        }
         double horizontalDisplacementSq = displacementX * displacementX + displacementZ * displacementZ;
         double totalDisplacementSq = horizontalDisplacementSq + displacementY * displacementY;
         boolean inLiquid = this.creature.bodyTouchingLiquid();
@@ -102,11 +134,15 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
             if (horizontalDisplacementSq >= 2.5E-7D) {
                 float targetYaw = (float)(MathHelper.atan2(displacementZ, displacementX) * 180D / Math.PI) - 90f;
                 this.creature.rotationYaw = this.limitAngle(this.creature.rotationYaw, targetYaw, 90f);
+                if (directlyApproachingAttackTarget) {
+                    this.creature.getLookHelper().setLookPositionWithEntity(attackTarget, 90f, 0f);
+                }
             }
             this.creature.setMoveStrafing(0f);
             this.creature.setAIMoveSpeed(
                     (float)(this.speed * this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue())
             );
+            this.continuePathMovementThroughControlGap = requestedAction == CreatureAction.MOVE_TO;
 
             CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
             double maximumClearance = navigation.getCanLeap() ?
@@ -136,5 +172,11 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
             this.stopWalkingControls();
             this.leapHelper.resetDelay();
         }
+    }
+
+    @Override
+    protected void stopWalkingControls() {
+        this.continuePathMovementThroughControlGap = false;
+        super.stopWalkingControls();
     }
 }

@@ -14,8 +14,6 @@ import java.util.Objects;
 
 public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
     private static final double TARGET_MOVED_REPATH_DISTANCE_SQ = 1D;
-    private static final int DIRECT_TARGET_MOVE_STALL_TICKS = 8;
-    private static final int CLOSE_TARGET_STRAFE_TICKS = 10;
 
     @NotNull
     private final String selectedMoveName;
@@ -34,9 +32,6 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
     private double lastTargetX;
     private double lastTargetY;
     private double lastTargetZ;
-    private int directTargetMoveStallTicks;
-    private double lastDirectTargetDistanceSq;
-    private int closeTargetStrafeTicks;
     private int pathingFrustrationTicks;
 
     //---frustration related stuff---
@@ -126,8 +121,6 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 }
             }
             else this.preserveLastLookDirection();
-            this.directTargetMoveStallTicks = 0;
-            this.closeTargetStrafeTicks = 0;
             this.pathingFrustrationTicks = 0;
             this.creature.getCreaturePathNavigate().clearPath();
         }
@@ -135,9 +128,9 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
         else if (this.selectedMoveBuilder.getRequireFindTargetToUse() && target != null && target.isEntityAlive()) {
             boolean dontPathToTarget = this.moveRuleBuilder.getDontPathToTarget();
 
-            //set look at target
-            this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, 0f);
-            if (!dontPathToTarget) {
+            //moves without pathing can look at the target without competing with navigation
+            if (dontPathToTarget) this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, 0f);
+            else {
                 this.hasLastLookDirection = true;
                 this.lastRotationYawHead = this.creature.rotationYawHead;
                 this.lastPrevRotationYawHead = this.creature.prevRotationYawHead;
@@ -196,16 +189,12 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 }
 
                 //stop pathing
-                this.directTargetMoveStallTicks = 0;
-                this.closeTargetStrafeTicks = 0;
                 this.pathingFrustrationTicks = 0;
                 this.creature.getCreaturePathNavigate().clearPath();
             }
             //---when move should not path to target, stop moving and wait for another move selection---
             else if (dontPathToTarget) {
                 this.repathCooldown = 0;
-                this.directTargetMoveStallTicks = 0;
-                this.closeTargetStrafeTicks = 0;
                 this.pathingFrustrationTicks = 0;
                 this.creature.getCreaturePathNavigate().clearPath();
             }
@@ -229,8 +218,6 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 //frontZone overlaps a planned block which this creature can break.
                 if (useBlockBreakPath) {
                     this.repathCooldown = 0;
-                    this.directTargetMoveStallTicks = 0;
-                    this.closeTargetStrafeTicks = 0;
                     if (!blockBreakNavigation.tryMoveAlongBlockBreakApproach(1D)) {
                         creatureNavigation.clearPath();
                         this.creature.getMoveHelper().setMoveTo(target.posX, target.posY, target.posZ, 1D);
@@ -239,62 +226,20 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                     return;
                 }
 
-                //---when creature is strafing away from close target---
-                if (this.closeTargetStrafeTicks > 0) {
-                    //tick down temporary strafe
-                    this.closeTargetStrafeTicks--;
+                boolean targetMoved = !this.hasLastTargetPos || target.getDistanceSq(this.lastTargetX, this.lastTargetY, this.lastTargetZ) > TARGET_MOVED_REPATH_DISTANCE_SQ;
+                boolean shouldRepath = this.repathCooldown <= 0 && (creatureNavigation.noPath() || targetMoved);
 
-                    //face close target
-                    double targetX = target.posX - this.creature.posX;
-                    double targetZ = target.posZ - this.creature.posZ;
-                    if (targetX * targetX + targetZ * targetZ >= 1E-4D) {
-                        this.creature.faceEntity(target, 90f, 0f);
-                        this.creature.renderYawOffset = this.creature.rotationYaw;
-                    }
-
-                    creatureNavigation.clearPath();
-                    this.directTargetMoveStallTicks = 0;
-                    this.creature.getMoveHelper().strafe(-1f, 0f);
+                //---when target moved or path ended, try to repath---
+                if (shouldRepath) {
                     this.rememberTargetPos(target);
+                    this.repathCooldown = 4 + this.creature.world.rand.nextInt(7);
+                    creatureNavigation.tryMoveToEntityLiving(target, 1D);
                 }
-                //---normal pathing---
-                else {
-                    boolean targetMoved = !this.hasLastTargetPos || target.getDistanceSq(this.lastTargetX, this.lastTargetY, this.lastTargetZ) > TARGET_MOVED_REPATH_DISTANCE_SQ;
-                    boolean shouldRepath = this.repathCooldown <= 0 && (creatureNavigation.noPath() || targetMoved);
 
-                    //---when target moved or path ended, try to repath---
-                    if (shouldRepath) {
-                        this.rememberTargetPos(target);
-                        this.repathCooldown = 4 + this.creature.world.rand.nextInt(7);
-                        //when pathing succeeds, reset direct movement fallback
-                        if (creatureNavigation.tryMoveToEntityLiving(target, 1D)) {
-                            this.directTargetMoveStallTicks = 0;
-                        }
-                    }
-
-                    //---when navigator has no path, move directly to target---
-                    if (creatureNavigation.noPath()) {
-                        double targetDistanceSq = this.creature.getDistanceSq(target);
-                        //when direct movement is not getting closer, count a stall
-                        if (this.directTargetMoveStallTicks > 0 && targetDistanceSq + 0.01D >= this.lastDirectTargetDistanceSq) {
-                            this.directTargetMoveStallTicks++;
-                        }
-                        //otherwise reset stall counter
-                        else this.directTargetMoveStallTicks = 1;
-                        this.lastDirectTargetDistanceSq = targetDistanceSq;
-
-                        //when direct movement stalls, strafe away instead
-                        if (this.directTargetMoveStallTicks >= DIRECT_TARGET_MOVE_STALL_TICKS) {
-                            this.directTargetMoveStallTicks = 0;
-                            this.closeTargetStrafeTicks = CLOSE_TARGET_STRAFE_TICKS;
-                            this.rememberTargetPos(target);
-                        }
-                        //otherwise keep directly moving to target
-                        else {
-                            this.creature.getMoveHelper().setMoveTo(target.posX, target.posY, target.posZ, 1D);
-                            this.rememberTargetPos(target);
-                        }
-                    }
+                //---when navigator has no path, keep directly moving to target---
+                if (creatureNavigation.noPath()) {
+                    this.creature.getMoveHelper().setMoveTo(target.posX, target.posY, target.posZ, 1D);
+                    this.rememberTargetPos(target);
                 }
             }
         }

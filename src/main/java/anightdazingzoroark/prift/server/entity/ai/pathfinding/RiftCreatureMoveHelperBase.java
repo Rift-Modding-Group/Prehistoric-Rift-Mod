@@ -94,6 +94,10 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
                 || this.creatureAction == CreatureAction.LEAP;
     }
 
+    public CreatureAction getCreatureAction() {
+        return this.creatureAction;
+    }
+
     @Override
     public void read(EntityMoveHelper that) {
         this.posX = that.getX();

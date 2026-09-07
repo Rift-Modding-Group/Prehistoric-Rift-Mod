@@ -145,6 +145,14 @@ dependencies {
     }
 }
 
+tasks.named('test', Test) {
+    useJUnitPlatform()
+    workingDir = layout.buildDirectory.dir('test-run').get().asFile
+    doFirst {
+        workingDir.mkdirs()
+    }
+}
+
 apply from: 'gradle/scripts/dependencies.gradle'
 
 processResources {
@@ -173,6 +181,10 @@ sourceSets {
                 property('mod_issue_tracker', mod_issue_tracker)
             }
         }
+    }
+    test {
+        compileClasspath += sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
     }
 }
 

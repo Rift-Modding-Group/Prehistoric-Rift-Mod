@@ -177,7 +177,6 @@ public class CreatureMoveSelectorBuilder {
         @Override
         public boolean targetWithinRange(@NotNull ICreature user, @NotNull EntityLivingBase target) {
             double dist = user.horizontalDistanceFromEntity(target);
-            System.out.println("horizontal dist: "+dist);
 
             //if minDistance is negative, it means only maxDistance matters
             if (this.minDistance < 0) return dist <= this.maxDistance;
