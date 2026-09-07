@@ -7,7 +7,6 @@ import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
-import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCommon;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
@@ -293,7 +292,7 @@ public class RiftCreatureRegistry {
                                 .setMoveRule(
                                         new MoveRuleBuilder("bite")
                                                 .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                                                .setDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("jawHitZone"))
+                                                .addDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("jawHitZone"))
                                                 .setUseBlockBreak()
                                 )
                                 .setMoveRule(
@@ -304,12 +303,12 @@ public class RiftCreatureRegistry {
                                                             && creature.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), "stompHitZone")) ?
                                                             0 : -1;
                                                 })
-                                                .setDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("stompHitZone"))
+                                                .addDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("stompHitZone"))
                                                 .setDontPathToTarget()
                                 )
                                 .setMoveRule(
                                         new MoveRuleBuilder("power_roar")
-                                                .setDetectionRule(new CreatureMoveSelectorBuilder.DistanceFromUserDetectionRule(12D))
+                                                .addDetectionRule(new CreatureMoveSelectorBuilder.HorizontalDistanceFromUserDetectionRule(12D))
                                                 .setUseWhenFrustrated()
                                                 .setDontPathToTarget()
                                 )
@@ -318,7 +317,8 @@ public class RiftCreatureRegistry {
                                                 .setPriorityPredicate((creature, target) -> {
                                                     return (target != null && target.isEntityAlive() && (creature.atRageThreshold() || creature.isUnableToPathToTarget())) ? 0 : -1;
                                                 })
-                                                .setDetectionRule(new CreatureMoveSelectorBuilder.DistanceFromUserDetectionRule(4D, 16D))
+                                                .addDetectionRule(new CreatureMoveSelectorBuilder.HorizontalDistanceFromUserDetectionRule(6D, 16D))
+                                                .addDetectionRule(new CreatureMoveSelectorBuilder.VerticalDistanceFromUserDetectionRule(5D, 16D))
                                                 .setUseWhenFrustrated()
                                 )
                                 .setCanSprintToAttack(1, 8D, 16D)
@@ -363,7 +363,7 @@ public class RiftCreatureRegistry {
                                 .setAnimNames("tail_sweep")
                         )
                         .addMove("plate_fling", new CreatureMoveBuilder()
-                                .setStaminaCost(0.12f)
+                                //.setStaminaCost(0.12f)
                                 .setPhysical()
                                 .setBasePower(30)
                                 .setRequireFindTargetToUse()
@@ -383,7 +383,7 @@ public class RiftCreatureRegistry {
                                 .setMoveRule(
                                         new MoveRuleBuilder("tail_stab")
                                                 .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                                                .setDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("tailHitZone"))
+                                                .addDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("tailHitZone"))
                                                 .setUseBlockBreak()
                                 )
                                 .setMoveRule(
@@ -393,7 +393,7 @@ public class RiftCreatureRegistry {
                                                             && creature.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), "spinHitZone")) ?
                                                             0 : -1;
                                                 })
-                                                .setDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("spinHitZone"))
+                                                .addDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("spinHitZone"))
                                                 .setDontPathToTarget()
                                 )
                                 .setMoveRule(
@@ -401,7 +401,9 @@ public class RiftCreatureRegistry {
                                                 .setPriorityPredicate((creature, target) -> {
                                                     return (target != null && target.isEntityAlive()) ? 0 : -1;
                                                 })
-                                                .setDetectionRule(new CreatureMoveSelectorBuilder.DistanceFromUserDetectionRule(8D, 16D))
+                                                .addDetectionRule(new CreatureMoveSelectorBuilder.HorizontalDistanceFromUserDetectionRule(12D, 16D))
+                                                .addDetectionRule(new CreatureMoveSelectorBuilder.VerticalDistanceFromUserDetectionRule(4D, 16D))
+                                                .setDontPathToTarget()
                                 )
                         )
                         //---targeting---

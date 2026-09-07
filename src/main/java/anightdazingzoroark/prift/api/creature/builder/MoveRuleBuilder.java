@@ -4,6 +4,8 @@ import anightdazingzoroark.prift.api.creature.ICreature;
 import net.minecraft.entity.EntityLivingBase;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiFunction;
 
 /**
@@ -17,7 +19,7 @@ public class MoveRuleBuilder {
     @NotNull
     private BiFunction<ICreature, EntityLivingBase, Integer> priorityPredicate = (creature, target) -> -1;
     @NotNull
-    private CreatureMoveSelectorBuilder.DetectionRule detectionRule = new CreatureMoveSelectorBuilder.DistanceFromUserDetectionRule("", 8D);
+    private final List<CreatureMoveSelectorBuilder.DetectionRule> detectionRules = new ArrayList<>();
     private boolean canUseWhenFrustrated;
     private boolean dontPathToTarget;
     private boolean useBlockBreak;
@@ -51,15 +53,20 @@ public class MoveRuleBuilder {
         return this.priorityPredicate;
     }
 
-    public MoveRuleBuilder setDetectionRule(@NotNull CreatureMoveSelectorBuilder.DetectionRule detectionRule) {
+    /**
+     * Add an alternative detection rule. A target only needs to match one rule.
+     */
+    public MoveRuleBuilder addDetectionRule(@NotNull CreatureMoveSelectorBuilder.DetectionRule detectionRule) {
         this.checkIfLocked();
-        this.detectionRule = detectionRule;
+        this.detectionRules.add(detectionRule);
         return this;
     }
 
-    @NotNull
-    public CreatureMoveSelectorBuilder.DetectionRule getDetectionRule() {
-        return this.detectionRule;
+    /**
+     * Check whether a target matches at least one configured detection rule.
+     */
+    public boolean targetMatchesAnyDetectionRule(@NotNull ICreature creature, @NotNull EntityLivingBase target) {
+        return this.detectionRules.stream().anyMatch(detectionRule -> detectionRule.targetWithinRange(creature, target));
     }
 
     public MoveRuleBuilder setUseWhenFrustrated() {

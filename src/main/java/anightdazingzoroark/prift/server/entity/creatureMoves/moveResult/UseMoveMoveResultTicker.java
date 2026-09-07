@@ -71,7 +71,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 && this.selectedMoveBuilder.getRequireFindTargetToUse()
                 && targetAvailability
                 && !this.selectedMoveUsedDueToFrustration
-                && !this.moveRuleBuilder.getDetectionRule().targetWithinRange(this.creature, target)
+                && !this.moveRuleBuilder.targetMatchesAnyDetectionRule(this.creature, target)
         ) {
             return false;
         }
@@ -145,7 +145,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 this.lastPrevRotationPitch = this.creature.prevRotationPitch;
             }
 
-            boolean targetWithinRange = this.moveRuleBuilder.getDetectionRule().targetWithinRange(this.creature, target);
+            boolean targetWithinRange = this.moveRuleBuilder.targetMatchesAnyDetectionRule(this.creature, target);
             this.creature.setUseBlockBreak(useBlockBreakPath);
             if (useBlockBreakPath) {
                 this.creature.setUnableToPathToTarget(false);

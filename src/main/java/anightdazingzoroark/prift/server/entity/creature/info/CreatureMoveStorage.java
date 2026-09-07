@@ -95,8 +95,8 @@ public class CreatureMoveStorage {
 
             if (index >= 0 && (target == null
                     || !target.isEntityAlive()
-                    || (!canPathIntoDetectionRange
-                        && !moveRuleBuilder.getDetectionRule().targetWithinRange(creature, target)))) {
+                    || (!canPathIntoDetectionRange && !moveRuleBuilder.targetMatchesAnyDetectionRule(creature, target)))
+            ) {
                 index = -1;
             }
 

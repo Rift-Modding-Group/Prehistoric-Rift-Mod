@@ -494,6 +494,20 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     public boolean hasStraightWalkingPathTo(@NotNull EntityLivingBase target) {
         return this.getCreaturePathNavigate().hasStraightWalkingPathTo(target);
     }
+
+    @Override
+    public double horizontalDistanceFromEntity(@NotNull Entity entity) {
+        double dx = Math.pow(this.posX - entity.posX, 2);
+        double dz = Math.pow(this.posZ - entity.posZ, 2);
+        return this.width / 2D + Math.sqrt(dx + dz);
+    }
+
+    @Override
+    public double verticalDistanceFromEntity(@NotNull Entity entity) {
+        double thisMidY = this.posY + this.height / 2D;
+        double entityMidY = entity.posY + entity.height / 2D;
+        return this.height / 2D + Math.abs(thisMidY - entityMidY);
+    }
     //---ICreature implementations from the api ends here---
 
     //this gets the scale of the model of the entity
@@ -989,7 +1003,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
         creatureMoveStorage.setCurrentMove(name);
     }
-
 
     //-----stamina use management-----
     //getting stamina cost excempts special modifiers: only base stamina stat matters

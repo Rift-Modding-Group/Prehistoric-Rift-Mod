@@ -38,6 +38,10 @@ public interface ICreature {
 
     Vec3d getPositionVector();
 
+    double horizontalDistanceFromEntity(@NotNull Entity entity);
+
+    double verticalDistanceFromEntity(@NotNull Entity entity);
+
     boolean bodyTouchingLiquid();
 
     boolean aabbIntersectsBoundingBox(@NotNull AxisAlignedBB otherAABB, @NotNull String boundingBoxName);

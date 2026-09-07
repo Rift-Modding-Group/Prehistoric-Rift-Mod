@@ -58,7 +58,7 @@ public class CreatureMoveSelectorBuilder {
                     if (!outsideCreatureAABB || !withinOuterBound || !outsideInnerBound) return -1;
                     return creature.hasStraightWalkingPathTo(target) ? priority : -1;
                 })
-                .setDetectionRule(new DistanceFromUserDetectionRule("", minDist, maxDist))
+                .addDetectionRule(new HorizontalDistanceFromUserDetectionRule(minDist, maxDist))
                 .setUseWhenFrustrated())
         );
         return this;
@@ -74,7 +74,7 @@ public class CreatureMoveSelectorBuilder {
         this.checkIfLocked();
         if (minDist > maxDist) throw new IllegalArgumentException(minDist+" is greater than "+maxDist+"!");
 
-        DistanceFromUserDetectionRule detectionRule = new DistanceFromUserDetectionRule("", minDist, maxDist);
+        HorizontalDistanceFromUserDetectionRule detectionRule = new HorizontalDistanceFromUserDetectionRule(minDist, maxDist);
         LeapMoveRuleBuilder leapMoveRuleBuilder = new LeapMoveRuleBuilder(requiresTargetContact).setLeapPriorityPredicate(priority, detectionRule);
         leapMoveRuleBuilder.setUseWhenFrustrated();
         leapMoveRuleBuilder.lock();
@@ -124,7 +124,7 @@ public class CreatureMoveSelectorBuilder {
                 if (!creature.canLeapToAttack() && !creature.atFrustrationThreshold()) return -1;
                 return detectionRule.targetWithinRange(creature, target) ? priority : -1;
             });
-            this.setDetectionRule(detectionRule);
+            this.addDetectionRule(detectionRule);
             return this;
         }
 
@@ -161,68 +161,52 @@ public class CreatureMoveSelectorBuilder {
         }
     }
 
-    public static class DistanceFromUserDetectionRule extends DetectionRule {
-        @NotNull
-        private final String locatorName;
+    public static class HorizontalDistanceFromUserDetectionRule extends DetectionRule {
         private final double minDistance;
         private final double maxDistance;
 
-        public DistanceFromUserDetectionRule(double maxDistance) {
-            this("", -1, maxDistance);
+        public HorizontalDistanceFromUserDetectionRule(double maxDistance) {
+            this(-1, maxDistance);
         }
 
-        public DistanceFromUserDetectionRule(double minDistance, double maxDistance) {
-            this("", minDistance, maxDistance);
-        }
-
-        public DistanceFromUserDetectionRule(@NotNull String locatorName, double maxDistance) {
-            this(locatorName, -1, maxDistance);
-        }
-
-        public DistanceFromUserDetectionRule(@NotNull String locatorName, double minDistance, double maxDistance) {
-            this.locatorName = locatorName;
+        public HorizontalDistanceFromUserDetectionRule(double minDistance, double maxDistance) {
             this.minDistance = minDistance;
             this.maxDistance = maxDistance;
         }
 
         @Override
         public boolean targetWithinRange(@NotNull ICreature user, @NotNull EntityLivingBase target) {
-            boolean outsideCreatureAABB = this.locatorName.isEmpty() || !this.withinCreatureAABB(user, target);
+            double dist = user.horizontalDistanceFromEntity(target);
+            System.out.println("horizontal dist: "+dist);
 
             //if minDistance is negative, it means only maxDistance matters
-            if (this.minDistance < 0) {
-                boolean withinBoundOfLocator = this.aabbFromLocator(user, this.maxDistance).grow(1e-5D).intersects(target.getEntityBoundingBox());
-                return withinBoundOfLocator && outsideCreatureAABB;
-            }
-            else if (this.maxDistance >= this.minDistance) {
-                boolean withinOuterBound = this.aabbFromLocator(user, this.maxDistance).grow(1e-5D).intersects(target.getEntityBoundingBox());
-                boolean outsideInnerBound = !this.aabbFromLocator(user, this.minDistance).grow(1e-5D).intersects(target.getEntityBoundingBox());
-                return withinOuterBound && outsideInnerBound && outsideCreatureAABB;
-            }
+            if (this.minDistance < 0) return dist <= this.maxDistance;
+            else if (this.maxDistance >= this.minDistance) return dist >= minDistance && dist <= this.maxDistance;
             throw new IllegalArgumentException("Given maxDistance is smaller than minDistance!");
         }
+    }
 
-        @NotNull
-        private AxisAlignedBB aabbFromLocator(@NotNull ICreature creature, double width) {
-            if (this.locatorName.isEmpty()) {
-                AxisAlignedBB creatureAABB = creature.getEntityBoundingBox();
-                return creatureAABB.grow(width);
-            }
-            else {
-                Vec3d worldSpaceLocator = creature.getLocatorWorldPos(this.locatorName);
-                return new AxisAlignedBB(
-                        worldSpaceLocator.x - width / 2D,
-                        worldSpaceLocator.y - width / 2D,
-                        worldSpaceLocator.z - width / 2D,
-                        worldSpaceLocator.x + width / 2D,
-                        worldSpaceLocator.y + width / 2D,
-                        worldSpaceLocator.z + width / 2D
-                );
-            }
+    public static class VerticalDistanceFromUserDetectionRule extends DetectionRule {
+        private final double minDistance;
+        private final double maxDistance;
+
+        public VerticalDistanceFromUserDetectionRule(double maxDistance) {
+            this(-1, maxDistance);
         }
 
-        private boolean withinCreatureAABB(@NotNull ICreature creature, EntityLivingBase target) {
-            return creature.getEntityBoundingBox().grow(1e-5D).intersects(target.getEntityBoundingBox());
+        public VerticalDistanceFromUserDetectionRule(double minDistance, double maxDistance) {
+            this.minDistance = minDistance;
+            this.maxDistance = maxDistance;
+        }
+
+        @Override
+        public boolean targetWithinRange(@NotNull ICreature user, @NotNull EntityLivingBase target) {
+            double dist = user.verticalDistanceFromEntity(target);
+
+            //if minDistance is negative, it means only maxDistance matters
+            if (this.minDistance < 0) return dist <= this.maxDistance;
+            else if (this.maxDistance >= this.minDistance) return dist >= minDistance && dist <= this.maxDistance;
+            throw new IllegalArgumentException("Given maxDistance is smaller than minDistance!");
         }
     }
 }
