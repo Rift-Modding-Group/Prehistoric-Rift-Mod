@@ -28,8 +28,6 @@ public class RiftFindTarget extends EntityAITarget {
 
     @Override
     public boolean shouldExecute() {
-        if (this.creature.isRetreating()) return false;
-
         //for herders, only herd leaders can find targets
         if (!this.creature.canLeadHerdBehavior()) return false;
 
@@ -63,7 +61,6 @@ public class RiftFindTarget extends EntityAITarget {
 
     @Override
     public boolean shouldContinueExecuting() {
-        if (this.creature.isRetreating()) return false;
         if (!this.creature.canLeadHerdBehavior()) return false;
 
         EntityLivingBase existingTarget = this.creature.getAttackTarget();

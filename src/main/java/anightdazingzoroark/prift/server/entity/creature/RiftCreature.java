@@ -10,7 +10,6 @@ import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.server.entity.ai.RiftFollowHerdLeader;
 import anightdazingzoroark.prift.server.entity.ai.RiftGoToLandFromWater;
 import anightdazingzoroark.prift.server.entity.ai.RiftHurtByTarget;
-import anightdazingzoroark.prift.server.entity.ai.RiftRetreatFromCombat;
 import anightdazingzoroark.prift.server.entity.ai.RiftWander;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
@@ -141,15 +140,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Nullable
     private RiftCreatureHerdHelper herdHelper;
 
-    //retreat related stuff
-    private boolean retreating;
-    @Nullable
-    private Vec3d retreatThreatPosition;
-    @Nullable
-    private Vec3d retreatOriginPosition;
-    @Nullable
-    private Vec3d retreatDestination;
-
     //target pathing state
     private boolean unableToPathToTarget;
     private int blockBreakEffectAttemptCount;
@@ -206,10 +196,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         this.trackingFallImpact = false;
         this.lastFallImpactYDelta = 0D;
-        this.retreating = false;
-        this.retreatThreatPosition = null;
-        this.retreatOriginPosition = null;
-        this.retreatDestination = null;
         if (this.creatureType.getFallCreatesImpact()) {
             this.rayMap.put("fallImpactRay", new RiftLibRayBuilder()
                     .setImpactOnly()
@@ -314,8 +300,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             this.targetTasks.addTask(1, new RiftHurtByTarget(this));
         }
         this.targetTasks.addTask(2, new RiftFindTarget(this, true));
-
-        if (this.creatureType.getCanRetreat()) this.tasks.addTask(0, new RiftRetreatFromCombat(this));
         this.tasks.addTask(1, new RiftUnmountedUseMove(this));
         if (!this.creatureType.getNavigation().getCanSwim()) {
             this.tasks.addTask(2, new RiftGoToLandFromWater(this));
@@ -341,26 +325,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (!this.world.isRemote) {
             //tick herding
             if (this.herdHelper != null) this.herdHelper.onUpdate();
-
-            //tick combat retreats
-            //for herders, herd followers inherit the leader's retreat state and
-            //keep formation. only the current leader decides when the group relocates.
-            if (this.creatureType.getCanRetreat() && this.canLeadHerdBehavior() && !this.isRetreating()) {
-                EntityLivingBase retreatTarget = this.getAttackTarget();
-                //retreat when out of stamina
-                float staminaAmntForRetreat = (float) Math.floor(this.getMaxStamina() * 0.03f); //ideally at 0, but due to how this works... well
-                if (retreatTarget != null && retreatTarget.isEntityAlive() && !this.isUnableToPathToTarget() && this.getStamina() <= staminaAmntForRetreat) {
-                    Vec3d threatPosition = retreatTarget.getPositionVector();
-                    if (this.herdHelper != null) this.herdHelper.beginRetreat(this, threatPosition);
-                    else {
-                        this.retreating = true;
-                        this.retreatThreatPosition = threatPosition;
-                        this.retreatOriginPosition = this.getPositionVector();
-                        this.retreatDestination = null;
-                    }
-                    this.setAttackTarget(null);
-                }
-            }
 
             //keep the pose active for the full airborne portion even if pathing
             //relinquishes its leap action before the creature reaches the ground
@@ -635,7 +599,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void setAttackTarget(@Nullable EntityLivingBase target) {
-        if (target != null && this.isRetreating()) target = null;
         boolean targetChanged = target != this.getAttackTarget();
         if (targetChanged) this.unableToPathToTarget = false;
         super.setAttackTarget(target);
@@ -761,51 +724,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Nullable
     public RiftCreatureHerdHelper getHerd() {
         return this.herdHelper;
-    }
-
-    //-----combat retreat management-----
-    public boolean isRetreating() {
-        return this.herdHelper == null ? this.retreating : this.herdHelper.isRetreating();
-    }
-
-    @Nullable
-    public Vec3d getRetreatThreatPosition() {
-        return this.herdHelper == null ? this.retreatThreatPosition : this.herdHelper.getRetreatThreatPosition();
-    }
-
-    @Nullable
-    public Vec3d getRetreatOriginPosition() {
-        return this.herdHelper == null ? this.retreatOriginPosition : this.herdHelper.getRetreatOriginPosition();
-    }
-
-    @Nullable
-    public Vec3d getRetreatDestination() {
-        return this.herdHelper == null ? this.retreatDestination : this.herdHelper.getRetreatDestination();
-    }
-
-    public void setRetreatDestination(@NotNull Vec3d destination) {
-        if (this.herdHelper != null) this.herdHelper.setRetreatDestination(this, destination);
-        else if (this.retreating) this.retreatDestination = destination;
-    }
-
-    public void clearRetreatDestination() {
-        if (this.herdHelper != null) this.herdHelper.clearRetreatDestination(this);
-        else if (this.retreating) this.retreatDestination = null;
-    }
-
-    public boolean isRetreatGroupAssembled() {
-        return this.herdHelper == null || this.herdHelper.isAssembledForRetreat();
-    }
-
-    public void finishRetreat() {
-        if (this.herdHelper != null) this.herdHelper.finishRetreat(this);
-        else if (this.retreating) {
-            this.retreating = false;
-            this.retreatThreatPosition = null;
-            this.retreatOriginPosition = null;
-            this.retreatDestination = null;
-            this.setAttackTarget(null);
-        }
     }
 
     //-----properties management-----

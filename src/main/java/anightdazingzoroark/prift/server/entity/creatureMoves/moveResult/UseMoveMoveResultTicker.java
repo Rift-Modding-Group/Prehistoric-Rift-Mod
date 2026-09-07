@@ -72,11 +72,14 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 && targetAvailability
                 && !this.selectedMoveUsedDueToFrustration
                 && !this.moveRuleBuilder.getDetectionRule().targetWithinRange(this.creature, target)
-        ) return false;
-        //when frustration gets high enough, stop current pathing and pick a frustration option
+        ) {
+            return false;
+        }
+            //when frustration gets high enough, stop current pathing and pick a frustration option
         else if (!this.selectedMoveUsedDueToFrustration
                 && !this.creature.getUseBlockBreak()
-                && this.creature.atFrustrationThreshold()) {
+                && this.creature.atFrustrationThreshold()
+        ) {
             return false;
         }
         //if creature hasnt executed move yet, keep it true to keep it running
@@ -106,7 +109,10 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                     this.blockBreakApplied = true;
                 }
             }
-            if (target != null
+            if (target != null && target.isEntityAlive() && this.moveRuleBuilder.getDontPathToTarget()) {
+                this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, 0f);
+            }
+            else if (target != null
                     && target.isEntityAlive()
                     && this.selectedMoveBuilder.getMoveChargeupBuilder() != null
                     && this.selectedMoveBuilder.getMoveChargeupBuilder().getCanRotateWhileReleasing()
@@ -130,8 +136,8 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
             boolean dontPathToTarget = this.moveRuleBuilder.getDontPathToTarget();
 
             //set look at target
+            this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, 0f);
             if (!dontPathToTarget) {
-                this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, 0f);
                 this.hasLastLookDirection = true;
                 this.lastRotationYawHead = this.creature.rotationYawHead;
                 this.lastPrevRotationYawHead = this.creature.prevRotationYawHead;
@@ -152,17 +158,9 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
             boolean breakableBlocksInFront = useBlockBreakPath && this.creature.hasBreakableBlocksInFront();
 
             //execute move when target is in range
-            if (breakableBlocksInFront
-                    || !useBlockBreakPath && (targetWithinRange || this.selectedMoveUsedDueToFrustration)) {
-                //forcibly stop rotation upon using a move
-                if (dontPathToTarget) {
-                    this.hasLastLookDirection = true;
-                    this.lastRotationYawHead = this.creature.rotationYaw;
-                    this.lastPrevRotationYawHead = this.creature.prevRotationYaw;
-                    this.lastRotationPitch = this.creature.rotationPitch;
-                    this.lastPrevRotationPitch = this.creature.prevRotationPitch;
-                }
-                else {
+            if (breakableBlocksInFront || !useBlockBreakPath && (targetWithinRange || this.selectedMoveUsedDueToFrustration)) {
+                //pathing moves face the body toward the target and lock that direction during the move
+                if (!dontPathToTarget) {
                     double targetX = target.posX - this.creature.posX;
                     double targetZ = target.posZ - this.creature.posZ;
                     //only rotate if target direction is usable
