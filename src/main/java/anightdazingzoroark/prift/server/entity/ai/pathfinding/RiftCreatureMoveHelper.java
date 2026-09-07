@@ -107,6 +107,14 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
         }
         double horizontalDisplacementSq = displacementX * displacementX + displacementZ * displacementZ;
         double totalDisplacementSq = horizontalDisplacementSq + displacementY * displacementY;
+        if (requestedAction == CreatureAction.CHARGE) {
+            double stoppingDistance = Math.max(0.5D, this.creature.width * 0.5D);
+            if (horizontalDisplacementSq <= stoppingDistance * stoppingDistance) {
+                this.stopWalkingControls();
+                this.leapHelper.resetDelay();
+                return;
+            }
+        }
         boolean inLiquid = this.creature.bodyTouchingLiquid();
         boolean followingWaterPath = this.creature.getCreaturePathNavigate().isFollowingWaterPath();
         if (!inLiquid) this.waterLandPathRetryTicks = 0;

@@ -98,9 +98,8 @@ public class SprintMoveResultTicker extends AbstractMoveResultTicker {
 
     private boolean hasReachedDestination() {
         double displacementX = this.destinationX - this.creature.posX;
-        double displacementY = this.destinationY - this.creature.posY;
         double displacementZ = this.destinationZ - this.creature.posZ;
         double stoppingDistance = Math.max(0.5D, this.creature.width * 0.5D);
-        return displacementX * displacementX + displacementZ * displacementZ <= stoppingDistance * stoppingDistance && Math.abs(displacementY) <= 0.25D;
+        return displacementX * displacementX + displacementZ * displacementZ <= stoppingDistance * stoppingDistance;
     }
 }

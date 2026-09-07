@@ -13,8 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
-    private static final double TARGET_MOVED_REPATH_DISTANCE_SQ = 1D;
-
     @NotNull
     private final String selectedMoveName;
     @NotNull
@@ -107,8 +105,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
             if (target != null && target.isEntityAlive() && this.moveRuleBuilder.getDontPathToTarget()) {
                 this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, 0f);
             }
-            else if (target != null
-                    && target.isEntityAlive()
+            else if (target != null && target.isEntityAlive()
                     && this.selectedMoveBuilder.getMoveChargeupBuilder() != null
                     && this.selectedMoveBuilder.getMoveChargeupBuilder().getCanRotateWhileReleasing()
                     && this.creature.getCreatureMoves().currentMoveMatches(this.selectedMoveName, ChargeupPhase.RELEASING)
@@ -226,7 +223,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                     return;
                 }
 
-                boolean targetMoved = !this.hasLastTargetPos || target.getDistanceSq(this.lastTargetX, this.lastTargetY, this.lastTargetZ) > TARGET_MOVED_REPATH_DISTANCE_SQ;
+                boolean targetMoved = !this.hasLastTargetPos || target.getDistanceSq(this.lastTargetX, this.lastTargetY, this.lastTargetZ) > 1D;
                 boolean shouldRepath = this.repathCooldown <= 0 && (creatureNavigation.noPath() || targetMoved);
 
                 //---when target moved or path ended, try to repath---
