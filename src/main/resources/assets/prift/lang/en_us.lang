@@ -9,6 +9,8 @@ item.raw_exotic_meat.name=Raw Exotic Meat
 item.cooked_exotic_meat.name=Cooked Exotic Meat
 item.creative_meal.name=Creative Meal
 item.creative_meal.tooltip=Instantly tames any wild creature and can be used to breed any tamed creature.
+item.tranq_bomb.name=Tranq Bomb
+item.tranq_bomb.tooltip=Throw at creatures at low health to incapacitate them for taming. Will act differently on other mobs.
 
 item.tyrannosaurus_arm.name=Tyrannosaurus Arm
 item.stegosaurus_plate.name=Stegosaurus Plate

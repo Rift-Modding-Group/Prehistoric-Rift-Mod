@@ -13,7 +13,7 @@ public class CreatureMoveHelper {
     }
 
     public static double calculateDamage(@NotNull RiftCreature attackingCreature, @Nullable CreatureMoveBuilder moveBuilder) {
-        if (moveBuilder == null || !moveBuilder.isValid()) return 0D;
+        if (moveBuilder == null || !moveBuilder.isValid() || moveBuilder.getBasePower() <= 0) return 0D;
 
         double statValueToUse = 0D;
         if (moveBuilder.getMoveType() == CreatureMoveBuilder.MoveType.PHYSICAL) {

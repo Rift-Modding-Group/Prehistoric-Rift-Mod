@@ -9,6 +9,9 @@ item.raw_exotic_meat.name=Carne cruda exótica
 item.cooked_exotic_meat.name=Carne cocinada exótica
 item.creative_meal.name=Alimentación creativa
 item.creative_meal.tooltip=Automáticamente tamea cualquiera criatura salvaje y se puede usar en criar cualquiera criatura tameada.
+item.tranq_bomb.name=Bomba tranquilizante
+item.tranq_bomb.tooltip=Throw at creatures at low health to incapacitate them for taming. Will act differently on other mobs.
+item.tranq_bomb.tooltip=Se lanza a criaturas con poca salud para incapacitarlas para tamear. Tiene efectos diferentes con otros mobs.
 
 item.tyrannosaurus_arm.name=Brazo de Tyrannosaurus
 item.stegosaurus_plate.name=Placa de Stegosaurus

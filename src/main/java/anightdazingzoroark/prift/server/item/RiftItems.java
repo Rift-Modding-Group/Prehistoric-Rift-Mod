@@ -1,10 +1,14 @@
 package anightdazingzoroark.prift.server.item;
 
+import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.prift.client.RiftCreativeTabs;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
+import anightdazingzoroark.riftlib.particle.RiftLibParticleHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
@@ -22,6 +26,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public class RiftItems {
     public static final List<Item> ITEMS = new ArrayList<>();
@@ -33,6 +38,7 @@ public class RiftItems {
     public static Item RAW_EXOTIC_MEAT;
     public static Item COOKED_EXOTIC_MEAT;
     public static Item CREATIVE_MEAL;
+    public static Item TRANQ_BOMB;
 
     public static Item getTributeItem(@NotNull String creatureName) {
         return TRIBUTE_ITEMS.get(creatureName);
@@ -58,6 +64,27 @@ public class RiftItems {
                 tooltip.add(TextFormatting.GRAY + I18n.format("item.creative_meal.tooltip"));
             }
         }, "creative_meal", true);
+        TRANQ_BOMB = registerItem(new RiftThrowableItem() {
+            @Override
+            @NotNull
+            public ProjectileBuilder getProjectileBuilder() {
+                return new ProjectileBuilder().setName("tranq_bomb")
+                        .setUseCubeModel().setHasParticleTrail()
+                        .setOnImpactEffect((creature, projectile, hitEntity, hitPos) -> {
+                            RiftLibParticleHelper.createParticle(
+                                    "prift:tranq_bomb_impact",
+                                    hitPos.x, hitPos.y, hitPos.z,
+                                    0, 0
+                            );
+                        });
+            }
+
+            @Override
+            @SideOnly(Side.CLIENT)
+            public void addInformation(ItemStack stack, World world, List<String> tooltip, ITooltipFlag tooltipFlag) {
+                tooltip.add(TextFormatting.GRAY + I18n.format("item.tranq_bomb.tooltip"));
+            }
+        }, "tranq_bomb", true);
 
         for (Map.Entry<String, RiftCreatureBuilder> creatureEntry : RiftCreatureRegistry.getCreatureBuilders().entrySet()) {
             String creatureName = creatureEntry.getKey();
@@ -68,9 +95,7 @@ public class RiftItems {
     }
 
     /*
-    public static void registerOreDictionaryTags() {
-
-    }
+    public static void registerOreDictionaryTags() {}
      */
 
     /**

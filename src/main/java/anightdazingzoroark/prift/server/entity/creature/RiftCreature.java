@@ -114,10 +114,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @NotNull
     private Map<String, AbstractPropertyValue<?>> propertyValueMap = Map.of();
 
-    //---anim names, for use in model classes---
-    @NotNull
-    private final List<String> animationNames = new ArrayList<>();
-
     //---remembered player targets (server only)---
     @NotNull
     private final List<UUID> rememberedPlayerTargetUUIDs = new ArrayList<>();
@@ -168,7 +164,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.moveHelper = new RiftCreatureMoveHelper(this);
         this.navigator = new RiftCreaturePathNavigate(this, worldIn);
         this.applyCreatureTypeSettings();
-        this.createAnimationNames();
         this.animData = new AnimationDataEntity(this, holder -> this.scale());
 
         if (worldIn != null && !worldIn.isRemote) {
@@ -224,7 +219,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.creatureType = builder;
         this.creatureInventory.setSize(this.creatureType.getInventorySize());
         this.applyCreatureTypeSettings();
-        this.createAnimationNames();
         this.animData = new AnimationDataEntity(this, holder -> this.scale());
         this.onCreatureTypeChanged();
 
@@ -1309,53 +1303,15 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.rayHitEffectMap.get(rayName).accept(this, rayOrigin, rayHitResult);
     }
 
-    //-----for animation names meant for use in model classes-----
-    private void createAnimationNames() {
-        this.animationNames.clear();
-
-        //---set normal stuff names---
-        this.animationNames.add("animation."+this.creatureType.getName()+".walk");
-        this.animationNames.add("animation."+this.creatureType.getName()+".sprint_pose");
-        if (this.creatureType.getNavigation().getCanLeap()) this.animationNames.add("animation."+this.creatureType.getName()+".leap");
-
-        //---for moves (for now phases arent supported so there)---
-        for (ImmutablePair<String, CreatureMoveBuilder> moveEntry : this.creatureType.getMoves()) {
-            String moveName = moveEntry.getKey();
-            CreatureMoveBuilder moveBuilder = moveEntry.getValue();
-            CreatureMoveChargeupBuilder chargeupBuilder = moveBuilder.getMoveChargeupBuilder();
-
-            //for chargeup moves
-            if (chargeupBuilder != null) {
-                for (ChargeupPhase currentChargeupPhase : ChargeupPhase.values()) {
-                    String chargeupPhaseName = currentChargeupPhase.name().toLowerCase();
-                    String controllerStateName = moveName + "_" + chargeupPhaseName;
-                    this.animationNames.add("animation."+this.creatureType.getName()+"."+controllerStateName);
-                }
-            }
-            else {
-                for (String animName : moveBuilder.getAnimNames()) {
-                    String moveAnimName = "animation." + this.creatureType.getName() + "." + animName;
-                    this.animationNames.add(moveAnimName);
-                }
-            }
-        }
-    }
-
-    //mostly for use in model classes to make anim identification easier lol
-    @NotNull
-    public List<String> getAnimationNames() {
-        return this.animationNames;
-    }
-
     //-----animation related methods-----
     @Override
-    @NonNull
+    @NotNull
     public AnimationDataEntity getAnimationData() {
         return this.animData;
     }
 
     @Override
-    public void initializeAnimationData(AnimationDataEntity animationData) {
+    public void initializeAnimationData(@NotNull AnimationDataEntity animationData) {
         //-----create animation controllers-----
         //---for normal stuff---
         animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "movement", "default",
