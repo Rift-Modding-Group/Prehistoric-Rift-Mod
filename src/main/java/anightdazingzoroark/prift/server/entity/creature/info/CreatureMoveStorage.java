@@ -487,15 +487,6 @@ public class CreatureMoveStorage {
         //-----for creature move user-----
         toReturn.setString("MoveUser", this.creatureType == null ? "" : this.creatureType.getName());
 
-        //-----for currently used move-----
-        toReturn.setString("CurrentMove", this.currentMove);
-        toReturn.setString("CurrentMoveChargeupPhase", this.currentMoveChargeupPhase == null ? "" : this.currentMoveChargeupPhase.name());
-        toReturn.setInteger("CurrentMoveTicks", this.currentMoveTicks);
-        toReturn.setInteger("CurrentMoveChargeUpTicks", this.currentMoveChargeUpTicks);
-        toReturn.setInteger("CurrentMoveBuildup", this.currentMoveBuildup);
-        toReturn.setBoolean("CurrentMoveHitEffectFired", this.currentMoveHitEffectFired);
-        toReturn.setBoolean("CurrentMoveEndEffectFired", this.currentMoveEndEffectFired);
-
         //-----for move cooldowns-----
 
         //final append
@@ -508,15 +499,6 @@ public class CreatureMoveStorage {
         //-----for creature move user-----
         String creatureTypeName = nbtTagCompound.getString("MoveUser");
         this.creatureType = creatureTypeName.isEmpty() ? null : RiftCreatureRegistry.getCreatureBuilder(creatureTypeName);
-
-        //-----for currently used move-----
-        this.currentMove = nbtTagCompound.getString("CurrentMove");
-        this.currentMoveChargeupPhase = this.readCurrentMoveChargeupPhase(nbtTagCompound);
-        this.currentMoveTicks = Math.max(0, nbtTagCompound.getInteger("CurrentMoveTicks"));
-        this.currentMoveChargeUpTicks = Math.max(0, nbtTagCompound.getInteger("CurrentMoveChargeUpTicks"));
-        this.currentMoveBuildup = Math.max(0, nbtTagCompound.getInteger("CurrentMoveBuildup"));
-        this.currentMoveHitEffectFired = nbtTagCompound.getBoolean("CurrentMoveHitEffectFired");
-        this.currentMoveEndEffectFired = nbtTagCompound.getBoolean("CurrentMoveEndEffectFired");
 
         //-----for move cooldowns-----
     }
