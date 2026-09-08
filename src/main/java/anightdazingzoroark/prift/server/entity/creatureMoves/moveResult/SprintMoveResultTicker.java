@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creatureMoves.moveResult;
 
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelperBase;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder.SprintMoveRuleBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
 import net.minecraft.entity.Entity;
@@ -19,11 +20,19 @@ public class SprintMoveResultTicker extends AbstractMoveResultTicker {
     private final double destinationY;
     private final double destinationZ;
     private final boolean hasDestination;
-    private boolean hasHitWhileSprinting;
+    @NotNull
+    private final SprintMoveRuleBuilder sprintMoveRuleBuilder;
+    @NotNull
+    private final List<EntityLivingBase> hitEntitiesWhileSprinting = new ArrayList<>();
     private int sprintTicks;
 
     public SprintMoveResultTicker(@NotNull RiftCreature creature, @NotNull MoveRuleBuilder moveRuleBuilder) {
         super(creature, moveRuleBuilder);
+        if (!(moveRuleBuilder instanceof SprintMoveRuleBuilder sprintMoveRuleBuilder)) {
+            throw new IllegalArgumentException("Sprint move results require a sprint move rule builder!");
+        }
+        this.sprintMoveRuleBuilder = sprintMoveRuleBuilder;
+
         EntityLivingBase target = creature.getAttackTarget();
         this.hasDestination = target != null
                 && target.isEntityAlive()
@@ -46,8 +55,8 @@ public class SprintMoveResultTicker extends AbstractMoveResultTicker {
         return this.hasDestination
                 && this.creature.isSprinting()
                 && this.creature.canUseStamina(staminaDrain)
-                && !this.hasHitWhileSprinting
                 && this.sprintTicks < MAX_SPRINT_TICKS
+                && !this.creature.collidedHorizontally
                 && !this.hasReachedDestination();
     }
 
@@ -67,15 +76,35 @@ public class SprintMoveResultTicker extends AbstractMoveResultTicker {
                 AxisAlignedBB aabb = this.creature.getAnimationData().getWorldSpaceAABB(frontZoneAnimatedBB.getName());
                 List<EntityLivingBase> hitEntities = this.creature.world.getEntitiesWithinAABB(EntityLivingBase.class, aabb)
                         .stream().filter(entity -> {
-                            return entity != null && !allHitEntities.contains(entity) && !this.creature.equals(entity) && !this.creature.isRelatedToEntity(entity);
+                            return entity != null && !allHitEntities.contains(entity) && !this.hitEntitiesWhileSprinting.contains(entity)
+                                    && !this.creature.equals(entity) && !this.creature.isRelatedToEntity(entity);
                         }).toList();
                 allHitEntities.addAll(hitEntities);
             }
 
-            //apply damage
+            //apply damage and knockback once to each entity without ending the sprint
             if (!allHitEntities.isEmpty()) {
-                for (Entity hitEntity : allHitEntities) this.creature.attackEntityFromSprint(hitEntity);
-                this.hasHitWhileSprinting = true;
+                for (Entity hitEntity : allHitEntities) {
+                    this.creature.attackEntityFromSprint(hitEntity, this.sprintMoveRuleBuilder.getBasePower());
+
+                    double displacementX = hitEntity.posX - this.creature.posX;
+                    double displacementZ = hitEntity.posZ - this.creature.posZ;
+                    double horizontalDisplacement = Math.sqrt(displacementX * displacementX + displacementZ * displacementZ);
+                    if (horizontalDisplacement <= 1E-5D) {
+                        double rotationYawRadians = Math.toRadians(this.creature.rotationYaw);
+                        displacementX = -Math.sin(rotationYawRadians);
+                        displacementZ = Math.cos(rotationYawRadians);
+                        horizontalDisplacement = 1D;
+                    }
+                    hitEntity.addVelocity(
+                            displacementX / horizontalDisplacement * 2D,
+                            0.5D,
+                            displacementZ / horizontalDisplacement * 2D
+                    );
+                    //for players
+                    hitEntity.velocityChanged = true;
+                }
+                this.hitEntitiesWhileSprinting.addAll(allHitEntities);
             }
         }
     }

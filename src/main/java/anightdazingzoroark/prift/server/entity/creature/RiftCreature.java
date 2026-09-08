@@ -571,8 +571,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //this method is to be used when attacking from sprinting. sprinting is considered
     //a physical move that makes contact
-    public void attackEntityFromSprint(Entity entityIn) {
-        this.attackEntityFromMovement(entityIn, 10);
+    public void attackEntityFromSprint(Entity entityIn, int basePower) {
+        this.attackEntityFromMovement(entityIn, basePower);
     }
 
     //this method is to be used when a leap attack makes contact with its target
