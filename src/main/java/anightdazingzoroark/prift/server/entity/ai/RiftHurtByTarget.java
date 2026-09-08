@@ -22,6 +22,7 @@ public class RiftHurtByTarget extends EntityAIHurtByTarget {
     public boolean shouldExecute() {
         EntityLivingBase revengeTarget = this.creature.getRevengeTarget();
         if (revengeTarget == null) return false;
+        if (revengeTarget == this.creature.getAttackTarget()) return false;
 
         //block if related to creature
         if (revengeTarget instanceof RiftCreature revengeCreature && this.creature.isRelatedToEntity(revengeCreature)) {
