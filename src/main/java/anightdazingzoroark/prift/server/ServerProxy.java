@@ -9,6 +9,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.server.entity.model.CreatureModel;
 import anightdazingzoroark.prift.server.item.RiftItems;
+import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.riftlib.model.ServerModelRegistry;
 import anightdazingzoroark.riftlib.resource.server.RiftLibCacheServer;
 import net.minecraftforge.common.MinecraftForge;
@@ -28,6 +29,7 @@ public class ServerProxy {
         //register events
         MinecraftForge.EVENT_BUS.register(new PrimerEventHandler(registryPrimer));
         MinecraftForge.EVENT_BUS.register(new ServerEvents());
+        MinecraftForge.EVENT_BUS.register(new RiftSounds());
 
         //register entities
         RiftCreatureRegistry.createCreatures();

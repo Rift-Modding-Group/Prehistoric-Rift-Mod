@@ -179,6 +179,12 @@
 			"timeline": {
 				"0.5": "function.create_offense_hitbox_by_tag('thagomizer');",
 				"0.625": "function.destroy_offense_hitbox_by_tag('thagomizer'); function.send_message('moveBlockBreakEffect');"
+			},
+			"sound_effects": {
+				"0.5": {
+					"effect": "prift.generic_move.tail",
+					"locator": "centerPoint"
+				}
 			}
 		},
 		"animation.stegosaurus.tail_sweep": {
@@ -242,6 +248,12 @@
 			"timeline": {
 				"0.4": "function.create_offense_hitbox_by_name('spinHitZone');",
 				"0.625": "function.destroy_offense_hitbox_by_name('spinHitZone');"
+			},
+			"sound_effects": {
+				"0.4": {
+					"effect": "prift.generic_move.tail",
+					"locator": "centerPoint"
+				}
 			}
 		},
 		"animation.stegosaurus.plate_fling": {
@@ -325,6 +337,12 @@
 			},
 			"timeline": {
 				"0.5": "function.send_message('moveHitEffect');"
+			},
+			"sound_effects": {
+				"0.5": {
+					"effect": "prift.stegosaurus.ranged_move",
+					"locator": "centerPoint"
+				}
 			}
 		}
 	}

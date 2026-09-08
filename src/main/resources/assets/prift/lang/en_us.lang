@@ -15,3 +15,18 @@ item.stegosaurus_plate.name=Stegosaurus Plate
 
 itemGroup.prift_items=Prehistoric Rift Items
 itemGroup.prift_spawn_eggs=Prehistoric Rift Spawn Eggs
+
+sounds.subtitle.tyrannosaurus_idle=Tyrannosaurus bellows
+sounds.subtitle.tyrannosaurus_hurt=Tyrannosaurus hurts
+sounds.subtitle.tyrannosaurus_death=Tyrannosaurus dies
+sounds.subtitle.tyrannosaurus_roar=Tyrannosaurus roars
+sounds.subtitle.tyrannosaurus_charge=Tyrannosaurus charges
+sounds.subtitle.tyrannosaurus_warn=Tyrannosaurus warns
+sounds.subtitle.stegosaurus_idle=Stegosaurus calls
+sounds.subtitle.stegosaurus_hurt=Stegosaurus hurts
+sounds.subtitle.stegosaurus_death=Stegosaurus dies
+sounds.subtitle.stegosaurus_ranged_move=Stegosaurus flings a plate
+sounds.subtitle.stegosaurus_warn=Stegosaurus warns
+sounds.subtitle.generic_bite_move=Creature bites
+sounds.subtitle.generic_stomp_move=Creature stomps
+sounds.subtitle.generic_tail_move=Creature swings its tail

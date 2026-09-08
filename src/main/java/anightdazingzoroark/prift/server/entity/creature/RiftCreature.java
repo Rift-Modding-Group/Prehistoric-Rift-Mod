@@ -27,6 +27,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilde
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
+import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.util.MathUtil;
@@ -66,6 +67,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -287,6 +289,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         //initialize creature moves
         CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
         creatureMoveStorage.setCreatureUser(this.creatureType);
+
+        //play the first idle sound immediately
+        this.playLivingSound();
 
         //return value
         return super.onInitialSpawn(difficulty, livingdata);
@@ -696,6 +701,44 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //mark dirty to force push on players
         if (entityIn instanceof EntityPlayer) entityIn.velocityChanged = true;
+    }
+
+    //-----sound management-----
+    @Override
+    @Nullable
+    protected SoundEvent getAmbientSound() {
+        return RiftSounds.getCreatureSound(this.creatureType.getName(), "idle");
+    }
+
+    @Override
+    @Nullable
+    protected SoundEvent getHurtSound(DamageSource damageSource) {
+        return RiftSounds.getCreatureSound(this.creatureType.getName(), "hurt");
+    }
+
+    @Override
+    @Nullable
+    protected SoundEvent getDeathSound() {
+        return RiftSounds.getCreatureSound(this.creatureType.getName(), "death");
+    }
+
+    @Override
+    public float getSoundVolume() {
+        return MathUtil.slopeResult(
+                this.getAgeInTicks(), true,
+                0, this.creatureType.getDaysUntilAdult() * 24000,
+                0.5f, 2f
+        );
+    }
+
+    @Override
+    public float getSoundPitch() {
+        float maturity = MathUtil.slopeResult(
+                this.getAgeInTicks(), true,
+                0, this.creatureType.getDaysUntilAdult() * 24000,
+                0f, 1f
+        );
+        return 1.25f - maturity * 0.25f + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.05f;
     }
 
     //-----herding management-----

@@ -123,6 +123,12 @@
 			"timeline": {
 				"0.15": "function.create_offense_hitbox_by_tag('jaw');",
 				"0.25": "function.destroy_offense_hitbox_by_tag('jaw'); function.send_message('moveBlockBreakEffect');"
+			},
+			"sound_effects": {
+				"0.15": {
+					"effect": "prift.generic_move.bite",
+					"locator": "centerPoint"
+				}
 			}
 		},
 		"animation.tyrannosaurus.incapacitated": {
@@ -204,6 +210,12 @@
 			},
 			"timeline": {
 				"0.625": "function.send_message('moveHitEffect');"
+			},
+			"sound_effects": {
+				"0.625": {
+					"effect": "prift.generic_move.stomp",
+					"locator": "stompOrigin"
+				}
 			}
 		},
 		"animation.tyrannosaurus.warn": {
@@ -246,10 +258,17 @@
 						"1.25": [0, 0, 0]
 					}
 				}
+			},
+			"sound_effects": {
+				"0.5": {
+					"effect": "prift.tyrannosaurus.warn",
+					"locator": "centerPoint"
+				}
 			}
 		},
 		"animation.tyrannosaurus.sprint_pose": {
 			"loop": true,
+			"animation_length": 5,
 			"bones": {
 				"body": {
 					"rotation": [5, 0, 0]
@@ -271,6 +290,12 @@
 				},
 				"rightClaw": {
 					"rotation": [37.5, 0, 0]
+				}
+			},
+			"sound_effects": {
+				"0.0": {
+					"effect": "prift.tyrannosaurus.charge",
+					"locator": "centerPoint"
 				}
 			}
 		},
@@ -481,6 +506,12 @@
 			},
 			"timeline": {
 				"0.5": "function.send_message('moveHitEffect');"
+			},
+			"sound_effects": {
+				"0.5": {
+					"effect": "prift.tyrannosaurus.roar",
+					"locator": "centerPoint"
+				}
 			}
 		},
 		"animation.tyrannosaurus.leap": {

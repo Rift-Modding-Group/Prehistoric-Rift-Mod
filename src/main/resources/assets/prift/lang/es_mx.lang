@@ -15,3 +15,18 @@ item.stegosaurus_plate.name=Placa de Stegosaurus
 
 itemGroup.prift_items=Items de Prehistoric Rift
 itemGroup.prift_spawn_eggs=Generadores de Prehistoric Rift
+
+sounds.subtitle.tyrannosaurus_idle=Tyrannosaurus brama
+sounds.subtitle.tyrannosaurus_hurt=Tyrannosaurus herido
+sounds.subtitle.tyrannosaurus_death=Tyrannosaurus muere
+sounds.subtitle.tyrannosaurus_roar=Tyrannosaurus ruge
+sounds.subtitle.tyrannosaurus_charge=Tyrannosaurus embiste
+sounds.subtitle.tyrannosaurus_warn=Tyrannosaurus advierte
+sounds.subtitle.stegosaurus_idle=Stegosaurus llama
+sounds.subtitle.stegosaurus_hurt=Stegosaurus herido
+sounds.subtitle.stegosaurus_death=Stegosaurus muere
+sounds.subtitle.stegosaurus_ranged_move=Stegosaurus lanza una placa
+sounds.subtitle.stegosaurus_warn=Stegosaurus advierte
+sounds.subtitle.generic_bite_move=Una criatura muerde
+sounds.subtitle.generic_stomp_move=Una criatura pisa fuerte
+sounds.subtitle.generic_tail_move=Una criatura balancea la cola
