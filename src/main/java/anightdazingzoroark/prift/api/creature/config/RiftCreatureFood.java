@@ -22,6 +22,10 @@ public class RiftCreatureFood {
     @SerializedName("percentReenergized")
     public Float percentReenergized;
 
+    //how effective the food item is when taming
+    @SerializedName("tameEffectiveness")
+    public Float tameEffectiveness;
+
     @SerializedName("foodEffects")
     public List<FoodEffect> foodEffects;
 
@@ -58,6 +62,11 @@ public class RiftCreatureFood {
 
         public Builder setPercentReenergized(float percentReenergized) {
             this.food.percentReenergized = percentReenergized;
+            return this;
+        }
+
+        public Builder setTamingEffectiveness(float tamingEffectiveness) {
+            this.food.tameEffectiveness = tamingEffectiveness;
             return this;
         }
 

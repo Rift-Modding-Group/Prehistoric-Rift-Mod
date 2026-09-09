@@ -12,6 +12,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilde
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
+import anightdazingzoroark.prift.util.RiftUtil;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
@@ -134,6 +135,13 @@ public class RiftCreatureRegistry {
                         .setDaysUntilAdult(7)
                         .setRetaliateWhenAttacked()
                         .setCanRetreat()
+                        .setFleeBehavior(
+                                16f,
+                                (creature, threat) -> {
+                                    return creature.getHealth() <= creature.getMaxHealth() * 0.15f
+                                            && RiftUtil.entityInTargetGroup(threat, "human");
+                                }
+                        )
                         .setHitboxInformation(Map.of(
                                 "leg", creature -> 0.25D,
                                 "body", creature -> 0.75D,
@@ -352,6 +360,14 @@ public class RiftCreatureRegistry {
                         ))
                         .setIsHerder(8)
                         .setCanRetreat()
+                        .setFleeBehavior(
+                                16f,
+                                (creature, threat) -> {
+                                    return creature.getHealth() <= creature.getMaxHealth() * 0.15f && !creature.isInHerd()
+                                            && (RiftUtil.entityInTargetGroup(threat, "human")
+                                                || RiftUtil.entityInTargetGroup(threat, "carnivoreCreature"));
+                                }
+                        )
                         .addBlockBreakLevel("axe", 2)
                         //---moves---
                         .addMove("tail_stab", CreatureMoveCommon.standardMeleeMove.copy()

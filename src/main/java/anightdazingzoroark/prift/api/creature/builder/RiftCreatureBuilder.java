@@ -5,11 +5,13 @@ import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractProperty
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.BooleanPropertyValue;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.IntegerPropertyValue;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.EntityLivingBase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -21,6 +23,9 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     @Nullable
     private Consumer<ICreature> updateEffect;
     private Map<String, Function<ICreature, Double>> hitboxTagDamageInfo;
+    private float fleeSearchDistance;
+    @Nullable
+    private BiPredicate<ICreature, EntityLivingBase> fleePredicate;
 
     /**
      * Set the name of the species of the creature, is to be required
@@ -39,6 +44,31 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     public String getLocalizedName() {
         return I18n.format("entity."+this.creatureName+".name");
     }
+
+    /**
+     * Make the creature flee matching nearby entities while the predicate is satisfied.
+     * The predicate can include conditions such as health and whether a herder is currently solitary.
+     */
+    public RiftCreatureBuilder setFleeBehavior(
+            float searchDistance, @NotNull BiPredicate<ICreature, EntityLivingBase> fleePredicate
+    ) {
+        this.checkIfLocked();
+        if (searchDistance <= 0f) throw new IllegalArgumentException("Flee search distance must be greater than 0!");
+
+        this.fleeSearchDistance = searchDistance;
+        this.fleePredicate = fleePredicate;
+        return this;
+    }
+
+    public float getFleeSearchDistance() {
+        return this.fleeSearchDistance;
+    }
+
+    @Nullable
+    public BiPredicate<ICreature, EntityLivingBase> getFleePredicate() {
+        return this.fleePredicate;
+    }
+
     /**
      * A creature's "phase" implies change in appearance, usable moves, and stats
      * Creatures can change between phases depending on different things

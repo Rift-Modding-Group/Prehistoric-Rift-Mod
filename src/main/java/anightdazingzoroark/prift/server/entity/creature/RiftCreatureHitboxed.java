@@ -38,6 +38,15 @@ public class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUs
     }
 
     /**
+     * disable vanilla raytraces and entity collisions
+     * hitboxes will take care of those instead
+     * */
+    @Override
+    public boolean canBeCollidedWith() {
+        return false;
+    }
+
+    /**
      * hitboxed creatures use their main body hitbox
      * */
     @Override

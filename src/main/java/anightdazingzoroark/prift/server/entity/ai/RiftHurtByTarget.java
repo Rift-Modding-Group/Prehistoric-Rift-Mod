@@ -22,6 +22,7 @@ public class RiftHurtByTarget extends EntityAIHurtByTarget {
     public boolean shouldExecute() {
         EntityLivingBase revengeTarget = this.creature.getRevengeTarget();
         if (revengeTarget == null) return false;
+        if (this.creature.shouldFleeFrom(revengeTarget)) return false;
         if (revengeTarget == this.creature.getAttackTarget()) return false;
 
         //block if related to creature
@@ -55,6 +56,7 @@ public class RiftHurtByTarget extends EntityAIHurtByTarget {
     public boolean shouldContinueExecuting() {
         //eeeeeeeee
         if (this.creature.getAttackTarget() == null || this.creature.getAttackTarget() != this.target) return false;
+        if (this.creature.shouldFleeFrom(this.target)) return false;
 
         //herder checks (if herder is not leader it cannot target)
         if (this.creature.isInHerd() && !this.creature.isHerdLeader()) {

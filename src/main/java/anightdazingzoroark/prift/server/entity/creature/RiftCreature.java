@@ -54,6 +54,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.*;
+import net.minecraft.entity.ai.EntityAIAvoidEntity;
 import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
@@ -136,9 +137,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private int rage;
     private int currentRageThreshold;
     private int rageEndCountdown;
-    //tiredness of creature from tranq bombs. counts down every 2 seconds
+    //tiredness of creature from tranq bombs. counts down every 0.5 seconds
     private int tiredness;
-    private int tirednessDecayTicks;
+    private int tirednessCountdown;
     private RiftCreatureEnums.@Nullable SleepCause sleepCause;
     //herd helper
     @Nullable
@@ -306,11 +307,34 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             this.targetTasks.addTask(1, new RiftHurtByTarget(this));
         }
         this.targetTasks.addTask(2, new RiftFindTarget(this, true));
+
+        if (this.creatureType.getFleePredicate() != null) {
+            this.tasks.addTask(0, new EntityAIAvoidEntity<EntityLivingBase>(
+                    this, EntityLivingBase.class,
+                    this::shouldFleeFrom, this.creatureType.getFleeSearchDistance(),
+                    1D, 1D
+            ) {
+                @Override
+                public boolean shouldContinueExecuting() {
+                    return this.closestLivingEntity != null
+                            && RiftCreature.this.shouldFleeFrom(this.closestLivingEntity)
+                            && super.shouldContinueExecuting();
+                }
+
+                @Override
+                public void startExecuting() {
+                    RiftCreature.this.setAttackTarget(null);
+                    super.startExecuting();
+                }
+            });
+        }
         this.tasks.addTask(1, new RiftUnmountedUseMove(this));
         if (!this.creatureType.getNavigation().getCanSwim()) {
             this.tasks.addTask(2, new RiftGoToLandFromWater(this));
         }
-        this.tasks.addTask(3, new RiftFollowHerdLeader(this));
+        if (this.creatureType.isHerder()) {
+            this.tasks.addTask(3, new RiftFollowHerdLeader(this));
+        }
         this.tasks.addTask(4, new RiftWander(this));
         this.tasks.addTask(5, new EntityAILookIdle(this) {
             @Override
@@ -335,20 +359,24 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 this.setIsSleeping(true);
             }
             if (this.tiredness > 0) {
-                this.tirednessDecayTicks++;
-                if (this.tirednessDecayTicks >= 40) {
+                this.tirednessCountdown++;
+                //as good as 0.5 seconds
+                if (this.tirednessCountdown >= 10) {
                     this.tiredness--;
-                    this.tirednessDecayTicks = 0;
-                    if (this.tiredness <= 0 && this.sleepCause == RiftCreatureEnums.SleepCause.TRANQ_BOMB) {
-                        this.sleepCause = null;
-                        this.setIsSleeping(false);
-                    }
+                    this.tirednessCountdown = 0;
                 }
             }
-            else this.tirednessDecayTicks = 0;
+            //wake up
+            if (this.tiredness <= 0 && this.sleepCause == RiftCreatureEnums.SleepCause.TRANQ_BOMB) {
+                this.sleepCause = null;
+                this.setIsSleeping(false);
+            }
 
             //tick herding
             if (this.herdHelper != null) this.herdHelper.onUpdate();
+
+            //creatures must drop threats that they are configured to flee
+            if (this.shouldFleeFrom(this.getAttackTarget())) this.setAttackTarget(null);
 
             //keep the pose active for the full airborne portion even if pathing
             //relinquishes its leap action before the creature reaches the ground
@@ -635,9 +663,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         return false;
     }
 
+    public boolean shouldFleeFrom(@Nullable EntityLivingBase entity) {
+        return entity != null && this.creatureType.getFleePredicate() != null
+                && this.creatureType.getFleePredicate().test(this, entity);
+    }
+
     @Override
     public void setAttackTarget(@Nullable EntityLivingBase target) {
-        if (target != null && this.getIsSleeping()) return;
+        if (target != null && (this.getIsSleeping() || this.shouldFleeFrom(target))) return;
         boolean targetChanged = target != this.getAttackTarget();
         if (targetChanged) this.unableToPathToTarget = false;
         super.setAttackTarget(target);
@@ -905,7 +938,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //-----tiredness management-----
     public void addTiredness(int value) {
         if (this.world.isRemote || value <= 0) return; //server only
-        if (this.getHealth() > this.getMaxHealth() * 0.1f) return; //must be at 10% of max health or less to be tired
+        if (this.getHealth() > this.getMaxHealth() * 0.15f) return; //must be at 15% of max health or less to be tired
         this.tiredness = Math.max(0, this.tiredness + value);
     }
 
@@ -1304,7 +1337,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //sleep state
         compound.setInteger("Tiredness", this.tiredness);
-        compound.setInteger("TirednessDecayTicks", this.tirednessDecayTicks);
         compound.setBoolean("Sleeping", this.getIsSleeping());
         compound.setByte("SleepCause", this.sleepCause == null ? (byte) -1 : (byte) this.sleepCause.ordinal());
 
@@ -1335,7 +1367,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //sleep state is restored last so entering sleep can cancel a saved move
         this.tiredness = Math.max(0, compound.getInteger("Tiredness"));
-        this.tirednessDecayTicks = Math.clamp(compound.getInteger("TirednessDecayTicks"), 0, 39);
         int savedSleepCauseOrdinal = compound.hasKey("SleepCause", 1) ? compound.getByte("SleepCause") : -1;
         this.sleepCause = savedSleepCauseOrdinal >= 0 ? RiftCreatureEnums.SleepCause.values()[savedSleepCauseOrdinal] : null;
 

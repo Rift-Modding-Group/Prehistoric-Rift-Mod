@@ -62,6 +62,7 @@ public class RiftFindTarget extends EntityAITarget {
     @Override
     public boolean shouldContinueExecuting() {
         if (!this.creature.canLeadHerdBehavior()) return false;
+        if (this.creature.shouldFleeFrom(this.targetEntity)) return false;
 
         EntityLivingBase existingTarget = this.creature.getAttackTarget();
         if (this.creature.isInHerd() && existingTarget != null && existingTarget != this.targetEntity) {
@@ -93,6 +94,7 @@ public class RiftFindTarget extends EntityAITarget {
     @Override
     protected boolean isSuitableTarget(@Nullable EntityLivingBase target, boolean includeInvincibles) {
         if (target == null) return false;
+        if (this.creature.shouldFleeFrom(target)) return false;
 
         if (this.creature.isRelatedToEntity(target)) return false;
 

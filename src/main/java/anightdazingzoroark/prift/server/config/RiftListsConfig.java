@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class RiftListsConfig {
     /**
-     * A configurable common list of entities that can be targeted by a creature.
+     * A configurable common list of entities that can be targeted by a creature or fled from.
      * */
     @SerializedName("targetGroups")
     public Map<String, List<String>> targetGroups = new LinkedHashMap<>();
