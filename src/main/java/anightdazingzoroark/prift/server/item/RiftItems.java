@@ -11,7 +11,6 @@ import anightdazingzoroark.riftlib.particle.RiftLibParticleHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -78,6 +77,7 @@ public class RiftItems {
             public ProjectileBuilder getProjectileBuilder() {
                 return new ProjectileBuilder().setName("tranq_bomb")
                         .setUseCubeModel().setHasParticleTrail()
+                        .registerBooleanValue("HasHitHitbox", false)
                         .setOnImpactFromPlayerEffect((player, projectile, hitEntity, hitPos) -> {
                             this.onImpactEffect(player, projectile, hitPos);
                         })
@@ -104,20 +104,25 @@ public class RiftItems {
                 );
                 for (Entity entity : affectedEntities) {
                     if (entity == null) continue;
-                    this.onHitEntity(player, entity, projectile);
+                    this.onHitEntity(player, entity, projectile, false);
                 }
             }
 
-            private void onHitEntity(@Nullable EntityPlayer player, @NotNull Entity entity, @NotNull IProjectile projectile) {
+            private void onHitEntity(@Nullable EntityPlayer player, @NotNull Entity entity, @NotNull IProjectile projectile, boolean fromHitbox) {
+                boolean canHitFromHitbox = !fromHitbox || !(boolean) projectile.getProperty("HasHitHitbox").getValue();
+
                 if (entity instanceof MultiPartEntityPart entityPart) {
-                    this.onHitEntity(player, (Entity) entityPart.parent, projectile);
+                    this.onHitEntity(player, (Entity) entityPart.parent, projectile, true);
                 }
-                else if (entity instanceof RiftCreature hitCreature) {
+                else if (entity instanceof RiftCreature hitCreature && canHitFromHitbox) {
                     hitCreature.addTiredness(projectile.getEntityWorld().rand.nextInt(20, 36));
                 }
-                else if (RiftUtil.entityInTargetGroup(entity, "animal")) {
+                else if (RiftUtil.entityInTargetGroup(entity, "animal") && canHitFromHitbox) {
                     entity.attackEntityFrom(DamageSource.causeThrownDamage((Entity) projectile, player), 10f);
                 }
+
+                //extra lock
+                if (fromHitbox && !(boolean) projectile.getProperty("HasHitHitbox").getValue()) projectile.setProperty("HasHitHitbox", true);
             }
 
             @Override

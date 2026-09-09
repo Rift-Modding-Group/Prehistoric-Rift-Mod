@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataProjectile;
+import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
 import anightdazingzoroark.riftlib.projectile.RiftLibProjectile;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -25,6 +26,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;
 
@@ -42,6 +44,9 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
     private Function<EntityPlayer, Double> damageByPlayer;
     @Nullable
     private final ProjectileSourceType projectileSource;
+    //--custom property values, which can be called and manipulated from a projectile builder--
+    @NotNull
+    private Map<String, AbstractPropertyValue<?>> propertyValueMap = Map.of();
 
     public RiftProjectile(World worldIn) {
         super(worldIn);
@@ -55,7 +60,7 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
         super(worldIn, x, y, z);
         this.projectileBuilder = builder;
         this.creatureMoveBuilder = new CreatureMoveBuilder();
-        this.setSpecialGetters(builder);
+        this.setFromBuilder(builder);
         this.projectileSource = ProjectileSourceType.DISPENSER;
     }
 
@@ -65,7 +70,7 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
         this.projectileBuilder = builder;
         this.creatureMoveBuilder = new CreatureMoveBuilder();
         this.setPosition(shooter.posX, shooter.posY + shooter.height / 2D, shooter.posZ);
-        this.setSpecialGetters(builder);
+        this.setFromBuilder(builder);
         this.projectileSource = ProjectileSourceType.PLAYER;
         this.damageByPlayer = damageByPlayer;
     }
@@ -76,14 +81,15 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
         this.projectileBuilder = builder;
         this.creatureMoveBuilder = creatureMoveBuilder;
         this.setPosition(shooter.posX, shooter.posY + shooter.height / 2D, shooter.posZ);
-        this.setSpecialGetters(builder);
+        this.setFromBuilder(builder);
         this.projectileSource = ProjectileSourceType.CREATURE;
     }
 
-    private void setSpecialGetters(@NotNull ProjectileBuilder builder) {
+    private void setFromBuilder(@NotNull ProjectileBuilder builder) {
         this.dataManager.set(NAME, builder.getName());
         this.dataManager.set(USE_CUBE_MODEL, builder.getUseCubeModel());
         this.dataManager.set(HAS_PARTICLE_TAIL, builder.getHasParticleTrail());
+        if (builder.getPropertyValueMap() != null) this.propertyValueMap = Map.copyOf(builder.getPropertyValueMap());
     }
 
     @Override
@@ -125,6 +131,24 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
 
     public boolean getHasParticleTrail() {
         return this.dataManager.get(HAS_PARTICLE_TAIL);
+    }
+
+    //-----properties management-----
+    @SuppressWarnings("unchecked")
+    public <I extends AbstractPropertyValue<?>> I getProperty(@NotNull String key) {
+        if (!this.propertyValueMap.containsKey(key)) {
+            throw new UnsupportedOperationException("Key " + key + " does not exist in property map for projectile " + this.getName() + "!");
+        }
+        return (I) this.propertyValueMap.get(key);
+    }
+
+    public <I> void setProperty(@NotNull String key, I value) {
+        AbstractPropertyValue<I> propertyValue = this.getProperty(key);
+        if (propertyValue.getHeldClass() != value.getClass()) {
+            throw new UnsupportedOperationException("Key " + key + " does not represent given value " + value + "!");
+        }
+        propertyValue.setValue(value);
+        //todo: make this able to sync to client as well
     }
 
     //-----from RiftLibProjectile-----

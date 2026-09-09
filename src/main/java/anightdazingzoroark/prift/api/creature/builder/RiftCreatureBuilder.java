@@ -76,6 +76,7 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     public Map<String, AbstractPropertyValue<?>> getPropertyValueMap() {
         return this.propertyValueMap;
     }
+
     //-----additional values end here-----
     /**
      * Update effects are extra stuff that happens with the creature every tick

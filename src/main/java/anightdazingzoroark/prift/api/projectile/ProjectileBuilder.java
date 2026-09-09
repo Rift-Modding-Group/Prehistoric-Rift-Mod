@@ -1,14 +1,20 @@
 package anightdazingzoroark.prift.api.projectile;
 
 import anightdazingzoroark.prift.api.creature.ICreature;
+import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.api.util.QuadConsumer;
 import anightdazingzoroark.prift.api.util.TriConsumer;
+import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
+import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.BooleanPropertyValue;
+import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.IntegerPropertyValue;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class ProjectileBuilder {
@@ -28,6 +34,8 @@ public class ProjectileBuilder {
     private boolean rotateAlongPitch;
     private boolean useCubeModel;
     private boolean hasParticleTrail;
+    @Nullable
+    private Map<String, AbstractPropertyValue<?>> propertyValueMap;
 
     /**
      * Set the name of the projectile, is to be required
@@ -145,5 +153,23 @@ public class ProjectileBuilder {
 
     public boolean getHasParticleTrail() {
         return this.hasParticleTrail;
+    }
+
+    //-----for additional values to this particle. they do sync from server to client, but they do not persist.-----
+    public ProjectileBuilder registerIntegerValue(@NotNull String name, int initVal) {
+        if (this.propertyValueMap == null) this.propertyValueMap = new HashMap<>();
+        this.propertyValueMap.put(name, new IntegerPropertyValue(name, initVal));
+        return this;
+    }
+
+    public ProjectileBuilder registerBooleanValue(@NotNull String name, boolean initVal) {
+        if (this.propertyValueMap == null) this.propertyValueMap = new HashMap<>();
+        this.propertyValueMap.put(name, new BooleanPropertyValue(name, initVal));
+        return this;
+    }
+
+    @Nullable
+    public Map<String, AbstractPropertyValue<?>> getPropertyValueMap() {
+        return this.propertyValueMap;
     }
 }

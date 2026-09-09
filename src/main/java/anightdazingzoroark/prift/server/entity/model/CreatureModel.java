@@ -24,7 +24,7 @@ public class CreatureModel extends AnimatedGeoModel<RiftCreature> {
     @NotNull
     public String getTextureLocation(RiftCreature riftCreature) {
         String name = riftCreature.getCreatureType().getName();
-        //note: is like this as color variants will be removed soon
-        return "entities/"+name+"/"+name+"_1.png";
+        String sleepNote = riftCreature.getIsSleeping() ? "_sleep" : "";
+        return "entities/"+name+"/"+name+sleepNote+".png";
     }
 }

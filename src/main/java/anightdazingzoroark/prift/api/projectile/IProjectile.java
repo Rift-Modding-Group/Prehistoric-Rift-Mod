@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.api.projectile;
 
 import anightdazingzoroark.prift.api.creature.ICreature;
+import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -29,4 +30,8 @@ public interface IProjectile {
 
     @Nullable
     EntityPlayer getPlayerShooter();
+
+    <I extends AbstractPropertyValue<?>> I getProperty(@NotNull String key);
+
+    <I> void setProperty(@NotNull String key, I value);
 }
