@@ -23,68 +23,6 @@
 				}
 			}
 		},
-		"animation.tyrannosaurus.sitting": {
-			"loop": true,
-			"bones": {
-				"body": {
-					"position": [0, -6, 0]
-				},
-				"leftLeg": {
-					"position": [0, -6, 0]
-				},
-				"leftShin": {
-					"position": [0, 7, -3]
-				},
-				"leftFoot": {
-					"position": [0, -1, 0]
-				},
-				"rightLeg": {
-					"position": [0, -6, 0]
-				},
-				"rightShin": {
-					"position": [0, 7, -3]
-				},
-				"rightFoot": {
-					"position": [0, -1, 0]
-				}
-			}
-		},
-		"animation.tyrannosaurus.attack": {
-			"animation_length": 0.52,
-			"bones": {
-				"body": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.12": [-7.5, 0, 0],
-						"0.24": [9, 0, 0],
-						"0.52": [0, 0, 0]
-					}
-				},
-				"neck": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.12": [2.5, 0, 0],
-						"0.24": [2.5, 0, 0],
-						"0.52": [0, 0, 0]
-					}
-				},
-				"head": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.12": [22.5, 0, 0],
-						"0.24": [22.5, 0, 0],
-						"0.52": [0, 0, 0]
-					}
-				},
-				"lowerJaw": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.12": [30, 0, 0],
-						"0.24": [0, 0, 0]
-					}
-				}
-			}
-		},
 		"animation.tyrannosaurus.bite": {
 			"animation_length": 0.5,
 			"bones": {
@@ -128,38 +66,6 @@
 				"0.15": {
 					"effect": "prift.generic_move.bite",
 					"locator": "centerPoint"
-				}
-			}
-		},
-		"animation.tyrannosaurus.incapacitated": {
-			"loop": true,
-			"bones": {
-				"base": {
-					"position": [0, -11, 0]
-				},
-				"tail0": {
-					"rotation": [-5, 0, 0]
-				},
-				"neck": {
-					"rotation": [15, 0, 0]
-				},
-				"leftArm": {
-					"rotation": [-85, 0, 0]
-				},
-				"leftClaw": {
-					"rotation": [50, 0, 0]
-				},
-				"rightArm": {
-					"rotation": [-85, 0, 0]
-				},
-				"rightClaw": {
-					"rotation": [50, 0, 0]
-				},
-				"leftLeg": {
-					"rotation": [70, 0, 0]
-				},
-				"rightLeg": {
-					"rotation": [70, 0, 0]
 				}
 			}
 		},
@@ -215,54 +121,6 @@
 				"0.625": {
 					"effect": "prift.generic_move.stomp",
 					"locator": "stompOrigin"
-				}
-			}
-		},
-		"animation.tyrannosaurus.warn": {
-			"animation_length": 1.25,
-			"bones": {
-				"body": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.25": [-7.5, 0, 0],
-						"0.5": [5, 0, 0],
-						"1.0": [5, 0, 0],
-						"1.25": [0, 0, 0]
-					}
-				},
-				"neck": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.25": [7.5, 0, 0],
-						"0.5": [-5, 0, 0],
-						"1.0": [-5, 0, 0],
-						"1.25": [0, 0, 0]
-					}
-				},
-				"head": {
-					"rotation": {
-						"0.25": [0, 0, 0],
-						"0.375": [0, 0, 12.5],
-						"0.5": [0, 0, -12.5],
-						"0.625": [0, 0, 12.5],
-						"0.75": [0, 0, -12.5],
-						"0.875": [0, 0, 12.5],
-						"1.0": [0, 0, 0]
-					}
-				},
-				"lowerJaw": {
-					"rotation": {
-						"0.25": [0, 0, 0],
-						"0.5": [22.5, 0, 0],
-						"1.0": [22.5, 0, 0],
-						"1.25": [0, 0, 0]
-					}
-				}
-			},
-			"sound_effects": {
-				"0.5": {
-					"effect": "prift.tyrannosaurus.warn",
-					"locator": "centerPoint"
 				}
 			}
 		},
@@ -547,6 +405,56 @@
 				},
 				"rightLeg": {
 					"rotation": [30, 0, 0]
+				}
+			}
+		},
+		"animation.tyrannosaurus.sleep": {
+			"loop": true,
+			"bones": {
+				"base": {
+					"position": [0, -6, 0]
+				},
+				"body": {
+					"position": [0, -3, 0]
+				},
+				"tail0": {
+					"rotation": [-12.8376, 9.0548, -4.2618]
+				},
+				"tail1": {
+					"rotation": [9.3086, 26.4885, 7.6734]
+				},
+				"tail2": {
+					"rotation": [-14.9695, 36.8351, 7.5897],
+					"position": [0.6, 0, 0]
+				},
+				"neck": {
+					"rotation": [26.3188, -28.8774, 1.3112],
+					"position": [1.2, -0.2, -3]
+				},
+				"head": {
+					"rotation": [-37.265, -16.3881, 15.6336]
+				},
+				"leftArm": {
+					"rotation": [-100, 0, 0]
+				},
+				"leftClaw": {
+					"rotation": [37.5, 0, 0]
+				},
+				"rightArm": {
+					"rotation": [-108.1685, -56.1582, 15.247],
+					"position": [-1, 0, 1]
+				},
+				"rightClaw": {
+					"rotation": [37.5, 0, 0]
+				},
+				"frontBody": {
+					"rotation": [12.5, 0, 0]
+				},
+				"leftShin": {
+					"position": [0, 6, -3]
+				},
+				"rightShin": {
+					"position": [0, 6, -3]
 				}
 			}
 		}

@@ -1,10 +1,12 @@
 package anightdazingzoroark.prift.api.projectile;
 
 import anightdazingzoroark.prift.api.creature.ICreature;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
@@ -22,6 +24,9 @@ public interface IProjectile {
 
     Vec3d getPositionVector();
 
-    @NotNull
-    ICreature getShooter();
+    @Nullable
+    ICreature getCreatureShooter();
+
+    @Nullable
+    EntityPlayer getPlayerShooter();
 }

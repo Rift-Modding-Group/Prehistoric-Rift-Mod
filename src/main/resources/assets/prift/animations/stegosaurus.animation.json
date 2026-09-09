@@ -43,43 +43,6 @@
 				}
 			}
 		},
-		"animation.stegosaurus.sitting": {
-			"loop": true,
-			"bones": {
-				"bodyBack": {
-					"position": [0, -5.5, 0]
-				},
-				"leftFrontLeg": {
-					"rotation": [-90, 0, 0],
-					"position": [0, -2, 4]
-				},
-				"rightFrontLeg": {
-					"rotation": [-90, 0, 0],
-					"position": [0, -2, 4]
-				},
-				"tail0": {
-					"rotation": [-10, 0, 0]
-				},
-				"tail1": {
-					"rotation": [-5, 0, 0]
-				},
-				"tail2": {
-					"rotation": [-5, 0, 0]
-				},
-				"leftBackLeg": {
-					"position": [0, 0.5, 0]
-				},
-				"rightBackLeg": {
-					"position": [0, 0.5, 0]
-				},
-				"rightBackShin": {
-					"position": [0, 5, 0]
-				},
-				"leftBackShin": {
-					"position": [0, 5, 0]
-				}
-			}
-		},
 		"animation.stegosaurus.tail_stab": {
 			"animation_length": 1.5,
 			"bones": {
@@ -342,6 +305,49 @@
 				"0.5": {
 					"effect": "prift.stegosaurus.ranged_move",
 					"locator": "centerPoint"
+				}
+			}
+		},
+		"animation.stegosaurus.sleep": {
+			"loop": true,
+			"bones": {
+				"body": {
+					"position": [0, -7.5, 0]
+				},
+				"neck": {
+					"rotation": [14.1883, -23.0042, -0.9015],
+					"position": [-0.6, 0, 0]
+				},
+				"head": {
+					"rotation": [-15, 0, 0],
+					"position": [0, 0, 1]
+				},
+				"leftFrontLeg": {
+					"rotation": [-90, 15, 0]
+				},
+				"rightFrontLeg": {
+					"rotation": [-90, -30, 0]
+				},
+				"tail0": {
+					"rotation": [-16.1768, 26.8849, -0.0501]
+				},
+				"tail1": {
+					"rotation": [11.0655, 19.251, 10.5888]
+				},
+				"tail2": {
+					"rotation": [1.766, 19.2705, 5.2521]
+				},
+				"leftBackLeg": {
+					"position": [0, 2, 0]
+				},
+				"leftBackShin": {
+					"position": [0, 5.5, 0]
+				},
+				"rightBackLeg": {
+					"position": [0, 2, 0]
+				},
+				"rightBackShin": {
+					"position": [0, 5.5, 0]
 				}
 			}
 		}

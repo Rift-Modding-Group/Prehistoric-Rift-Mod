@@ -116,6 +116,12 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
         return this.leapHelper.isLeaping();
     }
 
+    public void stopMovement() {
+        this.creatureAction = CreatureAction.WAIT;
+        this.leapHelper.resetDelay();
+        this.stopWalkingControls();
+    }
+
     @NotNull
     public RiftCreatureLeapHelper getLeapHelper() {
         return this.leapHelper;

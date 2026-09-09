@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.util;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.ServerProxy;
+import anightdazingzoroark.prift.server.config.RiftListsConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -13,6 +15,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.UUID;
 
 public class RiftUtil {
@@ -64,5 +67,13 @@ public class RiftUtil {
         int metadata = Integer.parseInt(string.substring(secondColonIndex + 1));
 
         return new ImmutablePair<>(itemId, metadata);
+    }
+
+    public static boolean entityInTargetGroup(@NotNull Entity entity, @NotNull String targetGroup) {
+        RiftListsConfig listsConfig = ServerProxy.jsonConfigParser.getListsConfig();
+        List<String> targetGroupList = listsConfig.targetGroups.get(targetGroup);
+        if (targetGroupList == null) return false;
+
+        return targetGroupList.stream().anyMatch(entityId -> entityMatchesID(entity, entityId));
     }
 }

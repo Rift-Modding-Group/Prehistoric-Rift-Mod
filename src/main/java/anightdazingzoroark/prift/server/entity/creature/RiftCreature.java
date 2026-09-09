@@ -109,6 +109,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private static final DataParameter<String> CREATURE_PHASE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.STRING);
     private static final DataParameter<Boolean> LEAPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USE_BLOCK_BREAK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> SLEEPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     //--custom property values, which can be called and manipulated from a creature builder--
     @NotNull
@@ -135,6 +136,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private int rage;
     private int currentRageThreshold;
     private int rageEndCountdown;
+    //tiredness of creature from tranq bombs. counts down every 2 seconds
+    private int tiredness;
+    private int tirednessDecayTicks;
+    private RiftCreatureEnums.@Nullable SleepCause sleepCause;
+    //herd helper
     @Nullable
     private RiftCreatureHerdHelper herdHelper;
 
@@ -244,6 +250,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.dataManager.register(CREATURE_PHASE, "");
         this.dataManager.register(LEAPING, false);
         this.dataManager.register(USE_BLOCK_BREAK, false);
+        this.dataManager.register(SLEEPING, false);
     }
 
     //this is gonna be mostly for registering the custom attributes
@@ -322,6 +329,24 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //server only operations
         if (!this.world.isRemote) {
+            //sleep and tiredness from tranq bombs
+            if (!this.getIsSleeping() && this.tiredness >= 100) {
+                this.sleepCause = RiftCreatureEnums.SleepCause.TRANQ_BOMB;
+                this.setIsSleeping(true);
+            }
+            if (this.tiredness > 0) {
+                this.tirednessDecayTicks++;
+                if (this.tirednessDecayTicks >= 40) {
+                    this.tiredness--;
+                    this.tirednessDecayTicks = 0;
+                    if (this.tiredness <= 0 && this.sleepCause == RiftCreatureEnums.SleepCause.TRANQ_BOMB) {
+                        this.sleepCause = null;
+                        this.setIsSleeping(false);
+                    }
+                }
+            }
+            else this.tirednessDecayTicks = 0;
+
             //tick herding
             if (this.herdHelper != null) this.herdHelper.onUpdate();
 
@@ -331,7 +356,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             this.setLeaping(this.getCreatureMoveHelper().isLeaping() || continueLeapPose);
 
             //tick fall impacts
-            if (!this.creatureType.getFallCreatesImpact() || this.bodyTouchingLiquid()) {
+            if (this.getIsSleeping() || !this.creatureType.getFallCreatesImpact() || this.bodyTouchingLiquid()) {
                 this.trackingFallImpact = false;
             }
             else if (!this.onGround) {
@@ -593,7 +618,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
      * this is for testing if another entity is related to this creature
      * such as if its tamed to its owner or if it is a herdmate
      * */
-    public boolean isRelatedToEntity(Entity entity) {
+    public boolean isRelatedToEntity(@Nullable Entity entity) {
         if (entity instanceof MultiPartEntityPart hitboxPart) {
             Entity hitboxParent = (Entity) hitboxPart.parent;
             return this.isRelatedToEntity(hitboxParent);
@@ -612,6 +637,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void setAttackTarget(@Nullable EntityLivingBase target) {
+        if (target != null && this.getIsSleeping()) return;
         boolean targetChanged = target != this.getAttackTarget();
         if (targetChanged) this.unableToPathToTarget = false;
         super.setAttackTarget(target);
@@ -851,7 +877,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     //-----frustration management-----
-    //todo: move all this to usemoveunmounted?
     public boolean atFrustrationThreshold() {
         return this.frustration >= 100;
     }
@@ -875,6 +900,38 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //-----rage management-----
     public boolean atRageThreshold() {
         return this.currentRageThreshold > 0 && this.rage >= this.currentRageThreshold;
+    }
+
+    //-----tiredness management-----
+    public void addTiredness(int value) {
+        if (this.world.isRemote || value <= 0) return; //server only
+        if (this.getHealth() > this.getMaxHealth() * 0.1f) return; //must be at 10% of max health or less to be tired
+        this.tiredness = Math.max(0, this.tiredness + value);
+    }
+
+    //-----sleep management-----
+    public boolean getIsSleeping() {
+        return this.dataManager.get(SLEEPING);
+    }
+
+    public void setIsSleeping(boolean value) {
+        boolean enteringSleep = value && !this.getIsSleeping();
+        this.dataManager.set(SLEEPING, value);
+        if (!enteringSleep || this.world.isRemote) return;
+
+        this.getNavigator().clearPath();
+        this.getCreatureMoveHelper().stopMovement();
+        this.setCurrentMove("");
+        this.setUseBlockBreak(false);
+        this.setSprinting(false);
+        this.setAttackTarget(null);
+        this.pendingStaminaDrain = 0f;
+        this.staminaDrainTicks = 0;
+    }
+
+    @Override
+    protected boolean isMovementBlocked() {
+        return this.getIsSleeping() || super.isMovementBlocked();
     }
 
     //-----creature phase management-----
@@ -1245,6 +1302,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         }
         compound.setTag("RememberedPlayerTargets", rememberedPlayerTargetsNBT);
 
+        //sleep state
+        compound.setInteger("Tiredness", this.tiredness);
+        compound.setInteger("TirednessDecayTicks", this.tirednessDecayTicks);
+        compound.setBoolean("Sleeping", this.getIsSleeping());
+        compound.setByte("SleepCause", this.sleepCause == null ? (byte) -1 : (byte) this.sleepCause.ordinal());
+
         //other nbt tags
         this.writeCreatureNBT(compound);
     }
@@ -1269,6 +1332,16 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //other nbt tags
         this.readCreatureNBT(compound);
+
+        //sleep state is restored last so entering sleep can cancel a saved move
+        this.tiredness = Math.max(0, compound.getInteger("Tiredness"));
+        this.tirednessDecayTicks = Math.clamp(compound.getInteger("TirednessDecayTicks"), 0, 39);
+        int savedSleepCauseOrdinal = compound.hasKey("SleepCause", 1) ? compound.getByte("SleepCause") : -1;
+        this.sleepCause = savedSleepCauseOrdinal >= 0 ? RiftCreatureEnums.SleepCause.values()[savedSleepCauseOrdinal] : null;
+
+        boolean sleeping = compound.getBoolean("Sleeping") && this.sleepCause != null;
+        if (!sleeping) this.sleepCause = null;
+        this.setIsSleeping(sleeping);
     }
 
     @Override
@@ -1316,25 +1389,36 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         //---for normal stuff---
         animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "movement", "default",
                 new AnimationControllerState<AnimationDataEntity>("default")
-                        .addStateTransition("moving", animData -> this.getCurrentMove().isEmpty() && !this.isLeaping() && animData.isMoving()),
+                        .addStateTransition("moving", animData -> !this.getIsSleeping() && this.getCurrentMove().isEmpty()
+                                && !this.isLeaping() && animData.isMoving()),
                 new AnimationControllerState<AnimationDataEntity>("moving", 0.1)
                         .addAnimation("animation."+this.creatureType.getName()+".walk")
-                        .addStateTransition("default", animData -> !this.getCurrentMove().isEmpty() || this.isLeaping() || !animData.isMoving())
+                        .addStateTransition("default", animData -> this.getIsSleeping() || !this.getCurrentMove().isEmpty()
+                                || this.isLeaping() || !animData.isMoving())
         ));
         animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "sprintPosing", "default",
                 new AnimationControllerState<AnimationDataEntity>("default", 0.2)
-                        .addStateTransition("sprint", animData -> this.getCurrentMove().isEmpty() && !this.isLeaping() && this.isSprinting()),
+                        .addStateTransition("sprint", animData -> !this.getIsSleeping() && this.getCurrentMove().isEmpty()
+                                && !this.isLeaping() && this.isSprinting()),
                 new AnimationControllerState<AnimationDataEntity>("sprint", 0.2)
                         .addAnimation("animation."+this.creatureType.getName()+".sprint_pose")
-                        .addStateTransition("default", animData -> !this.getCurrentMove().isEmpty() || this.isLeaping() || !this.isSprinting())
+                        .addStateTransition("default", animData -> this.getIsSleeping() || !this.getCurrentMove().isEmpty()
+                                || this.isLeaping() || !this.isSprinting())
+        ));
+        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "sleeping", "default",
+                new AnimationControllerState<AnimationDataEntity>("default", 0.2)
+                        .addStateTransition("sleeping", animData -> this.getIsSleeping()),
+                new AnimationControllerState<AnimationDataEntity>("sleeping", 0.2)
+                        .addAnimation("animation."+this.creatureType.getName()+".sleep")
+                        .addStateTransition("default", animData -> !this.getIsSleeping())
         ));
         if (this.creatureType.getNavigation().getCanLeap()) {
             animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "leaping", "default",
                     new AnimationControllerState<AnimationDataEntity>("default", 0.1)
-                            .addStateTransition("leaping", animData -> this.isLeaping()),
+                            .addStateTransition("leaping", animData -> !this.getIsSleeping() && this.isLeaping()),
                     new AnimationControllerState<AnimationDataEntity>("leaping", 0.1)
                             .addAnimation("animation."+this.creatureType.getName()+".leap")
-                            .addStateTransition("default", animData -> !this.isLeaping())
+                            .addStateTransition("default", animData -> this.getIsSleeping() || !this.isLeaping())
             ));
         }
         //---for moves---
@@ -1408,7 +1492,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                     String controllerStateName = moveName + "_" + chargeupPhaseName;
 
                     //---add transition in initial state---
-                    initialState.addStateTransition(controllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, currentChargeupPhase));
+                    initialState.addStateTransition(controllerStateName, animData -> !this.getIsSleeping()
+                            && this.getCreatureMoves().currentMoveMatches(moveName, currentChargeupPhase));
 
                     //---define corresponding state---
                     AnimationControllerState<AnimationDataEntity> stateToAdd = new AnimationControllerState<AnimationDataEntity>(controllerStateName)
@@ -1422,17 +1507,20 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                         String otherControllerStateName = moveName + "_" + otherChargeupPhaseName;
 
                         stateToAdd.addStateTransition(
-                                otherControllerStateName, animData -> this.getCreatureMoves().currentMoveMatches(moveName, otherChargeupPhase)
+                                otherControllerStateName, animData -> !this.getIsSleeping()
+                                        && this.getCreatureMoves().currentMoveMatches(moveName, otherChargeupPhase)
                         );
                     }
 
                     //exclusive for finish, to transition back to default
                     if (currentChargeupPhase == ChargeupPhase.FINISHING) {
-                        stateToAdd.addStateTransition("default", animData -> animData.allAnimationsFinished(controllerName))
+                        stateToAdd.addStateTransition("default", animData -> this.getIsSleeping()
+                                        || animData.allAnimationsFinished(controllerName))
                                 .addExitEffect(animData -> this.onMoveFinish(moveName));
                     }
                     //emergency exit condition for other phases, mostly for client
-                    else stateToAdd.addStateTransition("default", animData -> this.getCreatureMoves().getCurrentMove().isEmpty());
+                    else stateToAdd.addStateTransition("default", animData -> this.getIsSleeping()
+                            || this.getCreatureMoves().getCurrentMove().isEmpty());
 
                     //add the state
                     creatureMovesStates.add(stateToAdd);
@@ -1441,11 +1529,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             //for non chargeup moves, add other anim states for each move to a single anim controller
             else {
                 //transition from initial state to a state associated with the move
-                initialState.addStateTransition(moveName, animData -> this.getCurrentMove().equals(moveName));
+                initialState.addStateTransition(moveName, animData -> !this.getIsSleeping() && this.getCurrentMove().equals(moveName));
 
                 //create state for move
                 AnimationControllerState<AnimationDataEntity> moveState = new AnimationControllerState<AnimationDataEntity>(moveName)
-                        .addStateTransition("default", animData -> animData.allAnimationsFinished(controllerName))
+                        .addStateTransition("default", animData -> this.getIsSleeping()
+                                || animData.allAnimationsFinished(controllerName))
                         .addExitEffect(animData -> this.onMoveFinish(moveName));
 
                 //if the move state has multiple animation names, make it so that upon entry it

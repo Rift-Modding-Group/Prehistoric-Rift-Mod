@@ -1,8 +1,10 @@
 package anightdazingzoroark.prift.server.item;
 
-import anightdazingzoroark.example.entity.BombProjectile;
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.prift.server.entity.projectile.RiftProjectile;
+import net.minecraft.block.BlockDispenser;
+import net.minecraft.dispenser.BehaviorProjectileDispense;
+import net.minecraft.dispenser.IPosition;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -19,6 +21,16 @@ import java.util.function.Function;
  * helper for throwable items
  * */
 public abstract class RiftThrowableItem extends Item {
+    public RiftThrowableItem() {
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(this, new BehaviorProjectileDispense() {
+            @Override
+            @NotNull
+            protected RiftProjectile getProjectileEntity(@NotNull World world, @NotNull IPosition position, @NotNull ItemStack stack) {
+                return new RiftProjectile(world, position.getX(), position.getY(), position.getZ(), RiftThrowableItem.this.getProjectileBuilder());
+            }
+        });
+    }
+
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
         player.setActiveHand(hand);

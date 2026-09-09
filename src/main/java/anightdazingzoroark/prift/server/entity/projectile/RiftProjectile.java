@@ -12,7 +12,6 @@ import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataProjectile;
 import anightdazingzoroark.riftlib.projectile.RiftLibProjectile;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -21,14 +20,12 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class RiftProjectile extends RiftLibProjectile implements IProjectile {
@@ -43,13 +40,23 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
     private final CreatureMoveBuilder creatureMoveBuilder;
     @Nullable
     private Function<EntityPlayer, Double> damageByPlayer;
-    private final boolean byPlayer;
+    @Nullable
+    private final ProjectileSourceType projectileSource;
 
     public RiftProjectile(World worldIn) {
         super(worldIn);
         this.projectileBuilder = new ProjectileBuilder();
         this.creatureMoveBuilder = new CreatureMoveBuilder();
-        this.byPlayer = false;
+        this.projectileSource = null;
+    }
+
+    //---reserved for projectiles by dispensers---
+    public RiftProjectile(World worldIn, double x, double y, double z, @NotNull ProjectileBuilder builder) {
+        super(worldIn, x, y, z);
+        this.projectileBuilder = builder;
+        this.creatureMoveBuilder = new CreatureMoveBuilder();
+        this.setSpecialGetters(builder);
+        this.projectileSource = ProjectileSourceType.DISPENSER;
     }
 
     //---reserved for projectiles by players---
@@ -59,7 +66,7 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
         this.creatureMoveBuilder = new CreatureMoveBuilder();
         this.setPosition(shooter.posX, shooter.posY + shooter.height / 2D, shooter.posZ);
         this.setSpecialGetters(builder);
-        this.byPlayer = true;
+        this.projectileSource = ProjectileSourceType.PLAYER;
         this.damageByPlayer = damageByPlayer;
     }
 
@@ -70,7 +77,7 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
         this.creatureMoveBuilder = creatureMoveBuilder;
         this.setPosition(shooter.posX, shooter.posY + shooter.height / 2D, shooter.posZ);
         this.setSpecialGetters(builder);
-        this.byPlayer = false;
+        this.projectileSource = ProjectileSourceType.CREATURE;
     }
 
     private void setSpecialGetters(@NotNull ProjectileBuilder builder) {
@@ -124,9 +131,14 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
     @Override
     public void projectileImpactEffects(@Nullable EntityLivingBase hitEntity, @NotNull Vec3d hitPos) {
         //other effects
-        if (this.projectileBuilder.getOnImpactEffect() != null) {
-            ICreature shooter = this.byPlayer ? null : this.getShooter();
-            this.projectileBuilder.getOnImpactEffect().accept(shooter, this, hitEntity, hitPos);
+        if (this.projectileSource == ProjectileSourceType.CREATURE && this.projectileBuilder.getOnImpactFromCreatureEffect() != null) {
+            this.projectileBuilder.getOnImpactFromCreatureEffect().accept(this.getCreatureShooter(), this, hitEntity, hitPos);
+        }
+        else if (this.projectileSource == ProjectileSourceType.PLAYER && this.projectileBuilder.getOnImpactFromPlayerEffect() != null) {
+            this.projectileBuilder.getOnImpactFromPlayerEffect().accept(this.getPlayerShooter(), this, hitEntity, hitPos);
+        }
+        else if (this.projectileSource == ProjectileSourceType.DISPENSER && this.projectileBuilder.getOnImpactFromDispenserEffect() != null) {
+            this.projectileBuilder.getOnImpactFromDispenserEffect().accept(this, hitEntity, hitPos);
         }
     }
 
@@ -145,10 +157,12 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
 
     @Override
     public double getDamage() {
-        if (this.byPlayer && this.damageByPlayer != null) {
-            return this.damageByPlayer.apply((EntityPlayer) this.shootingEntity);
+        if (this.projectileSource == ProjectileSourceType.PLAYER && this.damageByPlayer != null) {
+            return this.damageByPlayer.apply(this.getPlayerShooter());
         }
-        else if (!this.byPlayer) return CreatureMoveHelper.calculateDamage((RiftCreature) this.getShooter(), this.creatureMoveBuilder);
+        else if (this.projectileSource == ProjectileSourceType.CREATURE && this.shootingEntity instanceof RiftCreature shooter) {
+            return CreatureMoveHelper.calculateDamage(shooter, this.creatureMoveBuilder);
+        }
         return 0;
     }
 
@@ -198,8 +212,19 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
         return this.onGround;
     }
 
-    @NotNull
-    public ICreature getShooter() {
+    @Nullable
+    public ICreature getCreatureShooter() {
         return (ICreature) this.shootingEntity;
+    }
+
+    @Nullable
+    public EntityPlayer getPlayerShooter() {
+        return (EntityPlayer) this.shootingEntity;
+    }
+
+    private enum ProjectileSourceType {
+        CREATURE,
+        PLAYER,
+        DISPENSER
     }
 }

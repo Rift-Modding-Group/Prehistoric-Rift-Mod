@@ -4,7 +4,7 @@ import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.util.QuadConsumer;
 import anightdazingzoroark.prift.api.util.TriConsumer;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +17,11 @@ public class ProjectileBuilder {
 
     //can be left alone
     @Nullable
-    private QuadConsumer<ICreature, IProjectile, EntityLivingBase, Vec3d> onImpactEffect;
+    private QuadConsumer<ICreature, IProjectile, EntityLivingBase, Vec3d> onImpactFromCreatureEffect;
+    @Nullable
+    private QuadConsumer<EntityPlayer, IProjectile, EntityLivingBase, Vec3d> onImpactFromPlayerEffect;
+    @Nullable
+    private TriConsumer<IProjectile, EntityLivingBase, Vec3d> onImpactFromDispenserEffect;
     @Nullable
     private Consumer<IProjectile> updateEffect;
     private boolean stayAfterImpact;
@@ -39,16 +43,42 @@ public class ProjectileBuilder {
     }
 
     /**
-     * Set what happens when the projectile hits
+     * Set what happens when the projectile hits and is launched by an entity
      * */
-    public ProjectileBuilder setOnImpactEffect(@NotNull QuadConsumer<ICreature, IProjectile, EntityLivingBase, Vec3d> onImpactEffect) {
-        this.onImpactEffect = onImpactEffect;
+    public ProjectileBuilder setOnImpactFromCreatureEffect(@NotNull QuadConsumer<ICreature, IProjectile, EntityLivingBase, Vec3d> onImpactFromCreatureEffect) {
+        this.onImpactFromCreatureEffect = onImpactFromCreatureEffect;
         return this;
     }
 
     @Nullable
-    public QuadConsumer<ICreature, IProjectile, EntityLivingBase, Vec3d> getOnImpactEffect() {
-        return this.onImpactEffect;
+    public QuadConsumer<ICreature, IProjectile, EntityLivingBase, Vec3d> getOnImpactFromCreatureEffect() {
+        return this.onImpactFromCreatureEffect;
+    }
+
+    /**
+     * Set what happens when the projectile hits and is launched by a player
+     * */
+    public ProjectileBuilder setOnImpactFromPlayerEffect(@NotNull QuadConsumer<EntityPlayer, IProjectile, EntityLivingBase, Vec3d> onImpactFromPlayerEffect) {
+        this.onImpactFromPlayerEffect = onImpactFromPlayerEffect;
+        return this;
+    }
+
+    @Nullable
+    public QuadConsumer<EntityPlayer, IProjectile, EntityLivingBase, Vec3d> getOnImpactFromPlayerEffect() {
+        return this.onImpactFromPlayerEffect;
+    }
+
+    /**
+     * Set what happens when the projectile hits and is launched by a dispenser
+     * */
+    public ProjectileBuilder setOnImpactForDispenserEffect(@NotNull TriConsumer<IProjectile, EntityLivingBase, Vec3d> onImpactFromDispenserEffect) {
+        this.onImpactFromDispenserEffect = onImpactFromDispenserEffect;
+        return this;
+    }
+
+    @Nullable
+    public TriConsumer<IProjectile, EntityLivingBase, Vec3d> getOnImpactFromDispenserEffect() {
+        return this.onImpactFromDispenserEffect;
     }
 
     /**

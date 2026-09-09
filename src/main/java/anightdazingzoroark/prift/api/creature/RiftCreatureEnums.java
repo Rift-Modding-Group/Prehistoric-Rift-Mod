@@ -46,6 +46,13 @@ public class RiftCreatureEnums {
         WEAKEN_THEN_FEED;
     }
 
+    //causes of sleep are from various factors and can affect behaviors relatin to em
+    public enum SleepCause {
+        TRANQ_BOMB, //from tranq bombs, makes them wake up after a while
+        NOCTURNALISM, //from sleeping at day
+        DIURNALISM; //from sleeping at night
+    }
+
     //Stats are to be on a scale of 0.5-10 with steps of 0.5
     //and will be represented as stars on most UIs
     public enum Stats {
