@@ -15,6 +15,7 @@ import anightdazingzoroark.riftlib.projectile.RiftLibProjectile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -86,11 +87,23 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
         this.dataManager.register(HAS_PARTICLE_TAIL, false);
     }
 
+    @Override
     public void onUpdate() {
         super.onUpdate();
 
         if (this.world.isRemote) return;
         if (this.projectileBuilder.getUpdateEffect() != null) this.projectileBuilder.getUpdateEffect().accept(this);
+    }
+
+    //-----mostly to ensure that projectile disappears when reloading world-----
+    @Override
+    public boolean writeToNBTOptional(@NotNull NBTTagCompound compound) {
+        return false;
+    }
+
+    @Override
+    public boolean writeToNBTAtomically(@NotNull NBTTagCompound compound) {
+        return false;
     }
 
     //-----special client-friendly getters-----
