@@ -9,6 +9,7 @@ import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.BooleanPropertyV
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.IntegerPropertyValue;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +35,8 @@ public class ProjectileBuilder {
     private boolean rotateAlongPitch;
     private boolean useCubeModel;
     private boolean hasParticleTrail;
+    @Nullable
+    private SoundEvent impactSoundEvent;
     @Nullable
     private Map<String, AbstractPropertyValue<?>> propertyValueMap;
 
@@ -153,6 +156,16 @@ public class ProjectileBuilder {
 
     public boolean getHasParticleTrail() {
         return this.hasParticleTrail;
+    }
+
+    public ProjectileBuilder setImpactSoundEvent(@Nullable SoundEvent soundEvent) {
+        this.impactSoundEvent = soundEvent;
+        return this;
+    }
+
+    @Nullable
+    public SoundEvent getImpactSoundEvent() {
+        return this.impactSoundEvent;
     }
 
     //-----for additional values to this particle. they do sync from server to client, but they do not persist.-----

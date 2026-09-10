@@ -72,8 +72,13 @@ public class RiftSounds {
 
     @Nullable
     public static SoundEvent getCreatureSound(@NotNull String creatureName, @NotNull String soundType) {
+        return getSound(creatureName + "." + soundType);
+    }
+
+    @Nullable
+    public static SoundEvent getSound(@NotNull String soundName) {
         return ForgeRegistries.SOUND_EVENTS.getValue(
-                new ResourceLocation(RiftInitialize.MODID, RiftInitialize.MODID + "." + creatureName + "." + soundType)
+                new ResourceLocation(RiftInitialize.MODID, RiftInitialize.MODID + "." + soundName)
         );
     }
 }

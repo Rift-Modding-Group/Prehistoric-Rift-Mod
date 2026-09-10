@@ -223,7 +223,7 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
 
     @Override
     public SoundEvent getOnProjectileHitSound() {
-        return null;
+        return this.projectileBuilder.getImpactSoundEvent();
     }
 
     //-----other IProjectile stuff-----

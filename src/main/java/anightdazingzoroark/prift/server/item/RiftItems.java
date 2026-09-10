@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.client.RiftCreativeTabs;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
+import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.prift.util.RiftUtil;
 import anightdazingzoroark.riftlib.particle.RiftLibParticleHelper;
 import net.minecraft.client.resources.I18n;
@@ -17,6 +18,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
@@ -83,7 +85,8 @@ public class RiftItems {
                         })
                         .setOnImpactForDispenserEffect((projectile, hitEntity, hitPos) -> {
                             this.onImpactEffect(null, projectile, hitPos);
-                        });
+                        })
+                        .setImpactSoundEvent(RiftSounds.getSound("tranq_bomb.impact"));
             }
 
             private void onImpactEffect(@Nullable EntityPlayer player, @NotNull IProjectile projectile, @NotNull Vec3d hitPos) {
@@ -130,8 +133,6 @@ public class RiftItems {
             public void addInformation(ItemStack stack, World world, List<String> tooltip, ITooltipFlag tooltipFlag) {
                 tooltip.add(TextFormatting.GRAY + I18n.format("item.tranq_bomb.tooltip"));
             }
-
-            //helper for tranq bomb
         }, "tranq_bomb", true);
 
         for (Map.Entry<String, RiftCreatureBuilder> creatureEntry : RiftCreatureRegistry.getCreatureBuilders().entrySet()) {

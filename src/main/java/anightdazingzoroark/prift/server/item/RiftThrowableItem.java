@@ -7,11 +7,13 @@ import net.minecraft.dispenser.BehaviorProjectileDispense;
 import net.minecraft.dispenser.IPosition;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,6 +52,10 @@ public abstract class RiftThrowableItem extends Item {
         EntityPlayer player = (EntityPlayer) entityLiving;
         RiftProjectile projectile = new RiftProjectile(player, this.getProjectileBuilder(), this.getDamageByPlayer());
         projectile.shoot(player, player.rotationPitch, player.rotationYaw, 0f, 1.6f, 0f);
+        worldIn.playSound(
+                null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_SNOWBALL_THROW,
+                SoundCategory.NEUTRAL, 0.5f, 0.4f / (itemRand.nextFloat() * 0.4f + 0.8f)
+        );
         if (!worldIn.isRemote) worldIn.spawnEntity(projectile);
         if (!player.isCreative()) stack.shrink(1);
     }

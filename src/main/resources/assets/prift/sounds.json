@@ -805,6 +805,14 @@
     "subtitle": "sounds.subtitle.generic_gnash_move_gnashing"
   },
 
+  "prift.tranq_bomb.impact": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/projectile/tranq_bomb_impact"
+    ],
+    "subtitle": "sounds.subtitle.tranq_bomb_impact"
+  },
+
   "prift.semi_manual_machine.reset": {
     "category": "block",
     "sounds": [
