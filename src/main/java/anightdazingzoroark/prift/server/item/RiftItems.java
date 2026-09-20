@@ -54,6 +54,8 @@ public class RiftItems {
     public static Item SMOKENUT;
     public static Item SMOKENUT_SEEDS;
     public static Item TRANQ_BOMB;
+    public static Item STINK_BOMB;
+    public static Item POISON_BOMB;
 
     public static Item getTributeItem(@NotNull String creatureName) {
         return TRIBUTE_ITEMS.get(creatureName);
@@ -150,7 +152,7 @@ public class RiftItems {
             public void addInformation(ItemStack stack, World world, List<String> tooltip, ITooltipFlag tooltipFlag) {
                 tooltip.add(TextFormatting.GRAY + I18n.format("item.tranq_bomb.tooltip"));
             }
-        }, "tranq_bomb", true);
+        }.setMaxStackSize(16), "tranq_bomb", true);
 
         for (Map.Entry<String, RiftCreatureBuilder> creatureEntry : RiftCreatureRegistry.getCreatureBuilders().entrySet()) {
             String creatureName = creatureEntry.getKey();

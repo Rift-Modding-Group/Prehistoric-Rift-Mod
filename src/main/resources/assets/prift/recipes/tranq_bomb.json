@@ -1,0 +1,18 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "X#",
+    "# "
+  ],
+  "key": {
+    "X": {
+      "item": "prift:smokenut"
+    },
+    "#": {
+      "item": "minecraft:rotten_flesh"
+    }
+  },
+  "result": {
+    "item": "prift:tranq_bomb"
+  }
+}
