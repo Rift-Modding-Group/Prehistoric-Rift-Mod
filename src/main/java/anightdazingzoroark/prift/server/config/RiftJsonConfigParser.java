@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -128,33 +129,43 @@ public class RiftJsonConfigParser {
                 Arrays.asList(
                         new RiftCreatureFood.Builder("minecraft:beef")
                                 .setPercentHealed(0.125f)
+                                .setTamingEffectiveness(0.05f, 0.1f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:cooked_beef")
                                 .setPercentHealed(0.25f)
+                                .setTamingEffectiveness(0.15f, 0.2f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:chicken")
                                 .setPercentHealed(0.125f)
+                                .setTamingEffectiveness(0.05f, 0.1f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:cooked_chicken")
                                 .setPercentHealed(0.25f)
+                                .setTamingEffectiveness(0.15f, 0.2f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:porkchop")
                                 .setPercentHealed(0.125f)
+                                .setTamingEffectiveness(0.05f, 0.1f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:cooked_porkchop")
                                 .setPercentHealed(0.25f)
+                                .setTamingEffectiveness(0.15f, 0.2f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:mutton")
                                 .setPercentHealed(0.125f)
+                                .setTamingEffectiveness(0.05f, 0.1f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:cooked_mutton")
                                 .setPercentHealed(0.25f)
+                                .setTamingEffectiveness(0.15f, 0.2f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:rabbit")
                                 .setPercentHealed(0.125f)
+                                .setTamingEffectiveness(0.05f, 0.1f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:cooked_rabbit")
                                 .setPercentHealed(0.25f)
+                                .setTamingEffectiveness(0.15f, 0.2f)
                                 .build()
                 )
         );
@@ -163,18 +174,23 @@ public class RiftJsonConfigParser {
                 Arrays.asList(
                         new RiftCreatureFood.Builder("minecraft:fish")
                                 .setPercentHealed(0.1f)
+                                .setTamingEffectiveness(0.05f, 0.1f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:cooked_fish")
                                 .setPercentHealed(0.2f)
+                                .setTamingEffectiveness(0.15f, 0.2f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:fish:1")
                                 .setPercentHealed(0.1f)
+                                .setTamingEffectiveness(0.05f, 0.1f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:cooked_fish:1")
                                 .setPercentHealed(0.2f)
+                                .setTamingEffectiveness(0.15f, 0.2f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:fish:2")
                                 .setPercentHealed(0.1f)
+                                .setTamingEffectiveness(0.05f, 0.1f)
                                 .build()
                 )
         );
@@ -183,9 +199,11 @@ public class RiftJsonConfigParser {
                 Arrays.asList(
                         new RiftCreatureFood.Builder("minecraft:apple")
                                 .setPercentHealed(0.05f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:melon")
                                 .setPercentHealed(0.05f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
                                 .build()
                 )
         );
@@ -194,12 +212,15 @@ public class RiftJsonConfigParser {
                 Arrays.asList(
                         new RiftCreatureFood.Builder("minecraft:carrot")
                                 .setPercentHealed(0.05f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:potato")
                                 .setPercentHealed(0.05f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:baked_potato")
                                 .setPercentHealed(0.1f)
+                                .setTamingEffectiveness(0.2f, 0.25f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:poisonous_potato")
                                 .setPercentHealed(0.05f)
@@ -207,6 +228,7 @@ public class RiftJsonConfigParser {
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:beetroot")
                                 .setPercentHealed(0.05f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
                                 .build()
                 )
         );
@@ -215,15 +237,19 @@ public class RiftJsonConfigParser {
                 Arrays.asList(
                         new RiftCreatureFood.Builder("minecraft:wheat")
                                 .setPercentHealed(0.05f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:hay_block")
                                 .setPercentHealed(0.2f)
+                                .setTamingEffectiveness(0.2f, 0.3f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:tallgrass:1")
                                 .setPercentHealed(0.05f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:double_plant:2")
                                 .setPercentHealed(0.1f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
                                 .build()
                 )
         );
@@ -232,21 +258,27 @@ public class RiftJsonConfigParser {
                 Arrays.asList(
                         new RiftCreatureFood.Builder("minecraft:leaves")
                                 .setPercentHealed(0.05f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:leaves:1")
                                 .setPercentHealed(0.05f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:leaves:2")
                                 .setPercentHealed(0.05f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:leaves:3")
                                 .setPercentHealed(0.05f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:leaves2")
                                 .setPercentHealed(0.05f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:leaves2:1")
                                 .setPercentHealed(0.05f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
                                 .build()
                 )
         );
@@ -268,7 +300,6 @@ public class RiftJsonConfigParser {
                 )
         );
 
-        //now set
         this.listsConfig = load(this.listsConfigPath, RiftListsConfig.class, defaultList);
     }
 

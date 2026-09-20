@@ -136,7 +136,7 @@ public class RiftItems {
                 if (entity instanceof MultiPartEntityPart entityPart) {
                     this.onHitEntity(player, (Entity) entityPart.parent, projectile, true);
                 }
-                else if (entity instanceof RiftCreature hitCreature && canHitFromHitbox) {
+                else if (entity instanceof RiftCreature hitCreature && !hitCreature.isTamed() && canHitFromHitbox) {
                     hitCreature.addTiredness(projectile.getEntityWorld().rand.nextInt(20, 36));
                 }
                 else if (RiftUtil.entityInTargetGroup(entity, "animal") && canHitFromHitbox) {

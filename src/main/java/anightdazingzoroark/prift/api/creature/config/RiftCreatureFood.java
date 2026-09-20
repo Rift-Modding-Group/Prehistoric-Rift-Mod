@@ -24,7 +24,7 @@ public class RiftCreatureFood {
 
     //how effective the food item is when taming
     @SerializedName("tameEffectiveness")
-    public Float tameEffectiveness;
+    public float[] tameEffectiveness;
 
     @SerializedName("foodEffects")
     public List<FoodEffect> foodEffects;
@@ -66,7 +66,11 @@ public class RiftCreatureFood {
         }
 
         public Builder setTamingEffectiveness(float tamingEffectiveness) {
-            this.food.tameEffectiveness = tamingEffectiveness;
+            return this.setTamingEffectiveness(tamingEffectiveness, tamingEffectiveness);
+        }
+
+        public Builder setTamingEffectiveness(float tamingEffectivenessMin, float tamingEffectivenessMax) {
+            this.food.tameEffectiveness = new float[]{tamingEffectivenessMin, tamingEffectivenessMax};
             return this;
         }
 

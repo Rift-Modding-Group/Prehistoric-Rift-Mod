@@ -44,10 +44,11 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private boolean isHerder;
     private int maxHerdSize;
     private boolean canRetreat;
-    private int inventorySize = 27;
     private int daysUntilAdult = 1;
     private boolean fallCreatesImpact;
     private boolean cannotBePushed;
+    @Nullable
+    private CreatureDomesticationBuilder domestication;
     @NotNull
     private CreatureNavigationBuilder navigation = new CreatureNavigationBuilder().setCanWalk();
     private CreatureMoveSelectorBuilder moveSelector = new CreatureMoveSelectorBuilder();
@@ -57,7 +58,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private Map<String, TriConsumer<ICreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
     private List<String> defaultTargetWhitelist;
     private List<String> defaultTargetBlacklist;
-    private List<RiftCreatureFood> defaultFoodItemWhitelist;
+    private List<Object> defaultFoodItemWhitelist;
     private List<String> defaultFoodItemBlacklist;
 
     @SuppressWarnings("unchecked")
@@ -69,6 +70,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * This locks this object so that when accessing any instances of this, it can never be modified ever
      * */
     public void lock() {
+        if (this.domestication != null) this.domestication.lock();
         this.locked = true;
     }
 
@@ -372,17 +374,20 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     }
 
     /**
-     * Set the creature's inventory size
-     * */
-    public T setInventorySize(int value) {
+     * Set how this creature is domesticated and which features become available after taming.
+     * Leaving this unset makes the creature untameable.
+     */
+    public T setDomestication(@NotNull CreatureDomesticationBuilder domestication) {
         this.checkIfLocked();
+        if (!domestication.isValid()) throw new IllegalArgumentException("Creature domestication builder is invalid!");
 
-        this.inventorySize = value;
+        this.domestication = domestication;
         return this.getThis();
     }
 
-    public int getInventorySize() {
-        return this.inventorySize;
+    @Nullable
+    public CreatureDomesticationBuilder getDomestication() {
+        return this.domestication;
     }
 
     /**
@@ -536,12 +541,21 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
         return this.getThis();
     }
 
+    public T addDefaultFoodItemWhitelistEntry(@NotNull String listName) {
+        this.checkIfLocked();
+
+        if (this.defaultFoodItemWhitelist == null) this.defaultFoodItemWhitelist = new ArrayList<>();
+        this.defaultFoodItemWhitelist.add(listName);
+
+        return this.getThis();
+    }
+
     public boolean hasDefaultFoodItemWhitelist() {
         return this.defaultFoodItemWhitelist != null;
     }
 
     @Nullable
-    public List<RiftCreatureFood> getDefaultFoodItemWhitelist() {
+    public List<Object> getDefaultFoodItemWhitelist() {
         if (this.defaultFoodItemWhitelist == null) return null;
         return List.copyOf(this.defaultFoodItemWhitelist);
     }
@@ -580,6 +594,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
                 && this.spawnEggColors != null
                 && this.scaleRangeForAge != null
                 && this.navigation.isValid()
+                && (this.domestication == null || this.domestication.isValid())
                 && this.tributeItemPartName != null
                 && !this.moveList.isEmpty();
     }

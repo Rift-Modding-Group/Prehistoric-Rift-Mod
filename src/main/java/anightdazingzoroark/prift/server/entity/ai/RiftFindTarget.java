@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
 import anightdazingzoroark.prift.server.ServerProxy;
+import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.creature.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.server.config.RiftListsConfig;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -28,6 +29,11 @@ public class RiftFindTarget extends EntityAITarget {
 
     @Override
     public boolean shouldExecute() {
+        if (this.creature.getIsSleeping()) return false;
+        if (this.creature.isTamed() && this.creature.getTameTargeting() != RiftCreatureEnums.TameTargeting.AGGRESSIVE) {
+            return false;
+        }
+
         //for herders, only herd leaders can find targets
         if (!this.creature.canLeadHerdBehavior()) return false;
 
@@ -61,6 +67,9 @@ public class RiftFindTarget extends EntityAITarget {
 
     @Override
     public boolean shouldContinueExecuting() {
+        if (this.creature.isTamed() && this.creature.getTameTargeting() != RiftCreatureEnums.TameTargeting.AGGRESSIVE) {
+            return false;
+        }
         if (!this.creature.canLeadHerdBehavior()) return false;
         if (this.creature.shouldFleeFrom(this.targetEntity)) return false;
 
@@ -98,9 +107,11 @@ public class RiftFindTarget extends EntityAITarget {
 
         if (this.creature.isRelatedToEntity(target)) return false;
 
-        if (target instanceof EntityPlayer player && this.creature.isRememberedPlayerTarget(player)) return true;
+        if (!this.creature.isTamed() && target instanceof EntityPlayer player && this.creature.isRememberedPlayerTarget(player)) {
+            return true;
+        }
 
-        if (!this.isAllowedByConfig(target)) return false;
+        if (!this.creature.isTamed() && !this.isAllowedByConfig(target)) return false;
 
         return super.isSuitableTarget(target, includeInvincibles);
     }

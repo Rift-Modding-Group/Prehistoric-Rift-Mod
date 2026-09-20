@@ -21,7 +21,7 @@ public class RiftCreatureConfig {
     //food groups or individual food items this creature can eat
     //individual food items are prioritized over entries w same itemId in groups
     @SerializedName("foodItemWhitelist")
-    public List<RiftCreatureFood> foodItemWhitelist = new ArrayList<>();
+    public List<Object> foodItemWhitelist = new ArrayList<>();
 
     //food groups or individual food items this creature cannot eat
     //is strings as... well...

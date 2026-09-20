@@ -58,7 +58,7 @@ public class RiftUtil {
     @NotNull
     private static ImmutablePair<String, Integer> getItemStackNameAndMeta(@NotNull String string) {
         int firstColonIndex = string.indexOf(":");
-        int secondColonIndex = string.indexOf(":", firstColonIndex);
+        int secondColonIndex = string.indexOf(":", firstColonIndex + 1);
 
         //no metadata provided, presume its 0 then
         if (secondColonIndex < 0) return new ImmutablePair<>(string, 0);

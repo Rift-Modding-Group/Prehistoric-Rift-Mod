@@ -43,7 +43,14 @@ public class RiftCreatureEnums {
 
     public enum TamingMethod {
         FEED,
-        WEAKEN_THEN_FEED;
+        TRANQ_THEN_FEED;
+    }
+
+    public enum TameTargeting {
+        ASSIST, //attack whatever the owner attacks, hitting related creatures does not count
+        DEFENSIVE, //retaliate when player attacks
+        AGGRESSIVE, //attack on sight, except related creatures
+        PASSIVE //never attack
     }
 
     //causes of sleep are from various factors and can affect behaviors relatin to em

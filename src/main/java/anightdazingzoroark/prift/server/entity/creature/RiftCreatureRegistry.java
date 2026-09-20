@@ -2,7 +2,9 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureDomesticationBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
+import anightdazingzoroark.prift.api.creature.config.RiftCreatureFood;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
@@ -133,6 +135,9 @@ public class RiftCreatureRegistry {
                         .setFallCreatesImpact()
                         .setCannotBePushed()
                         .setDaysUntilAdult(7)
+                        .setDomestication(new CreatureDomesticationBuilder()
+                                .setTamingMethod(RiftCreatureEnums.TamingMethod.TRANQ_THEN_FEED)
+                        )
                         .setRetaliateWhenAttacked()
                         .setCanRetreat()
                         .setFleeBehavior(
@@ -335,6 +340,7 @@ public class RiftCreatureRegistry {
                         //---targeting---
                         .addDefaultTargetWhitelistEntry("animal")
                         .addDefaultTargetWhitelistEntry("herbivoreCreature")
+                        .addDefaultFoodItemWhitelistEntry("meat")
                         .setRetaliateWhenAttacked()
                         .setRememberPlayerAttacker()
         );
@@ -352,6 +358,9 @@ public class RiftCreatureRegistry {
                         .setFallCreatesImpact()
                         .setCannotBePushed()
                         .setDaysUntilAdult(3)
+                        .setDomestication(new CreatureDomesticationBuilder()
+                                .setTamingMethod(RiftCreatureEnums.TamingMethod.TRANQ_THEN_FEED)
+                        )
                         .setHitboxInformation(Map.of(
                                 "leg", creature -> 0.25D,
                                 "body", creature -> 0.75D,
@@ -423,6 +432,10 @@ public class RiftCreatureRegistry {
                                 )
                         )
                         //---targeting---
+                        .addDefaultFoodItemWhitelistEntry("fruit")
+                        .addDefaultFoodItemWhitelistEntry("vegetable")
+                        .addDefaultFoodItemWhitelistEntry("grass")
+                        .addDefaultFoodItemWhitelistEntry("leaves")
                         .setRetaliateWhenAttacked()
                         .setRememberPlayerAttacker()
         );

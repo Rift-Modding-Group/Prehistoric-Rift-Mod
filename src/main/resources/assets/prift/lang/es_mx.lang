@@ -37,3 +37,5 @@ sounds.subtitle.generic_bite_move=Una criatura muerde
 sounds.subtitle.generic_stomp_move=Una criatura pisa fuerte
 sounds.subtitle.generic_tail_move=Una criatura balancea la cola
 sounds.subtitle.tranq_bomb_impact=La bomba tranquilizante estalla
+
+info.owner_name=Dueño: %s
