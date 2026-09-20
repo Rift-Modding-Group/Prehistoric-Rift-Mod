@@ -9,6 +9,8 @@ item.raw_exotic_meat.name=Raw Exotic Meat
 item.cooked_exotic_meat.name=Cooked Exotic Meat
 item.creative_meal.name=Creative Meal
 item.creative_meal.tooltip=Instantly tames any wild creature and can be used to breed any tamed creature.
+item.smokenut.name=Smokenut
+item.smokenut_seeds.name=Smokenut Seeds
 item.tranq_bomb.name=Tranq Bomb
 item.tranq_bomb.tooltip=Throw at creatures at low health to incapacitate them for taming. Will act differently on other mobs.
 
@@ -17,6 +19,8 @@ item.stegosaurus_plate.name=Stegosaurus Plate
 
 itemGroup.prift_items=Prehistoric Rift Items
 itemGroup.prift_spawn_eggs=Prehistoric Rift Spawn Eggs
+
+tile.smokenut_bush.name=Smokenut Bush
 
 sounds.subtitle.tyrannosaurus_idle=Tyrannosaurus bellows
 sounds.subtitle.tyrannosaurus_hurt=Tyrannosaurus hurts

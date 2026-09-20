@@ -6,23 +6,26 @@ import anightdazingzoroark.prift.client.RiftCreativeTabs;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
+import anightdazingzoroark.prift.server.block.RiftBlocks;
 import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.prift.util.RiftUtil;
 import anightdazingzoroark.riftlib.particle.RiftLibParticleHelper;
+import net.minecraft.block.Block;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemFood;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.SoundCategory;
+import net.minecraftforge.common.EnumPlantType;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -40,6 +43,7 @@ import java.util.Map;
 public class RiftItems {
     public static final List<Item> ITEMS = new ArrayList<>();
     private static final Map<String, Item> TRIBUTE_ITEMS = new LinkedHashMap<>();
+    private static final Map<Block, Item> BLOCK_ITEMS = new LinkedHashMap<>();
     private static boolean itemsRegistered;
     private static boolean recipesRegistered;
 
@@ -47,10 +51,16 @@ public class RiftItems {
     public static Item RAW_EXOTIC_MEAT;
     public static Item COOKED_EXOTIC_MEAT;
     public static Item CREATIVE_MEAL;
+    public static Item SMOKENUT;
+    public static Item SMOKENUT_SEEDS;
     public static Item TRANQ_BOMB;
 
     public static Item getTributeItem(@NotNull String creatureName) {
         return TRIBUTE_ITEMS.get(creatureName);
+    }
+
+    public static Item getBlockItem(Block block) {
+        return BLOCK_ITEMS.get(block);
     }
 
     //-----registry stuff-----
@@ -73,6 +83,13 @@ public class RiftItems {
                 tooltip.add(TextFormatting.GRAY + I18n.format("item.creative_meal.tooltip"));
             }
         }, "creative_meal", true);
+        SMOKENUT = registerItem(new Item(), "smokenut", true);
+        SMOKENUT_SEEDS = registerItem(new ItemSeeds(RiftBlocks.SMOKENUT_BUSH, Blocks.GRASS) {
+            @Override
+            public EnumPlantType getPlantType(IBlockAccess world, BlockPos pos) {
+                return EnumPlantType.Plains;
+            }
+        }, "smokenut_seeds", true);
         TRANQ_BOMB = registerItem(new RiftThrowableItem() {
             @Override
             @NotNull
@@ -157,12 +174,17 @@ public class RiftItems {
         recipesRegistered = true;
     }
 
-    private static Item registerItem(Item item, String registryName, boolean canBeInCreative) {
+    public static Item registerItem(Item item, String registryName, boolean canBeInCreative) {
         if (canBeInCreative) item.setCreativeTab(RiftCreativeTabs.creativeItemsTab);
         item.setRegistryName(registryName);
         item.setTranslationKey(registryName);
         ITEMS.add(item);
         return item;
+    }
+
+    public static void registerBlockItem(Block block, String registryName, boolean canBeInCreative) {
+        Item blockItem = registerItem(new ItemBlock(block), registryName, canBeInCreative);
+        BLOCK_ITEMS.put(block, blockItem);
     }
 
     @SubscribeEvent

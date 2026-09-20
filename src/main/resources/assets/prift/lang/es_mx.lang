@@ -9,6 +9,8 @@ item.raw_exotic_meat.name=Carne cruda exótica
 item.cooked_exotic_meat.name=Carne cocinada exótica
 item.creative_meal.name=Alimentación creativa
 item.creative_meal.tooltip=Automáticamente tamea cualquiera criatura salvaje y se puede usar en criar cualquiera criatura tameada.
+item.smokenut.name=Nuez de humo
+item.smokenut_seeds.name=Semillas de nuez de humo
 item.tranq_bomb.name=Bomba tranquilizante
 item.tranq_bomb.tooltip=Se lanza a criaturas con poca salud para incapacitarlas para tamear. Tiene efectos diferentes con otros mobs.
 
@@ -17,6 +19,8 @@ item.stegosaurus_plate.name=Placa de Stegosaurus
 
 itemGroup.prift_items=Items de Prehistoric Rift
 itemGroup.prift_spawn_eggs=Generadores de Prehistoric Rift
+
+tile.smokenut_bush.name=Arbusto de nuez de humo
 
 sounds.subtitle.tyrannosaurus_idle=Tyrannosaurus brama
 sounds.subtitle.tyrannosaurus_hurt=Tyrannosaurus herido

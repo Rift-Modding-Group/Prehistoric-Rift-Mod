@@ -171,7 +171,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.moveHelper = new RiftCreatureMoveHelper(this);
         this.navigator = new RiftCreaturePathNavigate(this, worldIn);
         this.applyCreatureTypeSettings();
-        this.animData = new AnimationDataEntity(this, holder -> this.scale());
+        this.animData = new AnimationDataEntity(this);
 
         if (worldIn != null && !worldIn.isRemote) {
             this.herdHelper = this.canDoHerding() ? new RiftCreatureHerdHelper(this) : null;
@@ -226,7 +226,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.creatureType = builder;
         this.creatureInventory.setSize(this.creatureType.getInventorySize());
         this.applyCreatureTypeSettings();
-        this.animData = new AnimationDataEntity(this, holder -> this.scale());
+        this.animData = new AnimationDataEntity(this);
         this.onCreatureTypeChanged();
 
         if (this.world != null && !this.world.isRemote) {
@@ -1416,6 +1416,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void initializeAnimationData(@NotNull AnimationDataEntity animationData) {
+        //-----set scale-----
+        animationData.setScale(holder -> this.scale());
+
         //-----create animation controllers-----
         //---for normal stuff---
         animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "movement", "default",
