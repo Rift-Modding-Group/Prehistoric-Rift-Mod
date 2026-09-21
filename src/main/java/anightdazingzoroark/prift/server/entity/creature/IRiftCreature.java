@@ -22,6 +22,7 @@ public interface IRiftCreature {
                 CreatureNBTKeyword.NATURE,
                 CreatureNBTKeyword.AGE_IN_TICKS,
                 CreatureNBTKeyword.STAMINA,
+                CreatureNBTKeyword.INVENTORY,
                 CreatureNBTKeyword.CREATURE_STATS,
                 CreatureNBTKeyword.CREATURE_MOVES
         };
@@ -64,6 +65,7 @@ public interface IRiftCreature {
     void setStamina(float value);
     float getMaxStamina();
     RiftLibInventoryHandler getCreatureInventory();
+    public void setCreatureInventory(RiftLibInventoryHandler value);
     CreatureStatsStorage getCreatureStats();
     void setCreatureStats(CreatureStatsStorage value);
     CreatureMoveStorage getCreatureMoves();

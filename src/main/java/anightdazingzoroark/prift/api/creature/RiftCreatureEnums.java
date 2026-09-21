@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.api.util.MathUtil;
 import net.minecraft.client.resources.I18n;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
 import java.util.function.Function;
 
 public class RiftCreatureEnums {
@@ -50,7 +51,17 @@ public class RiftCreatureEnums {
         ASSIST, //attack whatever the owner attacks, hitting related creatures does not count
         DEFENSIVE, //retaliate when player attacks
         AGGRESSIVE, //attack on sight, except related creatures
-        PASSIVE //never attack
+        PASSIVE; //never attack
+
+        @NotNull
+        public String getTranslatedName() {
+            return I18n.format("info.tame_targeting."+this.name().toLowerCase(Locale.ROOT));
+        }
+
+        @NotNull
+        public String getDescription() {
+            return I18n.format("info.tame_targeting."+this.name().toLowerCase(Locale.ROOT)+".description");
+        }
     }
 
     //causes of sleep are from various factors and can affect behaviors relatin to em

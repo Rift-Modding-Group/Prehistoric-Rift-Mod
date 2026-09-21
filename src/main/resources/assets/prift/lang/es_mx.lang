@@ -39,3 +39,16 @@ sounds.subtitle.generic_tail_move=Una criatura balancea la cola
 sounds.subtitle.tranq_bomb_impact=La bomba tranquilizante estalla
 
 info.owner_name=Dueño: %s
+info.tame_targeting.assist=Ayudar
+info.tame_targeting.assist.description=Ataca a las criaturas que el dueño elija como objetivo.
+info.tame_targeting.defensive=Defensivo
+info.tame_targeting.defensive.description=Contraataca cuando el dueño sea atacado.
+info.tame_targeting.aggressive=Agresivo
+info.tame_targeting.aggressive.description=Ataca objetivos válidos al verlos.
+info.tame_targeting.passive=Pasivo
+info.tame_targeting.passive.description=Nunca ataca automáticamente.
+
+gui.prift.creature_inventory=Inventario de criatura
+gui.prift.creature_settings=Ajustes de criatura
+gui.prift.player_inventory=Inventario del jugador
+gui.prift.tame_targeting=Modo de ataque

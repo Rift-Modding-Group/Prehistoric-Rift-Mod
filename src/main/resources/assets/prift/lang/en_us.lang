@@ -39,3 +39,16 @@ sounds.subtitle.generic_tail_move=Creature swings its tail
 sounds.subtitle.tranq_bomb_impact=Tranq bomb bursts
 
 info.owner_name=Owner: %s
+info.tame_targeting.assist=Assist
+info.tame_targeting.assist.description=Attack creatures targeted by the owner.
+info.tame_targeting.defensive=Defensive
+info.tame_targeting.defensive.description=Retaliate when the owner is attacked.
+info.tame_targeting.aggressive=Aggressive
+info.tame_targeting.aggressive.description=Attack valid targets on sight.
+info.tame_targeting.passive=Passive
+info.tame_targeting.passive.description=Never attack automatically.
+
+gui.prift.creature_inventory=Creature Inventory
+gui.prift.creature_settings=Creature Settings
+gui.prift.player_inventory=Player Inventory
+gui.prift.tame_targeting=Tame Targeting

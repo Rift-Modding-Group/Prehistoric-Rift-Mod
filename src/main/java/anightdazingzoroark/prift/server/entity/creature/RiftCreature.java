@@ -2,6 +2,22 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.prift.server.entity.projectile.RiftProjectile;
+import com.cleanroommc.modularui.api.IGuiHolder;
+import com.cleanroommc.modularui.api.drawable.IKey;
+import com.cleanroommc.modularui.drawable.GuiTextures;
+import com.cleanroommc.modularui.drawable.ItemDrawable;
+import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.screen.UISettings;
+import com.cleanroommc.modularui.value.sync.EnumSyncValue;
+import com.cleanroommc.modularui.value.sync.PanelSyncManager;
+import com.cleanroommc.modularui.widgets.CycleButtonWidget;
+import com.cleanroommc.modularui.widgets.PageButton;
+import com.cleanroommc.modularui.widgets.PagedWidget;
+import com.cleanroommc.modularui.widgets.SlotGroupWidget;
+import com.cleanroommc.modularui.widgets.layout.Flow;
+import com.cleanroommc.modularui.widgets.slot.ItemSlot;
+import com.cleanroommc.modularui.widgets.slot.ModularSlot;
+import com.cleanroommc.modularui.widget.ParentWidget;
 import io.netty.buffer.ByteBuf;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.api.creature.builder.CreatureDomesticationBuilder;
@@ -65,6 +81,7 @@ import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityFireball;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -96,7 +113,7 @@ import java.util.*;
 /**
  * le heart and soul of this mod
  * */
-public class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, IRiftCreature, ICreature, IRayCreator<RiftCreature>, IEntityAdditionalSpawnData {
+public class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, IRiftCreature, ICreature, IRayCreator<RiftCreature>, IEntityAdditionalSpawnData, IGuiHolder<RiftCreatureGuiData> {
     @NotNull
     private RiftCreatureBuilder creatureType;
     @NotNull
@@ -591,20 +608,27 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         ItemStack heldItem = player.getHeldItem(hand);
         //tamed only effects
         if (this.isTamed()) {
-            //feed tamed creatures for healing
-            if (this.isOwner(player) && !heldItem.isEmpty()) {
-                RiftCreatureFood creatureFood = this.getCreatureFood(heldItem);
-                if (creatureFood == null) return false;
-
-                if (creatureFood.percentHealed != null && creatureFood.percentHealed > 0f && this.getHealth() < this.getMaxHealth()) {
-                    this.consumeItemFromStack(player, heldItem);
-                    this.heal(this.getMaxHealth() * creatureFood.percentHealed);
-                    this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+            if (this.isOwner(player)) {
+                //open ui
+                if (heldItem.isEmpty()) {
+                    RiftCreatureGuiFactory.INSTANCE.open(player, this);
                     return true;
                 }
-                else return false;
+                //feed tamed creatures for healing
+                else {
+                    RiftCreatureFood creatureFood = this.getCreatureFood(heldItem);
+                    if (creatureFood == null) return false;
+
+                    if (creatureFood.percentHealed != null && creatureFood.percentHealed > 0f && this.getHealth() < this.getMaxHealth()) {
+                        this.consumeItemFromStack(player, heldItem);
+                        this.heal(this.getMaxHealth() * creatureFood.percentHealed);
+                        this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+                        return true;
+                    }
+                    else return false;
+                }
             }
-            else return super.processInteract(player, hand);
+            else return false;
         }
         //stuff for wild creatures
         else if (domestication != null) {
@@ -1532,6 +1556,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     @Override
+    public void setCreatureInventory(RiftLibInventoryHandler value) {
+        if (value != null) this.creatureInventory.deserializeNBT(value.serializeNBT());
+    }
+
+    @Override
     public CreatureStatsStorage getCreatureStats() {
         return this.dataManager.get(CREATURE_STATS);
     }
@@ -1885,6 +1914,109 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 this.posY + locatorPos.y,
                 this.posZ + locatorPos.z
         );
+    }
+
+    //-----ui stuff-----
+    @Override
+    public ModularPanel buildUI(RiftCreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
+        RiftLibInventoryHandler creatureInventory = data.getCreature().getCreatureInventory();
+        int inventorySize = creatureInventory.getSlots();
+        int inventoryColumns = Math.min(9, inventorySize);
+        int inventoryRows = (inventorySize + inventoryColumns - 1) / inventoryColumns;
+        int playerInventoryTop = 39 + inventoryRows * 18;
+
+        syncManager.registerSlotGroup("creature_inventory", inventoryColumns);
+        for (int i = 0; i < inventorySize; i++) {
+            syncManager.itemSlot(
+                    "creature_inventory", i,
+                    new ModularSlot(creatureInventory, i).slotGroup("creature_inventory")
+            );
+        }
+        syncManager.bindPlayerInventory(data.getPlayer());
+
+        syncManager.syncValue("tame_targeting", new EnumSyncValue<>(
+                RiftCreatureEnums.TameTargeting.class,
+                this::getTameTargeting,
+                value -> {
+                    if (!syncManager.isClient() && this.isTamed() && this.isOwner(syncManager.getPlayer())) {
+                        this.setTameTargeting(value);
+                    }
+                }
+        ));
+
+        SlotGroupWidget.Builder creatureInventoryBuilder = SlotGroupWidget.builder()
+                .key('I', index -> new ItemSlot().syncHandler("creature_inventory", index));
+        for (int row = 0; row < inventoryRows; row++) {
+            creatureInventoryBuilder.row("I".repeat(Math.min(inventoryColumns, inventorySize - row * inventoryColumns)));
+        }
+
+        PagedWidget.Controller tabController = new PagedWidget.Controller();
+        return ModularPanel.defaultPanel("rift_creature", 176, inventoryRows * 18 + 122)
+                .child(Flow.row()
+                        .coverChildren()
+                        .topRel(0f, 4, 1f)
+                        .child(new PageButton(0, tabController)
+                                .tab(GuiTextures.TAB_TOP, -1)
+                                .overlay(new ItemDrawable(Blocks.CHEST).asIcon())
+                                .addTooltipLine(IKey.lang("gui.prift.creature_inventory")))
+                        .child(new PageButton(1, tabController)
+                                .tab(GuiTextures.TAB_TOP, 1)
+                                .overlay(GuiTextures.GEAR.asIcon())
+                                .addTooltipLine(IKey.lang("gui.prift.creature_settings"))))
+                .child(new PagedWidget<>()
+                        .sizeRel(1f)
+                        .controller(tabController)
+                        .addPage(new ParentWidget<>()
+                                .sizeRel(1f)
+                                .child(IKey.lang("gui.prift.creature_inventory").asWidget().pos(7, 8))
+                                .child(creatureInventoryBuilder.build().top(20).horizontalCenter())
+                                .child(IKey.lang("gui.prift.player_inventory").asWidget().pos(7, playerInventoryTop - 12))
+                                .child(SlotGroupWidget.playerInventory(false).pos(7, playerInventoryTop))
+                        )
+                        .addPage(new ParentWidget<>()
+                                .sizeRel(1f)
+                                .child(IKey.lang("gui.prift.creature_settings").asWidget().pos(7, 8))
+                                .child(IKey.lang("gui.prift.tame_targeting").asWidget().pos(13, 27))
+                                .child(new CycleButtonWidget()
+                                        .syncHandler("tame_targeting")
+                                        .size(150, 20)
+                                        .top(42)
+                                        .horizontalCenter()
+                                        .stateOverlay(
+                                                RiftCreatureEnums.TameTargeting.ASSIST,
+                                                IKey.str(RiftCreatureEnums.TameTargeting.ASSIST.getTranslatedName())
+                                        )
+                                        .stateOverlay(
+                                                RiftCreatureEnums.TameTargeting.DEFENSIVE,
+                                                IKey.str(RiftCreatureEnums.TameTargeting.DEFENSIVE.getTranslatedName())
+                                        )
+                                        .stateOverlay(
+                                                RiftCreatureEnums.TameTargeting.AGGRESSIVE,
+                                                IKey.str(RiftCreatureEnums.TameTargeting.AGGRESSIVE.getTranslatedName())
+                                        )
+                                        .stateOverlay(
+                                                RiftCreatureEnums.TameTargeting.PASSIVE,
+                                                IKey.str(RiftCreatureEnums.TameTargeting.PASSIVE.getTranslatedName())
+                                        )
+                                        .addTooltip(
+                                                RiftCreatureEnums.TameTargeting.ASSIST.ordinal(),
+                                                IKey.str(RiftCreatureEnums.TameTargeting.ASSIST.getDescription())
+                                        )
+                                        .addTooltip(
+                                                RiftCreatureEnums.TameTargeting.DEFENSIVE.ordinal(),
+                                                IKey.str(RiftCreatureEnums.TameTargeting.DEFENSIVE.getDescription())
+                                        )
+                                        .addTooltip(
+                                                RiftCreatureEnums.TameTargeting.AGGRESSIVE.ordinal(),
+                                                IKey.str(RiftCreatureEnums.TameTargeting.AGGRESSIVE.getDescription())
+                                        )
+                                        .addTooltip(
+                                                RiftCreatureEnums.TameTargeting.PASSIVE.ordinal(),
+                                                IKey.str(RiftCreatureEnums.TameTargeting.PASSIVE.getDescription())
+                                        )
+                                )
+                        )
+                );
     }
 
     //-----other useless events idk nor care about-----

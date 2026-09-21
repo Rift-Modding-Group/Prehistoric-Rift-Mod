@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.server.entity.creature.IRiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
+import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.function.BiConsumer;
@@ -36,6 +37,11 @@ public class CreatureNBTKeyword<T> {
             "Stamina", Float.class,
             IRiftCreature::getStamina,
             IRiftCreature::setStamina
+    );
+    public static final CreatureNBTKeyword<RiftLibInventoryHandler> INVENTORY = new CreatureNBTKeyword<>(
+            "Inventory", RiftLibInventoryHandler.class,
+            IRiftCreature::getCreatureInventory,
+            IRiftCreature::setCreatureInventory
     );
     public static final CreatureNBTKeyword<CreatureStatsStorage> CREATURE_STATS = new CreatureNBTKeyword<>(
             "CreatureStats", CreatureStatsStorage.class,
@@ -87,6 +93,12 @@ public class CreatureNBTKeyword<T> {
             RiftCreatureBuilder builder = RiftCreatureRegistry.getCreatureBuilder(nbtTagCompound.getString(this.name));
             return this.typeClass.cast(builder);
         }
+        else if (this.typeClass == RiftLibInventoryHandler.class) {
+            if (!nbtTagCompound.hasKey(this.name, 10)) return null;
+            RiftLibInventoryHandler inventoryHandler = new RiftLibInventoryHandler();
+            inventoryHandler.deserializeNBT(nbtTagCompound.getCompoundTag(this.name));
+            return this.typeClass.cast(inventoryHandler);
+        }
         else if (this.typeClass == CreatureStatsStorage.class) {
             CreatureStatsStorage moveStorage = new CreatureStatsStorage();
             moveStorage.readFromNBT(nbtTagCompound.getCompoundTag(this.name));
@@ -120,6 +132,10 @@ public class CreatureNBTKeyword<T> {
         else if (this.typeClass == RiftCreatureBuilder.class) {
             nbtTagCompound.setString(this.name, ((RiftCreatureBuilder) value).getName());
         }
+        else if (this.typeClass == RiftLibInventoryHandler.class) {
+            if (value == null) return;
+            nbtTagCompound.setTag(this.name, ((RiftLibInventoryHandler) value).serializeNBT());
+        }
         else if (this.typeClass == CreatureStatsStorage.class) {
             nbtTagCompound.setTag(this.name, ((CreatureStatsStorage) value).getAsNBT());
         }
@@ -144,6 +160,11 @@ public class CreatureNBTKeyword<T> {
         }
         else if (this.typeClass == RiftCreatureBuilder.class) {
             nbtTagCompound.setString(this.name, ((RiftCreatureBuilder) this.writeValue.apply(creature)).getName());
+        }
+        else if (this.typeClass == RiftLibInventoryHandler.class) {
+            RiftLibInventoryHandler inventoryHandler = (RiftLibInventoryHandler) this.writeValue.apply(creature);
+            if (inventoryHandler == null) return;
+            nbtTagCompound.setTag(this.name, inventoryHandler.serializeNBT());
         }
         else if (this.typeClass == CreatureStatsStorage.class) {
             CreatureStatsStorage creatureStatsStorage = (CreatureStatsStorage) this.writeValue.apply(creature);

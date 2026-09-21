@@ -8,14 +8,16 @@ import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * a wrapper for NBTTagCompound for creatures meant for use in UIs and packets
  * */
 public class CreatureNBT implements IRiftCreature {
+    @NotNull
     public final NBTTagCompound nbtTagCompound;
 
-    public CreatureNBT(NBTTagCompound nbtTagCompound) {
+    public CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) {
         this.nbtTagCompound = nbtTagCompound;
     }
 
@@ -97,7 +99,13 @@ public class CreatureNBT implements IRiftCreature {
 
     @Override
     public RiftLibInventoryHandler getCreatureInventory() {
-        return null;
+        if (this.nbtTagCompound.isEmpty()) return null;
+        return CreatureNBTKeyword.INVENTORY.getValueFromNBT(this.nbtTagCompound);
+    }
+
+    @Override
+    public void setCreatureInventory(RiftLibInventoryHandler value) {
+        CreatureNBTKeyword.INVENTORY.setValueInNBT(this.nbtTagCompound, value);
     }
 
     @Override
