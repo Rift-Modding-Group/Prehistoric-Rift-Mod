@@ -2,30 +2,24 @@ package anightdazingzoroark.prift.server.entity.creature.info;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
-public class CreatureAcquisitionInfo {
-    public final AcquisitionMethod acquisitionMethod;
-    public final long acquisitionTime;
-
-    public CreatureAcquisitionInfo(AcquisitionMethod method, long acquisitionTime) {
-        this.acquisitionMethod = method;
-        this.acquisitionTime = acquisitionTime;
-    }
-
-    public CreatureAcquisitionInfo(NBTTagCompound nbt) {
-        if (nbt == null || nbt.isEmpty()) {
-            this.acquisitionMethod = null;
-            this.acquisitionTime = 0L;
-        }
+public record CreatureAcquisitionInfo(@Nullable AcquisitionMethod acquisitionMethod, long acquisitionTime) {
+    public static CreatureAcquisitionInfo fromNBT(@Nullable NBTTagCompound nbt) {
+        if (nbt == null || nbt.isEmpty()) return new CreatureAcquisitionInfo(null, 0L);
         else {
             byte acquisitionMethodByte = nbt.getByte("AcquisitionMethod");
-            this.acquisitionMethod = acquisitionMethodByte >= 0 ? AcquisitionMethod.values()[acquisitionMethodByte] : null;
-            this.acquisitionTime = nbt.getLong("AcquisitionTime");
+            AcquisitionMethod acquisitionMethod = acquisitionMethodByte >= 0 && acquisitionMethodByte < AcquisitionMethod.values().length
+                    ? AcquisitionMethod.values()[acquisitionMethodByte]
+                    : null;
+            long acquisitionTime = nbt.getLong("AcquisitionTime");
+            return new CreatureAcquisitionInfo(acquisitionMethod, acquisitionTime);
         }
     }
 
@@ -39,7 +33,7 @@ public class CreatureAcquisitionInfo {
         if (this.acquisitionTime <= 0L || this.acquisitionMethod == null) {
             return I18n.format("acquisition.unknown");
         }
-        return I18n.format("acquisition."+this.acquisitionMethod.toString().toLowerCase(), this.acquisitionTimeString());
+        return I18n.format("acquisition." + this.acquisitionMethod.name().toLowerCase(Locale.ROOT), this.acquisitionTimeString());
     }
 
     public NBTTagCompound getNBT() {

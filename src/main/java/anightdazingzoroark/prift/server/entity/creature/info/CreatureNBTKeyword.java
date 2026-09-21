@@ -53,6 +53,16 @@ public class CreatureNBTKeyword<T> {
             IRiftCreature::getCreatureMoves,
             IRiftCreature::setCreatureMoves
     );
+    public static final CreatureNBTKeyword<RiftCreatureEnums.TameTargeting> TAME_TARGETING = new CreatureNBTKeyword<>(
+            "TameTargeting", RiftCreatureEnums.TameTargeting.class,
+            IRiftCreature::getTameTargeting,
+            IRiftCreature::setTameTargeting
+    );
+    public static final CreatureNBTKeyword<CreatureAcquisitionInfo> ACQUISITION_INFO = new CreatureNBTKeyword<>(
+            "AcquisitionInfo", CreatureAcquisitionInfo.class,
+            IRiftCreature::getAcquisitionInfo,
+            IRiftCreature::setAcquisitionInfo
+    );
 
     //normal class operations here
     private final String name;
@@ -109,6 +119,9 @@ public class CreatureNBTKeyword<T> {
             moveStorage.readFromNBT(nbtTagCompound.getCompoundTag(this.name));
             return this.typeClass.cast(moveStorage);
         }
+        else if (this.typeClass == CreatureAcquisitionInfo.class) {
+            return this.typeClass.cast(CreatureAcquisitionInfo.fromNBT(nbtTagCompound.getCompoundTag(this.name)));
+        }
         else if (this.typeClass.isEnum()) {
             if (!nbtTagCompound.hasKey(this.name)) return null;
             int ordinal = nbtTagCompound.getByte(this.name);
@@ -141,6 +154,10 @@ public class CreatureNBTKeyword<T> {
         }
         else if (this.typeClass == CreatureMoveStorage.class) {
             nbtTagCompound.setTag(this.name, ((CreatureMoveStorage) value).getAsNBT());
+        }
+        else if (this.typeClass == CreatureAcquisitionInfo.class) {
+            if (value == null) return;
+            nbtTagCompound.setTag(this.name, ((CreatureAcquisitionInfo) value).getNBT());
         }
         else if (this.typeClass.isEnum()) {
             nbtTagCompound.setByte(this.name, value == null ? (byte) -1 : (byte) ((Enum<?>) value).ordinal());
@@ -175,6 +192,11 @@ public class CreatureNBTKeyword<T> {
             CreatureMoveStorage creatureMoveStorage = (CreatureMoveStorage) this.writeValue.apply(creature);
             if (creatureMoveStorage == null) return;
             nbtTagCompound.setTag(this.name, creatureMoveStorage.getAsNBT());
+        }
+        else if (this.typeClass == CreatureAcquisitionInfo.class) {
+            CreatureAcquisitionInfo acquisitionInfo = (CreatureAcquisitionInfo) this.writeValue.apply(creature);
+            if (acquisitionInfo == null) return;
+            nbtTagCompound.setTag(this.name, acquisitionInfo.getNBT());
         }
         else if (this.typeClass.isEnum()) {
             Enum<?> enumValue = (Enum<?>) this.writeValue.apply(creature);

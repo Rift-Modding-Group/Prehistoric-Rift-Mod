@@ -75,25 +75,42 @@ public class RiftCreatureEnums {
     //and will be represented as stars on most UIs
     public enum Stats {
         //health is well health
-        HEALTH(base -> MathUtil.slopeResult(base, false, 0, 10, 0, 200), true),
+        HEALTH(
+                base -> MathUtil.slopeResult(base, false, 0, 10, 0, 200),
+                true, 0xFF0000
+        ),
         //melee damage is damage from charge attacks, physical moves, and physical projectiles
-        MELEE_DAMAGE(base -> MathUtil.slopeResult(base, false, 0, 10, 0, 200), true),
+        MELEE_DAMAGE(
+                base -> MathUtil.slopeResult(base, false, 0, 10, 0, 200),
+                true, 0x800000
+        ),
         //elemental damage is damage from attacks with elemental properties, like breathing fire or exploding
-        ELEMENTAL_DAMAGE(base -> MathUtil.slopeResult(base, false, 0, 10, 0, 200), true),
+        ELEMENTAL_DAMAGE(
+                base -> MathUtil.slopeResult(base, false, 0, 10, 0, 200),
+                true, 0xFFA500
+        ),
         //stamina limits exertion such as special moves, leaps, and sprinting
-        STAMINA(base -> MathUtil.slopeResult(base, false, 0, 10, 150, 400), true),
+        STAMINA(
+                base -> MathUtil.slopeResult(base, false, 0, 10, 150, 400),
+                true, 0xFFFF00
+        ),
         //speed is movement speed, specifically on land. in water and air movement,
         //all creatures have different movement speeds that factor this in and their own individual fly and swim multipliers.
         //its unique among other stats in that it is on a scale of 1-5, has steps of 1, and is unaffected by leveling
-        SPEED(base -> MathUtil.slopeResult(base, false, 1, 5, 20, 100), true);
+        SPEED(
+                base -> MathUtil.slopeResult(base, false, 1, 5, 20, 100),
+                true, 0x00FFFF
+        );
 
         @NotNull
         private final Function<Double, Double> baseToParsedValue;
         private final boolean affectedByLeveling;
+        private final int color;
 
-        Stats(@NotNull Function<Double, Double> baseToParsedValue, boolean affectedByLeveling) {
+        Stats(@NotNull Function<Double, Double> baseToParsedValue, boolean affectedByLeveling, int color) {
             this.baseToParsedValue = baseToParsedValue;
             this.affectedByLeveling = affectedByLeveling;
+            this.color = color;
         }
 
         public double parseBaseValue(double baseValue) {
@@ -102,6 +119,20 @@ public class RiftCreatureEnums {
 
         public boolean getAffectedByLeveling() {
             return this.affectedByLeveling;
+        }
+
+        public int getColor() {
+            return this.color;
+        }
+
+        @NotNull
+        public String getTranslatedName() {
+            return I18n.format("stat.creature."+this.name().toLowerCase());
+        }
+
+        @NotNull
+        public String getDescription() {
+            return I18n.format("stat.creature."+this.name().toLowerCase()+".description");
         }
     }
 

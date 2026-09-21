@@ -75,9 +75,9 @@ public class RiftDataSerializers {
                 buf.writeLong(0L);
             }
             else {
-                byte acquisitionMethodByte = value.acquisitionMethod != null ? (byte) value.acquisitionMethod.ordinal() : (byte) -1;
+                byte acquisitionMethodByte = value.acquisitionMethod() != null ? (byte) value.acquisitionMethod().ordinal() : (byte) -1;
                 buf.writeByte(acquisitionMethodByte);
-                buf.writeLong(value.acquisitionTime);
+                buf.writeLong(value.acquisitionTime());
             }
         }
 

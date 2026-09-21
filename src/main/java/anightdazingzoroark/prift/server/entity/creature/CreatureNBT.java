@@ -1,26 +1,24 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureAcquisitionInfo;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureNBTKeyword;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.UUID;
+
 /**
  * a wrapper for NBTTagCompound for creatures meant for use in UIs and packets
- * */
-public class CreatureNBT implements IRiftCreature {
-    @NotNull
-    public final NBTTagCompound nbtTagCompound;
-
-    public CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) {
-        this.nbtTagCompound = nbtTagCompound;
-    }
-
+ */
+public record CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) implements IRiftCreature {
     private float getAttributeValue(String value) {
         NBTTagList attributeList = this.nbtTagCompound.getTagList("Attributes", 10);
         for (int x = 0; x < attributeList.tagCount(); x++) {
@@ -32,6 +30,19 @@ public class CreatureNBT implements IRiftCreature {
     }
 
     //-----so much boilerplate code from IRiftCreature incoming-----
+    @Override
+    public String getName() {
+        return this.getName(true);
+    }
+
+    @Override
+    public String getName(boolean showLevel) {
+        if (this.nbtTagCompound.isEmpty() || this.getCreatureType() == null) return "???";
+        String toReturn = this.hasCustomName() ? this.getCustomNameTag() : this.getCreatureType().getLocalizedName();
+        if (showLevel) toReturn = toReturn + " (" + I18n.format("info.level", this.getLevel()) + ")";
+        return toReturn;
+    }
+
     @Override
     public RiftCreatureBuilder getCreatureType() {
         if (this.nbtTagCompound.isEmpty()) return null;
@@ -128,5 +139,57 @@ public class CreatureNBT implements IRiftCreature {
     @Override
     public void setCreatureMoves(CreatureMoveStorage value) {
         CreatureNBTKeyword.CREATURE_MOVES.setValueInNBT(this.nbtTagCompound, value);
+    }
+
+    @Override
+    public RiftCreatureEnums.TameTargeting getTameTargeting() {
+        if (this.nbtTagCompound.isEmpty()) return null;
+        return CreatureNBTKeyword.TAME_TARGETING.getValueFromNBT(this.nbtTagCompound);
+    }
+
+    @Override
+    public void setTameTargeting(@NotNull RiftCreatureEnums.TameTargeting value) {
+        CreatureNBTKeyword.TAME_TARGETING.setValueInNBT(this.nbtTagCompound, value);
+    }
+
+    @Override
+    public CreatureAcquisitionInfo getAcquisitionInfo() {
+        return CreatureNBTKeyword.ACQUISITION_INFO.getValueFromNBT(this.nbtTagCompound);
+    }
+
+    @Override
+    public void setAcquisitionInfo(@NotNull CreatureAcquisitionInfo value) {
+        CreatureNBTKeyword.ACQUISITION_INFO.setValueInNBT(this.nbtTagCompound, value);
+    }
+
+    //-----helper nbt code incoming-----
+    @Override
+    public UUID getUniqueID() {
+        return this.nbtTagCompound.getUniqueId("UUID");
+    }
+
+    @Override
+    public boolean isTamed() {
+        if (this.nbtTagCompound.isEmpty()) return false;
+        return this.nbtTagCompound.hasKey("OwnerUUID");
+    }
+
+    @Override
+    public boolean isOwner(EntityLivingBase entity) {
+        if (this.nbtTagCompound.isEmpty() || entity == null) return false;
+        if (!this.nbtTagCompound.hasKey("OwnerUUID")) return false;
+        return entity.getUniqueID().equals(this.nbtTagCompound.getUniqueId("OwnerUUID"));
+    }
+
+    @Override
+    public boolean hasCustomName() {
+        if (this.nbtTagCompound.isEmpty()) return false;
+        return this.nbtTagCompound.hasKey("CustomName") && !this.nbtTagCompound.getString("CustomName").isEmpty();
+    }
+
+    @Override
+    public String getCustomNameTag() {
+        if (this.nbtTagCompound.isEmpty()) return "???";
+        return this.nbtTagCompound.getString("CustomName");
     }
 }

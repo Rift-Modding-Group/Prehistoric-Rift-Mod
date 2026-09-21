@@ -29,6 +29,15 @@ public class RiftCreatureGuiFactory extends AbstractUIFactory<RiftCreatureGuiDat
         GuiManager.open(this, new RiftCreatureGuiData(serverPlayer, creature), serverPlayer);
     }
 
+    public void open(@NotNull EntityPlayer player, @NotNull CreatureNBT creatureNBT) {
+        Objects.requireNonNull(player);
+        Objects.requireNonNull(creatureNBT);
+        if (creatureNBT.nbtTagCompound().isEmpty()) throw new IllegalArgumentException("CreatureNBT cannot be empty!");
+
+        EntityPlayerMP serverPlayer = verifyServerSide(player);
+        GuiManager.open(this, new RiftCreatureGuiData(serverPlayer, creatureNBT), serverPlayer);
+    }
+
     @Override
     @NotNull
     public IGuiHolder<RiftCreatureGuiData> getGuiHolder(RiftCreatureGuiData data) {
