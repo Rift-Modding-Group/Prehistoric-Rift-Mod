@@ -133,7 +133,9 @@ public record CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) implements IRi
     @Override
     public CreatureMoveStorage getCreatureMoves() {
         if (this.nbtTagCompound.isEmpty()) return null;
-        return CreatureNBTKeyword.CREATURE_MOVES.getValueFromNBT(this.nbtTagCompound);
+        CreatureMoveStorage creatureMoves = CreatureNBTKeyword.CREATURE_MOVES.getValueFromNBT(this.nbtTagCompound);
+        creatureMoves.setCreatureUser(this.getCreatureType());
+        return creatureMoves;
     }
 
     @Override
@@ -191,5 +193,10 @@ public record CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) implements IRi
     public String getCustomNameTag() {
         if (this.nbtTagCompound.isEmpty()) return "???";
         return this.nbtTagCompound.getString("CustomName");
+    }
+
+    @Override
+    public void setCustomNameTag(String value) {
+        this.nbtTagCompound.setString("CustomName", value);
     }
 }

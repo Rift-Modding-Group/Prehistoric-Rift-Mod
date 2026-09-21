@@ -104,4 +104,5 @@ public interface IRiftCreature {
     boolean isOwner(EntityLivingBase entity);
     boolean hasCustomName();
     String getCustomNameTag();
+    void setCustomNameTag(String value);
 }

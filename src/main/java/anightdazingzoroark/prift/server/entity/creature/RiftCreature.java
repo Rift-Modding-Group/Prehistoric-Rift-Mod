@@ -860,6 +860,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         return toReturn;
     }
 
+    @Override
+    public boolean getAlwaysRenderNameTag() {
+        return this.hasCustomName(); //teehee
+    }
+
     @Nullable
     private RiftCreatureFood getCreatureFood(@NotNull ItemStack itemStack) {
         RiftCreatureConfig creatureConfig = this.getCreatureConfig();
