@@ -118,6 +118,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private static final DataParameter<Boolean> USE_BLOCK_BREAK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> SLEEPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Float> TAMING_PROGRESS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
+    private static final DataParameter<Byte> TAME_TARGETING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
 
     //--custom property values, which can be called and manipulated from a creature builder--
     @NotNull
@@ -148,8 +149,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private int tiredness;
     private int tirednessCountdown;
     private RiftCreatureEnums.@Nullable SleepCause sleepCause;
-    @NotNull
-    private RiftCreatureEnums.TameTargeting tameTargeting = RiftCreatureEnums.TameTargeting.ASSIST;
     //herd helper
     @Nullable
     private RiftCreatureHerdHelper herdHelper;
@@ -264,6 +263,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.dataManager.register(USE_BLOCK_BREAK, false);
         this.dataManager.register(SLEEPING, false);
         this.dataManager.register(TAMING_PROGRESS, 0f);
+        this.dataManager.register(TAME_TARGETING, (byte) 0);
     }
 
     //this is gonna be mostly for registering the custom attributes
@@ -858,6 +858,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             //no colon, presumed to be list
             else {
                 List<RiftCreatureFood> innerBlacklist = listsConfig.foodGroups.get(blacklistEntry);
+                if (innerBlacklist == null) continue;
+
                 if (innerBlacklist.stream().anyMatch(creatureFood -> RiftUtil.itemStackMatchesString(itemStack, creatureFood.itemId))) {
                     return null;
                 }
@@ -878,6 +880,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             //check in list
             else if (object instanceof String string) {
                 List<RiftCreatureFood> innerWhitelist = listsConfig.foodGroups.get(string);
+                if (innerWhitelist == null) continue;
+
                 Optional<RiftCreatureFood> match = innerWhitelist.stream()
                         .filter(creatureFood -> RiftUtil.itemStackMatchesString(itemStack, creatureFood.itemId))
                         .findFirst();
@@ -1185,12 +1189,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @NotNull
     public RiftCreatureEnums.TameTargeting getTameTargeting() {
-        return this.tameTargeting;
+        return RiftCreatureEnums.TameTargeting.values()[this.dataManager.get(TAME_TARGETING)];
     }
 
     public void setTameTargeting(@NotNull RiftCreatureEnums.TameTargeting value) {
-        if (this.tameTargeting != value) this.setAttackTarget(null);
-        this.tameTargeting = value;
+        if (this.getTameTargeting() != value) this.setAttackTarget(null);
+        this.dataManager.set(TAME_TARGETING, (byte) value.ordinal());
     }
 
     //-----creature phase management-----
@@ -1606,10 +1610,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //domestication state
         this.setTamingProgress(compound.getFloat("TamingProgress"));
-        int tameTargetingOrdinal = compound.hasKey("TameTargeting", 1) ? compound.getByte("TameTargeting") : 0;
-        this.setTameTargeting(tameTargetingOrdinal >= 0 && tameTargetingOrdinal < RiftCreatureEnums.TameTargeting.values().length
-                ? RiftCreatureEnums.TameTargeting.values()[tameTargetingOrdinal]
-                : RiftCreatureEnums.TameTargeting.ASSIST);
+        int tameTargetingOrdinal = compound.hasKey("TameTargeting") ? compound.getByte("TameTargeting") : 0;
+        this.setTameTargeting(RiftCreatureEnums.TameTargeting.values()[tameTargetingOrdinal]);
         if (this.isTamed()) {
             this.leaveHerd();
             this.herdHelper = null;
