@@ -119,11 +119,6 @@ public class FixedSizeList<T> {
         return this.list.indexOf(value);
     }
 
-    @Deprecated //never ever use this
-    public List<T> getList() {
-        return this.list;
-    }
-
     public FixedSizeList<T> sublist(int minRange, int maxRange) {
         if (minRange < 0 || maxRange > this.maxSize) {
             throw new UnsupportedOperationException("Invalid range!");

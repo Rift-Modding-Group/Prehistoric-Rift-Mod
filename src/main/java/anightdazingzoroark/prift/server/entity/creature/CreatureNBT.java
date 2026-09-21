@@ -19,6 +19,8 @@ import java.util.UUID;
  * a wrapper for NBTTagCompound for creatures meant for use in UIs and packets
  */
 public record CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) implements IRiftCreature {
+    public static CreatureNBT EMPTY_NBT = new CreatureNBT(new NBTTagCompound());
+
     private float getAttributeValue(String value) {
         NBTTagList attributeList = this.nbtTagCompound.getTagList("Attributes", 10);
         for (int x = 0; x < attributeList.tagCount(); x++) {
