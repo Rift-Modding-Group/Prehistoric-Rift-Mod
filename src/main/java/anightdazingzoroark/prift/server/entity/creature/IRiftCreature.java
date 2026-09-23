@@ -12,6 +12,7 @@ import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -32,7 +33,8 @@ public interface IRiftCreature {
                 CreatureNBTKeyword.CREATURE_STATS,
                 CreatureNBTKeyword.CREATURE_MOVES,
                 CreatureNBTKeyword.TAME_TARGETING,
-                CreatureNBTKeyword.ACQUISITION_INFO
+                CreatureNBTKeyword.ACQUISITION_INFO,
+                CreatureNBTKeyword.DEPLOYMENT_TYPE
         };
     }
 
@@ -97,6 +99,8 @@ public interface IRiftCreature {
     void setTameTargeting(@NotNull RiftCreatureEnums.TameTargeting value);
     CreatureAcquisitionInfo getAcquisitionInfo();
     void setAcquisitionInfo(@NotNull CreatureAcquisitionInfo value);
+    RiftCreatureEnums.CreatureDeployment getDeploymentType();
+    void setDeploymentType(@Nullable RiftCreatureEnums.CreatureDeployment value);
 
     //-----same but these are helpers----
     UUID getUniqueID();

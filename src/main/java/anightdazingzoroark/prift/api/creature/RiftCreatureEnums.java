@@ -228,4 +228,11 @@ public class RiftCreatureEnums {
             return I18n.format("nature.creature."+this.name().toLowerCase());
         }
     }
+
+    public enum CreatureDeployment {
+        PARTY_INACTIVE,
+        PARTY, //with player in party
+        BASE, //wandering around box
+        BASE_INACTIVE; //sitting in box
+    }
 }

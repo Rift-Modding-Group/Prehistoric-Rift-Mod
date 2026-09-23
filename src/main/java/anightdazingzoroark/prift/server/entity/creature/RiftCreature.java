@@ -37,6 +37,7 @@ import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResu
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.config.RiftListsConfig;
 import anightdazingzoroark.prift.server.item.RiftItems;
+import anightdazingzoroark.prift.server.player.PlayerPartyProperties;
 import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
@@ -86,6 +87,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -126,6 +128,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private static final DataParameter<Boolean> SLEEPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Float> TAMING_PROGRESS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
     private static final DataParameter<Byte> TAME_TARGETING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
+    private static final DataParameter<Byte> DEPLOYMENT_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
 
     //--custom property values, which can be called and manipulated from a creature builder--
     @NotNull
@@ -273,6 +276,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.dataManager.register(SLEEPING, false);
         this.dataManager.register(TAMING_PROGRESS, 0f);
         this.dataManager.register(TAME_TARGETING, (byte) 0);
+        this.dataManager.register(DEPLOYMENT_TYPE, (byte) -1);
     }
 
     //this is gonna be mostly for registering the custom attributes
@@ -429,6 +433,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //server only operations
         if (!this.world.isRemote) {
+            if (this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.PARTY_INACTIVE) {
+                this.setDead();
+                return;
+            }
+
             //sleep and tiredness from tranq bombs
             if (!this.getIsSleeping() && this.tiredness >= 100) {
                 this.sleepCause = RiftCreatureEnums.SleepCause.TRANQ_BOMB;
@@ -1207,6 +1216,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.enablePersistence();
         this.world.setEntityState(this, (byte) 7);
         this.setHealth(this.getMaxHealth());
+
+        PlayerPartyProperties playerParty = PlayerPartyProperties.get(player);
+        if (playerParty != null && !playerParty.addPartyMember(this)) {
+            player.sendStatusMessage(new TextComponentTranslation("party.warning.party_full"), false);
+        }
     }
 
     public float getTamingProgress() {
@@ -1595,6 +1609,30 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Override
     public void setAcquisitionInfo(@NotNull CreatureAcquisitionInfo value) {
         this.acquisitionInfo = value;
+    }
+
+    @Override
+    public RiftCreatureEnums.CreatureDeployment getDeploymentType() {
+        byte deploymentTypeOrdinal = this.dataManager.get(DEPLOYMENT_TYPE);
+        if (deploymentTypeOrdinal < 0 || deploymentTypeOrdinal >= RiftCreatureEnums.CreatureDeployment.values().length) return null;
+        return RiftCreatureEnums.CreatureDeployment.values()[deploymentTypeOrdinal];
+    }
+
+    @Override
+    public void setDeploymentType(RiftCreatureEnums.CreatureDeployment value) {
+        this.dataManager.set(DEPLOYMENT_TYPE, value != null ? (byte) value.ordinal() : (byte) -1);
+    }
+
+    @Override
+    public void onDeath(DamageSource cause) {
+        if (!this.world.isRemote && this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.PARTY) {
+            this.setDeploymentType(RiftCreatureEnums.CreatureDeployment.PARTY_INACTIVE);
+            if (this.getOwner() instanceof EntityPlayer player) {
+                PlayerPartyProperties playerParty = PlayerPartyProperties.get(player);
+                if (playerParty != null) playerParty.updatePartyMember(this);
+            }
+        }
+        super.onDeath(cause);
     }
 
     //-----nbt parsing related stuff-----

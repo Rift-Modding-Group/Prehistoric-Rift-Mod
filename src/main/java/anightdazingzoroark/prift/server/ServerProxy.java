@@ -11,9 +11,14 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiFactory;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.server.entity.model.CreatureModel;
 import anightdazingzoroark.prift.server.item.RiftItems;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import anightdazingzoroark.prift.server.message.RiftPartyActionMessage;
+import anightdazingzoroark.prift.server.player.PlayerPartyProperties;
 import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.prift.server.world.RiftWorldGenerator;
 import anightdazingzoroark.riftlib.model.ServerModelRegistry;
+import anightdazingzoroark.riftlib.message.RiftLibMessageSide;
+import anightdazingzoroark.riftlib.nbtStorageUser.propertySystem.registry.PropertyRegistry;
 import anightdazingzoroark.riftlib.resource.server.RiftLibCacheServer;
 import com.cleanroommc.modularui.factory.GuiManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -22,6 +27,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraft.entity.player.EntityPlayer;
 
 @Mod.EventBusSubscriber
 public class ServerProxy {
@@ -30,6 +36,12 @@ public class ServerProxy {
 
     public void preInit(FMLPreInitializationEvent e) {
         registryPrimer = new InternalRegistryPrimer();
+
+        PropertyRegistry.register(
+                PlayerPartyProperties.PROPERTY_NAME,
+                new PropertyRegistry.ClassPropertyPair<>(EntityPlayer.class, PlayerPartyProperties::new)
+        );
+        RiftMessages.WRAPPER.registerMessage(RiftPartyActionMessage.class, RiftLibMessageSide.SERVER);
 
         //register events
         MinecraftForge.EVENT_BUS.register(new PrimerEventHandler(registryPrimer));

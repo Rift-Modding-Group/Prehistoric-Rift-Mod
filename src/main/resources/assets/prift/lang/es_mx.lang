@@ -49,6 +49,16 @@ info.tame_targeting.aggressive.description=Ataca objetivos válidos al verlos.
 info.tame_targeting.passive=Pasivo
 info.tame_targeting.passive.description=Nunca ataca automáticamente.
 
+key.prift.switch_party_mem_up=Seleccionar la criatura anterior del grupo
+key.prift.switch_party_mem_down=Seleccionar la criatura siguiente del grupo
+key.prift.quick_summon_dismiss=Invocar o retirar la criatura seleccionada
+
+party.warning.party_full=¡Tu grupo está lleno! Esta criatura permanecerá fuera del grupo.
+party.warning.cannot_summon=¡Esta criatura no se puede invocar en tu ubicación!
+party.warning.cannot_summon_dead=¡Esta criatura está muerta y no se puede invocar!
+party.warning.summon_success=Criatura invocada correctamente
+party.warning.dismiss_success=Criatura retirada correctamente
+
 gui.prift.creature_inventory=Inventario de criatura
 gui.prift.creature_settings=Ajustes de criatura
 gui.prift.player_inventory=Inventario del jugador

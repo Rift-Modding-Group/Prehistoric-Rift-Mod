@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.projectile.RiftProjectile;
 import anightdazingzoroark.riftlib.renderers.geo.GeoBlockRenderer;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -41,6 +42,10 @@ public class ClientProxy extends ServerProxy {
     @Override
     public void init(FMLInitializationEvent e) {
         super.init(e);
+
+        ClientRegistry.registerKeyBinding(RiftControls.SWITCH_PARTY_MEMBER_UP);
+        ClientRegistry.registerKeyBinding(RiftControls.SWITCH_PARTY_MEMBER_DOWN);
+        ClientRegistry.registerKeyBinding(RiftControls.DEPLOY_PARTY_MEMBER);
 
         //register item renderers
         ItemRenderer.registerItemRenderer();

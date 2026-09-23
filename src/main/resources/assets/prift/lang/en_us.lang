@@ -49,6 +49,16 @@ info.tame_targeting.aggressive.description=Attack valid targets on sight.
 info.tame_targeting.passive=Passive
 info.tame_targeting.passive.description=Never attack automatically.
 
+key.prift.switch_party_mem_up=Select previous party member
+key.prift.switch_party_mem_down=Select next party member
+key.prift.quick_summon_dismiss=Summon or dismiss selected party member
+
+party.warning.party_full=Your party is full! This creature will remain outside your party.
+party.warning.cannot_summon=This creature cannot be summoned at your location!
+party.warning.cannot_summon_dead=This creature is dead and cannot be summoned!
+party.warning.summon_success=Successfully summoned creature
+party.warning.dismiss_success=Successfully dismissed creature
+
 gui.prift.creature_inventory=Creature Inventory
 gui.prift.creature_settings=Creature Settings
 gui.prift.player_inventory=Player Inventory

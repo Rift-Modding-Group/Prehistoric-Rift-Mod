@@ -63,6 +63,11 @@ public class CreatureNBTKeyword<T> {
             IRiftCreature::getAcquisitionInfo,
             IRiftCreature::setAcquisitionInfo
     );
+    public static final CreatureNBTKeyword<RiftCreatureEnums.CreatureDeployment> DEPLOYMENT_TYPE = new CreatureNBTKeyword<>(
+            "DeploymentType", RiftCreatureEnums.CreatureDeployment.class,
+            IRiftCreature::getDeploymentType,
+            IRiftCreature::setDeploymentType
+    );
 
     //normal class operations here
     private final String name;

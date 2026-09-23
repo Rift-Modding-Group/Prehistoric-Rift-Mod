@@ -19,7 +19,7 @@ import java.util.UUID;
  * a wrapper for NBTTagCompound for creatures meant for use in UIs and packets
  */
 public record CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) implements IRiftCreature {
-    public static CreatureNBT EMPTY_NBT = new CreatureNBT(new NBTTagCompound());
+    public static final CreatureNBT EMPTY_NBT = new CreatureNBT(new NBTTagCompound());
 
     private float getAttributeValue(String value) {
         NBTTagList attributeList = this.nbtTagCompound.getTagList("Attributes", 10);
@@ -166,6 +166,17 @@ public record CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) implements IRi
         CreatureNBTKeyword.ACQUISITION_INFO.setValueInNBT(this.nbtTagCompound, value);
     }
 
+    @Override
+    public RiftCreatureEnums.CreatureDeployment getDeploymentType() {
+        if (this.nbtTagCompound.isEmpty()) return null;
+        return CreatureNBTKeyword.DEPLOYMENT_TYPE.getValueFromNBT(this.nbtTagCompound);
+    }
+
+    @Override
+    public void setDeploymentType(RiftCreatureEnums.CreatureDeployment value) {
+        CreatureNBTKeyword.DEPLOYMENT_TYPE.setValueInNBT(this.nbtTagCompound, value);
+    }
+
     //-----helper nbt code incoming-----
     @Override
     public UUID getUniqueID() {
@@ -181,8 +192,8 @@ public record CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) implements IRi
     @Override
     public boolean isOwner(EntityLivingBase entity) {
         if (this.nbtTagCompound.isEmpty() || entity == null) return false;
-        if (!this.nbtTagCompound.hasKey("OwnerUUID")) return false;
-        return entity.getUniqueID().equals(this.nbtTagCompound.getUniqueId("OwnerUUID"));
+        if (!this.nbtTagCompound.hasKey("OwnerUUID", 8)) return false;
+        return entity.getUniqueID().toString().equals(this.nbtTagCompound.getString("OwnerUUID"));
     }
 
     @Override
