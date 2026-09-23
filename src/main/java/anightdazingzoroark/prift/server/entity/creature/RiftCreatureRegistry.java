@@ -361,6 +361,7 @@ public class RiftCreatureRegistry {
                         .setDaysUntilAdult(3)
                         .setDomestication(new CreatureDomesticationBuilder()
                                 .setTamingMethod(RiftCreatureEnums.TamingMethod.TRANQ_THEN_FEED)
+                                .setControllerRideLocator("controllerPos")
                         )
                         .setHitboxInformation(Map.of(
                                 "leg", creature -> 0.25D,

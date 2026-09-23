@@ -721,12 +721,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 boolean hasTamingEffectiveness = creatureFood.tameEffectiveness != null && creatureFood.tameEffectiveness.length > 0;
                 if (hasTamingEffectiveness) {
                     if (domestication.getTamingMethod() == RiftCreatureEnums.TamingMethod.FEED || this.getIsSleeping() && this.sleepCause == RiftCreatureEnums.SleepCause.TRANQ_BOMB) {
-                        float firstValue = Math.clamp(creatureFood.tameEffectiveness[0], 0f, 1f);
-                        float secondValue = creatureFood.tameEffectiveness.length > 1
-                                ? Math.clamp(creatureFood.tameEffectiveness[1], 0f, 1f) : firstValue;
-                        float minimum = Math.min(firstValue, secondValue);
-                        float maximum = Math.max(firstValue, secondValue);
-                        float effectiveness = minimum == maximum ? minimum : this.rand.nextFloat(minimum, maximum);
+                        float effectiveness = this.rand.nextFloat(creatureFood.tameEffectiveness[0], creatureFood.tameEffectiveness[1]);
+                        if (this.getIsSleeping() && this.sleepCause == RiftCreatureEnums.SleepCause.TRANQ_BOMB) {
+                            effectiveness *= this.getTamingEffectivenessForLevel();
+                        }
 
                         float updatedProgress = Math.clamp(this.getTamingProgress() + effectiveness, 0f, 1f);
                         boolean completesTaming = updatedProgress >= 1f;
@@ -1305,6 +1303,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     public void setTamingProgress(float value) {
         this.dataManager.set(TAMING_PROGRESS, Math.clamp(value, 0f, 1f));
+    }
+
+    //exponentially reduce taming effectiveness from food
+    //and tiredness from tranq bombs based on level
+    public float getTamingEffectivenessForLevel() {
+        return Math.max(0.25f, 1f / (1f + Math.max(0, this.getLevel() - 1) * 0.1f));
     }
 
     @NotNull

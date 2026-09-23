@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.client;
 
-import anightdazingzoroark.prift.client.hud.TameProgressHUD;
 import anightdazingzoroark.prift.client.rendering.ItemRenderer;
 import anightdazingzoroark.prift.client.rendering.block.SmokenutBushBlockRenderer;
 import anightdazingzoroark.prift.client.rendering.entity.RiftCreatureRenderer;
