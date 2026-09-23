@@ -126,6 +126,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     public static final IAttribute STAMINA_ATTRIBUTE = new RangedAttribute(null, "rift.stamina", 2.0, 0.0, 2048.0).setShouldWatch(true);
 
     private static final DataParameter<Integer> LEVEL = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    public static final DataParameter<Integer> XP = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> NATURE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Integer> AGE_TICKS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Float> STAMINA_CURRENT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
@@ -278,6 +279,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     protected void entityInit() {
         super.entityInit();
         this.dataManager.register(LEVEL, 1);
+        this.dataManager.register(XP, 0);
         this.dataManager.register(NATURE, (byte) 0);
         this.dataManager.register(AGE_TICKS, 0);
         this.dataManager.register(STAMINA_CURRENT, 0f);
@@ -313,7 +315,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         //set level based on distance from 0, 0
         double distFromCenter = Math.sqrt(this.posX * this.posX + this.posZ * this.posZ);
         double levelSlopeResult = MathUtil.slopeResult(distFromCenter, false, 0, 1024, 1, 2);
-        levelSlopeResult = Math.clamp(levelSlopeResult, 1, 10);
+        levelSlopeResult = Math.clamp(levelSlopeResult, 1, IRiftCreature.MAX_LEVEL);
         levelSlopeResult = Math.round(levelSlopeResult);
         this.setLevel((int) levelSlopeResult);
 
@@ -1290,6 +1292,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.enablePersistence();
         this.world.setEntityState(this, (byte) 7);
         this.setHealth(this.getMaxHealth());
+        player.sendStatusMessage(new TextComponentTranslation("reminder.taming_finished", this.getDisplayName()), false);
 
         PlayerPartyProperties playerParty = PlayerPartyProperties.get(player);
         if (playerParty != null && !playerParty.addPartyMember(this)) {
@@ -1622,7 +1625,55 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void setLevel(int value) {
-        this.dataManager.set(LEVEL, value);
+        this.dataManager.set(LEVEL, Math.clamp(value, 1, IRiftCreature.MAX_LEVEL));
+    }
+
+    @Override
+    public int getXP() {
+        return this.dataManager.get(XP);
+    }
+
+    @Override
+    public void setXP(int value) {
+        this.dataManager.set(XP, this.getLevel() >= IRiftCreature.MAX_LEVEL ? 0 : Math.clamp(value, 0, this.getMaxXP()));
+    }
+
+    public void addXP(int value) {
+        if (this.world.isRemote || !this.isTamed() || value <= 0 || this.getLevel() >= IRiftCreature.MAX_LEVEL) return;
+
+        //add xp and see if it results in levelup
+        long accumulatedXP = (long) this.getXP() + value;
+        boolean leveledUp = false;
+        EntityLivingBase owner = this.getOwner();
+        while (this.getLevel() < IRiftCreature.MAX_LEVEL && accumulatedXP >= this.getMaxXP()) {
+            accumulatedXP -= this.getMaxXP();
+            this.setLevel(this.getLevel() + 1);
+            leveledUp = true;
+            if (owner instanceof EntityPlayer player) {
+                player.sendStatusMessage(new TextComponentTranslation("reminder.level_up", this.getDisplayName(), this.getLevel()), false);
+            }
+        }
+        this.setXP((int) accumulatedXP);
+
+        //update stats, scale old health and stamina to new, and update party after levelup
+        if (leveledUp) {
+            float healthFraction = this.getHealth() / this.getMaxHealth();
+            float staminaFraction = this.getStamina() / this.getMaxStamina();
+            this.getCreatureStats().applyStatsToCreature(this);
+            this.setHealth(this.getMaxHealth() * healthFraction);
+            this.setStamina(this.getMaxStamina() * staminaFraction);
+
+            if (owner instanceof EntityPlayer player) {
+                PlayerPartyProperties playerParty = PlayerPartyProperties.get(player);
+                if (playerParty != null) playerParty.updatePartyMember(this);
+            }
+        }
+    }
+
+    @Override
+    public int getExperiencePoints(EntityPlayer player) {
+        double averageStats = this.creatureType.getStats().values().stream().mapToDouble(value -> value).average().orElse(0D);
+        return Math.max(1, (int) Math.round(averageStats * Math.max(1, this.getLevel())));
     }
 
     @Override

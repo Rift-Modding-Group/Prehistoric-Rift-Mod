@@ -24,7 +24,7 @@ public class PlayerPartyHUD {
     private static final int INFO_BOX_WIDTH = 80;
     private static final int INFO_BOX_HEIGHT = 27;
     private static final int BAR_WIDTH = 50;
-    private static final int BAR_HEIGHT = 3;
+    private static final int BAR_HEIGHT = 1;
     private static final int PARTY_SLOT_TEXTURE_Y = 19;
     private static final int PARTY_ARROW_TEXTURE_Y = 57;
 
@@ -84,8 +84,11 @@ public class PlayerPartyHUD {
 
             float healthPercentage = selectedCreature.getHealth() / selectedCreature.getMaxHealth();
             float staminaPercentage = selectedCreature.getStamina() / selectedCreature.getMaxStamina();
+            float xpPercentage = selectedCreature.getLevel() >= IRiftCreature.MAX_LEVEL
+                    ? 0f : (float) selectedCreature.getXP() / selectedCreature.getMaxXP();
             drawStatusBar(informationLeft + 10, informationTop + 13, healthPercentage, 0xFFFF0000);
-            drawStatusBar(informationLeft + 10, informationTop + 20, staminaPercentage, 0xFFFFFF00);
+            drawStatusBar(informationLeft + 10, informationTop + 18, staminaPercentage, 0xFFFFFF00);
+            drawStatusBar(informationLeft + 10, informationTop + 23, xpPercentage, 0xFF90EE90);
         }
 
         drawArrow(minecraft, scaledWidth, scaledHeight, true);

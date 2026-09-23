@@ -22,10 +22,13 @@ import java.util.UUID;
  * This is more or less a helper interface for creature information.
  * */
 public interface IRiftCreature {
+    int MAX_LEVEL = 10;
+
     default CreatureNBTKeyword<?>[] getNBTKeywords() {
         return new CreatureNBTKeyword[]{
                 CreatureNBTKeyword.CREATURE_TYPE,
                 CreatureNBTKeyword.LEVEL,
+                CreatureNBTKeyword.XP,
                 CreatureNBTKeyword.NATURE,
                 CreatureNBTKeyword.AGE_IN_TICKS,
                 CreatureNBTKeyword.STAMINA,
@@ -87,6 +90,8 @@ public interface IRiftCreature {
     RiftCreatureBuilder getCreatureType();
     int getLevel();
     void setLevel(int value);
+    int getXP();
+    void setXP(int value);
     RiftCreatureEnums.Nature getNature();
     void setNature(RiftCreatureEnums.Nature value);
     int getAgeInTicks();
@@ -120,4 +125,10 @@ public interface IRiftCreature {
     boolean hasCustomName();
     String getCustomNameTag();
     void setCustomNameTag(String value);
+    default int getMaxXP() {
+        if (this.getCreatureType() == null || this.getCreatureType().getDomestication() == null) return 0;
+        return Math.max(1, (int) Math.round(
+                Math.max(1, this.getLevel()) * 100D / this.getCreatureType().getDomestication().getLevelupRate().getRate()
+        ));
+    }
 }

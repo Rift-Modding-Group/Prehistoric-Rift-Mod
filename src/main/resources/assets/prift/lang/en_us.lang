@@ -59,6 +59,9 @@ party.warning.cannot_summon_dead=This creature is dead and cannot be summoned!
 party.warning.summon_success=Successfully summoned creature
 party.warning.dismiss_success=Successfully dismissed creature
 
+reminder.taming_finished=Congratulations! You have tamed %s!
+reminder.level_up=%s has reached level %s!
+
 gui.prift.yes=§2Yes
 gui.prift.no=§4No
 gui.prift.creature_inventory=Creature Inventory
@@ -82,6 +85,7 @@ gui.prift.move_stamina_use.medium=Medium
 gui.prift.move_stamina_use.heavy=Heavy
 gui.prift.creature_summary.species=Species: %s
 gui.prift.creature_summary.level=Level %s
+gui.prift.creature_summary.xp=XP: %s / %s
 gui.prift.creature_summary.uuid=UUID: %s
 gui.prift.creature_summary.nature=Nature: %s
 gui.prift.creature_summary.nature.tooltip=Natures can change a creature's stats.

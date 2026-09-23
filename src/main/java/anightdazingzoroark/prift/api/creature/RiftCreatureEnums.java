@@ -132,11 +132,11 @@ public class RiftCreatureEnums {
     }
 
     public enum LevelupRate {
-        VERY_SLOW(1.6D),
-        SLOW(1.4D),
+        VERY_SLOW(0.8D),
+        SLOW(1D),
         NORMAL(1.2D),
-        FAST(1D),
-        VERY_FAST(0.8D);
+        FAST(1.4D),
+        VERY_FAST(1.6D);
 
         private final double rate;
 

@@ -137,6 +137,7 @@ public class RiftCreatureRegistry {
                         .setDaysUntilAdult(7)
                         .setDomestication(new CreatureDomesticationBuilder()
                                 .setTamingMethod(RiftCreatureEnums.TamingMethod.TRANQ_THEN_FEED)
+                                .setLevelupRate(RiftCreatureEnums.LevelupRate.SLOW)
                                 .setControllerRideLocator("controllerPos")
                         )
                         .setRetaliateWhenAttacked()
@@ -361,6 +362,7 @@ public class RiftCreatureRegistry {
                         .setDaysUntilAdult(3)
                         .setDomestication(new CreatureDomesticationBuilder()
                                 .setTamingMethod(RiftCreatureEnums.TamingMethod.TRANQ_THEN_FEED)
+                                .setLevelupRate(RiftCreatureEnums.LevelupRate.NORMAL)
                                 .setControllerRideLocator("controllerPos")
                         )
                         .setHitboxInformation(Map.of(

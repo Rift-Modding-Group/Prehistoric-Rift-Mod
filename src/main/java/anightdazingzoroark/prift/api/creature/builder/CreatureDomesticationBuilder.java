@@ -11,6 +11,7 @@ public class CreatureDomesticationBuilder {
 
     //all the following variables are required and must not be null, validated in isValid()
     private RiftCreatureEnums.TamingMethod tamingMethod;
+    private RiftCreatureEnums.LevelupRate levelupRate;
 
     //can be left alone
     private int inventorySize = 27;
@@ -28,6 +29,20 @@ public class CreatureDomesticationBuilder {
 
     public RiftCreatureEnums.TamingMethod getTamingMethod() {
         return this.tamingMethod;
+    }
+
+    /**
+     * Set how quickly this creature gains levels after being tamed.
+     * */
+    public CreatureDomesticationBuilder setLevelupRate(@NotNull RiftCreatureEnums.LevelupRate levelupRate) {
+        this.checkIfLocked();
+
+        this.levelupRate = levelupRate;
+        return this;
+    }
+
+    public RiftCreatureEnums.LevelupRate getLevelupRate() {
+        return this.levelupRate;
     }
 
     /**
@@ -64,7 +79,7 @@ public class CreatureDomesticationBuilder {
      * Get validity based on if all params are not null
      * */
     public boolean isValid() {
-        return this.tamingMethod != null;
+        return this.tamingMethod != null && this.levelupRate != null;
     }
 
     /**

@@ -23,6 +23,11 @@ public class CreatureNBTKeyword<T> {
             IRiftCreature::getLevel,
             IRiftCreature::setLevel
     );
+    public static final CreatureNBTKeyword<Integer> XP = new CreatureNBTKeyword<>(
+            "XP", Integer.class,
+            IRiftCreature::getXP,
+            IRiftCreature::setXP
+    );
     public static final CreatureNBTKeyword<RiftCreatureEnums.Nature> NATURE = new CreatureNBTKeyword<>(
             "Nature", RiftCreatureEnums.Nature.class,
             IRiftCreature::getNature,

@@ -53,13 +53,27 @@ public record CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) implements IRi
 
     @Override
     public int getLevel() {
-        if (this.nbtTagCompound.isEmpty()) return 0;
+        if (this.nbtTagCompound.isEmpty()) return 1;
         return CreatureNBTKeyword.LEVEL.getValueFromNBT(this.nbtTagCompound);
     }
 
     @Override
     public void setLevel(int value) {
-        CreatureNBTKeyword.LEVEL.setValueInNBT(this.nbtTagCompound, value);
+        CreatureNBTKeyword.LEVEL.setValueInNBT(this.nbtTagCompound, Math.clamp(value, 1, IRiftCreature.MAX_LEVEL));
+    }
+
+    @Override
+    public int getXP() {
+        if (this.nbtTagCompound.isEmpty()) return 0;
+        return CreatureNBTKeyword.XP.getValueFromNBT(this.nbtTagCompound);
+    }
+
+    @Override
+    public void setXP(int value) {
+        CreatureNBTKeyword.XP.setValueInNBT(
+                this.nbtTagCompound,
+                this.getLevel() >= IRiftCreature.MAX_LEVEL ? 0 : Math.clamp(value, 0, this.getMaxXP())
+        );
     }
 
     @Override

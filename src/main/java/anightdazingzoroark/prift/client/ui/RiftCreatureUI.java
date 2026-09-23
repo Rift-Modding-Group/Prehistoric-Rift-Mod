@@ -297,6 +297,8 @@ public class RiftCreatureUI {
                                         .asWidget().textAlign(Alignment.CenterLeft).widthRel(1f)
                                 )
                                 .child(IKey.lang("gui.prift.creature_summary.level", creature.getLevel()).scale(0.8f).asWidget().textAlign(Alignment.CenterLeft).widthRel(1f))
+                                .child(IKey.lang("gui.prift.creature_summary.xp", creature.getXP(), creature.getMaxXP()).scale(0.8f)
+                                        .asWidget().textAlign(Alignment.CenterLeft).widthRel(1f))
                                 .child(IKey.lang("gui.prift.creature_summary.nature",
                                                 creature.getNature() == null ? I18n.format("gui.prift.unknown") : creature.getNature().getTranslatedName()
                                         )

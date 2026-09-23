@@ -59,6 +59,9 @@ party.warning.cannot_summon_dead=¡Esta criatura está muerta y no se puede invo
 party.warning.summon_success=Criatura invocada correctamente
 party.warning.dismiss_success=Criatura retirada correctamente
 
+reminder.taming_finished=¡Has tameado a %s!
+reminder.level_up=¡%s ha alcanzado el nivel %s!
+
 gui.prift.yes=Sí
 gui.prift.no=No
 gui.prift.creature_inventory=Inventario de criatura
@@ -82,6 +85,7 @@ gui.prift.move_stamina_use.medium=Moderado
 gui.prift.move_stamina_use.heavy=Alto
 gui.prift.creature_summary.species=Especie: %s
 gui.prift.creature_summary.level=Nivel %s
+gui.prift.creature_summary.xp=XP: %s / %s
 gui.prift.creature_summary.uuid=UUID: %s
 gui.prift.creature_summary.nature=Naturaleza: %s
 gui.prift.creature_summary.nature.tooltip=Las naturalezas pueden cambiar las estadísticas de una criatura.
