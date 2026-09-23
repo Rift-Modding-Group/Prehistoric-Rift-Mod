@@ -111,6 +111,17 @@ public record CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) implements IRi
     }
 
     @Override
+    public RiftLibInventoryHandler getCreatureGear() {
+        if (this.nbtTagCompound.isEmpty()) return null;
+        return CreatureNBTKeyword.GEAR.getValueFromNBT(this.nbtTagCompound);
+    }
+
+    @Override
+    public void setCreatureGear(RiftLibInventoryHandler value) {
+        CreatureNBTKeyword.GEAR.setValueInNBT(this.nbtTagCompound, value);
+    }
+
+    @Override
     public RiftLibInventoryHandler getCreatureInventory() {
         if (this.nbtTagCompound.isEmpty()) return null;
         return CreatureNBTKeyword.INVENTORY.getValueFromNBT(this.nbtTagCompound);

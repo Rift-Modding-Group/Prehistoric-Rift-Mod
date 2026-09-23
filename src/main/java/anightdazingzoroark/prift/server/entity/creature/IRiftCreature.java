@@ -29,6 +29,7 @@ public interface IRiftCreature {
                 CreatureNBTKeyword.NATURE,
                 CreatureNBTKeyword.AGE_IN_TICKS,
                 CreatureNBTKeyword.STAMINA,
+                CreatureNBTKeyword.GEAR,
                 CreatureNBTKeyword.INVENTORY,
                 CreatureNBTKeyword.CREATURE_STATS,
                 CreatureNBTKeyword.CREATURE_MOVES,
@@ -75,6 +76,11 @@ public interface IRiftCreature {
         };
     }
 
+    default boolean canBeRidden() {
+        return this.getCreatureType() != null && this.getCreatureType().getDomestication() != null
+                && this.getCreatureType().getDomestication().getControllerRideLocator() != null;
+    }
+
     //-----boilerplate code incomin... omaga...-----
     String getName();
     String getName(boolean showLevel);
@@ -90,6 +96,8 @@ public interface IRiftCreature {
     float getStamina();
     void setStamina(float value);
     float getMaxStamina();
+    RiftLibInventoryHandler getCreatureGear();
+    void setCreatureGear(RiftLibInventoryHandler value);
     RiftLibInventoryHandler getCreatureInventory();
     void setCreatureInventory(RiftLibInventoryHandler value);
     CreatureStatsStorage getCreatureStats();

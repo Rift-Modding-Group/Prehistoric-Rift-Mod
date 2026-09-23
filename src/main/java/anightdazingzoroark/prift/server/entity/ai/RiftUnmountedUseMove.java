@@ -29,6 +29,8 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     //checking if a move could be used happens here
     @Override
     public boolean shouldExecute() {
+        if (this.creature.isBeingRidden()) return false;
+
         //cannot execute if the creature has no moves
         if (!this.creature.getCreatureMoves().isInitialized()) return false;
 
@@ -51,7 +53,8 @@ public class RiftUnmountedUseMove extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return (!this.creature.isLeaping() || this.isUsingLeapAttack())
+        return !this.creature.isBeingRidden()
+                && (!this.creature.isLeaping() || this.isUsingLeapAttack())
                 && this.moveResultTicker != null
                 && (!this.moveResultTicker.isOverridableWhileUsed() || this.createMoveRule() != null)
                 && this.moveResultTicker.canContinueTicking();
@@ -59,7 +62,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
 
     @Override
     public void resetTask() {
-        if (this.moveResultTicker != null) this.moveResultTicker.onEndTicker();
+        if (this.moveResultTicker != null && !this.creature.isBeingRidden()) this.moveResultTicker.onEndTicker();
         this.moveResultTicker = null;
     }
 

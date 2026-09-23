@@ -137,6 +137,7 @@ public class RiftCreatureRegistry {
                         .setDaysUntilAdult(7)
                         .setDomestication(new CreatureDomesticationBuilder()
                                 .setTamingMethod(RiftCreatureEnums.TamingMethod.TRANQ_THEN_FEED)
+                                .setControllerRideLocator("controllerPos")
                         )
                         .setRetaliateWhenAttacked()
                         .setCanRetreat()

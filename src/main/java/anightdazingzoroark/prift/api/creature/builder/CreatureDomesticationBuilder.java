@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.api.creature.builder;
 
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 //builder to describe domestication for this creature
 public class CreatureDomesticationBuilder {
@@ -13,7 +14,7 @@ public class CreatureDomesticationBuilder {
 
     //can be left alone
     private int inventorySize = 27;
-    private boolean isRideable;
+    private String controllerRideLocator;
 
     /**
      * set le taming method
@@ -45,17 +46,18 @@ public class CreatureDomesticationBuilder {
     }
 
     /**
-     * Make sure the creature can be saddled for riding
+     * Get the name of the locator on the model that will be used as the locator for riding the creature
      * */
-    public CreatureDomesticationBuilder setIsRideable() {
+    public CreatureDomesticationBuilder setControllerRideLocator(@NotNull String controllerRideLocator) {
         this.checkIfLocked();
 
-        this.isRideable = true;
+        this.controllerRideLocator = controllerRideLocator;
         return this;
     }
 
-    public boolean getIsRideable() {
-        return this.isRideable;
+    @Nullable
+    public String getControllerRideLocator() {
+        return this.controllerRideLocator;
     }
 
     /**

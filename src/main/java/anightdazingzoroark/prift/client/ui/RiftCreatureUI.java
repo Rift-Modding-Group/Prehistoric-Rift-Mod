@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.client.ClientEnums;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.creature.IRiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiData;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureAcquisitionInfo;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
@@ -19,8 +20,6 @@ import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.sync.*;
 import com.cleanroommc.modularui.widgets.CycleButtonWidget;
 import com.cleanroommc.modularui.widgets.ListWidget;
-import com.cleanroommc.modularui.widgets.PageButton;
-import com.cleanroommc.modularui.widgets.PagedWidget;
 import com.cleanroommc.modularui.widgets.SlotGroupWidget;
 import com.cleanroommc.modularui.widgets.TextWidget;
 import com.cleanroommc.modularui.widgets.layout.Flow;
@@ -44,7 +43,7 @@ public class RiftCreatureUI {
         int inventorySize = creatureInventory.getSlots();
         int inventoryColumns = Math.min(9, inventorySize);
         int inventoryRows = (inventorySize + inventoryColumns - 1) / inventoryColumns;
-        int playerInventoryTop = 39 + inventoryRows * 18;
+        boolean canBeRidden = creature.canBeRidden();
         syncManager.registerSlotGroup("creature_inventory", inventoryColumns);
         IntStream.range(0, inventorySize).forEach(index ->
                 syncManager.itemSlot(
@@ -52,6 +51,20 @@ public class RiftCreatureUI {
                         new ModularSlot(creatureInventory, index).slotGroup("creature_inventory")
                 )
         );
+        if (canBeRidden) {
+            syncManager.registerSlotGroup("creature_gear", 1);
+            syncManager.itemSlot(
+                    "creature_gear", 0,
+                    new ModularSlot(creature.getCreatureGear(), 0)
+                            .filter(stack -> stack.getItem() == Items.SADDLE)
+                            .changeListener((stack, onlyAmountChanged, client, init) -> {
+                                if (!client && creature instanceof RiftCreature deployedCreature) {
+                                    deployedCreature.setSaddled(deployedCreature.canBeRidden() && stack.getItem() == Items.SADDLE);
+                                }
+                            })
+                            .slotGroup("creature_gear")
+            );
+        }
         syncManager.bindPlayerInventory(data.getPlayer());
 
         //settings options
@@ -86,46 +99,59 @@ public class RiftCreatureUI {
         int statsIvColumnWidth = 27;
 
         //final return value
-        PagedWidget.Controller tabController = new PagedWidget.Controller();
-        return ModularPanel.defaultPanel("rift_creature", 176, inventoryRows * 18 + 122)
+        DynamicPagedWidget.Controller tabController = new DynamicPagedWidget.Controller();
+        return new ModularPanel("rift_creature").width(176).coverChildrenHeight()
                 .child(Flow.row().coverChildrenHeight().topRel(0f, 4, 1f).widthRel(1f)
-                        .child(new PageButton(0, tabController)
+                        .child(new DynamicPageButton(0, tabController)
                                 .tab(GuiTextures.TAB_TOP, -1)
                                 .overlay(new ItemDrawable(Blocks.CHEST).asIcon())
                                 .addTooltipLine(IKey.lang("gui.prift.creature_inventory")))
-                        .child(new PageButton(1, tabController)
+                        .child(new DynamicPageButton(1, tabController)
                                 .tab(GuiTextures.TAB_TOP, 0)
                                 .overlay(GuiTextures.GEAR.asIcon())
                                 .addTooltipLine(IKey.lang("gui.prift.creature_settings")))
-                        .child(new PageButton(2, tabController)
+                        .child(new DynamicPageButton(2, tabController)
                                 .tab(GuiTextures.TAB_TOP, 0)
                                 .overlay(GuiTextures.GRAPH.asIcon())
                                 .addTooltipLine(IKey.lang("gui.prift.creature_summary")))
-                        .child(new PageButton(3, tabController)
+                        .child(new DynamicPageButton(3, tabController)
                                 .tab(GuiTextures.TAB_TOP, 0)
                                 .overlay(new ItemDrawable(Items.IRON_SWORD).asIcon())
                                 .addTooltipLine(IKey.lang("gui.prift.creature_moves")))
                 )
-                .child(new PagedWidget<>()
-                        .sizeRel(1f)
+                .child(new DynamicPagedWidget<>()
+                        .widthRel(1f)
+                        .coverChildrenHeight()
                         .controller(tabController)
                         //page 1: inventory
                         .addPage(Flow.column()
-                                .sizeRel(1f)
-                                .child(IKey.lang("gui.prift.creature_inventory").asWidget().pos(7, 8))
+                                .widthRel(1f)
+                                .coverChildrenHeight()
+                                .padding(7, 8)
+                                .crossAxisAlignment(Alignment.CrossAxis.START)
+                                .childPadding(2)
+                                .childIf(canBeRidden, () -> Flow.column()
+                                        .widthRel(1f)
+                                        .coverChildrenHeight()
+                                        .crossAxisAlignment(Alignment.CrossAxis.START)
+                                        .child(IKey.lang("gui.prift.creature_gear").asWidget())
+                                        .child(new ItemSlot().syncHandler("creature_gear", 0))
+                                )
+                                .child(IKey.lang("gui.prift.creature_inventory").asWidget())
                                 .child(SlotGroupWidget.builder()
                                         .matrix(IntStream.range(0, inventoryRows)
                                                 .mapToObj(row -> "I".repeat(Math.min(inventoryColumns, inventorySize - row * inventoryColumns)))
                                                 .toArray(String[]::new))
                                         .key('I', index -> new ItemSlot().syncHandler("creature_inventory", index))
-                                        .build().top(20).horizontalCenter()
+                                        .build()
                                 )
-                                .child(IKey.lang("gui.prift.player_inventory").asWidget().pos(7, playerInventoryTop - 12))
-                                .child(SlotGroupWidget.playerInventory(false).pos(7, playerInventoryTop))
+                                .child(IKey.lang("gui.prift.player_inventory").asWidget().marginTop(4))
+                                .child(SlotGroupWidget.playerInventory(false))
                         )
                         //page 2: settings
                         .addPage(Flow.column()
                                 .widthRel(1f)
+                                .coverChildrenHeight()
                                 .padding(7, 8)
                                 .crossAxisAlignment(Alignment.CrossAxis.START)
                                 .childPadding(2)
@@ -197,6 +223,7 @@ public class RiftCreatureUI {
                         //page 3: summary
                         .addPage(Flow.column()
                                 .widthRel(1f)
+                                .coverChildrenHeight()
                                 .padding(7, 8)
                                 .crossAxisAlignment(Alignment.CrossAxis.START)
                                 .childPadding(1)
@@ -293,14 +320,15 @@ public class RiftCreatureUI {
                         )
                         //page 4: move information
                         .addPage(Flow.column()
-                                .sizeRel(1f)
+                                .widthRel(1f)
+                                .coverChildrenHeight()
                                 .padding(7, 8)
                                 .crossAxisAlignment(Alignment.CrossAxis.START)
                                 .childPadding(2)
                                 .child(IKey.lang("gui.prift.creature_moves").asWidget())
                                 .child(new ListWidget<>()
                                         .widthRel(1f)
-                                        .expanded()
+                                        .coverChildrenHeight()
                                         .crossAxisAlignment(Alignment.CrossAxis.START)
                                         .children(creature.getCreatureMoves().getUsableMoves(), moveEntry -> {
                                             float staminaConsumption = Math.max(

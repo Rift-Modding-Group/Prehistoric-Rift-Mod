@@ -48,6 +48,9 @@
 					"name": "body",
 					"parent": "base",
 					"pivot": [0, 16, -1.5],
+					"locators": {
+						"controllerPos": [0, 22.5, -13]
+					},
 					"bounding_boxes": {
 						"body": {
 							"origin": [-4.625, 11.75, -20.125],

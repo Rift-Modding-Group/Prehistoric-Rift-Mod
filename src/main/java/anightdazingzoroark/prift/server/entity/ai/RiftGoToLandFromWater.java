@@ -23,6 +23,7 @@ public class RiftGoToLandFromWater extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
+        if (this.creature.isBeingRidden()) return false;
         if (this.creature.getCreatureType().getNavigation().getCanSwim()) return false;
         if (!this.creature.bodyTouchingLiquid()) return false;
         this.landBlockPos = this.nearestLandBlock();
@@ -32,6 +33,7 @@ public class RiftGoToLandFromWater extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
+        if (this.creature.isBeingRidden()) return false;
         BlockPos creaturePos = this.creature.getPosition();
         return this.creature.world.getBlockState(creaturePos).getMaterial() != Material.AIR
                 || !this.creature.world.getBlockState(creaturePos.down()).getMaterial().isSolid();

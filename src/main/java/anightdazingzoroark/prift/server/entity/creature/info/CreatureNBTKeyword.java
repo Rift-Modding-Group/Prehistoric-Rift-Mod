@@ -43,6 +43,11 @@ public class CreatureNBTKeyword<T> {
             IRiftCreature::getCreatureInventory,
             IRiftCreature::setCreatureInventory
     );
+    public static final CreatureNBTKeyword<RiftLibInventoryHandler> GEAR = new CreatureNBTKeyword<>(
+            "Gear", RiftLibInventoryHandler.class,
+            IRiftCreature::getCreatureGear,
+            IRiftCreature::setCreatureGear
+    );
     public static final CreatureNBTKeyword<CreatureStatsStorage> CREATURE_STATS = new CreatureNBTKeyword<>(
             "CreatureStats", CreatureStatsStorage.class,
             IRiftCreature::getCreatureStats,

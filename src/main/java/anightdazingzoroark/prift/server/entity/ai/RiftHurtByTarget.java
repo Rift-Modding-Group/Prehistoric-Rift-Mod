@@ -20,7 +20,7 @@ public class RiftHurtByTarget extends EntityAIHurtByTarget {
 
     @Override
     public boolean shouldExecute() {
-        if (this.creature.isTamed() || this.creature.getIsSleeping()) return false;
+        if (this.creature.isTamed() || this.creature.getIsSleeping() || this.creature.isBeingRidden()) return false;
 
         EntityLivingBase revengeTarget = this.creature.getRevengeTarget();
         if (revengeTarget == null) return false;
@@ -56,6 +56,7 @@ public class RiftHurtByTarget extends EntityAIHurtByTarget {
 
     @Override
     public boolean shouldContinueExecuting() {
+        if (this.creature.isBeingRidden()) return false;
         //eeeeeeeee
         if (this.creature.getAttackTarget() == null || this.creature.getAttackTarget() != this.target) return false;
         if (this.creature.shouldFleeFrom(this.target)) return false;

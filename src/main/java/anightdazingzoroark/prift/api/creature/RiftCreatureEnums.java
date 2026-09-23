@@ -8,11 +8,6 @@ import java.util.Locale;
 import java.util.function.Function;
 
 public class RiftCreatureEnums {
-    public enum InventoryGearType {
-        SADDLE,
-        LARGE_WEAPON
-    }
-
     public enum CreatureCategory {
         ALL,
         DINOSAUR,

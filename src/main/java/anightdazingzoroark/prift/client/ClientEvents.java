@@ -2,17 +2,34 @@ package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.client.hud.PlayerPartyHUD;
 import anightdazingzoroark.prift.client.hud.TameProgressHUD;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiData;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiFactory;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftPartyActionMessage;
+import com.cleanroommc.modularui.factory.GuiManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.init.SoundEvents;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 
 public class ClientEvents {
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void openRiddenCreatureUI(GuiOpenEvent event) {
+        Minecraft minecraft = Minecraft.getMinecraft();
+        if (!(event.getGui() instanceof GuiInventory) || minecraft.player == null) return;
+        if (!(minecraft.player.getRidingEntity() instanceof RiftCreature creature)
+                || creature.getControllingPassenger() != minecraft.player) return;
+
+        event.setCanceled(true);
+        GuiManager.openFromClient(RiftCreatureGuiFactory.INSTANCE, new RiftCreatureGuiData(minecraft.player, creature));
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void renderHUD(RenderGameOverlayEvent.Post event) {
         if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) return;
@@ -29,7 +46,7 @@ public class ClientEvents {
     @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
     public void usePartyControls(InputEvent.KeyInputEvent event) {
         Minecraft minecraft = Minecraft.getMinecraft();
-        if (minecraft.player == null || RiftMessages.WRAPPER == null) return;
+        if (minecraft.player == null) return;
 
         boolean usedControl = false;
         if (RiftControls.SWITCH_PARTY_MEMBER_UP.isPressed()) {

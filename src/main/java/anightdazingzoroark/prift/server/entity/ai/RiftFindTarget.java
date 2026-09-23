@@ -29,7 +29,7 @@ public class RiftFindTarget extends EntityAITarget {
 
     @Override
     public boolean shouldExecute() {
-        if (this.creature.getIsSleeping()) return false;
+        if (this.creature.getIsSleeping() || this.creature.isBeingRidden()) return false;
         if (this.creature.isTamed() && this.creature.getTameTargeting() != RiftCreatureEnums.TameTargeting.AGGRESSIVE) {
             return false;
         }
@@ -67,6 +67,7 @@ public class RiftFindTarget extends EntityAITarget {
 
     @Override
     public boolean shouldContinueExecuting() {
+        if (this.creature.isBeingRidden()) return false;
         if (this.creature.isTamed() && this.creature.getTameTargeting() != RiftCreatureEnums.TameTargeting.AGGRESSIVE) {
             return false;
         }
