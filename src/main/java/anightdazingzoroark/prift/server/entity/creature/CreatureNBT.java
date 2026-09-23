@@ -177,6 +177,17 @@ public record CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) implements IRi
         CreatureNBTKeyword.DEPLOYMENT_TYPE.setValueInNBT(this.nbtTagCompound, value);
     }
 
+    @Override
+    public boolean getEatFromInventory() {
+        if (this.nbtTagCompound.isEmpty()) return false;
+        return CreatureNBTKeyword.EAT_FROM_INVENTORY.getValueFromNBT(this.nbtTagCompound);
+    }
+
+    @Override
+    public void setEatFromInventory(boolean value) {
+        CreatureNBTKeyword.EAT_FROM_INVENTORY.setValueInNBT(this.nbtTagCompound, value);
+    }
+
     //-----helper nbt code incoming-----
     @Override
     public UUID getUniqueID() {

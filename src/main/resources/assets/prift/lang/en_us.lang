@@ -59,11 +59,16 @@ party.warning.cannot_summon_dead=This creature is dead and cannot be summoned!
 party.warning.summon_success=Successfully summoned creature
 party.warning.dismiss_success=Successfully dismissed creature
 
+gui.prift.yes=§2Yes
+gui.prift.no=§4No
 gui.prift.creature_inventory=Creature Inventory
 gui.prift.creature_settings=Creature Settings
 gui.prift.player_inventory=Player Inventory
 gui.prift.tame_targeting=Tame Targeting
 gui.prift.nickname=Nickname
+gui.prift.eat_from_inventory=Eat from inventory
+gui.prift.eat_from_inventory_true=This creature will eat food items placed in its inventory
+gui.prift.eat_from_inventory_false=This creature will not eat food items placed in its inventory
 gui.prift.creature_summary=Creature Summary
 gui.prift.creature_moves=Creature Moves
 gui.prift.creature_moves.type=Type: %s

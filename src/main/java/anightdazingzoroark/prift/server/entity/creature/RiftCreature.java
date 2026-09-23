@@ -79,6 +79,8 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
@@ -129,6 +131,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private static final DataParameter<Float> TAMING_PROGRESS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
     private static final DataParameter<Byte> TAME_TARGETING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Byte> DEPLOYMENT_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
+    private static final DataParameter<Boolean> EAT_FROM_INVENTORY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     //--custom property values, which can be called and manipulated from a creature builder--
     @NotNull
@@ -277,6 +280,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.dataManager.register(TAMING_PROGRESS, 0f);
         this.dataManager.register(TAME_TARGETING, (byte) 0);
         this.dataManager.register(DEPLOYMENT_TYPE, (byte) -1);
+        this.dataManager.register(EAT_FROM_INVENTORY, false);
     }
 
     //this is gonna be mostly for registering the custom attributes
@@ -572,6 +576,52 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 }
             }
             else this.staminaRegenerationTicks = 0;
+
+            //-----eat one useful food item from the inventory every 3 seconds when enabled-----
+            if (this.isTamed() && this.getEatFromInventory() && this.ticksExisted % 60 == 0
+                    && (this.getHealth() < this.getMaxHealth() || this.getStamina() < this.getMaxStamina())
+            ) {
+                RiftLibInventoryHandler.ItemSearchResult foodSearchResult = this.creatureInventory.findItem(
+                        RiftLibInventoryHandler.ItemSearchDirection.LAST_TO_FIRST,
+                        foodStack -> {
+                            RiftCreatureFood creatureFood = this.getCreatureFood(foodStack);
+                            if (creatureFood == null) return false;
+
+                            boolean restoresHealth = creatureFood.percentHealed != null && creatureFood.percentHealed > 0f
+                                    && this.getHealth() < this.getMaxHealth();
+                            boolean restoresStamina = creatureFood.percentReenergized != null && creatureFood.percentReenergized > 0f
+                                    && this.getStamina() < this.getMaxStamina();
+                            return restoresHealth || restoresStamina;
+                        }
+                );
+                if (foodSearchResult.successful()) {
+                    ItemStack foodStack = foodSearchResult.foundStack();
+                    RiftCreatureFood creatureFood = this.getCreatureFood(foodStack);
+                    if (creatureFood != null) {
+                        if (creatureFood.percentHealed != null && creatureFood.percentHealed > 0f) {
+                            this.heal(this.getMaxHealth() * creatureFood.percentHealed);
+                        }
+                        if (creatureFood.percentReenergized != null && creatureFood.percentReenergized > 0f) {
+                            this.setStamina(this.getStamina() + this.getMaxStamina() * creatureFood.percentReenergized);
+                        }
+                        if (creatureFood.foodEffects != null) {
+                            for (RiftCreatureFood.FoodEffect foodEffect : creatureFood.foodEffects) {
+                                if (foodEffect.effectId == null || foodEffect.effectDuration == null || foodEffect.effectStrength == null) continue;
+
+                                Potion potion = Potion.getPotionFromResourceLocation(foodEffect.effectId);
+                                if (potion != null && foodEffect.effectDuration > 0) {
+                                    this.addPotionEffect(new PotionEffect(
+                                            potion, foodEffect.effectDuration * 20, Math.max(0, foodEffect.effectStrength)
+                                    ));
+                                }
+                            }
+                        }
+
+                        this.creatureInventory.extractItem(foodSearchResult.slot(), 1, false);
+                        this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+                    }
+                }
+            }
 
             //tick sprinting related stuff
             if (this.sprintToAttackCooldown > 0) this.sprintToAttackCooldown--;
@@ -991,6 +1041,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Override
     @Nullable
     protected SoundEvent getAmbientSound() {
+        if (this.getIsSleeping()) return null;
         return RiftSounds.getCreatureSound(this.creatureType.getName(), "idle");
     }
 
@@ -1239,6 +1290,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     public void setTameTargeting(@NotNull RiftCreatureEnums.TameTargeting value) {
         if (this.getTameTargeting() != value) this.setAttackTarget(null);
         this.dataManager.set(TAME_TARGETING, (byte) value.ordinal());
+    }
+
+    public boolean getEatFromInventory() {
+        return this.dataManager.get(EAT_FROM_INVENTORY);
+    }
+
+    public void setEatFromInventory(boolean value) {
+        this.dataManager.set(EAT_FROM_INVENTORY, value);
     }
 
     //-----creature phase management-----

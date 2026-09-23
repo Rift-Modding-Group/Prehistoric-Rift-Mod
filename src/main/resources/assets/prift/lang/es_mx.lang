@@ -59,11 +59,16 @@ party.warning.cannot_summon_dead=¡Esta criatura está muerta y no se puede invo
 party.warning.summon_success=Criatura invocada correctamente
 party.warning.dismiss_success=Criatura retirada correctamente
 
+gui.prift.yes=Sí
+gui.prift.no=No
 gui.prift.creature_inventory=Inventario de criatura
 gui.prift.creature_settings=Ajustes de criatura
 gui.prift.player_inventory=Inventario del jugador
 gui.prift.tame_targeting=Modo de ataque
 gui.prift.nickname=Apodo
+gui.prift.eat_from_inventory=Comer del inventario
+gui.prift.eat_from_inventory_true=Esta criatura consumirá alimentos en su inventario
+gui.prift.eat_from_inventory_false=Esta criatura no consumirá alimentos en su inventario
 gui.prift.creature_summary=Resumen de criatura
 gui.prift.creature_moves=Movimientos de criatura
 gui.prift.creature_moves.type=Tipo: %s

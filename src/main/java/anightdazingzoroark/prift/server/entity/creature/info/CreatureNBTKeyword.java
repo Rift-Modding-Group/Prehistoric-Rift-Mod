@@ -68,6 +68,11 @@ public class CreatureNBTKeyword<T> {
             IRiftCreature::getDeploymentType,
             IRiftCreature::setDeploymentType
     );
+    public static final CreatureNBTKeyword<Boolean> EAT_FROM_INVENTORY = new CreatureNBTKeyword<>(
+            "EatFromInventory", Boolean.class,
+            IRiftCreature::getEatFromInventory,
+            IRiftCreature::setEatFromInventory
+    );
 
     //normal class operations here
     private final String name;
@@ -97,6 +102,9 @@ public class CreatureNBTKeyword<T> {
     public T getValueFromNBT(NBTTagCompound nbtTagCompound) {
         if (this.typeClass == Integer.class) {
             return this.typeClass.cast(nbtTagCompound.getInteger(this.name));
+        }
+        else if (this.typeClass == Boolean.class) {
+            return this.typeClass.cast(nbtTagCompound.getBoolean(this.name));
         }
         else if (this.typeClass == Float.class) {
             return this.typeClass.cast(nbtTagCompound.getFloat(this.name));
@@ -141,6 +149,9 @@ public class CreatureNBTKeyword<T> {
         if (this.typeClass == Integer.class) {
             nbtTagCompound.setInteger(this.name, (Integer) value);
         }
+        else if (this.typeClass == Boolean.class) {
+            nbtTagCompound.setBoolean(this.name, (Boolean) value);
+        }
         else if (this.typeClass == Float.class) {
             nbtTagCompound.setFloat(this.name, (Float) value);
         }
@@ -173,6 +184,9 @@ public class CreatureNBTKeyword<T> {
         if (this.writeValue == null || creature == null) return;
         if (this.typeClass == Integer.class) {
             nbtTagCompound.setInteger(this.name, (Integer) this.writeValue.apply(creature));
+        }
+        else if (this.typeClass == Boolean.class) {
+            nbtTagCompound.setBoolean(this.name, (Boolean) this.writeValue.apply(creature));
         }
         else if (this.typeClass == Float.class) {
             nbtTagCompound.setFloat(this.name, (Float) this.writeValue.apply(creature));

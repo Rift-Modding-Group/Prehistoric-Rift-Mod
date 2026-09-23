@@ -34,7 +34,8 @@ public interface IRiftCreature {
                 CreatureNBTKeyword.CREATURE_MOVES,
                 CreatureNBTKeyword.TAME_TARGETING,
                 CreatureNBTKeyword.ACQUISITION_INFO,
-                CreatureNBTKeyword.DEPLOYMENT_TYPE
+                CreatureNBTKeyword.DEPLOYMENT_TYPE,
+                CreatureNBTKeyword.EAT_FROM_INVENTORY
         };
     }
 
@@ -101,6 +102,8 @@ public interface IRiftCreature {
     void setAcquisitionInfo(@NotNull CreatureAcquisitionInfo value);
     RiftCreatureEnums.CreatureDeployment getDeploymentType();
     void setDeploymentType(@Nullable RiftCreatureEnums.CreatureDeployment value);
+    boolean getEatFromInventory();
+    void setEatFromInventory(boolean value);
 
     //-----same but these are helpers----
     UUID getUniqueID();

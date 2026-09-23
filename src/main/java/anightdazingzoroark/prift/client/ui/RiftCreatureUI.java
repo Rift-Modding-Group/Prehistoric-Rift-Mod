@@ -54,6 +54,7 @@ public class RiftCreatureUI {
         );
         syncManager.bindPlayerInventory(data.getPlayer());
 
+        //settings options
         syncManager.syncValue("tame_targeting", new EnumSyncValue<>(
                 RiftCreatureEnums.TameTargeting.class,
                 creature::getTameTargeting,
@@ -63,7 +64,12 @@ public class RiftCreatureUI {
                 creature::getCustomNameTag,
                 creature::setCustomNameTag
         ));
+        syncManager.syncValue("eat_from_inventory", new BooleanSyncValue(
+                creature::getEatFromInventory,
+                creature::setEatFromInventory
+        ));
 
+        //acquisition info
         GenericSyncValue<CreatureAcquisitionInfo> acquisitionInfoValue = GenericSyncValue.builder(CreatureAcquisitionInfo.class)
                 .getter(creature::getAcquisitionInfo)
                 .serializer(RiftDataSerializers.ACQUISITION_INFO::write)
@@ -71,8 +77,7 @@ public class RiftCreatureUI {
                 .equals((first, second) -> {
                     return first.acquisitionMethod() == second.acquisitionMethod() && first.acquisitionTime() == second.acquisitionTime();
                 })
-                .copyImmutable()
-                .build();
+                .copyImmutable().build();
         syncManager.syncValue("acquisition_info", acquisitionInfoValue);
 
         //for stat table
@@ -176,6 +181,16 @@ public class RiftCreatureUI {
                                                         .setMaxLength(20)
                                                         .hintText(creature.getCreatureType().getLocalizedName())
                                                         .size(80, 20)
+                                        )
+                                        .row(
+                                                IKey.lang("gui.prift.eat_from_inventory").asWidget()
+                                                        .size(82, 20)
+                                                        .padding(1),
+                                                new CycleButtonWidget().syncHandler("eat_from_inventory").size(80, 20)
+                                                        .stateOverlay(false, IKey.lang("gui.prift.no"))
+                                                        .stateOverlay(true, IKey.lang("gui.prift.yes"))
+                                                        .addTooltip(0, IKey.lang("gui.prift.eat_from_inventory_false"))
+                                                        .addTooltip(1, IKey.lang("gui.prift.eat_from_inventory_true"))
                                         )
                                 )
                         )
