@@ -1,0 +1,155 @@
+entity.unknown.spawn_description=???
+entity.tyrannosaurus.name=Tyrannosaurus
+entity.tyrannosaurus.spawn_description=Un depredador alfa colosal que posee fuerza física inmensa, atletismo, y aliento de fuego.
+entity.stegosaurus.name=Stegosaurus
+entity.stegosaurus.spawn_description=Dedicado al pastoreo y va en manadas, lleva placas protectoras en el lomo y la cola y afilados thagomizadores en la punta de la cola. Las placas de su cola se pueden lanzar contra posibles amenazas.
+
+item.spawn_egg.name=Generar - %s
+item.raw_exotic_meat.name=Carne cruda exótica
+item.cooked_exotic_meat.name=Carne cocinada exótica
+item.creative_meal.name=Alimentación creativa
+item.creative_meal.tooltip=Automáticamente tamea cualquiera criatura salvaje y se puede usar en criar cualquiera criatura tameada.
+item.smokenut.name=Nuez de humo
+item.smokenut_seeds.name=Semillas de nuez de humo
+item.tranq_bomb.name=Bomba tranquilizante
+item.tranq_bomb.tooltip=Se lanza a criaturas con poca salud para incapacitarlas para tamear. Tiene efectos diferentes con otros mobs.
+
+item.tyrannosaurus_arm.name=Brazo de Tyrannosaurus
+item.stegosaurus_plate.name=Placa de Stegosaurus
+
+itemGroup.prift_items=Items de Prehistoric Rift
+itemGroup.prift_spawn_eggs=Generadores de Prehistoric Rift
+
+tile.smokenut_bush.name=Arbusto de nuez de humo
+
+sounds.subtitle.tyrannosaurus_idle=Tyrannosaurus brama
+sounds.subtitle.tyrannosaurus_hurt=Tyrannosaurus herido
+sounds.subtitle.tyrannosaurus_death=Tyrannosaurus muere
+sounds.subtitle.tyrannosaurus_roar=Tyrannosaurus ruge
+sounds.subtitle.tyrannosaurus_charge=Tyrannosaurus embiste
+sounds.subtitle.tyrannosaurus_warn=Tyrannosaurus advierte
+sounds.subtitle.stegosaurus_idle=Stegosaurus llama
+sounds.subtitle.stegosaurus_hurt=Stegosaurus herido
+sounds.subtitle.stegosaurus_death=Stegosaurus muere
+sounds.subtitle.stegosaurus_ranged_move=Stegosaurus lanza una placa
+sounds.subtitle.stegosaurus_warn=Stegosaurus advierte
+sounds.subtitle.generic_bite_move=Una criatura muerde
+sounds.subtitle.generic_stomp_move=Una criatura pisa fuerte
+sounds.subtitle.generic_tail_move=Una criatura balancea la cola
+sounds.subtitle.tranq_bomb_impact=La bomba tranquilizante estalla
+
+info.level=Nivel %s
+info.owner_name=Dueño: %s
+info.tame_targeting.assist=Ayudar
+info.tame_targeting.assist.description=Ataca a las criaturas que el dueño elija como objetivo.
+info.tame_targeting.defensive=Defensivo
+info.tame_targeting.defensive.description=Contraataca cuando el dueño sea atacado.
+info.tame_targeting.aggressive=Agresivo
+info.tame_targeting.aggressive.description=Ataca objetivos válidos al verlos.
+info.tame_targeting.passive=Pasivo
+info.tame_targeting.passive.description=Nunca ataca automáticamente.
+
+key.prift.switch_party_mem_up=Seleccionar la criatura anterior del grupo
+key.prift.switch_party_mem_down=Seleccionar la criatura siguiente del grupo
+key.prift.quick_summon_dismiss=Invocar o retirar la criatura seleccionada
+
+party.warning.party_full=¡Tu grupo está lleno! Esta criatura permanecerá fuera del grupo.
+party.warning.cannot_summon=¡Esta criatura no se puede invocar en tu ubicación!
+party.warning.cannot_summon_dead=¡Esta criatura está muerta y no se puede invocar!
+party.warning.summon_success=Criatura invocada correctamente
+party.warning.dismiss_success=Criatura retirada correctamente
+
+gui.prift.yes=Sí
+gui.prift.no=No
+gui.prift.creature_inventory=Inventario de criatura
+gui.prift.creature_settings=Ajustes de criatura
+gui.prift.player_inventory=Inventario del jugador
+gui.prift.tame_targeting=Modo de ataque
+gui.prift.nickname=Apodo
+gui.prift.eat_from_inventory=Comer del inventario
+gui.prift.eat_from_inventory_true=Esta criatura consumirá alimentos en su inventario
+gui.prift.eat_from_inventory_false=Esta criatura no consumirá alimentos en su inventario
+gui.prift.creature_summary=Resumen de criatura
+gui.prift.creature_moves=Movimientos de criatura
+gui.prift.creature_moves.type=Tipo: %s
+gui.prift.creature_moves.base_power=Poder: %s
+gui.prift.creature_moves.stamina=Resistencia: %s
+gui.prift.not_applicable=N/D
+gui.prift.move_stamina_use.none=Sin consumo
+gui.prift.move_stamina_use.light=Ligero
+gui.prift.move_stamina_use.medium=Moderado
+gui.prift.move_stamina_use.heavy=Alto
+gui.prift.creature_summary.species=Especie: %s
+gui.prift.creature_summary.level=Nivel %s
+gui.prift.creature_summary.uuid=UUID: %s
+gui.prift.creature_summary.nature=Naturaleza: %s
+gui.prift.creature_summary.nature.tooltip=Las naturalezas pueden cambiar las estadísticas de una criatura.
+gui.prift.creature_summary.stats=Estadísticas
+gui.prift.creature_summary.value=Valor
+gui.prift.creature_summary.iv=VI
+gui.prift.creature_summary.iv.description=Valor individual, un modificador de estadística distinta de cada criatura.
+gui.prift.creature_summary.acquisition=Información de adquisición
+gui.prift.unknown=Desconocida
+
+acquisition.unknown=Tameada hace mucho tiempo.
+acquisition.tamed_from_wild=Tameada en estado salvaje el %s.
+acquisition.hatched=Nació de un huevo el %s.
+acquisition.born=Nació el %s.
+acquisition.purchased=Comprada el %s.
+acquisition.received=Recibida el %s.
+
+stat.creature.health=Salud
+stat.creature.health.description=Determina cuánto daño puede recibir la criatura antes de ser derrotada.
+stat.creature.melee_damage=Daño físico
+stat.creature.melee_damage.description=Determina el daño de ataques físicos y proyectiles físicos.
+stat.creature.elemental_damage=Daño elemental
+stat.creature.elemental_damage.description=Determina el daño de ataques con propiedades elementales.
+stat.creature.stamina=Resistencia
+stat.creature.stamina.description=Limita el esfuerzo en varias acciónes.
+stat.creature.speed=Velocidad
+stat.creature.speed.description=Determina la velocidad de movimiento.
+
+nature.creature.steady=Estable
+nature.creature.composed=Serena
+nature.creature.temperate=Templada
+nature.creature.patient=Paciente
+nature.creature.adaptable=Adaptable
+nature.creature.guarded=Cautelosa
+nature.creature.grounded=Sensata
+nature.creature.stout=Robusta
+nature.creature.careful=Cuidadosa
+nature.creature.reckless=Temeraria
+nature.creature.blunt=Directa
+nature.creature.impetuous=Impetuosa
+nature.creature.brutish=Brutal
+nature.creature.fervid=Ferviente
+nature.creature.spiritual=Espiritual
+nature.creature.intense=Intensa
+nature.creature.focused=Concentrada
+nature.creature.tenacious=Tenaz
+nature.creature.disciplined=Disciplinada
+nature.creature.reserved=Reservada
+nature.creature.calm=Calmada
+nature.creature.skittish=Asustadiza
+nature.creature.nimble=Ágil
+nature.creature.restless=Inquieta
+nature.creature.hasty=Apresurada
+
+move.creature.type.physical=Físico
+move.creature.type.elemental=Elemental
+move.creature.type.status=Estado
+
+move.creature.bite=Mordisco
+move.creature.bite.description=Muerde a un objetivo con sus poderosas mandíbulas.
+move.creature.stomp=Pisotón
+move.creature.stomp.description=Pisotea el suelo para golpear objetivos cerca de sus patas.
+move.creature.power_roar=Rugido poderoso
+move.creature.power_roar.description=Desata un rugido sónico dañino.
+move.creature.flamethrower=Lanzallamas
+move.creature.flamethrower.description=Exhala una corriente continua de fuego hacia un objetivo.
+move.creature.tail_stab=Puñalada de cola
+move.creature.tail_stab.description=Apuñala a un objetivo con las púas de su cola.
+move.creature.tail_sweep=Barrido de cola
+move.creature.tail_sweep.description=Barre con su cola para golpear objetivos cercanos.
+move.creature.plate_fling=Lanzamiento de placa
+move.creature.plate_fling.description=Lanza una de las placas de su lomo hacia un objetivo distante.

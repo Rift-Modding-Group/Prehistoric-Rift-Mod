@@ -1,0 +1,2 @@
+# What is this?
+The API is to allow aspiring addon creators to add their own creatures using this mod + RiftLibrary. It exposes some stuff relevant to creature creation. It is highly recommended to import the API jar in your dependencies.

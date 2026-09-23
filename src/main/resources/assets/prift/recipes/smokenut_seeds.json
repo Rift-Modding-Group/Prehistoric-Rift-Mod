@@ -1,0 +1,11 @@
+{
+  "type": "forge:ore_shapeless",
+  "ingredients": [
+    {
+      "item": "prift:smokenut"
+    }
+  ],
+  "result": {
+    "item": "prift:smokenut_seeds"
+  }
+}

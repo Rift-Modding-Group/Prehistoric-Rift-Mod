@@ -1,66 +1,69 @@
 package anightdazingzoroark.prift.server.entity;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.server.entity.creaturenew.RiftCreatureRegistry;
-import anightdazingzoroark.prift.server.entity.creaturenew.builder.AbstractCreatureBuilder;
-import anightdazingzoroark.prift.server.entity.creaturenew.builder.RiftCreatureBuilder;
-import anightdazingzoroark.prift.server.entity.other.RiftEmbryo;
-import anightdazingzoroark.prift.server.entity.other.RiftTrap;
-import anightdazingzoroark.prift.server.entity.projectile.*;
-import net.minecraft.entity.Entity;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreatureHitboxed;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
+import anightdazingzoroark.prift.server.entity.projectile.RiftProjectile;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
-
-import java.util.ArrayList;
-import java.util.List;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.EntityEntry;
+import net.minecraftforge.fml.common.registry.EntityEntryBuilder;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 
 public class RiftEntities {
+    //builder friendly implementation of entity registry
+    //only 2 classes r used, sweet
     public static void registerEntities() {
-        int id = 0;
-        int prevMaxSize = 0;
-        //creatures
-        for (int x = 0; x < RiftCreatureType.values().length; x++) {
-            RiftCreatureType creature = RiftCreatureType.values()[id];
-            registerEntity(creature.name().toLowerCase(), creature.getCreature(), id, RiftInitialize.instance, creature.getEggPrimary(), creature.getEggSecondary());
-            id++;
+        for (String creatureName : RiftCreatureRegistry.getCreatureNames()) {
+            ResourceLocation registryName = new ResourceLocation(RiftInitialize.MODID, creatureName);
+            ForgeRegistries.ENTITIES.register(new CreatureTypeEntry(creatureName).setRegistryName(registryName));
         }
-        prevMaxSize += RiftCreatureType.values().length;
-        //NEW CREATURE REGISTRY
-        List<RiftCreatureBuilder> builderList = new ArrayList<>(RiftCreatureRegistry.creatureBuilderMap.values());
-        for (int x = 0; x < builderList.size(); x++) {
-            RiftCreatureBuilder builder = builderList.get(id - prevMaxSize);
-            registerEntity(
-                    builder.getName()+"_new", //this is temporary
-                    builder.getCreatureClass(),
-                    id, RiftInitialize.instance
-            );
-            id++;
-        }
-        prevMaxSize += builderList.size();
-        //weapons
-        for (int x = RiftCreatureType.values().length; x < RiftLargeWeaponType.values().length; x++) {
-            RiftLargeWeaponType weaponType = RiftLargeWeaponType.values()[id - prevMaxSize];
-            registerEntity(weaponType.name().toLowerCase()+"_entity", weaponType.getWeaponClass(), id, RiftInitialize.instance);
-            id++;
-        }
-        prevMaxSize += RiftLargeWeaponType.values().length;
-        //everything else
-        registerEntity("egg", RiftEgg.class, id++, RiftInitialize.instance);
-        registerEntity("sac", RiftSac.class, id++, RiftInitialize.instance);
-        registerEntity("embryo", RiftEmbryo.class, id++, RiftInitialize.instance);
-        registerEntity("cannonball_projectile", RiftCannonball.class, id++, RiftInitialize.instance);
-        registerEntity("mortar_shell_projectile", RiftMortarShell.class, id++, RiftInitialize.instance);
-        registerEntity("catapult_boulder_projectile", RiftCatapultBoulder.class, id++, RiftInitialize.instance);
-        registerEntity("thrown_bola", ThrownBola.class, id++, RiftInitialize.instance);
-        registerEntity("creature_projectile", RiftCreatureProjectileEntity.class, id++, RiftInitialize.instance);
-        registerEntity("trap", RiftTrap.class, id++, RiftInitialize.instance);
+
+        ResourceLocation creatureRegistryName = new ResourceLocation(RiftInitialize.MODID, "internal/creature");
+        ForgeRegistries.ENTITIES.register(EntityEntryBuilder.<RiftCreature>create()
+                .entity(RiftCreature.class)
+                .factory(RiftCreature::new)
+                .id(creatureRegistryName, 0)
+                .name("rift_creature")
+                .tracker(64, 1, true)
+                .build()
+        );
+
+        ResourceLocation hitboxedCreatureRegistryName = new ResourceLocation(RiftInitialize.MODID, "internal/creature_hitboxed");
+        ForgeRegistries.ENTITIES.register(EntityEntryBuilder.<RiftCreatureHitboxed>create()
+                .entity(RiftCreatureHitboxed.class)
+                .factory(RiftCreatureHitboxed::new)
+                .id(hitboxedCreatureRegistryName, 1)
+                .name("rift_creature_hitboxed")
+                .tracker(64, 1, true)
+                .build()
+        );
+
+        ResourceLocation projectileRegistryName = new ResourceLocation(RiftInitialize.MODID, "internal/projectile");
+        ForgeRegistries.ENTITIES.register(EntityEntryBuilder.<RiftProjectile>create()
+                .entity(RiftProjectile.class)
+                .factory(RiftProjectile::new)
+                .id(projectileRegistryName, 2)
+                .name("rift_projectile")
+                .tracker(64, 1, true)
+                .build()
+        );
     }
 
-    public static void registerEntity(String name, Class<? extends Entity> entityClass, int id, Object mod) {
-        EntityRegistry.registerModEntity(new ResourceLocation(RiftInitialize.MODID, name), entityClass, name, id, mod, 64, 1, true);
-    }
+    private static class CreatureTypeEntry extends EntityEntry {
+        @NotNull
+        private final String creatureName;
 
-    public static void registerEntity(String name, Class<? extends Entity> entityClass, int id, Object mod,  int eggPrimary, int eggSecondary) {
-        EntityRegistry.registerModEntity(new ResourceLocation(RiftInitialize.MODID, name), entityClass, name, id, mod, 64, 1, true, eggPrimary, eggSecondary);
+        private CreatureTypeEntry(@NotNull String creatureName) {
+            super(RiftCreatureRegistry.creatureUsesHitboxes(creatureName) ? RiftCreatureHitboxed.class : RiftCreature.class, creatureName);
+            this.creatureName = creatureName;
+        }
+
+        @Override
+        public RiftCreature newInstance(World world) {
+            return RiftCreatureRegistry.createCreature(world, this.creatureName);
+        }
     }
 }

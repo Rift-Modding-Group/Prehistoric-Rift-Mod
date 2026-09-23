@@ -23,127 +23,21 @@
 				}
 			}
 		},
-		"animation.tyrannosaurus.roar": {
-			"animation_length": 2,
-			"bones": {
-				"body": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.32": [-20, 0, 0],
-						"0.64": [15, 0, 0],
-						"1.84": [15, 0, 0],
-						"2.0": [0, 0, 0]
-					}
-				},
-				"neck": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.32": [20, 0, 0],
-						"0.64": [-15, 0, 0],
-						"0.8": [-15, 0, 0],
-						"1.84": [-15, 0, 0],
-						"2.0": [0, 0, 0]
-					}
-				},
-				"head": {
-					"rotation": {
-						"0.64": [0, 0, 0],
-						"0.8": [0, 0, -7.5],
-						"0.96": [0, 0, 7.5],
-						"1.12": [0, 0, -7.5],
-						"1.28": [0, 0, 7.5],
-						"1.44": [0, 0, -7.5],
-						"1.6": [0, 0, 7.5],
-						"1.76": [0, 0, 0]
-					}
-				},
-				"lowerJaw": {
-					"rotation": {
-						"0.36": [0, 0, 0],
-						"0.64": [22.5, 0, 0],
-						"1.76": [22.5, 0, 0],
-						"1.84": [0, 0, 0]
-					}
-				}
-			}
-		},
-		"animation.tyrannosaurus.sitting": {
-			"loop": true,
-			"bones": {
-				"body": {
-					"position": [0, -6, 0]
-				},
-				"leftLeg": {
-					"position": [0, -6, 0]
-				},
-				"leftShin": {
-					"position": [0, 7, -3]
-				},
-				"leftFoot": {
-					"position": [0, -1, 0]
-				},
-				"rightLeg": {
-					"position": [0, -6, 0]
-				},
-				"rightShin": {
-					"position": [0, 7, -3]
-				},
-				"rightFoot": {
-					"position": [0, -1, 0]
-				}
-			}
-		},
-		"animation.tyrannosaurus.attack": {
-			"animation_length": 0.52,
-			"bones": {
-				"body": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.12": [-7.5, 0, 0],
-						"0.24": [9, 0, 0],
-						"0.52": [0, 0, 0]
-					}
-				},
-				"neck": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.12": [2.5, 0, 0],
-						"0.24": [2.5, 0, 0],
-						"0.52": [0, 0, 0]
-					}
-				},
-				"head": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.12": [22.5, 0, 0],
-						"0.24": [22.5, 0, 0],
-						"0.52": [0, 0, 0]
-					}
-				},
-				"lowerJaw": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.12": [30, 0, 0],
-						"0.24": [0, 0, 0]
-					}
-				}
-			}
-		},
 		"animation.tyrannosaurus.bite": {
 			"animation_length": 0.5,
 			"bones": {
 				"body": {
 					"rotation": {
 						"0.0": [0, 0, 0],
-						"0.125": [-7.5, 0, 0],
-						"0.25": [9, 0, 0],
+						"0.125": [-10, 0, 0],
+						"0.25": [20, 0, 0],
 						"0.5": [0, 0, 0]
 					}
 				},
 				"neck": {
 					"rotation": {
 						"0.0": [0, 0, 0],
-						"0.125": [2.5, 0, 0],
+						"0.125": [5, 0, 0],
 						"0.25": [2.5, 0, 0],
 						"0.5": [0, 0, 0]
 					}
@@ -165,38 +59,13 @@
 				}
 			},
 			"timeline": {
-				"0.25": "'moveHitEffect'"
-			}
-		},
-		"animation.tyrannosaurus.incapacitated": {
-			"loop": true,
-			"bones": {
-				"base": {
-					"position": [0, -11, 0]
-				},
-				"tail0": {
-					"rotation": [-5, 0, 0]
-				},
-				"neck": {
-					"rotation": [15, 0, 0]
-				},
-				"leftArm": {
-					"rotation": [-85, 0, 0]
-				},
-				"leftClaw": {
-					"rotation": [50, 0, 0]
-				},
-				"rightArm": {
-					"rotation": [-85, 0, 0]
-				},
-				"rightClaw": {
-					"rotation": [50, 0, 0]
-				},
-				"leftLeg": {
-					"rotation": [70, 0, 0]
-				},
-				"rightLeg": {
-					"rotation": [70, 0, 0]
+				"0.15": "function.create_offense_hitbox_by_tag('jaw');",
+				"0.25": "function.destroy_offense_hitbox_by_tag('jaw'); function.send_message('moveBlockBreakEffect');"
+			},
+			"sound_effects": {
+				"0.15": {
+					"effect": "prift.generic_move.bite",
+					"locator": "centerPoint"
 				}
 			}
 		},
@@ -246,53 +115,18 @@
 				}
 			},
 			"timeline": {
-				"0.625": "'moveHitEffect'"
-			}
-		},
-		"animation.tyrannosaurus.warn": {
-			"animation_length": 1.25,
-			"bones": {
-				"body": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.25": [-7.5, 0, 0],
-						"0.5": [5, 0, 0],
-						"1.0": [5, 0, 0],
-						"1.25": [0, 0, 0]
-					}
-				},
-				"neck": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.25": [7.5, 0, 0],
-						"0.5": [-5, 0, 0],
-						"1.0": [-5, 0, 0],
-						"1.25": [0, 0, 0]
-					}
-				},
-				"head": {
-					"rotation": {
-						"0.25": [0, 0, 0],
-						"0.375": [0, 0, 12.5],
-						"0.5": [0, 0, -12.5],
-						"0.625": [0, 0, 12.5],
-						"0.75": [0, 0, -12.5],
-						"0.875": [0, 0, 12.5],
-						"1.0": [0, 0, 0]
-					}
-				},
-				"lowerJaw": {
-					"rotation": {
-						"0.25": [0, 0, 0],
-						"0.5": [22.5, 0, 0],
-						"1.0": [22.5, 0, 0],
-						"1.25": [0, 0, 0]
-					}
+				"0.625": "function.send_message('moveHitEffect');"
+			},
+			"sound_effects": {
+				"0.625": {
+					"effect": "prift.generic_move.stomp",
+					"locator": "stompOrigin"
 				}
 			}
 		},
 		"animation.tyrannosaurus.sprint_pose": {
 			"loop": true,
+			"animation_length": 5,
 			"bones": {
 				"body": {
 					"rotation": [5, 0, 0]
@@ -314,6 +148,313 @@
 				},
 				"rightClaw": {
 					"rotation": [37.5, 0, 0]
+				}
+			},
+			"sound_effects": {
+				"0.0": {
+					"effect": "prift.tyrannosaurus.charge",
+					"locator": "centerPoint"
+				}
+			}
+		},
+		"animation.tyrannosaurus.flamethrower_prewindup": {
+			"loop": true,
+			"timeline": {
+				"0.0": "function.send_message('moveChargeupPrewindupFinished');"
+			}
+		},
+		"animation.tyrannosaurus.flamethrower_windup": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.32,
+			"bones": {
+				"body": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.32": [-20, 0, 0]
+					}
+				},
+				"neck": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.32": [20, 0, 0]
+					}
+				},
+				"lowerJaw": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.32": [0, 0, 0]
+					}
+				}
+			},
+			"timeline": {
+				"0.32": "function.send_message('moveChargeupWindupFinished');"
+			}
+		},
+		"animation.tyrannosaurus.flamethrower_prereleasing": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.32,
+			"bones": {
+				"body": {
+					"rotation": {
+						"0.0": [-20, 0, 0],
+						"0.32": [15, 0, 0]
+					}
+				},
+				"neck": {
+					"rotation": {
+						"0.0": [20, 0, 0],
+						"0.32": ["-15-flamethrower_head_bend", 0, 0]
+					}
+				},
+				"lowerJaw": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.32": [22.5, 0, 0]
+					}
+				},
+				"head": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.32": [0, 0, -7.5]
+					}
+				}
+			},
+			"timeline": {
+				"0.32": "function.send_message('moveChargeupPrereleasingFinished');"
+			}
+		},
+		"animation.tyrannosaurus.flamethrower_releasing": {
+			"loop": true,
+			"animation_length": 0.64,
+			"bones": {
+				"body": {
+					"rotation": [15, 0, 0]
+				},
+				"neck": {
+					"rotation": ["-15-flamethrower_head_bend", 0, 0]
+				},
+				"head": {
+					"rotation": {
+						"0.0": [0, 0, -7.5],
+						"0.16": [0, 0, 7.5],
+						"0.32": [0, 0, -7.5],
+						"0.48": [0, 0, 7.5],
+						"0.64": [0, 0, -7.5]
+					}
+				},
+				"lowerJaw": {
+					"rotation": [22.5, 0, 0]
+				}
+			},
+			"particle_effects": {
+				"0.0": {
+					"effect": "prift:flamethrower_fire",
+					"locator": "flameLocator"
+				}
+			}
+		},
+		"animation.tyrannosaurus.flamethrower_finishing": {
+			"loop": false,
+			"animation_length": 0.24,
+			"bones": {
+				"body": {
+					"rotation": {
+						"0.0": [15, 0, 0],
+						"0.24": [0, 0, 0]
+					}
+				},
+				"neck": {
+					"rotation": {
+						"0.0": ["-15-flamethrower_head_bend", 0, 0],
+						"0.24": [0, 0, 0]
+					}
+				},
+				"head": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.24": [0, 0, 0]
+					}
+				},
+				"lowerJaw": {
+					"rotation": {
+						"0.0": [22.5, 0, 0],
+						"0.24": [0, 0, 0]
+					}
+				}
+			}
+		},
+		"animation.tyrannosaurus.power_roar": {
+			"animation_length": 2,
+			"bones": {
+				"body": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [5, 0, 0],
+						"0.5": [-12.5, 0, 0],
+						"1.75": [-12.5, 0, 0],
+						"2.0": [0, 0, 0]
+					}
+				},
+				"tail0": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [-5, 0, 0],
+						"0.5": [7.5, 0, 0],
+						"1.75": [7.5, 0, 0],
+						"2.0": [0, 0, 0]
+					}
+				},
+				"tail1": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [-5, 0, 0],
+						"0.5": [10, 0, 0],
+						"1.75": [10, 0, 0],
+						"2.0": [0, 0, 0]
+					}
+				},
+				"neck": {
+					"rotation": {
+						"0.25": [0, 0, 0],
+						"0.5": [-7.4365, -0.9762, -7.4365],
+						"0.75": [-7.4409, 0.9735, 7.433],
+						"1.0": [-7.4385, -0.983, -7.443],
+						"1.25": [-7.4409, 0.9735, 7.433],
+						"1.5": [-7.4385, -0.983, -7.443],
+						"1.75": [-7.4409, 0.9735, 7.433],
+						"2.0": [0, 0, 0]
+					}
+				},
+				"head": {
+					"rotation": {
+						"0.25": [0, 0, 0],
+						"0.5": [-7.4365, -0.9762, -7.4365],
+						"0.75": [-7.5, 0, 0],
+						"1.0": [-7.4365, -0.9762, -7.4365],
+						"1.25": [-7.5, 0, 0],
+						"1.5": [-7.4365, -0.9762, -7.4365],
+						"1.75": [-7.5, 0, 0],
+						"2.0": [0, 0, 0]
+					}
+				},
+				"lowerJaw": {
+					"rotation": {
+						"0.25": [0, 0, 0],
+						"0.5": [22.5, 0, 0],
+						"1.75": [22.5, 0, 0],
+						"2.0": [0, 0, 0]
+					}
+				},
+				"leftClaw": {
+					"rotation": {
+						"0.25": [0, 0, 0],
+						"0.5": [50, 0, 0],
+						"1.75": [50, 0, 0],
+						"2.0": [0, 0, 0]
+					}
+				},
+				"rightClaw": {
+					"rotation": {
+						"0.25": [0, 0, 0],
+						"0.5": [50, 0, 0],
+						"1.75": [50, 0, 0],
+						"2.0": [0, 0, 0]
+					}
+				}
+			},
+			"timeline": {
+				"0.5": "function.send_message('moveHitEffect');"
+			},
+			"sound_effects": {
+				"0.5": {
+					"effect": "prift.tyrannosaurus.roar",
+					"locator": "centerPoint"
+				}
+			}
+		},
+		"animation.tyrannosaurus.leap": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.05,
+			"bones": {
+				"body": {
+					"rotation": [-15, 0, 0]
+				},
+				"tail0": {
+					"rotation": [-5, 0, 0]
+				},
+				"tail1": {
+					"rotation": [5, 0, 0]
+				},
+				"neck": {
+					"rotation": [15, 0, 0]
+				},
+				"leftArm": {
+					"rotation": [35, 0, 0]
+				},
+				"leftClaw": {
+					"rotation": [25, 0, 0]
+				},
+				"rightArm": {
+					"rotation": [35, 0, 0]
+				},
+				"rightClaw": {
+					"rotation": [25, 0, 0]
+				},
+				"leftLeg": {
+					"rotation": [30, 0, 0]
+				},
+				"rightLeg": {
+					"rotation": [30, 0, 0]
+				}
+			}
+		},
+		"animation.tyrannosaurus.sleep": {
+			"loop": true,
+			"bones": {
+				"base": {
+					"position": [0, -6, 0]
+				},
+				"body": {
+					"position": [0, -3, 0]
+				},
+				"tail0": {
+					"rotation": [-12.8376, 9.0548, -4.2618]
+				},
+				"tail1": {
+					"rotation": [9.3086, 26.4885, 7.6734]
+				},
+				"tail2": {
+					"rotation": [-14.9695, 36.8351, 7.5897],
+					"position": [0.6, 0, 0]
+				},
+				"neck": {
+					"rotation": [26.3188, -28.8774, 1.3112],
+					"position": [1.2, -0.2, -3]
+				},
+				"head": {
+					"rotation": [-37.265, -16.3881, 15.6336]
+				},
+				"leftArm": {
+					"rotation": [-100, 0, 0]
+				},
+				"leftClaw": {
+					"rotation": [37.5, 0, 0]
+				},
+				"rightArm": {
+					"rotation": [-108.1685, -56.1582, 15.247],
+					"position": [-1, 0, 1]
+				},
+				"rightClaw": {
+					"rotation": [37.5, 0, 0]
+				},
+				"frontBody": {
+					"rotation": [12.5, 0, 0]
+				},
+				"leftShin": {
+					"position": [0, 6, -3]
+				},
+				"rightShin": {
+					"position": [0, 6, -3]
 				}
 			}
 		}

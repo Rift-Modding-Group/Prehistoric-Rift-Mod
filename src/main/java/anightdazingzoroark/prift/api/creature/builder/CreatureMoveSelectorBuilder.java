@@ -1,0 +1,230 @@
+package anightdazingzoroark.prift.api.creature.builder;
+
+import anightdazingzoroark.prift.api.creature.ICreature;
+import anightdazingzoroark.prift.api.creature.CreatureMoveResult;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IEntityMultiPart;
+import net.minecraft.entity.MultiPartEntityPart;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Creature-level AI policy for choosing moves.
+ * */
+public class CreatureMoveSelectorBuilder {
+    //extremely important
+    protected boolean locked;
+
+    //general storage of move rules
+    private final List<MoveRule> moveRules = new ArrayList<>();
+
+    /**
+     * This locks this object so that when accessing any instances of this, it can never be modified ever
+     * */
+    public void lock() {
+        this.locked = true;
+    }
+
+    public CreatureMoveSelectorBuilder setMoveRule(MoveRuleBuilder moveRuleBuilder) {
+        this.checkIfLocked();
+
+        moveRuleBuilder.lock();
+        this.moveRules.add(new MoveRule(CreatureMoveResult.USE_MOVE, moveRuleBuilder));
+        return this;
+    }
+
+    /**
+     * Make it so that sprinting can be used as an attack by this creature.
+     * Note that its only for when its on its own, when controlled by a rider
+     * it can spring to attack when commanded to (by simply sprinting lol)
+     * */
+    public CreatureMoveSelectorBuilder setCanSprintToAttack(int priority, double minDist, double maxDist, int basePower) {
+        this.checkIfLocked();
+        if (minDist > maxDist) throw new IllegalArgumentException(minDist+" is greater than "+maxDist+"!");
+
+        HorizontalDistanceFromUserDetectionRule detectionRule = new HorizontalDistanceFromUserDetectionRule(minDist, maxDist);
+        SprintMoveRuleBuilder sprintMoveRuleBuilder = new SprintMoveRuleBuilder(basePower);
+        sprintMoveRuleBuilder.setPriorityPredicate((creature, target) -> {
+            if (target == null || !target.isEntityAlive()) return -1;
+            if (!creature.canSprintToAttack() && !creature.atFrustrationThreshold()) return -1;
+            boolean outsideCreatureAABB = !creature.getEntityBoundingBox().grow(1e-5D).intersects(target.getEntityBoundingBox());
+            boolean outsideInnerBound = !creature.getEntityBoundingBox().grow(minDist).grow(1e-5D).intersects(target.getEntityBoundingBox());
+            boolean withinOuterBound = creature.getEntityBoundingBox().grow(maxDist).grow(1e-5D).intersects(target.getEntityBoundingBox());
+
+            if (!outsideCreatureAABB || !withinOuterBound || !outsideInnerBound) return -1;
+            return creature.hasStraightWalkingPathTo(target) ? priority : -1;
+        });
+        sprintMoveRuleBuilder.addDetectionRule(detectionRule);
+        sprintMoveRuleBuilder.setUseWhenFrustrated();
+        sprintMoveRuleBuilder.lock();
+
+        this.moveRules.add(new MoveRule(CreatureMoveResult.SPRINT, sprintMoveRuleBuilder));
+        return this;
+    }
+
+    /**
+     * Make it so that leaping can be used as an attack by this creature.
+     * setting requiresTargetContact to true makes it so that it deals
+     * damage upon touching the target when leaping. Otherwise it just
+     * jumps to the target.
+     * */
+    public CreatureMoveSelectorBuilder setCanLeapToAttack(int priority, double minDist, double maxDist, boolean requiresTargetContact) {
+        this.checkIfLocked();
+        if (minDist > maxDist) throw new IllegalArgumentException(minDist+" is greater than "+maxDist+"!");
+
+        HorizontalDistanceFromUserDetectionRule detectionRule = new HorizontalDistanceFromUserDetectionRule(minDist, maxDist);
+        LeapMoveRuleBuilder leapMoveRuleBuilder = new LeapMoveRuleBuilder(requiresTargetContact).setLeapPriorityPredicate(priority, detectionRule);
+        leapMoveRuleBuilder.setUseWhenFrustrated();
+        leapMoveRuleBuilder.lock();
+
+        this.moveRules.add(new MoveRule(CreatureMoveResult.LEAP, leapMoveRuleBuilder));
+        return this;
+    }
+
+    @NotNull
+    public List<MoveRule> getMoveRules() {
+        return this.moveRules;
+    }
+
+    /**
+     * Put this on every setter in builder to protect from post-creation editing
+     * */
+    protected void checkIfLocked() {
+        if (this.locked) throw new IllegalCallerException("A setter for a move selector builder cannot be called after the move selector is registered!");
+    }
+
+    public record MoveRule(@NotNull CreatureMoveResult moveResult, @NotNull MoveRuleBuilder moveRuleBuilder) {
+        @Override
+        public boolean equals(Object object) {
+            if (!(object instanceof MoveRule(CreatureMoveResult otherResult, MoveRuleBuilder otherMoveRuleBuilder))) return false;
+
+            if (otherResult != CreatureMoveResult.USE_MOVE) return otherResult == this.moveResult;
+            else return otherMoveRuleBuilder.getMoveName().equals(this.moveRuleBuilder.getMoveName());
+        }
+    }
+
+    /**
+     * Sprint-specific move rule data defining its damage power.
+     * */
+    public static class SprintMoveRuleBuilder extends MoveRuleBuilder {
+        private final int basePower;
+
+        private SprintMoveRuleBuilder(int basePower) {
+            super("");
+            this.basePower = basePower;
+        }
+
+        public int getBasePower() {
+            return this.basePower;
+        }
+    }
+
+    /**
+     * Leap-specific move rule data selecting whether target contact deals damage.
+     * */
+    public static final class LeapMoveRuleBuilder extends MoveRuleBuilder {
+        private final boolean requiresTargetContact;
+
+        private LeapMoveRuleBuilder(boolean requiresTargetContact) {
+            super("");
+            this.requiresTargetContact = requiresTargetContact;
+        }
+
+        private LeapMoveRuleBuilder setLeapPriorityPredicate(int priority, @NotNull DetectionRule detectionRule) {
+            this.setPriorityPredicate((creature, target) -> {
+                if (target == null || !target.isEntityAlive()) return -1;
+                if (!creature.isOnGround() || creature.bodyTouchingLiquid() || !creature.getNavigationBuilder().getCanLeap()) return -1;
+                if (!target.onGround || target.isInWater()) return -1;
+                if (!creature.canLeapToAttack() && !creature.atFrustrationThreshold()) return -1;
+                return detectionRule.targetWithinRange(creature, target) ? priority : -1;
+            });
+            this.addDetectionRule(detectionRule);
+            return this;
+        }
+
+        public boolean requiresTargetContact() {
+            return this.requiresTargetContact;
+        }
+    }
+
+    //-----target detection rules for moves-----
+    public abstract static class DetectionRule {
+        public abstract boolean targetWithinRange(@NotNull ICreature user, @NotNull EntityLivingBase target);
+    }
+
+    public static class BoundingBoxDetectionRule extends DetectionRule {
+        @NotNull
+        private final String boundingBoxName;
+
+        public BoundingBoxDetectionRule(@NotNull String boundingBoxName) {
+            this.boundingBoxName = boundingBoxName;
+        }
+
+        @Override
+        public boolean targetWithinRange(@NotNull ICreature user, @NotNull EntityLivingBase target) {
+            //test hitboxes first
+            if (target instanceof IEntityMultiPart) {
+                for (Entity part : target.getParts()) {
+                    if (!(part instanceof MultiPartEntityPart multiPartEntityPart)) continue;
+                    if (user.aabbIntersectsBoundingBox(multiPartEntityPart.getEntityBoundingBox(), this.boundingBoxName)) return true;
+                }
+            }
+
+            //back to entity
+            return user.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), this.boundingBoxName);
+        }
+    }
+
+    public static class HorizontalDistanceFromUserDetectionRule extends DetectionRule {
+        private final double minDistance;
+        private final double maxDistance;
+
+        public HorizontalDistanceFromUserDetectionRule(double maxDistance) {
+            this(-1, maxDistance);
+        }
+
+        public HorizontalDistanceFromUserDetectionRule(double minDistance, double maxDistance) {
+            this.minDistance = minDistance;
+            this.maxDistance = maxDistance;
+        }
+
+        @Override
+        public boolean targetWithinRange(@NotNull ICreature user, @NotNull EntityLivingBase target) {
+            double dist = user.horizontalDistanceFromEntity(target);
+
+            //if minDistance is negative, it means only maxDistance matters
+            if (this.minDistance < 0) return dist <= this.maxDistance;
+            else if (this.maxDistance >= this.minDistance) return dist >= minDistance && dist <= this.maxDistance;
+            throw new IllegalArgumentException("Given maxDistance is smaller than minDistance!");
+        }
+    }
+
+    public static class VerticalDistanceFromUserDetectionRule extends DetectionRule {
+        private final double minDistance;
+        private final double maxDistance;
+
+        public VerticalDistanceFromUserDetectionRule(double maxDistance) {
+            this(-1, maxDistance);
+        }
+
+        public VerticalDistanceFromUserDetectionRule(double minDistance, double maxDistance) {
+            this.minDistance = minDistance;
+            this.maxDistance = maxDistance;
+        }
+
+        @Override
+        public boolean targetWithinRange(@NotNull ICreature user, @NotNull EntityLivingBase target) {
+            double dist = user.verticalDistanceFromEntity(target);
+
+            //if minDistance is negative, it means only maxDistance matters
+            if (this.minDistance < 0) return dist <= this.maxDistance;
+            else if (this.maxDistance >= this.minDistance) return dist >= minDistance && dist <= this.maxDistance;
+            throw new IllegalArgumentException("Given maxDistance is smaller than minDistance!");
+        }
+    }
+}

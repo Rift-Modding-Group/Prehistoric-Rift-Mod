@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public class InternalRegistryPrimer {
-    private Map<Class<?>, List<IForgeRegistryEntry<?>>> primed = new HashMap<>();
+    private final Map<Class<?>, List<IForgeRegistryEntry<?>>> primed = new HashMap<>();
 
     public <V extends IForgeRegistryEntry<V>> V register(V entry) {
         Class<V> type = entry.getRegistryType();
@@ -18,10 +18,10 @@ public class InternalRegistryPrimer {
     }
 
     public <T extends IForgeRegistryEntry<T>> List<?> getEntries(Class<T> type) {
-        return primed.get(type);
+        return this.primed.get(type);
     }
 
     public void wipe(Class<?> type) {
-        primed.remove(type);
+        this.primed.remove(type);
     }
 }
