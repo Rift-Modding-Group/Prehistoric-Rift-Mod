@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.prift.client.ui.RiftCreatureUI;
+import anightdazingzoroark.prift.server.config.RiftGeneralConfig;
 import anightdazingzoroark.prift.server.entity.projectile.RiftProjectile;
 import anightdazingzoroark.riftlib.ridePositionLogic.DynamicRidePosList;
 import anightdazingzoroark.riftlib.ridePositionLogic.IDynamicRideUser;
@@ -170,7 +171,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private int tiredness;
     private int tirednessCountdown;
     @NotNull
-    private CreatureAcquisitionInfo acquisitionInfo = new CreatureAcquisitionInfo(null, 0L);
+    private CreatureAcquisitionInfo acquisitionInfo = CreatureAcquisitionInfo.NONE;
     private RiftCreatureEnums.@Nullable SleepCause sleepCause;
     //herd helper
     @Nullable
@@ -315,7 +316,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         //set level based on distance from 0, 0
         double distFromCenter = Math.sqrt(this.posX * this.posX + this.posZ * this.posZ);
         double levelSlopeResult = MathUtil.slopeResult(distFromCenter, false, 0, 1024, 1, 2);
-        levelSlopeResult = Math.clamp(levelSlopeResult, 1, IRiftCreature.MAX_LEVEL);
+        levelSlopeResult = Math.clamp(levelSlopeResult, 1, 10);
         levelSlopeResult = Math.round(levelSlopeResult);
         this.setLevel((int) levelSlopeResult);
 
@@ -1625,7 +1626,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void setLevel(int value) {
-        this.dataManager.set(LEVEL, Math.clamp(value, 1, IRiftCreature.MAX_LEVEL));
+        this.dataManager.set(LEVEL, Math.clamp(value, 1, RiftGeneralConfig.creatures.maxLevel));
     }
 
     @Override
@@ -1635,17 +1636,17 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void setXP(int value) {
-        this.dataManager.set(XP, this.getLevel() >= IRiftCreature.MAX_LEVEL ? 0 : Math.clamp(value, 0, this.getMaxXP()));
+        this.dataManager.set(XP, this.getLevel() >= RiftGeneralConfig.creatures.maxLevel ? 0 : Math.clamp(value, 0, this.getMaxXP()));
     }
 
     public void addXP(int value) {
-        if (this.world.isRemote || !this.isTamed() || value <= 0 || this.getLevel() >= IRiftCreature.MAX_LEVEL) return;
+        if (this.world.isRemote || !this.isTamed() || value <= 0 || this.getLevel() >= RiftGeneralConfig.creatures.maxLevel) return;
 
         //add xp and see if it results in levelup
         long accumulatedXP = (long) this.getXP() + value;
         boolean leveledUp = false;
         EntityLivingBase owner = this.getOwner();
-        while (this.getLevel() < IRiftCreature.MAX_LEVEL && accumulatedXP >= this.getMaxXP()) {
+        while (this.getLevel() < RiftGeneralConfig.creatures.maxLevel && accumulatedXP >= this.getMaxXP()) {
             accumulatedXP -= this.getMaxXP();
             this.setLevel(this.getLevel() + 1);
             leveledUp = true;

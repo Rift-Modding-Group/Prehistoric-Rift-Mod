@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
+import anightdazingzoroark.prift.server.config.RiftGeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureAcquisitionInfo;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureNBTKeyword;
@@ -59,7 +60,7 @@ public record CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) implements IRi
 
     @Override
     public void setLevel(int value) {
-        CreatureNBTKeyword.LEVEL.setValueInNBT(this.nbtTagCompound, Math.clamp(value, 1, IRiftCreature.MAX_LEVEL));
+        CreatureNBTKeyword.LEVEL.setValueInNBT(this.nbtTagCompound, Math.clamp(value, 1, RiftGeneralConfig.creatures.maxLevel));
     }
 
     @Override
@@ -72,7 +73,7 @@ public record CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) implements IRi
     public void setXP(int value) {
         CreatureNBTKeyword.XP.setValueInNBT(
                 this.nbtTagCompound,
-                this.getLevel() >= IRiftCreature.MAX_LEVEL ? 0 : Math.clamp(value, 0, this.getMaxXP())
+                this.getLevel() >= RiftGeneralConfig.creatures.maxLevel ? 0 : Math.clamp(value, 0, this.getMaxXP())
         );
     }
 
@@ -183,6 +184,7 @@ public record CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) implements IRi
 
     @Override
     public CreatureAcquisitionInfo getAcquisitionInfo() {
+        if (this.nbtTagCompound.isEmpty()) return CreatureAcquisitionInfo.NONE;
         return CreatureNBTKeyword.ACQUISITION_INFO.getValueFromNBT(this.nbtTagCompound);
     }
 

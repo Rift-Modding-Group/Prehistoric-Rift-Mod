@@ -26,6 +26,23 @@ public class RiftGeneralConfig {
                 "Disable at your own risk."
         })
         public boolean creatureKillNoLoot = true;
+
+        @Config.Name("Maximum Creature Level")
+        @Config.Comment({
+                "Maximum level that a creature can reach",
+                "Note that the mod has been scaled for a maximum level of 10",
+                "Anything higher can cause some... issues..."
+        })
+        @Config.RangeInt(min = 1)
+        public int maxLevel = 10;
+
+        @Config.Name("Creature Level-Up Factor")
+        @Config.Comment({
+                "Level-Up factor that affects how much xp is required for all creatures",
+                "to level up. Higher values means more XP required"
+        })
+        @Config.RangeInt(min = 1)
+        public int levelUpFactor = 100;
     }
 
     public static class WorldGen {

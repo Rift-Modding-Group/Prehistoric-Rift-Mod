@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.client.hud;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
+import anightdazingzoroark.prift.server.config.RiftGeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.CreatureStorage;
 import anightdazingzoroark.prift.server.entity.creature.IRiftCreature;
@@ -84,7 +85,7 @@ public class PlayerPartyHUD {
 
             float healthPercentage = selectedCreature.getHealth() / selectedCreature.getMaxHealth();
             float staminaPercentage = selectedCreature.getStamina() / selectedCreature.getMaxStamina();
-            float xpPercentage = selectedCreature.getLevel() >= IRiftCreature.MAX_LEVEL
+            float xpPercentage = selectedCreature.getLevel() >= RiftGeneralConfig.creatures.maxLevel
                     ? 0f : (float) selectedCreature.getXP() / selectedCreature.getMaxXP();
             drawStatusBar(informationLeft + 10, informationTop + 13, healthPercentage, 0xFFFF0000);
             drawStatusBar(informationLeft + 10, informationTop + 18, staminaPercentage, 0xFFFFFF00);

@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.api.creature.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
+import anightdazingzoroark.prift.server.config.RiftGeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureAcquisitionInfo;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureNBTKeyword;
@@ -22,8 +23,6 @@ import java.util.UUID;
  * This is more or less a helper interface for creature information.
  * */
 public interface IRiftCreature {
-    int MAX_LEVEL = 10;
-
     default CreatureNBTKeyword<?>[] getNBTKeywords() {
         return new CreatureNBTKeyword[]{
                 CreatureNBTKeyword.CREATURE_TYPE,
@@ -128,7 +127,7 @@ public interface IRiftCreature {
     default int getMaxXP() {
         if (this.getCreatureType() == null || this.getCreatureType().getDomestication() == null) return 0;
         return Math.max(1, (int) Math.round(
-                Math.max(1, this.getLevel()) * 100D / this.getCreatureType().getDomestication().getLevelupRate().getRate()
+                Math.max(1, this.getLevel()) * (double) (RiftGeneralConfig.creatures.levelUpFactor) / this.getCreatureType().getDomestication().getLevelupRate().getRate()
         ));
     }
 }

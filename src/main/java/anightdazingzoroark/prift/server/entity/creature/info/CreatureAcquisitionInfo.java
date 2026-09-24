@@ -11,8 +11,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 public record CreatureAcquisitionInfo(@Nullable AcquisitionMethod acquisitionMethod, long acquisitionTime) {
+    public static final CreatureAcquisitionInfo NONE = new CreatureAcquisitionInfo(null, 0L);
+
     public static CreatureAcquisitionInfo fromNBT(@Nullable NBTTagCompound nbt) {
-        if (nbt == null || nbt.isEmpty()) return new CreatureAcquisitionInfo(null, 0L);
+        if (nbt == null || nbt.isEmpty()) return NONE;
         else {
             byte acquisitionMethodByte = nbt.getByte("AcquisitionMethod");
             AcquisitionMethod acquisitionMethod = acquisitionMethodByte >= 0 && acquisitionMethodByte < AcquisitionMethod.values().length
