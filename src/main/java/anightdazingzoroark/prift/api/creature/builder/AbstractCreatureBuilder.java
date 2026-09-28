@@ -46,7 +46,6 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private boolean canRetreat;
     private int daysUntilAdult = 1;
     private boolean fallCreatesImpact;
-    private boolean cannotBePushed;
     @Nullable
     private CreatureDomesticationBuilder domestication;
     @NotNull
@@ -226,21 +225,6 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     public boolean getFallCreatesImpact() {
         return this.fallCreatesImpact;
-    }
-
-    /**
-     * Make it so this creature cannot be pushed
-     * */
-    public T setCannotBePushed() {
-        this.checkIfLocked();
-
-        this.cannotBePushed = true;
-        return this.getThis();
-    }
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public boolean getCannotBePushed() {
-        return this.cannotBePushed;
     }
 
     /**

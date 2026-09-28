@@ -1018,26 +1018,29 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     /**
      * make sure this creature doesn't get dislocated when pushed
      * */
+    /*
     @Override
     public void applyEntityCollision(Entity entityIn) {
-        if (!this.creatureType.getCannotBePushed()) super.applyEntityCollision(entityIn);
+        if (!this.isLargerThanEntity(entityIn)) super.applyEntityCollision(entityIn);
     }
+     */
 
     /**
      * push other entities
      * */
     @Override
     public void collideWithEntity(Entity entityIn) {
-        if (!this.creatureType.getCannotBePushed()) {
+        if (!this.isLargerThanEntity(entityIn)) {
             super.collideWithEntity(entityIn);
             return;
         }
 
         //special cases where given entity cannot be pushed back
-        if (entityIn == null || entityIn instanceof IProjectile || entityIn instanceof EntityFireball
-                || entityIn.equals(this) || this.isRidingSameEntity(entityIn) || entityIn.noClip
-                || (this.getCreatureMoveHelper().isLeaping() && entityIn.onGround)
-        ) return;
+        if (entityIn instanceof IProjectile || entityIn instanceof EntityFireball || entityIn.equals(this)
+                || this.isRidingSameEntity(entityIn) || entityIn.noClip || (this.getCreatureMoveHelper().isLeaping() && entityIn.onGround)
+        ) {
+            return;
+        }
 
         double dispX = entityIn.posX - this.posX;
         double dispZ = entityIn.posZ - this.posZ;
@@ -1061,6 +1064,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //mark dirty to force push on players
         if (entityIn instanceof EntityPlayer) entityIn.velocityChanged = true;
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private boolean isLargerThanEntity(@Nullable Entity entity) {
+        if (entity == null) return false;
+        float thisVolume = this.width * this.width * this.height;
+        float entityVolume = entity.width * entity.width * entity.height;
+        return thisVolume >= entityVolume;
     }
 
     //-----sound management-----

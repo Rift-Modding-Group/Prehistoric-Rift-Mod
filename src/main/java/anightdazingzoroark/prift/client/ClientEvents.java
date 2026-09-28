@@ -44,10 +44,11 @@ public class ClientEvents {
     }
 
     @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
-    public void usePartyControls(InputEvent.KeyInputEvent event) {
+    public void useKeyInputs(InputEvent.KeyInputEvent event) {
         Minecraft minecraft = Minecraft.getMinecraft();
         if (minecraft.player == null) return;
 
+        //---for party management---
         boolean usedControl = false;
         if (RiftControls.SWITCH_PARTY_MEMBER_UP.isPressed()) {
             RiftMessages.WRAPPER.sendToServer(new RiftPartyActionMessage(RiftPartyActionMessage.Action.SELECT_PREVIOUS));
@@ -64,5 +65,7 @@ public class ClientEvents {
         if (usedControl) {
             minecraft.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1f));
         }
+
+        //---for riding controls---
     }
 }
