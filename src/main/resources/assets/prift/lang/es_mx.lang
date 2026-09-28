@@ -154,7 +154,5 @@ move.creature.flamethrower=Lanzallamas
 move.creature.flamethrower.description=Exhala una corriente continua de fuego hacia un objetivo.
 move.creature.tail_stab=Puñalada de cola
 move.creature.tail_stab.description=Apuñala a un objetivo con las púas de su cola.
-move.creature.tail_sweep=Barrido de cola
-move.creature.tail_sweep.description=Barre con su cola para golpear objetivos cercanos.
 move.creature.plate_fling=Lanzamiento de placa
 move.creature.plate_fling.description=Lanza una de las placas de su lomo hacia un objetivo distante.

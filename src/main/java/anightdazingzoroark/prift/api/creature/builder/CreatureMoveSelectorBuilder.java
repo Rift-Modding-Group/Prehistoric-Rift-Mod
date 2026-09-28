@@ -160,9 +160,15 @@ public class CreatureMoveSelectorBuilder {
     public static class BoundingBoxDetectionRule extends DetectionRule {
         @NotNull
         private final String boundingBoxName;
+        private final boolean useTagName;
 
         public BoundingBoxDetectionRule(@NotNull String boundingBoxName) {
+            this(boundingBoxName, false);
+        }
+
+        public BoundingBoxDetectionRule(@NotNull String boundingBoxName, boolean useTagName) {
             this.boundingBoxName = boundingBoxName;
+            this.useTagName = useTagName;
         }
 
         @Override
@@ -171,11 +177,17 @@ public class CreatureMoveSelectorBuilder {
             if (target instanceof IEntityMultiPart) {
                 for (Entity part : target.getParts()) {
                     if (!(part instanceof MultiPartEntityPart multiPartEntityPart)) continue;
-                    if (user.aabbIntersectsBoundingBox(multiPartEntityPart.getEntityBoundingBox(), this.boundingBoxName)) return true;
+                    if (this.useTagName && user.aabbIntersectsBoundingBoxTag(multiPartEntityPart.getEntityBoundingBox(), this.boundingBoxName)) {
+                        return true;
+                    }
+                    else if (user.aabbIntersectsBoundingBox(multiPartEntityPart.getEntityBoundingBox(), this.boundingBoxName)) {
+                        return true;
+                    }
                 }
             }
 
             //back to entity
+            if (this.useTagName) return user.aabbIntersectsBoundingBoxTag(target.getEntityBoundingBox(), this.boundingBoxName);
             return user.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), this.boundingBoxName);
         }
     }

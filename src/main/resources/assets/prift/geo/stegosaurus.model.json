@@ -29,16 +29,6 @@
 							"size": [16, 26],
 							"collision": false,
 							"tags": ["frontZone"]
-						},
-						"spinHitZone": {
-							"origin": [-24, 0, -24],
-							"size": [48, 24],
-							"collision": false
-						},
-						"tailHitZone": {
-							"origin": [-1, 0, -34],
-							"size": [2, 16],
-							"collision": false
 						}
 					}
 				},
@@ -317,12 +307,6 @@
 							"size": [3.2, 5.6],
 							"collision": true,
 							"tags": ["tail"]
-						},
-						"thagomizerZone": {
-							"origin": [-14, 8.6, 26.5],
-							"size": [28, 22],
-							"collision": false,
-							"tags": ["thagomizer"]
 						}
 					}
 				},

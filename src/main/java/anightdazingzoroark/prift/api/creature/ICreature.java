@@ -46,6 +46,8 @@ public interface ICreature {
 
     boolean aabbIntersectsBoundingBox(@NotNull AxisAlignedBB otherAABB, @NotNull String boundingBoxName);
 
+    boolean aabbIntersectsBoundingBoxTag(@NotNull AxisAlignedBB otherAABB, @NotNull String tagName);
+
     @NotNull
     Vec3d getLocatorWorldPos(@NotNull String name);
 

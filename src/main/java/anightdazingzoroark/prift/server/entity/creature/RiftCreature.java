@@ -763,7 +763,17 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         return aabb.intersects(otherAABB);
     }
 
-    //---ICreature implementations from the api starts here---
+    public boolean aabbIntersectsBoundingBoxTag(@NotNull AxisAlignedBB otherAABB, @NotNull String tagName) {
+        List<AnimatedBoundingBox> boundingBoxesInTag = this.animData.getAnimatedBoundingBoxesByTag().get(tagName);
+        if (boundingBoxesInTag == null) return false;
+        for (AnimatedBoundingBox animatedBoundingBox : boundingBoxesInTag) {
+            AxisAlignedBB aabb = this.animData.getWorldSpaceAABB(animatedBoundingBox.getName());
+            if (aabb != null && aabb.intersects(otherAABB)) return true;
+        }
+        return false;
+    }
+
+    //---misc ICreature implementations from the api starts here---
     @Override
     @NotNull
     public RiftCreatureConfig getCreatureConfig() {
@@ -793,7 +803,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         double entityMidY = entity.posY + entity.height / 2D;
         return this.height / 2D + Math.abs(thisMidY - entityMidY);
     }
-    //---ICreature implementations from the api ends here---
+    //---misc ICreature implementations from the api ends here---
 
     //this gets the scale of the model of the entity
     public float scale() {
@@ -1014,16 +1024,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.leaveHerd();
         super.onRemovedFromWorld();
     }
-
-    /**
-     * make sure this creature doesn't get dislocated when pushed
-     * */
-    /*
-    @Override
-    public void applyEntityCollision(Entity entityIn) {
-        if (!this.isLargerThanEntity(entityIn)) super.applyEntityCollision(entityIn);
-    }
-     */
 
     /**
      * push other entities

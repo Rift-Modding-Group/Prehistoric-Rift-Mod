@@ -306,7 +306,7 @@ public class RiftCreatureRegistry {
                                 .setMoveRule(
                                         new MoveRuleBuilder("bite")
                                                 .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                                                .addDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("jawHitZone"))
+                                                .addDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("frontZone", true))
                                                 .setUseBlockBreak()
                                 )
                                 .setMoveRule(
@@ -385,10 +385,6 @@ public class RiftCreatureRegistry {
                                 .setBasePower(50)
                                 .setAnimNames("tail_stab")
                         )
-                        .addMove("tail_sweep", CreatureMoveCommon.standardMeleeMove.copy()
-                                .setBasePower(30)
-                                .setAnimNames("tail_sweep")
-                        )
                         .addMove("plate_fling", new CreatureMoveBuilder()
                                 //.setStaminaCost(0.12f)
                                 .setPhysical()
@@ -410,18 +406,8 @@ public class RiftCreatureRegistry {
                                 .setMoveRule(
                                         new MoveRuleBuilder("tail_stab")
                                                 .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                                                .addDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("tailHitZone"))
+                                                .addDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("frontZone", true))
                                                 .setUseBlockBreak()
-                                )
-                                .setMoveRule(
-                                        new MoveRuleBuilder("tail_sweep")
-                                                .setPriorityPredicate((creature, target) -> {
-                                                    return (target != null && target.isEntityAlive()
-                                                            && creature.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), "spinHitZone")) ?
-                                                            0 : -1;
-                                                })
-                                                .addDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("spinHitZone"))
-                                                .setDontPathToTarget()
                                 )
                                 .setMoveRule(
                                         new MoveRuleBuilder("plate_fling")

@@ -154,7 +154,5 @@ move.creature.flamethrower=Flamethrower
 move.creature.flamethrower.description=Breathes a sustained stream of fire at a target.
 move.creature.tail_stab=Tail Stab
 move.creature.tail_stab.description=Stabs a target with the spikes on its tail.
-move.creature.tail_sweep=Tail Sweep
-move.creature.tail_sweep.description=Sweeps its tail around to strike nearby targets.
 move.creature.plate_fling=Plate Fling
 move.creature.plate_fling.description=Launches one of its back plates at a distant target.
