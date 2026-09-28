@@ -1,21 +1,44 @@
 package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.server.config.RiftGeneralConfig;
+import anightdazingzoroark.prift.server.entity.ai.RiftAvoidStinkBomb;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.properties.OtherEntityProperties;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.event.ClickEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
+import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 public class ServerEvents {
+    @SubscribeEvent
+    public void addStinkBombGoal(EntityJoinWorldEvent event) {
+        if (event.getWorld().isRemote || !(event.getEntity() instanceof EntityLiving entityLiving)) return;
+
+        OtherEntityProperties otherEntityProperties = OtherEntityProperties.get(entityLiving);
+        if (otherEntityProperties == null || otherEntityProperties.hasStinkBombGoal()) return;
+        entityLiving.tasks.addTask(-1, new RiftAvoidStinkBomb(entityLiving));
+        otherEntityProperties.setHasStinkBombGoal(true);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void preventStinkBombTargeting(LivingSetAttackTargetEvent event) {
+        if (!(event.getEntityLiving() instanceof EntityLiving entityLiving) || event.getTarget() == null) return;
+
+        OtherEntityProperties otherEntityProperties = OtherEntityProperties.get(entityLiving);
+        if (otherEntityProperties != null && otherEntityProperties.isStinkBombed()) event.setNewTarget(null);
+    }
+
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         //make people join le discord

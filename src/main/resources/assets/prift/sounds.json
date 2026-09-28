@@ -808,9 +808,23 @@
   "prift.tranq_bomb.impact": {
     "category": "neutral",
     "sounds": [
-      "prift:entities/projectile/tranq_bomb_impact"
+      "prift:entities/projectile/smoke_bomb_impact"
     ],
     "subtitle": "sounds.subtitle.tranq_bomb_impact"
+  },
+  "prift.stink_bomb.impact": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/projectile/smoke_bomb_impact"
+    ],
+    "subtitle": "sounds.subtitle.stink_bomb_impact"
+  },
+  "prift.poison_bomb.impact": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/projectile/smoke_bomb_impact"
+    ],
+    "subtitle": "sounds.subtitle.poison_bomb_impact"
   },
 
   "prift.semi_manual_machine.reset": {

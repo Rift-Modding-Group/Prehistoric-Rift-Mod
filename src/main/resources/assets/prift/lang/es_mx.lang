@@ -13,9 +13,14 @@ item.smokenut.name=Nuez de humo
 item.smokenut_seeds.name=Semillas de nuez de humo
 item.tranq_bomb.name=Bomba tranquilizante
 item.tranq_bomb.tooltip=Se lanza a criaturas con poca salud para incapacitarlas para tamear. Tiene efectos diferentes con otros mobs.
+item.stink_bomb.name=Bomba fétida
+item.stink_bomb.tooltip=Se lanza a mobs para que se largan.
+item.poison_bomb.name=Bomba venenosa
+item.poison_bomb.tooltip=Se lanza a mobs para que se envenenan.
 
 item.tyrannosaurus_arm.name=Brazo de Tyrannosaurus
 item.stegosaurus_plate.name=Placa de Stegosaurus
+item.tribute_item.tooltip=El/La %s de un/una %s. Un recurso escaso y exclusivo utilizado en recetas especializadas.
 
 itemGroup.prift_items=Items de Prehistoric Rift
 itemGroup.prift_spawn_eggs=Generadores de Prehistoric Rift
@@ -37,6 +42,8 @@ sounds.subtitle.generic_bite_move=Una criatura muerde
 sounds.subtitle.generic_stomp_move=Una criatura pisa fuerte
 sounds.subtitle.generic_tail_move=Una criatura balancea la cola
 sounds.subtitle.tranq_bomb_impact=La bomba tranquilizante estalla
+sounds.subtitle.stink_bomb_impact=La bomba fétida estalla
+sounds.subtitle.poison_bomb_impact=La bomba venenosa estalla
 
 info.level=Nivel %s
 info.owner_name=Dueño: %s

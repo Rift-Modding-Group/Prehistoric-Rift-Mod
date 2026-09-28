@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.message;
 
-import anightdazingzoroark.prift.server.player.PlayerPartyProperties;
+import anightdazingzoroark.prift.server.properties.PlayerPartyProperties;
 import anightdazingzoroark.riftlib.message.RiftLibMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;

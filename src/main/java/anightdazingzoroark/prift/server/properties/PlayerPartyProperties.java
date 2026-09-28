@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.server.player;
+package anightdazingzoroark.prift.server.properties;
 
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.server.entity.creature.CreatureNBT;

@@ -13,7 +13,8 @@ import anightdazingzoroark.prift.server.entity.model.CreatureModel;
 import anightdazingzoroark.prift.server.item.RiftItems;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftPartyActionMessage;
-import anightdazingzoroark.prift.server.player.PlayerPartyProperties;
+import anightdazingzoroark.prift.server.properties.OtherEntityProperties;
+import anightdazingzoroark.prift.server.properties.PlayerPartyProperties;
 import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.prift.server.world.RiftWorldGenerator;
 import anightdazingzoroark.riftlib.model.ServerModelRegistry;
@@ -21,6 +22,7 @@ import anightdazingzoroark.riftlib.message.RiftLibMessageSide;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertySystem.registry.PropertyRegistry;
 import anightdazingzoroark.riftlib.resource.server.RiftLibCacheServer;
 import com.cleanroommc.modularui.factory.GuiManager;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -37,10 +39,17 @@ public class ServerProxy {
     public void preInit(FMLPreInitializationEvent e) {
         registryPrimer = new InternalRegistryPrimer();
 
+        //register properties
         PropertyRegistry.register(
                 PlayerPartyProperties.PROPERTY_NAME,
                 new PropertyRegistry.ClassPropertyPair<>(EntityPlayer.class, PlayerPartyProperties::new)
         );
+        PropertyRegistry.register(
+                OtherEntityProperties.PROPERTY_NAME,
+                new PropertyRegistry.ClassPropertyPair<>(EntityLivingBase.class, OtherEntityProperties::new)
+        );
+
+        //register messages
         RiftMessages.WRAPPER.registerMessage(RiftPartyActionMessage.class, RiftLibMessageSide.SERVER);
 
         //register events

@@ -7,7 +7,7 @@ import anightdazingzoroark.prift.server.entity.creature.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.CreatureStorage;
 import anightdazingzoroark.prift.server.entity.creature.IRiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.player.PlayerPartyProperties;
+import anightdazingzoroark.prift.server.properties.PlayerPartyProperties;
 import anightdazingzoroark.prift.util.RiftUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
