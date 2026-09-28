@@ -31,13 +31,20 @@ public class ClientEvents {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void renderHUD(RenderGameOverlayEvent.Post event) {
+    public void renderPartyHUD(RenderGameOverlayEvent.Text event) {
+        Minecraft minecraft = Minecraft.getMinecraft();
+        if (minecraft.player == null || minecraft.gameSettings.hideGUI) return;
+
+        PlayerPartyHUD.renderPlayerParty(minecraft, event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight());
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void renderTameProgressHUD(RenderGameOverlayEvent.Post event) {
         if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) return;
 
         Minecraft minecraft = Minecraft.getMinecraft();
         if (minecraft.player == null || minecraft.gameSettings.hideGUI) return;
 
-        PlayerPartyHUD.renderPlayerParty(minecraft, event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight());
         if (minecraft.objectMouseOver != null) {
             TameProgressHUD.renderTamingProgress(minecraft, event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight());
         }
