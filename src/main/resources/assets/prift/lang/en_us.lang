@@ -54,9 +54,16 @@ info.tame_targeting.aggressive.description=Attack valid targets on sight.
 info.tame_targeting.passive=Passive
 info.tame_targeting.passive.description=Never attack automatically.
 
-key.prift.switch_party_mem_up=Select previous party member
-key.prift.switch_party_mem_down=Select next party member
-key.prift.quick_summon_dismiss=Summon or dismiss selected party member
+key.prift.switch_party_mem_up=Previous party member
+key.prift.switch_party_mem_down=Next party member
+key.prift.quick_summon_dismiss=Summon/Dismiss selected party member
+key.prift.toggle_riding_move_hotbar=Switch between item and creature move hotbars
+
+hud.prift.riding.toggle_hotbar=Moves / Items
+hud.prift.riding.select_move=Select move
+hud.prift.riding.use_move=Use move
+hud.prift.riding.charge_move=Hold to charge
+hud.prift.riding.jump=Leap
 
 party.warning.party_full=Your party is full! This creature will remain outside your party.
 party.warning.cannot_summon=This creature cannot be summoned at your location!

@@ -16,7 +16,7 @@ public class RiftDataSerializers {
     public static final DataSerializer<CreatureMoveStorage> CREATURE_MOVE_STORAGE = new DataSerializer<CreatureMoveStorage>() {
         @Override
         public void write(PacketBuffer buf, CreatureMoveStorage value) {
-            NBTTagCompound nbtTagCompound = value.getAsNBT();
+            NBTTagCompound nbtTagCompound = value.getAsSyncNBT();
             ByteBufUtils.writeTag(buf, nbtTagCompound);
         }
 
@@ -25,7 +25,7 @@ public class RiftDataSerializers {
             CreatureMoveStorage toReturn = new CreatureMoveStorage();
             NBTTagCompound nbtTagCompound = ByteBufUtils.readTag(buf);
             if (nbtTagCompound == null) return toReturn;
-            toReturn.readFromNBT(nbtTagCompound);
+            toReturn.readFromSyncNBT(nbtTagCompound);
             return toReturn;
         }
 

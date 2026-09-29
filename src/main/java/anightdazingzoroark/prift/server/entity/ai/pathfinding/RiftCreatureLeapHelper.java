@@ -2,9 +2,11 @@ package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
+import anightdazingzoroark.prift.api.util.MathUtil;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.WalkNodeProcessor;
+import net.minecraft.entity.MoverType;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -15,7 +17,10 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Everything relating to managing a creature's ability to leap happens here
  * */
+@SuppressWarnings("SuspiciousNameCombination")
 public class RiftCreatureLeapHelper {
+    public static final int MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS = 20;
+    public static final int MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS = MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS * 2;
     private static final double GRAVITY = 0.08D; //wherever this came from, we will never know....
     private static final double VERTICAL_DRAG = 0.98D;
     private static final double LEAP_CLEARANCE = 0.25D;
@@ -41,10 +46,15 @@ public class RiftCreatureLeapHelper {
     private double leapTargetX;
     private double leapTargetY;
     private double leapTargetZ;
+    private double leapStartX;
     private double leapStartY;
+    private double leapStartZ;
     private float leapYaw;
     private boolean verticalLeap;
     private boolean clearedVerticalObstacle;
+    private boolean riddenLeap;
+    private int riddenLeapDurationTicks;
+    private double riddenLeapHeight;
 
     public RiftCreatureLeapHelper(@NotNull RiftCreatureMoveHelperBase moveHelper, @NotNull RiftCreature creature) {
         this.moveHelper = moveHelper;
@@ -92,6 +102,7 @@ public class RiftCreatureLeapHelper {
         this.verticalLeap = targetHeight > 1E-3D;
         this.leapStarted = false;
         this.clearedVerticalObstacle = false;
+        this.riddenLeap = false;
         this.leapTicks = 0;
         double upwardMotion = this.upwardVelocityForHeight(navigation.getLeapHeight() + LEAP_CLEARANCE);
         if (!this.hasClearLeapPath(upwardMotion)) {
@@ -113,6 +124,62 @@ public class RiftCreatureLeapHelper {
     }
 
     /**
+     * Starts a rider-controlled leap with the charge accumulated while the
+     * rider held the jump key.
+     * */
+    public boolean startRiddenLeap(float yaw, boolean movingForward, int chargeTicks) {
+        CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
+        float leapStaminaConsumption = MoveResult.LEAP.staminaConsumption();
+        if (this.isLeaping() || !navigation.getCanLeap() || !this.creature.onGround
+                || this.creature.bodyTouchingLiquid()
+                || !this.creature.canUseStamina(leapStaminaConsumption)
+                || !this.creature.useStamina(leapStaminaConsumption)
+        ) {
+            return false;
+        }
+
+        int clampedChargeTicks = Math.clamp(chargeTicks, 1, MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS);
+        double chargedLeapHeight = MathUtil.slopeResult(
+                clampedChargeTicks, true, 1, MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS, 1D, navigation.getLeapHeight()
+        );
+        double upwardMotion = this.upwardVelocityForHeight(chargedLeapHeight);
+        double yawRadians = Math.toRadians(yaw);
+        double leapDistance = MathUtil.slopeResult(
+                clampedChargeTicks, true, 1, MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS,
+                navigation.getLeapDistance() / navigation.getLeapHeight(), navigation.getLeapDistance()
+        );
+        this.leapStartX = this.creature.posX;
+        this.leapStartY = this.creature.posY;
+        this.leapStartZ = this.creature.posZ;
+        this.leapTargetX = this.creature.posX - Math.sin(yawRadians) * (movingForward ? leapDistance : 0D);
+        this.leapTargetY = this.creature.posY;
+        this.leapTargetZ = this.creature.posZ + Math.cos(yawRadians) * (movingForward ? leapDistance : 0D);
+        this.leapObstacleHeight = 0D;
+        this.leapYaw = yaw;
+        this.verticalLeap = false;
+        this.clearedVerticalObstacle = true;
+        this.riddenLeap = true;
+        this.riddenLeapDurationTicks = Math.max(2, this.ticksAboveHeight(upwardMotion, 0D));
+        if (this.riddenLeapDurationTicks % 2 != 0) this.riddenLeapDurationTicks++;
+        this.riddenLeapHeight = chargedLeapHeight;
+        this.leapStarted = true;
+        this.walkingBeforeLeapTicks = 0;
+        this.leapTicks = 0;
+        this.moveHelper.creatureAction = RiftCreatureMoveHelperBase.CreatureAction.LEAP;
+        this.creature.motionX = 0D;
+        this.creature.motionY = 0D;
+        this.creature.motionZ = 0D;
+        this.creature.fallDistance = 0f;
+        this.creature.isAirBorne = true;
+        this.creature.velocityChanged = true;
+        this.creature.getCreaturePathNavigate().clearPath();
+        this.creature.setSprinting(false);
+        this.moveHelper.stopWalkingControls();
+        ForgeHooks.onLivingJump(this.creature);
+        return true;
+    }
+
+    /**
      * copy another leap helper
      * */
     public void read(RiftCreatureLeapHelper that) {
@@ -125,10 +192,15 @@ public class RiftCreatureLeapHelper {
         this.leapTargetX = that.leapTargetX;
         this.leapTargetY = that.leapTargetY;
         this.leapTargetZ = that.leapTargetZ;
+        this.leapStartX = that.leapStartX;
         this.leapStartY = that.leapStartY;
+        this.leapStartZ = that.leapStartZ;
         this.leapYaw = that.leapYaw;
         this.verticalLeap = that.verticalLeap;
         this.clearedVerticalObstacle = that.clearedVerticalObstacle;
+        this.riddenLeap = that.riddenLeap;
+        this.riddenLeapDurationTicks = that.riddenLeapDurationTicks;
+        this.riddenLeapHeight = that.riddenLeapHeight;
     }
 
     /**
@@ -237,6 +309,7 @@ public class RiftCreatureLeapHelper {
      * Keeps the creature aimed and moving through the rest of its leap.
      * */
     public void continueLeap() {
+        if (this.riddenLeap) return;
         if (this.creature.bodyTouchingLiquid()) {
             this.cancelLeap();
             return;
@@ -272,11 +345,59 @@ public class RiftCreatureLeapHelper {
         }
         this.leapTicks++;
 
-        if (this.leapTicks > 80 || this.leapTicks > 1 && this.creature.onGround) {
+        if (this.leapTicks > 80 || this.leapTicks > 1
+                && (this.creature.onGround || this.creature.collidedVertically && this.creature.motionY <= 0D)) {
             this.creature.fallDistance = 0F;
             this.moveHelper.creatureAction = RiftCreatureMoveHelperBase.CreatureAction.WAIT;
             this.leapStarted = false;
             this.leapTicks = 0;
+        }
+    }
+
+    public boolean isRiddenLeap() {
+        return this.riddenLeap && this.isLeaping();
+    }
+
+    /**
+     * Moves a ridden creature through one collision-aware step of its charged leap.
+     * Ridden travel calls this directly so ordinary movement drag cannot shorten the arc.
+     * */
+    public void advanceRiddenLeap() {
+        if (!this.isRiddenLeap()) return;
+        if (this.creature.bodyTouchingLiquid() || this.leapTicks >= this.riddenLeapDurationTicks) {
+            this.cancelLeap();
+            this.creature.motionX = 0D;
+            this.creature.motionY = 0D;
+            this.creature.motionZ = 0D;
+            return;
+        }
+
+        this.faceLeapTarget();
+        this.moveHelper.stopWalkingControls();
+        int nextLeapTick = this.leapTicks + 1;
+        double progress = MathUtil.slopeResult(
+                nextLeapTick, true, 0D, this.riddenLeapDurationTicks, 0D, 1D
+        );
+        double nextX = MathUtil.slopeResult(progress, true, 0D, 1D, this.leapStartX, this.leapTargetX);
+        double nextY = this.leapStartY + 4D * this.riddenLeapHeight * progress * (1D - progress);
+        double nextZ = MathUtil.slopeResult(progress, true, 0D, 1D, this.leapStartZ, this.leapTargetZ);
+        this.creature.motionX = nextX - this.creature.posX;
+        this.creature.motionY = nextY - this.creature.posY;
+        this.creature.motionZ = nextZ - this.creature.posZ;
+        this.creature.move(MoverType.SELF, this.creature.motionX, this.creature.motionY, this.creature.motionZ);
+        this.creature.fallDistance = 0F;
+        this.creature.isAirBorne = true;
+        this.creature.velocityChanged = true;
+        this.leapTicks = nextLeapTick;
+
+        boolean movementBlocked = Math.abs(this.creature.posX - nextX) > 1E-4D
+                || Math.abs(this.creature.posY - nextY) > 1E-4D
+                || Math.abs(this.creature.posZ - nextZ) > 1E-4D;
+        if (movementBlocked || this.leapTicks >= this.riddenLeapDurationTicks) {
+            this.cancelLeap();
+            this.creature.motionX = 0D;
+            this.creature.motionY = 0D;
+            this.creature.motionZ = 0D;
         }
     }
 
@@ -304,6 +425,7 @@ public class RiftCreatureLeapHelper {
         this.moveHelper.creatureAction = RiftCreatureMoveHelperBase.CreatureAction.WAIT;
         this.resetDelay();
         this.leapStarted = false;
+        this.riddenLeap = false;
         this.leapTicks = 0;
     }
 

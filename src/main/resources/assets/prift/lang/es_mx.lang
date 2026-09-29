@@ -56,11 +56,18 @@ info.tame_targeting.aggressive.description=Ataca objetivos válidos al verlos.
 info.tame_targeting.passive=Pasivo
 info.tame_targeting.passive.description=Nunca ataca automáticamente.
 
-key.prift.switch_party_mem_up=Seleccionar la criatura anterior del grupo
-key.prift.switch_party_mem_down=Seleccionar la criatura siguiente del grupo
-key.prift.quick_summon_dismiss=Invocar o retirar la criatura seleccionada
+key.prift.switch_party_mem_up=Criatura anterior del equipo
+key.prift.switch_party_mem_down=Criatura siguiente del equipo
+key.prift.quick_summon_dismiss=Invocar/Retirar la criatura seleccionada
+key.prift.toggle_riding_move_hotbar=Cambiar entre las barras de objetos y movimientos
 
-party.warning.party_full=¡Tu grupo está lleno! Esta criatura permanecerá fuera del grupo.
+hud.prift.riding.toggle_hotbar=Movimientos / Objetos
+hud.prift.riding.select_move=Seleccionar movimiento
+hud.prift.riding.use_move=Usar movimiento
+hud.prift.riding.charge_move=Mantener para cargar
+hud.prift.riding.jump=Brincar
+
+party.warning.party_full=¡Tu equipo está lleno! Esta criatura permanecerá fuera del equipo.
 party.warning.cannot_summon=¡Esta criatura no se puede invocar en tu ubicación!
 party.warning.cannot_summon_dead=¡Esta criatura está muerta y no se puede invocar!
 party.warning.summon_success=Criatura invocada correctamente

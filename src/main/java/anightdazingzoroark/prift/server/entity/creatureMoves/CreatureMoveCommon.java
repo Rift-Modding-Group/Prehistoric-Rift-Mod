@@ -12,6 +12,6 @@ public class CreatureMoveCommon {
             .setPhysical()
             .setRequireFindTargetToUse()
             .setOnMoveHitEffect(creature -> {
-                creature.attackEntityAsMob(creature.getAttackTarget());
+                if (creature.getAttackTarget() != null) creature.attackEntityAsMob(creature.getAttackTarget());
             });
 }
