@@ -32,9 +32,16 @@ public class ServerEvents {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void preventStinkBombTargeting(LivingSetAttackTargetEvent event) {
+    public void setAttackTargeting(LivingSetAttackTargetEvent event) {
         if (!(event.getEntityLiving() instanceof EntityLiving entityLiving) || event.getTarget() == null) return;
 
+        //make sure that when a player is riding, entities that would attack it will
+        //be redirected to the creature it is riding on
+        if (event.getTarget() instanceof EntityPlayer player && player.getRidingEntity() instanceof RiftCreature riddenCreature) {
+            event.setNewTarget(riddenCreature);
+        }
+
+        //make sure stink bombing clears targets
         OtherEntityProperties otherEntityProperties = OtherEntityProperties.get(entityLiving);
         if (otherEntityProperties != null && otherEntityProperties.isStinkBombed()) event.setNewTarget(null);
     }
@@ -52,7 +59,9 @@ public class ServerEvents {
     @SubscribeEvent
     public void livingDropsEvent(LivingDropsEvent event) {
         //to reduce potential lag, mobs killed by wild creatures will not drop items
-        if (event.getSource().getTrueSource() instanceof RiftCreature && RiftGeneralConfig.creatures.creatureKillNoLoot) {
+        if (event.getSource().getTrueSource() instanceof RiftCreature creature
+                && !creature.isTamed() && RiftGeneralConfig.creatures.creatureKillNoLoot
+        ) {
             Entity attacked = event.getEntity();
             boolean tameableFlag = attacked instanceof EntityTameable tameable && tameable.isTamed();
             boolean playerFlag = attacked instanceof EntityPlayer;

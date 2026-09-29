@@ -30,6 +30,8 @@ public interface ICreature {
 
     boolean attackEntityAsMob(Entity entity);
 
+    Entity getControllingPassenger();
+
     boolean isEntityAlive();
 
     boolean isOnGround();
@@ -111,6 +113,8 @@ public interface ICreature {
     float getStamina();
 
     float getMaxStamina();
+
+    void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, float velocity, float inaccuracy);
 
     void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, @NotNull EntityLivingBase target, float velocity, float inaccuracy);
 }

@@ -1281,6 +1281,21 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //-----projectile management-----
     @Override
+    public void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, float velocity, float inaccuracy) {
+        CreatureMoveBuilder moveBuilder = this.getCreatureMoves().getUsableMoveBuilder(this.getCurrentMove());
+        if (moveBuilder == null) return;
+
+        //make modified look vector of length 16 and no y offset
+        Vec3d shootVector = new Vec3d(this.getLookVec().x, 0, this.getLookVec().z);
+        shootVector = shootVector.scale(16);
+
+        //now shoot
+        RiftProjectile projectile = new RiftProjectile(this, projectileBuilder, moveBuilder);
+        projectile.shoot(shootVector.x, 0, shootVector.z, velocity, inaccuracy);
+        this.world.spawnEntity(projectile);
+    }
+
+    @Override
     public void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, @NotNull EntityLivingBase target, float velocity, float inaccuracy) {
         CreatureMoveBuilder moveBuilder = this.getCreatureMoves().getUsableMoveBuilder(this.getCurrentMove());
         if (moveBuilder == null) return;

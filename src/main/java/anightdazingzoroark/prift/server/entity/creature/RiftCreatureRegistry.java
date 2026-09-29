@@ -391,13 +391,23 @@ public class RiftCreatureRegistry {
                                 .setBasePower(30)
                                 .setRequireFindTargetToUse()
                                 .setOnMoveHitEffect(creature -> {
-                                    EntityLivingBase target = creature.getAttackTarget();
-                                    if (target == null || !target.isEntityAlive()) return;
+                                    //when ridden, shoot forward
+                                    if (creature.getControllingPassenger() != null) {
+                                        creature.launchProjectile(
+                                                new ProjectileBuilder().setName("thrown_stegosaurus_plate").setRotateAlongPitch(),
+                                                3f, 0f
+                                        );
+                                    }
+                                    //otherwise, hit target
+                                    else {
+                                        EntityLivingBase target = creature.getAttackTarget();
+                                        if (target == null || !target.isEntityAlive()) return;
 
-                                    creature.launchProjectile(
-                                            new ProjectileBuilder().setName("thrown_stegosaurus_plate").setRotateAlongPitch(),
-                                            target, 3f, 0f
-                                    );
+                                        creature.launchProjectile(
+                                                new ProjectileBuilder().setName("thrown_stegosaurus_plate").setRotateAlongPitch(),
+                                                target, 3f, 0f
+                                        );
+                                    }
                                 })
                                 .setAnimNames("plate_fling")
                         )
