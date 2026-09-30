@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SprintMoveResultTicker extends AbstractMoveResultTicker {
-    private static final int MAX_SPRINT_TICKS = 100;
+    public static final int MAX_SPRINT_TICKS = 60;
 
     private final double destinationX;
     private final double destinationY;
@@ -34,10 +34,7 @@ public class SprintMoveResultTicker extends AbstractMoveResultTicker {
         this.sprintMoveRuleBuilder = sprintMoveRuleBuilder;
 
         EntityLivingBase target = creature.getAttackTarget();
-        this.hasDestination = target != null
-                && target.isEntityAlive()
-                && creature.canUseStamina(MoveResult.SPRINT.staminaConsumption())
-                && creature.getCreaturePathNavigate().hasStraightWalkingPathTo(target);
+        this.hasDestination = target != null && target.isEntityAlive() && creature.getCreaturePathNavigate().hasStraightWalkingPathTo(target);
         this.destinationX = this.hasDestination ? target.posX : creature.posX;
         this.destinationY = this.hasDestination ? target.posY : creature.posY;
         this.destinationZ = this.hasDestination ? target.posZ : creature.posZ;
@@ -51,10 +48,7 @@ public class SprintMoveResultTicker extends AbstractMoveResultTicker {
 
     @Override
     public boolean canContinueTicking() {
-        float staminaDrain = MoveResult.SPRINT.staminaConsumption() / 20f;
-        return this.hasDestination
-                && this.creature.isSprinting()
-                && this.creature.canUseStamina(staminaDrain)
+        return this.hasDestination && this.creature.isSprinting()
                 && this.sprintTicks < MAX_SPRINT_TICKS
                 && !this.creature.collidedHorizontally
                 && !this.hasReachedDestination();

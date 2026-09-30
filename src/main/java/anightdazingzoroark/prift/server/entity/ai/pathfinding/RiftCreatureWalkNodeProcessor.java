@@ -115,7 +115,6 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
             count = this.addWaterSurfaceOptions(pathOptions, count, currentPoint, targetPoint, maxDistance);
         }
         if (!this.allowLeaps || !this.creature.getNavigationBuilder().getCanLeap()
-                || !this.creature.canUseStamina(MoveResult.LEAP.staminaConsumption())
                 || this.creature.bodyTouchingLiquid()
                 || currentPoint.nodeType == PathNodeType.WATER
                 || this.isWaterSurfaceNode(currentPoint.x, currentPoint.y, currentPoint.z)

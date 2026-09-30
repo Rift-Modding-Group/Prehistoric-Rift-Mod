@@ -11,6 +11,7 @@ public class CreatureMoveCommon {
             .setMakesContact()
             .setPhysical()
             .setRequireFindTargetToUse()
+            .setStaminaCost(0.02f)
             .setOnMoveHitEffect(creature -> {
                 if (creature.getAttackTarget() != null) creature.attackEntityAsMob(creature.getAttackTarget());
             });

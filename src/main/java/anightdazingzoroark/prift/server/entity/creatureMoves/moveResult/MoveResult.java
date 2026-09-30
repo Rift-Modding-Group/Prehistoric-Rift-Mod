@@ -13,13 +13,15 @@ import java.util.function.BiFunction;
 public enum MoveResult {
     USE_MOVE(
             (creature, rule) -> new UseMoveMoveResultTicker(asConcreteCreature(creature), rule),
-            (moveBuilder, interval) -> moveBuilder == null ? -1f
-                    : moveBuilder.getStaminaCost() + moveBuilder.getStaminaDrainPerSecond() * interval / 20f,
+            (moveBuilder, interval) -> {
+                if (moveBuilder == null) return -1f;
+                else return moveBuilder.getStaminaCost() + moveBuilder.getStaminaDrainPerSecond() * interval / 20f;
+            },
             5
     ),
     SPRINT(
             (creature, rule) -> new SprintMoveResultTicker(asConcreteCreature(creature), rule),
-            (moveBuilder, interval) -> 0.01f,
+            (moveBuilder, interval) -> 0.1f,
             5
     ),
     LEAP(

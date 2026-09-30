@@ -40,6 +40,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilde
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
+import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.SprintMoveResultTicker;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.config.RiftListsConfig;
 import anightdazingzoroark.prift.server.item.RiftItems;
@@ -134,6 +135,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private static final DataParameter<Byte> NATURE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Integer> AGE_TICKS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Float> STAMINA_CURRENT = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
+    private static final DataParameter<Boolean> STAGGERED = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<CreatureMoveStorage> CREATURE_MOVES = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.CREATURE_MOVE_STORAGE);
     private static final DataParameter<CreatureStatsStorage> CREATURE_STATS = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.CREATURE_STATS_STORAGE);
     private static final DataParameter<String> CREATURE_PHASE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.STRING);
@@ -156,12 +158,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //--server side primitive params and objects--
     //manages a creature's ability to sprint based on whether or not it attacked before
     private int sprintToAttackCooldown;
+    private int riddenSprintTicks;
     //manages a creature's ability to leap based on whether it attacked before
     private int leapToAttackCooldown;
     private int staminaDrainTicks;
     private float pendingStaminaDrain;
-    private int staminaRegenerationDelay;
-    private int staminaRegenerationTicks;
     @Nullable
     private ChargeupPhase riddenMoveChargeupPhase;
     private int riddenMoveChargeupPhaseTicks;
@@ -183,6 +184,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //tiredness of creature from tranq bombs. counts down every 0.5 seconds
     private int tiredness;
     private int tirednessCountdown;
+    private int staminaRegenCountdown;
+    private int inactiveStaminaRegenTicks;
     @NotNull
     private CreatureAcquisitionInfo acquisitionInfo = CreatureAcquisitionInfo.NONE;
     private RiftCreatureEnums.@Nullable SleepCause sleepCause;
@@ -297,6 +300,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.dataManager.register(NATURE, (byte) 0);
         this.dataManager.register(AGE_TICKS, 0);
         this.dataManager.register(STAMINA_CURRENT, 0f);
+        this.dataManager.register(STAGGERED, false);
         this.dataManager.register(CreatureGearInventoryHandler.SADDLED, false);
         this.dataManager.register(CREATURE_MOVES, new CreatureMoveStorage());
         this.dataManager.register(CREATURE_STATS, new CreatureStatsStorage());
@@ -392,7 +396,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             ) {
                 @Override
                 public boolean shouldExecute() {
-                    return !RiftCreature.this.isTamed() && super.shouldExecute();
+                    return !RiftCreature.this.isTamed() && !RiftCreature.this.isStaggered() && super.shouldExecute();
                 }
 
                 @Override
@@ -400,6 +404,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                     return this.closestLivingEntity != null
                             && RiftCreature.this.shouldFleeFrom(this.closestLivingEntity)
                             && !RiftCreature.this.isTamed()
+                            && !RiftCreature.this.isStaggered()
                             && super.shouldContinueExecuting();
                 }
 
@@ -422,34 +427,41 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 @Override
                 public boolean shouldExecute() {
                     return !RiftCreature.this.getIsSleeping() && !RiftCreature.this.isBeingRidden()
-                            && RiftCreature.this.getAttackTarget() == null && super.shouldExecute();
+                            && RiftCreature.this.getAttackTarget() == null && !RiftCreature.this.isStaggered()
+                            && super.shouldExecute();
                 }
 
                 @Override
                 public boolean shouldContinueExecuting() {
                     return !RiftCreature.this.getIsSleeping() && !RiftCreature.this.isBeingRidden()
-                            && RiftCreature.this.getAttackTarget() == null && super.shouldContinueExecuting();
+                            && RiftCreature.this.getAttackTarget() == null && !RiftCreature.this.isStaggered()
+                            && super.shouldContinueExecuting();
                 }
             });
         }
         this.tasks.addTask(4, new EntityAIWander(this, 1D) {
             @Override
             public boolean shouldExecute() {
-                return !RiftCreature.this.isTamed() && RiftCreature.this.canLeadHerdBehavior() && super.shouldExecute();
+                return !RiftCreature.this.isTamed() && !RiftCreature.this.isStaggered() && RiftCreature.this.canLeadHerdBehavior() && super.shouldExecute();
             }
 
             @Override
             public boolean shouldContinueExecuting() {
-                return !RiftCreature.this.isTamed() && RiftCreature.this.canLeadHerdBehavior() && super.shouldContinueExecuting();
+                return !RiftCreature.this.isTamed()  && !RiftCreature.this.isStaggered() && RiftCreature.this.canLeadHerdBehavior() && super.shouldContinueExecuting();
             }
 
             @Override
             public void resetTask() {
-                if (RiftCreature.this.isTamed() || !RiftCreature.this.canLeadHerdBehavior()) RiftCreature.this.getNavigator().clearPath();
+                if (RiftCreature.this.isTamed() || RiftCreature.this.isStaggered() || !RiftCreature.this.canLeadHerdBehavior()) RiftCreature.this.getNavigator().clearPath();
                 super.resetTask();
             }
         });
         this.tasks.addTask(5, new EntityAILookIdle(this) {
+            @Override
+            public boolean shouldExecute() {
+                return super.shouldExecute() && !RiftCreature.this.isStaggered();
+            }
+
             @Override
             public void resetTask() {
                 this.idleTime = 0;
@@ -489,7 +501,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                     this.getNavigator().clearPath();
 
                     if (this.isSprinting()) {
-                        int sprintBasePower = 0;
+                        this.riddenSprintTicks++;
+                        int sprintBasePower = 10;
                         for (CreatureMoveSelectorBuilder.MoveRule moveRule : this.creatureType.getMoveSelector().getMoveRules()) {
                             if (moveRule.moveResult() == CreatureMoveResult.SPRINT
                                     && moveRule.moveRuleBuilder() instanceof CreatureMoveSelectorBuilder.SprintMoveRuleBuilder sprintRule) {
@@ -540,9 +553,17 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
                         boolean hitBreakableBlocks = this.hasBreakableBlocksInFront();
                         if (hitBreakableBlocks) this.breakBlocksInFrontInPathing();
-                        if (hitEntity || hitBreakableBlocks || this.collidedHorizontally) this.setSprinting(false);
+                        if (hitEntity || hitBreakableBlocks || this.collidedHorizontally
+                                || this.riddenSprintTicks >= SprintMoveResultTicker.MAX_SPRINT_TICKS
+                        ) {
+                            this.setSprinting(false);
+                        }
                     }
                 }
+            }
+            if (this.riddenSprintTicks > 0 && (!this.isBeingRidden() || !this.isSprinting())) {
+                this.resetSprintToAttackCooldown();
+                this.riddenSprintTicks = 0;
             }
 
             //sleep and tiredness from tranq bombs
@@ -605,11 +626,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             CreatureMoveBuilder currentMoveBuilder = creatureMoveStorage.getMoveBuilderCurrentMove();
             CreatureMoveChargeupBuilder currentMoveChargeupBuilder = currentMoveBuilder == null
                     ? null : currentMoveBuilder.getMoveChargeupBuilder();
-            ChargeupPhase currentRiddenChargeupPhase = creatureMoveStorage.currentMoveMatches(
-                    this.getCurrentMove(), ChargeupPhase.WINDUP
-            ) ? ChargeupPhase.WINDUP : creatureMoveStorage.currentMoveMatches(
-                    this.getCurrentMove(), ChargeupPhase.PRERELEASING
-            ) ? ChargeupPhase.PRERELEASING : null;
+            ChargeupPhase currentRiddenChargeupPhase;
+            if (creatureMoveStorage.currentMoveMatches(this.getCurrentMove(), ChargeupPhase.WINDUP)) {
+                currentRiddenChargeupPhase = ChargeupPhase.WINDUP;
+            }
+            else if (creatureMoveStorage.currentMoveMatches(this.getCurrentMove(), ChargeupPhase.PRERELEASING)) {
+                currentRiddenChargeupPhase = ChargeupPhase.PRERELEASING;
+            }
+            else currentRiddenChargeupPhase = null;
             if (this.isBeingRidden()
                     && currentMoveChargeupBuilder != null
                     && currentMoveChargeupBuilder.getChargeUpWhileUse()
@@ -633,9 +657,19 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             //-----stamina consumption-----
             float staminaDrainPerSecond = 0f;
             int staminaConsumptionInterval = 0;
-            if (this.isSprinting()) {
-                staminaDrainPerSecond = MoveResult.SPRINT.staminaConsumption();
-                staminaConsumptionInterval = MoveResult.SPRINT.staminaConsumptionInterval();
+
+            //stamina consumption when moving
+            if (this.animData.isMoving()) {
+                if (this.isSprinting()) {
+                    staminaDrainPerSecond = MoveResult.SPRINT.staminaConsumption();
+                    staminaConsumptionInterval = MoveResult.SPRINT.staminaConsumptionInterval();
+                }
+                //stamina consumption when moving normally only applies on tamed creatures
+                //that are being ridden controlled by a player
+                else if (this.isTamed() && this.getControllingPassenger() != null) {
+                    staminaDrainPerSecond = 0.01f;
+                    staminaConsumptionInterval = 60;
+                }
             }
             boolean currentMoveDrainsStamina = currentMoveBuilder != null && !this.getUseBlockBreak()
                     && currentMoveBuilder.getStaminaDrainPerSecond() > 0f
@@ -651,7 +685,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             boolean staminaStoppedCurrentMove = false;
             if (staminaDrainPerSecond > 0f) {
                 float staminaDrainThisTick = staminaDrainPerSecond / 20f;
-                if (this.canUseStamina(staminaDrainThisTick)) {
+                if (this.getStamina() > 0) {
                     this.pendingStaminaDrain += staminaDrainThisTick;
                     this.staminaDrainTicks++;
                     if (this.staminaDrainTicks >= staminaConsumptionInterval) {
@@ -688,24 +722,42 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             }
             if (this.isBeingRidden()) this.dataManager.setDirty(CREATURE_MOVES);
 
-            //-----stamina regen-----
-            if (this.staminaRegenerationDelay > 0) {
-                this.staminaRegenerationDelay--;
-                this.staminaRegenerationTicks = 0;
-            }
-            //fighting and exertion slow down regen
-            else if (this.getStamina() < this.getMaxStamina()) {
-                this.staminaRegenerationTicks++;
-                if (this.staminaRegenerationTicks >= MoveResult.USE_MOVE.staminaConsumptionInterval()) {
-                    boolean rapidlyRegenerating = this.getAttackTarget() == null && this.getCurrentMove().isEmpty()
-                            && !this.isSprinting() && !this.isLeaping();
-                    float staminaRegenerationPerSecond = rapidlyRegenerating ? 0.02f : 0.005f;
-                    float staminaToAdd = this.getStaminaCost(staminaRegenerationPerSecond * MoveResult.USE_MOVE.staminaConsumptionInterval() / 20f);
-                    this.setStamina(this.getStamina() + staminaToAdd);
-                    this.staminaRegenerationTicks = 0;
+            //when out of stamina, creature will go into a staggered pose and recover after 10-20 seconds
+            if (this.getStamina() <= 0f && !this.isStaggered()) {
+                this.setSprinting(false);
+                if (this.getCurrentMove().isEmpty() && !this.isLeaping()) {
+                    this.setStaggered(true);
+                    this.staminaRegenCountdown = this.rand.nextInt(200, 401); //as good as 10-20 seconds
+                    this.getNavigator().clearPath();
+                    this.getCreatureMoveHelper().stopMovement();
+                    this.setUseBlockBreak(false);
+                    this.pendingStaminaDrain = 0f;
+                    this.staminaDrainTicks = 0;
                 }
             }
-            else this.staminaRegenerationTicks = 0;
+
+            //-----stamina regen-----
+            if (this.isStaggered()) {
+                this.inactiveStaminaRegenTicks = 0;
+                this.staminaRegenCountdown--;
+                if (this.staminaRegenCountdown <= 0) {
+                    this.setStamina(this.getMaxStamina());
+                    this.setStaggered(false);
+                }
+            }
+            else if (this.getStamina() < this.getMaxStamina()) {
+                boolean inactive = !this.animData.isMoving() && this.getAttackTarget() == null
+                        && this.getCurrentMove().isEmpty() && !this.isSprinting() && !this.isLeaping();
+                if (inactive) {
+                    this.inactiveStaminaRegenTicks++;
+                    if (this.inactiveStaminaRegenTicks >= 900) {
+                        this.setStamina(this.getMaxStamina());
+                        this.inactiveStaminaRegenTicks = 0;
+                    }
+                }
+                else this.inactiveStaminaRegenTicks = 0;
+            }
+            else this.inactiveStaminaRegenTicks = 0;
 
             //-----eat one useful food item from the inventory every 3 seconds when enabled-----
             if (this.isTamed() && this.getEatFromInventory() && this.ticksExisted % 60 == 0
@@ -1333,7 +1385,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     public void resetSprintToAttackCooldown() {
-        this.sprintToAttackCooldown = this.world.rand.nextInt(5, 11) * 20;
+        this.sprintToAttackCooldown = this.creatureType.getSprintCooldown();
     }
 
     //-----leap to attack management-----
@@ -1404,7 +1456,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     protected boolean isMovementBlocked() {
-        return this.getIsSleeping() || super.isMovementBlocked();
+        return this.getIsSleeping() || this.isStaggered() || super.isMovementBlocked();
     }
 
     //-----taming management-----
@@ -1634,7 +1686,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     public void useMoveFromRider(@NotNull EntityPlayer rider, int moveIndex) {
-        if (this.world.isRemote || this.getControllingPassenger() != rider || this.getIsSleeping() || this.isLeaping()) {
+        if (this.world.isRemote || this.getControllingPassenger() != rider || !this.riderCanControl() || this.isLeaping()) {
             return;
         }
 
@@ -1645,7 +1697,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         ImmutablePair<String, CreatureMoveBuilder> selectedMove = moves.get(moveIndex);
         String moveName = selectedMove.getKey();
         CreatureMoveBuilder moveBuilder = selectedMove.getValue();
-        if (moveStorage.moveCurrentCooldown(moveName) > 0 || !this.canUseStamina(moveBuilder.getStaminaCost())) return;
+        if (moveStorage.moveCurrentCooldown(moveName) > 0) return;
 
         this.rotationYaw = rider.rotationYaw;
         this.prevRotationYaw = rider.rotationYaw;
@@ -1679,11 +1731,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     public void setSprintingFromRider(@NotNull EntityPlayer rider, boolean sprinting) {
         if (this.world.isRemote || this.getControllingPassenger() != rider) return;
-        this.setSprinting(sprinting
-                && !this.getIsSleeping()
-                && !this.isLeaping()
-                && this.getCurrentMove().isEmpty()
-                && this.canUseStamina(MoveResult.SPRINT.staminaConsumption() / 20f));
+        this.setSprinting(sprinting && this.riderCanControl() && !this.isLeaping()
+                && this.getStamina() > 0f && this.canSprintToAttack());
     }
 
     //-----stamina use management-----
@@ -1693,23 +1742,23 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         return nominalMaximumFraction * 100f;
     }
 
-    public boolean canUseStamina(float nominalMaximumFraction) {
-        if (nominalMaximumFraction < 0f) return false;
-        if (nominalMaximumFraction == 0f) return true;
-        float requiredStamina = this.getStaminaCost(nominalMaximumFraction + this.pendingStaminaDrain);
-        return this.getStamina() + 1E-4f >= requiredStamina;
-    }
-
     public boolean useStamina(float nominalMaximumFraction) {
         if (nominalMaximumFraction < 0f) return false;
         float staminaCost = this.getStaminaCost(nominalMaximumFraction);
         if (staminaCost <= 0f) return true;
-        if (this.getStamina() + 1E-4f < staminaCost) return false;
+        if (this.getStamina() <= 0f) return false;
 
         this.setStamina(this.getStamina() - staminaCost);
-        this.staminaRegenerationDelay = 30;
-        this.staminaRegenerationTicks = 0;
+        this.inactiveStaminaRegenTicks = 0;
         return true;
+    }
+
+    public boolean isStaggered() {
+        return this.dataManager.get(STAGGERED);
+    }
+
+    private void setStaggered(boolean value) {
+        this.dataManager.set(STAGGERED, value);
     }
 
     //-----navigation management-----
@@ -1749,9 +1798,65 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.unableToPathToTarget = unableToPathToTarget;
     }
 
+    @Nullable
+    public BlockPos findNearestLandBlock(double detectRange, boolean onlyInFront) {
+        double bodyYPos;
+        if (this instanceof RiftCreatureHitboxed hitboxedCreature) {
+            bodyYPos = hitboxedCreature.getMultiHitboxList().getCollisionHitboxByName("body").posY;
+        }
+        else bodyYPos = this.posY;
+
+        int horizontalDetectBound = (int) Math.ceil(detectRange / 2D);
+        BlockPos closest = null;
+        double closestDistanceSq = Double.MAX_VALUE;
+        BlockPos.MutableBlockPos posToTest = new BlockPos.MutableBlockPos();
+        for (int x = -horizontalDetectBound; x <= horizontalDetectBound; x++) {
+            for (int y = -1; y <= 1; y++) {
+                for (int z = -horizontalDetectBound; z <= horizontalDetectBound; z++) {
+                    posToTest.setPos(this.posX + x, bodyYPos + y, this.posZ + z);
+                    if (this.world.getBlockState(posToTest).getMaterial() != Material.AIR
+                            || !this.world.getBlockState(posToTest.down()).getMaterial().isSolid()) {
+                        continue;
+                    }
+
+                    if (onlyInFront) {
+                        double displacementX = posToTest.getX() - this.posX;
+                        double displacementZ = posToTest.getZ() - this.posZ;
+                        double forwardX = Math.sin(-Math.toRadians(this.rotationYaw));
+                        double forwardZ = Math.cos(Math.toRadians(this.rotationYaw));
+                        if (displacementX * forwardX + displacementZ * forwardZ <= 0D) continue;
+                    }
+
+                    double distanceSq = posToTest.distanceSq(this.posX, this.posY, this.posZ);
+                    if (distanceSq >= closestDistanceSq) continue;
+
+                    AxisAlignedBB shoreBounds = this.getEntityBoundingBox().offset(
+                            posToTest.getX() - this.posX,
+                            posToTest.getY() - this.getEntityBoundingBox().minY,
+                            posToTest.getZ() - this.posZ
+                    );
+                    if (this.world.collidesWithAnyBlock(shoreBounds)) continue;
+
+                    closest = posToTest.toImmutable();
+                    closestDistanceSq = distanceSq;
+                }
+            }
+        }
+        return closest;
+    }
+
     @Override
     public void travel(float strafe, float vertical, float forward) {
-        if (this.isSaddled() && this.isBeingRidden() && this.getControllingPassenger() instanceof EntityPlayer playerController) {
+        //make sure to prematurely stop all horizontal movement on staggering
+        if (this.isStaggered()) {
+            strafe = 0;
+            forward = 0;
+        }
+
+        boolean useStandardTravel = true;
+
+        //move when riding and saddled
+        if (this.isBeingRidden() && this.riderCanControl() && this.getControllingPassenger() instanceof EntityPlayer playerController) {
             strafe = playerController.moveStrafing * 0.5f;
             forward = playerController.moveForward;
             this.stepHeight = 1f;
@@ -1759,30 +1864,31 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             float moveSpeed = (float) Math.max(0, this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
             this.setAIMoveSpeed(moveSpeed);
 
-            if (!this.world.isRemote && this.riddenLeapPoseActive) return;
-
-            if (this.riddenLeapChargeTicks > 0 && !this.getCreatureMoveHelper().isLeaping() && this.onGround) {
-                if (this.riddenLeapDelayTicks >= this.getNavigationBuilder().getLeapDelay()) {
-                    this.rotationYaw = playerController.rotationYaw;
-                    this.rotationYawHead = playerController.rotationYaw;
-                    this.renderYawOffset = playerController.rotationYaw;
-                    boolean startedLeap = this.getCreatureMoveHelper().getLeapHelper().startRiddenLeap(
-                            playerController.rotationYaw,
-                            this.riddenLeapForward,
-                            this.riddenLeapChargeTicks
-                    );
-                    if (startedLeap) {
-                        this.riddenLeapCooldownTicks = RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS;
+            if (!this.world.isRemote && this.riddenLeapPoseActive) useStandardTravel = false;
+            else {
+                if (this.riddenLeapChargeTicks > 0 && !this.getCreatureMoveHelper().isLeaping() && this.onGround) {
+                    if (this.riddenLeapDelayTicks >= this.getNavigationBuilder().getLeapDelay()) {
+                        this.rotationYaw = playerController.rotationYaw;
+                        this.rotationYawHead = playerController.rotationYaw;
+                        this.renderYawOffset = playerController.rotationYaw;
+                        boolean startedLeap = this.getCreatureMoveHelper().getLeapHelper().startRiddenLeap(
+                                playerController.rotationYaw,
+                                this.riddenLeapForward,
+                                this.riddenLeapChargeTicks
+                        );
+                        if (startedLeap) {
+                            this.riddenLeapCooldownTicks = RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS;
+                        }
+                        this.riddenLeapChargeTicks = 0;
+                        this.riddenLeapDelayTicks = 0;
+                        this.riddenLeapForward = false;
                     }
-                    this.riddenLeapChargeTicks = 0;
-                    this.riddenLeapDelayTicks = 0;
-                    this.riddenLeapForward = false;
+                    else this.riddenLeapDelayTicks++;
                 }
-                else this.riddenLeapDelayTicks++;
-            }
-            if (this.getCreatureMoveHelper().getLeapHelper().isRiddenLeap()) {
-                this.getCreatureMoveHelper().getLeapHelper().advanceRiddenLeap();
-                return;
+                if (this.getCreatureMoveHelper().getLeapHelper().isRiddenLeap()) {
+                    this.getCreatureMoveHelper().getLeapHelper().advanceRiddenLeap();
+                    useStandardTravel = false;
+                }
             }
         }
         else if (!this.isBeingRidden()) {
@@ -1790,37 +1896,49 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             this.jumpMovementFactor = 0.02f;
         }
 
-        //get out of 2 block or more deep water pits
-        if (forward > 0) {
-            double highestWaterPos = this.highestWaterPos();
-            if (this.bodyTouchingLiquid() && this.posY >= highestWaterPos - 2 && this.posY <= highestWaterPos + 2) {
-                double xMove = this.width * Math.sin(-Math.toRadians(this.rotationYaw));
-                double zMove = this.width * Math.cos(Math.toRadians(this.rotationYaw));
-                BlockPos ahead = new BlockPos(this.posX + xMove, highestWaterPos, this.posZ + zMove);
-                BlockPos above = ahead.up();
-                if (this.world.getBlockState(ahead).getMaterial().isSolid() && !this.world.getBlockState(above).getMaterial().isSolid() && !this.world.isRemote) {
-                    this.setPosition(this.posX + xMove, highestWaterPos + 1D, this.posZ + zMove);
+        boolean riddenGroundMovement = this.isBeingRidden() && this.riderCanControl()
+                && (forward != 0f || strafe != 0f);
+        if (useStandardTravel) {
+            if (riddenGroundMovement && forward > 0f && this.bodyTouchingLiquid()) {
+                BlockPos shorePos = this.findNearestLandBlock(this.width * 2D, true);
+                if (shorePos != null) {
+                    double displacementX = shorePos.getX() - this.posX;
+                    double displacementZ = shorePos.getZ() - this.posZ;
+                    double shoreTransferDistanceSq = this.width * this.width;
+                    if (displacementX * displacementX + displacementZ * displacementZ <= shoreTransferDistanceSq) {
+                        this.setPosition(shorePos.getX(), shorePos.getY(), shorePos.getZ());
+                    }
                 }
             }
+
+            //float above water
+            if (this.bodyTouchingLiquid()) this.motionY += 0.1D;
+
+            super.travel(strafe, vertical, forward);
+
+            //vanilla stepping can stop at a diagonal one-block corner on wide creatures
+            if (riddenGroundMovement && this.collidedHorizontally && this.onGround && !this.bodyTouchingLiquid()) {
+                this.jump();
+            }
         }
+    }
 
-        //float above water
-        if (this.bodyTouchingLiquid()) this.motionY += 0.1D;
-
-        super.travel(strafe, vertical, forward);
+    public boolean riderCanControl() {
+        return this.getControllingPassenger() != null && this.isSaddled() && !this.getIsSleeping() && !this.isStaggered()
+                && this.getCreatureMoves().getCurrentMove().isEmpty();
     }
 
     public void jumpFromRider(@NotNull EntityPlayer rider, int chargeTicks, boolean movingForward) {
         if (!this.world.isRemote) {
             if (this.getControllingPassenger() != rider
-                    || this.getIsSleeping()
+                    || !this.riderCanControl()
                     || !this.getNavigationBuilder().getCanLeap()
                     || this.bodyTouchingLiquid()
-                    || !this.getCurrentMove().isEmpty()
                     || this.getCreatureMoveHelper().isLeaping()
                     || this.riddenLeapPoseActive
                     || this.riddenLeapCooldownTicks > 0
-                    || !this.useStamina(MoveResult.LEAP.staminaConsumption())) {
+                    || !this.useStamina(MoveResult.LEAP.staminaConsumption())
+            ) {
                 return;
             }
 
@@ -1859,28 +1977,15 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 && !this.getCreatureMoveHelper().isLeaping()
                 && this.riddenLeapChargeTicks <= 0
                 && this.riddenLeapCooldownTicks <= 0
-                && this.canUseStamina(MoveResult.LEAP.staminaConsumption());
+                && !this.isStaggered()
+                && this.getStamina() > 0f;
     }
 
     public int getRiddenLeapCooldownTicks() {
         return this.riddenLeapCooldownTicks;
     }
 
-    private double highestWaterPos() {
-        double maxHeight = this.world.getActualHeight() - this.getPosition().getY();
-        if (this.bodyTouchingLiquid()) {
-            if (!this.world.getBlockState(this.getPosition()).getMaterial().isLiquid()) return 0D;
-            for (int i = 0; i <= maxHeight; i++) {
-                BlockPos pos = this.getPosition().add(0, i, 0);
-                if (!this.world.getBlockState(pos).getMaterial().isLiquid()) return this.getPosition().getY() + i - 1;
-            }
-        }
-        return 0D;
-    }
-
-    /**
-     * nonhitboxed creatures use their main body
-     * */
+    //nonhitboxed creatures use their main body
     public boolean bodyTouchingLiquid() {
         return this.isInWater() || this.isInLava();
     }
@@ -2194,7 +2299,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public boolean canRotateMounted() {
-        return !this.getCreatureMoveHelper().getLeapHelper().isRiddenLeap() && !this.riddenLeapPoseActive;
+        return !this.getCreatureMoveHelper().getLeapHelper().isRiddenLeap() && !this.riddenLeapPoseActive
+                && !this.isSprinting() && !this.isStaggered();
     }
 
     @Override
@@ -2297,6 +2403,13 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 new AnimationControllerState<AnimationDataEntity>("sleeping", 0.2)
                         .addAnimation("animation."+this.creatureType.getName()+".sleep")
                         .addStateTransition("default", animData -> !this.getIsSleeping())
+        ));
+        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "staggered", "default",
+                new AnimationControllerState<AnimationDataEntity>("default", 0.2)
+                        .addStateTransition("staggered", animData -> this.isStaggered()),
+                new AnimationControllerState<AnimationDataEntity>("staggered", 0.2)
+                        .addAnimation("animation."+this.creatureType.getName()+".staggered")
+                        .addStateTransition("default", animData -> !this.isStaggered())
         ));
         if (this.creatureType.getNavigation().getCanLeap()) {
             animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "leaping", "default",

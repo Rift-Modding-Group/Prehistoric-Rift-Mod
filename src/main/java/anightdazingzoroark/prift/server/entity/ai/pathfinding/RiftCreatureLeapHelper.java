@@ -67,10 +67,8 @@ public class RiftCreatureLeapHelper {
     public boolean prepareLeapTo(double x, double y, double z) {
         if (this.isLeaping()) return false;
         CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
-        if (!navigation.getCanLeap()
-                || !this.creature.canUseStamina(MoveResult.LEAP.staminaConsumption())
-                || !this.creature.onGround
-                || this.creature.bodyTouchingLiquid()) {
+        if (!navigation.getCanLeap() || this.creature.getStamina() <= 0f
+                || !this.creature.onGround || this.creature.bodyTouchingLiquid()) {
             this.resetDelay();
             return false;
         }
@@ -129,12 +127,7 @@ public class RiftCreatureLeapHelper {
      * */
     public boolean startRiddenLeap(float yaw, boolean movingForward, int chargeTicks) {
         CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
-        float leapStaminaConsumption = MoveResult.LEAP.staminaConsumption();
-        if (this.isLeaping() || !navigation.getCanLeap() || !this.creature.onGround
-                || this.creature.bodyTouchingLiquid()
-                || !this.creature.canUseStamina(leapStaminaConsumption)
-                || !this.creature.useStamina(leapStaminaConsumption)
-        ) {
+        if (this.isLeaping() || !navigation.getCanLeap() || !this.creature.onGround || this.creature.bodyTouchingLiquid()) {
             return false;
         }
 
@@ -271,10 +264,7 @@ public class RiftCreatureLeapHelper {
             this.cancelLeap();
             return false;
         }
-        float leapStaminaConsumption = MoveResult.LEAP.staminaConsumption();
-        if (!this.creature.canUseStamina(leapStaminaConsumption)
-                || !this.creature.useStamina(leapStaminaConsumption)
-        ) {
+        if (!this.creature.useStamina(MoveResult.LEAP.staminaConsumption())) {
             this.cancelLeap();
             return false;
         }

@@ -46,6 +46,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private boolean canRetreat;
     private int daysUntilAdult = 1;
     private boolean fallCreatesImpact;
+    private int sprintCooldown = 300;
     @Nullable
     private CreatureDomesticationBuilder domestication;
     @NotNull
@@ -225,6 +226,20 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     public boolean getFallCreatesImpact() {
         return this.fallCreatesImpact;
+    }
+
+    /**
+     * Set the cooldown for when this creature sprints, by default its 300 ticks or 15 seconds
+     * */
+    public T setSprintCooldown(int sprintCooldown) {
+        this.checkIfLocked();
+
+        this.sprintCooldown = sprintCooldown;
+        return this.getThis();
+    }
+
+    public int getSprintCooldown() {
+        return this.sprintCooldown;
     }
 
     /**

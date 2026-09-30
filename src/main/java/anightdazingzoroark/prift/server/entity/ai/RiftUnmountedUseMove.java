@@ -29,7 +29,11 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     //checking if a move could be used happens here
     @Override
     public boolean shouldExecute() {
+        //cannot use when ridden cos no
         if (this.creature.isBeingRidden()) return false;
+
+        //cannot execute if staggered
+        if (this.creature.isStaggered()) return false;
 
         //cannot execute if the creature has no moves
         if (!this.creature.getCreatureMoves().isInitialized()) return false;
@@ -54,6 +58,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     @Override
     public boolean shouldContinueExecuting() {
         return !this.creature.isBeingRidden()
+                && !this.creature.isStaggered()
                 && (!this.creature.isLeaping() || this.isUsingLeapAttack())
                 && this.moveResultTicker != null
                 && (!this.moveResultTicker.isOverridableWhileUsed() || this.createMoveRule() != null)

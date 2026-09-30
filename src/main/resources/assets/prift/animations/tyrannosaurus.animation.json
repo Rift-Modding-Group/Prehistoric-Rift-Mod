@@ -3,23 +3,13 @@
 	"animations": {
 		"animation.tyrannosaurus.walk": {
 			"loop": true,
-			"animation_length": 2,
+			"anim_time_update": "query.modified_distance_moved",
 			"bones": {
 				"leftLeg": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.5": [22.5, 0, 0],
-						"1.5": [-22.5, 0, 0],
-						"2.0": [0, 0, 0]
-					}
+					"rotation": ["-math.sin(query.anim_time * 30) * -22.5", 0, 0]
 				},
 				"rightLeg": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.5": [-22.5, 0, 0],
-						"1.5": [22.5, 0, 0],
-						"2.0": [0, 0, 0]
-					}
+					"rotation": ["-math.sin(query.anim_time * 30) * 22.5", 0, 0]
 				}
 			}
 		},
@@ -455,6 +445,45 @@
 				},
 				"rightShin": {
 					"position": [0, 6, -3]
+				}
+			}
+		},
+		"animation.tyrannosaurus.staggered": {
+			"loop": true,
+			"animation_length": 2,
+			"bones": {
+				"body": {
+					"rotation": [7.5, 0, 0]
+				},
+				"tail0": {
+					"rotation": [-5, 0, 0]
+				},
+				"tail1": {
+					"rotation": [-15, 0, 0]
+				},
+				"tail2": {
+					"rotation": [-15, 0, 0]
+				},
+				"neck": {
+					"rotation": {
+						"0.0": [18.1276, -19.6835, -3.6165],
+						"1.0": [13.13, -19.68, -3.62],
+						"2.0": [18.1276, -19.6835, -3.6165]
+					}
+				},
+				"head": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"1.0": [5, 0, 0],
+						"2.0": [0, 0, 0]
+					}
+				},
+				"lowerJaw": {
+					"rotation": {
+						"0.0": [22.5, 0, 0],
+						"1.0": [15, 0, 0],
+						"2.0": [22.5, 0, 0]
+					}
 				}
 			}
 		}

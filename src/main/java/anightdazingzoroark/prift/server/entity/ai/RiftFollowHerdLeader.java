@@ -34,6 +34,9 @@ public class RiftFollowHerdLeader extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
+        //cannot follow when staggered
+        if (this.creature.isStaggered()) return false;
+
         RiftCreature currentLeader = this.creature.getHerdLeader();
         if (this.pathLeader != currentLeader || currentLeader == null || !currentLeader.isEntityAlive()) {
             this.pathLeader = null;
@@ -58,6 +61,7 @@ public class RiftFollowHerdLeader extends EntityAIBase {
         Vec3d currentFollowPosition = this.getFollowPosition();
         double stopDistance = this.getStopDistance();
         return currentLeader != null && currentLeader == this.leader
+                && !this.creature.isStaggered()
                 && currentLeader.isEntityAlive() && this.creature.getAttackTarget() == null
                 && currentFollowPosition != null && !this.isWithinFollowPosition(currentLeader, currentFollowPosition, stopDistance);
     }

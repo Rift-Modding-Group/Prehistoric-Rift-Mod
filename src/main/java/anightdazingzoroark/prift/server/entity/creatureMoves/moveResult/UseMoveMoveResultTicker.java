@@ -87,7 +87,8 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
         boolean useBlockBreakPath = target != null && target.isEntityAlive() && this.canUseBlockBreak
                 && blockBreakNavigation.shouldUseBlockBreakPath(target);
         float requiredStamina = MoveResult.USE_MOVE.staminaConsumption(this.selectedMoveBuilder);
-        if (!this.hasExecutedMove && !useBlockBreakPath && !this.creature.canUseStamina(requiredStamina)) {
+        if (!this.hasExecutedMove && !useBlockBreakPath
+                && requiredStamina > 0f && this.creature.getStamina() <= 0f) {
             this.creature.setUseBlockBreak(false);
             blockBreakNavigation.clearPath();
             return;

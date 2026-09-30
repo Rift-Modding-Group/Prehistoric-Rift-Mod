@@ -120,7 +120,8 @@ public class CreatureMoveStorage {
 
             float requiredStaminaFraction = MoveResult.valueOf(moveRule.moveResult().name()).staminaConsumption(moveBuilder);
             //moves selected to open a planned route are navigation work and remain usable without stamina
-            if (index >= 0 && !moveRule.equals(blockBreakMoveRule) && !creature.canUseStamina(requiredStaminaFraction)) {
+            if (index >= 0 && !moveRule.equals(blockBreakMoveRule)
+                    && requiredStaminaFraction > 0f && creature.getStamina() <= 0f) {
                 index = -1;
             }
 
