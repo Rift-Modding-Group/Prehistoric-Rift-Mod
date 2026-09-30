@@ -43,24 +43,23 @@ public class CreatureMoveSelectorBuilder {
      * Note that its only for when its on its own, when controlled by a rider
      * it can spring to attack when commanded to (by simply sprinting lol)
      * */
-    public CreatureMoveSelectorBuilder setCanSprintToAttack(int priority, double minDist, double maxDist, int basePower) {
+    public CreatureMoveSelectorBuilder setCanSprintToAttack(int priority, double minDist, double maxDist) {
         this.checkIfLocked();
         if (minDist > maxDist) throw new IllegalArgumentException(minDist+" is greater than "+maxDist+"!");
 
-        HorizontalDistanceFromUserDetectionRule detectionRule = new HorizontalDistanceFromUserDetectionRule(minDist, maxDist);
-        SprintMoveRuleBuilder sprintMoveRuleBuilder = new SprintMoveRuleBuilder(basePower);
-        sprintMoveRuleBuilder.setPriorityPredicate((creature, target) -> {
-            if (target == null || !target.isEntityAlive()) return -1;
-            if (!creature.canSprintToAttack() && !creature.atFrustrationThreshold()) return -1;
-            boolean outsideCreatureAABB = !creature.getEntityBoundingBox().grow(1e-5D).intersects(target.getEntityBoundingBox());
-            boolean outsideInnerBound = !creature.getEntityBoundingBox().grow(minDist).grow(1e-5D).intersects(target.getEntityBoundingBox());
-            boolean withinOuterBound = creature.getEntityBoundingBox().grow(maxDist).grow(1e-5D).intersects(target.getEntityBoundingBox());
+        MoveRuleBuilder sprintMoveRuleBuilder = new MoveRuleBuilder("")
+                .setPriorityPredicate((creature, target) -> {
+                    if (target == null || !target.isEntityAlive()) return -1;
+                    if (!creature.canSprintToAttack() && !creature.atFrustrationThreshold()) return -1;
+                    boolean outsideCreatureAABB = !creature.getEntityBoundingBox().grow(1e-5D).intersects(target.getEntityBoundingBox());
+                    boolean outsideInnerBound = !creature.getEntityBoundingBox().grow(minDist).grow(1e-5D).intersects(target.getEntityBoundingBox());
+                    boolean withinOuterBound = creature.getEntityBoundingBox().grow(maxDist).grow(1e-5D).intersects(target.getEntityBoundingBox());
 
-            if (!outsideCreatureAABB || !withinOuterBound || !outsideInnerBound) return -1;
-            return creature.hasStraightWalkingPathTo(target) ? priority : -1;
-        });
-        sprintMoveRuleBuilder.addDetectionRule(detectionRule);
-        sprintMoveRuleBuilder.setUseWhenFrustrated();
+                    if (!outsideCreatureAABB || !withinOuterBound || !outsideInnerBound) return -1;
+                    return creature.hasStraightWalkingPathTo(target) ? priority : -1;
+                })
+                .addDetectionRule(new HorizontalDistanceFromUserDetectionRule(minDist, maxDist))
+                .setUseWhenFrustrated();
         sprintMoveRuleBuilder.lock();
 
         this.moveRules.add(new MoveRule(CreatureMoveResult.SPRINT, sprintMoveRuleBuilder));
@@ -105,22 +104,6 @@ public class CreatureMoveSelectorBuilder {
 
             if (otherResult != CreatureMoveResult.USE_MOVE) return otherResult == this.moveResult;
             else return otherMoveRuleBuilder.getMoveName().equals(this.moveRuleBuilder.getMoveName());
-        }
-    }
-
-    /**
-     * Sprint-specific move rule data defining its damage power.
-     * */
-    public static class SprintMoveRuleBuilder extends MoveRuleBuilder {
-        private final int basePower;
-
-        private SprintMoveRuleBuilder(int basePower) {
-            super("");
-            this.basePower = basePower;
-        }
-
-        public int getBasePower() {
-            return this.basePower;
         }
     }
 

@@ -22,6 +22,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
 
 public class ClientEvents {
@@ -128,6 +129,22 @@ public class ClientEvents {
             RiftMessages.WRAPPER.sendToServer(new RiftRidingActionMessage(
                     RiftRidingActionMessage.Action.SET_SPRINTING, this.selectedRidingMove, keyPressed
             ));
+        }
+    }
+
+    //make sure that on ridden creatures, the sprint key does
+    //not make make the rider sprint when said creature is on sprint cooldown
+    @SubscribeEvent
+    public void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+
+        Minecraft minecraft = Minecraft.getMinecraft();
+        if (minecraft.player != null
+                && minecraft.player.getRidingEntity() instanceof RiftCreature creature
+                && creature.getControllingPassenger() == minecraft.player
+                && !creature.isSprinting()
+        ) {
+            minecraft.player.setSprinting(false);
         }
     }
 

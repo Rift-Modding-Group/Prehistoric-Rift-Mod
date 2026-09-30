@@ -46,6 +46,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private boolean canRetreat;
     private int daysUntilAdult = 1;
     private boolean fallCreatesImpact;
+    private int sprintBasePower = 10;
     private int sprintCooldown = 300;
     @Nullable
     private CreatureDomesticationBuilder domestication;
@@ -226,6 +227,20 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     public boolean getFallCreatesImpact() {
         return this.fallCreatesImpact;
+    }
+
+    /**
+     * Set the base power of this creature's sprint attack. By default it's 10.
+     * */
+    public T setSprintBasePower(int sprintBasePower) {
+        this.checkIfLocked();
+
+        this.sprintBasePower = sprintBasePower;
+        return this.getThis();
+    }
+
+    public int getSprintBasePower() {
+        return this.sprintBasePower;
     }
 
     /**
