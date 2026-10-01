@@ -13,7 +13,9 @@ import java.util.List;
  * Everything relating to managing a creature's sprint happens here.
  */
 public class RiftCreatureSprintHelper {
-    private static final int MAXIMUM_SPRINT_TICKS = 60;
+    public static final int MAXIMUM_SPRINT_TICKS = 60;
+    public static final byte RESET_COOLDOWN_STATUS = 64;
+    public static final byte REMOVE_COOLDOWN_STATUS = 65;
 
     @NotNull
     private final RiftCreature creature;
@@ -118,9 +120,15 @@ public class RiftCreatureSprintHelper {
 
     public void removeCooldown() {
         this.setCooldown(0);
+        if (!this.creature.world.isRemote) {
+            this.creature.world.setEntityState(this.creature, REMOVE_COOLDOWN_STATUS);
+        }
     }
 
     public void resetCooldown() {
         this.setCooldown(this.creature.getCreatureType().getSprintCooldown());
+        if (!this.creature.world.isRemote) {
+            this.creature.world.setEntityState(this.creature, RESET_COOLDOWN_STATUS);
+        }
     }
 }

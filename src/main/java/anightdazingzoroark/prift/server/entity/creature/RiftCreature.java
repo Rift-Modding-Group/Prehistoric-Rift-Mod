@@ -32,7 +32,6 @@ import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureLeapHe
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreaturePathNavigate;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreaturePathNavigate.BlockBreakPlanEntry;
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
-import anightdazingzoroark.prift.api.creature.CreatureMoveResult;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
@@ -474,6 +473,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         //disable default growth system
         if (this.getGrowingAge() < 0) this.setGrowingAge(0);
         if (this.riddenLeapCooldownTicks > 0) this.riddenLeapCooldownTicks--;
+        if (this.sprintHelper.getCooldown() > 0) {
+            this.sprintHelper.setCooldown(this.sprintHelper.getCooldown() - 1);
+        }
 
         //server only operations
         if (!this.world.isRemote) {
@@ -755,10 +757,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 }
             }
 
-            //tick sprinting related stuff
-            if (this.sprintHelper.getCooldown() > 0) {
-                this.sprintHelper.setCooldown(this.sprintHelper.getCooldown() - 1);
-            }
             if (this.leapToAttackCooldown > 0) this.leapToAttackCooldown--;
 
             //tick creature rage
@@ -1337,6 +1335,13 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         return this.sprintHelper;
     }
 
+    @Override
+    public void handleStatusUpdate(byte id) {
+        if (id == RiftCreatureSprintHelper.RESET_COOLDOWN_STATUS) this.sprintHelper.resetCooldown();
+        else if (id == RiftCreatureSprintHelper.REMOVE_COOLDOWN_STATUS) this.sprintHelper.removeCooldown();
+        else super.handleStatusUpdate(id);
+    }
+
     //-----leap to attack management-----
     public boolean canLeapToAttack() {
         return this.leapToAttackCooldown == 0;
@@ -1798,10 +1803,15 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void travel(float strafe, float vertical, float forward) {
-        //make sure to prematurely stop all horizontal movement on staggering
-        if (this.isStaggered()) {
+        boolean riddenMoveActive = this.isBeingRidden() && !this.getCurrentMove().isEmpty();
+
+        //make sure staggering and ridden moves cannot retain walking input
+        if (this.isStaggered() || riddenMoveActive) {
             strafe = 0;
             forward = 0;
+            this.setAIMoveSpeed(0f);
+            this.setMoveForward(0f);
+            this.setMoveStrafing(0f);
         }
 
         boolean useStandardTravel = true;
@@ -2202,11 +2212,13 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Override
     public void writeSpawnData(ByteBuf buffer) {
         ByteBufUtils.writeUTF8String(buffer, this.creatureType.getName());
+        buffer.writeInt(this.sprintHelper.getCooldown());
     }
 
     @Override
     public void readSpawnData(ByteBuf additionalData) {
         this.changeCreatureType(resolveCreatureBuilder(ByteBufUtils.readUTF8String(additionalData)));
+        this.sprintHelper.setCooldown(additionalData.readInt());
     }
 
     //-----dynamic ride pos related methods-----

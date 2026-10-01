@@ -354,7 +354,7 @@ public class RiftCreatureLeapHelper {
      * */
     public void advanceRiddenLeap() {
         if (!this.isRiddenLeap()) return;
-        if (this.creature.bodyTouchingLiquid() || this.leapTicks >= this.riddenLeapDurationTicks) {
+        if (this.creature.bodyTouchingLiquid()) {
             this.cancelLeap();
             this.creature.motionX = 0D;
             this.creature.motionY = 0D;
@@ -366,11 +366,11 @@ public class RiftCreatureLeapHelper {
         this.moveHelper.stopWalkingControls();
         int nextLeapTick = this.leapTicks + 1;
         double progress = MathUtil.slopeResult(
-                nextLeapTick, true, 0D, this.riddenLeapDurationTicks, 0D, 1D
+                nextLeapTick, false, 0D, this.riddenLeapDurationTicks, 0D, 1D
         );
-        double nextX = MathUtil.slopeResult(progress, true, 0D, 1D, this.leapStartX, this.leapTargetX);
+        double nextX = MathUtil.slopeResult(progress, false, 0D, 1D, this.leapStartX, this.leapTargetX);
         double nextY = this.leapStartY + 4D * this.riddenLeapHeight * progress * (1D - progress);
-        double nextZ = MathUtil.slopeResult(progress, true, 0D, 1D, this.leapStartZ, this.leapTargetZ);
+        double nextZ = MathUtil.slopeResult(progress, false, 0D, 1D, this.leapStartZ, this.leapTargetZ);
         this.creature.motionX = nextX - this.creature.posX;
         this.creature.motionY = nextY - this.creature.posY;
         this.creature.motionZ = nextZ - this.creature.posZ;
@@ -383,7 +383,7 @@ public class RiftCreatureLeapHelper {
         boolean movementBlocked = Math.abs(this.creature.posX - nextX) > 1E-4D
                 || Math.abs(this.creature.posY - nextY) > 1E-4D
                 || Math.abs(this.creature.posZ - nextZ) > 1E-4D;
-        if (movementBlocked || this.leapTicks >= this.riddenLeapDurationTicks) {
+        if (movementBlocked || this.creature.onGround && this.leapTicks > 1) {
             this.cancelLeap();
             this.creature.motionX = 0D;
             this.creature.motionY = 0D;

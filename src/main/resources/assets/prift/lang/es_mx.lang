@@ -65,6 +65,7 @@ hud.prift.riding.toggle_hotbar=Movimientos / Objetos
 hud.prift.riding.select_move=Seleccionar movimiento
 hud.prift.riding.use_move=Usar movimiento
 hud.prift.riding.charge_move=Mantener para cargar
+hud.prift.riding.sprint=Correr
 hud.prift.riding.jump=Brincar
 
 party.warning.party_full=¡Tu equipo está lleno! Esta criatura permanecerá fuera del equipo.

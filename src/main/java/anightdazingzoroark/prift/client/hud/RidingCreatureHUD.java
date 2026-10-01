@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.api.util.MathUtil;
 import anightdazingzoroark.prift.client.RiftControls;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureLeapHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreatureSprintHelper;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -20,54 +21,34 @@ import org.lwjgl.input.Keyboard;
 import java.util.List;
 import java.util.Locale;
 
-@SuppressWarnings("SuspiciousNameCombination")
 public class RidingCreatureHUD {
     private static final ResourceLocation CONTROLS_TEXTURE = new ResourceLocation(RiftInitialize.MODID, "textures/ui/controls.png");
-    private static final ResourceLocation HUD_ICONS_TEXTURE = new ResourceLocation(RiftInitialize.MODID, "textures/ui/hud_icons.png");
     private static final int SLOT_SIZE = 20;
     private static final int SLOT_SPACING = 2;
     private static final int CONTROL_ICON_COLUMN_WIDTH = 24;
     private static final float CONTROLS_SCALE = 0.75f;
 
-    public void renderLeapChargeBar(
-            @NotNull Minecraft minecraft, int chargeTicks, int cooldownTicks,
-            int cooldownDisplayChargeTicks, int width, int height
-    ) {
-        int barWidth = 182;
-        int left = width / 2 - barWidth / 2;
-        int top = height - 32;
-        int fillWidth;
-        //chargeup fill
-        if (chargeTicks > 0) {
-            fillWidth = Math.round(MathUtil.slopeResult(
-                    chargeTicks, true, 0, RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS, 0, barWidth
-            ));
-        }
-        //cooldown fill
-        else {
-            double oldChargeFill = MathUtil.slopeResult(
-                    cooldownDisplayChargeTicks, true,
-                    0, RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS,
-                    0, barWidth
-            );
-            fillWidth = (int) Math.round(MathUtil.slopeResult(
-                    cooldownTicks, true,
-                    0, RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS,
-                    0, oldChargeFill
-            ));
-        }
+    private int jumpChargeTicks;
+    private int jumpCooldownTicks;
+    private int jumpCooldownDisplayChargeTicks;
+    private int sprintTicks;
+    private int sprintCooldownTicks;
+    private int sprintCooldownDisplayTicks;
 
-        minecraft.getTextureManager().bindTexture(HUD_ICONS_TEXTURE);
-        GlStateManager.enableBlend();
-        GlStateManager.color(1f, 1f, 1f, 1f);
-        Gui.drawModalRectWithCustomSizedTexture(left, top, 0, 9, barWidth, 5, 256, 256);
-        if (fillWidth > 0) {
-            Gui.drawModalRectWithCustomSizedTexture(left, top, 0, 14, fillWidth, 5, 256, 256);
-        }
-        GlStateManager.disableBlend();
-        minecraft.getTextureManager().bindTexture(Gui.ICONS);
+    //---setters---
+    public void setJumpState(int chargeTicks, int cooldownTicks, int cooldownDisplayChargeTicks) {
+        this.jumpChargeTicks = Math.max(0, chargeTicks);
+        this.jumpCooldownTicks = Math.max(0, cooldownTicks);
+        this.jumpCooldownDisplayChargeTicks = Math.max(0, cooldownDisplayChargeTicks);
     }
 
+    public void setSprintState(int sprintTicks, int cooldownTicks, int cooldownDisplayTicks) {
+        this.sprintTicks = Math.max(0, sprintTicks);
+        this.sprintCooldownTicks = Math.max(0, cooldownTicks);
+        this.sprintCooldownDisplayTicks = Math.max(0, cooldownDisplayTicks);
+    }
+
+    //---render---
     public void renderMoveHotbar(@NotNull Minecraft minecraft, @NotNull RiftCreature creature, int selectedMove, int width, int height) {
         List<ImmutablePair<String, CreatureMoveBuilder>> moves = creature.getCreatureMoves().getUsableMoves();
         if (moves.isEmpty()) return;
@@ -154,14 +135,14 @@ public class RidingCreatureHUD {
         //switch between item hotbar and move hotbar
         int row = 0;
         this.drawControl(
-                minecraft, RiftControls.TOGGLE_RIDING_MOVE_HOTBAR.getKeyCode(),
-                I18n.format("hud.prift.riding.toggle_hotbar"), row++
+                minecraft, moveHotbarActive, RiftControls.TOGGLE_RIDING_MOVE_HOTBAR.getKeyCode(),
+                I18n.format("hud.prift.riding.toggle_hotbar"), 0xFFFFFF, row++
         );
         if (moveHotbarActive) {
             //move selection by scrolling
             this.drawControl(
-                    minecraft, RiftControls.MIDDLE_MOUSE,
-                    I18n.format("hud.prift.riding.select_move"), row++
+                    minecraft, true, RiftControls.MIDDLE_MOUSE,
+                    I18n.format("hud.prift.riding.select_move"), 0xFFFFFF, row++
             );
 
             //move use instruction by left clicking
@@ -173,21 +154,75 @@ public class RidingCreatureHUD {
             }
             else moveUseInstruction = I18n.format("hud.prift.riding.use_move");
             this.drawControl(
-                    minecraft, minecraft.gameSettings.keyBindAttack.getKeyCode(),
-                    moveUseInstruction, row++
+                    minecraft, true, minecraft.gameSettings.keyBindAttack.getKeyCode(),
+                    moveUseInstruction, 0xFFFFFF, row++
             );
         }
+        //ctrl for sprinting
+        int maximumSprintCooldown = Math.max(0, creature.getCreatureType().getSprintCooldown());
+        double sprintProgress;
+        if (this.sprintTicks > 0) {
+            sprintProgress = (double) this.sprintTicks / RiftCreatureSprintHelper.MAXIMUM_SPRINT_TICKS;
+        }
+        else if (this.sprintCooldownTicks > 0 && maximumSprintCooldown > 0) {
+            double sprintDisplayProgress = MathUtil.slopeResult(
+                    this.sprintCooldownDisplayTicks, true,
+                    0, RiftCreatureSprintHelper.MAXIMUM_SPRINT_TICKS,
+                    0D, 1D
+            );
+            sprintProgress = MathUtil.slopeResult(
+                    this.sprintCooldownTicks, true,
+                    0, maximumSprintCooldown,
+                    0D, sprintDisplayProgress
+            );
+        }
+        else sprintProgress = 0D;
+        int sprintColor = this.sprintTicks == 0 && this.sprintCooldownTicks > 0 ? 0xAAAAAA : 0xFFFFFF;
+        this.drawControl(
+                minecraft, moveHotbarActive, minecraft.gameSettings.keyBindSprint.getKeyCode(),
+                I18n.format("hud.prift.riding.sprint"), sprintColor, sprintProgress, row++
+        );
         //spacebar for jumping
         if (creature.getNavigationBuilder().getCanLeap()) {
+            double leapProgress;
+            if (this.jumpChargeTicks > 0) {
+                leapProgress = (double) this.jumpChargeTicks / RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS;
+            }
+            else if (this.jumpCooldownTicks > 0) {
+                double leapDisplayProgress = MathUtil.slopeResult(
+                        this.jumpCooldownDisplayChargeTicks, true,
+                        0, RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS,
+                        0D, 1D
+                );
+                leapProgress = MathUtil.slopeResult(
+                        this.jumpCooldownTicks, true,
+                        0, RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS,
+                        0D, leapDisplayProgress
+                );
+            }
+            else leapProgress = 0D;
+            int leapColor = this.jumpCooldownTicks > 0 ? 0xAAAAAA : 0xFFFFFF;
             this.drawControl(
-                    minecraft, minecraft.gameSettings.keyBindJump.getKeyCode(),
-                    I18n.format("hud.prift.riding.jump"), row
+                    minecraft, moveHotbarActive, minecraft.gameSettings.keyBindJump.getKeyCode(),
+                    I18n.format("hud.prift.riding.jump"), leapColor, leapProgress, row
             );
         }
         GlStateManager.popMatrix();
     }
 
-    private void drawControl(@NotNull Minecraft minecraft, int keyCode, @NotNull String purpose, int row) {
+    //well
+    private void drawControl(
+            @NotNull Minecraft minecraft, boolean moveHotbarActive, int keyCode,
+            @NotNull String purpose, int purposeTextColor, int row
+    ) {
+        this.drawControl(minecraft, moveHotbarActive, keyCode, purpose, purposeTextColor, -1D, row);
+    }
+
+    //universal, with special case param for sprint and leap
+    private void drawControl(
+            @NotNull Minecraft minecraft, boolean moveHotbarActive, int keyCode,
+            @NotNull String purpose, int purposeTextColor, double progress, int row
+    ) {
         //---set uvs from keybind textures---
         int textureX;
         int textureY;
@@ -215,7 +250,7 @@ public class RidingCreatureHUD {
         //---create control guides---
         int iconWidth = keyCode == Keyboard.KEY_SPACE ? 24 : 16;
         int left = 140;
-        int top = 80 + row * 20;
+        int top = (moveHotbarActive ? 60 : 80) + row * 20;
         int iconLeft = left + (CONTROL_ICON_COLUMN_WIDTH - iconWidth) / 2;
         minecraft.getTextureManager().bindTexture(CONTROLS_TEXTURE);
         GlStateManager.enableBlend();
@@ -225,19 +260,41 @@ public class RidingCreatureHUD {
 
         if (textureX == 0 && textureY == 0) {
             String keyName = Keyboard.getKeyName(keyCode);
+
+            //special case for lctrl
+            if (keyCode == Keyboard.KEY_LCONTROL) keyName = "LCtrl";
+            float keyCharScale = (keyCode == Keyboard.KEY_LCONTROL) ? 0.5f : 1f;
+
+            if (keyCharScale < 1f) {
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(keyCharScale, keyCharScale, 1);
+            }
             minecraft.fontRenderer.drawString(
                     keyName,
-                    iconLeft + (iconWidth - minecraft.fontRenderer.getStringWidth(keyName)) / 2f + 0.5f,
-                    top + (16 - minecraft.fontRenderer.FONT_HEIGHT) / 2f + 0.5f,
+                    (iconLeft + (iconWidth - minecraft.fontRenderer.getStringWidth(keyName) * keyCharScale) / 2f + 0.5f) / keyCharScale,
+                    (top + (16 - minecraft.fontRenderer.FONT_HEIGHT * keyCharScale) / 2f + 0.5f) / keyCharScale,
                     0x202020,
                     false
             );
+            if (keyCharScale < 1f) GlStateManager.popMatrix();
         }
-        minecraft.fontRenderer.drawStringWithShadow(
-                purpose,
-                left + CONTROL_ICON_COLUMN_WIDTH + 4,
-                top + (16 - minecraft.fontRenderer.FONT_HEIGHT) / 2f,
-                0xFFFFFF
-        );
+
+        //draw action
+        float actionPosX = left + CONTROL_ICON_COLUMN_WIDTH + 4;
+        float actionPosY = top + (16 - minecraft.fontRenderer.FONT_HEIGHT) / 2f;
+        minecraft.fontRenderer.drawStringWithShadow(purpose, actionPosX, actionPosY, purposeTextColor);
+
+        if (progress >= 0D) {
+            int lineLeft = Math.round(actionPosX);
+            int lineTop = Math.round(actionPosY) + minecraft.fontRenderer.FONT_HEIGHT + 1;
+            int fillWidth = (int) Math.round(MathUtil.slopeResult(
+                    Math.clamp(progress, 0D, 1D), true,
+                    0D, 1D, 0, 80
+            ));
+
+            if (fillWidth > 0) {
+                Gui.drawRect(lineLeft, lineTop, lineLeft + fillWidth, lineTop + 2, 0xFF000000 | purposeTextColor);
+            }
+        }
     }
 }

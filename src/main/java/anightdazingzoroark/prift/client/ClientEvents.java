@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureLeapHe
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiData;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiFactory;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreatureSprintHelper;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftPartyActionMessage;
 import anightdazingzoroark.prift.server.message.RiftRidingActionMessage;
@@ -34,6 +35,8 @@ public class ClientEvents {
     private int selectedRidingMove;
     private int riddenLeapChargeStartTick = -1;
     private int riddenLeapCooldownDisplayChargeTicks;
+    private int riddenSprintStartTick = -1;
+    private int riddenSprintCooldownDisplayTicks;
 
     /**
      * block default inventory opening when riding on a creature
@@ -193,6 +196,43 @@ public class ClientEvents {
 
         RiftCreature riddenCreature = this.updateRidingState(minecraft);
         if (riddenCreature != null) {
+            //exclusively for creatures that jump
+            if (riddenCreature.getNavigationBuilder().getCanLeap()) {
+                int chargeTicks = this.riddenLeapChargeStartTick < 0 ? 0 : Math.clamp(
+                        minecraft.player.ticksExisted - this.riddenLeapChargeStartTick + 1,
+                        0, RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS
+                );
+                if (chargeTicks == 0 && riddenCreature.getRiddenLeapCooldownTicks() == 0) {
+                    this.riddenLeapCooldownDisplayChargeTicks = 0;
+                }
+
+                this.ridingCreatureHUD.setJumpState(
+                        chargeTicks, riddenCreature.getRiddenLeapCooldownTicks(), this.riddenLeapCooldownDisplayChargeTicks
+                );
+            }
+
+            int currentTick = minecraft.player.ticksExisted;
+            if (riddenCreature.isSprinting()) {
+                if (this.riddenSprintStartTick < 0) this.riddenSprintStartTick = currentTick;
+            }
+            else if (this.riddenSprintStartTick >= 0) {
+                this.riddenSprintCooldownDisplayTicks = Math.clamp(
+                        currentTick - this.riddenSprintStartTick + 1,
+                        1, RiftCreatureSprintHelper.MAXIMUM_SPRINT_TICKS
+                );
+                this.riddenSprintStartTick = -1;
+            }
+
+            int sprintTicks = this.riddenSprintStartTick < 0 ? 0 : Math.clamp(
+                    currentTick - this.riddenSprintStartTick + 1,
+                    0, RiftCreatureSprintHelper.MAXIMUM_SPRINT_TICKS
+            );
+            int sprintCooldownTicks = riddenCreature.getSprintHelper().getCooldown();
+            if (sprintTicks == 0 && sprintCooldownTicks == 0) this.riddenSprintCooldownDisplayTicks = 0;
+            this.ridingCreatureHUD.setSprintState(
+                    sprintTicks, sprintCooldownTicks, this.riddenSprintCooldownDisplayTicks
+            );
+
             this.ridingCreatureHUD.renderControls(
                     minecraft, riddenCreature, this.moveHotbarActive, this.selectedRidingMove, width, height
             );
@@ -218,26 +258,7 @@ public class ClientEvents {
                     event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight()
             );
             event.setCanceled(true);
-            return;
         }
-
-        //replace the experience bar with the ridden creature's leap charge bar
-        RiftCreature riddenCreature = this.updateRidingState(minecraft);
-        if (riddenCreature == null || !riddenCreature.getNavigationBuilder().getCanLeap()) return;
-
-        int chargeTicks = this.riddenLeapChargeStartTick < 0 ? 0 : Math.clamp(
-                minecraft.player.ticksExisted - this.riddenLeapChargeStartTick + 1,
-                0, RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS
-        );
-        if (chargeTicks == 0 && riddenCreature.getRiddenLeapCooldownTicks() == 0) {
-            this.riddenLeapCooldownDisplayChargeTicks = 0;
-        }
-        this.ridingCreatureHUD.renderLeapChargeBar(
-                minecraft, chargeTicks, riddenCreature.getRiddenLeapCooldownTicks(),
-                this.riddenLeapCooldownDisplayChargeTicks,
-                event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight()
-        );
-        event.setCanceled(true);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -273,6 +294,10 @@ public class ClientEvents {
             this.selectedRidingMove = 0;
             this.riddenLeapChargeStartTick = -1;
             this.riddenLeapCooldownDisplayChargeTicks = 0;
+            this.riddenSprintStartTick = -1;
+            this.riddenSprintCooldownDisplayTicks = riddenCreature != null
+                    && riddenCreature.getSprintHelper().getCooldown() > 0
+                    ? RiftCreatureSprintHelper.MAXIMUM_SPRINT_TICKS : 0;
         }
 
         if (riddenCreature != null) {
