@@ -1,0 +1,21 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "XM",
+    "# "
+  ],
+  "key": {
+    "X": {
+      "item": "prift:smokenut"
+    },
+    "M": {
+      "item": "minecraft:red_mushroom"
+    },
+    "#": {
+      "item": "minecraft:rotten_flesh"
+    }
+  },
+  "result": {
+    "item": "prift:stink_bomb"
+  }
+}

@@ -1,0 +1,47 @@
+{
+	"format_version": "1.12.0",
+	"riftlibrary:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.thrown_stegosaurus_plate",
+				"texture_width": 16,
+				"texture_height": 16,
+				"visible_bounds_width": 2,
+				"visible_bounds_height": 1.5,
+				"visible_bounds_offset": [0, 0.25, 0]
+			},
+			"bones": [
+				{
+					"name": "body",
+					"pivot": [0.5, 0, -0.5],
+					"cubes": [
+						{"origin": [-0.5, 0, -1.5], "size": [1, 2, 3], "uv": [0, 0]},
+						{"origin": [-0.5, 0.5, -2.5], "size": [1, 1, 1], "uv": [2, 5]}
+					]
+				}
+			]
+		},
+		{
+			"description": {
+				"identifier": "geometry.generic_cube_projectile",
+				"texture_width": 32,
+				"texture_height": 32,
+				"visible_bounds_width": 2,
+				"visible_bounds_height": 1.5,
+				"visible_bounds_offset": [0, 0.25, 0]
+			},
+			"bones": [
+				{
+					"name": "bone",
+					"pivot": [0, 4, 0],
+					"cubes": [
+						{"origin": [-4, 0, -4], "size": [8, 8, 8], "uv": [0, 0]}
+					],
+					"locators": {
+						"center": [0, 4, 0]
+					}
+				}
+			]
+		}
+	]
+}

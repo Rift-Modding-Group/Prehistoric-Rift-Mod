@@ -13,10 +13,11 @@ public class RiftMixinSetTargetAfterHitboxHit {
     @Inject(method = "setLastAttackedEntity", at = @At(value = "HEAD"), cancellable = true)
     public void setLastAttackedEntity(Entity entity, CallbackInfo ci) {
         if (entity instanceof MultiPartEntityPart entityPart) {
+            EntityLivingBase thisEntity = ((EntityLivingBase) (Object)this);
             if (entityPart.parent instanceof EntityLivingBase) {
-                ((EntityLivingBase) (Object)this).lastAttackedEntity = (EntityLivingBase) entityPart.parent;
+                thisEntity.lastAttackedEntity = (EntityLivingBase) entityPart.parent;
             }
-            ((EntityLivingBase) (Object)this).lastAttackedEntityTime = ((EntityLivingBase) (Object)this).ticksExisted;
+            thisEntity.lastAttackedEntityTime = thisEntity.ticksExisted;
             ci.cancel();
         }
     }

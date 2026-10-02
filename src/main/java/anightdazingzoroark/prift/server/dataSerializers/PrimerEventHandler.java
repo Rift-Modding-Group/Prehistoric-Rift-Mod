@@ -9,7 +9,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import java.util.List;
 
 public class PrimerEventHandler {
-    private InternalRegistryPrimer registry;
+    private final InternalRegistryPrimer registry;
 
     public PrimerEventHandler(InternalRegistryPrimer registry) {
         this.registry = registry;
@@ -24,8 +24,6 @@ public class PrimerEventHandler {
 
     private <T extends IForgeRegistryEntry<T>> void fillRegistry(Class<T> registrySuperType, IForgeRegistry<T> forgeRegistry) {
         List<?> entries = registry.getEntries(registrySuperType);
-        if(entries != null) {
-            entries.forEach((e) -> forgeRegistry.register((T) e));
-        }
+        if (entries != null) entries.forEach((e) -> forgeRegistry.register((T) e));
     }
 }

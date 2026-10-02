@@ -1,99 +1,81 @@
 package anightdazingzoroark.prift.server.entity.ai;
 
-import anightdazingzoroark.prift.server.entity.CreatureDeployment;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.util.math.BlockPos;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class RiftGoToLandFromWater extends EntityAIBase {
+    private static final double DETECT_RANGE = 16;
+    @NotNull
     private final RiftCreature creature;
-    private final int detectRange;
-    private final double speed;
+    @Nullable
     protected BlockPos landBlockPos;
 
-    public RiftGoToLandFromWater(RiftCreature creature, int detectRange, double speed) {
+    public RiftGoToLandFromWater(@NotNull RiftCreature creature) {
         this.creature = creature;
-        this.detectRange = detectRange;
-        this.speed = speed;
         this.setMutexBits(1);
     }
 
     @Override
     public boolean shouldExecute() {
-        if (this.creature.isInWater()) {
-            this.landBlockPos = this.nearestLandBlock();
-            if (this.creature.isTamed()) return this.landBlockPos != null
-                    && !this.creature.isSitting()
-                    && this.creature.getDeploymentType() == CreatureDeployment.BASE
-                    && !this.creature.isBeingRidden();
-            else return this.landBlockPos != null;
-        }
-        return false;
+        //cannot search when staggered
+        if (this.creature.isStaggered()) return false;
+
+        //cannot search when ridden
+        if (this.creature.isBeingRidden()) return false;
+
+        //cannot search if can swim, this is a landlubber only ai goal
+        if (this.creature.getCreatureType().getNavigation().getCanSwim()) return false;
+
+        //cannot search if not in water
+        if (!this.creature.bodyTouchingLiquid()) return false;
+
+        this.landBlockPos = this.creature.findNearestLandBlock(DETECT_RANGE, false);
+        return this.landBlockPos != null;
     }
+
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.creature.isInWater() && this.creature.getEnergy() > 0;
+        if (this.creature.isBeingRidden() || this.creature.isStaggered()) return false;
+        BlockPos creaturePos = this.creature.getPosition();
+        return this.creature.world.getBlockState(creaturePos).getMaterial() != Material.AIR
+                || !this.creature.world.getBlockState(creaturePos.down()).getMaterial().isSolid();
     }
 
     @Override
     public void resetTask() {
+        this.creature.getNavigator().clearPath();
+        this.creature.getMoveHelper().setMoveTo(this.creature.posX, this.creature.posY, this.creature.posZ, 0D);
         this.landBlockPos = null;
     }
 
     @Override
     public void updateTask() {
-        this.creature.getLookHelper().setLookPosition(this.landBlockPos.getX(), this.landBlockPos.getY(), this.landBlockPos.getZ(), 30, 30);
-        this.creature.getMoveHelper().setMoveTo(this.landBlockPos.getX(), this.landBlockPos.getY(), this.landBlockPos.getZ(), this.speed);
+        if (this.landBlockPos == null) return;
+
+        double displacementX = this.landBlockPos.getX() - this.creature.posX;
+        double displacementZ = this.landBlockPos.getZ() - this.creature.posZ;
+        double shoreTransferDistanceSq = this.creature.width * this.creature.width;
+        if (displacementX * displacementX + displacementZ * displacementZ <= shoreTransferDistanceSq) {
+            this.creature.setPosition(
+                    this.landBlockPos.getX(),
+                    this.landBlockPos.getY(),
+                    this.landBlockPos.getZ()
+            );
+            this.creature.getNavigator().clearPath();
+            this.creature.getMoveHelper().setMoveTo(
+                    this.creature.posX,
+                    this.creature.posY,
+                    this.creature.posZ,
+                    0D
+            );
+            return;
+        }
+        this.creature.getMoveHelper().setMoveTo(this.landBlockPos.getX(), this.landBlockPos.getY(), this.landBlockPos.getZ(), 1D);
     }
 
-    //look for a land block with sufficient space on top to go to
-    private BlockPos nearestLandBlock() {
-        //get all valid positions
-        List<BlockPos> blockPosList = new ArrayList<>();
-        for (int x = -this.detectRange/2; x <= this.detectRange/2; x++) {
-            for (int y = -this.detectRange/2; y <= this.detectRange/2; y++) {
-                for (int z = -this.detectRange/2; z <= this.detectRange/2; z++) {
-                    BlockPos tempPos = this.creature.getPosition().add(x, y, z);
-                    if (this.creature.world.getBlockState(tempPos).getMaterial() == Material.AIR) {
-                        if (canFitHitbox(tempPos)) blockPosList.add(tempPos);
-                    }
-                }
-            }
-        }
-
-        //calculate the closest one
-        if (!blockPosList.isEmpty()) {
-            BlockPos closest = null;
-            for (BlockPos testPos : blockPosList) {
-                if (closest == null) closest = testPos;
-                else {
-                    if (testPos.distanceSq(this.creature.posX, this.creature.posY, this.creature.posZ) <= closest.distanceSq(this.creature.posX, this.creature.posY, this.creature.posZ)) {
-                        closest = testPos;
-                    }
-                }
-            }
-            return closest;
-        }
-        return null;
-    }
-
-    private boolean canFitHitbox(BlockPos pos) {
-        float width = Math.round(this.creature.width);
-        if (this.creature.world.getBlockState(pos.down()).getMaterial().isSolid()) {
-            for (int x = -Math.round(width/2f); x <= Math.round(width/2f); x++) {
-                for (int y = 0; y <= this.creature.height; y++) {
-                    for (int z = -Math.round(width/2f); z <= Math.round(width/2f); z++) {
-                        if (this.creature.world.getBlockState(pos.add(x, y, z)).getMaterial().isSolid()) return false;
-                    }
-                }
-            }
-            return true;
-        }
-        return false;
-    }
 }

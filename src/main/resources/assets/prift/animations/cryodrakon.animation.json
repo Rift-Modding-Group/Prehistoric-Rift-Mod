@@ -1,0 +1,33 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.cryodrakon.default": {
+			"loop": true,
+			"bones": {
+				"body": {
+					"rotation": [45, 0, 0]
+				},
+				"leftWing": {
+					"rotation": [65.2149, -38.8446, -53.6398],
+					"position": [-1.5, 0, 0]
+				},
+				"leftWingFlap": {
+					"rotation": [0, 120, 0]
+				},
+				"rightWing": {
+					"rotation": [65.2149, 38.8446, 53.6398],
+					"position": [1.5, 0, 0]
+				},
+				"rightWingFlap": {
+					"rotation": [0, -120, 0]
+				},
+				"neck": {
+					"rotation": [-15, 0, 0]
+				},
+				"head": {
+					"rotation": [-30, 0, 0]
+				}
+			}
+		}
+	}
+}

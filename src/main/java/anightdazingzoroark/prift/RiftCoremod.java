@@ -5,7 +5,6 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-@IFMLLoadingPlugin.MCVersion("1.12.2")
 public class RiftCoremod implements IFMLLoadingPlugin {
     @Override
     public @Nullable String[] getASMTransformerClass() {
