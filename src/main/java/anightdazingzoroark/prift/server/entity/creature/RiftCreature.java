@@ -143,6 +143,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private static final DataParameter<Byte> TAME_TARGETING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Byte> DEPLOYMENT_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> EAT_FROM_INVENTORY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> LEAP_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> SPRINT_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
 
     //--custom property values, which can be called and manipulated from a creature builder--
     @NotNull
@@ -155,8 +157,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //--server side primitive params and objects--
     @NotNull
     private final RiftCreatureSprintHelper sprintHelper;
-    //manages a creature's ability to leap based on whether it attacked before
-    private int leapToAttackCooldown;
     private int staminaDrainTicks;
     private float pendingStaminaDrain;
     @Nullable
@@ -164,7 +164,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private int riddenMoveChargeupPhaseTicks;
     private int riddenLeapChargeTicks;
     private int riddenLeapDelayTicks;
-    private int riddenLeapCooldownTicks;
     private boolean riddenLeapForward;
     private boolean riddenLeapPoseActive;
     private boolean riddenLeapPoseAirborne;
@@ -309,6 +308,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.dataManager.register(TAME_TARGETING, (byte) 0);
         this.dataManager.register(DEPLOYMENT_TYPE, (byte) -1);
         this.dataManager.register(EAT_FROM_INVENTORY, false);
+        this.dataManager.register(LEAP_COOLDOWN, 0);
+        this.dataManager.register(SPRINT_COOLDOWN, 0);
     }
 
     //this is gonna be mostly for registering the custom attributes
@@ -472,16 +473,19 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //disable default growth system
         if (this.getGrowingAge() < 0) this.setGrowingAge(0);
-        if (this.riddenLeapCooldownTicks > 0) this.riddenLeapCooldownTicks--;
-        if (this.sprintHelper.getCooldown() > 0) {
-            this.sprintHelper.setCooldown(this.sprintHelper.getCooldown() - 1);
-        }
 
         //server only operations
         if (!this.world.isRemote) {
             if (this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.PARTY_INACTIVE) {
                 this.setDead();
                 return;
+            }
+
+            if (this.getLeapCooldown() > 0) {
+                this.setLeapCooldown(this.getLeapCooldown() - 1);
+            }
+            if (this.getSprintCooldown() > 0) {
+                this.setSprintCooldown(this.getSprintCooldown() - 1);
             }
 
             if (this.riddenLeapPoseActive) {
@@ -756,8 +760,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                     }
                 }
             }
-
-            if (this.leapToAttackCooldown > 0) this.leapToAttackCooldown--;
 
             //tick creature rage
             if (this.getAttackTarget() != null) {
@@ -1326,6 +1328,17 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     //-----sprint management-----
+    @Override
+    public int getSprintCooldown() {
+        return this.dataManager.get(SPRINT_COOLDOWN);
+    }
+
+    @Override
+    public void setSprintCooldown(int value) {
+        this.dataManager.set(SPRINT_COOLDOWN, Math.max(0, value));
+    }
+
+    @Override
     public boolean canSprintToAttack() {
         return this.sprintHelper.canSprint();
     }
@@ -1335,24 +1348,28 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         return this.sprintHelper;
     }
 
+    //-----leap management-----
     @Override
-    public void handleStatusUpdate(byte id) {
-        if (id == RiftCreatureSprintHelper.RESET_COOLDOWN_STATUS) this.sprintHelper.resetCooldown();
-        else if (id == RiftCreatureSprintHelper.REMOVE_COOLDOWN_STATUS) this.sprintHelper.removeCooldown();
-        else super.handleStatusUpdate(id);
+    public int getLeapCooldown() {
+        return this.dataManager.get(LEAP_COOLDOWN);
     }
 
-    //-----leap to attack management-----
+    @Override
+    public void setLeapCooldown(int value) {
+        this.dataManager.set(LEAP_COOLDOWN, Math.max(0, value));
+    }
+
+    @Override
     public boolean canLeapToAttack() {
-        return this.leapToAttackCooldown == 0;
+        return this.getLeapCooldown() == 0;
     }
 
     public void removeLeapToAttackCooldown() {
-        this.leapToAttackCooldown = 0;
+        this.setLeapCooldown(0);
     }
 
     public void resetLeapToAttackCooldown() {
-        this.leapToAttackCooldown = this.world.rand.nextInt(5, 11) * 20;
+        this.setLeapCooldown(this.world.rand.nextInt(5, 11) * 20);
     }
 
     //-----frustration management-----
@@ -1838,7 +1855,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                                 this.riddenLeapChargeTicks
                         );
                         if (startedLeap) {
-                            this.riddenLeapCooldownTicks = RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS;
+                            this.setLeapCooldown(RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS);
                         }
                         this.riddenLeapChargeTicks = 0;
                         this.riddenLeapDelayTicks = 0;
@@ -1896,7 +1913,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                     || this.bodyTouchingLiquid()
                     || this.getCreatureMoveHelper().isLeaping()
                     || this.riddenLeapPoseActive
-                    || this.riddenLeapCooldownTicks > 0
+                    || this.getLeapCooldown() > 0
                     || !this.useStamina(MoveResult.LEAP.staminaConsumption())
             ) {
                 return;
@@ -1908,7 +1925,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             this.riddenLeapPoseActive = true;
             this.riddenLeapPoseAirborne = !this.onGround;
             this.riddenLeapPoseTicks = 0;
-            this.riddenLeapCooldownTicks = RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS;
+            this.setLeapCooldown(RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS);
             this.getCreaturePathNavigate().clearPath();
             this.setSprinting(false);
             this.setLeaping(true);
@@ -1936,13 +1953,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 && this.getCurrentMove().isEmpty()
                 && !this.getCreatureMoveHelper().isLeaping()
                 && this.riddenLeapChargeTicks <= 0
-                && this.riddenLeapCooldownTicks <= 0
+                && this.getLeapCooldown() <= 0
                 && !this.isStaggered()
                 && this.getStamina() > 0f;
-    }
-
-    public int getRiddenLeapCooldownTicks() {
-        return this.riddenLeapCooldownTicks;
     }
 
     //nonhitboxed creatures use their main body
@@ -2132,6 +2145,26 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     @Override
+    public int getInactiveStaminaRegen() {
+        return this.inactiveStaminaRegenTicks;
+    }
+
+    @Override
+    public void setInactiveStaminaRegen(int value) {
+        this.inactiveStaminaRegenTicks = value;
+    }
+
+    @Override
+    public void regenerateStaminaInactive() {
+        if (this.getStamina() >= this.getMaxStamina()) return;
+
+        if (this.inactiveStaminaRegenTicks++ >= MAX_INACTIVITY_STAMINA_REGEN) {
+            this.setStamina(this.getMaxStamina());
+            this.inactiveStaminaRegenTicks = 0;
+        }
+    }
+
+    @Override
     public void onDeath(DamageSource cause) {
         if (!this.world.isRemote && this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.PARTY) {
             this.setDeploymentType(RiftCreatureEnums.CreatureDeployment.PARTY_INACTIVE);
@@ -2212,13 +2245,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Override
     public void writeSpawnData(ByteBuf buffer) {
         ByteBufUtils.writeUTF8String(buffer, this.creatureType.getName());
-        buffer.writeInt(this.sprintHelper.getCooldown());
     }
 
     @Override
     public void readSpawnData(ByteBuf additionalData) {
         this.changeCreatureType(resolveCreatureBuilder(ByteBufUtils.readUTF8String(additionalData)));
-        this.sprintHelper.setCooldown(additionalData.readInt());
     }
 
     //-----dynamic ride pos related methods-----
@@ -2295,7 +2326,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (removedController) {
             this.riddenLeapChargeTicks = 0;
             this.riddenLeapDelayTicks = 0;
-            this.riddenLeapCooldownTicks = 0;
             this.riddenLeapForward = false;
             this.riddenLeapPoseActive = false;
             this.riddenLeapPoseAirborne = false;

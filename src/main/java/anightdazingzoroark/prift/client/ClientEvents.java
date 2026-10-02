@@ -202,12 +202,12 @@ public class ClientEvents {
                         minecraft.player.ticksExisted - this.riddenLeapChargeStartTick + 1,
                         0, RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS
                 );
-                if (chargeTicks == 0 && riddenCreature.getRiddenLeapCooldownTicks() == 0) {
+                if (chargeTicks == 0 && riddenCreature.getLeapCooldown() == 0) {
                     this.riddenLeapCooldownDisplayChargeTicks = 0;
                 }
 
                 this.ridingCreatureHUD.setJumpState(
-                        chargeTicks, riddenCreature.getRiddenLeapCooldownTicks(), this.riddenLeapCooldownDisplayChargeTicks
+                        chargeTicks, riddenCreature.getLeapCooldown(), this.riddenLeapCooldownDisplayChargeTicks
                 );
             }
 
@@ -227,7 +227,7 @@ public class ClientEvents {
                     currentTick - this.riddenSprintStartTick + 1,
                     0, RiftCreatureSprintHelper.MAXIMUM_SPRINT_TICKS
             );
-            int sprintCooldownTicks = riddenCreature.getSprintHelper().getCooldown();
+            int sprintCooldownTicks = riddenCreature.getSprintCooldown();
             if (sprintTicks == 0 && sprintCooldownTicks == 0) this.riddenSprintCooldownDisplayTicks = 0;
             this.ridingCreatureHUD.setSprintState(
                     sprintTicks, sprintCooldownTicks, this.riddenSprintCooldownDisplayTicks
@@ -296,7 +296,7 @@ public class ClientEvents {
             this.riddenLeapCooldownDisplayChargeTicks = 0;
             this.riddenSprintStartTick = -1;
             this.riddenSprintCooldownDisplayTicks = riddenCreature != null
-                    && riddenCreature.getSprintHelper().getCooldown() > 0
+                    && riddenCreature.getSprintCooldown() > 0
                     ? RiftCreatureSprintHelper.MAXIMUM_SPRINT_TICKS : 0;
         }
 

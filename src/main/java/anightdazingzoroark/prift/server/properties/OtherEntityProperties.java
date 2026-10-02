@@ -24,13 +24,16 @@ public class OtherEntityProperties extends AbstractEntityProperties<EntityLiving
     }
 
     @Override
-    protected void registerDefaults(EntityLivingBase entityLivingBase) {
+    protected void registerDefaults(@NotNull EntityLivingBase entityLivingBase) {
         this.register(new BooleanPropertyValue("StinkBombed", false));
         this.register(new DoublePropertyValue("StinkBombX", 0D));
         this.register(new DoublePropertyValue("StinkBombY", 0D));
         this.register(new DoublePropertyValue("StinkBombZ", 0D));
         this.register(new BooleanPropertyValue("HasStinkBombGoal", false), false);
     }
+
+    @Override
+    public void onTickProperty() {}
 
     public boolean isStinkBombed() {
         return this.get("StinkBombed");

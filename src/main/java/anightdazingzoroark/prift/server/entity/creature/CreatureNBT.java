@@ -215,6 +215,52 @@ public record CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) implements IRi
         CreatureNBTKeyword.EAT_FROM_INVENTORY.setValueInNBT(this.nbtTagCompound, value);
     }
 
+    @Override
+    public int getLeapCooldown() {
+        if (this.nbtTagCompound.isEmpty()) return 0;
+        return CreatureNBTKeyword.LEAP_COOLDOWN.getValueFromNBT(this.nbtTagCompound);
+    }
+
+    @Override
+    public void setLeapCooldown(int value) {
+        CreatureNBTKeyword.LEAP_COOLDOWN.setValueInNBT(this.nbtTagCompound, Math.max(0, value));
+    }
+
+    @Override
+    public int getSprintCooldown() {
+        if (this.nbtTagCompound.isEmpty()) return 0;
+        return CreatureNBTKeyword.SPRINT_COOLDOWN.getValueFromNBT(this.nbtTagCompound);
+    }
+
+    @Override
+    public void setSprintCooldown(int value) {
+        CreatureNBTKeyword.SPRINT_COOLDOWN.setValueInNBT(this.nbtTagCompound, Math.max(0, value));
+    }
+
+    @Override
+    public int getInactiveStaminaRegen() {
+        if (this.nbtTagCompound.isEmpty()) return 0;
+        return CreatureNBTKeyword.INACTIVE_STAMINA_REGEN.getValueFromNBT(this.nbtTagCompound);
+    }
+
+    @Override
+    public void setInactiveStaminaRegen(int value) {
+        CreatureNBTKeyword.INACTIVE_STAMINA_REGEN.setValueInNBT(this.nbtTagCompound, value);
+    }
+
+    @Override
+    public void regenerateStaminaInactive() {
+        if (this.nbtTagCompound.isEmpty()) return;
+        if (this.getStamina() >= this.getMaxStamina()) return;
+
+        int inactiveStaminaRegen = this.getInactiveStaminaRegen();
+        if (inactiveStaminaRegen++ >= MAX_INACTIVITY_STAMINA_REGEN) {
+            this.setStamina(this.getMaxStamina());
+            this.setInactiveStaminaRegen(0);
+        }
+        else this.setInactiveStaminaRegen(inactiveStaminaRegen);
+    }
+
     //-----helper nbt code incoming-----
     @Override
     public UUID getUniqueID() {

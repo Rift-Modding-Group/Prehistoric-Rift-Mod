@@ -23,6 +23,8 @@ import java.util.UUID;
  * This is more or less a helper interface for creature information.
  * */
 public interface IRiftCreature {
+    int MAX_INACTIVITY_STAMINA_REGEN = 900;
+
     default CreatureNBTKeyword<?>[] getNBTKeywords() {
         return new CreatureNBTKeyword[]{
                 CreatureNBTKeyword.CREATURE_TYPE,
@@ -38,7 +40,10 @@ public interface IRiftCreature {
                 CreatureNBTKeyword.TAME_TARGETING,
                 CreatureNBTKeyword.ACQUISITION_INFO,
                 CreatureNBTKeyword.DEPLOYMENT_TYPE,
-                CreatureNBTKeyword.EAT_FROM_INVENTORY
+                CreatureNBTKeyword.EAT_FROM_INVENTORY,
+                CreatureNBTKeyword.LEAP_COOLDOWN,
+                CreatureNBTKeyword.SPRINT_COOLDOWN,
+                CreatureNBTKeyword.INACTIVE_STAMINA_REGEN
         };
     }
 
@@ -116,6 +121,12 @@ public interface IRiftCreature {
     void setDeploymentType(@Nullable RiftCreatureEnums.CreatureDeployment value);
     boolean getEatFromInventory();
     void setEatFromInventory(boolean value);
+    int getLeapCooldown();
+    void setLeapCooldown(int value);
+    int getSprintCooldown();
+    void setSprintCooldown(int value);
+    int getInactiveStaminaRegen(); //note: is server only, don't care on client
+    void setInactiveStaminaRegen(int value); //same here
 
     //-----same but these are helpers----
     UUID getUniqueID();
@@ -124,6 +135,7 @@ public interface IRiftCreature {
     boolean hasCustomName();
     String getCustomNameTag();
     void setCustomNameTag(String value);
+    void regenerateStaminaInactive();
     default int getMaxXP() {
         if (this.getCreatureType() == null || this.getCreatureType().getDomestication() == null) return 0;
         return Math.max(1, (int) Math.round(

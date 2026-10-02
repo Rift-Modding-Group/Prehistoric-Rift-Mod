@@ -83,6 +83,21 @@ public class CreatureNBTKeyword<T> {
             IRiftCreature::getEatFromInventory,
             IRiftCreature::setEatFromInventory
     );
+    public static final CreatureNBTKeyword<Integer> LEAP_COOLDOWN = new CreatureNBTKeyword<>(
+            "LeapCooldown", Integer.class,
+            IRiftCreature::getLeapCooldown,
+            IRiftCreature::setLeapCooldown
+    );
+    public static final CreatureNBTKeyword<Integer> SPRINT_COOLDOWN = new CreatureNBTKeyword<>(
+            "SprintCooldown", Integer.class,
+            IRiftCreature::getSprintCooldown,
+            IRiftCreature::setSprintCooldown
+    );
+    public static final CreatureNBTKeyword<Integer> INACTIVE_STAMINA_REGEN = new CreatureNBTKeyword<>(
+            "InactiveStaminaRegen", Integer.class,
+            IRiftCreature::getInactiveStaminaRegen,
+            IRiftCreature::setInactiveStaminaRegen
+    );
 
     //normal class operations here
     private final String name;

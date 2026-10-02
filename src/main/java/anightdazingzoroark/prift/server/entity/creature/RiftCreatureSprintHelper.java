@@ -14,15 +14,12 @@ import java.util.List;
  */
 public class RiftCreatureSprintHelper {
     public static final int MAXIMUM_SPRINT_TICKS = 60;
-    public static final byte RESET_COOLDOWN_STATUS = 64;
-    public static final byte REMOVE_COOLDOWN_STATUS = 65;
 
     @NotNull
     private final RiftCreature creature;
     @NotNull
     private final List<EntityLivingBase> hitEntities = new ArrayList<>();
     private int sprintTicks;
-    private int cooldown;
     private boolean riddenSprint;
 
     public RiftCreatureSprintHelper(@NotNull RiftCreature creature) {
@@ -85,9 +82,7 @@ public class RiftCreatureSprintHelper {
     }
 
     public boolean canContinueSprinting() {
-        return this.creature.isSprinting()
-                && this.sprintTicks < MAXIMUM_SPRINT_TICKS
-                && !this.creature.collidedHorizontally;
+        return this.creature.isSprinting() && this.sprintTicks < MAXIMUM_SPRINT_TICKS && !this.creature.collidedHorizontally;
     }
 
     public void endSprint(boolean startCooldown) {
@@ -107,28 +102,18 @@ public class RiftCreatureSprintHelper {
     }
 
     public boolean canSprint() {
-        return this.cooldown == 0;
-    }
-
-    public int getCooldown() {
-        return this.cooldown;
+        return this.creature.getSprintCooldown() == 0;
     }
 
     public void setCooldown(int cooldown) {
-        this.cooldown = Math.max(0, cooldown);
+        this.creature.setSprintCooldown(cooldown);
     }
 
     public void removeCooldown() {
         this.setCooldown(0);
-        if (!this.creature.world.isRemote) {
-            this.creature.world.setEntityState(this.creature, REMOVE_COOLDOWN_STATUS);
-        }
     }
 
     public void resetCooldown() {
         this.setCooldown(this.creature.getCreatureType().getSprintCooldown());
-        if (!this.creature.world.isRemote) {
-            this.creature.world.setEntityState(this.creature, RESET_COOLDOWN_STATUS);
-        }
     }
 }

@@ -136,13 +136,13 @@ public class RidingCreatureHUD {
         int row = 0;
         this.drawControl(
                 minecraft, moveHotbarActive, RiftControls.TOGGLE_RIDING_MOVE_HOTBAR.getKeyCode(),
-                I18n.format("hud.prift.riding.toggle_hotbar"), 0xFFFFFF, row++
+                I18n.format("hud.prift.riding.toggle_hotbar"), row++
         );
         if (moveHotbarActive) {
             //move selection by scrolling
             this.drawControl(
                     minecraft, true, RiftControls.MIDDLE_MOUSE,
-                    I18n.format("hud.prift.riding.select_move"), 0xFFFFFF, row++
+                    I18n.format("hud.prift.riding.select_move"), row++
             );
 
             //move use instruction by left clicking
@@ -155,7 +155,7 @@ public class RidingCreatureHUD {
             else moveUseInstruction = I18n.format("hud.prift.riding.use_move");
             this.drawControl(
                     minecraft, true, minecraft.gameSettings.keyBindAttack.getKeyCode(),
-                    moveUseInstruction, 0xFFFFFF, row++
+                    moveUseInstruction, row++
             );
         }
         //ctrl for sprinting
@@ -213,9 +213,9 @@ public class RidingCreatureHUD {
     //well
     private void drawControl(
             @NotNull Minecraft minecraft, boolean moveHotbarActive, int keyCode,
-            @NotNull String purpose, int purposeTextColor, int row
+            @NotNull String purpose, int row
     ) {
-        this.drawControl(minecraft, moveHotbarActive, keyCode, purpose, purposeTextColor, -1D, row);
+        this.drawControl(minecraft, moveHotbarActive, keyCode, purpose, 0xFFFFFF, -1D, row);
     }
 
     //universal, with special case param for sprint and leap

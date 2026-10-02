@@ -34,7 +34,7 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
     }
 
     @Override
-    protected void registerDefaults(EntityPlayer entity) {
+    protected void registerDefaults(@NotNull EntityPlayer entity) {
         this.register(new ObjectPropertyValue<>(
                 "Creatures", new CreatureStorage(MAX_SIZE), CreatureStorage.class,
                 CreatureStorage::getAsNBT,
@@ -45,6 +45,34 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
                 }
         ));
         this.register(new IntegerPropertyValue("SelectedPosition", 0));
+    }
+
+    @Override
+    public void onTickProperty() {
+        //tick inactive party members to regenerate stamina and recharge movement cooldowns
+        if (this.getEntityHolder().world.isRemote) return;
+
+        CreatureStorage creatureStorage = this.getCreatureStorage();
+        for (int index = 0; index < creatureStorage.getSize(); index++) {
+            CreatureNBT storedCreature = creatureStorage.getCreature(index);
+            if (storedCreature.nbtTagCompound().isEmpty()) continue;
+
+            if (storedCreature.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.PARTY_INACTIVE) {
+                if (storedCreature.getStamina() < storedCreature.getMaxStamina()) {
+                    storedCreature.regenerateStaminaInactive();
+                    if (storedCreature.getStamina() >= storedCreature.getMaxStamina()) {
+                        //needed to update stamina amnt on client
+                        this.syncToClientMultiple("Creatures");
+                    }
+                }
+                if (storedCreature.getLeapCooldown() > 0) {
+                    storedCreature.setLeapCooldown(storedCreature.getLeapCooldown() - 1);
+                }
+                if (storedCreature.getSprintCooldown() > 0) {
+                    storedCreature.setSprintCooldown(storedCreature.getSprintCooldown() - 1);
+                }
+            }
+        }
     }
 
     @NotNull
