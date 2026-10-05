@@ -32,10 +32,8 @@ public class LeapMoveResultTicker extends AbstractMoveResultTicker {
             creature.removeLeapToAttackCooldown();
             creature.resetFrustration();
         }
-        else if (!this.leapPrepared && this.target != null
-                && creature.getCreaturePathNavigate().tryMoveToEntityLiving(this.target, 1D)
-        ) {
-            creature.resetLeapToAttackCooldown();
+        else if (!this.leapPrepared && this.target != null) {
+            creature.getCreaturePathNavigate().tryMoveToEntityLiving(this.target, 1D);
         }
         if (this.leapPrepared) creature.getCreaturePathNavigate().clearPath();
     }
@@ -58,7 +56,6 @@ public class LeapMoveResultTicker extends AbstractMoveResultTicker {
         if (this.leapPrepared && this.hasLeftGround && this.creature.onGround) {
             if (this.leapMoveRuleBuilder.requiresTargetContact()) this.tryDamageTargetOnContact();
         }
-        if (this.leapPrepared) this.creature.resetLeapToAttackCooldown();
         this.creature.getCreaturePathNavigate().clearPath();
     }
 

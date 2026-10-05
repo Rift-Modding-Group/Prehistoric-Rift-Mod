@@ -335,8 +335,12 @@ public class RiftCreatureLeapHelper {
         }
         this.leapTicks++;
 
-        if (this.leapTicks > 80 || this.leapTicks > 1
-                && (this.creature.onGround || this.creature.collidedVertically && this.creature.motionY <= 0D)) {
+        boolean landed = this.leapTicks > 1 && this.creature.onGround;
+        boolean blockedByWall = this.leapTicks > 1 && this.creature.collidedHorizontally
+                && (Math.abs(this.creature.motionX) > 1E-6D || Math.abs(this.creature.motionZ) > 1E-6D);
+        boolean blockedVertically = this.leapTicks > 1 && this.creature.collidedVertically && this.creature.motionY <= 0D;
+        if (landed || blockedByWall) this.creature.resetLeapToAttackCooldown();
+        if (this.leapTicks > 80 || landed || blockedByWall || blockedVertically) {
             this.creature.fallDistance = 0F;
             this.moveHelper.creatureAction = RiftCreatureMoveHelperBase.CreatureAction.WAIT;
             this.leapStarted = false;
@@ -380,10 +384,14 @@ public class RiftCreatureLeapHelper {
         this.creature.velocityChanged = true;
         this.leapTicks = nextLeapTick;
 
-        boolean movementBlocked = Math.abs(this.creature.posX - nextX) > 1E-4D
-                || Math.abs(this.creature.posY - nextY) > 1E-4D
+        boolean blockedByWall = Math.abs(this.creature.posX - nextX) > 1E-4D
                 || Math.abs(this.creature.posZ - nextZ) > 1E-4D;
-        if (movementBlocked || this.creature.onGround && this.leapTicks > 1) {
+        boolean movementBlocked = blockedByWall || Math.abs(this.creature.posY - nextY) > 1E-4D;
+        boolean landed = this.creature.onGround && this.leapTicks > 1;
+        if (blockedByWall || landed) {
+            this.creature.setLeapCooldown(MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS);
+        }
+        if (movementBlocked || landed) {
             this.cancelLeap();
             this.creature.motionX = 0D;
             this.creature.motionY = 0D;

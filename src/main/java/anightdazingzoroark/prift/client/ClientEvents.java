@@ -202,12 +202,18 @@ public class ClientEvents {
                         minecraft.player.ticksExisted - this.riddenLeapChargeStartTick + 1,
                         0, RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS
                 );
-                if (chargeTicks == 0 && riddenCreature.getLeapCooldown() == 0) {
+                boolean riddenLeapPendingOrActive = riddenCreature.isRiddenLeapPendingOrActive();
+                int leapCooldownTicks = riddenCreature.getLeapCooldown();
+                if (chargeTicks == 0 && !riddenLeapPendingOrActive && leapCooldownTicks == 0) {
                     this.riddenLeapCooldownDisplayChargeTicks = 0;
+                }
+                int displayedChargeTicks = chargeTicks;
+                if (displayedChargeTicks == 0 && riddenLeapPendingOrActive) {
+                    displayedChargeTicks = this.riddenLeapCooldownDisplayChargeTicks;
                 }
 
                 this.ridingCreatureHUD.setJumpState(
-                        chargeTicks, riddenCreature.getLeapCooldown(), this.riddenLeapCooldownDisplayChargeTicks
+                        displayedChargeTicks, leapCooldownTicks, this.riddenLeapCooldownDisplayChargeTicks
                 );
             }
 
