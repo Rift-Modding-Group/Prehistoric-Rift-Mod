@@ -9,6 +9,7 @@ import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
+import anightdazingzoroark.prift.api.util.MathUtil;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCommon;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
@@ -385,6 +386,23 @@ public class RiftCreatureRegistry {
                         .addMove("tail_stab", CreatureMoveCommon.standardMeleeMove.copy()
                                 .setBasePower(50)
                                 .setAnimNames("tail_stab")
+                        )
+                        .addMove("thagomize", new CreatureMoveBuilder()
+                                .setMakesContact()
+                                .setPhysical()
+                                .setRequireFindTargetToUse()
+                                .setStaminaCost(0.08f)
+                                .setStaminaDrainPerSecond(0.02f)
+                                .setBasePower(50)
+                                .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
+                                        .setChargeUpThenRelease()
+                                        .setMaxChargeUp(100)
+                                        .setCooldownMultiplier(6D)
+                                        .setBasePowerMultiplier((creature, basePower, chargeUp) -> {
+                                            int chargeIntMultiplier = (int) Math.floor(chargeUp / 20D) + 1;
+                                            return MathUtil.slopeResult(chargeIntMultiplier, true, 1, 6, 1D, 2D);
+                                        })
+                                )
                         )
                         .addMove("plate_fling", new CreatureMoveBuilder()
                                 .setStaminaCost(0.08f)

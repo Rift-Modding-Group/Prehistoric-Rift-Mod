@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.api.creature.builder;
 
 import anightdazingzoroark.prift.api.creature.ICreature;
+import anightdazingzoroark.riftlib.util.TriFunction;
 import net.minecraft.entity.EntityLivingBase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,6 +18,8 @@ public class CreatureMoveChargeupBuilder {
     private boolean chargeUpWhileUse;
     private boolean canRotateWhileReleasing;
     private int maxChargeUp = 100;
+    @NotNull
+    private TriFunction<ICreature, Integer, Integer, Double> basePowerMultiplier = (creature, basePower, chargeUp) -> 1D;
     @NotNull
     private Function<ICreature, Double> cooldownMultiplier = creature -> 2D;
 
@@ -72,6 +75,22 @@ public class CreatureMoveChargeupBuilder {
         return this.maxChargeUp;
     }
 
+    /**
+     * Set a base power move multiplier based on the charge
+     * */
+    public CreatureMoveChargeupBuilder setBasePowerMultiplier(@NotNull TriFunction<ICreature, Integer, Integer, Double> basePowerMultiplier) {
+        this.basePowerMultiplier = basePowerMultiplier;
+        return this;
+    }
+
+    @NotNull
+    public TriFunction<ICreature, Integer, Integer, Double> getBasePowerMultiplier() {
+        return this.basePowerMultiplier;
+    }
+
+    /**
+     * Set a cooldown multiplier based on the charge
+     * */
     public CreatureMoveChargeupBuilder setCooldownMultiplier(double value) {
         this.cooldownMultiplier = creature -> value;
         return this;
@@ -134,6 +153,7 @@ public class CreatureMoveChargeupBuilder {
         toReturn.chargeUpWhileUse = this.chargeUpWhileUse;
         toReturn.canRotateWhileReleasing = this.canRotateWhileReleasing;
         toReturn.maxChargeUp = this.maxChargeUp;
+        toReturn.basePowerMultiplier = this.basePowerMultiplier;
         toReturn.cooldownMultiplier = this.cooldownMultiplier;
         toReturn.windupEndEffect = this.windupEndEffect;
         toReturn.prereleaseEndEffect = this.prereleaseEndEffect;

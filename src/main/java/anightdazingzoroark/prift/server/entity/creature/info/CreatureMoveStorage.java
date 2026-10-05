@@ -387,6 +387,10 @@ public class CreatureMoveStorage {
         }
     }
 
+    public int getCurrentMoveChargeUpTicks() {
+        return this.currentMoveChargeUpTicks;
+    }
+
     public boolean hasCurrentMoveEndEffectFired() {
         return this.currentMoveEndEffectFired;
     }

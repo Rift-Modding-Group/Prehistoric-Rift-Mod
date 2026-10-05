@@ -5,6 +5,7 @@
   "target": "@env(DEFAULT)",
   "client": [],
   "mixins": [
+    "RiftMixinAllowRiddenCreatureDamageToDummy",
     "RiftMixinMatchCreatureType",
     "RiftMixinSetTargetAfterHitboxHit"
   ],

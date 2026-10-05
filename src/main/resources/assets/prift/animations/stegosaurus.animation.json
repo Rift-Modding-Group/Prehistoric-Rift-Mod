@@ -319,6 +319,302 @@
 					"rotation": [7.1098, 3.7315, -11.9384]
 				}
 			}
+		},
+		"animation.stegosaurus.thagomize_prewindup": {
+			"loop": true,
+			"timeline": {
+				"0.0": "function.send_message('moveChargeupPrewindupFinished');"
+			}
+		},
+		"animation.stegosaurus.thagomize_windup": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.5,
+			"bones": {
+				"body": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [0, 22.5, 0]
+					}
+				},
+				"bodyFront": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [5, 0, 0]
+					}
+				},
+				"neck": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [12.5, 0, 0]
+					}
+				},
+				"leftFrontLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [-33.4814, 28.9, -0.5344]
+					}
+				},
+				"rightFrontLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [-33.4814, -28.9, 0.5344]
+					}
+				},
+				"tail0": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [23.2939, 16.6657, 5.4161]
+					}
+				},
+				"tail1": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [12.5, 12.5, 0]
+					}
+				},
+				"tail2": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [15, 15, 0]
+					}
+				},
+				"leftBackLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [12.5, 0, 0]
+					},
+					"position": {
+						"0.0": [0, 0, 0],
+						"0.5": [0, -0.9, 0]
+					}
+				},
+				"rightBackLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.5": [15, 0, 0]
+					},
+					"position": {
+						"0.0": [0, 0, 0],
+						"0.5": [0, -0.9, 0]
+					}
+				}
+			}
+		},
+		"animation.stegosaurus.thagomize_prereleasing": {
+			"loop": "hold_on_last_frame",
+			"bones": {
+				"body": {
+					"rotation": [0, 22.5, 0]
+				},
+				"bodyFront": {
+					"rotation": [5, 0, 0]
+				},
+				"neck": {
+					"rotation": [12.5, 0, 0]
+				},
+				"leftFrontLeg": {
+					"rotation": [-33.4814, 28.9, -0.5344]
+				},
+				"rightFrontLeg": {
+					"rotation": [-33.4814, -28.9, 0.5344]
+				},
+				"tail0": {
+					"rotation": [23.2939, 16.6657, 5.4161]
+				},
+				"tail1": {
+					"rotation": [12.5, 12.5, 0]
+				},
+				"tail2": {
+					"rotation": [15, 15, 0]
+				},
+				"leftBackLeg": {
+					"rotation": [12.5, 0, 0],
+					"position": [0, -0.9, 0]
+				},
+				"rightBackLeg": {
+					"rotation": [15, 0, 0],
+					"position": [0, -0.9, 0]
+				}
+			},
+			"timeline": {
+				"0.0": "function.send_message('moveChargeupPrereleasingFinished');"
+			}
+		},
+		"animation.stegosaurus.thagomize_releasing": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.25,
+			"bones": {
+				"body": {
+					"rotation": {
+						"0.0": [0, 22.5, 0],
+						"0.25": [0, -142.5, 0]
+					}
+				},
+				"bodyFront": {
+					"rotation": [5, 0, 0]
+				},
+				"neck": {
+					"rotation": {
+						"0.0": [12.5, 0, 0],
+						"0.25": [12.9264, 14.6364, 3.3192]
+					}
+				},
+				"head": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [0, 15, 0]
+					}
+				},
+				"leftFrontLeg": {
+					"rotation": [-33.4814, 28.9, -0.5344]
+				},
+				"rightFrontLeg": {
+					"rotation": [-33.4814, -28.9, 0.5344]
+				},
+				"bodyBack": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [-5, 0, 0]
+					}
+				},
+				"tail0": {
+					"rotation": {
+						"0.0": [23.2939, 16.6657, 5.4161],
+						"0.25": [-22.3499, -20.3503, 8.7582]
+					}
+				},
+				"tail1": {
+					"rotation": {
+						"0.0": [12.5, 12.5, 0],
+						"0.25": [-5.2511, -27.4613, 1.8106]
+					}
+				},
+				"tail2": {
+					"rotation": {
+						"0.0": [15, 15, 0],
+						"0.25": [3.3372, -26.8614, -7.5567]
+					}
+				},
+				"leftBackLeg": {
+					"rotation": [12.5, 0, 0],
+					"position": [0, -0.9, 0]
+				},
+				"rightBackLeg": {
+					"rotation": [15, 0, 0],
+					"position": [0, -0.9, 0]
+				}
+			},
+			"sound_effects": {
+				"0.25": {
+					"effect": "prift.generic_move.tail",
+					"locator": "centerPoint"
+				}
+			},
+			"timeline": {
+				"0.25": "function.create_offense_hitbox_by_tag('frontZone'); function.send_message('moveChargeupReleasingFinished');"
+			}
+		},
+		"animation.stegosaurus.thagomize_finishing": {
+			"animation_length": 1,
+			"bones": {
+				"body": {
+					"rotation": {
+						"0.0": [0, -142.5, 0],
+						"0.375": [0, -142.5, 0],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"bodyFront": {
+					"rotation": {
+						"0.0": [5, 0, 0],
+						"0.375": [5, 0, 0],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"neck": {
+					"rotation": {
+						"0.0": [12.9264, 14.6364, 3.3192],
+						"0.375": [12.93, 14.64, 3.32],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"head": {
+					"rotation": {
+						"0.0": [0, 15, 0],
+						"0.375": [0, 15, 0],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"leftFrontLeg": {
+					"rotation": {
+						"0.0": [-33.48, 28.9, -0.53],
+						"0.375": [-33.48, 28.9, -0.53],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"rightFrontLeg": {
+					"rotation": {
+						"0.0": [-33.48, -28.9, 0.53],
+						"0.375": [-33.48, -28.9, 0.53],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"bodyBack": {
+					"rotation": {
+						"0.0": [-5, 0, 0],
+						"0.375": [-5, 0, 0],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"tail0": {
+					"rotation": {
+						"0.0": [-22.3499, -20.3503, 8.7582],
+						"0.375": [-20.1597, -10.8753, -1.9192],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"tail1": {
+					"rotation": {
+						"0.0": [-5.2511, -27.4613, 1.8106],
+						"0.375": [-0.1108, 0.0122, 1.8346],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"tail2": {
+					"rotation": {
+						"0.0": [3.3372, -26.8614, -7.5567],
+						"0.375": [4.6106, 2.5598, -1.5204],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"leftBackLeg": {
+					"rotation": {
+						"0.0": [12.5, 0, 0],
+						"0.375": [12.5, 0, 0],
+						"1.0": [0, 0, 0]
+					},
+					"position": {
+						"0.0": [0, -0.9, 0],
+						"0.375": [0, -0.9, 0],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"rightBackLeg": {
+					"rotation": {
+						"0.0": [15, 0, 0],
+						"0.375": [15, 0, 0],
+						"1.0": [0, 0, 0]
+					},
+					"position": {
+						"0.0": [0, -0.9, 0],
+						"0.375": [0, -0.9, 0],
+						"1.0": [0, 0, 0]
+					}
+				}
+			},
+			"timeline": {
+				"0.125": "function.destroy_offense_hitbox_by_tag('frontZone');"
+			}
 		}
 	}
 }

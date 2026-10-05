@@ -15,6 +15,7 @@ public class CreatureMoveHelper {
     public static double calculateDamage(@NotNull RiftCreature attackingCreature, @Nullable CreatureMoveBuilder moveBuilder) {
         if (moveBuilder == null || !moveBuilder.isValid() || moveBuilder.getBasePower() <= 0) return 0D;
 
+        //get stat value
         double statValueToUse = 0D;
         if (moveBuilder.getMoveType() == CreatureMoveBuilder.MoveType.PHYSICAL) {
             statValueToUse = attackingCreature.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
@@ -23,6 +24,19 @@ public class CreatureMoveHelper {
             statValueToUse = attackingCreature.getEntityAttribute(RiftCreature.ELEMENTAL_DAMAGE_ATTRIBUTE).getAttributeValue();
         }
 
-        return statValueToUse * moveBuilder.getBasePower() * 0.005;
+        //get base power
+        int basePower = moveBuilder.getBasePower();
+        double finalBasePower;
+        if (moveBuilder.getMoveChargeupBuilder() != null) {
+            int chargeUpTicks = attackingCreature.getCreatureMoves().getCurrentMoveChargeUpTicks();
+            double basePowerMultiplier = moveBuilder.getMoveChargeupBuilder().getBasePowerMultiplier().apply(
+                    attackingCreature, basePower, chargeUpTicks
+            );
+            finalBasePower = basePower * basePowerMultiplier;
+        }
+        else finalBasePower = basePower;
+        finalBasePower *= 0.005D; //small multiplier
+
+        return statValueToUse * finalBasePower;
     }
 }
