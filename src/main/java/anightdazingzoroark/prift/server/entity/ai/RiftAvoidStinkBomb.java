@@ -21,6 +21,7 @@ public class RiftAvoidStinkBomb extends EntityAIBase {
     private final PathNavigate navigation;
     @Nullable
     private Path path;
+    private Vec3d posToAvoid;
     private int pathRetryTicks;
 
     public RiftAvoidStinkBomb(@NotNull EntityLiving entity) {
@@ -33,14 +34,14 @@ public class RiftAvoidStinkBomb extends EntityAIBase {
     public boolean shouldExecute() {
         OtherEntityProperties otherEntityProperties = OtherEntityProperties.get(this.entity);
         if (otherEntityProperties == null || !otherEntityProperties.isStinkBombed()) return false;
-        Vec3d origin = otherEntityProperties.getStinkBombOrigin();
-        if (this.entity.getDistanceSq(origin.x, origin.y, origin.z) >= FLEE_DISTANCE_SQ) {
-            otherEntityProperties.clearStinkBomb();
+        this.posToAvoid = this.entity.getPositionVector();
+        if (this.entity.getDistanceSq(this.posToAvoid.x, this.posToAvoid.y, this.posToAvoid.z) >= FLEE_DISTANCE_SQ) {
+            otherEntityProperties.setStinkBombed(false);
             return false;
         }
 
         this.clearTargets();
-        this.path = this.findPathAway(origin);
+        this.path = this.findPathAway(this.posToAvoid);
         this.pathRetryTicks = PATH_RETRY_INTERVAL;
         return true;
     }
@@ -50,9 +51,8 @@ public class RiftAvoidStinkBomb extends EntityAIBase {
         OtherEntityProperties otherEntityProperties = OtherEntityProperties.get(this.entity);
         if (otherEntityProperties == null || !otherEntityProperties.isStinkBombed()) return false;
 
-        Vec3d origin = otherEntityProperties.getStinkBombOrigin();
-        if (this.entity.getDistanceSq(origin.x, origin.y, origin.z) < FLEE_DISTANCE_SQ) return true;
-        otherEntityProperties.clearStinkBomb();
+        if (this.entity.getDistanceSq(this.posToAvoid.x, this.posToAvoid.y, this.posToAvoid.z) < FLEE_DISTANCE_SQ) return true;
+        otherEntityProperties.setStinkBombed(false);
         return false;
     }
 
@@ -79,7 +79,7 @@ public class RiftAvoidStinkBomb extends EntityAIBase {
 
         OtherEntityProperties otherEntityProperties = OtherEntityProperties.get(this.entity);
         if (otherEntityProperties == null) return;
-        this.path = this.findPathAway(otherEntityProperties.getStinkBombOrigin());
+        this.path = this.findPathAway(this.posToAvoid);
         this.pathRetryTicks = PATH_RETRY_INTERVAL;
         if (this.path != null) this.navigation.setPath(this.path, 1D);
     }

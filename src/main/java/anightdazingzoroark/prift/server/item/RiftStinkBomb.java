@@ -60,22 +60,22 @@ public class RiftStinkBomb extends RiftThrowableItem {
         List<Entity> affectedEntities = projectile.getEntityWorld().getEntitiesWithinAABB(Entity.class, affectedRange);
         for (Entity entity : affectedEntities) {
             if (entity == null) continue;
-            this.onHitEntity(entity, projectile, hitPos, false);
+            this.onHitEntity(entity, projectile, false);
         }
     }
 
-    private void onHitEntity(@NotNull Entity entity, @NotNull IProjectile projectile, @NotNull Vec3d hitPos, boolean fromHitbox) {
+    private void onHitEntity(@NotNull Entity entity, @NotNull IProjectile projectile, boolean fromHitbox) {
         boolean canHitFromHitbox = !fromHitbox || !(boolean) projectile.getProperty("HasHitHitbox").getValue();
 
         if (entity instanceof MultiPartEntityPart entityPart) {
-            this.onHitEntity((Entity) entityPart.parent, projectile, hitPos, true);
+            this.onHitEntity((Entity) entityPart.parent, projectile, true);
         }
         else if (entity instanceof EntityLiving entityLiving && (!(entity instanceof EntityTameable tameable) || !tameable.isTamed())
                 && !RiftUtil.entityInTargetGroup(entity, "human") && canHitFromHitbox
         ) {
             OtherEntityProperties otherEntityProperties = OtherEntityProperties.get(entityLiving);
             if (otherEntityProperties != null) {
-                otherEntityProperties.applyStinkBomb(hitPos);
+                otherEntityProperties.setStinkBombed(true);
                 entityLiving.setAttackTarget(null);
                 entityLiving.setRevengeTarget(null);
                 entityLiving.getNavigator().clearPath();

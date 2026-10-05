@@ -957,8 +957,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         //apply damage
         double damage = CreatureMoveHelper.calculateDamage(this);
         boolean flag = entityIn.attackEntityFrom(damageSource, (float) damage);
-        if (creatureMoveBuilder.getOnTargetHitEffect() != null && creatureMoveBuilder.getMakesContact()) {
-            creatureMoveBuilder.getOnTargetHitEffect().accept(this, entityIn);
+
+        //hit effects that require making contact
+        if (creatureMoveBuilder.getMakesContact()) {
+            if (creatureMoveBuilder.getOnTargetHitEffect() != null) creatureMoveBuilder.getOnTargetHitEffect().accept(this, entityIn);
+
+            if (creatureMoveBuilder.getMoveChargeupBuilder() != null && creatureMoveBuilder.getMoveChargeupBuilder().getOnHitEntityDuringRelease() != null) {
+                creatureMoveBuilder.getMoveChargeupBuilder().getOnHitEntityDuringRelease().accept(this, this.getCreatureMoves().getCurrentMoveChargeUpTicks(), entityIn);
+            }
         }
 
         //apply elemental effects

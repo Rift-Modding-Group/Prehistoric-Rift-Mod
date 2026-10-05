@@ -1,7 +1,9 @@
 package anightdazingzoroark.prift.api.creature.builder;
 
 import anightdazingzoroark.prift.api.creature.ICreature;
+import anightdazingzoroark.prift.api.util.TriConsumer;
 import anightdazingzoroark.riftlib.util.TriFunction;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,6 +29,7 @@ public class CreatureMoveChargeupBuilder {
     private Consumer<ICreature> prereleaseEndEffect;
     private Consumer<ICreature> releaseEndEffect;
     private BiConsumer<ICreature, EntityLivingBase> releaseDuringUseEffect;
+    private TriConsumer<ICreature, Integer, Entity> onHitEntityDuringRelease;
 
     public CreatureMoveChargeupBuilder setChargeUpThenRelease() {
         return this.setChargeUpThenRelease(false);
@@ -144,6 +147,19 @@ public class CreatureMoveChargeupBuilder {
     @Nullable
     public BiConsumer<ICreature, EntityLivingBase> getReleaseDuringUseEffect() {
         return this.releaseDuringUseEffect;
+    }
+
+    /**
+     * What happens when entities are hit while in the release state
+     * */
+    public CreatureMoveChargeupBuilder setOnHitEntityDuringRelease(@NotNull TriConsumer<ICreature, Integer, Entity> onHitEntityDuringRelease) {
+        this.onHitEntityDuringRelease = onHitEntityDuringRelease;
+        return this;
+    }
+
+    @Nullable
+    public TriConsumer<ICreature, Integer, Entity> getOnHitEntityDuringRelease() {
+        return this.onHitEntityDuringRelease;
     }
 
     @NotNull

@@ -15,6 +15,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilde
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
+import anightdazingzoroark.prift.server.properties.OtherEntityProperties;
 import anightdazingzoroark.prift.util.RiftUtil;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
@@ -401,6 +402,13 @@ public class RiftCreatureRegistry {
                                         .setBasePowerMultiplier((creature, basePower, chargeUp) -> {
                                             int chargeIntMultiplier = (int) Math.floor(chargeUp / 20D) + 1;
                                             return MathUtil.slopeResult(chargeIntMultiplier, true, 1, 6, 1D, 2D);
+                                        })
+                                        .setOnHitEntityDuringRelease((creature, chargeUp, hitEntity) -> {
+                                            if (!(hitEntity instanceof EntityLivingBase hitEntityLiving)) return;
+                                            OtherEntityProperties otherEntityProperties = OtherEntityProperties.get(hitEntityLiving);
+                                            if (otherEntityProperties == null) return;
+                                            int bleedStrength = (int) MathUtil.slopeResult(chargeUp, true, 0, 100, 0, 4);
+                                            otherEntityProperties.setBleeding(bleedStrength, 100);
                                         })
                                 )
                         )
