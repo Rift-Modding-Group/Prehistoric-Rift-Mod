@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.properties;
 
 import anightdazingzoroark.prift.server.entity.RiftDamage;
+import anightdazingzoroark.riftlib.RiftLibMod;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertySystem.AbstractEntityProperties;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertySystem.RiftLibProperty;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.BooleanPropertyValue;
@@ -36,19 +37,31 @@ public class OtherEntityProperties extends AbstractEntityProperties<EntityLiving
 
     @Override
     public void onTickProperty() {
-        if (this.getEntityHolder().world.isRemote) return;
-
-        //tick bleeding
-        int bleedingDuration = this.get("BleedingDuration");
-        if (this.isBleeding()) {
-            //deal damage based on if entity was moving horizontally
-            if (bleedingDuration % 20 == 0) {
-                float damage = ((int) this.get("BleedingStrength") + 1) * (MiscUtils.getEntityHorizontalSpeed(this.getEntityHolder()) > 0 ? 2 : 1);
-                this.getEntityHolder().attackEntityFrom(RiftDamage.RIFT_BLEED, damage);
+        if (this.getEntityHolder().world.isRemote) {
+            //show bleeding particles
+            if (this.isBleeding() && this.getEntityHolder().ticksExisted % 20 == 0) {
+                RiftLibMod.PROXY.spawnParticle(
+                        "prift:bleed",
+                        this.getEntityHolder().posX,
+                        this.getEntityHolder().posY + this.getEntityHolder().height / 2D,
+                        this.getEntityHolder().posZ,
+                        "variable.emission_radius", Double.toString(this.getEntityHolder().width * 0.75D)
+                );
             }
+        }
+        else {
+            //tick bleeding
+            int bleedingDuration = this.get("BleedingDuration");
+            if (this.isBleeding()) {
+                //deal damage based on if entity was moving horizontally
+                if (bleedingDuration % 20 == 0) {
+                    float damage = ((int) this.get("BleedingStrength") + 1) * (MiscUtils.getEntityHorizontalSpeed(this.getEntityHolder()) > 0 ? 2 : 1);
+                    this.getEntityHolder().attackEntityFrom(RiftDamage.RIFT_BLEED, damage);
+                }
 
-            //tick down
-            this.set("BleedingDuration", bleedingDuration - 1);
+                //tick down
+                this.set("BleedingDuration", bleedingDuration - 1);
+            }
         }
     }
 

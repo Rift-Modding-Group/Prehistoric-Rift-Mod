@@ -447,6 +447,11 @@ public class RiftCreatureRegistry {
                                                 .setUseBlockBreak()
                                 )
                                 .setMoveRule(
+                                        new MoveRuleBuilder("thagomize")
+                                                .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
+                                                .addDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("frontZone", true))
+                                )
+                                .setMoveRule(
                                         new MoveRuleBuilder("plate_fling")
                                                 .setPriorityPredicate((creature, target) -> {
                                                     return (target != null && target.isEntityAlive()) ? 0 : -1;

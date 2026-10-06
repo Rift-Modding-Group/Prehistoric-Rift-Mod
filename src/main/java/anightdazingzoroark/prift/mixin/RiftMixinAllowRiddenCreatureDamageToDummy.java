@@ -41,7 +41,6 @@ public abstract class RiftMixinAllowRiddenCreatureDamageToDummy {
     @Inject(method = "attackEntityFrom", at = @At("HEAD"), cancellable = true)
     private void attackEntityFrom(DamageSource damageSource, float damage, CallbackInfoReturnable<Boolean> callback) {
         if (!(damageSource.getTrueSource() instanceof RiftCreature creature && creature.getControllingPassenger() instanceof EntityPlayer controllingPlayer)) return;
-        System.out.println("creature: "+creature);
         EntityDummy thisEntityDummy = (EntityDummy) (Object) this;
 
         if (thisEntityDummy.world.isRemote) return;

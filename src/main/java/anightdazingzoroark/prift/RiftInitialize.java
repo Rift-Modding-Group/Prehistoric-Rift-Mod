@@ -1,12 +1,14 @@
 package anightdazingzoroark.prift;
 
 import anightdazingzoroark.prift.server.ServerProxy;
+import anightdazingzoroark.prift.server.commands.RiftBleedCommand;
 import anightdazingzoroark.riftlib.RiftLib;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import org.apache.logging.log4j.Logger;
 
 @Mod(
@@ -63,13 +65,8 @@ public class RiftInitialize {
         PROXY.postInit(event);
     }
 
-    /*
     @Mod.EventHandler
     public void serverLoad(FMLServerStartingEvent event) {
         event.registerServerCommand(new RiftBleedCommand());
-        event.registerServerCommand(new RiftCreatureHighlightCommand());
-        event.registerServerCommand(new RiftJournalCommand());
-        event.registerServerCommand(new RiftResetWildCreaturesCommand());
     }
-     */
 }

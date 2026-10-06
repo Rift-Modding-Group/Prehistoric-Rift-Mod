@@ -171,3 +171,7 @@ move.creature.thagomize=Thagomize
 move.creature.thagomize.description=Charges up and swings its thagomizer in a powerful arc. The resulting blow causes its target to bleed.
 move.creature.plate_fling=Plate Fling
 move.creature.plate_fling.description=Launches one of its back plates at a distant target.
+
+priftcommands.bleed.usage=/priftbleed <player|entity> <seconds> [strength]
+priftcommands.bleed.successful=Applied bleed to %s
+priftcommands.bleed.cannot_bleed=Could not apply bleed to %s
