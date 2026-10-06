@@ -872,12 +872,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         return aabb.grow(1e-5D).contains(posVec);
     }
 
+    @Override
     public boolean aabbIntersectsBoundingBox(@NotNull AxisAlignedBB otherAABB, @NotNull String boundingBoxName) {
         AxisAlignedBB aabb = this.animData.getWorldSpaceAABB(boundingBoxName);
         if (aabb == null) return false;
         return aabb.intersects(otherAABB);
     }
 
+    @Override
     public boolean aabbIntersectsBoundingBoxTag(@NotNull AxisAlignedBB otherAABB, @NotNull String tagName) {
         List<AnimatedBoundingBox> boundingBoxesInTag = this.animData.getAnimatedBoundingBoxesByTag().get(tagName);
         if (boundingBoxesInTag == null) return false;

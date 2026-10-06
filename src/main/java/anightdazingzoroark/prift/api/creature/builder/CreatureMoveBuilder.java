@@ -18,7 +18,6 @@ public class CreatureMoveBuilder {
     //all the following variables are required and must not be null, validated in isValid()
     private MoveType moveType;
     private BiConsumer<ICreature, EntityLivingBase> onMoveBeginEffect;
-    private Consumer<ICreature> onMoveHitEffect;
     private String[] animNames;
 
     //the following can be left alone
@@ -31,6 +30,7 @@ public class CreatureMoveBuilder {
     private boolean makesContact;
     private Element element;
     private int elementEffectStrength;
+    private Consumer<ICreature> onMoveHitEffect;
     @Nullable
     private BiConsumer<ICreature, Entity> whileMoveUseEffect;
     @Nullable
@@ -305,7 +305,7 @@ public class CreatureMoveBuilder {
         if (this.moveChargeupBuilder != null) {
             return this.moveChargeupBuilder.getChargeUpThenRelease() || this.moveChargeupBuilder.getChargeUpWhileUse();
         }
-        return this.onMoveHitEffect != null && this.animNames != null && this.animNames.length > 0;
+        return this.animNames != null && this.animNames.length > 0;
     }
 
     /**
@@ -316,7 +316,6 @@ public class CreatureMoveBuilder {
         CreatureMoveBuilder toReturn = new CreatureMoveBuilder();
 
         toReturn.moveType = this.moveType;
-        toReturn.onMoveHitEffect = this.onMoveHitEffect;
         toReturn.animNames = this.animNames;
 
         toReturn.movePower = this.movePower;
@@ -328,6 +327,7 @@ public class CreatureMoveBuilder {
         toReturn.makesContact = this.makesContact;
         toReturn.element = this.element;
         toReturn.elementEffectStrength = this.elementEffectStrength;
+        toReturn.onMoveHitEffect = this.onMoveHitEffect;
         toReturn.whileMoveUseEffect = this.whileMoveUseEffect;
         toReturn.onTargetHitEffect = this.onTargetHitEffect;
         toReturn.onBlockHitEffect = this.onBlockHitEffect;

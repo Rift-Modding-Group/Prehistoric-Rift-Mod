@@ -25,14 +25,20 @@
 							"size": [24, 4],
 							"collision": false
 						},
-						"frontZone0": {
-							"origin": [-8, 0, -37.5],
+						"frontZone1": {
+							"origin": [-8, 0, -32],
 							"size": [16, 24],
 							"collision": false,
 							"tags": ["frontZone"]
 						},
-						"frontZone1": {
+						"frontZone2": {
 							"origin": [-8, 0, -21.5],
+							"size": [16, 24],
+							"collision": false,
+							"tags": ["frontZone"]
+						},
+						"frontZone0": {
+							"origin": [-8, 0, -42.5],
 							"size": [16, 24],
 							"collision": false,
 							"tags": ["frontZone"]

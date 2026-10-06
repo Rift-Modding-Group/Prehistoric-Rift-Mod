@@ -109,7 +109,8 @@ public class CreatureMoveStorage {
             if (index >= 0 && moveRule.moveResult() == CreatureMoveResult.LEAP
                     && target != null
                     && target.isEntityAlive()
-                    && creature.getCreaturePathNavigate().hasSafeDownwardWalkingPathTo(target)) {
+                    && creature.getCreaturePathNavigate().hasSafeDownwardWalkingPathTo(target)
+            ) {
                 index = -1;
             }
 
@@ -120,12 +121,12 @@ public class CreatureMoveStorage {
 
             float requiredStaminaFraction = MoveResult.valueOf(moveRule.moveResult().name()).staminaConsumption(moveBuilder);
             //moves selected to open a planned route are navigation work and remain usable without stamina
-            if (index >= 0 && !moveRule.equals(blockBreakMoveRule)
-                    && requiredStaminaFraction > 0f && creature.getStamina() <= 0f) {
+            if (index >= 0 && !moveRule.equals(blockBreakMoveRule) && requiredStaminaFraction > 0f && creature.getStamina() <= 0f) {
                 index = -1;
             }
 
             this.prioritizedUsableMoves.remove(moveRule);
+
             //positive indexes can be added
             if (index >= 0) this.prioritizedUsableMoves.add(index, moveRule);
         }
