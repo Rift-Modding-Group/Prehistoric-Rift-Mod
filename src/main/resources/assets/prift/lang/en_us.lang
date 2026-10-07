@@ -41,7 +41,12 @@ sounds.subtitle.stegosaurus_warn=Stegosaurus warns
 sounds.subtitle.generic_bite_move=Creature bites
 sounds.subtitle.generic_stomp_move=Creature stomps
 sounds.subtitle.generic_tail_move=Creature swings its tail
+sounds.subtitle.generic_chargeup_weak=Creature charges up (weak)
+sounds.subtitle.generic_chargeup_medium=Creature charges up (medium)
+sounds.subtitle.generic_chargeup_strong=Creature charges up (strong)
 sounds.subtitle.tranq_bomb_impact=Tranq bomb bursts
+sounds.subtitle.stink_bomb_impact=Stink bomb bursts
+sounds.subtitle.poison_bomb_impact=Poison bomb bursts
 
 info.level=Level %s
 info.owner_name=Owner: %s

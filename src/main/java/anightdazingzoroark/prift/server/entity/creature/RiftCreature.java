@@ -949,6 +949,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
      * */
     @Override
     public boolean attackEntityAsMob(Entity entityIn) {
+        //protection
+        if (this.isRelatedToEntity(entityIn)) return false;
+
+        //get move used
         CreatureMoveBuilder creatureMoveBuilder = this.getCreatureMoves().getMoveBuilderCurrentMove();
         if (creatureMoveBuilder == null) return false;
 
@@ -1280,7 +1284,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //-----properties management-----
     @SuppressWarnings("unchecked")
-    public <I> I getProperty(String key) {
+    public <I extends AbstractPropertyValue<?>> I getProperty(String key) {
         if (!this.propertyValueMap.containsKey(key)) {
             throw new UnsupportedOperationException("Key " + key + " does not exist in property map for " + this.creatureType.getName() + "!");
         }

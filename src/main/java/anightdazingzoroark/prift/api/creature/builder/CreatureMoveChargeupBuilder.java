@@ -28,6 +28,7 @@ public class CreatureMoveChargeupBuilder {
     private Consumer<ICreature> windupEndEffect;
     private Consumer<ICreature> prereleaseEndEffect;
     private Consumer<ICreature> releaseEndEffect;
+    private BiConsumer<ICreature, Integer> windupEffect;
     private BiConsumer<ICreature, EntityLivingBase> releaseDuringUseEffect;
     private TriConsumer<ICreature, Integer, Entity> onHitEntityDuringRelease;
 
@@ -137,6 +138,19 @@ public class CreatureMoveChargeupBuilder {
     @Nullable
     public Consumer<ICreature> getReleaseEndEffect() {
         return this.releaseEndEffect;
+    }
+
+    /**
+     * What happens while a creature is winding up
+     * */
+    public CreatureMoveChargeupBuilder setWindupEffect(@NotNull BiConsumer<ICreature, Integer> windupEffect) {
+        this.windupEffect = windupEffect;
+        return this;
+    }
+
+    @Nullable
+    public BiConsumer<ICreature, Integer> getWindupEffect() {
+        return this.windupEffect;
     }
 
     public CreatureMoveChargeupBuilder setReleaseDuringUseEffect(@NotNull BiConsumer<ICreature, EntityLivingBase> releaseDuringUseEffect) {

@@ -297,13 +297,13 @@ public class CreatureMoveStorage {
             }
 
             if (chargeupBuilder.getChargeUpThenRelease() && this.currentMoveChargeupPhase == ChargeupPhase.WINDUP) {
-                this.addCurrentMoveBuildup(chargeupBuilder);
-                if (this.currentMoveBuildup >= chargeupBuilder.getMaxChargeUp()) {
+                this.addCurrentMoveBuildup(creature, chargeupBuilder);
+                if (this.currentMoveReleaseRequested && this.currentMoveBuildup >= chargeupBuilder.getMaxChargeUp()) {
                     this.finishCurrentMoveChargeupPhase(creature);
                 }
             }
             else if (chargeupBuilder.getChargeUpWhileUse() && this.currentMoveChargeupPhase == ChargeupPhase.RELEASING) {
-                this.addCurrentMoveBuildup(chargeupBuilder);
+                this.addCurrentMoveBuildup(creature, chargeupBuilder);
                 if (this.currentMoveBuildup >= chargeupBuilder.getMaxChargeUp()) {
                     this.finishCurrentMoveUse(creature);
                 }
@@ -410,8 +410,7 @@ public class CreatureMoveStorage {
         if (chargeupBuilder == null) return true;
         if (this.currentMoveHitEffectFired) return false;
 
-        return this.currentMoveChargeupPhase == ChargeupPhase.PRERELEASING
-                || this.currentMoveChargeupPhase == ChargeupPhase.RELEASING;
+        return this.currentMoveChargeupPhase == ChargeupPhase.PRERELEASING || this.currentMoveChargeupPhase == ChargeupPhase.RELEASING;
     }
 
     public void runCurrentMoveHitEffect(@NotNull RiftCreature creature) {
@@ -447,7 +446,9 @@ public class CreatureMoveStorage {
         this.clearCurrentMove();
     }
 
-    private void addCurrentMoveBuildup(@NotNull CreatureMoveChargeupBuilder chargeupBuilder) {
+    private void addCurrentMoveBuildup(@NotNull RiftCreature creature, @NotNull CreatureMoveChargeupBuilder chargeupBuilder) {
+        if (chargeupBuilder.getWindupEffect() != null) chargeupBuilder.getWindupEffect().accept(creature, this.currentMoveBuildup);
+        if (this.currentMoveBuildup >= chargeupBuilder.getMaxChargeUp()) return;
         this.currentMoveChargeUpTicks++;
         this.currentMoveBuildup = Math.min(chargeupBuilder.getMaxChargeUp(), this.currentMoveBuildup + 1);
     }

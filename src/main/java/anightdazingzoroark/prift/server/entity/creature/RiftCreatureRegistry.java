@@ -16,7 +16,9 @@ import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.server.properties.OtherEntityProperties;
+import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.prift.util.RiftUtil;
+import anightdazingzoroark.riftlib.particle.RiftLibParticleHelper;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
@@ -28,6 +30,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -397,6 +401,7 @@ public class RiftCreatureRegistry {
                                 }
                         )
                         .addBlockBreakLevel("axe", 2)
+                        .registerIntegerValue("ChargeUpLevel", 0)
                         //---moves---
                         .addMove("tail_stab", CreatureMoveCommon.standardMeleeMove.copy()
                                 .setBasePower(50)
@@ -409,6 +414,9 @@ public class RiftCreatureRegistry {
                                 .setStaminaCost(0.08f)
                                 .setStaminaDrainPerSecond(0.02f)
                                 .setBasePower(50)
+                                .setOnMoveEndEffect(creature -> {
+                                    creature.setProperty("ChargeUpLevel", 0);
+                                })
                                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                                         .setChargeUpThenRelease()
                                         .setMaxChargeUp(100)
@@ -416,6 +424,60 @@ public class RiftCreatureRegistry {
                                         .setBasePowerMultiplier((creature, basePower, chargeUp) -> {
                                             int chargeIntMultiplier = (int) Math.floor(chargeUp / 20D) + 1;
                                             return MathUtil.slopeResult(chargeIntMultiplier, true, 1, 6, 1D, 2D);
+                                        })
+                                        .setWindupEffect((creature, chargeUp) -> {
+                                            int chargeUpLevel = (int) creature.getProperty("ChargeUpLevel").getValue();
+                                            if (chargeUpLevel >= 5 || chargeUp <= 0 || chargeUp > 100 || chargeUp % 20D != 0) return;
+
+                                            //set chargeup level
+                                            chargeUpLevel++;
+                                            creature.setProperty("ChargeUpLevel", chargeUpLevel);
+
+                                            //show particles
+                                            AxisAlignedBB creatureAABB = creature.getEntityBoundingBox();
+                                            double width = creatureAABB.maxX - creatureAABB.minX;
+                                            double height = creatureAABB.maxY - creatureAABB.minY;
+                                            RiftLibParticleHelper.createParticle(
+                                                    "prift:charge_level_up",
+                                                    creature.getPositionVector().x, creature.getPositionVector().y + height / 2D, creature.getPositionVector().z,
+                                                    0, 0,
+                                                    "variable.emission_radius", Double.toString(width * 0.005D)
+                                            );
+
+                                            //play sound
+                                            if (chargeUpLevel == 1 || chargeUpLevel == 2) {
+                                                creature.getEntityWorld().playSound(
+                                                        null,
+                                                        creature.getPositionVector().x,
+                                                        creature.getPositionVector().y,
+                                                        creature.getPositionVector().z,
+                                                        RiftSounds.getSound("generic_move.chargeup_weak"),
+                                                        SoundCategory.NEUTRAL,
+                                                        1f, 1f
+                                                );
+                                            }
+                                            else if (chargeUpLevel == 3 || chargeUpLevel == 4) {
+                                                creature.getEntityWorld().playSound(
+                                                        null,
+                                                        creature.getPositionVector().x,
+                                                        creature.getPositionVector().y,
+                                                        creature.getPositionVector().z,
+                                                        RiftSounds.getSound("generic_move.chargeup_medium"),
+                                                        SoundCategory.NEUTRAL,
+                                                        1f, 1f
+                                                );
+                                            }
+                                            else if (chargeUpLevel == 5) {
+                                                creature.getEntityWorld().playSound(
+                                                        null,
+                                                        creature.getPositionVector().x,
+                                                        creature.getPositionVector().y,
+                                                        creature.getPositionVector().z,
+                                                        RiftSounds.getSound("generic_move.chargeup_strong"),
+                                                        SoundCategory.NEUTRAL,
+                                                        1f, 1f
+                                                );
+                                            }
                                         })
                                         .setOnHitEntityDuringRelease((creature, chargeUp, hitEntity) -> {
                                             if (!(hitEntity instanceof EntityLivingBase hitEntityLiving)) return;

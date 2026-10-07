@@ -804,7 +804,27 @@
     ],
     "subtitle": "sounds.subtitle.generic_gnash_move_gnashing"
   },
-
+  "prift.generic_move.chargeup_weak": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_chargeup_weak"
+    ],
+    "subtitle": "sounds.subtitle.generic_chargeup_weak"
+  },
+  "prift.generic_move.chargeup_medium": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_chargeup_medium"
+    ],
+    "subtitle": "sounds.subtitle.generic_chargeup_medium"
+  },
+  "prift.generic_move.chargeup_strong": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_chargeup_strong"
+    ],
+    "subtitle": "sounds.subtitle.generic_chargeup_strong"
+  },
   "prift.tranq_bomb.impact": {
     "category": "neutral",
     "sounds": [
@@ -826,7 +846,6 @@
     ],
     "subtitle": "sounds.subtitle.poison_bomb_impact"
   },
-
   "prift.semi_manual_machine.reset": {
     "category": "block",
     "sounds": [

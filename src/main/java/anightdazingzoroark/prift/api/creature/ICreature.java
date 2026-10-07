@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
+import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -86,7 +87,7 @@ public interface ICreature {
     @NotNull
     CreatureNavigationBuilder getNavigationBuilder();
 
-    <I> I getProperty(String key);
+    <I extends AbstractPropertyValue<?>> I getProperty(String key);
 
     <I> void setProperty(String key, I value);
 
