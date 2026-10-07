@@ -14,6 +14,9 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.GuiIngameForge;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.input.Keyboard;
@@ -21,11 +24,21 @@ import org.lwjgl.input.Keyboard;
 import java.util.List;
 import java.util.Locale;
 
+@SideOnly(Side.CLIENT)
 public class RidingCreatureHUD {
     private static final ResourceLocation CONTROLS_TEXTURE = new ResourceLocation(RiftInitialize.MODID, "textures/ui/controls.png");
+    private static final ResourceLocation HUD_TEXTURE = new ResourceLocation(RiftInitialize.MODID, "textures/ui/hud_icons.png");
     private static final int SLOT_SIZE = 20;
     private static final int SLOT_SPACING = 2;
     private static final int CONTROL_ICON_COLUMN_WIDTH = 24;
+    private static final int STATUS_ICON_SIZE = 9;
+    private static final int STATUS_ICON_SPACING = 8;
+    private static final int STATUS_ROW_HEIGHT = 10;
+    private static final int HEALTH_ICON_COUNT = 20;
+    private static final int STAMINA_ICON_COUNT = 20;
+    private static final int EMPTY_STAMINA_TEXTURE_X = 0;
+    private static final int FULL_STAMINA_TEXTURE_X = 9;
+    private static final int HALF_STAMINA_TEXTURE_X = 18;
     private static final float CONTROLS_SCALE = 0.75f;
 
     private int jumpChargeTicks;
@@ -49,6 +62,95 @@ public class RidingCreatureHUD {
     }
 
     //---render---
+    //reimplementation of ridden creature health that uses creature health percentage
+    public void renderCreatureHealth(@NotNull Minecraft minecraft, @NotNull RiftCreature creature, int width, int height) {
+        int healthLevel = 0;
+        if (creature.getMaxHealth() > 0f) {
+            healthLevel = (int) Math.round(MathUtil.slopeResult(
+                    creature.getHealth(), true,
+                    0D, creature.getMaxHealth(),
+                    0D, HEALTH_ICON_COUNT * 2D
+            ));
+        }
+
+        int left = width / 2 - 91;
+        int top = height - GuiIngameForge.left_height;
+        int healthRowCount = (HEALTH_ICON_COUNT + 9) / 10;
+
+        minecraft.getTextureManager().bindTexture(Gui.ICONS);
+        GlStateManager.enableBlend();
+        GlStateManager.color(1f, 1f, 1f, 1f);
+        for (int heartIndex = 0; heartIndex < HEALTH_ICON_COUNT; heartIndex++) {
+            int heartValue = heartIndex * 2 + 1;
+            int heartLeft = left + heartIndex % 10 * STATUS_ICON_SPACING;
+            int heartTop = top - heartIndex / 10 * STATUS_ROW_HEIGHT;
+            Gui.drawModalRectWithCustomSizedTexture(
+                    heartLeft, heartTop, 52, 9, STATUS_ICON_SIZE, STATUS_ICON_SIZE, 256, 256
+            );
+
+            if (heartValue < healthLevel) {
+                Gui.drawModalRectWithCustomSizedTexture(
+                        heartLeft, heartTop, 88, 9, STATUS_ICON_SIZE, STATUS_ICON_SIZE, 256, 256
+                );
+            }
+            else if (heartValue == healthLevel) {
+                //flip half heart icon
+                GlStateManager.pushMatrix();
+                GlStateManager.translate(heartLeft + STATUS_ICON_SIZE, 0f, 0f);
+                GlStateManager.scale(-1f, 1f, 1f);
+                Gui.drawModalRectWithCustomSizedTexture(
+                        0, heartTop, 97, 9, STATUS_ICON_SIZE, STATUS_ICON_SIZE, 256, 256
+                );
+                GlStateManager.popMatrix();
+            }
+        }
+        GlStateManager.disableBlend();
+
+        GuiIngameForge.left_height += healthRowCount * STATUS_ROW_HEIGHT;
+    }
+
+    public void renderStamina(@NotNull Minecraft minecraft, @NotNull RiftCreature creature, int width, int height) {
+        int staminaLevel = 0;
+        if (creature.getMaxStamina() > 0f) {
+            staminaLevel = (int) Math.round(MathUtil.slopeResult(
+                    creature.getStamina(), true,
+                    0D, creature.getMaxStamina(),
+                    0D, STAMINA_ICON_COUNT * 2D
+            ));
+        }
+
+        int right = width / 2 + 91;
+        int top = height - GuiIngameForge.right_height;
+        minecraft.getTextureManager().bindTexture(HUD_TEXTURE);
+        GlStateManager.enableBlend();
+        GlStateManager.color(1f, 1f, 1f, 1f);
+        for (int staminaIndex = 0; staminaIndex < STAMINA_ICON_COUNT; staminaIndex++) {
+            int staminaValue = staminaIndex * 2 + 1;
+            int staminaLeft = right - staminaIndex % 10 * STATUS_ICON_SPACING - STATUS_ICON_SIZE;
+            int staminaTop = top - staminaIndex / 10 * STATUS_ROW_HEIGHT;
+            Gui.drawModalRectWithCustomSizedTexture(
+                    staminaLeft, staminaTop, EMPTY_STAMINA_TEXTURE_X, 0,
+                    STATUS_ICON_SIZE, STATUS_ICON_SIZE, 256, 256
+            );
+
+            if (staminaValue < staminaLevel) {
+                Gui.drawModalRectWithCustomSizedTexture(
+                        staminaLeft, staminaTop, FULL_STAMINA_TEXTURE_X, 0,
+                        STATUS_ICON_SIZE, STATUS_ICON_SIZE, 256, 256
+                );
+            }
+            else if (staminaValue == staminaLevel) {
+                Gui.drawModalRectWithCustomSizedTexture(
+                        staminaLeft, staminaTop, HALF_STAMINA_TEXTURE_X, 0,
+                        STATUS_ICON_SIZE, STATUS_ICON_SIZE, 256, 256
+                );
+            }
+        }
+        GlStateManager.disableBlend();
+
+        GuiIngameForge.right_height += (STAMINA_ICON_COUNT + 9) / 10 * STATUS_ROW_HEIGHT;
+    }
+
     public void renderMoveHotbar(@NotNull Minecraft minecraft, @NotNull RiftCreature creature, int selectedMove, int width, int height) {
         List<ImmutablePair<String, CreatureMoveBuilder>> moves = creature.getCreatureMoves().getUsableMoves();
         if (moves.isEmpty()) return;
@@ -116,11 +218,21 @@ public class RidingCreatureHUD {
 
         //show currently selected move above move hotbar
         String selectedMoveName = I18n.format("move.creature." + moves.get(selectedMove).getKey());
+        int selectedMoveNameLeft = (width - minecraft.fontRenderer.getStringWidth(selectedMoveName)) / 2;
         minecraft.fontRenderer.drawStringWithShadow(
                 selectedMoveName,
-                (width - minecraft.fontRenderer.getStringWidth(selectedMoveName)) / 2f,
-                top - minecraft.fontRenderer.FONT_HEIGHT - 12,
+                selectedMoveNameLeft,
+                top - minecraft.fontRenderer.FONT_HEIGHT - 30,
                 0xFFFFFF
+        );
+
+        //separator line between moves and creature health and stamina
+        int separatorLeft = width / 2 - 91;
+        int separatorTop = top - 5;
+        Gui.drawRect(
+                separatorLeft, separatorTop,
+                separatorLeft + 182, separatorTop + 1,
+                0xFF808080
         );
     }
 

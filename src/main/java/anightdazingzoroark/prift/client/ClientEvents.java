@@ -17,6 +17,7 @@ import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.init.SoundEvents;
+import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -24,6 +25,7 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.input.Keyboard;
 
 public class ClientEvents {
@@ -248,17 +250,56 @@ public class ClientEvents {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onRidingOverlayRender(RenderGameOverlayEvent.Pre event) {
         RenderGameOverlayEvent.ElementType elementType = event.getType();
-        if (elementType != RenderGameOverlayEvent.ElementType.HOTBAR && elementType != RenderGameOverlayEvent.ElementType.EXPERIENCE) return;
+        if (elementType != RenderGameOverlayEvent.ElementType.HEALTH
+                && elementType != RenderGameOverlayEvent.ElementType.FOOD
+                && elementType != RenderGameOverlayEvent.ElementType.HEALTHMOUNT
+                && elementType != RenderGameOverlayEvent.ElementType.HOTBAR
+                && elementType != RenderGameOverlayEvent.ElementType.EXPERIENCE
+        ) return;
 
+        //get player and settings
         Minecraft minecraft = Minecraft.getMinecraft();
         if (minecraft.player == null || minecraft.gameSettings.hideGUI) return;
 
-        //show move hotbar when riding a creature and when it is set to be shown
-        if (elementType == RenderGameOverlayEvent.ElementType.HOTBAR) {
-            if (!this.moveHotbarActive) return;
+        RiftCreature riddenCreature = this.updateRidingState(minecraft);
 
-            RiftCreature riddenCreature = this.updateRidingState(minecraft);
-            if (riddenCreature == null) return;
+        //hide vanilla mount health and replace it with creature stamina or player hunger
+        if (elementType == RenderGameOverlayEvent.ElementType.HEALTHMOUNT) {
+            if (riddenCreature != null && this.moveHotbarActive) {
+                this.ridingCreatureHUD.renderStamina(
+                        minecraft, riddenCreature,
+                        event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight()
+                );
+            }
+            else if (minecraft.ingameGUI instanceof GuiIngameForge guiIngameForge) {
+                guiIngameForge.renderFood(event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight());
+            }
+            event.setCanceled(true);
+            return;
+        }
+
+        if (riddenCreature == null) return;
+
+        //hide player health and replace it with mounted creature health when in view moves view
+        if (elementType == RenderGameOverlayEvent.ElementType.HEALTH && this.moveHotbarActive) {
+            this.ridingCreatureHUD.renderCreatureHealth(
+                    minecraft, riddenCreature,
+                    event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight()
+            );
+            event.setCanceled(true);
+            return;
+        }
+
+        //hide player hunger and experience when in view moves view
+        if ((elementType == RenderGameOverlayEvent.ElementType.FOOD || elementType == RenderGameOverlayEvent.ElementType.EXPERIENCE)
+                && this.moveHotbarActive
+        ) {
+            event.setCanceled(true);
+            return;
+        }
+
+        //show move hotbar when riding a creature and when it is set to be shown
+        if (elementType == RenderGameOverlayEvent.ElementType.HOTBAR && this.moveHotbarActive) {
             this.ridingCreatureHUD.renderMoveHotbar(
                     minecraft, riddenCreature, this.selectedRidingMove,
                     event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight()
@@ -286,6 +327,7 @@ public class ClientEvents {
         this.usingRidingMove = false;
     }
 
+    @Nullable
     private RiftCreature updateRidingState(Minecraft minecraft) {
         RiftCreature riddenCreature = minecraft.player != null
                 && minecraft.player.getRidingEntity() instanceof RiftCreature creature
