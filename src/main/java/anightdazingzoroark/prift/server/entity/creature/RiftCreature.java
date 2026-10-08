@@ -632,7 +632,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                     staminaConsumptionInterval = 60;
                 }
             }
-            boolean currentMoveDrainsStamina = currentMoveBuilder != null && !this.getUseBlockBreak()
+            boolean currentMoveDrainsStamina = currentMoveBuilder != null
+                    && (!this.getUseBlockBreak() || this.isBeingRidden())
                     && currentMoveBuilder.getStaminaDrainPerSecond() > 0f
                     && creatureMoveStorage.currentMoveMatches(this.getCurrentMove(), ChargeupPhase.RELEASING);
             if (currentMoveDrainsStamina) {
@@ -691,7 +692,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                     this.staminaRegenCountdown = this.rand.nextInt(200, 401); //as good as 10-20 seconds
                     this.getNavigator().clearPath();
                     this.getCreatureMoveHelper().stopMovement();
-                    this.setUseBlockBreak(false);
+                    if (!this.isBeingRidden()) this.setUseBlockBreak(false);
                     this.pendingStaminaDrain = 0f;
                     this.staminaDrainTicks = 0;
                 }
@@ -1563,6 +1564,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         Set<BlockPos> blocks = new HashSet<>();
         List<AnimatedBoundingBox> frontZones = this.animData.getAnimatedBoundingBoxesByTag().get("frontZone");
         if (frontZones == null) return blocks;
+        boolean riderMoveBreaking = this.getCreatureMoves().canCurrentMoveBreakBlocksFromRider(this);
 
         for (AnimatedBoundingBox frontZone : frontZones) {
             AxisAlignedBB frontBounds = this.animData.getWorldSpaceAABB(frontZone.getName());
@@ -1583,11 +1585,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 AxisAlignedBB worldCollisionBounds = collisionBounds.offset(immutablePos);
                 BlockBreakPlanEntry planEntry = this.getBlockBreakPlan(immutablePos);
                 boolean riderSprintBreaking = this.isBeingRidden() && this.isSprinting();
-                if (planEntry == null && !riderSprintBreaking) continue;
+                if (planEntry == null && !riderSprintBreaking && !riderMoveBreaking) continue;
 
                 boolean ordinaryJumpable = planEntry != null
                         && this.getCreaturePathNavigate().isStandardJumpable(planEntry, worldCollisionBounds);
-                if ((riderSprintBreaking || !ordinaryJumpable)
+                if ((riderSprintBreaking || riderMoveBreaking || !ordinaryJumpable)
                         && worldCollisionBounds.intersects(frontBounds)
                         && this.canBreakBlock(immutablePos)) {
                     blocks.add(immutablePos);
@@ -1692,7 +1694,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.prevRotationYawHead = rider.rotationYaw;
 
         super.setAttackTarget(null);
-        this.setUseBlockBreak(false);
         this.setSprinting(false);
         this.setCurrentMove(moveName);
         if (!moveStorage.getCurrentMove().equals(moveName) || !this.useStamina(moveBuilder.getStaminaCost())) {

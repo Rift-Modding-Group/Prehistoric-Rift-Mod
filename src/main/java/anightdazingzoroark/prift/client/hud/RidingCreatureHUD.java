@@ -244,33 +244,18 @@ public class RidingCreatureHUD {
         GlStateManager.translate(width / 2f, height / 2f, 0f);
         GlStateManager.scale(CONTROLS_SCALE, CONTROLS_SCALE, CONTROLS_SCALE);
 
-        //switch between item hotbar and move hotbar
-        int row = 0;
+        //-----right side-----
+        //---switch between item hotbar and move hotbar---
+        int rightRow = 0;
+        String hotbarSwapString;
+        if (moveHotbarActive) hotbarSwapString = I18n.format("hud.prift.riding.show_item_hotbar");
+        else hotbarSwapString = I18n.format("hud.prift.riding.show_move_hotbar");
         this.drawControl(
-                minecraft, moveHotbarActive, RiftControls.TOGGLE_RIDING_MOVE_HOTBAR.getKeyCode(),
-                I18n.format("hud.prift.riding.toggle_hotbar"), row++
+                minecraft, RiftControls.TOGGLE_RIDING_MOVE_HOTBAR.getKeyCode(),
+                hotbarSwapString, true, rightRow++
         );
-        if (moveHotbarActive) {
-            //move selection by scrolling
-            this.drawControl(
-                    minecraft, true, RiftControls.MIDDLE_MOUSE,
-                    I18n.format("hud.prift.riding.select_move"), row++
-            );
 
-            //move use instruction by left clicking
-            String moveUseInstruction;
-            if (!creature.getCreatureMoves().getUsableMoves().isEmpty()
-                    && creature.getCreatureMoves().getUsableMoves().get(selectedMove).getValue().getMoveChargeupBuilder() != null
-            ) {
-                moveUseInstruction = I18n.format("hud.prift.riding.charge_move");
-            }
-            else moveUseInstruction = I18n.format("hud.prift.riding.use_move");
-            this.drawControl(
-                    minecraft, true, minecraft.gameSettings.keyBindAttack.getKeyCode(),
-                    moveUseInstruction, row++
-            );
-        }
-        //ctrl for sprinting
+        //---ctrl for sprinting---
         int maximumSprintCooldown = Math.max(0, creature.getCreatureType().getSprintCooldown());
         double sprintProgress;
         if (this.sprintTicks > 0) {
@@ -291,10 +276,11 @@ public class RidingCreatureHUD {
         else sprintProgress = 0D;
         int sprintColor = this.sprintTicks == 0 && this.sprintCooldownTicks > 0 ? 0xAAAAAA : 0xFFFFFF;
         this.drawControl(
-                minecraft, moveHotbarActive, minecraft.gameSettings.keyBindSprint.getKeyCode(),
-                I18n.format("hud.prift.riding.sprint"), sprintColor, sprintProgress, row++
+                minecraft, minecraft.gameSettings.keyBindSprint.getKeyCode(),
+                I18n.format("hud.prift.riding.sprint"), sprintColor, sprintProgress, true, rightRow++
         );
-        //spacebar for jumping
+
+        //---spacebar for jumping---
         if (creature.getNavigationBuilder().getCanLeap()) {
             double leapProgress;
             if (this.jumpChargeTicks > 0) {
@@ -315,25 +301,59 @@ public class RidingCreatureHUD {
             else leapProgress = 0D;
             int leapColor = this.jumpCooldownTicks > 0 ? 0xAAAAAA : 0xFFFFFF;
             this.drawControl(
-                    minecraft, moveHotbarActive, minecraft.gameSettings.keyBindJump.getKeyCode(),
-                    I18n.format("hud.prift.riding.jump"), leapColor, leapProgress, row
+                    minecraft, minecraft.gameSettings.keyBindJump.getKeyCode(),
+                    I18n.format("hud.prift.riding.jump"), leapColor, leapProgress, true, rightRow++
             );
         }
+
+        //-----left side-----
+        if (moveHotbarActive) {
+            int leftRow = 0;
+
+            //---move use instruction by left clicking---
+            String moveUseInstruction;
+            if (!creature.getCreatureMoves().getUsableMoves().isEmpty()
+                    && creature.getCreatureMoves().getUsableMoves().get(selectedMove).getValue().getMoveChargeupBuilder() != null
+            ) {
+                moveUseInstruction = I18n.format("hud.prift.riding.charge_move");
+            }
+            else moveUseInstruction = I18n.format("hud.prift.riding.use_move");
+            this.drawControl(
+                    minecraft, minecraft.gameSettings.keyBindAttack.getKeyCode(),
+                    moveUseInstruction, false, leftRow++
+            );
+
+            //---move selection by scrolling---
+            this.drawControl(
+                    minecraft, RiftControls.MIDDLE_MOUSE,
+                    I18n.format("hud.prift.riding.select_move"), false, leftRow++
+            );
+
+            //---block break---
+            String blockBreakString;
+            if (creature.getUseBlockBreak()) blockBreakString = I18n.format("hud.prift.riding.block_break_disable");
+            else blockBreakString = I18n.format("hud.prift.riding.block_break_enable");
+            this.drawControl(
+                    minecraft, RiftControls.TOGGLE_RIDING_BLOCK_BREAK.getKeyCode(),
+                    blockBreakString, false, leftRow
+            );
+        }
+
         GlStateManager.popMatrix();
     }
 
     //well
     private void drawControl(
-            @NotNull Minecraft minecraft, boolean moveHotbarActive, int keyCode,
-            @NotNull String purpose, int row
+            @NotNull Minecraft minecraft, int keyCode,
+            @NotNull String purpose, boolean rightSide, int row
     ) {
-        this.drawControl(minecraft, moveHotbarActive, keyCode, purpose, 0xFFFFFF, -1D, row);
+        this.drawControl(minecraft, keyCode, purpose, 0xFFFFFF, -1D, rightSide, row);
     }
 
     //universal, with special case param for sprint and leap
     private void drawControl(
-            @NotNull Minecraft minecraft, boolean moveHotbarActive, int keyCode,
-            @NotNull String purpose, int purposeTextColor, double progress, int row
+            @NotNull Minecraft minecraft, int keyCode,
+            @NotNull String purpose, int purposeTextColor, double progress, boolean rightSide, int row
     ) {
         //---set uvs from keybind textures---
         int textureX;
@@ -361,9 +381,11 @@ public class RidingCreatureHUD {
 
         //---create control guides---
         int iconWidth = keyCode == Keyboard.KEY_SPACE ? 24 : 16;
-        int left = 140;
-        int top = (moveHotbarActive ? 60 : 80) + row * 20;
-        int iconLeft = left + (CONTROL_ICON_COLUMN_WIDTH - iconWidth) / 2;
+        int iconColumnLeft;
+        if (rightSide) iconColumnLeft = 140;
+        else iconColumnLeft = -140 - CONTROL_ICON_COLUMN_WIDTH;
+        int top = 80 + row * 20;
+        int iconLeft = iconColumnLeft + (CONTROL_ICON_COLUMN_WIDTH - iconWidth) / 2;
         minecraft.getTextureManager().bindTexture(CONTROLS_TEXTURE);
         GlStateManager.enableBlend();
         GlStateManager.color(1f, 1f, 1f, 1f);
@@ -392,12 +414,13 @@ public class RidingCreatureHUD {
         }
 
         //draw action
-        float actionPosX = left + CONTROL_ICON_COLUMN_WIDTH + 4;
+        float actionPosX;
+        if (rightSide) actionPosX = iconColumnLeft + CONTROL_ICON_COLUMN_WIDTH + 4;
+        else actionPosX = iconColumnLeft - minecraft.fontRenderer.getStringWidth(purpose) - 4;
         float actionPosY = top + (16 - minecraft.fontRenderer.FONT_HEIGHT) / 2f;
         minecraft.fontRenderer.drawStringWithShadow(purpose, actionPosX, actionPosY, purposeTextColor);
 
         if (progress >= 0D) {
-            int lineLeft = Math.round(actionPosX);
             int lineTop = Math.round(actionPosY) + minecraft.fontRenderer.FONT_HEIGHT + 1;
             int fillWidth = (int) Math.round(MathUtil.slopeResult(
                     Math.clamp(progress, 0D, 1D), true,
@@ -405,7 +428,17 @@ public class RidingCreatureHUD {
             ));
 
             if (fillWidth > 0) {
-                Gui.drawRect(lineLeft, lineTop, lineLeft + fillWidth, lineTop + 2, 0xFF000000 | purposeTextColor);
+                int lineLeft;
+                int lineRight;
+                if (rightSide) {
+                    lineLeft = iconColumnLeft + CONTROL_ICON_COLUMN_WIDTH + 4;
+                    lineRight = lineLeft + fillWidth;
+                }
+                else {
+                    lineRight = iconColumnLeft - 4;
+                    lineLeft = lineRight - fillWidth;
+                }
+                Gui.drawRect(lineLeft, lineTop, lineRight, lineTop + 2, 0xFF000000 | purposeTextColor);
             }
         }
     }

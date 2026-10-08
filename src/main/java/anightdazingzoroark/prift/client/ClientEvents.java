@@ -93,6 +93,17 @@ public class ClientEvents {
             minecraft.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1f));
         }
 
+        //toggle block breaking with ridden melee moves
+        boolean toggleBlockBreakPressed = RiftControls.TOGGLE_RIDING_BLOCK_BREAK.isPressed();
+        if (this.moveHotbarActive && toggleBlockBreakPressed) {
+            RiftMessages.WRAPPER.sendToServer(new RiftRidingActionMessage(
+                    RiftRidingActionMessage.Action.SET_BLOCK_BREAK,
+                    this.selectedRidingMove,
+                    !riddenCreature.getUseBlockBreak()
+            ));
+            minecraft.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1f));
+        }
+
         int eventKey = Keyboard.getEventKey();
         boolean keyPressed = Keyboard.getEventKeyState();
 

@@ -413,6 +413,15 @@ public class CreatureMoveStorage {
         return this.currentMoveChargeupPhase == ChargeupPhase.PRERELEASING || this.currentMoveChargeupPhase == ChargeupPhase.RELEASING;
     }
 
+    public boolean canCurrentMoveBreakBlocksFromRider(@NotNull RiftCreature creature) {
+        CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
+        return creature.isBeingRidden()
+                && creature.getUseBlockBreak()
+                && currentMoveBuilder != null
+                && currentMoveBuilder.getMoveType() != CreatureMoveBuilder.MoveType.STATUS
+                && currentMoveBuilder.getMakesContact();
+    }
+
     public void runCurrentMoveHitEffect(@NotNull RiftCreature creature) {
         CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
         if (currentMoveBuilder == null) return;
@@ -423,7 +432,12 @@ public class CreatureMoveStorage {
         if (this.currentMoveHitEffectFired) return;
 
         this.currentMoveHitEffectFired = true;
-        if (creature.getUseBlockBreak()) {
+        if (this.canCurrentMoveBreakBlocksFromRider(creature)) {
+            if (currentMoveBuilder.getOnMoveHitEffect() != null) currentMoveBuilder.getOnMoveHitEffect().accept(creature);
+            creature.recordBlockBreakEffectAttempt();
+            creature.breakBlocksInFrontInPathing();
+        }
+        else if (creature.getUseBlockBreak()) {
             creature.recordBlockBreakEffectAttempt();
             creature.breakBlocksInFrontInPathing();
         }

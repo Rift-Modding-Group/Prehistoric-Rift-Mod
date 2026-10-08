@@ -4,7 +4,6 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureDomesticationBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
-import anightdazingzoroark.prift.api.creature.config.RiftCreatureFood;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;

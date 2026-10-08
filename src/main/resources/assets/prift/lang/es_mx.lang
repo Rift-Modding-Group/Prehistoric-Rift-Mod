@@ -63,13 +63,17 @@ key.prift.switch_party_mem_up=Criatura anterior del equipo
 key.prift.switch_party_mem_down=Criatura siguiente del equipo
 key.prift.quick_summon_dismiss=Invocar/Retirar la criatura seleccionada
 key.prift.toggle_riding_move_hotbar=Cambiar entre las barras de objetos y movimientos
+key.prift.toggle_riding_block_break=Alternar destrucción de bloques con ataques cuerpo a cuerpo
 
-hud.prift.riding.toggle_hotbar=Movimientos / Objetos
+hud.prift.riding.show_move_hotbar=Mostrar hotbar de movimientos
+hud.prift.riding.show_item_hotbar=Mostrar hotbar de objetos
 hud.prift.riding.select_move=Seleccionar movimiento
 hud.prift.riding.use_move=Usar movimiento
 hud.prift.riding.charge_move=Mantener para cargar
 hud.prift.riding.sprint=Correr
 hud.prift.riding.jump=Brincar
+hud.prift.riding.block_break_enable=Activar destrucción de bloques
+hud.prift.riding.block_break_disable=Desactivar destrucción de bloques
 
 party.warning.party_full=¡Tu equipo está lleno! Esta criatura permanecerá fuera del equipo.
 party.warning.cannot_summon=¡Esta criatura no se puede invocar en tu ubicación!

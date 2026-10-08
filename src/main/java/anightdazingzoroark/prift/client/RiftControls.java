@@ -19,4 +19,7 @@ public class RiftControls {
     public static final KeyBinding TOGGLE_RIDING_MOVE_HOTBAR = new KeyBinding(
             "key.prift.toggle_riding_move_hotbar", Keyboard.KEY_R, RiftInitialize.MODNAME
     );
+    public static final KeyBinding TOGGLE_RIDING_BLOCK_BREAK = new KeyBinding(
+            "key.prift.toggle_riding_block_break", Keyboard.KEY_C, RiftInitialize.MODNAME
+    );
 }

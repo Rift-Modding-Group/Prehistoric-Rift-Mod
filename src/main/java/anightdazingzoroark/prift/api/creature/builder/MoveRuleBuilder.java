@@ -90,7 +90,7 @@ public class MoveRuleBuilder {
     }
 
     /**
-     * Make it so this move can be used in clearing paths
+     * Make it so this move can be used in clearing paths when pathfinding
      */
     public MoveRuleBuilder setUseBlockBreak() {
         this.checkIfLocked();

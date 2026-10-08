@@ -47,6 +47,7 @@ public class RiftRidingActionMessage extends RiftLibMessage<RiftRidingActionMess
             case RELEASE_MOVE -> creature.releaseMoveFromRider(player);
             case JUMP -> creature.jumpFromRider(player, message.value, message.active);
             case SET_SPRINTING -> creature.setSprintingFromRider(player, message.active);
+            case SET_BLOCK_BREAK -> creature.setUseBlockBreak(message.active);
         }
     }
 
@@ -57,6 +58,7 @@ public class RiftRidingActionMessage extends RiftLibMessage<RiftRidingActionMess
         START_MOVE,
         RELEASE_MOVE,
         JUMP,
-        SET_SPRINTING
+        SET_SPRINTING,
+        SET_BLOCK_BREAK
     }
 }

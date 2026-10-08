@@ -81,6 +81,10 @@ public interface ICreature {
 
     boolean isInHerd();
 
+    boolean getUseBlockBreak();
+
+    boolean isTamed();
+
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean isHerdLeader();
 
