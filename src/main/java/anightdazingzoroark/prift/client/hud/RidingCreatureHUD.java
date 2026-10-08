@@ -19,6 +19,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.input.Keyboard;
 
 import java.util.List;
@@ -47,6 +48,11 @@ public class RidingCreatureHUD {
     private int sprintTicks;
     private int sprintCooldownTicks;
     private int sprintCooldownDisplayTicks;
+
+    public boolean isEnabled(@NotNull Minecraft minecraft, @Nullable RiftCreature creature) {
+        return minecraft.player != null && !minecraft.gameSettings.hideGUI && creature != null
+                && creature.getControllingPassenger() == minecraft.player;
+    }
 
     //---setters---
     public void setJumpState(int chargeTicks, int cooldownTicks, int cooldownDisplayChargeTicks) {
@@ -238,7 +244,7 @@ public class RidingCreatureHUD {
 
     public void renderControls(
             @NotNull Minecraft minecraft, @NotNull RiftCreature creature, boolean moveHotbarActive,
-            int selectedMove, int width, int height
+            boolean ridingAimActive, int selectedMove, int width, int height
     ) {
         GlStateManager.pushMatrix();
         GlStateManager.translate(width / 2f, height / 2f, 0f);
@@ -309,19 +315,43 @@ public class RidingCreatureHUD {
         //-----left side-----
         if (moveHotbarActive) {
             int leftRow = 0;
+            CreatureMoveBuilder selectedMoveBuilder = creature.getCreatureMoves().getUsableMoves().isEmpty()
+                    ? null : creature.getCreatureMoves().getUsableMoves().get(selectedMove).getValue();
 
-            //---move use instruction by left clicking---
-            String moveUseInstruction;
-            if (!creature.getCreatureMoves().getUsableMoves().isEmpty()
-                    && creature.getCreatureMoves().getUsableMoves().get(selectedMove).getValue().getMoveChargeupBuilder() != null
-            ) {
-                moveUseInstruction = I18n.format("hud.prift.riding.charge_move");
+            if (selectedMoveBuilder != null
+                    && selectedMoveBuilder.getRiddenAimingType() == CreatureMoveBuilder.RiddenAimingType.RANGED) {
+                if (ridingAimActive) {
+                    this.drawControl(
+                            minecraft, minecraft.gameSettings.keyBindAttack.getKeyCode(),
+                            I18n.format("hud.prift.riding.shoot_move"), false, leftRow++
+                    );
+                }
+                else {
+                    this.drawControl(
+                            minecraft, minecraft.gameSettings.keyBindUseItem.getKeyCode(),
+                            I18n.format("hud.prift.riding.aim_move"), false, leftRow++
+                    );
+                }
             }
-            else moveUseInstruction = I18n.format("hud.prift.riding.use_move");
-            this.drawControl(
-                    minecraft, minecraft.gameSettings.keyBindAttack.getKeyCode(),
-                    moveUseInstruction, false, leftRow++
-            );
+            else {
+                String moveUseInstruction;
+                if (selectedMoveBuilder != null && selectedMoveBuilder.getMoveChargeupBuilder() != null) {
+                    moveUseInstruction = I18n.format("hud.prift.riding.charge_move");
+                }
+                else moveUseInstruction = I18n.format("hud.prift.riding.use_move");
+                this.drawControl(
+                        minecraft, minecraft.gameSettings.keyBindAttack.getKeyCode(),
+                        moveUseInstruction, false, leftRow++
+                );
+
+                if (selectedMoveBuilder != null
+                        && selectedMoveBuilder.getRiddenAimingType() == CreatureMoveBuilder.RiddenAimingType.TARGETED_MELEE) {
+                    this.drawControl(
+                            minecraft, minecraft.gameSettings.keyBindUseItem.getKeyCode(),
+                            I18n.format("hud.prift.riding.aim_move"), false, leftRow++
+                    );
+                }
+            }
 
             //---move selection by scrolling---
             this.drawControl(

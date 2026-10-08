@@ -116,7 +116,7 @@
 				}
 			},
 			"timeline": {
-				"0.5": "function.create_offense_hitbox_by_tag('frontZone');",
+				"0.5": "function.create_offense_hitbox_by_tag('frontZone'); function.send_message('riddenTargetedMeleeHitEffect');",
 				"0.625": "function.destroy_offense_hitbox_by_tag('frontZone'); function.send_message('moveBlockBreakEffect');"
 			},
 			"sound_effects": {
@@ -511,7 +511,7 @@
 				}
 			},
 			"timeline": {
-				"0.25": "function.create_offense_hitbox_by_tag('frontZone'); function.send_message('moveChargeupReleasingFinished');"
+				"0.25": "function.create_offense_hitbox_by_tag('frontZone'); function.send_message('riddenTargetedMeleeHitEffect'); function.send_message('moveChargeupReleasingFinished');"
 			}
 		},
 		"animation.stegosaurus.thagomize_finishing": {

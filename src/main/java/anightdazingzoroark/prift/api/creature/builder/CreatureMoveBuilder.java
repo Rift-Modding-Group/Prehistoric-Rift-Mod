@@ -40,6 +40,8 @@ public class CreatureMoveBuilder {
     @Nullable
     private Consumer<ICreature> onMoveEndEffect;
     private boolean useCanStopMovement;
+    @NotNull
+    private RiddenAimingType riddenAimingType = RiddenAimingType.NONE;
 
     /**
      * This locks this object so that when accessing any instances of this, it can never be modified ever
@@ -155,6 +157,21 @@ public class CreatureMoveBuilder {
 
     public boolean getMakesContact() {
         return this.makesContact;
+    }
+
+    /**
+     * Controls how this move behaves while its rider holds the use-item button.
+     * */
+    public CreatureMoveBuilder setRiddenAimingType(@NotNull RiddenAimingType riddenAimingType) {
+        this.checkIfLocked();
+
+        this.riddenAimingType = riddenAimingType;
+        return this;
+    }
+
+    @NotNull
+    public RiddenAimingType getRiddenAimingType() {
+        return this.riddenAimingType;
     }
 
     /**
@@ -333,6 +350,7 @@ public class CreatureMoveBuilder {
         toReturn.onBlockHitEffect = this.onBlockHitEffect;
         toReturn.onMoveEndEffect = this.onMoveEndEffect;
         toReturn.useCanStopMovement = this.useCanStopMovement;
+        toReturn.riddenAimingType = this.riddenAimingType;
 
         return toReturn;
     }
@@ -348,5 +366,11 @@ public class CreatureMoveBuilder {
         PHYSICAL,
         ELEMENTAL,
         STATUS
+    }
+
+    public enum RiddenAimingType {
+        NONE,
+        RANGED,
+        TARGETED_MELEE
     }
 }

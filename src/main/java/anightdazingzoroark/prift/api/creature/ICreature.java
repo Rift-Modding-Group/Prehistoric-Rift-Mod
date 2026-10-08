@@ -14,6 +14,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
@@ -118,6 +119,9 @@ public interface ICreature {
     float getStamina();
 
     float getMaxStamina();
+
+    @Nullable
+    Vec3d getRiddenAimPosition();
 
     void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, float velocity, float inaccuracy);
 

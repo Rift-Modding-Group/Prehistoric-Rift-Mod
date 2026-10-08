@@ -3,6 +3,8 @@ package anightdazingzoroark.prift.client;
 import anightdazingzoroark.prift.client.hud.PlayerPartyHUD;
 import anightdazingzoroark.prift.client.hud.RidingCreatureHUD;
 import anightdazingzoroark.prift.client.hud.TameProgressHUD;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenAimingType;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureLeapHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiData;
@@ -10,6 +12,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiFactory;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureSprintHelper;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftPartyActionMessage;
+import anightdazingzoroark.prift.server.message.RiftRidingAimMessage;
 import anightdazingzoroark.prift.server.message.RiftRidingActionMessage;
 import com.cleanroommc.modularui.factory.GuiManager;
 import net.minecraft.client.Minecraft;
@@ -25,20 +28,34 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.input.Keyboard;
 
+import java.util.List;
+
 public class ClientEvents {
-    private final RidingCreatureHUD ridingCreatureHUD = new RidingCreatureHUD();
+    @NotNull
+    private final RidingCreatureHUD ridingCreatureHUD;
+    @NotNull
+    private final CameraHandler cameraHandler;
 
     private int riddenCreatureId = -1;
     private boolean moveHotbarActive;
     private boolean usingRidingMove;
+    private boolean ridingAimActive;
+    private int ridingAimMove = -1;
     private int selectedRidingMove;
     private int riddenLeapChargeStartTick = -1;
     private int riddenLeapCooldownDisplayChargeTicks;
     private int riddenSprintStartTick = -1;
     private int riddenSprintCooldownDisplayTicks;
+
+    public ClientEvents(@NotNull RidingCreatureHUD ridingCreatureHUD, @NotNull CameraHandler cameraHandler) {
+        this.ridingCreatureHUD = ridingCreatureHUD;
+        this.cameraHandler = cameraHandler;
+    }
 
     /**
      * block default inventory opening when riding on a creature
@@ -52,6 +69,7 @@ public class ClientEvents {
                 || creature.getControllingPassenger() != minecraft.player) return;
 
         if (this.usingRidingMove) this.releaseSelectedRidingMove();
+        this.stopRidingAim();
         event.setCanceled(true);
         GuiManager.openFromClient(RiftCreatureGuiFactory.INSTANCE, new RiftCreatureGuiData(minecraft.player, creature));
     }
@@ -82,6 +100,7 @@ public class ClientEvents {
         //for changing between item hotbar and move hotbar
         if (RiftControls.TOGGLE_RIDING_MOVE_HOTBAR.isPressed()) {
             if (this.moveHotbarActive && this.usingRidingMove) this.releaseSelectedRidingMove();
+            if (this.moveHotbarActive) this.stopRidingAim();
 
             this.moveHotbarActive = !this.moveHotbarActive;
             //block default mouse actions
@@ -115,7 +134,10 @@ public class ClientEvents {
                 if (!hotbarBinding.isActiveAndMatches(eventKey)) continue;
 
                 hotbarBinding.isPressed();
-                if (hotbarSlot < moveCount) this.selectedRidingMove = hotbarSlot;
+                if (hotbarSlot < moveCount && hotbarSlot != this.selectedRidingMove) {
+                    this.stopRidingAim();
+                    this.selectedRidingMove = hotbarSlot;
+                }
                 break;
             }
         }
@@ -155,13 +177,24 @@ public class ClientEvents {
         if (event.phase != TickEvent.Phase.END) return;
 
         Minecraft minecraft = Minecraft.getMinecraft();
-        if (minecraft.player != null
-                && minecraft.player.getRidingEntity() instanceof RiftCreature creature
-                && creature.getControllingPassenger() == minecraft.player
-                && !creature.isSprinting()
-        ) {
-            minecraft.player.setSprinting(false);
+        RiftCreature riddenCreature = this.updateRidingState(minecraft);
+        if (this.ridingAimActive && (!this.ridingCreatureHUD.isEnabled(minecraft, riddenCreature) || riddenCreature == null)) {
+            this.stopRidingAim();
         }
+        else if (this.ridingAimActive) {
+            List<ImmutablePair<String, CreatureMoveBuilder>> moves = riddenCreature.getCreatureMoves().getUsableMoves();
+            if (!this.moveHotbarActive || minecraft.currentScreen != null
+                    || this.ridingAimMove < 0 || this.ridingAimMove >= moves.size()
+                    || moves.get(this.ridingAimMove).getValue().getRiddenAimingType() == RiddenAimingType.NONE
+            ) {
+                this.stopRidingAim();
+            }
+        }
+        this.cameraHandler.update(minecraft, riddenCreature, this.moveHotbarActive, this.ridingAimActive);
+        if (riddenCreature == null) return;
+        if (this.ridingAimActive) this.cameraHandler.sendRidingAimUpdate(minecraft, riddenCreature, this.ridingAimMove);
+
+        if (!riddenCreature.isSprinting()) minecraft.player.setSprinting(false);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -176,7 +209,9 @@ public class ClientEvents {
 
         //make scroll switch between moves
         if (event.getDwheel() != 0) {
-            this.selectedRidingMove = Math.floorMod(this.selectedRidingMove + (event.getDwheel() > 0 ? -1 : 1), moveCount);
+            int nextMove = Math.floorMod(this.selectedRidingMove + (event.getDwheel() > 0 ? -1 : 1), moveCount);
+            if (nextMove != this.selectedRidingMove) this.stopRidingAim();
+            this.selectedRidingMove = nextMove;
             event.setCanceled(true);
         }
 
@@ -191,8 +226,22 @@ public class ClientEvents {
             else this.releaseSelectedRidingMove();
             event.setCanceled(true);
         }
-        //clicking other mouse buttons don't do anythin
-        else if (event.getButton() == 1 || event.getButton() == 2) {
+        //hold right click to aim moves that opt into ridden aiming
+        else if (event.getButton() == 1) {
+            CreatureMoveBuilder selectedMove = riddenCreature.getCreatureMoves().getUsableMoves().get(this.selectedRidingMove).getValue();
+            if (this.ridingCreatureHUD.isEnabled(minecraft, riddenCreature)
+                    && selectedMove.getRiddenAimingType() != RiddenAimingType.NONE) {
+                if (event.isButtonstate()) {
+                    this.ridingAimActive = true;
+                    this.ridingAimMove = this.selectedRidingMove;
+                    this.cameraHandler.sendRidingAimUpdate(minecraft, riddenCreature, this.ridingAimMove);
+                }
+                else this.stopRidingAim();
+            }
+            event.setCanceled(true);
+        }
+        //clicking middle mouse doesn't do anything beyond move selection via scrolling
+        else if (event.getButton() == 2) {
             event.setCanceled(true);
         }
     }
@@ -253,7 +302,8 @@ public class ClientEvents {
             );
 
             this.ridingCreatureHUD.renderControls(
-                    minecraft, riddenCreature, this.moveHotbarActive, this.selectedRidingMove, width, height
+                    minecraft, riddenCreature, this.moveHotbarActive, this.ridingAimActive,
+                    this.selectedRidingMove, width, height
             );
         }
     }
@@ -338,6 +388,19 @@ public class ClientEvents {
         this.usingRidingMove = false;
     }
 
+    private void stopRidingAim() {
+        if (!this.ridingAimActive) return;
+
+        Minecraft minecraft = Minecraft.getMinecraft();
+        if (minecraft.getConnection() != null) {
+            RiftMessages.WRAPPER.sendToServer(new RiftRidingAimMessage(
+                    false, this.ridingAimMove, -1, 0D, 0D, 0D
+            ));
+        }
+        this.ridingAimActive = false;
+        this.ridingAimMove = -1;
+    }
+
     @Nullable
     private RiftCreature updateRidingState(Minecraft minecraft) {
         RiftCreature riddenCreature = minecraft.player != null
@@ -347,6 +410,7 @@ public class ClientEvents {
         int currentRiddenCreatureId = riddenCreature == null ? -1 : riddenCreature.getEntityId();
 
         if (currentRiddenCreatureId != this.riddenCreatureId) {
+            this.stopRidingAim();
             this.riddenCreatureId = currentRiddenCreatureId;
             this.moveHotbarActive = false;
             this.usingRidingMove = false;

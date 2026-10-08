@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.client.rendering.ItemRenderer;
 import anightdazingzoroark.prift.client.rendering.block.SmokenutBushBlockRenderer;
 import anightdazingzoroark.prift.client.rendering.entity.RiftCreatureRenderer;
 import anightdazingzoroark.prift.client.rendering.entity.RiftProjectileRenderer;
+import anightdazingzoroark.prift.client.hud.RidingCreatureHUD;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.block.RiftBlocks;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -34,7 +35,10 @@ public class ClientProxy extends ServerProxy {
         GeoBlockRenderer.registerBlockRenderer(RiftBlocks.SMOKENUT_BUSH, new SmokenutBushBlockRenderer());
 
         //register HUDs
-        MinecraftForge.EVENT_BUS.register(new ClientEvents());
+        RidingCreatureHUD ridingCreatureHUD = new RidingCreatureHUD();
+        CameraHandler cameraHandler = new CameraHandler(ridingCreatureHUD);
+        MinecraftForge.EVENT_BUS.register(cameraHandler);
+        MinecraftForge.EVENT_BUS.register(new ClientEvents(ridingCreatureHUD, cameraHandler));
     }
 
     @SideOnly(Side.CLIENT)

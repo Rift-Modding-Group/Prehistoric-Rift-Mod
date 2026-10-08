@@ -49,7 +49,7 @@
 				}
 			},
 			"timeline": {
-				"0.15": "function.create_offense_hitbox_by_tag('frontZone');",
+				"0.15": "function.create_offense_hitbox_by_tag('frontZone'); function.send_message('riddenTargetedMeleeHitEffect');",
 				"0.25": "function.destroy_offense_hitbox_by_tag('frontZone'); function.send_message('moveBlockBreakEffect');"
 			},
 			"sound_effects": {

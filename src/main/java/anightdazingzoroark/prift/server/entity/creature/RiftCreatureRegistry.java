@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureDomesticationBuild
 import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenAimingType;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.prift.api.util.MathUtil;
@@ -242,6 +243,7 @@ public class RiftCreatureRegistry {
                         //---moves---
                         .addMove("bite", CreatureMoveCommon.standardMeleeMove.copy()
                                 .setBasePower(50)
+                                .setRiddenAimingType(RiddenAimingType.TARGETED_MELEE)
                                 .setAnimNames("bite")
                         )
                         .addMove("stomp", new CreatureMoveBuilder()
@@ -286,16 +288,25 @@ public class RiftCreatureRegistry {
                                 .setRequireFindTargetToUse()
                                 .setElemental(Element.FIRE, 0)
                                 .setWhileMoveUseEffect((creature, target) -> {
-                                    if (target == null || !target.isEntityAlive()) return;
+                                    Vec3d fireDistVec = creature.getLocatorWorldPos("fireDistPoint");
+                                    Vec3d aimPosition = creature.getRiddenAimPosition();
+                                    Vec3d targetPosition;
+                                    double verticalDist;
+                                    if (aimPosition != null) {
+                                        targetPosition = aimPosition;
+                                        verticalDist = aimPosition.y - fireDistVec.y;
+                                    }
+                                    else {
+                                        if (target == null || !target.isEntityAlive()) return;
+                                        targetPosition = target.getPositionVector();
+                                        verticalDist = (targetPosition.y + target.height / 2D) - fireDistVec.y;
+                                    }
 
                                     //get distance between the locator and the target
-                                    Vec3d fireDistVec = creature.getLocatorWorldPos("fireDistPoint");
-                                    Vec3d targetCenter = target.getPositionVector();
-                                    double distToTarget = fireDistVec.distanceTo(targetCenter);
+                                    double distToTarget = fireDistVec.distanceTo(targetPosition);
                                     if (distToTarget <= 1E-4D) return;
 
                                     //convert into angle using trig magic
-                                    double verticalDist = (targetCenter.y + target.height / 2D) - fireDistVec.y;
                                     double angle = Math.toDegrees(Math.asin(Math.clamp(verticalDist / distToTarget, -1D, 1D)));
 
                                     //now set variable
@@ -314,6 +325,7 @@ public class RiftCreatureRegistry {
                                 .setOnMoveEndEffect(creature -> {
                                     creature.getAnimationData().setVariable("flamethrower_head_bend", 0);
                                 })
+                                .setRiddenAimingType(RiddenAimingType.RANGED)
                         )
                         //---attack ai---
                         .setMoveSelector(new CreatureMoveSelectorBuilder()
@@ -404,6 +416,7 @@ public class RiftCreatureRegistry {
                         //---moves---
                         .addMove("tail_stab", CreatureMoveCommon.standardMeleeMove.copy()
                                 .setBasePower(50)
+                                .setRiddenAimingType(RiddenAimingType.TARGETED_MELEE)
                                 .setAnimNames("tail_stab")
                         )
                         .addMove("thagomize", new CreatureMoveBuilder()
@@ -413,6 +426,7 @@ public class RiftCreatureRegistry {
                                 .setStaminaCost(0.08f)
                                 .setStaminaDrainPerSecond(0.02f)
                                 .setBasePower(50)
+                                .setRiddenAimingType(RiddenAimingType.TARGETED_MELEE)
                                 .setOnMoveEndEffect(creature -> {
                                     creature.setProperty("ChargeUpLevel", 0);
                                 })
@@ -492,6 +506,7 @@ public class RiftCreatureRegistry {
                                 .setPhysical()
                                 .setBasePower(30)
                                 .setRequireFindTargetToUse()
+                                .setRiddenAimingType(RiddenAimingType.RANGED)
                                 .setOnMoveHitEffect(creature -> {
                                     //when ridden, shoot forward
                                     if (creature.getControllingPassenger() != null) {
