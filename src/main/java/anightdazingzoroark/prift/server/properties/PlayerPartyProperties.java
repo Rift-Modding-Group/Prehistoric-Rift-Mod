@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.server.entity.creature.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.CreatureStorage;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
+import anightdazingzoroark.prift.server.entity.creature.IRiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.util.RiftUtil;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertySystem.AbstractEntityProperties;
@@ -129,9 +130,12 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
     }
 
     public void toggleSelectedPartyMember() {
-        if (this.getEntityHolder().world.isRemote) return;
+        this.togglePartyMember(this.getSelectedPosition());
+    }
 
-        int selectedPosition = this.getSelectedPosition();
+    public void togglePartyMember(int selectedPosition) {
+        if (this.getEntityHolder().world.isRemote) return;
+        if (selectedPosition < 0 || selectedPosition >= MAX_SIZE) return;
         CreatureNBT storedCreature = this.getCreatureStorage().getCreature(selectedPosition);
         if (storedCreature.nbtTagCompound().isEmpty() || !storedCreature.isOwner(this.getEntityHolder())) return;
 
@@ -159,9 +163,7 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
             return;
         }
 
-        BlockPos positionBelowPlayer = this.getEntityHolder().getPosition().down();
-        Material materialBelowPlayer = this.getEntityHolder().world.getBlockState(positionBelowPlayer).getMaterial();
-        if (materialBelowPlayer == Material.AIR && !this.getEntityHolder().isRiding() || materialBelowPlayer == Material.LAVA) {
+        if (!this.canSummonAtCurrentPosition()) {
             this.getEntityHolder().sendStatusMessage(new TextComponentTranslation("party.warning.cannot_summon"), false);
             return;
         }
@@ -182,6 +184,46 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
         creatureStorage.setCreature(selectedPosition, storedCreature);
         this.set("Creatures", creatureStorage);
         this.getEntityHolder().sendStatusMessage(new TextComponentTranslation("party.warning.summon_success"), false);
+    }
+
+    public boolean canSummonAtCurrentPosition() {
+        BlockPos positionBelowPlayer = this.getEntityHolder().getPosition().down();
+        Material materialBelowPlayer = this.getEntityHolder().world.getBlockState(positionBelowPlayer).getMaterial();
+        return (materialBelowPlayer != Material.AIR || this.getEntityHolder().isRiding())
+                && materialBelowPlayer != Material.LAVA;
+    }
+
+    public void swapPartyMembers(int firstPosition, int secondPosition) {
+        if (this.getEntityHolder().world.isRemote) return;
+        if (firstPosition < 0 || firstPosition >= MAX_SIZE || secondPosition < 0 || secondPosition >= MAX_SIZE) return;
+        if (firstPosition == secondPosition) return;
+
+        CreatureStorage creatureStorage = this.getCreatureStorage();
+        CreatureNBT firstCreature = creatureStorage.getCreature(firstPosition);
+        creatureStorage.setCreature(firstPosition, creatureStorage.getCreature(secondPosition));
+        creatureStorage.setCreature(secondPosition, firstCreature);
+        this.set("Creatures", creatureStorage);
+
+        int selectedPosition = this.getSelectedPosition();
+        if (selectedPosition == firstPosition) this.set("SelectedPosition", secondPosition);
+        else if (selectedPosition == secondPosition) this.set("SelectedPosition", firstPosition);
+    }
+
+    public void savePartyMember(int index, @NotNull IRiftCreature creature) {
+        if (this.getEntityHolder().world.isRemote || index < 0 || index >= MAX_SIZE) return;
+        CreatureNBT currentCreature = this.getCreatureStorage().getCreature(index);
+        if (currentCreature.nbtTagCompound().isEmpty() || !currentCreature.getUniqueID().equals(creature.getUniqueID())) return;
+        if (!creature.isOwner(this.getEntityHolder())) return;
+
+        if (creature instanceof RiftCreature deployedCreature) {
+            this.storeCreatureAt(index, deployedCreature);
+            return;
+        }
+        if (creature instanceof CreatureNBT storedCreature) {
+            CreatureStorage creatureStorage = this.getCreatureStorage();
+            creatureStorage.setCreature(index, storedCreature);
+            this.set("Creatures", creatureStorage);
+        }
     }
 
     private void storeCreatureAt(int index, @NotNull RiftCreature creature) {

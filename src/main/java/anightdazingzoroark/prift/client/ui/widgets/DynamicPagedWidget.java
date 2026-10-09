@@ -51,13 +51,19 @@ public class DynamicPagedWidget<W extends DynamicPagedWidget<W>> extends Widget<
 
     public W controller(Controller controller) {
         controller.pagedWidget = this;
+        this.currentPageIndex = controller.initialPageIndex;
         return getThis();
     }
 
     public static class Controller {
         private DynamicPagedWidget<?> pagedWidget;
+        private int initialPageIndex;
 
         public Controller() {}
+
+        public Controller(int initialPageIndex) {
+            this.initialPageIndex = initialPageIndex;
+        }
 
         public void setPage(int page) {
             if (this.pagedWidget == null || !this.pagedWidget.isValid()) {

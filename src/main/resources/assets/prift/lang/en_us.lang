@@ -64,6 +64,7 @@ key.prift.switch_party_mem_down=Next party member
 key.prift.quick_summon_dismiss=Summon/Dismiss selected party member
 key.prift.toggle_riding_move_hotbar=Switch between item and creature move hotbars
 key.prift.toggle_riding_block_break=Toggle ridden melee block breaking
+key.prift.open_party_menu=Open Party Menu
 
 hud.prift.riding.show_move_hotbar=Show move hotbar
 hud.prift.riding.show_item_hotbar=Show item hotbar
@@ -120,6 +121,15 @@ gui.prift.creature_summary.iv=IV
 gui.prift.creature_summary.iv.description=Individual Value, a stat modifier unique to each creature.
 gui.prift.creature_summary.acquisition=Acquisition Info
 gui.prift.unknown=Unknown
+gui.prift.party.title=Party
+gui.prift.party.empty=Empty
+gui.prift.party.sort=Sort
+gui.prift.party.dropdown.summon=Summon
+gui.prift.party.dropdown.dismiss=Dismiss
+gui.prift.party.dropdown.inventory=Inventory
+gui.prift.party.dropdown.settings=Settings
+gui.prift.party.dropdown.summary=Summary
+gui.prift.party.dropdown.moves=Moves
 
 acquisition.unknown=Tamed a long time ago.
 acquisition.tamed_from_wild=Tamed from the wild on %s.

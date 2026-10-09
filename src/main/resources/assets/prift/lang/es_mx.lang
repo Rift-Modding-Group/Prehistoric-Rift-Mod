@@ -64,6 +64,7 @@ key.prift.switch_party_mem_down=Criatura siguiente del equipo
 key.prift.quick_summon_dismiss=Invocar/Retirar la criatura seleccionada
 key.prift.toggle_riding_move_hotbar=Cambiar entre las barras de objetos y movimientos
 key.prift.toggle_riding_block_break=Alternar destrucción de bloques con ataques cuerpo a cuerpo
+key.prift.open_party_menu=Abrir menú de equipo
 
 hud.prift.riding.show_move_hotbar=Mostrar hotbar de movimientos
 hud.prift.riding.show_item_hotbar=Mostrar hotbar de objetos
@@ -120,6 +121,15 @@ gui.prift.creature_summary.iv=VI
 gui.prift.creature_summary.iv.description=Valor individual, un modificador de estadística distinta de cada criatura.
 gui.prift.creature_summary.acquisition=Información de adquisición
 gui.prift.unknown=Desconocida
+gui.prift.party.title=Equipo
+gui.prift.party.empty=Vacío
+gui.prift.party.sort=Ordenar
+gui.prift.party.dropdown.summon=Invocar
+gui.prift.party.dropdown.dismiss=Despedir
+gui.prift.party.dropdown.inventory=Inventario
+gui.prift.party.dropdown.settings=Adjustes
+gui.prift.party.dropdown.summary=Resumen
+gui.prift.party.dropdown.moves=Movimientos
 
 acquisition.unknown=Tameada hace mucho tiempo.
 acquisition.tamed_from_wild=Tameada en estado salvaje el %s.

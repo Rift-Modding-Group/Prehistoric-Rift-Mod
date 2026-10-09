@@ -16,6 +16,9 @@ public class RiftControls {
     public static final KeyBinding DEPLOY_PARTY_MEMBER = new KeyBinding(
             "key.prift.quick_summon_dismiss", Keyboard.KEY_K, RiftInitialize.MODNAME
     );
+    public static final KeyBinding OPEN_PARTY_MENU = new KeyBinding(
+            "key.prift.open_party_menu", Keyboard.KEY_J, RiftInitialize.MODNAME
+    );
     public static final KeyBinding TOGGLE_RIDING_MOVE_HOTBAR = new KeyBinding(
             "key.prift.toggle_riding_move_hotbar", Keyboard.KEY_R, RiftInitialize.MODNAME
     );

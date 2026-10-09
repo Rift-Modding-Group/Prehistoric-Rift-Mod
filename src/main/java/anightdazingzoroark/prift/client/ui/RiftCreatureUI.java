@@ -35,7 +35,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Locale;
 import java.util.stream.IntStream;
 
 public class RiftCreatureUI {
@@ -45,6 +44,7 @@ public class RiftCreatureUI {
 
         //inventory
         RiftLibInventoryHandler creatureInventory = creature.getCreatureInventory();
+        RiftLibInventoryHandler creatureGear = creature.getCreatureGear();
         int inventorySize = creatureInventory.getSlots();
         int inventoryColumns = Math.min(9, inventorySize);
         int inventoryRows = (inventorySize + inventoryColumns - 1) / inventoryColumns;
@@ -54,18 +54,22 @@ public class RiftCreatureUI {
                 syncManager.itemSlot(
                         "creature_inventory", index,
                         new ModularSlot(creatureInventory, index).slotGroup("creature_inventory")
+                                .changeListener((stack, onlyAmountChanged, client, init) -> {
+                                    if (!client && !init) data.saveInventory(creatureInventory);
+                                })
                 )
         );
         if (canBeRidden) {
             syncManager.registerSlotGroup("creature_gear", 1);
             syncManager.itemSlot(
                     "creature_gear", 0,
-                    new ModularSlot(creature.getCreatureGear(), 0)
+                    new ModularSlot(creatureGear, 0)
                             .filter(stack -> stack.getItem() == Items.SADDLE)
                             .changeListener((stack, onlyAmountChanged, client, init) -> {
                                 if (!client && creature instanceof RiftCreature deployedCreature) {
                                     deployedCreature.setSaddled(deployedCreature.canBeRidden() && stack.getItem() == Items.SADDLE);
                                 }
+                                if (!client && !init) data.saveGear(creatureGear);
                             })
                             .slotGroup("creature_gear")
             );
@@ -76,15 +80,24 @@ public class RiftCreatureUI {
         syncManager.syncValue("tame_targeting", new EnumSyncValue<>(
                 RiftCreatureEnums.TameTargeting.class,
                 creature::getTameTargeting,
-                creature::setTameTargeting
+                value -> {
+                    creature.setTameTargeting(value);
+                    data.saveChanges();
+                }
         ));
         syncManager.syncValue("custom_name", new StringSyncValue(
                 creature::getCustomNameTag,
-                creature::setCustomNameTag
+                value -> {
+                    creature.setCustomNameTag(value);
+                    data.saveChanges();
+                }
         ));
         syncManager.syncValue("eat_from_inventory", new BooleanSyncValue(
                 creature::getEatFromInventory,
-                creature::setEatFromInventory
+                value -> {
+                    creature.setEatFromInventory(value);
+                    data.saveChanges();
+                }
         ));
 
         //acquisition info
@@ -104,7 +117,7 @@ public class RiftCreatureUI {
         int statsIvColumnWidth = 27;
 
         //final return value
-        DynamicPagedWidget.Controller tabController = new DynamicPagedWidget.Controller();
+        DynamicPagedWidget.Controller tabController = new DynamicPagedWidget.Controller(data.getInitialPage());
         return new ModularPanel("rift_creature").width(176).coverChildrenHeight()
                 .child(Flow.row().coverChildrenHeight().topRel(0f, 4, 1f).widthRel(1f)
                         .child(new DynamicPageButton(0, tabController)

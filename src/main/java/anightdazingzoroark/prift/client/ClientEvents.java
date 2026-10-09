@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.client;
 import anightdazingzoroark.prift.client.hud.PlayerPartyHUD;
 import anightdazingzoroark.prift.client.hud.RidingCreatureHUD;
 import anightdazingzoroark.prift.client.hud.TameProgressHUD;
+import anightdazingzoroark.prift.client.ui.RiftPartyScreen;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenAimingType;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
@@ -16,6 +17,7 @@ import anightdazingzoroark.prift.server.message.RiftPartyActionMessage;
 import anightdazingzoroark.prift.server.message.RiftRidingAimMessage;
 import anightdazingzoroark.prift.server.message.RiftRidingActionMessage;
 import com.cleanroommc.modularui.factory.GuiManager;
+import com.cleanroommc.modularui.factory.ClientGUI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.inventory.GuiInventory;
@@ -92,6 +94,9 @@ public class ClientEvents {
         if (RiftControls.DEPLOY_PARTY_MEMBER.isPressed()) {
             RiftMessages.WRAPPER.sendToServer(new RiftPartyActionMessage(RiftPartyActionMessage.Action.DEPLOY_OR_DISMISS));
             minecraft.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1f));
+        }
+        if (RiftControls.OPEN_PARTY_MENU.isPressed() && minecraft.currentScreen == null) {
+            ClientGUI.open(new RiftPartyScreen());
         }
 
         //---for riding controls---

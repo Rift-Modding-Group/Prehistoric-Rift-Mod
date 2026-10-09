@@ -10,6 +10,8 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class RiftPartyActionMessage extends RiftLibMessage<RiftPartyActionMessage> {
     private byte action;
+    private int firstPosition = -1;
+    private int secondPosition = -1;
 
     public RiftPartyActionMessage() {}
 
@@ -17,14 +19,24 @@ public class RiftPartyActionMessage extends RiftLibMessage<RiftPartyActionMessag
         this.action = (byte) action.ordinal();
     }
 
+    public RiftPartyActionMessage(Action action, int firstPosition, int secondPosition) {
+        this.action = (byte) action.ordinal();
+        this.firstPosition = firstPosition;
+        this.secondPosition = secondPosition;
+    }
+
     @Override
     public void fromBytes(ByteBuf buffer) {
         this.action = buffer.readByte();
+        this.firstPosition = buffer.readInt();
+        this.secondPosition = buffer.readInt();
     }
 
     @Override
     public void toBytes(ByteBuf buffer) {
         buffer.writeByte(this.action);
+        buffer.writeInt(this.firstPosition);
+        buffer.writeInt(this.secondPosition);
     }
 
     @Override
@@ -38,6 +50,8 @@ public class RiftPartyActionMessage extends RiftLibMessage<RiftPartyActionMessag
             case SELECT_PREVIOUS -> playerParty.selectPreviousPartyMember();
             case SELECT_NEXT -> playerParty.selectNextPartyMember();
             case DEPLOY_OR_DISMISS -> playerParty.toggleSelectedPartyMember();
+            case SWAP -> playerParty.swapPartyMembers(message.firstPosition, message.secondPosition);
+            case TOGGLE_PARTY_MEMBER -> playerParty.togglePartyMember(message.firstPosition);
         }
     }
 
@@ -47,6 +61,8 @@ public class RiftPartyActionMessage extends RiftLibMessage<RiftPartyActionMessag
     public enum Action {
         SELECT_PREVIOUS,
         SELECT_NEXT,
-        DEPLOY_OR_DISMISS
+        DEPLOY_OR_DISMISS,
+        SWAP,
+        TOGGLE_PARTY_MEMBER
     }
 }

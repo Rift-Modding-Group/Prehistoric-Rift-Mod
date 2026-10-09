@@ -46,6 +46,7 @@ public class ClientProxy extends ServerProxy {
         ClientRegistry.registerKeyBinding(RiftControls.SWITCH_PARTY_MEMBER_UP);
         ClientRegistry.registerKeyBinding(RiftControls.SWITCH_PARTY_MEMBER_DOWN);
         ClientRegistry.registerKeyBinding(RiftControls.DEPLOY_PARTY_MEMBER);
+        ClientRegistry.registerKeyBinding(RiftControls.OPEN_PARTY_MENU);
         ClientRegistry.registerKeyBinding(RiftControls.TOGGLE_RIDING_MOVE_HOTBAR);
         ClientRegistry.registerKeyBinding(RiftControls.TOGGLE_RIDING_BLOCK_BREAK);
 
