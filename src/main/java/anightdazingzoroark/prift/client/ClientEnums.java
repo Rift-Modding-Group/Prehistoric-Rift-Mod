@@ -17,7 +17,7 @@ public class ClientEnums {
 
         @NotNull
         public String getTranslatedName() {
-            return I18n.format("gui.prift.move_stamina_use."+this.toString().toLowerCase(Locale.ROOT));
+            return I18n.format("gui.prift.move_stamina_use." + this.toString().toLowerCase());
         }
 
         @NotNull

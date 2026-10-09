@@ -1,4 +1,4 @@
-package anightdazingzoroark.prift.client.ui;
+package anightdazingzoroark.prift.client.ui.widgets;
 
 import com.cleanroommc.modularui.api.ITheme;
 import com.cleanroommc.modularui.api.drawable.IDrawable;

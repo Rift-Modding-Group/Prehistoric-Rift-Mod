@@ -270,7 +270,7 @@ public class RiftCreatureRegistry {
                                 .setStaminaCost(0.15f)
                                 .setBasePower(20)
                                 .setRequireFindTargetToUse()
-                                .setElemental(Element.SONIC, 0)
+                                .setElemental(Element.SOUND, 0)
                                 .setOnMoveHitEffect(creature -> {
                                     if (!(creature instanceof IRayCreator<?> rayCreator)) return;
                                     RiftLibRayHelper.createRay(rayCreator, "roarRay", "centerPoint");

@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.api.creature.builder;
 
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.ICreature;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.BlockPos;
@@ -365,7 +366,12 @@ public class CreatureMoveBuilder {
     public enum MoveType {
         PHYSICAL,
         ELEMENTAL,
-        STATUS
+        STATUS;
+
+        @NotNull
+        public String getTranslatedName() {
+            return I18n.format("move.creature.type." + this.name().toLowerCase());
+        }
     }
 
     public enum RiddenAimingType {

@@ -3,6 +3,9 @@ package anightdazingzoroark.prift.client.ui;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.client.ClientEnums;
+import anightdazingzoroark.prift.client.ui.widgets.DynamicPageButton;
+import anightdazingzoroark.prift.client.ui.widgets.DynamicPagedWidget;
+import anightdazingzoroark.prift.client.ui.widgets.MoveIconTextures;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.creature.IRiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -30,11 +33,13 @@ import com.cleanroommc.modularui.widgets.textfield.TextFieldWidget;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 import java.util.stream.IntStream;
 
 public class RiftCreatureUI {
+    @NotNull
     public static ModularPanel show(RiftCreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
         IRiftCreature creature = data.getCreature();
 
@@ -322,46 +327,57 @@ public class RiftCreatureUI {
                         )
                         //page 4: move information
                         .addPage(Flow.column()
-                                .widthRel(1f)
-                                .coverChildrenHeight()
+                                .size(176, 175)
                                 .padding(7, 8)
                                 .crossAxisAlignment(Alignment.CrossAxis.START)
                                 .childPadding(2)
                                 .child(IKey.lang("gui.prift.creature_moves").asWidget())
-                                .child(new ListWidget<>()
-                                        .widthRel(1f)
-                                        .coverChildrenHeight()
+                                .child(new ListWidget<>().widthRel(1f).expanded()
                                         .crossAxisAlignment(Alignment.CrossAxis.START)
                                         .children(creature.getCreatureMoves().getUsableMoves(), moveEntry -> {
                                             float staminaConsumption = Math.max(
                                                     moveEntry.getValue().getStaminaCost(),
                                                     moveEntry.getValue().getStaminaDrainPerSecond()
                                             );
-                                            return Flow.column()
-                                                    .widthRel(1f)
-                                                    .coverChildrenHeight()
-                                                    .padding(2, 1)
-                                                    .crossAxisAlignment(Alignment.CrossAxis.START)
+                                            ClientEnums.StaminaUse staminaUse = ClientEnums.StaminaUse.getUse(staminaConsumption);
+                                            return Flow.column().widthRel(1f).coverChildrenHeight()
+                                                    .padding(2, 1).crossAxisAlignment(Alignment.CrossAxis.START)
                                                     .child(IKey.lang("move.creature." + moveEntry.getKey()).scale(0.8f).asWidget())
-                                                    .child(Flow.row()
-                                                            .widthRel(1f)
-                                                            .coverChildrenHeight()
+                                                    .child(Flow.row().widthRel(1f).coverChildrenHeight()
                                                             .mainAxisAlignment(Alignment.MainAxis.SPACE_BETWEEN)
-                                                            .child(IKey.lang(
-                                                                    "gui.prift.creature_moves.type",
-                                                                    I18n.format("move.creature.type." + moveEntry.getValue().getMoveType().name().toLowerCase(Locale.ROOT))
-                                                            ).scale(0.65f).asWidget())
+                                                            .child(Flow.row().coverChildren()
+                                                                    .child(MoveIconTextures.getTextureForMoveType(moveEntry.getValue().getMoveType()))
+                                                                    .childIf(
+                                                                            moveEntry.getValue().getMoveType() == CreatureMoveBuilder.MoveType.ELEMENTAL,
+                                                                            IKey.SPACE::asWidget
+                                                                    )
+                                                                    .childIf(
+                                                                            moveEntry.getValue().getMoveType() == CreatureMoveBuilder.MoveType.ELEMENTAL,
+                                                                            () -> MoveIconTextures.getTextureForElementType(
+                                                                                    moveEntry.getValue().getElement(),
+                                                                                    moveEntry.getValue().getElementEffectStrength()
+                                                                            )
+                                                                    )
+                                                            )
                                                             .child(IKey.lang(
                                                                     "gui.prift.creature_moves.base_power",
                                                                     moveEntry.getValue().getMoveType() == CreatureMoveBuilder.MoveType.STATUS
-                                                                            ? I18n.format("gui.prift.not_applicable")
+                                                                            ? " " + I18n.format("gui.prift.not_applicable")
                                                                             : Integer.toString(moveEntry.getValue().getBasePower())
                                                             ).scale(0.65f).asWidget())
                                                     )
-                                                    .child(IKey.lang(
-                                                            "gui.prift.creature_moves.stamina",
-                                                            ClientEnums.StaminaUse.getUse(staminaConsumption).getTranslatedName()
-                                                    ).scale(0.65f).asWidget())
+                                                    .child(Flow.row().coverChildren().childPadding(1)
+                                                            .child(IKey.lang(
+                                                                    "gui.prift.creature_moves.stamina",
+                                                                    staminaUse == ClientEnums.StaminaUse.NONE
+                                                                            ? I18n.format("gui.prift.not_applicable")
+                                                                            : ""
+                                                            ).scale(0.65f).asWidget())
+                                                            .children(
+                                                                    staminaUse.ordinal(),
+                                                                    ignored -> MoveIconTextures.getStaminaIcon()
+                                                            )
+                                                    )
                                                     .child(IKey.lang("move.creature." + moveEntry.getKey() + ".description")
                                                             .scale(0.65f).asWidget().widthRel(1f).textAlign(Alignment.CenterLeft))
                                                     .child(new Rectangle().color(0xFF555555).asWidget()

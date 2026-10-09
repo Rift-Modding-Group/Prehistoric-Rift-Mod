@@ -50,12 +50,12 @@ public class RiftCreatureEnums {
 
         @NotNull
         public String getTranslatedName() {
-            return I18n.format("info.tame_targeting."+this.name().toLowerCase(Locale.ROOT));
+            return I18n.format("info.tame_targeting."+this.name().toLowerCase());
         }
 
         @NotNull
         public String getDescription() {
-            return I18n.format("info.tame_targeting."+this.name().toLowerCase(Locale.ROOT)+".description");
+            return I18n.format("info.tame_targeting."+this.name().toLowerCase()+".description");
         }
     }
 

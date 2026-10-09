@@ -35,7 +35,7 @@ public record CreatureAcquisitionInfo(@Nullable AcquisitionMethod acquisitionMet
         if (this.acquisitionTime <= 0L || this.acquisitionMethod == null) {
             return I18n.format("acquisition.unknown");
         }
-        return I18n.format("acquisition." + this.acquisitionMethod.name().toLowerCase(Locale.ROOT), this.acquisitionTimeString());
+        return I18n.format("acquisition." + this.acquisitionMethod.name().toLowerCase(), this.acquisitionTimeString());
     }
 
     public NBTTagCompound getNBT() {
