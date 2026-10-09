@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.client.hud.RidingCreatureHUD;
 import anightdazingzoroark.prift.client.hud.TameProgressHUD;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenAimingType;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureLeapHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiData;
@@ -260,7 +261,7 @@ public class ClientEvents {
             event.setCanceled(true);
         }
         //hold right click to aim moves that opt into ridden aiming
-        else if (event.getButton() == 1) {
+        else if (event.getButton() == 1 && !riddenCreature.isLeaping()) {
             CreatureMoveBuilder selectedMove = riddenCreature.getCreatureMoves().getUsableMoves().get(this.selectedRidingMove).getValue();
             if (this.ridingCreatureHUD.isEnabled(minecraft, riddenCreature) && selectedMove.getRiddenAimingType() != RiddenAimingType.NONE) {
                 if (event.isButtonstate()) {
@@ -271,7 +272,13 @@ public class ClientEvents {
                     riddenCreature.setRiddenAimingFromClient(true);
                     this.cameraHandler.sendRidingAimUpdate(minecraft, riddenCreature, this.ridingAimMove);
                 }
-                else this.stopRidingAim();
+                else {
+                    CreatureMoveChargeupBuilder chargeupBuilder = selectedMove.getMoveChargeupBuilder();
+                    if (this.usingRidingMove && chargeupBuilder != null && chargeupBuilder.getChargeUpWhileUse()) {
+                        this.releaseSelectedRidingMove();
+                    }
+                    this.stopRidingAim();
+                }
             }
             event.setCanceled(true);
         }

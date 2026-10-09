@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.server.entity.creature.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.CreatureStorage;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.util.RiftUtil;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertySystem.AbstractEntityProperties;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertySystem.RiftLibProperty;
@@ -49,7 +50,8 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
 
     @Override
     public void onTickProperty() {
-        //tick inactive party members to regenerate stamina and recharge movement cooldowns
+        //tick inactive party members to regenerate stamina, recharge movement cooldowns
+        //and tick down move cooldowns
         if (this.getEntityHolder().world.isRemote) return;
 
         CreatureStorage creatureStorage = this.getCreatureStorage();
@@ -70,6 +72,11 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
                 }
                 if (storedCreature.getSprintCooldown() > 0) {
                     storedCreature.setSprintCooldown(storedCreature.getSprintCooldown() - 1);
+                }
+                if (storedCreature.getCreatureMoves() != null) {
+                    CreatureMoveStorage creatureMoveStorage = storedCreature.getCreatureMoves();
+                    creatureMoveStorage.tickCooldowns();
+                    storedCreature.setCreatureMoves(creatureMoveStorage);
                 }
             }
         }

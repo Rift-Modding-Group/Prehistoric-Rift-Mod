@@ -83,6 +83,7 @@ party.warning.cannot_summon_dead=This creature is dead and cannot be summoned!
 party.warning.summon_success=Successfully summoned creature
 party.warning.dismiss_success=Successfully dismissed creature
 
+reminder.incorrect_taming_method=That's not how you tame this creature, silly! You must fight this creature until it's at low health, then throw tranq bombs until it sleeps, and feed it to finally tame it!
 reminder.taming_finished=Congratulations! You have tamed %s!
 reminder.level_up=%s has reached level %s!
 

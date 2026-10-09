@@ -521,6 +521,15 @@ public class CreatureMoveStorage {
         toReturn.setString("MoveUser", this.creatureType == null ? "" : this.creatureType.getName());
 
         //-----for move cooldowns-----
+        NBTTagList cooldownList = new NBTTagList();
+        for (Map.Entry<String, Integer> cooldownEntry : this.moveCooldowns.entrySet()) {
+            NBTTagCompound cooldownNBT = new NBTTagCompound();
+            cooldownNBT.setString("Move", cooldownEntry.getKey());
+            cooldownNBT.setInteger("Remaining", cooldownEntry.getValue());
+            cooldownNBT.setInteger("Maximum", this.moveMaximumCooldown(cooldownEntry.getKey()));
+            cooldownList.appendTag(cooldownNBT);
+        }
+        toReturn.setTag("MoveCooldowns", cooldownList);
 
         //final append
         return toReturn;
@@ -535,6 +544,16 @@ public class CreatureMoveStorage {
         this.creatureType = creatureTypeName.isEmpty() ? null : RiftCreatureRegistry.getCreatureBuilder(creatureTypeName);
 
         //-----for move cooldowns-----
+        NBTTagList cooldownList = nbtTagCompound.getTagList("MoveCooldowns", 10);
+        for (int index = 0; index < cooldownList.tagCount(); index++) {
+            NBTTagCompound cooldownNBT = cooldownList.getCompoundTagAt(index);
+            String moveName = cooldownNBT.getString("Move");
+            int remaining = Math.max(0, cooldownNBT.getInteger("Remaining"));
+            int maximum = Math.max(remaining, cooldownNBT.getInteger("Maximum"));
+            if (moveName.isEmpty() || remaining == 0) continue;
+            this.moveCooldowns.put(moveName, remaining);
+            this.moveMaximumCooldowns.put(moveName, maximum);
+        }
     }
 
     @NotNull
@@ -550,16 +569,6 @@ public class CreatureMoveStorage {
         toReturn.setInteger("CurrentMoveBuildup", this.currentMoveBuildup);
         toReturn.setBoolean("CurrentMoveHitEffectFired", this.currentMoveHitEffectFired);
         toReturn.setBoolean("CurrentMoveEndEffectFired", this.currentMoveEndEffectFired);
-
-        NBTTagList cooldownList = new NBTTagList();
-        for (Map.Entry<String, Integer> cooldownEntry : this.moveCooldowns.entrySet()) {
-            NBTTagCompound cooldownNBT = new NBTTagCompound();
-            cooldownNBT.setString("Move", cooldownEntry.getKey());
-            cooldownNBT.setInteger("Remaining", cooldownEntry.getValue());
-            cooldownNBT.setInteger("Maximum", this.moveMaximumCooldown(cooldownEntry.getKey()));
-            cooldownList.appendTag(cooldownNBT);
-        }
-        toReturn.setTag("MoveCooldowns", cooldownList);
         return toReturn;
     }
 
@@ -575,16 +584,5 @@ public class CreatureMoveStorage {
         this.currentMoveHitEffectFired = nbtTagCompound.getBoolean("CurrentMoveHitEffectFired");
         this.currentMoveEndEffectFired = nbtTagCompound.getBoolean("CurrentMoveEndEffectFired");
         this.currentMoveReleaseRequested = false;
-
-        NBTTagList cooldownList = nbtTagCompound.getTagList("MoveCooldowns", 10);
-        for (int index = 0; index < cooldownList.tagCount(); index++) {
-            NBTTagCompound cooldownNBT = cooldownList.getCompoundTagAt(index);
-            String moveName = cooldownNBT.getString("Move");
-            int remaining = Math.max(0, cooldownNBT.getInteger("Remaining"));
-            int maximum = Math.max(remaining, cooldownNBT.getInteger("Maximum"));
-            if (moveName.isEmpty() || remaining <= 0) continue;
-            this.moveCooldowns.put(moveName, remaining);
-            this.moveMaximumCooldowns.put(moveName, maximum);
-        }
     }
 }

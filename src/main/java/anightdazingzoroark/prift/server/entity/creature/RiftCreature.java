@@ -808,36 +808,31 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public boolean processInteract(EntityPlayer player, @NotNull EnumHand hand) {
-        //everythin we wanna do here is server only
-        if (this.world.isRemote) return super.processInteract(player, hand);
-
         CreatureDomesticationBuilder domestication = this.creatureType.getDomestication();
         ItemStack heldItem = player.getHeldItem(hand);
+
         //tamed only effects
         if (this.isTamed()) {
             if (this.isOwner(player)) {
                 //mount a saddled creature or open its ui
-                if (heldItem.isEmpty()) {
+                if (heldItem.isEmpty() && !this.world.isRemote) {
                     if (this.canBeRidden() && this.isSaddled() && !player.isSneaking() && !this.getIsSleeping()) {
                         player.startRiding(this);
-                        return true;
                     }
-                    RiftCreatureGuiFactory.INSTANCE.open(player, this);
-                    return true;
+                    else RiftCreatureGuiFactory.INSTANCE.open(player, this);
                 }
                 //feed tamed creatures for healing
-                else {
+                else if (!heldItem.isEmpty()) {
                     RiftCreatureFood creatureFood = this.getCreatureFood(heldItem);
-                    if (creatureFood == null) return false;
-
-                    if (creatureFood.percentHealed != null && creatureFood.percentHealed > 0f && this.getHealth() < this.getMaxHealth()) {
+                    if (creatureFood != null && creatureFood.percentHealed != null && creatureFood.percentHealed > 0f
+                            && this.getHealth() < this.getMaxHealth()
+                    ) {
                         this.consumeItemFromStack(player, heldItem);
                         this.heal(this.getMaxHealth() * creatureFood.percentHealed);
                         this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
-                        return true;
                     }
-                    else return false;
                 }
+                return true;
             }
             else return false;
         }
@@ -845,33 +840,46 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         else if (domestication != null) {
             //creative meal automatically tames creature
             if (heldItem.getItem() == RiftItems.CREATIVE_MEAL) {
+                this.consumeItemFromStack(player, heldItem);
+                this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
                 this.tameCreature(player);
                 return true;
             }
             //normal feed taming
             else if (!heldItem.isEmpty()) {
                 RiftCreatureFood creatureFood = this.getCreatureFood(heldItem);
-                if (creatureFood == null) return false;
 
-                boolean hasTamingEffectiveness = creatureFood.tameEffectiveness != null && creatureFood.tameEffectiveness.length > 0;
-                if (hasTamingEffectiveness) {
-                    if (domestication.getTamingMethod() == RiftCreatureEnums.TamingMethod.FEED || this.getIsSleeping() && this.sleepCause == RiftCreatureEnums.SleepCause.TRANQ_BOMB) {
-                        float effectiveness = this.rand.nextFloat(creatureFood.tameEffectiveness[0], creatureFood.tameEffectiveness[1]);
-                        if (this.getIsSleeping() && this.sleepCause == RiftCreatureEnums.SleepCause.TRANQ_BOMB) {
-                            effectiveness *= this.getTamingEffectivenessForLevel();
-                        }
+                boolean hasTamingEffectiveness;
+                if (creatureFood == null) hasTamingEffectiveness = false;
+                else hasTamingEffectiveness = creatureFood.tameEffectiveness != null && creatureFood.tameEffectiveness.length > 0;
 
-                        float updatedProgress = Math.clamp(this.getTamingProgress() + effectiveness, 0f, 1f);
-                        boolean completesTaming = updatedProgress >= 1f;
-                        if (!completesTaming || !ForgeEventFactory.onAnimalTame(this, player)) {
-                            this.consumeItemFromStack(player, heldItem);
-                            this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+                //feed creature taming food to eventually tame it
+                if (creatureFood != null && ((hasTamingEffectiveness && domestication.getTamingMethod() == RiftCreatureEnums.TamingMethod.FEED)
+                        || (this.getIsSleeping() && this.sleepCause == RiftCreatureEnums.SleepCause.TRANQ_BOMB))
+                ) {
+                    float effectiveness = this.rand.nextFloat(creatureFood.tameEffectiveness[0], creatureFood.tameEffectiveness[1]);
+                    if (this.getIsSleeping() && this.sleepCause == RiftCreatureEnums.SleepCause.TRANQ_BOMB) {
+                        effectiveness *= this.getTamingEffectivenessForLevel();
+                    }
 
-                            if (completesTaming) this.tameCreature(player);
-                            else this.setTamingProgress(updatedProgress);
-                        }
+                    float updatedProgress = Math.clamp(this.getTamingProgress() + effectiveness, 0f, 1f);
+                    boolean completesTaming = updatedProgress >= 1f;
+                    if (!completesTaming || !ForgeEventFactory.onAnimalTame(this, player)) {
+                        this.consumeItemFromStack(player, heldItem);
+                        this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+
+                        if (completesTaming) this.tameCreature(player);
+                        else this.setTamingProgress(updatedProgress);
                     }
                     return true;
+                }
+                //to prevent idiots from attempting to feed anything then complaining,
+                //give them a warning them tell them the right way to tame the creature
+                else if (creatureFood != null && domestication.getTamingMethod() == RiftCreatureEnums.TamingMethod.TRANQ_THEN_FEED
+                        && !(this.getIsSleeping() && this.sleepCause == RiftCreatureEnums.SleepCause.TRANQ_BOMB) && !this.world.isRemote
+                ) {
+                    player.sendStatusMessage(new TextComponentTranslation("reminder.incorrect_taming_method"), false);
+                    return false;
                 }
                 else return false;
             }
@@ -1485,6 +1493,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //-----taming management-----
     public void tameCreature(@NotNull EntityPlayer player) {
+        if (this.world.isRemote) return;
+
         this.setTamingProgress(0f);
         this.setTamedBy(player);
         this.setAcquisitionInfo(new CreatureAcquisitionInfo(
@@ -2772,6 +2782,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         }, Side.SERVER));
     }
 
+    @SuppressWarnings("unchecked")
     private void initAnimControllerForPhase(AnimationDataEntity animationData, @NotNull String phase) {
         List<AnimationControllerState<AnimationDataEntity>> creatureMovesStates = new ArrayList<>();
         List<ImmutablePair<String, CreatureMoveBuilder>> moveBuilderMap;
