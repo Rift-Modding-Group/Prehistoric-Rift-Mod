@@ -21,6 +21,7 @@ import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.init.SoundEvents;
 import net.minecraftforge.client.GuiIngameForge;
+import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -28,6 +29,8 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,12 +38,12 @@ import org.lwjgl.input.Keyboard;
 
 import java.util.List;
 
+@SideOnly(Side.CLIENT)
 public class ClientEvents {
     @NotNull
-    private final RidingCreatureHUD ridingCreatureHUD;
+    private final RidingCreatureHUD ridingCreatureHUD = new RidingCreatureHUD();
     @NotNull
-    private final CameraHandler cameraHandler;
-
+    private final CameraHandler cameraHandler = new CameraHandler(this.ridingCreatureHUD);
     private int riddenCreatureId = -1;
     private boolean moveHotbarActive;
     private boolean usingRidingMove;
@@ -52,11 +55,6 @@ public class ClientEvents {
     private int riddenSprintStartTick = -1;
     private int riddenSprintCooldownDisplayTicks;
 
-    public ClientEvents(@NotNull RidingCreatureHUD ridingCreatureHUD, @NotNull CameraHandler cameraHandler) {
-        this.ridingCreatureHUD = ridingCreatureHUD;
-        this.cameraHandler = cameraHandler;
-    }
-
     /**
      * block default inventory opening when riding on a creature
      * and open creature inventory instead
@@ -65,8 +63,7 @@ public class ClientEvents {
     public void onRiddenCreatureInventoryOpen(GuiOpenEvent event) {
         Minecraft minecraft = Minecraft.getMinecraft();
         if (!(event.getGui() instanceof GuiInventory) || minecraft.player == null) return;
-        if (!(minecraft.player.getRidingEntity() instanceof RiftCreature creature)
-                || creature.getControllingPassenger() != minecraft.player) return;
+        if (!(minecraft.player.getRidingEntity() instanceof RiftCreature creature) || creature.getControllingPassenger() != minecraft.player) return;
 
         if (this.usingRidingMove) this.releaseSelectedRidingMove();
         this.stopRidingAim();
@@ -74,6 +71,9 @@ public class ClientEvents {
         GuiManager.openFromClient(RiftCreatureGuiFactory.INSTANCE, new RiftCreatureGuiData(minecraft.player, creature));
     }
 
+    /**
+     * keybinds are dealt with here
+     * */
     @SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
     public void onKeyInput(InputEvent.KeyInputEvent event) {
         Minecraft minecraft = Minecraft.getMinecraft();
@@ -170,14 +170,17 @@ public class ClientEvents {
         }
     }
 
-    //make sure that on ridden creatures, the sprint key does
-    //not make make the rider sprint when said creature is on sprint cooldown
+    /**
+     * operations that require constant updates happen here
+     * */
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
 
         Minecraft minecraft = Minecraft.getMinecraft();
         RiftCreature riddenCreature = this.updateRidingState(minecraft);
+
+        //---tick custom camera stuff---
         if (this.ridingAimActive && (!this.ridingCreatureHUD.isEnabled(minecraft, riddenCreature) || riddenCreature == null)) {
             this.stopRidingAim();
         }
@@ -191,12 +194,42 @@ public class ClientEvents {
             }
         }
         this.cameraHandler.update(minecraft, riddenCreature, this.moveHotbarActive, this.ridingAimActive);
-        if (riddenCreature == null) return;
-        if (this.ridingAimActive) this.cameraHandler.sendRidingAimUpdate(minecraft, riddenCreature, this.ridingAimMove);
+        if (riddenCreature != null && this.ridingAimActive) {
+            this.cameraHandler.sendRidingAimUpdate(minecraft, riddenCreature, this.ridingAimMove);
+        }
 
-        if (!riddenCreature.isSprinting()) minecraft.player.setSprinting(false);
+        //---disable sprint key when on sprint cooldown---
+        if (riddenCreature != null && !riddenCreature.isSprinting()) minecraft.player.setSprinting(false);
     }
 
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onRidingCameraSetup(EntityViewRenderEvent.CameraSetup event) {
+        Minecraft minecraft = Minecraft.getMinecraft();
+        RiftCreature riddenCreature = this.updateRidingState(minecraft);
+        CameraHandler.RidingCameraAngles cameraAngles = this.cameraHandler.setupRidingCamera(
+                minecraft, riddenCreature, event.getEntity(), event.getRenderPartialTicks()
+        );
+        if (cameraAngles == null) return;
+        event.setYaw(cameraAngles.yaw());
+        event.setPitch(cameraAngles.pitch());
+    }
+
+    /**
+     * handle fov change when aiming
+     * */
+    @SubscribeEvent
+    public void onRidingCameraFov(EntityViewRenderEvent.FOVModifier event) {
+        Minecraft minecraft = Minecraft.getMinecraft();
+        RiftCreature riddenCreature = this.updateRidingState(minecraft);
+        event.setFOV(this.cameraHandler.modifyRidingCameraFov(
+                minecraft, riddenCreature, event.getEntity(),
+                event.getRenderPartialTicks(), event.getFOV()
+        ));
+    }
+
+    /**
+     * all mousebound controls happen here
+     * */
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onRidingMouseInput(MouseEvent event) {
         Minecraft minecraft = Minecraft.getMinecraft();
@@ -229,11 +262,13 @@ public class ClientEvents {
         //hold right click to aim moves that opt into ridden aiming
         else if (event.getButton() == 1) {
             CreatureMoveBuilder selectedMove = riddenCreature.getCreatureMoves().getUsableMoves().get(this.selectedRidingMove).getValue();
-            if (this.ridingCreatureHUD.isEnabled(minecraft, riddenCreature)
-                    && selectedMove.getRiddenAimingType() != RiddenAimingType.NONE) {
+            if (this.ridingCreatureHUD.isEnabled(minecraft, riddenCreature) && selectedMove.getRiddenAimingType() != RiddenAimingType.NONE) {
                 if (event.isButtonstate()) {
                     this.ridingAimActive = true;
                     this.ridingAimMove = this.selectedRidingMove;
+                    this.riddenLeapChargeStartTick = -1;
+                    this.cameraHandler.beginRidingAim(riddenCreature, this.ridingAimMove);
+                    riddenCreature.setRiddenAimingFromClient(true);
                     this.cameraHandler.sendRidingAimUpdate(minecraft, riddenCreature, this.ridingAimMove);
                 }
                 else this.stopRidingAim();
@@ -246,7 +281,9 @@ public class ClientEvents {
         }
     }
 
-    //show player party and ridden creature huds
+    /**
+     * show player party and ridden creature huds
+     * */
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onTextOverlayRender(RenderGameOverlayEvent.Text event) {
         Minecraft minecraft = Minecraft.getMinecraft();
@@ -308,6 +345,9 @@ public class ClientEvents {
         }
     }
 
+    /**
+     * for completely custom hud stuff above hotbar
+     * */
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onRidingOverlayRender(RenderGameOverlayEvent.Pre event) {
         RenderGameOverlayEvent.ElementType elementType = event.getType();
@@ -326,13 +366,7 @@ public class ClientEvents {
 
         //hide vanilla mount health and replace it with creature stamina or player hunger
         if (elementType == RenderGameOverlayEvent.ElementType.HEALTHMOUNT) {
-            if (riddenCreature != null && this.moveHotbarActive) {
-                this.ridingCreatureHUD.renderStamina(
-                        minecraft, riddenCreature,
-                        event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight()
-                );
-            }
-            else if (minecraft.ingameGUI instanceof GuiIngameForge guiIngameForge) {
+            if ((riddenCreature == null || !this.moveHotbarActive) && minecraft.ingameGUI instanceof GuiIngameForge guiIngameForge) {
                 guiIngameForge.renderFood(event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight());
             }
             event.setCanceled(true);
@@ -343,10 +377,6 @@ public class ClientEvents {
 
         //hide player health and replace it with mounted creature health when in view moves view
         if (elementType == RenderGameOverlayEvent.ElementType.HEALTH && this.moveHotbarActive) {
-            this.ridingCreatureHUD.renderCreatureHealth(
-                    minecraft, riddenCreature,
-                    event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight()
-            );
             event.setCanceled(true);
             return;
         }
@@ -361,26 +391,36 @@ public class ClientEvents {
 
         //show move hotbar when riding a creature and when it is set to be shown
         if (elementType == RenderGameOverlayEvent.ElementType.HOTBAR && this.moveHotbarActive) {
+            int width = event.getResolution().getScaledWidth();
+            int height = event.getResolution().getScaledHeight();
+            this.ridingCreatureHUD.renderCreatureHealth(minecraft, riddenCreature, width, height);
+            this.ridingCreatureHUD.renderStamina(minecraft, riddenCreature, width, height);
             this.ridingCreatureHUD.renderMoveHotbar(
                     minecraft, riddenCreature, this.selectedRidingMove,
-                    event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight()
+                    width, height
             );
             event.setCanceled(true);
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void onTameProgressRender(RenderGameOverlayEvent.Post event) {
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onOverlayPostRender(RenderGameOverlayEvent.Post event) {
         if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) return;
 
         Minecraft minecraft = Minecraft.getMinecraft();
+        RiftCreature riddenCreature = this.updateRidingState(minecraft);
+        int screenWidth = event.getResolution().getScaledWidth();
+        int screenHeight = event.getResolution().getScaledHeight();
+
+        //render aim crosshair
+        this.cameraHandler.renderRidingAimCrosshair(minecraft, riddenCreature, screenWidth, screenHeight);
         if (minecraft.player == null || minecraft.gameSettings.hideGUI || minecraft.objectMouseOver == null) return;
 
-        TameProgressHUD.renderTamingProgress(
-                minecraft, event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight()
-        );
+        //render tame progress hud
+        TameProgressHUD.renderTamingProgress(minecraft, screenWidth, screenHeight);
     }
 
+    //-----helpers-----
     private void releaseSelectedRidingMove() {
         RiftMessages.WRAPPER.sendToServer(new RiftRidingActionMessage(
                 RiftRidingActionMessage.Action.RELEASE_MOVE, this.selectedRidingMove, false
@@ -392,11 +432,15 @@ public class ClientEvents {
         if (!this.ridingAimActive) return;
 
         Minecraft minecraft = Minecraft.getMinecraft();
+        if (minecraft.player != null && minecraft.player.getRidingEntity() instanceof RiftCreature creature) {
+            creature.setRiddenAimingFromClient(false);
+        }
         if (minecraft.getConnection() != null) {
             RiftMessages.WRAPPER.sendToServer(new RiftRidingAimMessage(
-                    false, this.ridingAimMove, -1, 0D, 0D, 0D
+                    false, this.ridingAimMove, -1, 0D, 0D, 0D, null, null
             ));
         }
+        this.cameraHandler.endRidingAim();
         this.ridingAimActive = false;
         this.ridingAimMove = -1;
     }
@@ -418,8 +462,7 @@ public class ClientEvents {
             this.riddenLeapChargeStartTick = -1;
             this.riddenLeapCooldownDisplayChargeTicks = 0;
             this.riddenSprintStartTick = -1;
-            this.riddenSprintCooldownDisplayTicks = riddenCreature != null
-                    && riddenCreature.getSprintCooldown() > 0
+            this.riddenSprintCooldownDisplayTicks = riddenCreature != null && riddenCreature.getSprintCooldown() > 0
                     ? RiftCreatureSprintHelper.MAXIMUM_SPRINT_TICKS : 0;
         }
 

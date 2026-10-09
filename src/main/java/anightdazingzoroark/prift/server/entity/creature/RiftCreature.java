@@ -88,12 +88,14 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.DifficultyInstance;
@@ -146,6 +148,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private static final DataParameter<Boolean> EAT_FROM_INVENTORY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> LEAP_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> SPRINT_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> RIDDEN_AIMING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
 
     //--custom property values, which can be called and manipulated from a creature builder--
     @NotNull
@@ -169,13 +172,17 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private boolean riddenLeapPoseActive;
     private boolean riddenLeapPoseAirborne;
     private int riddenLeapPoseTicks;
-    private boolean riddenAiming;
     @NotNull
     private String riddenAimingMoveName = "";
     private int riddenAimTargetEntityId = -1;
     private boolean riddenAimTargetHit;
     @Nullable
     private Vec3d riddenAimPosition;
+    @Nullable
+    private BlockPos riddenAimBlockPosition;
+    @Nullable
+    private EnumFacing riddenAimBlockFace;
+    private double riddenMeleeAimReach;
     //when a creature fails to use a move or takes too long to pathfind for melee move,
     //this counts up, which then makes them use a ranged move or their sprint move
     private int frustration;
@@ -318,6 +325,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.dataManager.register(EAT_FROM_INVENTORY, false);
         this.dataManager.register(LEAP_COOLDOWN, 0);
         this.dataManager.register(SPRINT_COOLDOWN, 0);
+        this.dataManager.register(RIDDEN_AIMING, false);
     }
 
     //this is gonna be mostly for registering the custom attributes
@@ -965,7 +973,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         CreatureMoveBuilder creatureMoveBuilder = this.getCreatureMoves().getMoveBuilderCurrentMove();
         if (creatureMoveBuilder == null) return false;
 
-        if (this.riddenAiming
+        if (this.isRiddenAiming()
                 && creatureMoveBuilder.getRiddenAimingType() == RiddenAimingType.TARGETED_MELEE
                 && this.getCurrentMove().equals(this.riddenAimingMoveName)
         ) {
@@ -1341,7 +1349,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Override
     @Nullable
     public Vec3d getRiddenAimPosition() {
-        return this.riddenAiming && this.getCurrentMove().equals(this.riddenAimingMoveName) ? this.riddenAimPosition : null;
+        return this.isRiddenAiming() && this.getCurrentMove().equals(this.riddenAimingMoveName)
+                ? this.riddenAimPosition : null;
     }
 
     @Override
@@ -1589,41 +1598,113 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @NotNull
     private Set<BlockPos> getBreakableBlocksInFront() {
         Set<BlockPos> blocks = new HashSet<>();
-        List<AnimatedBoundingBox> frontZones = this.animData.getAnimatedBoundingBoxesByTag().get("frontZone");
-        if (frontZones == null) return blocks;
         boolean riderMoveBreaking = this.getCreatureMoves().canCurrentMoveBreakBlocksFromRider(this);
 
-        for (AnimatedBoundingBox frontZone : frontZones) {
-            AxisAlignedBB frontBounds = this.animData.getWorldSpaceAABB(frontZone.getName());
-            if (frontBounds == null) continue;
+        //---aiming!!!---
+        if (riderMoveBreaking && this.isRiddenAiming() && this.getCurrentMove().equals(this.riddenAimingMoveName)) {
+            if (this.riddenAimBlockPosition == null || this.riddenAimBlockFace == null || this.riddenAimPosition == null) return blocks;
 
-            BlockPos minimum = new BlockPos(Math.floor(frontBounds.minX), Math.floor(frontBounds.minY), Math.floor(frontBounds.minZ));
-            BlockPos maximum = new BlockPos(
-                    Math.ceil(frontBounds.maxX) - 1D,
-                    Math.ceil(frontBounds.maxY) - 1D,
-                    Math.ceil(frontBounds.maxZ) - 1D
-            );
-            for (BlockPos blockPos : BlockPos.getAllInBoxMutable(minimum, maximum)) {
-                BlockPos immutablePos = blockPos.toImmutable();
-                IBlockState blockState = this.world.getBlockState(immutablePos);
-                AxisAlignedBB collisionBounds = blockState.getCollisionBoundingBox(this.world, immutablePos);
-                if (collisionBounds == null) continue;
+            int holeWidth = (int) Math.ceil(this.width);
+            int holeHeight = (int) Math.ceil(this.height);
+            EnumFacing.Axis hitAxis = this.riddenAimBlockFace.getAxis();
 
-                AxisAlignedBB worldCollisionBounds = collisionBounds.offset(immutablePos);
-                BlockBreakPlanEntry planEntry = this.getBlockBreakPlan(immutablePos);
-                boolean riderSprintBreaking = this.isBeingRidden() && this.isSprinting();
-                if (planEntry == null && !riderSprintBreaking && !riderMoveBreaking) continue;
-
-                boolean ordinaryJumpable = planEntry != null
-                        && this.getCreaturePathNavigate().isStandardJumpable(planEntry, worldCollisionBounds);
-                if ((riderSprintBreaking || riderMoveBreaking || !ordinaryJumpable)
-                        && worldCollisionBounds.intersects(frontBounds)
-                        && this.canBreakBlock(immutablePos)) {
-                    blocks.add(immutablePos);
+            //if crosshair hits bottom or top of block, break 1 block deep and use creature width for holesize
+            if (hitAxis == EnumFacing.Axis.Y) {
+                int minimumX = this.getCenteredHoleMinimum(this.riddenAimPosition.x, holeWidth);
+                int minimumZ = this.getCenteredHoleMinimum(this.riddenAimPosition.z, holeWidth);
+                for (int xOffset = 0; xOffset < holeWidth; xOffset++) {
+                    for (int zOffset = 0; zOffset < holeWidth; zOffset++) {
+                        this.addRiddenAimBreakableBlock(
+                                blocks,
+                                new BlockPos(
+                                        minimumX + xOffset,
+                                        this.riddenAimBlockPosition.getY(),
+                                        minimumZ + zOffset
+                                )
+                        );
+                    }
                 }
+                return blocks;
+            }
+            //otherwise, make hole based on height and width of user, block
+            //hit by crosshair is the bottom and the center
+            else {
+                int minimumHorizontal;
+                if (hitAxis == EnumFacing.Axis.X) {
+                    minimumHorizontal = this.getCenteredHoleMinimum(this.riddenAimPosition.z, holeWidth);
+                }
+                else {
+                    minimumHorizontal = this.getCenteredHoleMinimum(this.riddenAimPosition.x, holeWidth);
+                }
+                int minimumY = MathHelper.floor(this.riddenAimPosition.y);
+                for (int horizontalOffset = 0; horizontalOffset < holeWidth; horizontalOffset++) {
+                    for (int verticalOffset = 0; verticalOffset < holeHeight; verticalOffset++) {
+                        BlockPos blockPosition;
+                        if (hitAxis == EnumFacing.Axis.X) {
+                            blockPosition = new BlockPos(
+                                    this.riddenAimBlockPosition.getX(),
+                                    minimumY + verticalOffset,
+                                    minimumHorizontal + horizontalOffset
+                            );
+                        }
+                        else {
+                            blockPosition = new BlockPos(
+                                    minimumHorizontal + horizontalOffset,
+                                    minimumY + verticalOffset,
+                                    this.riddenAimBlockPosition.getZ()
+                            );
+                        }
+                        this.addRiddenAimBreakableBlock(blocks, blockPosition);
+                    }
+                }
+                return blocks;
             }
         }
-        return blocks;
+        //---not aiming, use front zone hitboxes---
+        else {
+            List<AnimatedBoundingBox> frontZones = this.animData.getAnimatedBoundingBoxesByTag().get("frontZone");
+            if (frontZones == null) return blocks;
+
+            for (AnimatedBoundingBox frontZone : frontZones) {
+                AxisAlignedBB frontBounds = this.animData.getWorldSpaceAABB(frontZone.getName());
+                if (frontBounds == null) continue;
+
+                BlockPos minimum = new BlockPos(Math.floor(frontBounds.minX), Math.floor(frontBounds.minY), Math.floor(frontBounds.minZ));
+                BlockPos maximum = new BlockPos(
+                        Math.ceil(frontBounds.maxX) - 1D,
+                        Math.ceil(frontBounds.maxY) - 1D,
+                        Math.ceil(frontBounds.maxZ) - 1D
+                );
+                for (BlockPos blockPos : BlockPos.getAllInBoxMutable(minimum, maximum)) {
+                    BlockPos immutablePos = blockPos.toImmutable();
+                    IBlockState blockState = this.world.getBlockState(immutablePos);
+                    AxisAlignedBB collisionBounds = blockState.getCollisionBoundingBox(this.world, immutablePos);
+                    if (collisionBounds == null) continue;
+
+                    AxisAlignedBB worldCollisionBounds = collisionBounds.offset(immutablePos);
+                    BlockBreakPlanEntry planEntry = this.getBlockBreakPlan(immutablePos);
+                    boolean riderSprintBreaking = this.isBeingRidden() && this.isSprinting();
+                    if (planEntry == null && !riderSprintBreaking && !riderMoveBreaking) continue;
+
+                    boolean ordinaryJumpable = planEntry != null
+                            && this.getCreaturePathNavigate().isStandardJumpable(planEntry, worldCollisionBounds);
+                    if ((riderSprintBreaking || riderMoveBreaking || !ordinaryJumpable)
+                            && worldCollisionBounds.intersects(frontBounds)
+                            && this.canBreakBlock(immutablePos)) {
+                        blocks.add(immutablePos);
+                    }
+                }
+            }
+            return blocks;
+        }
+    }
+
+    private int getCenteredHoleMinimum(double center, int size) {
+        return (int) Math.round(center - size * 0.5D);
+    }
+
+    private void addRiddenAimBreakableBlock(@NotNull Set<BlockPos> blocks, @NotNull BlockPos blockPosition) {
+        if (this.canBreakBlock(blockPosition)) blocks.add(blockPosition);
     }
 
     //---block break methods for ai use---
@@ -1743,45 +1824,153 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.dataManager.setDirty(CREATURE_MOVES);
     }
 
+    public boolean isTargetedMeleeRiddenMove(int moveIndex) {
+        List<ImmutablePair<String, CreatureMoveBuilder>> moves = this.getCreatureMoves().getUsableMoves();
+        return moveIndex >= 0 && moveIndex < moves.size()
+                && moves.get(moveIndex).getValue().getRiddenAimingType() == RiddenAimingType.TARGETED_MELEE;
+    }
+
+    public double calculateRiddenMeleeAimReach() {
+        List<AnimatedBoundingBox> frontHitZones = this.animData.getAnimatedBoundingBoxesByTag().get("frontZone");
+        if (frontHitZones == null || frontHitZones.isEmpty()) return 0D;
+
+        AnimatedBoundingBox furthestFrontHitZone = null;
+        for (AnimatedBoundingBox frontHitZone : frontHitZones) {
+            if (furthestFrontHitZone == null || frontHitZone.getModelSpacePosition().z < furthestFrontHitZone.getModelSpacePosition().z) {
+                furthestFrontHitZone = frontHitZone;
+            }
+        }
+        AxisAlignedBB furthestBounds = this.animData.getWorldSpaceAABB(furthestFrontHitZone.getName());
+        if (furthestBounds == null) return 0D;
+
+        Vec3d creatureCenter = new Vec3d(this.posX, this.posY + this.height * 0.5D, this.posZ);
+        double halfFrontHitZoneWidth = (furthestBounds.maxX - furthestBounds.minX) * 0.5D;
+        return creatureCenter.distanceTo(furthestBounds.getCenter()) + halfFrontHitZoneWidth;
+    }
+
     public void setRiddenAimFromRider(
             @NotNull EntityPlayer rider, boolean active, int moveIndex, int targetEntityId,
-            double aimX, double aimY, double aimZ
+            double aimX, double aimY, double aimZ,
+            @Nullable BlockPos targetBlock, @Nullable EnumFacing targetBlockFace
     ) {
         if (this.world.isRemote || this.getControllingPassenger() != rider) return;
         if (!active) {
-            this.riddenAiming = false;
+            this.setRiddenAiming(false);
             this.riddenAimingMoveName = "";
             this.riddenAimTargetEntityId = -1;
             this.riddenAimTargetHit = false;
             this.riddenAimPosition = null;
+            this.riddenAimBlockPosition = null;
+            this.riddenAimBlockFace = null;
+            this.riddenMeleeAimReach = 0D;
             return;
         }
 
         List<ImmutablePair<String, CreatureMoveBuilder>> moves = this.getCreatureMoves().getUsableMoves();
         if (moveIndex < 0 || moveIndex >= moves.size()) return;
         ImmutablePair<String, CreatureMoveBuilder> selectedMove = moves.get(moveIndex);
-        if (selectedMove.getValue().getRiddenAimingType() == RiddenAimingType.NONE) return;
-        if (aimX != aimX || aimY != aimY || aimZ != aimZ) return;
+        RiddenAimingType aimingType = selectedMove.getValue().getRiddenAimingType();
+        if (aimingType == RiddenAimingType.NONE) return;
+
+        if (!this.isRiddenAiming() || !selectedMove.getKey().equals(this.riddenAimingMoveName)) {
+            this.riddenMeleeAimReach = aimingType == RiddenAimingType.TARGETED_MELEE ? this.calculateRiddenMeleeAimReach() : 0D;
+        }
+        if (aimingType != RiddenAimingType.TARGETED_MELEE) {
+            targetBlock = null;
+            targetBlockFace = null;
+        }
 
         Vec3d riderEyes = rider.getPositionEyes(1f);
         Vec3d aimPosition = new Vec3d(aimX, aimY, aimZ);
         if (aimPosition.squareDistanceTo(riderEyes) > 6400D) return;
 
+        Vec3d creatureAimOrigin = new Vec3d(
+                this.posX,
+                this.posY + this.height * 0.5D,
+                this.posZ
+        );
+        RayTraceResult creatureBlockHit = this.world.rayTraceBlocks(
+                creatureAimOrigin, aimPosition, false, true, false
+        );
+        if (creatureBlockHit != null
+                && creatureAimOrigin.squareDistanceTo(creatureBlockHit.hitVec) + 1E-6D
+                < creatureAimOrigin.squareDistanceTo(aimPosition)
+        ) {
+            aimPosition = creatureBlockHit.hitVec;
+            targetEntityId = -1;
+            if (aimingType == RiddenAimingType.TARGETED_MELEE) {
+                targetBlock = creatureBlockHit.getBlockPos();
+                targetBlockFace = creatureBlockHit.sideHit;
+            }
+        }
         Entity aimedEntity = this.world.getEntityByID(targetEntityId);
-        if (aimedEntity == this || aimedEntity == rider
-                || aimedEntity != null && aimedEntity.getDistanceSq(this) > 6400D) {
+        if (aimedEntity == this || aimedEntity == rider || aimedEntity != null && aimedEntity.getDistanceSq(this) > 6400D) {
             aimedEntity = null;
         }
-
-        this.riddenAiming = true;
+        boolean meleeAimOutOfRange = false;
+        if (aimingType == RiddenAimingType.TARGETED_MELEE) {
+            double reachWithNetworkTolerance = this.riddenMeleeAimReach + 0.25D;
+            double reachSquared = reachWithNetworkTolerance * reachWithNetworkTolerance;
+            if (aimedEntity == null) {
+                meleeAimOutOfRange = aimPosition.squareDistanceTo(creatureAimOrigin) > reachSquared;
+            }
+            else {
+                AxisAlignedBB aimedBounds = aimedEntity.getEntityBoundingBox() .grow(aimedEntity.getCollisionBorderSize());
+                Vec3d nearestTargetPoint = new Vec3d(
+                        Math.clamp(creatureAimOrigin.x, aimedBounds.minX, aimedBounds.maxX),
+                        Math.clamp(creatureAimOrigin.y, aimedBounds.minY, aimedBounds.maxY),
+                        Math.clamp(creatureAimOrigin.z, aimedBounds.minZ, aimedBounds.maxZ)
+                );
+                meleeAimOutOfRange = nearestTargetPoint.squareDistanceTo(creatureAimOrigin) > reachSquared;
+            }
+        }
+        if (meleeAimOutOfRange) {
+            aimedEntity = null;
+            targetBlock = null;
+            targetBlockFace = null;
+        }
+        if (aimedEntity != null) {
+            targetBlock = null;
+            targetBlockFace = null;
+        }
+        if (targetBlock == null) targetBlockFace = null;
+        if (targetBlock != null) {
+            IBlockState targetBlockState = this.world.getBlockState(targetBlock);
+            AxisAlignedBB targetBlockBounds = targetBlockState.getCollisionBoundingBox(this.world, targetBlock);
+            boolean targetBlockOutOfRange = targetBlock.distanceSq(riderEyes.x, riderEyes.y, riderEyes.z) > 6400D;
+            boolean aimMissesTargetBlock = targetBlockBounds == null
+                    || !targetBlockBounds.offset(targetBlock).grow(0.01D).contains(aimPosition);
+            if (targetBlockOutOfRange || aimMissesTargetBlock) {
+                targetBlock = null;
+                targetBlockFace = null;
+            }
+        }
+        this.setRiddenAiming(true);
+        this.setSprinting(false);
         this.riddenAimingMoveName = selectedMove.getKey();
         this.riddenAimTargetEntityId = aimedEntity == null ? -1 : aimedEntity.getEntityId();
         this.riddenAimPosition = aimPosition;
+        this.riddenAimBlockPosition = targetBlock == null ? null : targetBlock.toImmutable();
+        this.riddenAimBlockFace = targetBlockFace;
+    }
+
+    public void setRiddenAimingFromClient(boolean active) {
+        if (!this.world.isRemote) return;
+        this.setRiddenAiming(active);
+        if (active) this.setSprinting(false);
+    }
+
+    public boolean isRiddenAiming() {
+        return this.dataManager.get(RIDDEN_AIMING);
+    }
+
+    private void setRiddenAiming(boolean active) {
+        this.dataManager.set(RIDDEN_AIMING, active);
     }
 
     public void setSprintingFromRider(@NotNull EntityPlayer rider, boolean sprinting) {
         if (this.world.isRemote || this.getControllingPassenger() != rider) return;
-        boolean shouldSprint = sprinting && this.riderCanControl() && !this.isLeaping()
+        boolean shouldSprint = sprinting && !this.isRiddenAiming() && this.riderCanControl() && !this.isLeaping()
                 && this.getStamina() > 0f && this.canSprintToAttack();
         if (shouldSprint && !this.isSprinting()) this.sprintHelper.beginSprint(true, true);
         else if (!shouldSprint) this.setSprinting(false);
@@ -1916,6 +2105,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (this.isBeingRidden() && this.riderCanControl() && this.getControllingPassenger() instanceof EntityPlayer playerController) {
             strafe = playerController.moveStrafing * 0.5f;
             forward = playerController.moveForward;
+            //similar to 3rd person shoulder surf games, slow down when aiming
+            if (this.isRiddenAiming()) {
+                strafe *= 0.25f;
+                forward *= 0.25f;
+            }
+            //slow down when going backwards
             if (forward < 0) forward *= 0.5f;
             this.stepHeight = 1f;
             this.jumpMovementFactor = this.getAIMoveSpeed() * 0.1f;
@@ -1988,7 +2183,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (!this.world.isRemote) {
             if (this.getControllingPassenger() == rider && this.riderCanControl() && this.getNavigationBuilder().getCanLeap()
                     && !this.bodyTouchingLiquid() && !this.getCreatureMoveHelper().isLeaping() && !this.riddenLeapPoseActive
-                    && this.getLeapCooldown() <= 0 && this.useStamina(MoveResult.LEAP.staminaConsumption())
+                    && !this.isRiddenAiming() && this.getLeapCooldown() <= 0
+                    && this.useStamina(MoveResult.LEAP.staminaConsumption())
             ) {
                 this.rotationYaw = rider.rotationYaw;
                 this.rotationYawHead = rider.rotationYaw;
@@ -2023,6 +2219,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 && !this.getCreatureMoveHelper().isLeaping()
                 && this.riddenLeapChargeTicks <= 0
                 && this.getLeapCooldown() <= 0
+                && !this.isRiddenAiming()
                 && !this.isStaggered()
                 && this.getStamina() > 0f;
     }
@@ -2401,11 +2598,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             this.getCreatureMoveHelper().stopMovement();
             this.setUseBlockBreak(false);
             this.getCreatureMoves().resetCurrentMove(this);
-            this.riddenAiming = false;
+            this.setRiddenAiming(false);
             this.riddenAimingMoveName = "";
             this.riddenAimTargetEntityId = -1;
             this.riddenAimTargetHit = false;
             this.riddenAimPosition = null;
+            this.riddenAimBlockPosition = null;
+            this.riddenAimBlockFace = null;
+            this.riddenMeleeAimReach = 0D;
         }
     }
 
@@ -2420,11 +2620,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             this.riddenLeapPoseActive = false;
             this.riddenLeapPoseAirborne = false;
             this.riddenLeapPoseTicks = 0;
-            this.riddenAiming = false;
+            this.setRiddenAiming(false);
             this.riddenAimingMoveName = "";
             this.riddenAimTargetEntityId = -1;
             this.riddenAimTargetHit = false;
             this.riddenAimPosition = null;
+            this.riddenAimBlockPosition = null;
+            this.riddenAimBlockFace = null;
+            this.riddenMeleeAimReach = 0D;
         }
         if (!this.world.isRemote && removedController) {
             this.getCreatureMoves().resetCurrentMove(this);
@@ -2522,12 +2725,21 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         }, Side.SERVER));
         animationData.addAnimationMessageEffect("riddenTargetedMeleeHitEffect", new AnimatableRunValue(() -> {
             CreatureMoveBuilder creatureMoveBuilder = this.getCreatureMoves().getMoveBuilderCurrentMove();
-            if (!this.riddenAiming || this.riddenAimTargetHit || creatureMoveBuilder == null
+            if (!this.isRiddenAiming() || this.riddenAimTargetHit || creatureMoveBuilder == null
                     || creatureMoveBuilder.getRiddenAimingType() != RiddenAimingType.TARGETED_MELEE
                     || !this.getCurrentMove().equals(this.riddenAimingMoveName)) return;
 
             Entity aimedEntity = this.world.getEntityByID(this.riddenAimTargetEntityId);
-            if (aimedEntity != null) this.attackEntityAsMob(aimedEntity);
+            if (aimedEntity != null) {
+                this.attackEntityAsMob(aimedEntity);
+                return;
+            }
+            if (this.getUseBlockBreak() && this.riddenAimBlockPosition != null) {
+                CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+                if (creatureMoveStorage.canRunCurrentMoveHitEffect()) {
+                    creatureMoveStorage.runCurrentMoveHitEffect(this);
+                }
+            }
         }, Side.SERVER));
         animationData.addAnimationMessageEffect("moveBlockBreakEffect", new AnimatableRunValue(() -> {
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();

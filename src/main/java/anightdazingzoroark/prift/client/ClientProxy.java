@@ -34,11 +34,8 @@ public class ClientProxy extends ServerProxy {
         //register block renderers
         GeoBlockRenderer.registerBlockRenderer(RiftBlocks.SMOKENUT_BUSH, new SmokenutBushBlockRenderer());
 
-        //register HUDs
-        RidingCreatureHUD ridingCreatureHUD = new RidingCreatureHUD();
-        CameraHandler cameraHandler = new CameraHandler(ridingCreatureHUD);
-        MinecraftForge.EVENT_BUS.register(cameraHandler);
-        MinecraftForge.EVENT_BUS.register(new ClientEvents(ridingCreatureHUD, cameraHandler));
+        //register events
+        MinecraftForge.EVENT_BUS.register(new ClientEvents());
     }
 
     @SideOnly(Side.CLIENT)

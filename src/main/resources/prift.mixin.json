@@ -3,7 +3,9 @@
   "package": "anightdazingzoroark.prift.mixin",
   "compatibilityLevel": "JAVA_8",
   "target": "@env(DEFAULT)",
-  "client": [],
+  "client": [
+    "RiftMixinIgnoreRiddenEntityTarget"
+  ],
   "mixins": [
     "RiftMixinAllowRiddenCreatureDamageToDummy",
     "RiftMixinMatchCreatureType",
