@@ -21,7 +21,6 @@ public enum Element {
     ICE(0x26D8E0, (target, strength) -> {}),
     //like dragon element from MH
     MESOZOIC(0x26D8E0, (target, strength) -> {}),
-    SOUND(0x21956E, (target, strength) -> {}),
     WIND(0x000000, (target, strength) -> {}),
     POISON(0x000000, (target, strength) -> {}),
     //"evil" or "death" or anything dark, like a dark or ghost type pokemon
@@ -40,7 +39,13 @@ public enum Element {
 
     @NotNull
     public String getTranslatedName(int level) {
-        String translatedName = I18n.format("move.creature.element." + this.name().toLowerCase(Locale.ROOT));
+        String translatedName = I18n.format("move.creature.element." + this.name().toLowerCase());
+        if (this == NEUTRAL) return translatedName;
         return translatedName + (level >= 0 ? " " + I18n.format("enchantment.level." + (level + 1)) : "");
+    }
+
+    @NotNull
+    public String getTranslatedDescription() {
+        return I18n.format("move.creature.element." + this.name().toLowerCase() + ".description");
     }
 }

@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.client.ui.widgets;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.drawable.UITexture;
 import com.cleanroommc.modularui.widget.Widget;
 import org.jetbrains.annotations.NotNull;
@@ -46,11 +47,11 @@ public class MoveIconTextures {
             case ELECTRIC -> ELECTRIC_ELEMENT;
             case ICE -> ICE_ELEMENT;
             case MESOZOIC -> MESOZOIC_ELEMENT;
-            case SOUND -> SOUND_ELEMENT;
             default -> NEUTRAL_ELEMENT;
         }).asWidget().size(16, 16)
-                .addTooltipLine(element.getTranslatedName(level))
-                .tooltipTextColor(0xFF000000 | element.color);
+                .addTooltipLine(IKey.str(element.getTranslatedName(level))
+                        .color(0xFF000000 | element.color).asTextIcon())
+                .addTooltipLine(element.getTranslatedDescription());
     }
 
     @NotNull
