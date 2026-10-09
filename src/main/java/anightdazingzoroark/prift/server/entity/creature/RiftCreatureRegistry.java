@@ -33,6 +33,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -288,35 +289,43 @@ public class RiftCreatureRegistry {
                                 .setRequireFindTargetToUse()
                                 .setElemental(Element.FIRE, 0)
                                 .setWhileMoveUseEffect((creature, target) -> {
-                                    Vec3d fireDistVec = creature.getLocatorWorldPos("fireDistPoint");
                                     Vec3d aimPosition = creature.getRiddenAimPosition();
                                     Vec3d targetPosition;
-                                    double verticalDist;
-                                    if (aimPosition != null) {
-                                        targetPosition = aimPosition;
-                                        verticalDist = aimPosition.y - fireDistVec.y;
-                                    }
+                                    //assume mounted targeting and aiming
+                                    if (aimPosition != null) targetPosition = aimPosition;
+                                    //assume unmounted targeting
                                     else {
                                         if (target == null || !target.isEntityAlive()) return;
-                                        targetPosition = target.getPositionVector();
-                                        verticalDist = (targetPosition.y + target.height / 2D) - fireDistVec.y;
+                                        targetPosition = target.getPositionVector().add(0D, target.height / 2D, 0D);
                                     }
 
                                     //get distance between the locator and the target
-                                    double distToTarget = fireDistVec.distanceTo(targetPosition);
-                                    if (distToTarget <= 1E-4D) return;
+                                    Vec3d flameOrigin = creature.getLocatorWorldPos("flamethrowerAimLocator");
+                                    Vec3d targetOffset = targetPosition.subtract(flameOrigin);
+                                    double horizontalDistance = Math.sqrt(targetOffset.x * targetOffset.x + targetOffset.z * targetOffset.z);
+                                    if (horizontalDistance <= 1E-4D && Math.abs(targetOffset.y) <= 1E-4D) return;
 
                                     //convert into angle using trig magic
-                                    double angle = Math.toDegrees(Math.asin(Math.clamp(verticalDist / distToTarget, -1D, 1D)));
+                                    double aimPitch = Math.toDegrees(Math.atan2(targetOffset.y, horizontalDistance));
+                                    double headBend = Math.clamp(aimPitch, -60D, 35D);
+                                    double aimPitchCorrection = headBend - aimPitch;
+
+                                    double targetYaw = Math.toDegrees(Math.atan2(-targetOffset.x, targetOffset.z));
+                                    EntityLivingBase creatureEntity = creature.asRayCreator().getRayCreator();
+                                    double creatureYaw = creatureEntity.isBeingRidden()
+                                            ? creatureEntity.rotationYaw : creatureEntity.rotationYawHead;
+                                    double aimYaw = MathHelper.wrapDegrees(targetYaw - creatureYaw);
 
                                     //now set variable
-                                    creature.getAnimationData().setVariable("flamethrower_head_bend", Math.clamp(angle, -60, 35));
+                                    creature.getAnimationData().setVariable("flamethrower_head_bend", headBend);
+                                    creature.getAnimationData().setVariable("flamethrower_aim_pitch", aimPitchCorrection);
+                                    creature.getAnimationData().setVariable("flamethrower_aim_yaw", Math.clamp(aimYaw, -80D, 80D));
                                 })
                                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                                         .setChargeUpWhileUse(true)
                                         .setMaxChargeUp(300)
                                         .setPrereleaseEndEffect(creature -> {
-                                            RiftLibRayHelper.createRay(creature.asRayCreator(), "flamethrowerRay", "flameLocator");
+                                            RiftLibRayHelper.createRay(creature.asRayCreator(), "flamethrowerRay", "flamethrowerAimLocator");
                                         })
                                         .setReleaseEndEffect(creature -> {
                                             RiftLibRayHelper.killRay(creature.asRayCreator(), "flamethrowerRay");
@@ -324,6 +333,8 @@ public class RiftCreatureRegistry {
                                 )
                                 .setOnMoveEndEffect(creature -> {
                                     creature.getAnimationData().setVariable("flamethrower_head_bend", 0);
+                                    creature.getAnimationData().setVariable("flamethrower_aim_pitch", 0);
+                                    creature.getAnimationData().setVariable("flamethrower_aim_yaw", 0);
                                 })
                                 .setRiddenAimingType(RiddenAimingType.RANGED)
                         )
@@ -418,6 +429,16 @@ public class RiftCreatureRegistry {
                                 .setBasePower(50)
                                 .setRiddenAimingType(RiddenAimingType.TARGETED_MELEE)
                                 .setAnimNames("tail_stab")
+                        )
+                        .addMove("tail_slam", new CreatureMoveBuilder()
+                                .setMakesContact()
+                                .setPhysical()
+                                .setRequireFindTargetToUse()
+                                .setStaminaCost(0.15f)
+                                .setBasePower(70)
+                                .setRiddenAimingType(RiddenAimingType.TARGETED_MELEE)
+                                .setAnimNames("tail_slam")
+                                .setCooldown(400)
                         )
                         .addMove("thagomize", new CreatureMoveBuilder()
                                 .setMakesContact()
@@ -537,8 +558,16 @@ public class RiftCreatureRegistry {
                                                 .setUseBlockBreak()
                                 )
                                 .setMoveRule(
-                                        new MoveRuleBuilder("thagomize")
+                                        new MoveRuleBuilder("tail_slam")
                                                 .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
+                                                .addDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("frontZone", true))
+                                                .setUseBlockBreak()
+                                )
+                                .setMoveRule(
+                                        new MoveRuleBuilder("thagomize")
+                                                .setPriorityPredicate((creature, target) -> {
+                                                    return target != null && target.isEntityAlive() && creature.atRageThreshold() ? 0 : -1;
+                                                })
                                                 .addDetectionRule(new CreatureMoveSelectorBuilder.BoundingBoxDetectionRule("frontZone", true))
                                                 .setDontPathToTarget()
                                 )

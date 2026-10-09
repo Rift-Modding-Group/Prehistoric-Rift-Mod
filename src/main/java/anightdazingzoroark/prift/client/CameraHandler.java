@@ -50,6 +50,7 @@ public class CameraHandler {
     private double ridingMeleeAimReach;
     private int cameraCreatureId = -1;
     private double creatureCameraSideExtent;
+    private double creatureCameraFocusDistance;
 
     public CameraHandler(@NotNull RidingCreatureHUD ridingCreatureHUD) {
         this.ridingCreatureHUD = ridingCreatureHUD;
@@ -75,6 +76,7 @@ public class CameraHandler {
         if (shouldEnable && riddenCreature != null && this.cameraCreatureId != riddenCreature.getEntityId()) {
             this.cameraCreatureId = riddenCreature.getEntityId();
             this.creatureCameraSideExtent = this.calculateCreatureCameraSideExtent(riddenCreature);
+            this.creatureCameraFocusDistance = this.calculateCreatureCameraFocusDistance(riddenCreature);
         }
 
         if (shouldEnable && !this.enabled) {
@@ -411,10 +413,7 @@ public class CameraHandler {
     }
 
     private double getAimCameraFocusDistance() {
-        double bodyClearance = this.creatureCameraSideExtent + RIDING_AIM_CAMERA_BODY_MARGIN;
-        double convergenceWidth = this.getAimCameraSideDistance() - bodyClearance;
-        convergenceWidth = Math.max(0.1D, convergenceWidth);
-        return bodyClearance * RIDING_AIM_CAMERA_DISTANCE / convergenceWidth;
+        return this.creatureCameraFocusDistance;
     }
 
     @NotNull
@@ -467,6 +466,45 @@ public class CameraHandler {
             maximumSideOffset = Math.max(maximumSideOffset, sideOffset);
         }
         return maximumSideOffset;
+    }
+
+    private double calculateCreatureCameraFocusDistance(@NotNull RiftCreature riddenCreature) {
+        double yawRadians = Math.toRadians(riddenCreature.rotationYaw);
+        double cameraSideX = -Math.cos(yawRadians);
+        double cameraSideZ = -Math.sin(yawRadians);
+        double creatureForwardX = -Math.sin(yawRadians);
+        double creatureForwardZ = Math.cos(yawRadians);
+        double cameraSideDistance = this.getAimCameraSideDistance();
+        double bodyClearance = this.creatureCameraSideExtent + RIDING_AIM_CAMERA_BODY_MARGIN;
+        double convergenceWidth = Math.max(0.1D, cameraSideDistance - bodyClearance);
+        double focusDistance = bodyClearance * RIDING_AIM_CAMERA_DISTANCE / convergenceWidth;
+
+        for (AnimatedBoundingBox animatedBoundingBox : riddenCreature.getAnimationData().getAnimatedBoundingBoxes().values()) {
+            if (!animatedBoundingBox.canDoCollisions()) continue;
+            AxisAlignedBB bounds = riddenCreature.getAnimationData().getWorldSpaceAABB(animatedBoundingBox.getName());
+            if (bounds == null) continue;
+
+            double sideX = cameraSideX >= 0D ? bounds.maxX : bounds.minX;
+            double sideZ = cameraSideZ >= 0D ? bounds.maxZ : bounds.minZ;
+            double sideExtent = (sideX - riddenCreature.posX) * cameraSideX
+                    + (sideZ - riddenCreature.posZ) * cameraSideZ;
+            double requiredClearance = Math.max(0D, sideExtent) + RIDING_AIM_CAMERA_BODY_MARGIN;
+
+            double frontX = creatureForwardX >= 0D ? bounds.maxX : bounds.minX;
+            double frontZ = creatureForwardZ >= 0D ? bounds.maxZ : bounds.minZ;
+            double forwardExtent = (frontX - riddenCreature.posX) * creatureForwardX
+                    + (frontZ - riddenCreature.posZ) * creatureForwardZ;
+            forwardExtent = Math.max(0D, forwardExtent);
+
+            double remainingSideDistance = cameraSideDistance - requiredClearance;
+            if (remainingSideDistance <= 0.1D) continue;
+            double requiredFocusDistance = (
+                    cameraSideDistance * forwardExtent
+                            + requiredClearance * RIDING_AIM_CAMERA_DISTANCE
+            ) / remainingSideDistance;
+            focusDistance = Math.max(focusDistance, requiredFocusDistance);
+        }
+        return focusDistance;
     }
 
     @NotNull
@@ -531,6 +569,7 @@ public class CameraHandler {
         this.cameraTransition = 0D;
         this.cameraCreatureId = -1;
         this.creatureCameraSideExtent = 0D;
+        this.creatureCameraFocusDistance = 0D;
     }
 
     public record RidingCameraAngles(float yaw, float pitch) {}

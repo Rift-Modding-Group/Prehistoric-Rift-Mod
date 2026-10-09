@@ -1349,8 +1349,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Override
     @Nullable
     public Vec3d getRiddenAimPosition() {
-        return this.isRiddenAiming() && this.getCurrentMove().equals(this.riddenAimingMoveName)
-                ? this.riddenAimPosition : null;
+        return this.isRiddenAiming() && this.getCurrentMove().equals(this.riddenAimingMoveName) ? this.riddenAimPosition : null;
     }
 
     @Override

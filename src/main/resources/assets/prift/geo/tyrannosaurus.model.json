@@ -223,6 +223,14 @@
 					}
 				},
 				{
+					"name": "flamethrowerAim",
+					"parent": "head",
+					"pivot": [0, 18.5, -30],
+					"locators": {
+						"flamethrowerAimLocator": [0, 18.5, -30]
+					}
+				},
+				{
 					"name": "upperJaw",
 					"parent": "head",
 					"pivot": [0, 0, -14],

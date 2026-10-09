@@ -207,6 +207,12 @@
 						"0.0": [0, 0, 0],
 						"0.32": [0, 0, -7.5]
 					}
+				},
+				"flamethrowerAim": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.32": ["flamethrower_aim_pitch", "flamethrower_aim_yaw", 0]
+					}
 				}
 			},
 			"timeline": {
@@ -234,12 +240,15 @@
 				},
 				"lowerJaw": {
 					"rotation": [22.5, 0, 0]
+				},
+				"flamethrowerAim": {
+					"rotation": ["flamethrower_aim_pitch", "flamethrower_aim_yaw", 0]
 				}
 			},
 			"particle_effects": {
 				"0.0": {
 					"effect": "prift:flamethrower_fire",
-					"locator": "flameLocator"
+					"locator": "flamethrowerAimLocator"
 				}
 			}
 		},
@@ -268,6 +277,12 @@
 				"lowerJaw": {
 					"rotation": {
 						"0.0": [22.5, 0, 0],
+						"0.24": [0, 0, 0]
+					}
+				},
+				"flamethrowerAim": {
+					"rotation": {
+						"0.0": ["flamethrower_aim_pitch", "flamethrower_aim_yaw", 0],
 						"0.24": [0, 0, 0]
 					}
 				}
