@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.prift.client.ui.RiftCreatureUI;
 import anightdazingzoroark.prift.server.config.RiftGeneralConfig;
 import anightdazingzoroark.prift.server.entity.projectile.RiftProjectile;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataEntityLiving;
 import anightdazingzoroark.riftlib.ridePositionLogic.DynamicRidePosList;
 import anightdazingzoroark.riftlib.ridePositionLogic.IDynamicRideUser;
 import com.cleanroommc.modularui.api.IGuiHolder;
@@ -115,7 +116,7 @@ import java.util.*;
 /**
  * le heart and soul of this mod
  * */
-public class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntity>, IDynamicRideUser<RiftCreature>, IRiftCreature, ICreature, IRayCreator<RiftCreature>, IEntityAdditionalSpawnData, IGuiHolder<RiftCreatureGuiData> {
+public class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntityLiving>, IDynamicRideUser<RiftCreature>, IRiftCreature, ICreature, IRayCreator<RiftCreature>, IEntityAdditionalSpawnData, IGuiHolder<RiftCreatureGuiData> {
     @NotNull
     private RiftCreatureBuilder creatureType;
     @NotNull
@@ -123,7 +124,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @NotNull
     private final RiftLibInventoryHandler creatureInventory;
     @NotNull
-    private AnimationDataEntity animData;
+    private AnimationDataEntityLiving animData;
     @NotNull
     private DynamicRidePosList dynamicRidePosList;
 
@@ -2667,54 +2668,54 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //-----animation related methods-----
     @Override
     @NotNull
-    public AnimationDataEntity getAnimationData() {
+    public AnimationDataEntityLiving getAnimationData() {
         return this.animData;
     }
 
     @Override
-    public void initializeAnimationData(@NotNull AnimationDataEntity animationData) {
+    public void initializeAnimationData(@NotNull AnimationDataEntityLiving animationData) {
         //-----set scale-----
         animationData.setScale(holder -> this.scale());
 
         //-----create animation controllers-----
         //---for normal stuff---
-        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "movement", "default",
-                new AnimationControllerState<AnimationDataEntity>("default")
+        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntityLiving>(this, "movement", "default",
+                new AnimationControllerState<AnimationDataEntityLiving>("default")
                         .addStateTransition("moving", animData -> !this.getIsSleeping() && this.getCurrentMove().isEmpty()
                                 && !this.isLeaping() && animData.isMoving()),
-                new AnimationControllerState<AnimationDataEntity>("moving", 0.1)
+                new AnimationControllerState<AnimationDataEntityLiving>("moving", 0.1)
                         .addAnimation("animation."+this.creatureType.getName()+".walk")
                         .addStateTransition("default", animData -> this.getIsSleeping() || !this.getCurrentMove().isEmpty()
                                 || this.isLeaping() || !animData.isMoving())
         ));
-        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "sprintPosing", "default",
-                new AnimationControllerState<AnimationDataEntity>("default", 0.2)
+        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntityLiving>(this, "sprintPosing", "default",
+                new AnimationControllerState<AnimationDataEntityLiving>("default", 0.2)
                         .addStateTransition("sprint", animData -> !this.getIsSleeping() && this.getCurrentMove().isEmpty()
                                 && !this.isLeaping() && this.isSprinting()),
-                new AnimationControllerState<AnimationDataEntity>("sprint", 0.2)
+                new AnimationControllerState<AnimationDataEntityLiving>("sprint", 0.2)
                         .addAnimation("animation."+this.creatureType.getName()+".sprint_pose")
                         .addStateTransition("default", animData -> this.getIsSleeping() || !this.getCurrentMove().isEmpty()
                                 || this.isLeaping() || !this.isSprinting())
         ));
-        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "sleeping", "default",
-                new AnimationControllerState<AnimationDataEntity>("default", 0.2)
+        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntityLiving>(this, "sleeping", "default",
+                new AnimationControllerState<AnimationDataEntityLiving>("default", 0.2)
                         .addStateTransition("sleeping", animData -> this.getIsSleeping()),
-                new AnimationControllerState<AnimationDataEntity>("sleeping", 0.2)
+                new AnimationControllerState<AnimationDataEntityLiving>("sleeping", 0.2)
                         .addAnimation("animation."+this.creatureType.getName()+".sleep")
                         .addStateTransition("default", animData -> !this.getIsSleeping())
         ));
-        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "staggered", "default",
-                new AnimationControllerState<AnimationDataEntity>("default", 0.2)
+        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntityLiving>(this, "staggered", "default",
+                new AnimationControllerState<AnimationDataEntityLiving>("default", 0.2)
                         .addStateTransition("staggered", animData -> this.isStaggered()),
-                new AnimationControllerState<AnimationDataEntity>("staggered", 0.2)
+                new AnimationControllerState<AnimationDataEntityLiving>("staggered", 0.2)
                         .addAnimation("animation."+this.creatureType.getName()+".staggered")
                         .addStateTransition("default", animData -> !this.isStaggered())
         ));
         if (this.creatureType.getNavigation().getCanLeap()) {
-            animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, "leaping", "default",
-                    new AnimationControllerState<AnimationDataEntity>("default", 0.1)
+            animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntityLiving>(this, "leaping", "default",
+                    new AnimationControllerState<AnimationDataEntityLiving>("default", 0.1)
                             .addStateTransition("leaping", animData -> !this.getIsSleeping() && this.isLeaping()),
-                    new AnimationControllerState<AnimationDataEntity>("leaping", 0.1)
+                    new AnimationControllerState<AnimationDataEntityLiving>("leaping", 0.1)
                             .addAnimation("animation."+this.creatureType.getName()+".leap")
                             .addStateTransition("default", animData -> this.getIsSleeping() || !this.isLeaping())
             ));
@@ -2783,14 +2784,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     @SuppressWarnings("unchecked")
-    private void initAnimControllerForPhase(AnimationDataEntity animationData, @NotNull String phase) {
-        List<AnimationControllerState<AnimationDataEntity>> creatureMovesStates = new ArrayList<>();
+    private void initAnimControllerForPhase(AnimationDataEntityLiving animationData, @NotNull String phase) {
+        List<AnimationControllerState<AnimationDataEntityLiving>> creatureMovesStates = new ArrayList<>();
         List<ImmutablePair<String, CreatureMoveBuilder>> moveBuilderMap;
         if (phase.isEmpty()) moveBuilderMap = this.creatureType.getMoves();
         else moveBuilderMap = this.creatureType.getPhaseBuilderMaps().get(phase).getMoves();
 
         //add the initial state
-        AnimationControllerState<AnimationDataEntity> initialState = new AnimationControllerState<>("default");
+        AnimationControllerState<AnimationDataEntityLiving> initialState = new AnimationControllerState<>("default");
         creatureMovesStates.add(initialState);
 
         //define anim controller name
@@ -2813,7 +2814,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                             && this.getCreatureMoves().currentMoveMatches(moveName, currentChargeupPhase));
 
                     //---define corresponding state---
-                    AnimationControllerState<AnimationDataEntity> stateToAdd = new AnimationControllerState<AnimationDataEntity>(controllerStateName)
+                    AnimationControllerState<AnimationDataEntityLiving> stateToAdd = new AnimationControllerState<AnimationDataEntityLiving>(controllerStateName)
                             .addAnimation("animation."+this.creatureType.getName()+"."+controllerStateName);
 
                     //and loop again xd
@@ -2849,7 +2850,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 initialState.addStateTransition(moveName, animData -> !this.getIsSleeping() && this.getCurrentMove().equals(moveName));
 
                 //create state for move
-                AnimationControllerState<AnimationDataEntity> moveState = new AnimationControllerState<AnimationDataEntity>(moveName)
+                AnimationControllerState<AnimationDataEntityLiving> moveState = new AnimationControllerState<AnimationDataEntityLiving>(moveName)
                         .addStateTransition("default", animData -> this.getIsSleeping()
                                 || animData.allAnimationsFinished(controllerName))
                         .addExitEffect(animData -> this.onMoveFinish(moveName));
@@ -2882,7 +2883,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         }
 
         //now create animation controller for phase
-        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntity>(this, controllerName, "default",
+        animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntityLiving>(this, controllerName, "default",
                 creatureMovesStates.toArray(new AnimationControllerState[0])
         ));
     }

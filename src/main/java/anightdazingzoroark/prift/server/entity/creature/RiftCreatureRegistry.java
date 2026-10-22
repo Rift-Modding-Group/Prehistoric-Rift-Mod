@@ -311,9 +311,8 @@ public class RiftCreatureRegistry {
                                     double aimPitchCorrection = headBend - aimPitch;
 
                                     double targetYaw = Math.toDegrees(Math.atan2(-targetOffset.x, targetOffset.z));
-                                    EntityLivingBase creatureEntity = creature.asRayCreator().getRayCreator();
-                                    double creatureYaw = creatureEntity.isBeingRidden()
-                                            ? creatureEntity.rotationYaw : creatureEntity.rotationYawHead;
+                                    Entity creatureEntity = creature.asRayCreator().getRayCreator();
+                                    double creatureYaw = creatureEntity.rotationYaw;
                                     double aimYaw = MathHelper.wrapDegrees(targetYaw - creatureYaw);
 
                                     //now set variable

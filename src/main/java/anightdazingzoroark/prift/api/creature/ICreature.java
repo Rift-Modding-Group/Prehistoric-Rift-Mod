@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
+import anightdazingzoroark.riftlib.core.manager.AnimationDataEntityLiving;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
 import net.minecraft.entity.Entity;
@@ -56,7 +57,7 @@ public interface ICreature {
     Vec3d getLocatorWorldPos(@NotNull String name);
 
     @NotNull
-    AnimationDataEntity getAnimationData();
+    AnimationDataEntityLiving getAnimationData();
 
     /**
      * Returns this creature as a RiftLib ray creator.

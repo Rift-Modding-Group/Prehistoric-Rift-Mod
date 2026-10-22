@@ -3,13 +3,14 @@ package anightdazingzoroark.prift.client.rendering.entity;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.model.CreatureModel;
 import anightdazingzoroark.riftlib.geo.GeoModel;
+import anightdazingzoroark.riftlib.renderers.geo.GeoEntityLivingRenderer;
 import anightdazingzoroark.riftlib.renderers.geo.GeoEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderManager;
 
 /**
  * This renderer is for rendering stuff on the client for the common creature model.
  * */
-public class RiftCreatureRenderer extends GeoEntityRenderer<RiftCreature> {
+public class RiftCreatureRenderer extends GeoEntityLivingRenderer<RiftCreature> {
     public RiftCreatureRenderer(RenderManager renderManager) {
         super(renderManager, new CreatureModel());
     }
