@@ -758,6 +758,14 @@
 				"1.0": "function.create_offense_hitbox_by_tag('frontZone'); function.send_message('riddenTargetedMeleeHitEffect');",
 				"1.125": "function.destroy_offense_hitbox_by_tag('frontZone');"
 			}
+		},
+		"animation.stegosaurus.look": {
+			"loop": true,
+			"bones": {
+				"neck": {
+					"rotation": ["math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
+				}
+			}
 		}
 	}
 }

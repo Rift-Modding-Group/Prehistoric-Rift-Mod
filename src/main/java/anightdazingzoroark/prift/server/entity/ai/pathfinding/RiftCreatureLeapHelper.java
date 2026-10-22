@@ -437,21 +437,11 @@ public class RiftCreatureLeapHelper {
     }
 
     /**
-     * Keeps the body and head pointed at the chosen landing spot.
+     * Keeps the body pointed at the chosen landing spot without overriding the head's look direction.
      * */
     private void faceLeapTarget() {
         this.creature.rotationYaw = this.leapYaw;
-        this.creature.rotationYawHead = this.leapYaw;
         this.creature.renderYawOffset = this.leapYaw;
-
-        double yawRadians = Math.toRadians(this.leapYaw + 90F);
-        this.creature.getLookHelper().setLookPosition(
-                this.creature.posX + Math.cos(yawRadians),
-                this.creature.posY + this.creature.getEyeHeight(),
-                this.creature.posZ + Math.sin(yawRadians),
-                360F,
-                0F
-        );
     }
 
     /**

@@ -54,7 +54,6 @@ import anightdazingzoroark.riftlib.core.AnimatableRunValue;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
-import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
 import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
 import anightdazingzoroark.riftlib.model.AnimatedLocator;
@@ -233,7 +232,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.moveHelper = new RiftCreatureMoveHelper(this);
         this.navigator = new RiftCreaturePathNavigate(this, worldIn);
         this.applyCreatureTypeSettings();
-        this.animData = new AnimationDataEntity(this);
+        this.animData = new AnimationDataEntityLiving(this);
         this.dynamicRidePosList = new DynamicRidePosList(this, this.animData);
 
         if (worldIn != null && !worldIn.isRemote) {
@@ -290,7 +289,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         CreatureDomesticationBuilder domestication = this.creatureType.getDomestication();
         this.creatureInventory.setSize(domestication == null ? 1 : domestication.getInventorySize());
         this.applyCreatureTypeSettings();
-        this.animData = new AnimationDataEntity(this);
+        this.animData = new AnimationDataEntityLiving(this);
         this.dynamicRidePosList = new DynamicRidePosList(this, this.animData);
         this.onCreatureTypeChanged();
 
@@ -474,7 +473,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.tasks.addTask(5, new EntityAILookIdle(this) {
             @Override
             public boolean shouldExecute() {
-                return super.shouldExecute() && !RiftCreature.this.isStaggered();
+                return !RiftCreature.this.isStaggered() && RiftCreature.this.getRNG().nextFloat() < 0.15f;
             }
 
             @Override
@@ -2113,6 +2112,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //move when riding and saddled
         if (this.isBeingRidden() && this.riderCanControl() && this.getControllingPassenger() instanceof EntityPlayer playerController) {
+            if (this.isSprinting()) this.rotationYaw = this.renderYawOffset;
             strafe = playerController.moveStrafing * 0.5f;
             forward = playerController.moveForward;
             //similar to 3rd person shoulder surf games, slow down when aiming
@@ -2131,11 +2131,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             else {
                 if (this.riddenLeapChargeTicks > 0 && !this.getCreatureMoveHelper().isLeaping() && this.onGround) {
                     if (this.riddenLeapDelayTicks >= this.getNavigationBuilder().getLeapDelay()) {
-                        this.rotationYaw = playerController.rotationYaw;
-                        this.rotationYawHead = playerController.rotationYaw;
-                        this.renderYawOffset = playerController.rotationYaw;
+                        this.rotationYaw = this.renderYawOffset;
                         this.getCreatureMoveHelper().getLeapHelper().startRiddenLeap(
-                                playerController.rotationYaw,
+                                this.rotationYaw,
                                 this.riddenLeapForward,
                                 this.riddenLeapChargeTicks
                         );
@@ -2196,9 +2194,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                     && !this.isRiddenAiming() && this.getLeapCooldown() <= 0
                     && this.useStamina(MoveResult.LEAP.staminaConsumption())
             ) {
-                this.rotationYaw = rider.rotationYaw;
-                this.rotationYawHead = rider.rotationYaw;
-                this.renderYawOffset = rider.rotationYaw;
+                this.rotationYaw = this.renderYawOffset;
                 this.riddenLeapPoseActive = true;
                 this.riddenLeapPoseAirborne = !this.onGround;
                 this.riddenLeapPoseTicks = 0;
@@ -2209,9 +2205,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         }
         else {
             if (this.canChargeRiddenLeap(rider)) {
-                this.rotationYaw = rider.rotationYaw;
-                this.rotationYawHead = rider.rotationYaw;
-                this.renderYawOffset = rider.rotationYaw;
+                this.rotationYaw = this.renderYawOffset;
                 this.riddenLeapChargeTicks = Math.clamp(chargeTicks, 1, RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS);
                 this.riddenLeapDelayTicks = 0;
                 this.riddenLeapForward = movingForward || rider.moveForward > 0f;
@@ -2650,11 +2644,13 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //-----ray related methods-----
     @Override
+    @NotNull
     public RiftCreature getRayCreator() {
         return this;
     }
 
     @Override
+    @NotNull
     public Map<String, RiftLibRayBuilder> getRayBuilders() {
         return this.rayMap;
     }
@@ -2679,6 +2675,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //-----create animation controllers-----
         //---for normal stuff---
+        animationData.addAnimation("animation."+this.creatureType.getName()+".look", data -> this.getCurrentMove().isEmpty());
         animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntityLiving>(this, "movement", "default",
                 new AnimationControllerState<AnimationDataEntityLiving>("default")
                         .addStateTransition("moving", animData -> !this.getIsSleeping() && this.getCurrentMove().isEmpty()

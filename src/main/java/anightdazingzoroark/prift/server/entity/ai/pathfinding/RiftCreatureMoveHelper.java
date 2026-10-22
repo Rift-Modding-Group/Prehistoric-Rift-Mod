@@ -146,6 +146,7 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
             if (horizontalDisplacementSq >= 2.5E-7D) {
                 float targetYaw = (float)(MathHelper.atan2(displacementZ, displacementX) * 180D / Math.PI) - 90f;
                 this.creature.rotationYaw = this.limitAngle(this.creature.rotationYaw, targetYaw, 90f);
+                if (requestedAction == CreatureAction.CHARGE) this.creature.renderYawOffset = this.creature.rotationYaw;
                 if (directlyApproachingAttackTarget) {
                     this.creature.getLookHelper().setLookPositionWithEntity(attackTarget, 90f, 0f);
                 }

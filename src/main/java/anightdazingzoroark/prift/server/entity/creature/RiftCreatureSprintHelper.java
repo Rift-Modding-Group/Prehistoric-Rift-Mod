@@ -30,6 +30,7 @@ public class RiftCreatureSprintHelper {
         this.sprintTicks = 0;
         this.hitEntities.clear();
         this.riddenSprint = sprinting && riddenSprint;
+        if (this.riddenSprint) this.creature.rotationYaw = this.creature.renderYawOffset;
         this.creature.setSprinting(sprinting);
     }
 

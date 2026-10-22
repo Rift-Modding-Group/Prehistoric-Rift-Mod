@@ -541,6 +541,14 @@
 				"0.375": "function.create_offense_hitbox_by_tag('frontZone');",
 				"0.5": "function.destroy_offense_hitbox_by_tag('frontZone'); function.send_message('moveBlockBreakEffect');"
 			}
+		},
+		"animation.tyrannosaurus.look": {
+			"loop": true,
+			"bones": {
+				"neck": {
+					"rotation": ["math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
+				}
+			}
 		}
 	}
 }
