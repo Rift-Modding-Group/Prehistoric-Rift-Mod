@@ -473,7 +473,16 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.tasks.addTask(5, new EntityAILookIdle(this) {
             @Override
             public boolean shouldExecute() {
-                return !RiftCreature.this.isStaggered() && RiftCreature.this.getRNG().nextFloat() < 0.15f;
+                return RiftCreature.this.getAttackTarget() == null && !RiftCreature.this.getIsSleeping()
+                        && !RiftCreature.this.isBeingRidden() && !RiftCreature.this.isStaggered()
+                        && RiftCreature.this.getRNG().nextFloat() < 0.15f;
+            }
+
+            @Override
+            public boolean shouldContinueExecuting() {
+                return RiftCreature.this.getAttackTarget() == null && !RiftCreature.this.getIsSleeping()
+                        && !RiftCreature.this.isBeingRidden() && !RiftCreature.this.isStaggered()
+                        && super.shouldContinueExecuting();
             }
 
             @Override
@@ -485,6 +494,16 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void onLivingUpdate() {
+        //submit before vanilla consumes look requests; idle goals yield to combat targets.
+        if (!this.world.isRemote && !this.isAIDisabled()) {
+            EntityLivingBase target = this.getAttackTarget();
+            if (target != null && target.isEntityAlive() && !this.isBeingRidden()
+                    && !this.getIsSleeping() && !this.isStaggered() && this.getCurrentMove().isEmpty()
+            ) {
+                this.getLookHelper().setLookPositionWithEntity(target, 30f, this.getVerticalFaceSpeed());
+            }
+        }
+
         super.onLivingUpdate();
 
         //disable default growth system
@@ -2528,6 +2547,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     //-----dynamic ride pos related methods-----
+    @NotNull
     public RiftCreature getDynamicRideUser() {
         return this;
     }

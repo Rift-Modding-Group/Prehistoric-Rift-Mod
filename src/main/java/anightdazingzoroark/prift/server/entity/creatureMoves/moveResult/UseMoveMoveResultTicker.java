@@ -104,7 +104,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 }
             }
             if (target != null && target.isEntityAlive() && this.moveRuleBuilder.getDontPathToTarget()) {
-                this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, 0f);
+                this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, this.creature.getVerticalFaceSpeed());
             }
             else if (target != null && target.isEntityAlive()
                     && this.selectedMoveBuilder.getMoveChargeupBuilder() != null
@@ -127,7 +127,9 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
             boolean dontPathToTarget = this.moveRuleBuilder.getDontPathToTarget();
 
             //moves without pathing can look at the target without competing with navigation
-            if (dontPathToTarget) this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, 0f);
+            if (dontPathToTarget) {
+                this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, this.creature.getVerticalFaceSpeed());
+            }
             else {
                 this.hasLastLookDirection = true;
                 this.lastRotationYawHead = this.creature.rotationYawHead;
