@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.api.util.MathUtil;
-import anightdazingzoroark.prift.client.hud.RidingCreatureHUD;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import anightdazingzoroark.prift.server.message.RiftRidingAimMessage;
@@ -38,8 +37,6 @@ public class CameraHandler {
     public static float RIDING_MELEE_AIM_FOV_MULTIPLIER = 0.9f;
     private static final double RENDER_DISTANCE_OFFSET = 0D;
 
-    @NotNull
-    private final RidingCreatureHUD ridingCreatureHUD;
     private boolean enabled;
     private boolean ridingAimActive;
     private int previousThirdPersonView = -1;
@@ -52,8 +49,10 @@ public class CameraHandler {
     private double creatureCameraSideExtent;
     private double creatureCameraFocusDistance;
 
-    public CameraHandler(@NotNull RidingCreatureHUD ridingCreatureHUD) {
-        this.ridingCreatureHUD = ridingCreatureHUD;
+    private boolean canUseRidingCamera(@NotNull Minecraft minecraft, @Nullable RiftCreature riddenCreature) {
+        // Hiding the HUD must not disable the camera or aiming controls.
+        return minecraft.player != null && riddenCreature != null
+                && riddenCreature.getControllingPassenger() == minecraft.player;
     }
 
     /**
@@ -64,11 +63,11 @@ public class CameraHandler {
             boolean moveHotbarActive, boolean ridingAimActive
     ) {
         this.ridingAimActive = ridingAimActive;
-        boolean ridingCreatureHUDEnabled = this.ridingCreatureHUD.isEnabled(minecraft, riddenCreature);
-        boolean shouldEnable = ridingCreatureHUDEnabled && moveHotbarActive && ridingAimActive;
+        boolean ridingCameraAvailable = this.canUseRidingCamera(minecraft, riddenCreature);
+        boolean shouldEnable = ridingCameraAvailable && moveHotbarActive && ridingAimActive;
 
         //restore on disable
-        if (!ridingCreatureHUDEnabled) {
+        if (!ridingCameraAvailable) {
             this.restorePreviousCamera(minecraft);
             return;
         }
@@ -222,7 +221,7 @@ public class CameraHandler {
             @NotNull Minecraft minecraft, @Nullable RiftCreature riddenCreature,
             @NotNull Entity riderEntity, double partialTicks
     ) {
-        if (!this.enabled || !this.ridingCreatureHUD.isEnabled(minecraft, riddenCreature)
+        if (!this.enabled || !this.canUseRidingCamera(minecraft, riddenCreature)
                 || riddenCreature == null || riderEntity != minecraft.player
                 || minecraft.gameSettings.thirdPersonView != 1
         ) {
@@ -271,7 +270,7 @@ public class CameraHandler {
             @NotNull Minecraft minecraft, @Nullable RiftCreature riddenCreature,
             @NotNull Entity riderEntity, double partialTicks, float currentFov
     ) {
-        if (!this.enabled || !this.ridingCreatureHUD.isEnabled(minecraft, riddenCreature) || riderEntity != minecraft.player) return currentFov;
+        if (!this.enabled || !this.canUseRidingCamera(minecraft, riddenCreature) || riderEntity != minecraft.player) return currentFov;
 
         double transition = MathUtil.slopeResult(
                 partialTicks, true, 0D, 1D,
@@ -289,7 +288,7 @@ public class CameraHandler {
             int screenWidth, int screenHeight
     ) {
         if (!this.enabled || !this.ridingAimActive) return;
-        if (!this.ridingCreatureHUD.isEnabled(minecraft, riddenCreature)) return;
+        if (minecraft.gameSettings.hideGUI || !this.canUseRidingCamera(minecraft, riddenCreature)) return;
 
         int crosshairLeft = screenWidth / 2 - 7;
         int crosshairTop = screenHeight / 2 - 7;

@@ -46,7 +46,7 @@ public class ClientEvents {
     @NotNull
     private final RidingCreatureHUD ridingCreatureHUD = new RidingCreatureHUD();
     @NotNull
-    private final CameraHandler cameraHandler = new CameraHandler(this.ridingCreatureHUD);
+    private final CameraHandler cameraHandler = new CameraHandler();
     private int riddenCreatureId = -1;
     private boolean moveHotbarActive;
     private boolean usingRidingMove;
@@ -187,7 +187,7 @@ public class ClientEvents {
         RiftCreature riddenCreature = this.updateRidingState(minecraft);
 
         //---tick custom camera stuff---
-        if (this.ridingAimActive && (!this.ridingCreatureHUD.isEnabled(minecraft, riddenCreature) || riddenCreature == null)) {
+        if (this.ridingAimActive && riddenCreature == null) {
             this.stopRidingAim();
         }
         else if (this.ridingAimActive) {
@@ -268,7 +268,7 @@ public class ClientEvents {
         //hold right click to aim moves that opt into ridden aiming
         else if (event.getButton() == 1 && !riddenCreature.isLeaping()) {
             CreatureMoveBuilder selectedMove = riddenCreature.getCreatureMoves().getUsableMoves().get(this.selectedRidingMove).getValue();
-            if (this.ridingCreatureHUD.isEnabled(minecraft, riddenCreature) && selectedMove.getRiddenAimingType() != RiddenAimingType.NONE) {
+            if (selectedMove.getRiddenAimingType() != RiddenAimingType.NONE) {
                 if (event.isButtonstate()) {
                     this.ridingAimActive = true;
                     this.ridingAimMove = this.selectedRidingMove;
