@@ -313,6 +313,18 @@
 							"size": [3.2, 5.6],
 							"collision": true,
 							"tags": ["tail"]
+						},
+						"thazomizer0": {
+							"origin": [-5, 12.2, 31],
+							"size": [10, 9],
+							"collision": true,
+							"tags": ["tail", "thagomizer"]
+						},
+						"thazomizer1": {
+							"origin": [-5, 12.2, 38],
+							"size": [10, 9],
+							"collision": true,
+							"tags": ["tail", "thagomizer"]
 						}
 					}
 				},

@@ -1,7 +1,10 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
+import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,4 +42,9 @@ public class CreatureMoveHelper {
 
         return statValueToUse * finalBasePower;
     }
+
+    public static boolean targetMatchesAnyDetectionRule(@NotNull MoveRuleBuilder rule, @NotNull ICreature creature, @NotNull EntityLivingBase target) {
+        return rule.getDetectionRules().stream().anyMatch(detection -> detection.targetWithinRange(creature, target));
+    }
+
 }

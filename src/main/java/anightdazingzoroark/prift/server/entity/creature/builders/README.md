@@ -1,0 +1,1 @@
+With how many more creature builders there will be and their stupid ass size, a package full of classes that just create then would be a great way to diminish this.

@@ -40,9 +40,10 @@
 				},
 				"neck": {
 					"rotation": {
-						"0.375": [0, 0, 0],
-						"0.625": [0, -30, 0],
-						"1.5": [0, 0, 0]
+						"0.0": ["tail_attack_pitch", "tail_attack_yaw", 0],
+						"0.375": ["tail_attack_pitch", "tail_attack_yaw", 0],
+						"0.625": ["tail_attack_pitch", "tail_attack_yaw - 30", 0],
+						"1.5": ["tail_attack_pitch", "tail_attack_yaw", 0]
 					}
 				},
 				"head": {
@@ -72,7 +73,7 @@
 					"rotation": {
 						"0.0": [0, 0, 0],
 						"0.375": [5, 0, 0],
-						"0.625": [-25.0991, 40.965, -10.207],
+						"0.625": ["tail_attack_strike_pitch", 40.965, -10.207],
 						"1.5": [0, 0, 0]
 					}
 				},
@@ -110,14 +111,14 @@
 					"rotation": {
 						"0.0": [0, 0, 0],
 						"0.375": [0, 0, 0],
-						"0.625": [0, 135, 0],
+						"0.625": [0, "135 + tail_attack_yaw", 0],
 						"1.5": [0, 0, 0]
 					}
 				}
 			},
 			"timeline": {
-				"0.5": "function.create_offense_hitbox_by_tag('frontZone'); function.send_message('riddenTargetedMeleeHitEffect');",
-				"0.625": "function.destroy_offense_hitbox_by_tag('frontZone'); function.send_message('moveBlockBreakEffect');"
+				"0.5": "function.create_offense_hitbox_by_tag('thagomizer');",
+				"0.625": "function.destroy_offense_hitbox_by_tag('thagomizer'); function.send_message('moveBlockBreakEffect');"
 			},
 			"sound_effects": {
 				"0.5": {
@@ -344,8 +345,8 @@
 				},
 				"neck": {
 					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.5": [12.5, 0, 0]
+						"0.0": ["math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0],
+						"0.5": ["math.clamp(query.head_x_rotation, -15, 15) - 5", "math.clamp(query.head_y_rotation, -15, 15) - 22.5", 0]
 					}
 				},
 				"leftFrontLeg": {
@@ -410,7 +411,7 @@
 					"rotation": [5, 0, 0]
 				},
 				"neck": {
-					"rotation": [12.5, 0, 0]
+					"rotation": ["tail_attack_pitch - 5", "tail_attack_yaw - 22.5", 0]
 				},
 				"leftFrontLeg": {
 					"rotation": [-33.4814, 28.9, -0.5344]
@@ -447,7 +448,7 @@
 				"body": {
 					"rotation": {
 						"0.0": [0, 22.5, 0],
-						"0.25": [0, -142.5, 0]
+						"0.25": [0, "-142.5 + tail_attack_yaw", 0]
 					}
 				},
 				"bodyFront": {
@@ -455,8 +456,8 @@
 				},
 				"neck": {
 					"rotation": {
-						"0.0": [12.5, 0, 0],
-						"0.25": [12.9264, 14.6364, 3.3192]
+						"0.0": ["tail_attack_pitch - 5", "tail_attack_yaw - 22.5", 0],
+						"0.25": ["12.9264 + tail_attack_pitch", "14.6364 + tail_attack_yaw", 3.3192]
 					}
 				},
 				"head": {
@@ -480,7 +481,7 @@
 				"tail0": {
 					"rotation": {
 						"0.0": [23.2939, 16.6657, 5.4161],
-						"0.25": [-22.3499, -20.3503, 8.7582]
+						"0.25": ["tail_attack_strike_pitch", -20.3503, 8.7582]
 					}
 				},
 				"tail1": {
@@ -511,7 +512,8 @@
 				}
 			},
 			"timeline": {
-				"0.25": "function.create_offense_hitbox_by_tag('frontZone'); function.send_message('riddenTargetedMeleeHitEffect'); function.send_message('moveChargeupReleasingFinished');"
+				"0.125": "function.create_offense_hitbox_by_tag('thagomizer');",
+				"0.25": "function.send_message('moveChargeupReleasingFinished');"
 			}
 		},
 		"animation.stegosaurus.thagomize_finishing": {
@@ -519,8 +521,8 @@
 			"bones": {
 				"body": {
 					"rotation": {
-						"0.0": [0, -142.5, 0],
-						"0.375": [0, -142.5, 0],
+						"0.0": [0, "-142.5 + tail_attack_yaw", 0],
+						"0.375": [0, "-142.5 + tail_attack_yaw", 0],
 						"1.0": [0, 0, 0]
 					}
 				},
@@ -533,9 +535,9 @@
 				},
 				"neck": {
 					"rotation": {
-						"0.0": [12.9264, 14.6364, 3.3192],
-						"0.375": [12.93, 14.64, 3.32],
-						"1.0": [0, 0, 0]
+						"0.0": ["12.9264 + tail_attack_pitch", "14.6364 + tail_attack_yaw", 3.3192],
+						"0.375": ["12.93 + tail_attack_pitch", "14.64 + tail_attack_yaw", 3.32],
+						"1.0": ["tail_attack_pitch", "tail_attack_yaw", 0]
 					}
 				},
 				"head": {
@@ -568,8 +570,8 @@
 				},
 				"tail0": {
 					"rotation": {
-						"0.0": [-22.3499, -20.3503, 8.7582],
-						"0.375": [-20.1597, -10.8753, -1.9192],
+						"0.0": ["tail_attack_strike_pitch", -20.3503, 8.7582],
+						"0.375": ["-20.1597 + (tail_attack_strike_pitch + 22.3499) * 0.5", -10.8753, -1.9192],
 						"1.0": [0, 0, 0]
 					}
 				},
@@ -613,7 +615,7 @@
 				}
 			},
 			"timeline": {
-				"0.125": "function.destroy_offense_hitbox_by_tag('frontZone');"
+				"0.125": "function.destroy_offense_hitbox_by_tag('thagomizer');"
 			}
 		},
 		"animation.stegosaurus.tail_slam": {

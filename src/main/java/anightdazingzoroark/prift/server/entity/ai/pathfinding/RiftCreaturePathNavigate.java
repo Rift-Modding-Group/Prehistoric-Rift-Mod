@@ -108,6 +108,16 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
 
     @Override
     protected void pathFollow() {
+        if (this.currentPath instanceof AttackApproachPath && !this.currentPath.isFinished()
+                && this.currentPath.getCurrentPathIndex() == this.currentPath.getCurrentPathLength() - 1) {
+            Vec3d position = this.getEntityPosition();
+            Vec3d endpoint = this.currentPath.getVectorFromIndex(this.creature, this.currentPath.getCurrentPathIndex());
+            // Large creatures normally consume waypoints early; an attack position needs closer alignment.
+            if (Math.abs(position.x - endpoint.x) < 0.15D && Math.abs(position.z - endpoint.z) < 0.15D
+                    && Math.abs(position.y - endpoint.y) < 1D) this.currentPath.incrementPathIndex();
+            this.checkForStuck(position);
+            return;
+        }
         if (!this.creature.bodyTouchingLiquid() && !this.isFollowingWaterPath()) {
             super.pathFollow();
             return;

@@ -29,6 +29,7 @@ public class CreatureMoveBuilder {
     private CreatureMoveChargeupBuilder moveChargeupBuilder;
     private boolean requireFindTargetToUse;
     private boolean makesContact;
+    private boolean useLookBasedFacing;
     private Element element;
     private int elementEffectStrength;
     private Consumer<ICreature> onMoveHitEffect;
@@ -41,6 +42,7 @@ public class CreatureMoveBuilder {
     @Nullable
     private Consumer<ICreature> onMoveEndEffect;
     private boolean useCanStopMovement;
+    private boolean preventMovement;
     @NotNull
     private RiddenAimingType riddenAimingType = RiddenAimingType.NONE;
 
@@ -158,6 +160,29 @@ public class CreatureMoveBuilder {
 
     public boolean getMakesContact() {
         return this.makesContact;
+    }
+
+    /** Keep the user stationary throughout this move, including charge-up and recovery. */
+    public CreatureMoveBuilder setPreventMovement(boolean value) {
+        this.checkIfLocked();
+        this.preventMovement = value;
+        return this;
+    }
+
+    public boolean getPreventMovement() {
+        return this.preventMovement;
+    }
+
+    /** Face the target at move start, accounting for the look yaw retained by the animation. */
+    @NotNull
+    public CreatureMoveBuilder setUseLookBasedFacing(boolean useLookBasedFacing) {
+        this.checkIfLocked();
+        this.useLookBasedFacing = useLookBasedFacing;
+        return this;
+    }
+
+    public boolean getUseLookBasedFacing() {
+        return this.useLookBasedFacing;
     }
 
     /**
@@ -335,6 +360,7 @@ public class CreatureMoveBuilder {
 
         toReturn.moveType = this.moveType;
         toReturn.animNames = this.animNames;
+        toReturn.onMoveBeginEffect = this.onMoveBeginEffect;
 
         toReturn.movePower = this.movePower;
         toReturn.moveCooldown = this.moveCooldown;
@@ -343,6 +369,7 @@ public class CreatureMoveBuilder {
         toReturn.moveChargeupBuilder = this.moveChargeupBuilder == null ? null : this.moveChargeupBuilder.copy();
         toReturn.requireFindTargetToUse = this.requireFindTargetToUse;
         toReturn.makesContact = this.makesContact;
+        toReturn.setUseLookBasedFacing(this.getUseLookBasedFacing());
         toReturn.element = this.element;
         toReturn.elementEffectStrength = this.elementEffectStrength;
         toReturn.onMoveHitEffect = this.onMoveHitEffect;
@@ -351,6 +378,7 @@ public class CreatureMoveBuilder {
         toReturn.onBlockHitEffect = this.onBlockHitEffect;
         toReturn.onMoveEndEffect = this.onMoveEndEffect;
         toReturn.useCanStopMovement = this.useCanStopMovement;
+        toReturn.preventMovement = this.preventMovement;
         toReturn.riddenAimingType = this.riddenAimingType;
 
         return toReturn;

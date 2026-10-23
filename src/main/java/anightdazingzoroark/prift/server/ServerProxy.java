@@ -63,7 +63,7 @@ public class ServerProxy {
 
         //register entities
         RiftCreatureRegistry.createCreatures();
-        MinecraftForge.EVENT_BUS.post(new RiftCreatureRegistrationEvent(RiftCreatureRegistry::registerCreatureType));
+        MinecraftForge.EVENT_BUS.post(new RiftCreatureRegistrationEvent((name, builder) -> RiftCreatureRegistry.registerCreatureType(builder)));
         RiftCreatureRegistry.finishCreatureRegistration();
         RiftEntities.registerEntities();
 

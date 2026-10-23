@@ -1,12 +1,19 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves.moveResult;
 
+import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreaturePathNavigate;
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.AttackApproachPath;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
+import anightdazingzoroark.prift.api.creature.builder.detectionRule.DetectionRule;
+import anightdazingzoroark.prift.api.creature.builder.detectionRule.AnimatedHitboxDetectionRule;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.pathfinding.PathNavigate;
+import net.minecraft.pathfinding.Path;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,6 +25,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
     @NotNull
     private final CreatureMoveBuilder selectedMoveBuilder;
     private final boolean canUseBlockBreak;
+    private boolean wasRotatingWhileCharging;
     private boolean hasExecutedMove; //flag to set to true when a move is currently being used by a creature
     private boolean executingBlockBreak;
     private boolean blockBreakApplied;
@@ -64,7 +72,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 && this.selectedMoveBuilder.getRequireFindTargetToUse()
                 && targetAvailability
                 && !this.selectedMoveUsedDueToFrustration
-                && !this.moveRuleBuilder.targetMatchesAnyDetectionRule(this.creature, target)
+                && !CreatureMoveHelper.targetMatchesAnyDetectionRule(this.moveRuleBuilder, this.creature, target)
         ) {
             return false;
         }
@@ -103,7 +111,26 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                     this.blockBreakApplied = true;
                 }
             }
-            if (target != null && target.isEntityAlive() && this.moveRuleBuilder.getDontPathToTarget()) {
+            CreatureMoveChargeupBuilder charge = this.selectedMoveBuilder.getMoveChargeupBuilder();
+            boolean rotatingWhileCharging = this.creature.canRotateWhileCharging();
+            if (this.wasRotatingWhileCharging && !rotatingWhileCharging) {
+                this.hasLastLookDirection = true;
+                this.lastRotationYawHead = this.creature.renderYawOffset;
+                this.lastPrevRotationYawHead = this.creature.prevRenderYawOffset;
+                this.lastRotationPitch = this.creature.rotationPitch;
+                this.lastPrevRotationPitch = this.creature.prevRotationPitch;
+            }
+            this.wasRotatingWhileCharging = rotatingWhileCharging;
+            if (target != null && target.isEntityAlive() && rotatingWhileCharging) {
+                this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, this.creature.getVerticalFaceSpeed());
+                this.hasLastLookDirection = true;
+                this.lastRotationYawHead = this.creature.getAnimationData().getModelYaw();
+                this.lastPrevRotationYawHead = this.creature.prevRenderYawOffset;
+                this.lastRotationPitch = this.creature.rotationPitch;
+                this.lastPrevRotationPitch = this.creature.prevRotationPitch;
+            }
+            else if (target != null && target.isEntityAlive() && this.moveRuleBuilder.getDontPathToTarget()
+                    && (charge == null || !charge.getCanRotateWhileCharging())) {
                 this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, this.creature.getVerticalFaceSpeed());
             }
             else if (target != null && target.isEntityAlive()
@@ -138,7 +165,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 this.lastPrevRotationPitch = this.creature.prevRotationPitch;
             }
 
-            boolean targetWithinRange = this.moveRuleBuilder.targetMatchesAnyDetectionRule(this.creature, target);
+            boolean targetWithinRange = CreatureMoveHelper.targetMatchesAnyDetectionRule(this.moveRuleBuilder, this.creature, target);
             this.creature.setUseBlockBreak(useBlockBreakPath);
             if (useBlockBreakPath) {
                 this.creature.setUnableToPathToTarget(false);
@@ -152,8 +179,13 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
 
             //execute move when target is in range
             if (breakableBlocksInFront || !useBlockBreakPath && (targetWithinRange || this.selectedMoveUsedDueToFrustration)) {
-                //pathing moves face the body toward the target and lock that direction during the move
-                if (!dontPathToTarget) {
+                // Use the same target-facing heading as prediction, without adding saved neck yaw twice.
+                if (this.selectedMoveBuilder.getUseLookBasedFacing()) {
+                    float moveYaw = this.creature.getAnimationData().getModelYaw();
+                    if (!breakableBlocksInFront) moveYaw = CreatureLookUtil.getLookBasedAttackYaw(this.creature, target);
+                    this.setLookDirection(moveYaw);
+                }
+                else if (!dontPathToTarget) {
                     double targetX = target.posX - this.creature.posX;
                     double targetZ = target.posZ - this.creature.posZ;
                     //only rotate if target direction is usable
@@ -233,12 +265,29 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 if (shouldRepath) {
                     this.rememberTargetPos(target);
                     this.repathCooldown = 4 + this.creature.world.rand.nextInt(7);
-                    creatureNavigation.tryMoveToEntityLiving(target, 1D);
+                    Path approachPath = null;
+                    for (DetectionRule detection : this.moveRuleBuilder.getDetectionRules()) {
+                        if (!(detection instanceof AnimatedHitboxDetectionRule animated)) continue;
+                        approachPath = AttackApproachPath.findPath(this.creature, target, animated);
+                        if (approachPath != null) break;
+                    }
+                    if (approachPath != null) {
+                        // Ensure setPath retains the attack-position path even if its nodes match the old path.
+                        creatureNavigation.clearPath();
+                    }
+                    if (approachPath == null || !creatureNavigation.setPath(approachPath, 1D)) {
+                        creatureNavigation.tryMoveToEntityLiving(target, 1D);
+                    }
+                    else this.creature.setUnableToPathToTarget(false);
                 }
 
                 //---when navigator has no path, keep directly moving to target---
                 if (creatureNavigation.noPath()) {
-                    this.creature.getMoveHelper().setMoveTo(target.posX, target.posY, target.posZ, 1D);
+                    if (creatureNavigation.getPath() instanceof AttackApproachPath) {
+                        // Let the look pose settle at the chosen attack position before replanning.
+                        this.creature.getCreatureMoveHelper().stopMovement();
+                    }
+                    else this.creature.getMoveHelper().setMoveTo(target.posX, target.posY, target.posZ, 1D);
                     this.rememberTargetPos(target);
                 }
             }

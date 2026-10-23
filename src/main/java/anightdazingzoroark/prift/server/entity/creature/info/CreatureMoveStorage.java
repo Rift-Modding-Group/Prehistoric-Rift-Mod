@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilde
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.prift.util.PriorityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -95,7 +96,7 @@ public class CreatureMoveStorage {
 
             if (index >= 0 && (target == null
                     || !target.isEntityAlive()
-                    || (!canPathIntoDetectionRange && !moveRuleBuilder.targetMatchesAnyDetectionRule(creature, target)))
+                    || (!canPathIntoDetectionRange && !CreatureMoveHelper.targetMatchesAnyDetectionRule(moveRuleBuilder, creature, target)))
             ) {
                 index = -1;
             }
@@ -298,7 +299,7 @@ public class CreatureMoveStorage {
 
             if (chargeupBuilder.getChargeUpThenRelease() && this.currentMoveChargeupPhase == ChargeupPhase.WINDUP) {
                 this.addCurrentMoveBuildup(creature, chargeupBuilder);
-                if (this.currentMoveReleaseRequested && this.currentMoveBuildup >= chargeupBuilder.getMaxChargeUp()) {
+                if (!creature.isBeingRidden() && this.currentMoveBuildup >= chargeupBuilder.getMaxChargeUp()) {
                     this.finishCurrentMoveChargeupPhase(creature);
                 }
             }
@@ -358,7 +359,18 @@ public class CreatureMoveStorage {
             this.runChargeupPhaseEndEffect(creature, chargeupBuilder, finishedPhase);
 
             if (finishedPhase == ChargeupPhase.PREWINDUP) this.currentMoveChargeupPhase = ChargeupPhase.WINDUP;
-            else if (finishedPhase == ChargeupPhase.WINDUP) this.currentMoveChargeupPhase = ChargeupPhase.PRERELEASING;
+            else if (finishedPhase == ChargeupPhase.WINDUP) {
+                if (chargeupBuilder.getCanRotateWhileCharging()) {
+                    float bodyYaw = creature.getAnimationData().getModelYaw();
+                    creature.rotationYaw = bodyYaw;
+                    creature.prevRotationYaw = bodyYaw;
+                    creature.renderYawOffset = bodyYaw;
+                    creature.prevRenderYawOffset = bodyYaw;
+                    creature.rotationYawHead = bodyYaw;
+                    creature.prevRotationYawHead = bodyYaw;
+                }
+                this.currentMoveChargeupPhase = ChargeupPhase.PRERELEASING;
+            }
             else if (finishedPhase == ChargeupPhase.PRERELEASING) {
                 this.runCurrentMoveHitEffect(creature, currentMoveBuilder);
                 this.currentMoveChargeupPhase = ChargeupPhase.RELEASING;

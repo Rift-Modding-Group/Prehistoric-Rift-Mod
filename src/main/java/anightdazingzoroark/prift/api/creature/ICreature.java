@@ -4,7 +4,6 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
-import anightdazingzoroark.riftlib.core.manager.AnimationDataEntity;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntityLiving;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
@@ -96,6 +95,9 @@ public interface ICreature {
     <I extends AbstractPropertyValue<?>> I getProperty(String key);
 
     <I> void setProperty(String key, I value);
+
+    @NotNull
+    String getCurrentMove();
 
     String getPhase();
 

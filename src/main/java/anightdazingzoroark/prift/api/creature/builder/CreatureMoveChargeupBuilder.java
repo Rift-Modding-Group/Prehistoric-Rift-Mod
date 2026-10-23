@@ -19,6 +19,7 @@ public class CreatureMoveChargeupBuilder {
     private boolean chargeUpThenRelease;
     private boolean chargeUpWhileUse;
     private boolean canRotateWhileReleasing;
+    private boolean canRotateWhileCharging;
     private int maxChargeUp = 100;
     @NotNull
     private TriFunction<ICreature, Integer, Integer, Double> basePowerMultiplier = (creature, basePower, chargeUp) -> 1D;
@@ -68,6 +69,16 @@ public class CreatureMoveChargeupBuilder {
 
     public boolean getCanRotateWhileReleasing() {
         return this.canRotateWhileReleasing;
+    }
+
+    /** Allow aiming during prewindup and windup, independently of movement. */
+    public CreatureMoveChargeupBuilder setCanRotateWhileCharging(boolean value) {
+        this.canRotateWhileCharging = value;
+        return this;
+    }
+
+    public boolean getCanRotateWhileCharging() {
+        return this.canRotateWhileCharging;
     }
 
     public CreatureMoveChargeupBuilder setMaxChargeUp(int value) {
@@ -182,13 +193,16 @@ public class CreatureMoveChargeupBuilder {
         toReturn.chargeUpThenRelease = this.chargeUpThenRelease;
         toReturn.chargeUpWhileUse = this.chargeUpWhileUse;
         toReturn.canRotateWhileReleasing = this.canRotateWhileReleasing;
+        toReturn.canRotateWhileCharging = this.canRotateWhileCharging;
         toReturn.maxChargeUp = this.maxChargeUp;
         toReturn.basePowerMultiplier = this.basePowerMultiplier;
         toReturn.cooldownMultiplier = this.cooldownMultiplier;
         toReturn.windupEndEffect = this.windupEndEffect;
         toReturn.prereleaseEndEffect = this.prereleaseEndEffect;
         toReturn.releaseEndEffect = this.releaseEndEffect;
+        toReturn.windupEffect = this.windupEffect;
         toReturn.releaseDuringUseEffect = this.releaseDuringUseEffect;
+        toReturn.onHitEntityDuringRelease = this.onHitEntityDuringRelease;
         return toReturn;
     }
 

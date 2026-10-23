@@ -1,13 +1,8 @@
 package anightdazingzoroark.prift.api.creature.builder;
 
-import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.CreatureMoveResult;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IEntityMultiPart;
-import net.minecraft.entity.MultiPartEntityPart;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.Vec3d;
+import anightdazingzoroark.prift.api.creature.builder.detectionRule.DetectionRule;
+import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -132,94 +127,6 @@ public class CreatureMoveSelectorBuilder {
 
         public boolean requiresTargetContact() {
             return this.requiresTargetContact;
-        }
-    }
-
-    //-----target detection rules for moves-----
-    public abstract static class DetectionRule {
-        public abstract boolean targetWithinRange(@NotNull ICreature user, @NotNull EntityLivingBase target);
-    }
-
-    public static class BoundingBoxDetectionRule extends DetectionRule {
-        @NotNull
-        private final String boundingBoxName;
-        private final boolean useTagName;
-
-        public BoundingBoxDetectionRule(@NotNull String boundingBoxName) {
-            this(boundingBoxName, false);
-        }
-
-        public BoundingBoxDetectionRule(@NotNull String boundingBoxName, boolean useTagName) {
-            this.boundingBoxName = boundingBoxName;
-            this.useTagName = useTagName;
-        }
-
-        @Override
-        public boolean targetWithinRange(@NotNull ICreature user, @NotNull EntityLivingBase target) {
-            //test hitboxes first
-            if (target instanceof IEntityMultiPart) {
-                for (Entity part : target.getParts()) {
-                    if (!(part instanceof MultiPartEntityPart multiPartEntityPart)) continue;
-                    if (this.useTagName && user.aabbIntersectsBoundingBoxTag(multiPartEntityPart.getEntityBoundingBox(), this.boundingBoxName)) {
-                        return true;
-                    }
-                    else if (user.aabbIntersectsBoundingBox(multiPartEntityPart.getEntityBoundingBox(), this.boundingBoxName)) {
-                        return true;
-                    }
-                }
-            }
-
-            //back to entity
-            if (this.useTagName) return user.aabbIntersectsBoundingBoxTag(target.getEntityBoundingBox(), this.boundingBoxName);
-            return user.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), this.boundingBoxName);
-        }
-    }
-
-    public static class HorizontalDistanceFromUserDetectionRule extends DetectionRule {
-        private final double minDistance;
-        private final double maxDistance;
-
-        public HorizontalDistanceFromUserDetectionRule(double maxDistance) {
-            this(-1, maxDistance);
-        }
-
-        public HorizontalDistanceFromUserDetectionRule(double minDistance, double maxDistance) {
-            this.minDistance = minDistance;
-            this.maxDistance = maxDistance;
-        }
-
-        @Override
-        public boolean targetWithinRange(@NotNull ICreature user, @NotNull EntityLivingBase target) {
-            double dist = user.horizontalDistanceFromEntity(target);
-
-            //if minDistance is negative, it means only maxDistance matters
-            if (this.minDistance < 0) return dist <= this.maxDistance;
-            else if (this.maxDistance >= this.minDistance) return dist >= minDistance && dist <= this.maxDistance;
-            throw new IllegalArgumentException("Given maxDistance is smaller than minDistance!");
-        }
-    }
-
-    public static class VerticalDistanceFromUserDetectionRule extends DetectionRule {
-        private final double minDistance;
-        private final double maxDistance;
-
-        public VerticalDistanceFromUserDetectionRule(double maxDistance) {
-            this(-1, maxDistance);
-        }
-
-        public VerticalDistanceFromUserDetectionRule(double minDistance, double maxDistance) {
-            this.minDistance = minDistance;
-            this.maxDistance = maxDistance;
-        }
-
-        @Override
-        public boolean targetWithinRange(@NotNull ICreature user, @NotNull EntityLivingBase target) {
-            double dist = user.verticalDistanceFromEntity(target);
-
-            //if minDistance is negative, it means only maxDistance matters
-            if (this.minDistance < 0) return dist <= this.maxDistance;
-            else if (this.maxDistance >= this.minDistance) return dist >= minDistance && dist <= this.maxDistance;
-            throw new IllegalArgumentException("Given maxDistance is smaller than minDistance!");
         }
     }
 }

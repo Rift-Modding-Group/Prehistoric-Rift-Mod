@@ -498,7 +498,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (!this.world.isRemote && !this.isAIDisabled()) {
             EntityLivingBase target = this.getAttackTarget();
             if (target != null && target.isEntityAlive() && !this.isBeingRidden()
-                    && !this.getIsSleeping() && !this.isStaggered() && this.getCurrentMove().isEmpty()
+                    && !this.getIsSleeping() && !this.isStaggered() && (this.getCurrentMove().isEmpty() || this.canRotateWhileCharging())
             ) {
                 this.getLookHelper().setLookPositionWithEntity(target, 30f, this.getVerticalFaceSpeed());
             }
@@ -993,6 +993,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
      * */
     @Override
     public boolean attackEntityAsMob(Entity entityIn) {
+        Entity hitEntity = entityIn instanceof MultiPartEntityPart hitboxPart ? (Entity) hitboxPart.parent : entityIn;
         //protection
         if (this.isRelatedToEntity(entityIn)) return false;
 
@@ -1005,7 +1006,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 && this.getCurrentMove().equals(this.riddenAimingMoveName)
         ) {
             Entity aimedEntity = this.world.getEntityByID(this.riddenAimTargetEntityId);
-            if (aimedEntity == null || entityIn != aimedEntity || this.riddenAimTargetHit) return false;
+            if (aimedEntity == null || hitEntity != aimedEntity || this.riddenAimTargetHit) return false;
             this.riddenAimTargetHit = true;
         }
 
@@ -1033,7 +1034,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //other stuff
         Entity attackTarget = this.getAttackTarget();
-        Entity hitEntity = entityIn instanceof MultiPartEntityPart hitboxPart ? (Entity) hitboxPart.parent : entityIn;
         if (attackTarget != null && hitEntity == attackTarget) this.attackTargetHitCount++;
         this.setLastAttackedEntity(entityIn);
         return flag;
@@ -1798,6 +1798,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     //-----move use management-----
+    @Override
+    @NotNull
     public String getCurrentMove() {
         return this.getCreatureMoves().getCurrentMove();
     }
@@ -2114,8 +2116,41 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         return closest;
     }
 
+    public boolean canRotateWhileCharging() {
+        CreatureMoveStorage moves = this.getCreatureMoves();
+        CreatureMoveBuilder move = moves.getMoveBuilderCurrentMove();
+        CreatureMoveChargeupBuilder charge = move == null ? null : move.getMoveChargeupBuilder();
+        return charge != null && charge.getCanRotateWhileCharging()
+                && (moves.currentMoveMatches(this.getCurrentMove(), ChargeupPhase.PREWINDUP)
+                || moves.currentMoveMatches(this.getCurrentMove(), ChargeupPhase.WINDUP));
+    }
+
+    public boolean isMovementLockedByMove() {
+        CreatureMoveBuilder move = this.getCreatureMoves().getMoveBuilderCurrentMove();
+        return move != null && move.getPreventMovement();
+    }
+
+    @Override
+    public void move(MoverType type, double x, double y, double z) {
+        if (this.isMovementLockedByMove()) {
+            this.motionX = 0D;
+            this.motionY = 0D;
+            this.motionZ = 0D;
+            return;
+        }
+        super.move(type, x, y, z);
+    }
+
     @Override
     public void travel(float strafe, float vertical, float forward) {
+        if (this.isMovementLockedByMove()) {
+            this.getNavigator().clearPath();
+            this.getCreatureMoveHelper().stopMovement();
+            this.motionX = 0D;
+            this.motionY = 0D;
+            this.motionZ = 0D;
+            return;
+        }
         boolean riddenMoveActive = this.isBeingRidden() && !this.getCurrentMove().isEmpty();
 
         //make sure staggering and ridden moves cannot retain walking input
@@ -2587,6 +2622,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public boolean canRotateMounted() {
+        CreatureMoveBuilder move = this.getCreatureMoves().getMoveBuilderCurrentMove();
+        CreatureMoveChargeupBuilder charge = move == null ? null : move.getMoveChargeupBuilder();
+        if (charge != null && charge.getCanRotateWhileCharging() && !this.canRotateWhileCharging()) return false;
         return !this.getCreatureMoveHelper().getLeapHelper().isRiddenLeap() && !this.riddenLeapPoseActive
                 && !this.isSprinting() && !this.isStaggered();
     }
