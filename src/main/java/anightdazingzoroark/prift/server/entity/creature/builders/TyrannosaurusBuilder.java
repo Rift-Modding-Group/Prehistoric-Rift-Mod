@@ -146,8 +146,8 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                 //---moves---
                 .addMove("bite", CreatureMoveCommon.standardMeleeMove.copy()
                         .setBasePower(50)
-                        .setOnMoveBeginEffect((creature, target) -> this.captureBiteLook(creature))
-                        .setUseLookBasedFacing(true)
+                        .setOnMoveBeginEffect((creature, target) -> this.captureHeadAttackLook(creature))
+                        .setUseLookBasedFacing()
                         .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.TARGETED_MELEE)
                         .setAnimNames("bite")
                 )
@@ -167,6 +167,9 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                         .setBasePower(40)
                         .setRequireFindTargetToUse()
                         .setElemental(Element.FIRE, 0)
+                        .setOnMoveBeginEffect((creature, target) -> this.captureHeadAttackLook(creature))
+                        .setUseLookBasedFacing()
+                        .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
                         .setCooldown(300)
                         .setAnimNames("flame_spit")
                 )
@@ -210,7 +213,7 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                                 .setMoveRule(
                                         new MoveRuleBuilder("bite")
                                                 .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                                                .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", this::captureBiteLook))
+                                                .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", this::captureHeadAttackLook))
                                                 .setUseBlockBreak()
                                 )
                                 .setMoveRule(
@@ -226,8 +229,8 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                                 )
                                 .setMoveRule(
                                         new MoveRuleBuilder("flame_spit")
-                                                .setPriorityPredicate((creature, target) -> target != null && !creature.bodyTouchingLiquid() ? 3 : -1)
-                                                .addDetectionRule(new BoundingBoxDetectionRule("frontZone", true))
+                                                .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
+                                                .addDetectionRule(new AnimatedHitboxDetectionRule("flame_spit", this::captureHeadAttackLook))
                                                 .setUseBlockBreak()
                                 )
                                 .setMoveRule(
@@ -258,13 +261,13 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
 
     //-----helpers for moves-----
     /**
-     * Shared by reach prediction and move start so both use the same saved neck pose.
+     * Shared by bite and flame spit, including reach prediction, to capture the same neck pose.
      * */
-    private void captureBiteLook(@NotNull ICreature creature) {
+    private void captureHeadAttackLook(@NotNull ICreature creature) {
         AnimationDataEntityLiving data = creature.getAnimationData();
         CreatureLookUtil.LookPose look = CreatureLookUtil.getLookPose(creature);
-        data.setVariable("bite_pitch", look.pitch());
-        data.setVariable("bite_yaw", look.yaw());
-        data.setVariable("bite_swing", MathUtil.slopeResult(look.pitch(), true, -15D, 0D, -1D, 1D));
+        data.setVariable("head_attack_pitch", look.pitch());
+        data.setVariable("head_attack_yaw", look.yaw());
+        data.setVariable("head_attack_swing", MathUtil.slopeResult(look.pitch(), true, -15D, 0D, -1D, 1D));
     }
 }

@@ -162,10 +162,12 @@ public class CreatureMoveBuilder {
         return this.makesContact;
     }
 
-    /** Keep the user stationary throughout this move, including charge-up and recovery. */
-    public CreatureMoveBuilder setPreventMovement(boolean value) {
+    /**
+     * Keep the user stationary throughout this move, including charge-up and recovery.
+     * */
+    public CreatureMoveBuilder setPreventMovement() {
         this.checkIfLocked();
-        this.preventMovement = value;
+        this.preventMovement = true;
         return this;
     }
 
@@ -173,11 +175,13 @@ public class CreatureMoveBuilder {
         return this.preventMovement;
     }
 
-    /** Face the target at move start, accounting for the look yaw retained by the animation. */
+    /**
+     * Face the target at move start, accounting for the look yaw retained by the animation.
+     * */
     @NotNull
-    public CreatureMoveBuilder setUseLookBasedFacing(boolean useLookBasedFacing) {
+    public CreatureMoveBuilder setUseLookBasedFacing() {
         this.checkIfLocked();
-        this.useLookBasedFacing = useLookBasedFacing;
+        this.useLookBasedFacing = true;
         return this;
     }
 
@@ -369,7 +373,7 @@ public class CreatureMoveBuilder {
         toReturn.moveChargeupBuilder = this.moveChargeupBuilder == null ? null : this.moveChargeupBuilder.copy();
         toReturn.requireFindTargetToUse = this.requireFindTargetToUse;
         toReturn.makesContact = this.makesContact;
-        toReturn.setUseLookBasedFacing(this.getUseLookBasedFacing());
+        toReturn.useLookBasedFacing = this.useLookBasedFacing;
         toReturn.element = this.element;
         toReturn.elementEffectStrength = this.elementEffectStrength;
         toReturn.onMoveHitEffect = this.onMoveHitEffect;

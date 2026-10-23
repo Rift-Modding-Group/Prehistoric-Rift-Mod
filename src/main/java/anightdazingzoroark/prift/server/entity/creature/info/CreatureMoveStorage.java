@@ -11,6 +11,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilde
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
+import anightdazingzoroark.prift.api.creature.builder.detectionRule.AnimatedHitboxDetectionRule;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.prift.util.PriorityList;
@@ -92,7 +93,8 @@ public class CreatureMoveStorage {
                     : null;
             boolean canPathIntoDetectionRange = moveBuilder != null
                     && moveBuilder.getRequireFindTargetToUse()
-                    && moveBuilder.getMakesContact()
+                    && (moveBuilder.getMakesContact() || moveRuleBuilder.getDetectionRules().stream()
+                    .anyMatch(AnimatedHitboxDetectionRule.class::isInstance))
                     && !moveRuleBuilder.getDontPathToTarget();
 
             if (index >= 0 && (target == null

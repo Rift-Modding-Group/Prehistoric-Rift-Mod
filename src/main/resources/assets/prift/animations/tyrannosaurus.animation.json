@@ -19,24 +19,24 @@
 				"body": {
 					"rotation": {
 						"0.0": [0, 0, 0],
-						"0.125": ["-10 * bite_swing", 0, 0],
-						"0.25": ["20 * bite_swing", 0, 0],
+						"0.125": ["-10 * head_attack_swing", 0, 0],
+						"0.25": ["20 * head_attack_swing", 0, 0],
 						"0.5": [0, 0, 0]
 					}
 				},
 				"neck": {
 					"rotation": {
-						"0.0": ["bite_pitch", "bite_yaw", 0],
-						"0.125": ["bite_pitch + 5 * bite_swing", "bite_yaw", 0],
-						"0.25": ["bite_pitch + 2.5 * bite_swing", "bite_yaw", 0],
-						"0.5": ["bite_pitch", "bite_yaw", 0]
+						"0.0": ["head_attack_pitch", "head_attack_yaw", 0],
+						"0.125": ["head_attack_pitch + 5 * head_attack_swing", "head_attack_yaw", 0],
+						"0.25": ["head_attack_pitch + 2.5 * head_attack_swing", "head_attack_yaw", 0],
+						"0.5": ["head_attack_pitch", "head_attack_yaw", 0]
 					}
 				},
 				"head": {
 					"rotation": {
 						"0.0": [0, 0, 0],
-						"0.125": ["22.5 * bite_swing", 0, 0],
-						"0.25": ["22.5 * bite_swing", 0, 0],
+						"0.125": ["22.5 * head_attack_swing", 0, 0],
+						"0.25": ["22.5 * head_attack_swing", 0, 0],
 						"0.5": [0, 0, 0]
 					}
 				},
@@ -500,17 +500,19 @@
 						"0.0": [0, 0, 0],
 						"0.25": [-7.5, 0, 0],
 						"0.375": [10, 0, 0],
-						"0.5": [-7.5, 0, 0],
+						"0.5": [10, 0, 0],
+						"0.625": [-7.5, 0, 0],
 						"1.0": [0, 0, 0]
 					}
 				},
 				"neck": {
 					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.25": [27.5, 0, 0],
-						"0.375": [22.5, 0, 0],
-						"0.5": [27.5, 0, 0],
-						"1.0": [0, 0, 0]
+						"0.0": ["head_attack_pitch", "head_attack_yaw", 0],
+						"0.25": ["head_attack_pitch + 7.5", "head_attack_yaw", 0],
+						"0.375": ["head_attack_pitch - 10", "head_attack_yaw", 0],
+						"0.5": ["head_attack_pitch - 10", "head_attack_yaw", 0],
+						"0.625": ["head_attack_pitch + 7.5", "head_attack_yaw", 0],
+						"1.0": ["head_attack_pitch", "head_attack_yaw", 0]
 					}
 				},
 				"lowerJaw": {
@@ -522,14 +524,14 @@
 				}
 			},
 			"particle_effects": {
-				"0.2917": {
+				"0.375": {
 					"effect": "prift:flame_spit",
 					"locator": "flameLocator"
 				}
 			},
 			"timeline": {
-				"0.375": "function.create_offense_hitbox_by_tag('frontZone');",
-				"0.5": "function.destroy_offense_hitbox_by_tag('frontZone'); function.send_message('moveBlockBreakEffect');"
+				"0.375": "function.create_offense_hitbox_by_tag('flame_spit');",
+				"0.5": "function.destroy_offense_hitbox_by_tag('flame_spit'); function.send_message('moveBlockBreakEffect');"
 			}
 		},
 		"animation.tyrannosaurus.look": {
