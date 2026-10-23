@@ -498,20 +498,20 @@
 				"body": {
 					"rotation": {
 						"0.0": [0, 0, 0],
-						"0.25": [-7.5, 0, 0],
-						"0.375": [10, 0, 0],
-						"0.5": [10, 0, 0],
-						"0.625": [-7.5, 0, 0],
+						"0.25": ["-7.5 * head_attack_swing", 0, 0],
+						"0.375": ["10 * head_attack_swing", 0, 0],
+						"0.5": ["10 * head_attack_swing", 0, 0],
+						"0.625": ["-7.5 * head_attack_swing", 0, 0],
 						"1.0": [0, 0, 0]
 					}
 				},
 				"neck": {
 					"rotation": {
 						"0.0": ["head_attack_pitch", "head_attack_yaw", 0],
-						"0.25": ["head_attack_pitch + 7.5", "head_attack_yaw", 0],
-						"0.375": ["head_attack_pitch - 10", "head_attack_yaw", 0],
-						"0.5": ["head_attack_pitch - 10", "head_attack_yaw", 0],
-						"0.625": ["head_attack_pitch + 7.5", "head_attack_yaw", 0],
+						"0.25": ["head_attack_pitch + 7.5 * head_attack_swing", "head_attack_yaw", 0],
+						"0.375": ["head_attack_pitch - 10 * head_attack_swing", "head_attack_yaw", 0],
+						"0.5": ["head_attack_pitch - 10 * head_attack_swing", "head_attack_yaw", 0],
+						"0.625": ["head_attack_pitch + 7.5 * head_attack_swing", "head_attack_yaw", 0],
 						"1.0": ["head_attack_pitch", "head_attack_yaw", 0]
 					}
 				},
