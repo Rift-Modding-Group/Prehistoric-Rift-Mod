@@ -97,9 +97,7 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                         .setPreventMovement(true)
                         .setUseLookBasedFacing(true)
                         .setOnMoveBeginEffect(this::captureThagomizeLook)
-                        .setOnMoveEndEffect(creature -> {
-                            creature.setProperty("ChargeUpLevel", 0);
-                        })
+                        .setOnMoveEndEffect(creature -> creature.setProperty("ChargeUpLevel", 0))
                         .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                                 .setChargeUpThenRelease()
                                 .setCanRotateWhileCharging(true)

@@ -121,7 +121,14 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 this.lastPrevRotationPitch = this.creature.prevRotationPitch;
             }
             this.wasRotatingWhileCharging = rotatingWhileCharging;
-            if (target != null && target.isEntityAlive() && rotatingWhileCharging) {
+            if (charge != null && charge.getCanLookWhileUsing()) {
+                // Live head tracking replaces the heading frozen at move start.
+                this.hasLastLookDirection = false;
+                if (target != null && target.isEntityAlive()) {
+                    this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, this.creature.getVerticalFaceSpeed());
+                }
+            }
+            else if (target != null && target.isEntityAlive() && rotatingWhileCharging) {
                 this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, this.creature.getVerticalFaceSpeed());
                 this.hasLastLookDirection = true;
                 this.lastRotationYawHead = this.creature.getAnimationData().getModelYaw();
@@ -315,7 +322,11 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
 
         //preserve last look direction after target is gone
         EntityLivingBase target = this.creature.getAttackTarget();
-        if (target == null || !target.isEntityAlive()) this.preserveLastLookDirection();
+        CreatureMoveChargeupBuilder charge = this.selectedMoveBuilder.getMoveChargeupBuilder();
+        boolean canLookWhileUsing = charge != null && charge.getCanLookWhileUsing();
+        if (!canLookWhileUsing && (target == null || !target.isEntityAlive())) {
+            this.preserveLastLookDirection();
+        }
     }
 
     @Override

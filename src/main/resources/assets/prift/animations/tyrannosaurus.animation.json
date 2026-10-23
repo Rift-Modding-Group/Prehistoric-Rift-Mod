@@ -149,6 +149,11 @@
 		},
 		"animation.tyrannosaurus.flamethrower_prewindup": {
 			"loop": true,
+			"bones": {
+				"neck": {
+					"rotation": ["math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
+				}
+			},
 			"timeline": {
 				"0.0": "function.send_message('moveChargeupPrewindupFinished');"
 			}
@@ -165,8 +170,8 @@
 				},
 				"neck": {
 					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.32": [20, 0, 0]
+						"0.0": ["math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0],
+						"0.32": ["20 + math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
 					}
 				},
 				"lowerJaw": {
@@ -192,8 +197,8 @@
 				},
 				"neck": {
 					"rotation": {
-						"0.0": [20, 0, 0],
-						"0.32": ["-15-flamethrower_head_bend", 0, 0]
+						"0.0": ["20 + math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0],
+						"0.32": ["-15 + math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
 					}
 				},
 				"lowerJaw": {
@@ -206,12 +211,6 @@
 					"rotation": {
 						"0.0": [0, 0, 0],
 						"0.32": [0, 0, -7.5]
-					}
-				},
-				"flamethrowerAim": {
-					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.32": ["flamethrower_aim_pitch", "flamethrower_aim_yaw", 0]
 					}
 				}
 			},
@@ -227,7 +226,7 @@
 					"rotation": [15, 0, 0]
 				},
 				"neck": {
-					"rotation": ["-15-flamethrower_head_bend", 0, 0]
+					"rotation": ["-15 + math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
 				},
 				"head": {
 					"rotation": {
@@ -240,9 +239,6 @@
 				},
 				"lowerJaw": {
 					"rotation": [22.5, 0, 0]
-				},
-				"flamethrowerAim": {
-					"rotation": ["flamethrower_aim_pitch", "flamethrower_aim_yaw", 0]
 				}
 			},
 			"particle_effects": {
@@ -264,8 +260,8 @@
 				},
 				"neck": {
 					"rotation": {
-						"0.0": ["-15-flamethrower_head_bend", 0, 0],
-						"0.24": [0, 0, 0]
+						"0.0": ["-15 + math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0],
+						"0.24": ["math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
 					}
 				},
 				"head": {
@@ -277,12 +273,6 @@
 				"lowerJaw": {
 					"rotation": {
 						"0.0": [22.5, 0, 0],
-						"0.24": [0, 0, 0]
-					}
-				},
-				"flamethrowerAim": {
-					"rotation": {
-						"0.0": ["flamethrower_aim_pitch", "flamethrower_aim_yaw", 0],
 						"0.24": [0, 0, 0]
 					}
 				}

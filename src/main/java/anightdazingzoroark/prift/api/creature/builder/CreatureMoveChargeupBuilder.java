@@ -20,6 +20,7 @@ public class CreatureMoveChargeupBuilder {
     private boolean chargeUpWhileUse;
     private boolean canRotateWhileReleasing;
     private boolean canRotateWhileCharging;
+    private boolean canLookWhileUsing;
     private int maxChargeUp = 100;
     @NotNull
     private TriFunction<ICreature, Integer, Integer, Double> basePowerMultiplier = (creature, basePower, chargeUp) -> 1D;
@@ -79,6 +80,19 @@ public class CreatureMoveChargeupBuilder {
 
     public boolean getCanRotateWhileCharging() {
         return this.canRotateWhileCharging;
+    }
+
+    /**
+     * Keep normal head tracking active throughout this move's charge-up, release, and recovery.
+     * */
+    @NotNull
+    public CreatureMoveChargeupBuilder setCanLookWhileUsing(boolean value) {
+        this.canLookWhileUsing = value;
+        return this;
+    }
+
+    public boolean getCanLookWhileUsing() {
+        return this.canLookWhileUsing;
     }
 
     public CreatureMoveChargeupBuilder setMaxChargeUp(int value) {
@@ -194,6 +208,7 @@ public class CreatureMoveChargeupBuilder {
         toReturn.chargeUpWhileUse = this.chargeUpWhileUse;
         toReturn.canRotateWhileReleasing = this.canRotateWhileReleasing;
         toReturn.canRotateWhileCharging = this.canRotateWhileCharging;
+        toReturn.canLookWhileUsing = this.canLookWhileUsing;
         toReturn.maxChargeUp = this.maxChargeUp;
         toReturn.basePowerMultiplier = this.basePowerMultiplier;
         toReturn.cooldownMultiplier = this.cooldownMultiplier;

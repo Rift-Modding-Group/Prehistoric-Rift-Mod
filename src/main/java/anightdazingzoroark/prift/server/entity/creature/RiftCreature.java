@@ -497,8 +497,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         //submit before vanilla consumes look requests; idle goals yield to combat targets.
         if (!this.world.isRemote && !this.isAIDisabled()) {
             EntityLivingBase target = this.getAttackTarget();
+            CreatureMoveBuilder move = this.getCreatureMoves().getMoveBuilderCurrentMove();
+            CreatureMoveChargeupBuilder charge = move == null ? null : move.getMoveChargeupBuilder();
+            boolean canLookWhileUsing = charge != null && charge.getCanLookWhileUsing();
             if (target != null && target.isEntityAlive() && !this.isBeingRidden()
-                    && !this.getIsSleeping() && !this.isStaggered() && (this.getCurrentMove().isEmpty() || this.canRotateWhileCharging())
+                    && !this.getIsSleeping() && !this.isStaggered()
+                    && (this.getCurrentMove().isEmpty() || this.canRotateWhileCharging() || canLookWhileUsing)
             ) {
                 this.getLookHelper().setLookPositionWithEntity(target, 30f, this.getVerticalFaceSpeed());
             }
