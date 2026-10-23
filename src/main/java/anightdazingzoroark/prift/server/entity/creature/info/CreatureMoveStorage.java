@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature.info;
 
 import anightdazingzoroark.prift.api.creature.CreatureMoveResult;
+import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
@@ -77,7 +78,7 @@ public class CreatureMoveStorage {
         if (!this.isInitialized()) return;
 
         CreatureMoveSelectorBuilder.MoveRule blockBreakMoveRule = this.getBlockBreakMoveRule(creature, target);
-        for (CreatureMoveSelectorBuilder.MoveRule moveRule : this.creatureType.getMoveSelector().getMoveRules()) {
+        for (CreatureMoveSelectorBuilder.MoveRule moveRule : this.creatureType.getMoveRules()) {
             MoveRuleBuilder moveRuleBuilder = moveRule.moveRuleBuilder();
 
             boolean useDueToFrustration = moveRule.moveResult() == CreatureMoveResult.USE_MOVE
@@ -142,7 +143,7 @@ public class CreatureMoveStorage {
 
         CreatureMoveSelectorBuilder.MoveRule bestRule = null;
         int bestPriority = Integer.MAX_VALUE;
-        for (CreatureMoveSelectorBuilder.MoveRule moveRule : this.creatureType.getMoveSelector().getMoveRules()) {
+        for (CreatureMoveSelectorBuilder.MoveRule moveRule : this.creatureType.getMoveRules()) {
             if (moveRule.moveResult() != CreatureMoveResult.USE_MOVE) continue;
 
             MoveRuleBuilder ruleBuilder = moveRule.moveRuleBuilder();
@@ -210,19 +211,11 @@ public class CreatureMoveStorage {
     public CreatureMoveBuilder getUsableMoveBuilder(String phaseName, String moveName) {
         if (!this.isInitialized()) return null;
 
-        List<ImmutablePair<String, CreatureMoveBuilder>> moveMap;
-        if (phaseName.isEmpty()) moveMap = this.creatureType.getMoves();
-        else {
-            CreaturePhaseBuilder phaseBuilder = this.creatureType.getPhaseBuilderMaps().get(phaseName);
-            if (phaseBuilder == null) return null;
-            moveMap = phaseBuilder.getMoves();
-        }
-
-        for (ImmutablePair<String, CreatureMoveBuilder> moveEntry : moveMap) {
-            if (!moveEntry.getKey().equals(moveName)) continue;
-            return moveEntry.getValue();
-        }
-        return null;
+        AbstractCreatureBuilder<?> configuration = this.creatureType;
+        if (!phaseName.isEmpty()) configuration = this.creatureType.getPhaseBuilderMaps().get(phaseName);
+        if (configuration == null) return null;
+        AbstractCreatureBuilder.MoveDefinition definition = configuration.getMoveDefinitions().get(moveName);
+        return definition == null ? null : definition.moveBuilder();
     }
 
     //-----currently used move management-----

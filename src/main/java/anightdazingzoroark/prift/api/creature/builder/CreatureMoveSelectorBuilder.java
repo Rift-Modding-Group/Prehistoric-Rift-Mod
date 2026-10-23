@@ -82,7 +82,7 @@ public class CreatureMoveSelectorBuilder {
 
     @NotNull
     public List<MoveRule> getMoveRules() {
-        return this.moveRules;
+        return List.copyOf(this.moveRules);
     }
 
     /**
@@ -92,15 +92,7 @@ public class CreatureMoveSelectorBuilder {
         if (this.locked) throw new IllegalCallerException("A setter for a move selector builder cannot be called after the move selector is registered!");
     }
 
-    public record MoveRule(@NotNull CreatureMoveResult moveResult, @NotNull MoveRuleBuilder moveRuleBuilder) {
-        @Override
-        public boolean equals(Object object) {
-            if (!(object instanceof MoveRule(CreatureMoveResult otherResult, MoveRuleBuilder otherMoveRuleBuilder))) return false;
-
-            if (otherResult != CreatureMoveResult.USE_MOVE) return otherResult == this.moveResult;
-            else return otherMoveRuleBuilder.getMoveName().equals(this.moveRuleBuilder.getMoveName());
-        }
-    }
+    public record MoveRule(@NotNull CreatureMoveResult moveResult, @NotNull MoveRuleBuilder moveRuleBuilder) {}
 
     /**
      * Leap-specific move rule data selecting whether target contact deals damage.

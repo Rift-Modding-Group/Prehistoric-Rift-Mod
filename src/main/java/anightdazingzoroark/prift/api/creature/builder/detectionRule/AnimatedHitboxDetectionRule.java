@@ -1,11 +1,9 @@
 package anightdazingzoroark.prift.api.creature.builder.detectionRule;
 
-import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
-import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.util.MathUtil;
 import anightdazingzoroark.riftlib.model.AnimationHitboxTimeline;
@@ -23,7 +21,6 @@ import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -79,28 +76,21 @@ public class AnimatedHitboxDetectionRule extends DetectionRule {
         }
         if (configuration == null) return null;
 
-        MoveRuleBuilder rule = configuration.getMoveSelector().getMoveRules().stream()
-                .map(CreatureMoveSelectorBuilder.MoveRule::moveRuleBuilder)
-                .filter(candidate -> candidate.getDetectionRules().contains(this))
-                .findFirst().orElse(null);
-        if (rule == null) return null;
-
-        CreatureMoveBuilder move = configuration.getMoves().stream()
-                .filter(entry -> entry.getLeft().equals(rule.getMoveName()))
-                .map(ImmutablePair::getRight).findFirst().orElse(null);
-        if (move == null) return null;
+        AbstractCreatureBuilder.MoveDefinition definition = configuration.getDetectionOwners().get(this);
+        if (definition == null) return null;
+        CreatureMoveBuilder move = definition.moveBuilder();
 
         AnimationDataEntityLiving data = user.getAnimationData();
         List<String> animationSuffixes;
         if (move.getMoveChargeupBuilder() != null) {
             animationSuffixes = Arrays.stream(ChargeupPhase.values())
-                    .map(phase -> rule.getMoveName() + "_" + phase.name().toLowerCase()).toList();
+                    .map(phase -> definition.name() + "_" + phase.name().toLowerCase()).toList();
         }
         else {
             String[] names = move.getAnimNames();
             if (names == null || names.length == 0) return null;
             int index = 0;
-            if (user.getCurrentMove().equals(rule.getMoveName()) && names.length > 1) {
+            if (user.getCurrentMove().equals(definition.name()) && names.length > 1) {
                 index = Math.clamp((int) data.getVariable("chosenMove"), 0, names.length - 1);
             }
             animationSuffixes = List.of(names[index]);

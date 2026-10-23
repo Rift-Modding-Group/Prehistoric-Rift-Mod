@@ -1,9 +1,12 @@
 package anightdazingzoroark.prift.api.creature.builder;
 
 import anightdazingzoroark.prift.api.creature.config.RiftCreatureFood;
+import anightdazingzoroark.prift.api.creature.CreatureMoveResult;
+import anightdazingzoroark.prift.api.creature.builder.detectionRule.DetectionRule;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.util.TriConsumer;
+import anightdazingzoroark.prift.api.util.CreatureMoveUtil;
 import anightdazingzoroark.riftlib.ray.RiftLibRay;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import net.minecraft.entity.EntityLivingBase;
@@ -13,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +34,14 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private int[] spawnEggColors;
     private float[] scaleRangeForAge;
     private String tributeItemPartName;
-    private final List<ImmutablePair<String, CreatureMoveBuilder>> moveList = new ArrayList<>();
+    @NotNull
+    private Map<String, MoveDefinition> moves = Map.of();
+    @NotNull
+    private Map<DetectionRule, MoveDefinition> detectionOwners = Map.of();
+    @NotNull
+    private List<ImmutablePair<String, CreatureMoveBuilder>> orderedMoves = List.of();
+    @NotNull
+    private List<CreatureMoveSelectorBuilder.MoveRule> moveRules = List.of();
 
     //the following can be left alone
     private float[] mainHitboxSize = new float[]{1f, 1f};
@@ -71,6 +82,16 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * This locks this object so that when accessing any instances of this, it can never be modified ever
      * */
     public void lock() {
+        if (this.locked) return;
+        this.setMoveSelector(this.moveSelector);
+        for (CreatureMoveSelectorBuilder.MoveRule rule : this.moveRules) {
+            if (rule.moveResult() == CreatureMoveResult.USE_MOVE && !this.moves.containsKey(rule.moveRuleBuilder().getMoveName())) {
+                throw new IllegalArgumentException("No move is registered for rule " + rule.moveRuleBuilder().getMoveName());
+            }
+        }
+        if (this instanceof RiftCreatureBuilder creature) {
+            for (CreaturePhaseBuilder phase : creature.getPhaseBuilderMaps().values()) phase.lock();
+        }
         if (this.domestication != null) this.domestication.lock();
         this.locked = true;
     }
@@ -173,16 +194,60 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * Set a map containing the moves that this creature can use. Key is the name,
      * value is the move builder for that move.
      * */
-    public T addMove(String name, CreatureMoveBuilder moveBuilder) {
+    public T addMove(@NotNull String name, @NotNull CreatureMoveBuilder moveBuilder) {
         this.checkIfLocked();
+        if (this.moves.containsKey(name)) throw new IllegalArgumentException("Move " + name + " is already registered!");
 
+        Map<String, MoveDefinition> declarations = new LinkedHashMap<>(this.moves);
+        declarations.put(name, new MoveDefinition(name, moveBuilder, List.of()));
+        List<CreatureMoveSelectorBuilder.MoveRule> policies = this.moveSelector.getMoveRules();
+        Map<String, MoveDefinition> moves = CreatureMoveUtil.groupMoveRules(declarations, policies);
+        Map<DetectionRule, MoveDefinition> owners = CreatureMoveUtil.indexDetectionOwners(moves);
+        List<ImmutablePair<String, CreatureMoveBuilder>> orderedMoves = new ArrayList<>(this.orderedMoves);
+        orderedMoves.add(new ImmutablePair<>(name, moveBuilder));
         moveBuilder.lock();
-        this.moveList.add(new ImmutablePair<>(name, moveBuilder));
+
+        this.moves = moves;
+        this.detectionOwners = owners;
+        this.orderedMoves = List.copyOf(orderedMoves);
+        this.moveRules = List.copyOf(policies);
+
         return this.getThis();
     }
 
+    /**
+     * Ordered rider slots, retained for callers that address moves by index.
+     * */
+    @NotNull
     public List<ImmutablePair<String, CreatureMoveBuilder>> getMoves() {
-        return List.copyOf(this.moveList);
+        return this.orderedMoves;
+    }
+
+    @NotNull
+    public Map<String, MoveDefinition> getMoveDefinitions() {
+        return this.moves;
+    }
+
+    /**
+     * Keys identify detector instances, rather than comparing detector values.
+     * */
+    @NotNull
+    public Map<DetectionRule, MoveDefinition> getDetectionOwners() {
+        return this.detectionOwners;
+    }
+
+    /**
+     * Ordered AI policies, including sprint and leap policies without a named move.
+     * */
+    @NotNull
+    public List<CreatureMoveSelectorBuilder.MoveRule> getMoveRules() {
+        return this.moveRules;
+    }
+
+    public record MoveDefinition(@NotNull String name, @NotNull CreatureMoveBuilder moveBuilder, @NotNull List<MoveRuleBuilder> rules) {
+        public MoveDefinition {
+            rules = List.copyOf(rules);
+        }
     }
 
     /**
@@ -440,8 +505,14 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     public T setMoveSelector(@NotNull CreatureMoveSelectorBuilder moveSelector) {
         this.checkIfLocked();
 
+        List<CreatureMoveSelectorBuilder.MoveRule> policies = moveSelector.getMoveRules();
+        Map<String, MoveDefinition> moves = CreatureMoveUtil.groupMoveRules(this.moves, policies);
+        Map<DetectionRule, MoveDefinition> owners = CreatureMoveUtil.indexDetectionOwners(moves);
         moveSelector.lock();
         this.moveSelector = moveSelector;
+        this.moves = moves;
+        this.detectionOwners = owners;
+        this.moveRules = List.copyOf(policies);
         return this.getThis();
     }
 
@@ -610,7 +681,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
                 && this.navigation.isValid()
                 && (this.domestication == null || this.domestication.isValid())
                 && this.tributeItemPartName != null
-                && !this.moveList.isEmpty();
+                && !this.moves.isEmpty();
     }
 
     /**
