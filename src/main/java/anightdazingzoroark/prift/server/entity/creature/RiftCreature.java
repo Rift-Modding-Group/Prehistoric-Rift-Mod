@@ -337,6 +337,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.getAttributeMap().registerAttribute(ELEMENTAL_DAMAGE_ATTRIBUTE);
         this.getAttributeMap().registerAttribute(STAMINA_ATTRIBUTE);
         this.getAttributeMap().getAttributeInstance(EntityLivingBase.SWIM_SPEED).setBaseValue(1.5D);
+        this.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(32D);
     }
 
     @Override
@@ -1071,12 +1072,15 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     /**
      * this is for testing if another entity is related to this creature
-     * such as if its tamed to its owner or if it is a herdmate
+     * such as if its tamed to its owner or if it is a herdmate or teammate
      * */
     public boolean isRelatedToEntity(@Nullable Entity entity) {
         if (entity instanceof MultiPartEntityPart hitboxPart) {
             Entity hitboxParent = (Entity) hitboxPart.parent;
             return this.isRelatedToEntity(hitboxParent);
+        }
+        else if (entity != null && this.isOnSameTeam(entity)) {
+            return true;
         }
         else if (entity instanceof RiftCreature otherCreature && this.isHerdmate(otherCreature)) {
             return true;

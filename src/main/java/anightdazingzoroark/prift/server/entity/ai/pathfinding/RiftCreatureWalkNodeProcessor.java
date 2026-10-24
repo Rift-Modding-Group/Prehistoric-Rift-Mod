@@ -108,6 +108,52 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
     @Override
     public int findPathOptions(PathPoint[] pathOptions, PathPoint currentPoint, PathPoint targetPoint, float maxDistance) {
         int count = super.findPathOptions(pathOptions, currentPoint, targetPoint, maxDistance);
+        int supportedOptions = 0;
+        for (int index = 0; index < count; index++) {
+            PathPoint candidate = pathOptions[index];
+            if (candidate.nodeType == PathNodeType.OPEN) {
+                AxisAlignedBB body = this.creature.getEntityBoundingBox();
+                AxisAlignedBB support = body.offset(
+                        candidate.x + this.entitySizeX * 0.5D - this.creature.posX,
+                        candidate.y - body.minY - 0.125D,
+                        candidate.z + this.entitySizeZ * 0.5D - this.creature.posZ
+                );
+                // Vanilla can retain the original OPEN node after its fall scan reaches y=0.
+                // It is a walking option only if the actual body has support at that height.
+                if (!this.creature.world.collidesWithAnyBlock(support)) continue;
+            }
+            pathOptions[supportedOptions++] = candidate;
+        }
+        count = supportedOptions;
+        if (currentPoint.nodeType != PathNodeType.WATER && this.creature.getPathPriority(PathNodeType.WALKABLE) >= 0f) {
+            for (EnumFacing facing : EnumFacing.Plane.HORIZONTAL) {
+                int x = currentPoint.x + facing.getXOffset();
+                int z = currentPoint.z + facing.getZOffset();
+                AxisAlignedBB creatureBounds = this.creature.getEntityBoundingBox();
+                AxisAlignedBB candidateBounds = creatureBounds.offset(
+                        x + this.entitySizeX * 0.5D - this.creature.posX,
+                        currentPoint.y - creatureBounds.minY,
+                        z + this.entitySizeZ * 0.5D - this.creature.posZ
+                );
+                for (int drop = 0; drop <= this.creature.getMaxFallHeight() && currentPoint.y - drop > 0; drop++) {
+                    AxisAlignedBB landingBounds = candidateBounds.offset(0D, -drop, 0D);
+                    if (this.creature.world.collidesWithAnyBlock(landingBounds)) break;
+                    PathNodeType type = this.getNodeType(x, currentPoint.y - drop, z);
+                    if (type != PathNodeType.OPEN && type != PathNodeType.WALKABLE) break;
+                    if (!this.creature.world.collidesWithAnyBlock(landingBounds.offset(0D, -0.125D, 0D))) continue;
+                    if (drop == 0) break;
+
+                    PathPoint landing = this.openPoint(x, currentPoint.y - drop, z);
+                    if (!landing.visited && landing.distanceTo(targetPoint) < maxDistance
+                            && !this.contains(pathOptions, count, landing)) {
+                        landing.nodeType = PathNodeType.WALKABLE;
+                        landing.costMalus = Math.max(landing.costMalus, this.creature.getPathPriority(PathNodeType.WALKABLE));
+                        pathOptions[count++] = landing;
+                    }
+                    break;
+                }
+            }
+        }
         if (this.waterPathingAllowed) {
             for (int index = 0; index < count; index++) {
                 if (pathOptions[index].nodeType == PathNodeType.WATER) pathOptions[index].costMalus = WATER_PATH_COST;

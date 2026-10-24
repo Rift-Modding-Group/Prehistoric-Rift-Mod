@@ -2,10 +2,13 @@ package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
+import anightdazingzoroark.prift.api.util.MathUtil;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.pathfinding.Path;
+import net.minecraft.pathfinding.PathNodeType;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
@@ -166,16 +169,39 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
                     && this.creature.getCreaturePathNavigate().isApproachingSafeDownwardPathTransition();
             boolean approachingPlannedBlockBreak = this.creature.getUseBlockBreak()
                     && this.creature.hasBreakableBlocksInFront();
+            // A wide creature can safely approach a lip while part of its body
+            // remains supported. Check the whole walk before a center-only gap scan.
+            Path walkingPath = this.creature.getCreaturePathNavigate().getPath();
+            boolean supportedWalkingApproach = requestedAction == CreatureAction.MOVE_TO
+                    && !inLiquid && !followingWaterPath && !approachingPlannedBlockBreak
+                    && this.creature.onGround && walkingPath != null && !walkingPath.isFinished()
+                    && walkingPath.getPathPointFromIndex(walkingPath.getCurrentPathIndex()).nodeType == PathNodeType.WALKABLE
+                    && Math.abs(displacementY) < 1E-3D;
+            if (supportedWalkingApproach) {
+                AxisAlignedBB body = this.creature.getEntityBoundingBox();
+                int samples = Math.max(1, (int) Math.ceil(Math.sqrt(horizontalDisplacementSq) / 0.25D));
+                for (int sample = 0; sample <= samples; sample++) {
+                    AxisAlignedBB nextBody = body.offset(
+                            MathUtil.slopeResult(sample, false, 0, samples, 0D, displacementX),
+                            0D,
+                            MathUtil.slopeResult(sample, false, 0, samples, 0D, displacementZ)
+                    );
+                    if (this.creature.world.collidesWithAnyBlock(nextBody)
+                            || !this.creature.world.collidesWithAnyBlock(nextBody.offset(0D, -0.125D, 0D))) {
+                        supportedWalkingApproach = false;
+                        break;
+                    }
+                }
+            }
             boolean leapHandled = !approachingPlannedBlockBreak
                     && !inLiquid && !followingWaterPath && !approachingSafeDownwardTransition
+                    && !supportedWalkingApproach
                     && this.leapHelper.tryHandleLeap(this.posX, this.posY, this.posZ, obstacleClearance, requestedAction);
 
             if (!leapHandled) {
                 this.leapHelper.resetDelay();
-
-                boolean closeToWaypoint = horizontalDisplacementSq < Math.max(1f, this.creature.width * this.creature.width);
-                boolean standardJumpTransition = (obstacleClearance > this.creature.stepHeight && obstacleClearance <= STANDARD_JUMP_CLEARANCE)
-                        || (closeToWaypoint && displacementY > this.creature.stepHeight && displacementY <= STANDARD_JUMP_CLEARANCE);
+                boolean standardJumpTransition = obstacleClearance > this.creature.stepHeight
+                        && obstacleClearance <= STANDARD_JUMP_CLEARANCE;
                 if (!inLiquid && !followingWaterPath && navigation.getCanWalk() && this.creature.onGround && standardJumpTransition) {
                     this.creature.getJumpHelper().setJumping();
                     this.creatureAction = CreatureAction.JUMPING;

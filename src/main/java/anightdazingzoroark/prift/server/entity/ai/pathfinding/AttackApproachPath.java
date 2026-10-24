@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
@@ -26,6 +27,8 @@ import java.util.stream.IntStream;
  * */
 public class AttackApproachPath extends Path {
     private static final int MAX_PATH_ATTEMPTS = 4;
+    @Nullable
+    private BooleanSupplier targetWithinRange;
 
     public AttackApproachPath(@NotNull Path path) {
         super(IntStream.range(0, path.getCurrentPathLength()).mapToObj(path::getPathPointFromIndex).toArray(PathPoint[]::new));
@@ -45,11 +48,20 @@ public class AttackApproachPath extends Path {
         AnimatedHitboxDetectionRule.AttackPreview preview = detection.createPreview(creature, target);
         if (preview == null) return null;
         float yaw = CreatureLookUtil.getLookBasedAttackYaw(creature, target);
-        return findPath(
+        AttackApproachPath path = findPath(
                 creature, target, preview.bounds(Vec3d.ZERO, yaw),
                 position -> preview.bounds(position, CreatureLookUtil.getLookBasedAttackYaw(creature, target, position)),
                 AnimatedHitboxDetectionRule.getTargetBounds(target)
         );
+        if (path != null) {
+            // The neck pose can change while climbing; use the live prediction on arrival.
+            path.targetWithinRange = () -> !target.isEntityAlive() || detection.targetWithinRange(creature, target);
+        }
+        return path;
+    }
+
+    public static boolean canFinish(@NotNull AttackApproachPath path) {
+        return path.targetWithinRange == null || path.targetWithinRange.getAsBoolean();
     }
 
     /**
@@ -57,7 +69,7 @@ public class AttackApproachPath extends Path {
      * */
     @Nullable
     public static AttackApproachPath findPath(
-            @NotNull EntityLiving creature, @NotNull EntityLivingBase target, @NotNull List<AxisAlignedBB> relativeHitboxes,
+            @NotNull RiftCreature creature, @NotNull EntityLivingBase target, @NotNull List<AxisAlignedBB> relativeHitboxes,
             @NotNull Function<Vec3d, List<AxisAlignedBB>> hitboxesAtPosition, @NotNull List<AxisAlignedBB> targetBounds
     ) {
         double maximumReach = 0D;
@@ -92,13 +104,17 @@ public class AttackApproachPath extends Path {
             AxisAlignedBB body = creature.getEntityBoundingBox().offset(position.subtract(origin));
             if (body.intersects(target.getEntityBoundingBox())
                     || !creature.world.getCollisionBoxes(creature, body).isEmpty()
-                    || creature.world.getCollisionBoxes(creature, body.offset(0D, -0.125D, 0D)).isEmpty()) continue;
+                    || creature.world.getCollisionBoxes(creature, body.offset(0D, -0.125D, 0D)).isEmpty()
+            ) {
+                continue;
+            }
             List<AxisAlignedBB> volumes = hitboxesAtPosition.apply(position);
             if (volumes.stream().noneMatch(volume -> targetBounds.stream().anyMatch(volume::intersects))) continue;
 
             if (pathAttempts++ >= MAX_PATH_ATTEMPTS) break;
             Path path = creature.getNavigator().getPathToXYZ(position.x, position.y, position.z);
             if (path == null || path.getCurrentPathLength() == 0) continue;
+            if (!creature.getCreaturePathNavigate().pathLeapArcsAreClear(path)) continue;
             Vec3d end = path.getVectorFromIndex(creature, path.getCurrentPathLength() - 1);
             double x = end.x - position.x;
             double z = end.z - position.z;
@@ -115,7 +131,16 @@ public class AttackApproachPath extends Path {
                     break;
                 }
             }
-            if (safePath) return new AttackApproachPath(path);
+            if (safePath) {
+                AttackApproachPath approachPath = new AttackApproachPath(path);
+                approachPath.targetWithinRange = () -> {
+                    if (!target.isEntityAlive()) return true;
+                    List<AxisAlignedBB> liveTargetBounds = AnimatedHitboxDetectionRule.getTargetBounds(target);
+                    return hitboxesAtPosition.apply(creature.getPositionVector()).stream()
+                            .anyMatch(volume -> liveTargetBounds.stream().anyMatch(volume::intersects));
+                };
+                return approachPath;
+            }
         }
         return null;
     }

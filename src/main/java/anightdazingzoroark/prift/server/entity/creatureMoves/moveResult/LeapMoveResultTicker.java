@@ -33,6 +33,9 @@ public class LeapMoveResultTicker extends AbstractMoveResultTicker {
             creature.resetFrustration();
         }
         else if (!this.leapPrepared && this.target != null) {
+            // A target can fit beside a ledge where the creature cannot land.
+            // Let ordinary move pathing run before retrying the rejected leap.
+            creature.resetLeapToAttackCooldown();
             creature.getCreaturePathNavigate().tryMoveToEntityLiving(this.target, 1D);
         }
         if (this.leapPrepared) creature.getCreaturePathNavigate().clearPath();

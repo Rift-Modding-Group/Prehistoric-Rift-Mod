@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.api.util.MathUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -21,8 +22,10 @@ import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,12 +47,16 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
     private RiftCreatureWalkNodeProcessor riftNodeProcessor;
     private final RiftCreature creature;
     @Nullable
+    private Path blockedAttackApproachPath;
+    @Nullable
     private BlockPos cachedWalkingPathOrigin;
     @Nullable
     private BlockPos cachedWalkingPathTarget;
     private long cachedWalkingPathTime = Long.MIN_VALUE;
     private boolean cachedWalkingPathResult;
     private boolean cachedSafeDownwardWalkingPathResult;
+    @Nullable
+    private Path cachedCompleteWalkingPath;
     @Nullable
     private BlockPos cachedBlockBreakOrigin;
     @Nullable
@@ -75,6 +82,20 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
         this.nodeProcessor = this.riftNodeProcessor;
         this.nodeProcessor.setCanEnterDoors(true);
         return new PathFinder(this.nodeProcessor);
+    }
+
+    @Override
+    public float getPathSearchRange() {
+        float range = super.getPathSearchRange();
+        Entity target = this.entity.getAttackTarget();
+        if (target != null && target.isEntityAlive()) {
+            // The search budget covers cumulative Manhattan travel, including the descent.
+            double travel = Math.abs(target.posX - this.entity.posX)
+                    + Math.abs(target.getEntityBoundingBox().minY - this.entity.getEntityBoundingBox().minY)
+                    + Math.abs(target.posZ - this.entity.posZ);
+            return (float) Math.max(range, travel + this.entity.width + this.entity.getMaxFallHeight());
+        }
+        return range;
     }
 
     @Override
@@ -108,16 +129,39 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
 
     @Override
     protected void pathFollow() {
-        if (this.currentPath instanceof AttackApproachPath && !this.currentPath.isFinished()
-                && this.currentPath.getCurrentPathIndex() == this.currentPath.getCurrentPathLength() - 1) {
+        if (this.currentPath != null && this.currentPath.getCurrentPathIndex() == 0 && this.currentPath.getCurrentPathLength() > 1) {
+            Vec3d position = this.getEntityPosition();
+            Vec3d start = this.currentPath.getVectorFromIndex(this.creature, 0);
+            double radius = Math.max(0.75D, this.creature.width * 0.5D);
+            // The initial node represents the occupied footprint, even when its center overhangs a step.
+            if (Math.abs(position.x - start.x) < radius && Math.abs(position.z - start.z) < radius
+                    && Math.abs(position.y - start.y) < 1D) {
+                this.currentPath.incrementPathIndex();
+            }
+        }
+        if (this.currentPath instanceof AttackApproachPath approachPath && !this.currentPath.isFinished()
+                && this.currentPath.getCurrentPathIndex() == this.currentPath.getCurrentPathLength() - 1
+        ) {
             Vec3d position = this.getEntityPosition();
             Vec3d endpoint = this.currentPath.getVectorFromIndex(this.creature, this.currentPath.getCurrentPathIndex());
             // Large creatures normally consume waypoints early; an attack position needs closer alignment.
             if (Math.abs(position.x - endpoint.x) < 0.15D && Math.abs(position.z - endpoint.z) < 0.15D
-                    && Math.abs(position.y - endpoint.y) < 1D) this.currentPath.incrementPathIndex();
+                    && Math.abs(position.y - endpoint.y) < 1D
+            ) {
+                if (this.currentPath == this.blockedAttackApproachPath) {
+                    this.currentPath.incrementPathIndex();
+                    this.creature.setUnableToPathToTarget(true);
+                }
+                else if (AttackApproachPath.canFinish(approachPath)) this.currentPath.incrementPathIndex();
+                else if (position.squareDistanceTo(endpoint) < 1E-4D) {
+                    // The planned position no longer connects with the current pose or target.
+                    this.clearPath();
+                }
+            }
             this.checkForStuck(position);
             return;
         }
+
         if (!this.creature.bodyTouchingLiquid() && !this.isFollowingWaterPath()) {
             super.pathFollow();
             return;
@@ -148,15 +192,103 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
     }
 
     @Override
+    @SuppressWarnings("SuspiciousNameCombination")
     public boolean tryMoveToEntityLiving(Entity target, double speed) {
         if (target.isInWater()) return this.tryMoveToEntityLivingUsingWater(target, speed);
         if (!this.canNavigate()) return false;
 
         Path path = this.getPathToEntityLiving(target);
+        boolean blockedAttackRoute = false;
+        if (target == this.creature.getAttackTarget() && path != null) {
+            for (int index = Math.max(1, path.getCurrentPathIndex()); index < path.getCurrentPathLength(); index++) {
+                PathPoint from = path.getPathPointFromIndex(index - 1);
+                PathPoint to = path.getPathPointFromIndex(index);
+                if (!this.riftNodeProcessor.isLeapEdge(from, to) || this.riftNodeProcessor.hasClearLeapArc(from, to)) continue;
+
+                // A blocked leap is irrelevant when the body can walk and step up instead.
+                AxisAlignedBB walkingBody = this.creature.getEntityBoundingBox();
+                double offsetX = target.posX - this.creature.posX;
+                double offsetZ = target.posZ - this.creature.posZ;
+                int samples = Math.max(1, (int) Math.ceil(Math.hypot(offsetX, offsetZ) / DIRECT_SUPPORT_SCAN_STEP));
+                double walkingY = walkingBody.minY;
+                boolean canWalkDirectly = true;
+                for (int sample = 1; sample <= samples; sample++) {
+                    AxisAlignedBB nextBody = walkingBody.offset(
+                            MathUtil.slopeResult(sample, false, 0, samples, 0D, offsetX),
+                            walkingY - walkingBody.minY,
+                            MathUtil.slopeResult(sample, false, 0, samples, 0D, offsetZ)
+                    );
+                    double step = 0D;
+                    while (this.world.collidesWithAnyBlock(nextBody) && step < RiftCreatureMoveHelper.STANDARD_JUMP_HEIGHT) {
+                        nextBody = nextBody.offset(0D, 0.125D, 0D);
+                        step += 0.125D;
+                    }
+                    if (this.world.collidesWithAnyBlock(nextBody)
+                            || !this.world.collidesWithAnyBlock(nextBody.offset(0D, -0.125D, 0D))) {
+                        canWalkDirectly = false;
+                        break;
+                    }
+                    walkingY = nextBody.minY;
+                }
+                if (canWalkDirectly && Math.abs(walkingY - target.getEntityBoundingBox().minY) < 0.125D) break;
+
+                this.updateWalkingPathCache(target);
+                if (this.cachedCompleteWalkingPath != null) {
+                    path = this.cachedCompleteWalkingPath;
+                    break;
+                }
+
+                // Approach the obstruction without committing to a leap through the ceiling.
+                int approachLength = index;
+                for (int approachIndex = path.getCurrentPathIndex() + 1; approachIndex < index; approachIndex++) {
+                    if (target.getEntityBoundingBox().minY >= this.creature.getEntityBoundingBox().minY
+                            && path.getPathPointFromIndex(approachIndex).y < MathHelper.floor(this.creature.getEntityBoundingBox().minY)
+                    ) {
+                        // Do not drop into a pit whose exit depends on that blocked leap.
+                        approachLength = approachIndex;
+                        break;
+                    }
+                }
+                // A leap edge may begin before the lip; retain the supported walk up to it.
+                List<PathPoint> approachPoints = new ArrayList<>();
+                for (int approachIndex = 0; approachIndex < approachLength; approachIndex++) {
+                    approachPoints.add(path.getPathPointFromIndex(approachIndex));
+                }
+                PathPoint lipStart = approachPoints.getLast();
+                PathPoint beyondLip = path.getPathPointFromIndex(approachLength);
+                int stepsToLip = Math.max(Math.abs(beyondLip.x - lipStart.x), Math.abs(beyondLip.z - lipStart.z));
+                int nodeSize = MathHelper.floor(this.creature.width + 1F);
+                for (int step = 1; step <= stepsToLip; step++) {
+                    int x = MathHelper.floor(MathUtil.slopeResult(step, false, 0, stepsToLip, lipStart.x, beyondLip.x));
+                    int z = MathHelper.floor(MathUtil.slopeResult(step, false, 0, stepsToLip, lipStart.z, beyondLip.z));
+                    AxisAlignedBB body = walkingBody.offset(
+                            x + nodeSize * 0.5D - this.creature.posX,
+                            lipStart.y - walkingBody.minY,
+                            z + nodeSize * 0.5D - this.creature.posZ
+                    );
+                    if (this.world.collidesWithAnyBlock(body)
+                            || !this.world.collidesWithAnyBlock(body.offset(0D, -0.125D, 0D))) break;
+                    PathNodeType type = this.riftNodeProcessor.getPathNodeType(this.world, x, lipStart.y, z,
+                            this.creature, nodeSize, MathHelper.floor(this.creature.height + 1F), nodeSize,
+                            this.nodeProcessor.getCanOpenDoors(), this.nodeProcessor.getCanEnterDoors());
+                    if (type != PathNodeType.OPEN && type != PathNodeType.WALKABLE) break;
+                    PathPoint lipPoint = new PathPoint(x, lipStart.y, z);
+                    lipPoint.nodeType = PathNodeType.WALKABLE;
+                    approachPoints.add(lipPoint);
+                }
+                int currentIndex = path.getCurrentPathIndex();
+                path = new AttackApproachPath(new Path(approachPoints.toArray(PathPoint[]::new)));
+                path.setCurrentPathIndex(currentIndex);
+                blockedAttackRoute = true;
+                this.clearPath();
+                break;
+            }
+        }
         boolean startedPath = path != null && this.setPath(path, speed);
         if (target == this.creature.getAttackTarget()) {
+            this.blockedAttackApproachPath = blockedAttackRoute && startedPath ? this.currentPath : null;
             this.creature.setUnableToPathToTarget(!startedPath
-                    || path.getCurrentPathLength() <= 1
+                    || !blockedAttackRoute && path.getCurrentPathLength() <= 1
                     || !this.pathIsSafe(path));
         }
         return startedPath;
@@ -180,6 +312,7 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
         return false;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean pathReachesTarget(@Nullable Path path, Entity target) {
         if (path == null) return false;
 
@@ -428,7 +561,7 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
         return true;
     }
 
-    private boolean pathLeapArcsAreClear(@NotNull Path path) {
+    public boolean pathLeapArcsAreClear(@NotNull Path path) {
         int firstEdgeEndIndex = Math.max(1, path.getCurrentPathIndex());
         for (int index = firstEdgeEndIndex; index < path.getCurrentPathLength(); index++) {
             PathPoint from = path.getPathPointFromIndex(index - 1);
@@ -948,6 +1081,7 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
     private void updateWalkingPathResults(Entity target) {
         this.cachedWalkingPathResult = false;
         this.cachedSafeDownwardWalkingPathResult = false;
+        this.cachedCompleteWalkingPath = null;
         if (!this.canNavigate()) return;
 
         RiftCreatureWalkNodeProcessor walkingProcessor = new RiftCreatureWalkNodeProcessor(this.creature, false);
@@ -970,6 +1104,7 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
         //a partial walking path ending at the same height can merely be the near edge of a gap
         //only a path that reaches the target node proves that walking down is possible
         this.cachedSafeDownwardWalkingPathResult = this.pathIsSafe(path);
+        if (this.cachedSafeDownwardWalkingPathResult) this.cachedCompleteWalkingPath = path;
         this.cachedWalkingPathResult = this.pathIsStraight(path) && this.directRouteHasSupport(target);
     }
 
