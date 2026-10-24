@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature.builders;
 
-import anightdazingzoroark.prift.api.util.CreatureLookUtil;
+import anightdazingzoroark.prift.server.entity.creature.CreatureLookUtil;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.VerticalDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.BoundingBoxDetectionRule;
@@ -13,6 +13,13 @@ import anightdazingzoroark.prift.api.creature.builder.detectionRule.AnimatedHitb
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCommon;
 import anightdazingzoroark.prift.util.RiftUtil;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntityLiving;
+import anightdazingzoroark.riftlib.core.IAnimatable;
+import anightdazingzoroark.riftlib.core.builder.Animation;
+import anightdazingzoroark.riftlib.core.snapshot.BoneSnapshot;
+import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
+import anightdazingzoroark.riftlib.model.AnimatedGeoModel;
+import anightdazingzoroark.riftlib.model.AnimationPoseSampler;
+import anightdazingzoroark.riftlib.model.ServerModelRegistry;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
@@ -25,10 +32,12 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.List;
 
 public class TyrannosaurusBuilder extends RiftCreatureBuilder {
     public TyrannosaurusBuilder() {
@@ -146,9 +155,10 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                 //---moves---
                 .addMove("bite", CreatureMoveCommon.standardMeleeMove.copy()
                         .setBasePower(50)
-                        .setOnMoveBeginEffect((creature, target) -> this.captureHeadAttackLook(creature))
+                        .setOnMoveBeginEffect((creature, target) -> this.captureHeadAttackLook(creature, "bite"))
                         .setUseLookBasedFacing()
                         .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.TARGETED_MELEE)
+                        .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.WIDE)
                         .setAnimNames("bite")
                 )
                 .addMove("stomp", new CreatureMoveBuilder()
@@ -167,9 +177,10 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                         .setBasePower(40)
                         .setRequireFindTargetToUse()
                         .setElemental(Element.FIRE, 0)
-                        .setOnMoveBeginEffect((creature, target) -> this.captureHeadAttackLook(creature))
+                        .setOnMoveBeginEffect((creature, target) -> this.captureHeadAttackLook(creature, "flame_spit"))
                         .setUseLookBasedFacing()
-                        .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
+                        .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.TARGETED_MELEE)
+                        .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.WIDE)
                         .setCooldown(300)
                         .setAnimNames("flame_spit")
                 )
@@ -207,13 +218,14 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                                 })
                         )
                         .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
+                        .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.POINT)
                 )
                 //---attack ai---
                 .setMoveSelector(new CreatureMoveSelectorBuilder()
                                 .setMoveRule(
                                         new MoveRuleBuilder("bite")
                                                 .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                                                .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", this::captureHeadAttackLook))
+                                                .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", creature -> this.captureHeadAttackLook(creature, "bite")))
                                                 .setUseBlockBreak()
                                 )
                                 .setMoveRule(
@@ -230,7 +242,7 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                                 .setMoveRule(
                                         new MoveRuleBuilder("flame_spit")
                                                 .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                                                .addDetectionRule(new AnimatedHitboxDetectionRule("flame_spit", this::captureHeadAttackLook))
+                                                .addDetectionRule(new AnimatedHitboxDetectionRule("flame_spit", creature -> this.captureHeadAttackLook(creature, "flame_spit")))
                                                 .setUseBlockBreak()
                                 )
                                 .setMoveRule(
@@ -263,11 +275,49 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
     /**
      * Shared by bite and flame spit, including reach prediction, to capture the same neck pose.
      * */
-    private void captureHeadAttackLook(@NotNull ICreature creature) {
+    private void captureHeadAttackLook(@NotNull ICreature creature, @NotNull String moveName) {
         AnimationDataEntityLiving data = creature.getAnimationData();
-        CreatureLookUtil.LookPose look = CreatureLookUtil.getLookPose(creature);
+        CreatureLookUtil.LookPose look = CreatureLookUtil.getAttackLookPose(creature);
         data.setVariable("head_attack_pitch", look.pitch());
         data.setVariable("head_attack_yaw", look.yaw());
-        data.setVariable("head_attack_swing", MathUtil.slopeResult(look.pitch(), true, -15D, 0D, -1D, 1D));
+        data.setVariable("head_attack_swing", MathUtil.slopeResult(look.pitch(), true, CreatureLookUtil.HEAD_PITCH_MIN, 0D, -1D, 1D));
+
+        Vec3d target = CreatureLookUtil.getRiddenAttackPosition(creature);
+        if (target == null || !(data.getHolder() instanceof IAnimatable<?> animatable)) return;
+        AnimatedGeoModel<?> model = ServerModelRegistry.getServerModel(animatable);
+        if (model == null || data.getBoneSnapshotCollection().isEmpty()) return;
+        Animation animation = model.getAnimations("animation.tyrannosaurus." + moveName, animatable);
+        String hitboxTag = moveName.equals("bite") ? "jaw" : "flame_spit";
+        List<AnimatedBoundingBox> hitboxes = data.getAnimatedBoundingBoxesByTag().get(hitboxTag);
+        if (animation == null || hitboxes == null || hitboxes.isEmpty()) return;
+        HeadStrikePose strike = new HeadStrikePose(data, animation, hitboxes, moveName.equals("bite") ? 4D : 8.75D);
+
+        // The authored body swing also moves the jaw; fit the strike, rather than copying camera pitch.
+        float lowerPitch = CreatureLookUtil.HEAD_PITCH_MIN;
+        float upperPitch = CreatureLookUtil.HEAD_PITCH_MAX;
+        double lowerHeight = strike.sampleHeight(lowerPitch);
+        double upperHeight = strike.sampleHeight(upperPitch);
+        double targetHeight = Math.clamp(target.y, Math.min(lowerHeight, upperHeight), Math.max(lowerHeight, upperHeight));
+        for (int step = 0; step < 10; step++) {
+            float pitch = (lowerPitch + upperPitch) / 2f;
+            double height = strike.sampleHeight(pitch);
+            if ((height < targetHeight) == (upperHeight > lowerHeight)) lowerPitch = pitch;
+            else upperPitch = pitch;
+        }
+        strike.sampleHeight((lowerPitch + upperPitch) / 2f);
+    }
+
+    private record HeadStrikePose(
+            @NotNull AnimationDataEntityLiving data, @NotNull Animation animation,
+            @NotNull List<AnimatedBoundingBox> hitboxes, double tick
+    ) {
+        private double sampleHeight(float pitch) {
+            this.data.setVariable("head_attack_pitch", pitch);
+            this.data.setVariable("head_attack_swing", MathUtil.slopeResult(pitch, true, CreatureLookUtil.HEAD_PITCH_MIN, 0D, -1D, 1D));
+            Map<String, BoneSnapshot> pose = AnimationPoseSampler.sample(this.animation, this.data, this.tick);
+            return this.hitboxes.stream().mapToDouble(hitbox -> hitbox.getWorldSpaceBounds(
+                    this.data.getScale(), this.data.getModelYaw(), this.data.getHolder().getPositionVector(), pose
+            ).getCenter().y).average().orElseThrow();
+        }
     }
 }

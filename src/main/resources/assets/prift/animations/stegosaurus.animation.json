@@ -117,7 +117,7 @@
 				}
 			},
 			"timeline": {
-				"0.5": "function.create_offense_hitbox_by_tag('thagomizer');",
+				"0.5": "function.create_offense_hitbox_by_tag('thagomizer'); function.send_message('riddenTargetedMeleeHitEffect');",
 				"0.625": "function.destroy_offense_hitbox_by_tag('thagomizer'); function.send_message('moveBlockBreakEffect');"
 			},
 			"sound_effects": {
@@ -512,7 +512,7 @@
 				}
 			},
 			"timeline": {
-				"0.125": "function.create_offense_hitbox_by_tag('thagomizer');",
+				"0.125": "function.create_offense_hitbox_by_tag('thagomizer'); function.send_message('riddenTargetedMeleeHitEffect');",
 				"0.25": "function.send_message('moveChargeupReleasingFinished');"
 			}
 		},

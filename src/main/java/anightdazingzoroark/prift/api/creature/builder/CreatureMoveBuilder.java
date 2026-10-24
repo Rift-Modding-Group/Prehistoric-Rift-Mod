@@ -45,6 +45,8 @@ public class CreatureMoveBuilder {
     private boolean preventMovement;
     @NotNull
     private RiddenAimingType riddenAimingType = RiddenAimingType.NONE;
+    @NotNull
+    private RiddenCrosshairType riddenCrosshairType = RiddenCrosshairType.POINT;
 
     /**
      * This locks this object so that when accessing any instances of this, it can never be modified ever
@@ -342,6 +344,18 @@ public class CreatureMoveBuilder {
         return this.onTargetHitEffect;
     }
 
+    @NotNull
+    public CreatureMoveBuilder setRiddenCrosshairType(@NotNull RiddenCrosshairType type) {
+        this.checkIfLocked();
+        this.riddenCrosshairType = type;
+        return this;
+    }
+
+    @NotNull
+    public RiddenCrosshairType getRiddenCrosshairType() {
+        return this.riddenCrosshairType;
+    }
+
     /**
      * Get validity based on if some params are not null
      * */
@@ -384,6 +398,7 @@ public class CreatureMoveBuilder {
         toReturn.useCanStopMovement = this.useCanStopMovement;
         toReturn.preventMovement = this.preventMovement;
         toReturn.riddenAimingType = this.riddenAimingType;
+        toReturn.riddenCrosshairType = this.riddenCrosshairType;
 
         return toReturn;
     }
@@ -404,6 +419,15 @@ public class CreatureMoveBuilder {
         public String getTranslatedName() {
             return I18n.format("move.creature.type." + this.name().toLowerCase());
         }
+    }
+
+    /**
+     * This affects what kind of crosshair will be used when the move is aiming.
+     * It affects how many entities or blocks will be hit by a move.
+     * */
+    public enum RiddenCrosshairType {
+        POINT,
+        WIDE
     }
 
     public enum RiddenAimingType {

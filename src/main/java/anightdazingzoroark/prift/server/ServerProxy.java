@@ -11,10 +11,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiFactory;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.server.entity.model.CreatureModel;
 import anightdazingzoroark.prift.server.item.RiftItems;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftPartyActionMessage;
-import anightdazingzoroark.prift.server.message.RiftRidingAimMessage;
-import anightdazingzoroark.prift.server.message.RiftRidingActionMessage;
+import anightdazingzoroark.prift.server.message.*;
 import anightdazingzoroark.prift.server.properties.OtherEntityProperties;
 import anightdazingzoroark.prift.server.properties.PlayerPartyProperties;
 import anightdazingzoroark.prift.server.sound.RiftSounds;
@@ -54,7 +51,8 @@ public class ServerProxy {
         //register messages
         RiftMessages.WRAPPER.registerMessage(RiftPartyActionMessage.class, RiftLibMessageSide.SERVER);
         RiftMessages.WRAPPER.registerMessage(RiftRidingActionMessage.class, RiftLibMessageSide.SERVER);
-        RiftMessages.WRAPPER.registerMessage(RiftRidingAimMessage.class, RiftLibMessageSide.SERVER);
+        RiftMessages.WRAPPER.registerMessage(RiftRidingStartAimMessage.class, RiftLibMessageSide.SERVER);
+        RiftMessages.WRAPPER.registerMessage(RiftRidingEndAimMessage.class, RiftLibMessageSide.SERVER);
 
         //register events
         MinecraftForge.EVENT_BUS.register(new PrimerEventHandler(registryPrimer));

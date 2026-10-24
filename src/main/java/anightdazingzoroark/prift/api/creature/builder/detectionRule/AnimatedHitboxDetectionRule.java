@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.api.creature.builder.detectionRule;
 
-import anightdazingzoroark.prift.api.util.CreatureLookUtil;
+import anightdazingzoroark.prift.server.entity.creature.CreatureLookUtil;
 import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
@@ -69,7 +69,7 @@ public class AnimatedHitboxDetectionRule extends DetectionRule {
     }
 
     @Nullable
-    public AttackPreview createPreview(@NotNull ICreature user, @NotNull EntityLivingBase target) {
+    public AttackPreview createPreview(@NotNull ICreature user, @Nullable EntityLivingBase target) {
         AbstractCreatureBuilder<?> configuration = user.getCreatureType();
         if (!user.getPhase().isEmpty()) {
             configuration = user.getCreatureType().getPhaseBuilderMaps().get(user.getPhase());
@@ -95,7 +95,8 @@ public class AnimatedHitboxDetectionRule extends DetectionRule {
             }
             animationSuffixes = List.of(names[index]);
         }
-        // Once the move starts, prediction must keep its captured aim.
+
+        //once the move starts, prediction must keep its captured aim.
         if (user.getCurrentMove().isEmpty()) this.preparePose.accept(user, target);
         List<AnimatedBoundingBox> hitboxes = data.getAnimatedBoundingBoxesByTag().get(this.hitboxTag);
         if (hitboxes == null || hitboxes.isEmpty() || data.getBoneSnapshotCollection().isEmpty()) return null;

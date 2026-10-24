@@ -66,6 +66,11 @@ public class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUs
     }
 
     @Override
+    public void attackEntityWithHitbox(@NotNull Entity entity) {
+        this.attackEntityWithMove(entity);
+    }
+
+    @Override
     public float hitboxDamageMultiplier(RiftLibCollisionHitbox<RiftCreatureHitboxed> collisionHitbox, DamageSource source) {
         Map<String, Function<ICreature, Double>> hitboxHitInfo = this.getCreatureType().getHitboxInformation();
         if (hitboxHitInfo == null) return 1f;

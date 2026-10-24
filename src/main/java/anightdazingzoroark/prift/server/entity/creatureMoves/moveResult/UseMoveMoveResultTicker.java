@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves.moveResult;
 
-import anightdazingzoroark.prift.api.util.CreatureLookUtil;
+import anightdazingzoroark.prift.server.entity.creature.CreatureLookUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreaturePathNavigate;

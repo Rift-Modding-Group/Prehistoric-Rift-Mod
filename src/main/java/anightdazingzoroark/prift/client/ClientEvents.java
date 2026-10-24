@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.client;
 import anightdazingzoroark.prift.client.hud.PlayerPartyHUD;
 import anightdazingzoroark.prift.client.hud.RidingCreatureHUD;
 import anightdazingzoroark.prift.client.hud.TameProgressHUD;
+import anightdazingzoroark.prift.client.rendering.entity.RiftCreatureRenderer;
 import anightdazingzoroark.prift.client.ui.RiftPartyScreen;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenAimingType;
@@ -12,10 +13,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiData;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiFactory;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureSprintHelper;
-import anightdazingzoroark.prift.server.message.RiftMessages;
-import anightdazingzoroark.prift.server.message.RiftPartyActionMessage;
-import anightdazingzoroark.prift.server.message.RiftRidingAimMessage;
-import anightdazingzoroark.prift.server.message.RiftRidingActionMessage;
+import anightdazingzoroark.prift.server.message.*;
 import com.cleanroommc.modularui.factory.GuiManager;
 import com.cleanroommc.modularui.factory.ClientGUI;
 import net.minecraft.client.Minecraft;
@@ -28,6 +26,7 @@ import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
@@ -57,6 +56,28 @@ public class ClientEvents {
     private int riddenLeapCooldownDisplayChargeTicks;
     private int riddenSprintStartTick = -1;
     private int riddenSprintCooldownDisplayTicks;
+    @Nullable
+    private RiftCreatureRenderer.RiderPass riderAimPass;
+    @NotNull
+    private RiftCreatureRenderer.FadeState riderAimVisibility = new RiftCreatureRenderer.FadeState(false, 1f);
+    private int translucentRiderId = -1;
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onRiderRenderPre(@NotNull RenderPlayerEvent.Pre event) {
+        if (event.getEntityPlayer() != Minecraft.getMinecraft().player) return;
+        this.translucentRiderId = -1;
+        this.riderAimVisibility = RiftCreatureRenderer.getRiderAimVisibility(event.getEntityPlayer());
+        if (this.riderAimVisibility.opacity() >= 1f) return;
+        this.riderAimPass = RiftCreatureRenderer.RiderPass.capture(this.riderAimPass);
+        if (this.riderAimPass != null) this.translucentRiderId = event.getEntityPlayer().getEntityId();
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onRiderRenderPost(@NotNull RenderPlayerEvent.Post event) {
+        if (event.getEntityPlayer().getEntityId() != this.translucentRiderId || this.riderAimPass == null) return;
+        this.riderAimPass.composite(this.riderAimVisibility.opacity(), this.riderAimVisibility.fading());
+        this.translucentRiderId = -1;
+    }
 
     /**
      * block default inventory opening when riding on a creature
@@ -258,6 +279,9 @@ public class ClientEvents {
         if (event.getButton() == 0) {
             if (event.isButtonstate()) {
                 this.usingRidingMove = true;
+                if (this.ridingAimActive) {
+                    this.cameraHandler.sendRidingAimUpdate(minecraft, riddenCreature, this.ridingAimMove);
+                }
                 RiftMessages.WRAPPER.sendToServer(new RiftRidingActionMessage(
                         RiftRidingActionMessage.Action.START_MOVE, this.selectedRidingMove, false
                 ));
@@ -274,7 +298,6 @@ public class ClientEvents {
                     this.ridingAimMove = this.selectedRidingMove;
                     this.riddenLeapChargeStartTick = -1;
                     this.cameraHandler.beginRidingAim(riddenCreature, this.ridingAimMove);
-                    riddenCreature.setRiddenAimingFromClient(true);
                     this.cameraHandler.sendRidingAimUpdate(minecraft, riddenCreature, this.ridingAimMove);
                 }
                 else {
@@ -445,12 +468,10 @@ public class ClientEvents {
 
         Minecraft minecraft = Minecraft.getMinecraft();
         if (minecraft.player != null && minecraft.player.getRidingEntity() instanceof RiftCreature creature) {
-            creature.setRiddenAimingFromClient(false);
+            creature.stopRiddenAim();
         }
         if (minecraft.getConnection() != null) {
-            RiftMessages.WRAPPER.sendToServer(new RiftRidingAimMessage(
-                    false, this.ridingAimMove, -1, 0D, 0D, 0D, null, null
-            ));
+            RiftMessages.WRAPPER.sendToServer(new RiftRidingEndAimMessage());
         }
         this.cameraHandler.endRidingAim();
         this.ridingAimActive = false;
@@ -461,8 +482,7 @@ public class ClientEvents {
     private RiftCreature updateRidingState(Minecraft minecraft) {
         RiftCreature riddenCreature = minecraft.player != null
                 && minecraft.player.getRidingEntity() instanceof RiftCreature creature
-                && creature.getControllingPassenger() == minecraft.player
-                ? creature : null;
+                && creature.getControllingPassenger() == minecraft.player ? creature : null;
         int currentRiddenCreatureId = riddenCreature == null ? -1 : riddenCreature.getEntityId();
 
         if (currentRiddenCreatureId != this.riddenCreatureId) {

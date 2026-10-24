@@ -49,7 +49,7 @@
 				}
 			},
 			"timeline": {
-				"0.15": "function.create_offense_hitbox_by_tag('jaw');",
+				"0.15": "function.create_offense_hitbox_by_tag('jaw'); function.send_message('riddenTargetedMeleeHitEffect');",
 				"0.25": "function.destroy_offense_hitbox_by_tag('jaw'); function.send_message('moveBlockBreakEffect');"
 			},
 			"sound_effects": {
@@ -530,7 +530,7 @@
 				}
 			},
 			"timeline": {
-				"0.375": "function.create_offense_hitbox_by_tag('flame_spit');",
+				"0.375": "function.create_offense_hitbox_by_tag('flame_spit'); function.send_message('riddenTargetedMeleeHitEffect');",
 				"0.5": "function.destroy_offense_hitbox_by_tag('flame_spit'); function.send_message('moveBlockBreakEffect');"
 			}
 		},

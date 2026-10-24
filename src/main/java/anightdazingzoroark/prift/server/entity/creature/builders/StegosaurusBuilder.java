@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature.builders;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.BoundingBoxDetectionRule;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.VerticalDistanceFromUserDetectionRule;
-import anightdazingzoroark.prift.api.util.CreatureLookUtil;
+import anightdazingzoroark.prift.server.entity.creature.CreatureLookUtil;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.creature.builder.*;
@@ -75,6 +75,7 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                         .setOnMoveBeginEffect(this::captureTailStabLook)
                         .setUseLookBasedFacing()
                         .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.TARGETED_MELEE)
+                        .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.WIDE)
                         .setAnimNames("tail_stab")
                 )
                 .addMove("tail_slam", new CreatureMoveBuilder()
@@ -84,6 +85,7 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                         .setStaminaCost(0.15f)
                         .setBasePower(70)
                         .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.TARGETED_MELEE)
+                        .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.WIDE)
                         .setAnimNames("tail_slam")
                         .setCooldown(400)
                 )
@@ -96,6 +98,8 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                         .setBasePower(50)
                         .setPreventMovement()
                         .setUseLookBasedFacing()
+                        .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.TARGETED_MELEE)
+                        .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.WIDE)
                         .setOnMoveBeginEffect(this::captureThagomizeLook)
                         .setOnMoveEndEffect(creature -> creature.setProperty("ChargeUpLevel", 0))
                         .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
@@ -177,6 +181,7 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                         .setBasePower(30)
                         .setRequireFindTargetToUse()
                         .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
+                        .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.POINT)
                         .setOnMoveHitEffect(creature -> {
                             //when ridden, shoot forward
                             if (creature.getControllingPassenger() != null) {
@@ -244,7 +249,7 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
      * */
     private void captureTailStabLook(@NotNull ICreature creature, @Nullable EntityLivingBase target) {
         AnimationDataEntityLiving data = creature.getAnimationData();
-        CreatureLookUtil.LookPose look = CreatureLookUtil.getLookPose(creature);
+        CreatureLookUtil.LookPose look = CreatureLookUtil.getAttackLookPose(creature);
         data.setVariable("tail_attack_pitch", look.pitch());
         data.setVariable("tail_attack_yaw", look.yaw());
         data.setVariable("tail_attack_strike_pitch", -25.0991D - look.pitch());
@@ -258,8 +263,9 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
         Vec3d eyes = data.getHolder().getPositionEyes(1f);
         Vec3d offset = targetPosition.subtract(eyes);
         double distance = Math.sqrt(offset.x * offset.x + offset.z * offset.z);
-        double pitch = Math.clamp(Math.toDegrees(Math.atan2(-offset.y, distance)), -15D, 15D);
-        strike.fitPitchToHeight(eyes.y - Math.tan(Math.toRadians(pitch)) * distance);
+        double pitch = Math.clamp(Math.toDegrees(Math.atan2(-offset.y, distance)), CreatureLookUtil.HEAD_PITCH_MIN, CreatureLookUtil.HEAD_PITCH_MAX);
+        if (CreatureLookUtil.getRiddenAttackPosition(creature) != null) strike.fitPitchToHeight(targetPosition.y);
+        else strike.fitPitchToHeight(eyes.y - Math.tan(Math.toRadians(pitch)) * distance);
     }
 
     /**
@@ -267,10 +273,10 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
      * */
     private void captureThagomizeLook(@NotNull ICreature creature, @Nullable EntityLivingBase target) {
         AnimationDataEntityLiving data = creature.getAnimationData();
-        CreatureLookUtil.LookPose look = CreatureLookUtil.getLookPose(creature);
-        if (!creature.getCurrentMove().isEmpty()) {
+        CreatureLookUtil.LookPose look = CreatureLookUtil.getAttackLookPose(creature);
+        if (!creature.getCurrentMove().isEmpty() && creature.getControllingPassenger() == null) {
             // The windup has its own authored pose; capture the physical head aim, not that pose.
-            look = new CreatureLookUtil.LookPose(Math.clamp(data.getHeadPitch(1f), -15f, 15f), Math.clamp(data.getHeadYaw(1f), -15f, 15f));
+            look = new CreatureLookUtil.LookPose(Math.clamp(data.getHeadPitch(1f), CreatureLookUtil.HEAD_PITCH_MIN, CreatureLookUtil.HEAD_PITCH_MAX), Math.clamp(data.getHeadYaw(1f), -15f, 15f));
         }
         data.setVariable("tail_attack_pitch", look.pitch());
         data.setVariable("tail_attack_yaw", look.yaw());
@@ -282,19 +288,20 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
 
         Vec3d eyes = data.getHolder().getPositionEyes(1f);
         Vec3d targetPosition = this.getTailAttackTargetPosition(creature, target);
-        // Without a target, aim along the rider's head ray at the tail's natural reach.
+        // AI keeps its head-based reach; riders supply an explicit strike height.
         double distance = 3D * data.getScale();
         if (targetPosition != null) {
             Vec3d offset = targetPosition.subtract(eyes);
             distance = Math.sqrt(offset.x * offset.x + offset.z * offset.z);
         }
-        strike.fitPitchToHeight(eyes.y - Math.tan(Math.toRadians(look.pitch())) * distance);
+        if (CreatureLookUtil.getRiddenAttackPosition(creature) != null && targetPosition != null) strike.fitPitchToHeight(targetPosition.y);
+        else strike.fitPitchToHeight(eyes.y - Math.tan(Math.toRadians(look.pitch())) * distance);
     }
 
     @Nullable
     private Vec3d getTailAttackTargetPosition(@NotNull ICreature creature, @Nullable EntityLivingBase target) {
         if (target != null && target.isEntityAlive()) return target.getEntityBoundingBox().getCenter();
-        return creature.getRiddenAimPosition();
+        return CreatureLookUtil.getRiddenAttackPosition(creature);
     }
 
     @Nullable
