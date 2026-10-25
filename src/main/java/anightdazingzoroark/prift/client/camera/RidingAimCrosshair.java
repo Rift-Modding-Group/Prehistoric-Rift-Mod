@@ -17,8 +17,25 @@ import org.jetbrains.annotations.NotNull;
 public class RidingAimCrosshair {
     @NotNull
     private static final ResourceLocation JAWS_CROSSHAIR = new ResourceLocation("prift", "textures/ui/jaws_crosshair.png");
+    @NotNull
+    private static final ResourceLocation LEAP_CROSSHAIR = new ResourceLocation("prift", "textures/ui/leap_crosshair.png");
 
-    public static void render(@NotNull Minecraft minecraft, @NotNull RiddenCrosshairType crosshairType, int screenWidth, int screenHeight) {
+    public static void renderLeapCrosshair(@NotNull Minecraft minecraft, boolean validTarget, boolean ready, int screenWidth, int screenHeight) {
+        if (!ready) GlStateManager.color(1f, 1f, 1f, 0.22f);
+        else if (validTarget) GlStateManager.color(0.4f, 1f, 0.4f, 0.65f);
+        else GlStateManager.color(1f, 0.4f, 0.4f, 0.65f);
+        minecraft.getTextureManager().bindTexture(LEAP_CROSSHAIR);
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(
+                GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
+        );
+        Gui.drawModalRectWithCustomSizedTexture(screenWidth / 2 - 12, screenHeight / 2 - 12,
+                0f, 0f, 24, 24, 24, 24);
+        GlStateManager.color(1f, 1f, 1f, 1f);
+    }
+
+    public static void renderWideCrosshair(@NotNull Minecraft minecraft, @NotNull RiddenCrosshairType crosshairType, int screenWidth, int screenHeight) {
         int crosshairLeft = screenWidth / 2 - 7;
         int crosshairTop = screenHeight / 2 - 7;
         GlStateManager.color(1f, 1f, 1f, 1f);

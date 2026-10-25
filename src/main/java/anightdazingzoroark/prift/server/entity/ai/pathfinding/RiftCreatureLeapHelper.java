@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResu
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.WalkNodeProcessor;
 import net.minecraft.entity.MoverType;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -23,8 +24,6 @@ public class RiftCreatureLeapHelper {
     public static final int MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS = MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS * 2;
     private static final double GRAVITY = 0.08D; //wherever this came from, we will never know....
     private static final double VERTICAL_DRAG = 0.98D;
-    private static final double LEAP_CLEARANCE = 0.25D;
-    private static final double VERTICAL_EDGE_CLEARANCE = 0.125D;
     private static final double OBSTACLE_SCAN_STEP = 0.125D;
     private static final double OBSTACLE_LOOKAHEAD_DISTANCE = 0.25D;
     private static final double GAP_SCAN_STEP = 0.25D;
@@ -37,24 +36,15 @@ public class RiftCreatureLeapHelper {
     private final RiftCreatureMoveHelperBase moveHelper;
     @NotNull
     private final RiftCreature creature;
-    private boolean leapStarted;
-    private int walkingBeforeLeapTicks;
-    private int leapTicks;
-    private double leapObstacleHeight;
-    private double leapMotionX;
-    private double leapMotionZ;
-    private double leapTargetX;
-    private double leapTargetY;
-    private double leapTargetZ;
-    private double leapStartX;
-    private double leapStartY;
-    private double leapStartZ;
+    @NotNull
+    private LeapPhase phase = LeapPhase.IDLE;
+    private int phaseTicks;
     private float leapYaw;
-    private boolean verticalLeap;
-    private boolean clearedVerticalObstacle;
     private boolean riddenLeap;
-    private int riddenLeapDurationTicks;
-    private double riddenLeapHeight;
+    @Nullable
+    private CreatureLeapPlan leapPlan;
+    @Nullable
+    private RiddenLeapRequest.Charged queuedCharge;
 
     public RiftCreatureLeapHelper(@NotNull RiftCreatureMoveHelperBase moveHelper, @NotNull RiftCreature creature) {
         this.moveHelper = moveHelper;
@@ -62,51 +52,26 @@ public class RiftCreatureLeapHelper {
     }
 
     /**
-     * This points the next leap at a spot and gets its launch ready.
+     * Prepares a safe AI destination using the same plan consumed by rider-controlled leaps.
      * */
     public boolean prepareLeapTo(double x, double y, double z) {
-        if (this.isLeaping()) return false;
+        if (this.phase != LeapPhase.IDLE || this.isLeaping()) return false;
         CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
-        if (!navigation.getCanLeap() || this.creature.getStamina() <= 0f
-                || !this.creature.onGround || this.creature.bodyTouchingLiquid()) {
-            this.resetDelay();
+        this.resetDelay();
+        if (navigation == null || !navigation.getCanLeap() || this.creature.getStamina() <= 0f
+                || !CreatureLeapPlan.hasTakeoffSupport(this.creature) || this.creature.bodyTouchingLiquid()
+                || !this.isWithinLeapDistance(Math.hypot(x - this.creature.posX, z - this.creature.posZ))
+                || !this.hasSafeLandingNode(x, y, z)
+        ) {
             return false;
         }
-
-        double displacementX = x - this.creature.posX;
-        double displacementZ = z - this.creature.posZ;
-        double horizontalDistance = Math.sqrt(displacementX * displacementX + displacementZ * displacementZ);
-        if (!this.isWithinLeapDistance(horizontalDistance)) {
-            this.resetDelay();
-            return false;
-        }
-        if (!this.hasSafeLandingNode(x, y, z)) {
-            this.resetDelay();
-            return false;
-        }
-
-        double targetHeight = Math.max(0D, y - this.creature.posY);
-        double obstacleHeight = Math.max(targetHeight, this.getObstacleClearance(x, z, navigation.getLeapHeight()));
-        if (obstacleHeight > navigation.getLeapHeight() + 1E-3D) {
-            this.resetDelay();
-            return false;
-        }
-
-        this.leapTargetX = x;
-        this.leapTargetY = y;
-        this.leapTargetZ = z;
-        this.leapObstacleHeight = obstacleHeight;
-        this.leapYaw = (float)(Math.atan2(displacementZ, displacementX) * 180D / Math.PI) - 90F;
-        this.verticalLeap = targetHeight > 1E-3D;
-        this.leapStarted = false;
-        this.clearedVerticalObstacle = false;
+        double obstacleHeight = Math.max(y - this.creature.posY, this.getObstacleClearance(x, z, navigation.getLeapHeight()));
+        this.leapPlan = CreatureLeapPlan.navigation(this.creature, this.creature.getEntityBoundingBox(), new Vec3d(x, y, z), obstacleHeight);
         this.riddenLeap = false;
-        this.leapTicks = 0;
-        double upwardMotion = this.upwardVelocityForHeight(navigation.getLeapHeight() + LEAP_CLEARANCE);
-        if (!this.hasClearLeapPath(upwardMotion)) {
-            this.resetDelay();
-            return false;
-        }
+        this.phaseTicks = 0;
+        if (this.leapPlan == null) return false;
+        this.phase = LeapPhase.AI_WINDUP;
+        this.leapYaw = (float) Math.toDegrees(Math.atan2(this.creature.posX - x, z - this.creature.posZ));
         return true;
     }
 
@@ -114,54 +79,60 @@ public class RiftCreatureLeapHelper {
         return this.moveHelper.creatureAction == RiftCreatureMoveHelperBase.CreatureAction.LEAP;
     }
 
-    /**
-     * Starts the little walking wait before a leap from scratch.
-     * */
+    public boolean isLeapActive() {
+        return this.phase == LeapPhase.ACTIVE && this.isLeaping();
+    }
+
+    public boolean isRiddenLeap() {
+        return this.riddenLeap && this.isLeaping();
+    }
+
     public void resetDelay() {
-        this.walkingBeforeLeapTicks = 0;
+        if (this.phase == LeapPhase.AI_WINDUP) this.phaseTicks = 0;
     }
 
     /**
-     * Starts a rider-controlled leap with the charge accumulated while the
-     * rider held the jump key.
+     * Selects a charged forward/upward plan, or uses the server-approved aimed plan.
      * */
-    public boolean startRiddenLeap(float yaw, boolean movingForward, int chargeTicks) {
+    public boolean startRiddenLeap(float yaw, boolean movingForward, int chargeTicks, @Nullable CreatureLeapPlan plan) {
         CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
-        if (this.isLeaping() || !navigation.getCanLeap() || !this.creature.onGround || this.creature.bodyTouchingLiquid()) {
+        if (this.phase != LeapPhase.IDLE && this.phase != LeapPhase.RIDER_WINDUP
+                || this.isLeaping() || navigation == null || !navigation.getCanLeap()
+        ) {
             return false;
         }
+        if (plan != null && !plan.isClear(this.creature)) return false;
+        CreatureLeapPlan selectedPlan = plan;
+        if (selectedPlan == null) selectedPlan = CreatureLeapPlan.charged(this.creature, yaw, movingForward, chargeTicks);
+        if (selectedPlan == null) return false;
+        return this.startLeap(selectedPlan, true, yaw);
+    }
 
-        int clampedChargeTicks = Math.clamp(chargeTicks, 1, MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS);
-        double chargedLeapHeight = MathUtil.slopeResult(
-                clampedChargeTicks, true, 1, MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS, 1D, navigation.getLeapHeight()
-        );
-        double upwardMotion = this.upwardVelocityForHeight(chargedLeapHeight);
-        double yawRadians = Math.toRadians(yaw);
-        double leapDistance = MathUtil.slopeResult(
-                clampedChargeTicks, true, 1, MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS,
-                navigation.getLeapDistance() / navigation.getLeapHeight(), navigation.getLeapDistance()
-        );
-        this.leapStartX = this.creature.posX;
-        this.leapStartY = this.creature.posY;
-        this.leapStartZ = this.creature.posZ;
-        this.leapTargetX = this.creature.posX - Math.sin(yawRadians) * (movingForward ? leapDistance : 0D);
-        this.leapTargetY = this.creature.posY;
-        this.leapTargetZ = this.creature.posZ + Math.cos(yawRadians) * (movingForward ? leapDistance : 0D);
-        this.leapObstacleHeight = 0D;
-        this.leapYaw = yaw;
-        this.verticalLeap = false;
-        this.clearedVerticalObstacle = true;
-        this.riddenLeap = true;
-        this.riddenLeapDurationTicks = Math.max(2, this.ticksAboveHeight(upwardMotion, 0D));
-        if (this.riddenLeapDurationTicks % 2 != 0) this.riddenLeapDurationTicks++;
-        this.riddenLeapHeight = chargedLeapHeight;
-        this.leapStarted = true;
-        this.walkingBeforeLeapTicks = 0;
-        this.leapTicks = 0;
+    /**
+     * All sources enter the same launch lifecycle. Stamina/approval belong to the requesting controller.
+     * */
+    private boolean startLeap(@NotNull CreatureLeapPlan plan, boolean ridden, float fallbackYaw) {
+        CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
+        if (navigation == null || !navigation.getCanLeap() || !CreatureLeapPlan.hasTakeoffSupport(this.creature)
+                || this.creature.bodyTouchingLiquid()
+        ) {
+            return false;
+        }
+        this.leapPlan = plan;
+        this.riddenLeap = ridden;
+        this.leapYaw = fallbackYaw;
+        if (Math.hypot(plan.landing().x - plan.start().x, plan.landing().z - plan.start().z) > 1E-6D) {
+            this.leapYaw = (float) Math.toDegrees(Math.atan2(plan.start().x - plan.landing().x, plan.landing().z - plan.start().z));
+        }
+        this.creature.setPosition(plan.start().x, plan.start().y, plan.start().z);
+        this.phase = LeapPhase.ACTIVE;
+        this.phaseTicks = 0;
+        this.queuedCharge = null;
         this.moveHelper.creatureAction = RiftCreatureMoveHelperBase.CreatureAction.LEAP;
-        this.creature.motionX = 0D;
-        this.creature.motionY = 0D;
-        this.creature.motionZ = 0D;
+        Vec3d velocity = plan.velocity(0D);
+        this.creature.motionX = velocity.x;
+        this.creature.motionY = velocity.y;
+        this.creature.motionZ = velocity.z;
         this.creature.fallDistance = 0f;
         this.creature.isAirBorne = true;
         this.creature.velocityChanged = true;
@@ -172,28 +143,163 @@ public class RiftCreatureLeapHelper {
         return true;
     }
 
-    /**
-     * copy another leap helper
-     * */
-    public void read(RiftCreatureLeapHelper that) {
-        this.leapStarted = that.leapStarted;
-        this.walkingBeforeLeapTicks = that.walkingBeforeLeapTicks;
-        this.leapTicks = that.leapTicks;
-        this.leapObstacleHeight = that.leapObstacleHeight;
-        this.leapMotionX = that.leapMotionX;
-        this.leapMotionZ = that.leapMotionZ;
-        this.leapTargetX = that.leapTargetX;
-        this.leapTargetY = that.leapTargetY;
-        this.leapTargetZ = that.leapTargetZ;
-        this.leapStartX = that.leapStartX;
-        this.leapStartY = that.leapStartY;
-        this.leapStartZ = that.leapStartZ;
+    public void read(@NotNull RiftCreatureLeapHelper that) {
+        this.phase = that.phase;
+        this.phaseTicks = that.phaseTicks;
         this.leapYaw = that.leapYaw;
-        this.verticalLeap = that.verticalLeap;
-        this.clearedVerticalObstacle = that.clearedVerticalObstacle;
         this.riddenLeap = that.riddenLeap;
-        this.riddenLeapDurationTicks = that.riddenLeapDurationTicks;
-        this.riddenLeapHeight = that.riddenLeapHeight;
+        this.leapPlan = that.leapPlan;
+        this.queuedCharge = that.queuedCharge;
+    }
+
+    /**
+     * Handles rider input and server approval without maintaining a second leap state on the creature.
+     * */
+    @Nullable
+    public CreatureLeapPlan jumpFromRider(@NotNull EntityPlayer rider, @NotNull RiddenLeapRequest request) {
+        if (this.creature.getControllingPassenger() != rider) return null;
+        if (request instanceof RiddenLeapRequest.Approval(CreatureLeapPlan acceptedPlan)) {
+            if (!this.creature.world.isRemote || this.phase != LeapPhase.AWAITING_APPROVAL) return null;
+            this.cancelLeap();
+            // Approval may arrive after the server consumed the rider's last stamina.
+            if (acceptedPlan == null || !this.creature.riderCanControl() || !CreatureLeapPlan.hasTakeoffSupport(this.creature)
+                    || this.creature.bodyTouchingLiquid()
+            ) {
+                return null;
+            }
+            this.leapPlan = acceptedPlan;
+            this.riddenLeap = true;
+            this.phase = LeapPhase.RIDER_WINDUP;
+            return acceptedPlan;
+        }
+
+        CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
+        if (navigation == null || !navigation.getCanLeap() || !this.creature.riderCanControl()) return null;
+        boolean aimed = request instanceof RiddenLeapRequest.Aimed;
+        if ((this.creature.world.isRemote || aimed) && !this.canChargeRiddenLeap(rider)) return null;
+        if (!this.creature.world.isRemote && (this.creature.bodyTouchingLiquid() || this.isLeaping()
+                || this.phase != LeapPhase.IDLE || this.creature.getLeapCooldown() > 0)) return null;
+
+        RiddenLeapRequest.Charged charge = null;
+        CreatureLeapPlan plan;
+        switch (request) {
+            case RiddenLeapRequest.Charged(int chargeTicks, boolean movingForward) -> {
+                charge = new RiddenLeapRequest.Charged(
+                        Math.clamp(chargeTicks, 1, MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS),
+                        movingForward || rider.moveForward > 0f
+                );
+                plan = CreatureLeapPlan.charged(this.creature, this.creature.renderYawOffset, charge.movingForward(), charge.chargeTicks());
+            }
+            case RiddenLeapRequest.Aimed aim -> plan = CreatureLeapPlan.create(this.creature, aim.target());
+            default -> throw new IllegalStateException("Unexpected value: " + request);
+        }
+        if (plan == null) return null;
+
+        if (this.creature.world.isRemote) {
+            this.riddenLeap = true;
+            this.phaseTicks = 0;
+            if (aimed) {
+                this.phase = LeapPhase.AWAITING_APPROVAL;
+                this.leapPlan = plan;
+                this.queuedCharge = null;
+                this.creature.motionX = 0D;
+                this.creature.motionY = 0D;
+                this.creature.motionZ = 0D;
+            }
+            else {
+                this.phase = LeapPhase.RIDER_WINDUP;
+                this.queuedCharge = charge;
+                this.leapPlan = null;
+                this.creature.rotationYaw = this.creature.renderYawOffset;
+            }
+        }
+        else {
+            if (!this.creature.useStamina(MoveResult.LEAP.staminaConsumption())) return null;
+            if (aimed) this.creature.stopRiddenAim();
+            this.riddenLeap = true;
+            this.phase = CreatureLeapPlan.hasTakeoffSupport(this.creature) ? LeapPhase.REMOTE_TAKEOFF : LeapPhase.REMOTE_AIRBORNE;
+            this.phaseTicks = 0;
+            this.leapPlan = plan;
+            this.queuedCharge = null;
+            this.moveHelper.creatureAction = RiftCreatureMoveHelperBase.CreatureAction.LEAP;
+            this.creature.rotationYaw = this.creature.renderYawOffset;
+            this.creature.getCreaturePathNavigate().clearPath();
+            this.creature.setSprinting(false);
+            this.creature.setLeaping(true);
+        }
+        return plan;
+    }
+
+    public boolean canChargeRiddenLeap(@NotNull EntityPlayer rider) {
+        CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
+        return navigation != null && navigation.getCanLeap() && this.creature.getControllingPassenger() == rider
+                && this.phase == LeapPhase.IDLE && !this.isLeaping()
+                && !this.creature.getIsSleeping() && !this.creature.isStaggered()
+                && CreatureLeapPlan.hasTakeoffSupport(this.creature) && !this.creature.bodyTouchingLiquid()
+                && this.creature.getCurrentMove().isEmpty() && this.creature.getLeapCooldown() <= 0 && this.creature.getStamina() > 0f;
+    }
+
+    public boolean isRiddenLeapPendingOrActive() {
+        return this.riddenLeap && this.phase != LeapPhase.IDLE;
+    }
+
+    /** The tick hook tracks replicated rider movement; the travel hook exclusively advances local leap movement. */
+    public boolean updateLeap(@NotNull UpdatePhase updatePhase) {
+        if (updatePhase == UpdatePhase.TICK) {
+            if (this.creature.world.isRemote) return false;
+            if (this.creature.getLeapCooldown() > 0) this.creature.setLeapCooldown(this.creature.getLeapCooldown() - 1);
+            if (this.phase == LeapPhase.REMOTE_TAKEOFF || this.phase == LeapPhase.REMOTE_AIRBORNE) {
+                this.phaseTicks++;
+                boolean supported = CreatureLeapPlan.hasTakeoffSupport(this.creature);
+                if (!supported) this.phase = LeapPhase.REMOTE_AIRBORNE;
+                boolean landed = this.phase == LeapPhase.REMOTE_AIRBORNE && supported;
+                boolean blocked = this.phase == LeapPhase.REMOTE_AIRBORNE && this.creature.collidedHorizontally;
+                if (landed || blocked) this.creature.setLeapCooldown(MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS);
+                if (this.creature.bodyTouchingLiquid() || this.phaseTicks > 80 || landed || blocked) this.cancelLeap();
+            }
+            this.creature.setLeaping(this.isLeaping());
+            return false;
+        }
+
+        if ((this.phase == LeapPhase.AWAITING_APPROVAL || this.phase == LeapPhase.RIDER_WINDUP)
+                && (!this.creature.isBeingRidden() || !this.creature.riderCanControl())) {
+            this.cancelLeap();
+            return false;
+        }
+        if (this.phase == LeapPhase.AWAITING_APPROVAL) {
+            if (++this.phaseTicks >= 80) this.cancelLeap();
+            this.creature.motionX = 0D;
+            this.creature.motionY = 0D;
+            this.creature.motionZ = 0D;
+            return true;
+        }
+        if (this.phase == LeapPhase.REMOTE_TAKEOFF || this.phase == LeapPhase.REMOTE_AIRBORNE) return true;
+        if (this.phase == LeapPhase.RIDER_WINDUP && CreatureLeapPlan.hasTakeoffSupport(this.creature)) {
+            CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
+            if (navigation == null || !navigation.getCanLeap()) this.cancelLeap();
+            else if (this.phaseTicks >= navigation.getLeapDelay()) {
+                this.creature.rotationYaw = this.creature.renderYawOffset;
+                int chargeTicks = MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS;
+                boolean movingForward = true;
+                if (this.queuedCharge != null) {
+                    chargeTicks = this.queuedCharge.chargeTicks();
+                    movingForward = this.queuedCharge.movingForward();
+                }
+                if (!this.startRiddenLeap(this.creature.rotationYaw, movingForward, chargeTicks, this.leapPlan)) this.cancelLeap();
+            }
+            else {
+                this.phaseTicks++;
+                if (this.leapPlan != null) {
+                    this.creature.motionX = 0D;
+                    this.creature.motionY = 0D;
+                    this.creature.motionZ = 0D;
+                    return true;
+                }
+            }
+        }
+        if (!this.isLeapActive()) return false;
+        this.advanceLeap();
+        return true;
     }
 
     /**
@@ -204,7 +310,7 @@ public class RiftCreatureLeapHelper {
             double obstacleClearance, RiftCreatureMoveHelperBase.CreatureAction requestedAction
     ) {
         CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
-        if (!navigation.getCanLeap() || this.creature.bodyTouchingLiquid()) return false;
+        if (navigation == null || !navigation.getCanLeap() || this.creature.bodyTouchingLiquid()) return false;
 
         double displacementY = targetY - this.creature.posY;
         double standardJumpClearance = RiftCreatureMoveHelper.STANDARD_JUMP_CLEARANCE;
@@ -235,163 +341,99 @@ public class RiftCreatureLeapHelper {
     }
 
     /**
-     * This gets a leap started once the creature has walked for long enough.
-     * */
-    public boolean tryStartLeap() {
-        if (this.leapStarted) return true;
-
+     * AI requests wait for their configured windup, then enter the shared launch path.
+     */
+    public void tryStartLeap() {
+        if (this.phase != LeapPhase.AI_WINDUP) return;
         CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
-        if (!navigation.getCanLeap() || !this.creature.onGround || this.creature.bodyTouchingLiquid()) {
+        if (this.leapPlan == null || navigation == null || !navigation.getCanLeap()
+                || !CreatureLeapPlan.hasTakeoffSupport(this.creature) || this.creature.bodyTouchingLiquid()
+        ) {
             this.cancelLeap();
-            return false;
+            return;
         }
-
-        double displacementX = this.leapTargetX - this.creature.posX;
-        double displacementZ = this.leapTargetZ - this.creature.posZ;
-        double horizontalDistance = Math.sqrt(displacementX * displacementX + displacementZ * displacementZ);
-        if (!this.isWithinLeapDistance(horizontalDistance)) {
-            this.cancelLeap();
-            return false;
-        }
-
         this.faceLeapTarget();
-        this.walkingBeforeLeapTicks++;
-        if (this.walkingBeforeLeapTicks <= navigation.getLeapDelay()) return false;
-
-        double upwardMotion = this.upwardVelocityForHeight(navigation.getLeapHeight() + LEAP_CLEARANCE);
-        if (!this.hasClearLeapPath(upwardMotion)) {
+        this.moveHelper.stopWalkingControls();
+        if (++this.phaseTicks <= navigation.getLeapDelay()) return;
+        Vec3d landing = this.leapPlan.landing();
+        double obstacleHeight = Math.max(landing.y - this.creature.posY,
+                this.getObstacleClearance(landing.x, landing.z, navigation.getLeapHeight()));
+        CreatureLeapPlan plan = CreatureLeapPlan.navigation(this.creature, this.creature.getEntityBoundingBox(), landing, obstacleHeight);
+        if (plan == null) {
             this.creature.getCreaturePathNavigate().clearPath();
             this.cancelLeap();
-            return false;
+            return;
         }
         if (!this.creature.useStamina(MoveResult.LEAP.staminaConsumption())) {
             this.cancelLeap();
-            return false;
+            return;
         }
-        if (this.verticalLeap) {
-            this.leapMotionX = 0D;
-            this.leapMotionZ = 0D;
+        this.startLeap(plan, false, this.leapYaw);
+    }
+
+    /**
+     * Advances AI, charged, and aimed leaps once from travel, using the same collision-aware motion.
+     * */
+    public void advanceLeap() {
+        if (!this.isLeapActive() || this.leapPlan == null) return;
+        if (this.creature.bodyTouchingLiquid()) {
+            this.cancelLeap();
+            this.creature.motionX = 0D;
+            this.creature.motionY = 0D;
+            this.creature.motionZ = 0D;
+            return;
+        }
+        this.faceLeapTarget();
+        this.moveHelper.stopWalkingControls();
+        Vec3d previousPosition = this.creature.getPositionVector();
+        boolean followingThrough = this.phaseTicks >= this.leapPlan.durationTicks();
+        int nextTick = this.phaseTicks + 1;
+        double progress = (double) nextTick / this.leapPlan.durationTicks();
+        Vec3d nextPosition;
+        Vec3d nextVelocity;
+        if (followingThrough) {
+            nextPosition = previousPosition.add(this.creature.motionX, this.creature.motionY, this.creature.motionZ);
+            nextVelocity = new Vec3d(this.creature.motionX * 0.91D,
+                    (this.creature.motionY - GRAVITY) * VERTICAL_DRAG, this.creature.motionZ * 0.91D);
         }
         else {
-            int crossingTicks = Math.max(1, this.ticksAboveHeight(upwardMotion, this.leapObstacleHeight));
-            double horizontalMotion = horizontalDistance / crossingTicks;
-            this.leapMotionX = displacementX / horizontalDistance * horizontalMotion;
-            this.leapMotionZ = displacementZ / horizontalDistance * horizontalMotion;
+            nextPosition = this.leapPlan.position(progress);
+            nextVelocity = this.leapPlan.velocity(progress);
         }
-        this.leapStartY = this.creature.posY;
-        this.clearedVerticalObstacle = !this.verticalLeap;
-        this.creature.motionX = this.leapMotionX;
-        this.creature.motionY = upwardMotion;
-        this.creature.motionZ = this.leapMotionZ;
+        for (int sample = 1; sample <= CreatureLeapPlan.SAMPLES_PER_TICK; sample++) {
+            double sampleX = MathUtil.slopeResult(sample, true, 0, CreatureLeapPlan.SAMPLES_PER_TICK, previousPosition.x, nextPosition.x);
+            double sampleY = MathUtil.slopeResult(sample, true, 0, CreatureLeapPlan.SAMPLES_PER_TICK, previousPosition.y, nextPosition.y);
+            double sampleZ = MathUtil.slopeResult(sample, true, 0, CreatureLeapPlan.SAMPLES_PER_TICK, previousPosition.z, nextPosition.z);
+            // Delayed lateral motion can begin within this tick; sample the same piecewise plan used by validation.
+            if (!followingThrough) {
+                Vec3d plannedSample = this.leapPlan.position((this.phaseTicks + (double) sample / CreatureLeapPlan.SAMPLES_PER_TICK)
+                        / this.leapPlan.durationTicks());
+                sampleX = plannedSample.x;
+                sampleY = plannedSample.y;
+                sampleZ = plannedSample.z;
+            }
+            this.creature.move(MoverType.SELF, sampleX - this.creature.posX, sampleY - this.creature.posY, sampleZ - this.creature.posZ);
+            if (Math.abs(this.creature.posX - sampleX) > 1E-4D || Math.abs(this.creature.posY - sampleY) > 1E-4D
+                    || Math.abs(this.creature.posZ - sampleZ) > 1E-4D) break;
+        }
+        this.creature.motionX = nextVelocity.x;
+        this.creature.motionY = nextVelocity.y;
+        this.creature.motionZ = nextVelocity.z;
         this.creature.fallDistance = 0f;
         this.creature.isAirBorne = true;
-        this.creature.getCreaturePathNavigate().clearPath();
-        this.creature.setSprinting(false);
-        this.moveHelper.stopWalkingControls();
-        this.leapStarted = true;
-        this.leapTicks = 0;
-        this.resetDelay();
-        ForgeHooks.onLivingJump(this.creature);
-        return true;
-    }
-
-    /**
-     * Keeps the creature aimed and moving through the rest of its leap.
-     * */
-    public void continueLeap() {
-        if (this.riddenLeap) return;
-        if (this.creature.bodyTouchingLiquid()) {
-            this.cancelLeap();
-            return;
-        }
-        this.faceLeapTarget();
-        this.moveHelper.stopWalkingControls();
-        this.creature.fallDistance = 0F;
-        double remainingX = this.leapTargetX - this.creature.posX;
-        double remainingZ = this.leapTargetZ - this.creature.posZ;
-        double remainingDistanceSq = remainingX * remainingX + remainingZ * remainingZ;
-        if (!this.clearedVerticalObstacle) {
-            double climbedHeight = this.creature.posY - this.leapStartY;
-            if (climbedHeight >= this.leapObstacleHeight + VERTICAL_EDGE_CLEARANCE) {
-                this.clearedVerticalObstacle = true;
-            }
-            else {
-                this.creature.motionX = 0D;
-                this.creature.motionZ = 0D;
-            }
-        }
-
-        if (this.clearedVerticalObstacle && this.verticalLeap) {
-            this.setVerticalLeapMotion(remainingX, remainingZ, this.creature.posY - this.leapStartY);
-        }
-        double leapMotionDistanceSq = this.leapMotionX * this.leapMotionX + this.leapMotionZ * this.leapMotionZ;
-        if (this.clearedVerticalObstacle && remainingDistanceSq <= leapMotionDistanceSq) {
-            this.creature.motionX = remainingX;
-            this.creature.motionZ = remainingZ;
-        }
-        else if (this.clearedVerticalObstacle) {
-            this.creature.motionX = this.leapMotionX;
-            this.creature.motionZ = this.leapMotionZ;
-        }
-        this.leapTicks++;
-
-        boolean landed = this.leapTicks > 1 && this.creature.onGround;
-        boolean blockedByWall = this.leapTicks > 1 && this.creature.collidedHorizontally
-                && (Math.abs(this.creature.motionX) > 1E-6D || Math.abs(this.creature.motionZ) > 1E-6D);
-        boolean blockedVertically = this.leapTicks > 1 && this.creature.collidedVertically && this.creature.motionY <= 0D;
-        if (landed || blockedByWall) this.creature.resetLeapToAttackCooldown();
-        if (this.leapTicks > 80 || landed || blockedByWall || blockedVertically) {
-            this.creature.fallDistance = 0F;
-            this.moveHelper.creatureAction = RiftCreatureMoveHelperBase.CreatureAction.WAIT;
-            this.leapStarted = false;
-            this.leapTicks = 0;
-        }
-    }
-
-    public boolean isRiddenLeap() {
-        return this.riddenLeap && this.isLeaping();
-    }
-
-    /**
-     * Moves a ridden creature through one collision-aware step of its charged leap.
-     * Ridden travel calls this directly so ordinary movement drag cannot shorten the arc.
-     * */
-    public void advanceRiddenLeap() {
-        if (!this.isRiddenLeap()) return;
-        if (this.creature.bodyTouchingLiquid()) {
-            this.cancelLeap();
-            this.creature.motionX = 0D;
-            this.creature.motionY = 0D;
-            this.creature.motionZ = 0D;
-            return;
-        }
-
-        this.faceLeapTarget();
-        this.moveHelper.stopWalkingControls();
-        int nextLeapTick = this.leapTicks + 1;
-        double progress = MathUtil.slopeResult(
-                nextLeapTick, false, 0D, this.riddenLeapDurationTicks, 0D, 1D
-        );
-        double nextX = MathUtil.slopeResult(progress, false, 0D, 1D, this.leapStartX, this.leapTargetX);
-        double nextY = this.leapStartY + 4D * this.riddenLeapHeight * progress * (1D - progress);
-        double nextZ = MathUtil.slopeResult(progress, false, 0D, 1D, this.leapStartZ, this.leapTargetZ);
-        this.creature.motionX = nextX - this.creature.posX;
-        this.creature.motionY = nextY - this.creature.posY;
-        this.creature.motionZ = nextZ - this.creature.posZ;
-        this.creature.move(MoverType.SELF, this.creature.motionX, this.creature.motionY, this.creature.motionZ);
-        this.creature.fallDistance = 0F;
-        this.creature.isAirBorne = true;
         this.creature.velocityChanged = true;
-        this.leapTicks = nextLeapTick;
-
-        boolean blockedByWall = Math.abs(this.creature.posX - nextX) > 1E-4D
-                || Math.abs(this.creature.posZ - nextZ) > 1E-4D;
-        boolean movementBlocked = blockedByWall || Math.abs(this.creature.posY - nextY) > 1E-4D;
-        boolean landed = this.creature.onGround && this.leapTicks > 1;
-        if (blockedByWall || landed) {
-            this.creature.setLeapCooldown(MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS);
+        this.phaseTicks = nextTick;
+        boolean blocked = Math.abs(this.creature.posX - nextPosition.x) > 1E-4D
+                || Math.abs(this.creature.posY - nextPosition.y) > 1E-4D
+                || Math.abs(this.creature.posZ - nextPosition.z) > 1E-4D;
+        boolean landed = this.creature.onGround && nextTick > 1;
+        if (!blocked && !landed && nextTick == this.leapPlan.durationTicks() && CreatureLeapPlan.hasTakeoffSupport(this.creature)) {
+            this.creature.move(MoverType.SELF, 0D, -1E-3D, 0D);
+            landed = this.creature.onGround;
         }
-        if (movementBlocked || landed) {
+        if (blocked || landed) {
+            if (this.riddenLeap) this.creature.setLeapCooldown(MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS);
+            else this.creature.resetLeapToAttackCooldown();
             this.cancelLeap();
             this.creature.motionX = 0D;
             this.creature.motionY = 0D;
@@ -399,37 +441,15 @@ public class RiftCreatureLeapHelper {
         }
     }
 
-    /**
-     * Adds the horizontal part once a vertical leap has cleared the ledge.
-     * */
-    private void setVerticalLeapMotion(double remainingX, double remainingZ, double climbedHeight) {
-        double remainingDistance = Math.sqrt(remainingX * remainingX + remainingZ * remainingZ);
-        if (remainingDistance < 1E-6D) return;
-
-        int crossingTicks = this.ticksUntilDescendingBelowHeight(
-                climbedHeight,
-                this.creature.motionY,
-                this.leapObstacleHeight + VERTICAL_EDGE_CLEARANCE
-        );
-        double horizontalMotion = remainingDistance / crossingTicks;
-        this.leapMotionX = remainingX / remainingDistance * horizontalMotion;
-        this.leapMotionZ = remainingZ / remainingDistance * horizontalMotion;
-    }
-
-    /**
-     * Drops the pending leap and puts the move helper back at rest.
-     * */
-    private void cancelLeap() {
+    public void cancelLeap() {
         this.moveHelper.creatureAction = RiftCreatureMoveHelperBase.CreatureAction.WAIT;
-        this.resetDelay();
-        this.leapStarted = false;
+        this.phase = LeapPhase.IDLE;
+        this.phaseTicks = 0;
         this.riddenLeap = false;
-        this.leapTicks = 0;
+        this.leapPlan = null;
+        this.queuedCharge = null;
     }
 
-    /**
-     * Stops walking momentum so it cannot fight the leap calculations.
-     * */
     private void stopHorizontalMovement() {
         this.moveHelper.stopWalkingControls();
         this.creature.motionX = 0D;
@@ -449,7 +469,8 @@ public class RiftCreatureLeapHelper {
      * */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean isWithinLeapDistance(double horizontalDistance) {
-        return horizontalDistance > 1E-6D && horizontalDistance <= this.creature.getNavigationBuilder().getLeapDistance();
+        CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
+        return navigation != null && horizontalDistance > 1E-6D && horizontalDistance <= navigation.getLeapDistance();
     }
 
     /**
@@ -469,14 +490,15 @@ public class RiftCreatureLeapHelper {
      * */
     @Nullable
     private GapLeapTarget findGapLeapTarget(double targetX, double targetZ) {
+        CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
         double displacementX = targetX - this.creature.posX;
         double displacementZ = targetZ - this.creature.posZ;
         double horizontalDistance = Math.sqrt(displacementX * displacementX + displacementZ * displacementZ);
-        if (!this.creature.onGround || horizontalDistance < 1E-6D) return null;
+        if (navigation == null || !this.creature.onGround || horizontalDistance < 1E-6D) return null;
 
         double directionX = displacementX / horizontalDistance;
         double directionZ = displacementZ / horizontalDistance;
-        double leapDistance = this.creature.getNavigationBuilder().getLeapDistance();
+        double leapDistance = navigation.getLeapDistance();
         GapLeapTarget directTarget = this.scanGapRay(
                 directionX,
                 directionZ,
@@ -509,9 +531,7 @@ public class RiftCreatureLeapHelper {
         }
 
         double stoppingDistance = Math.max(GAP_SCAN_STEP, this.creature.width * 0.25D);
-        return directTarget.gapStartDistance <= stoppingDistance + 1E-6D
-                ? directTarget
-                : null;
+        return directTarget.gapStartDistance <= stoppingDistance + 1E-6D ? directTarget : null;
     }
 
     /**
@@ -708,227 +728,6 @@ public class RiftCreatureLeapHelper {
     }
 
     /**
-     * Check if leap path is clear. Good for making sure it don't bump into a ceiling
-     * */
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    private boolean hasClearLeapPath(double upwardMotion) {
-        return this.hasClearLeapPath(
-                this.creature.getEntityBoundingBox(),
-                this.leapTargetX,
-                this.leapTargetY,
-                this.leapTargetZ,
-                this.leapObstacleHeight,
-                this.verticalLeap,
-                upwardMotion
-        );
-    }
-
-    boolean hasClearPlannedLeap(
-            @NotNull AxisAlignedBB startingBounds,
-            double targetX,
-            double targetY,
-            double targetZ,
-            double obstacleHeight
-    ) {
-        double upwardMotion = this.upwardVelocityForHeight(
-                this.creature.getNavigationBuilder().getLeapHeight() + LEAP_CLEARANCE
-        );
-        return this.hasClearLeapPath(
-                startingBounds,
-                targetX,
-                targetY,
-                targetZ,
-                obstacleHeight,
-                targetY - startingBounds.minY > 1E-3D,
-                upwardMotion
-        );
-    }
-
-    private boolean hasClearLeapPath(
-            @NotNull AxisAlignedBB startingBounds,
-            double targetX,
-            double targetY,
-            double targetZ,
-            double obstacleHeight,
-            boolean verticalLeap,
-            double upwardMotion
-    ) {
-        double startingCenterX = (startingBounds.minX + startingBounds.maxX) * 0.5D;
-        double startingCenterZ = (startingBounds.minZ + startingBounds.maxZ) * 0.5D;
-        double targetOffsetX = targetX - startingCenterX;
-        double targetOffsetZ = targetZ - startingCenterZ;
-        double horizontalDistance = Math.sqrt(targetOffsetX * targetOffsetX + targetOffsetZ * targetOffsetZ);
-        if (horizontalDistance < 1E-6D) return false;
-
-        AxisAlignedBB landingBounds = startingBounds.offset(
-                targetOffsetX,
-                targetY - startingBounds.minY + 1E-3D,
-                targetOffsetZ
-        );
-        if (this.creature.world.collidesWithAnyBlock(landingBounds)) return false;
-
-        double fixedMotionX = 0D;
-        double fixedMotionZ = 0D;
-        if (!verticalLeap) {
-            int crossingTicks = Math.max(1, this.ticksAboveHeight(upwardMotion, obstacleHeight));
-            double horizontalMotion = horizontalDistance / crossingTicks;
-            fixedMotionX = targetOffsetX / horizontalDistance * horizontalMotion;
-            fixedMotionZ = targetOffsetZ / horizontalDistance * horizontalMotion;
-        }
-
-        double simulatedX = 0D;
-        double simulatedZ = 0D;
-        double simulatedHeight = 0D;
-        double simulatedVerticalMotion = upwardMotion;
-        boolean simulatedObstacleCleared = !verticalLeap;
-        double clearanceFloor = Math.min(startingBounds.minY, targetY)
-                + obstacleHeight + VERTICAL_EDGE_CLEARANCE;
-
-        for (int tick = 0; tick < 80; tick++) {
-            if (!simulatedObstacleCleared
-                    && simulatedHeight >= obstacleHeight + VERTICAL_EDGE_CLEARANCE) {
-                simulatedObstacleCleared = true;
-            }
-
-            double remainingX = targetOffsetX - simulatedX;
-            double remainingZ = targetOffsetZ - simulatedZ;
-            double horizontalMotionX = 0D;
-            double horizontalMotionZ = 0D;
-            if (simulatedObstacleCleared) {
-                if (verticalLeap) {
-                    double remainingDistance = Math.sqrt(remainingX * remainingX + remainingZ * remainingZ);
-                    if (remainingDistance >= 1E-6D) {
-                        int crossingTicks = this.ticksUntilDescendingBelowHeight(
-                                simulatedHeight,
-                                simulatedVerticalMotion,
-                                obstacleHeight + VERTICAL_EDGE_CLEARANCE
-                        );
-                        double horizontalMotion = remainingDistance / crossingTicks;
-                        horizontalMotionX = remainingX / remainingDistance * horizontalMotion;
-                        horizontalMotionZ = remainingZ / remainingDistance * horizontalMotion;
-                    }
-                }
-                else {
-                    horizontalMotionX = fixedMotionX;
-                    horizontalMotionZ = fixedMotionZ;
-                }
-
-                double remainingDistanceSq = remainingX * remainingX + remainingZ * remainingZ;
-                double motionDistanceSq = horizontalMotionX * horizontalMotionX + horizontalMotionZ * horizontalMotionZ;
-                if (remainingDistanceSq <= motionDistanceSq) {
-                    horizontalMotionX = remainingX;
-                    horizontalMotionZ = remainingZ;
-                }
-            }
-
-            double nextX = simulatedX + horizontalMotionX;
-            double nextZ = simulatedZ + horizontalMotionZ;
-            double nextHeight = simulatedHeight + simulatedVerticalMotion;
-            int sampleCount = Math.max(1, (int)Math.ceil(Math.max(
-                    Math.max(Math.abs(horizontalMotionX), Math.abs(horizontalMotionZ)),
-                    Math.abs(simulatedVerticalMotion)
-            ) / OBSTACLE_SCAN_STEP));
-
-            for (int sample = 1; sample <= sampleCount; sample++) {
-                double progress = (double)sample / sampleCount;
-                double sampleX = simulatedX + horizontalMotionX * progress;
-                double sampleZ = simulatedZ + horizontalMotionZ * progress;
-                double sampleHeight = simulatedHeight + simulatedVerticalMotion * progress;
-                double sampleFeetY = startingBounds.minY + sampleHeight;
-                double sampleRemainingX = targetOffsetX - sampleX;
-                double sampleRemainingZ = targetOffsetZ - sampleZ;
-                boolean reachedLandingHeight = simulatedVerticalMotion <= 0D
-                        && sampleFeetY <= targetY + 1E-3D;
-                if (reachedLandingHeight) {
-                    double remainingDistanceSq = sampleRemainingX * sampleRemainingX
-                            + sampleRemainingZ * sampleRemainingZ;
-                    return remainingDistanceSq <= OBSTACLE_LOOKAHEAD_DISTANCE * OBSTACLE_LOOKAHEAD_DISTANCE;
-                }
-
-                AxisAlignedBB sampleBounds = startingBounds.offset(sampleX, sampleHeight, sampleZ);
-                double overheadMinimumY = Math.max(sampleBounds.minY, clearanceFloor);
-                if (sampleBounds.maxY > overheadMinimumY + 1E-6D) {
-                    AxisAlignedBB overheadBounds = new AxisAlignedBB(
-                            sampleBounds.minX,
-                            overheadMinimumY,
-                            sampleBounds.minZ,
-                            sampleBounds.maxX,
-                            sampleBounds.maxY,
-                            sampleBounds.maxZ
-                    );
-                    if (this.creature.world.collidesWithAnyBlock(overheadBounds)) return false;
-                }
-            }
-
-            simulatedX = nextX;
-            simulatedZ = nextZ;
-            simulatedHeight = nextHeight;
-            simulatedVerticalMotion = (simulatedVerticalMotion - GRAVITY) * VERTICAL_DRAG;
-        }
-        return false;
-    }
-
-    /**
-     * Works out the upward speed needed to reach a particular height.
-     * */
-    private double upwardVelocityForHeight(double height) {
-        double low = 0D;
-        double high = Math.max(0.42D, Math.sqrt(2D * GRAVITY * height) + GRAVITY);
-        for (int expansion = 0; expansion < 64 && this.simulatedJumpHeight(high) < height; expansion++) {
-            high *= 2D;
-        }
-        for (int iteration = 0; iteration < 48; iteration++) {
-            double middle = (low + high) * 0.5D;
-            if (this.simulatedJumpHeight(middle) < height) low = middle;
-            else high = middle;
-        }
-        return high;
-    }
-
-    /**
-     * Runs a tiny jump simulation so the velocity search has something to measure.
-     * */
-    private double simulatedJumpHeight(double upwardMotion) {
-        double height = 0D;
-        double motion = upwardMotion;
-        for (int tick = 0; tick < 10000 && motion > 0D; tick++) {
-            height += motion;
-            motion = (motion - GRAVITY) * VERTICAL_DRAG;
-        }
-        return height;
-    }
-
-    /**
-     * Counts how many ticks the jump arc stays above the obstacle.
-     * */
-    private int ticksAboveHeight(double upwardMotion, double targetHeight) {
-        double height = 0D;
-        double motion = upwardMotion;
-        int ticks = 0;
-        int ticksAboveHeight = 0;
-        do {
-            height += motion;
-            if (height > targetHeight) ticksAboveHeight++;
-            motion = (motion - GRAVITY) * VERTICAL_DRAG;
-            ticks++;
-        }
-        while (height > 0D && ticks < 80);
-        return ticksAboveHeight;
-    }
-
-    /**
-     * Estimates when a falling leap will dip back below the requested height.
-     * */
-    private int ticksUntilDescendingBelowHeight(double height, double motion, double targetHeight) {
-        for (int ticks = 1; ticks <= 80; ticks++) {
-            height += motion;
-            motion = (motion - GRAVITY) * VERTICAL_DRAG;
-            if (motion <= 0D && height <= targetHeight) return Math.max(1, ticks - 1);
-        }
-        return 80;
-    }
-
-    /**
      * This is just the gap check result, along with its landing spot when one is safe.
      * */
     private record GapLeapTarget(boolean safe, double x, double z, double gapStartDistance) {
@@ -945,5 +744,35 @@ public class RiftCreatureLeapHelper {
         private static GapLeapTarget blocked(double gapStartDistance) {
             return new GapLeapTarget(false, 0D, 0D, gapStartDistance);
         }
+    }
+
+    /**
+     * Selects which creature update hook is calling the helper, keeping movement from advancing twice per tick.
+     * */
+    public enum UpdatePhase {
+        //called from onLivingUpdate for server cooldowns, rider takeoff/landing tracking, and pose synchronization.
+        TICK,
+        //called from travel to process rider approval/windup and advance locally simulated AI or rider leaps.
+        TRAVEL
+    }
+
+    /**
+     * Tracks the leap's lifecycle; each phase determines how the shared phaseTicks timer is used.
+     * */
+    private enum LeapPhase {
+        //no leap is queued or running
+        IDLE,
+        //the AI has a validated destination and is waiting through its launch delay
+        AI_WINDUP,
+        //the rider's charged jump or approved aimed leap is queued for launch.
+        RIDER_WINDUP,
+        //the rider's client holds its takeoff position while awaiting server acceptance of an aimed leap.
+        AWAITING_APPROVAL,
+        //this side simulates the trajectory and its airborne continuation until landing or collision.
+        ACTIVE,
+        //the server accepted a rider leap and is waiting for client-controlled movement to leave the ground.
+        REMOTE_TAKEOFF,
+        //the server observes the rider's airborne movement until landing, collision, or timeout.
+        REMOTE_AIRBORNE
     }
 }

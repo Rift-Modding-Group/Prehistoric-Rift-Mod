@@ -78,6 +78,9 @@ hud.prift.riding.aim_move=Mantener para apuntar
 hud.prift.riding.shoot_move=Disparar
 hud.prift.riding.sprint=Correr
 hud.prift.riding.jump=Brincar
+hud.prift.riding.aim_leap=Mantener para apuntar el salto
+hud.prift.riding.leap_to_target=Brincar al punto señalado
+hud.prift.riding.release_aim=Suelta para dejar de apuntar
 hud.prift.riding.block_break_enable=Activar destrucción de bloques
 hud.prift.riding.block_break_disable=Desactivar destrucción de bloques
 

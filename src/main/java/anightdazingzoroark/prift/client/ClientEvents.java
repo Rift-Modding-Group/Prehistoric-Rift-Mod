@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.client;
 
+import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiddenLeapRequest;
 import anightdazingzoroark.prift.client.hud.PlayerPartyHUD;
 import anightdazingzoroark.prift.client.hud.RidingCreatureHUD;
 import anightdazingzoroark.prift.client.hud.TameProgressHUD;
@@ -9,6 +10,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenAimingType;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureLeapHelper;
+import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.RiddenAimTarget;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiData;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiFactory;
@@ -53,6 +55,8 @@ public class ClientEvents {
     private int ridingAimMove = -1;
     private int selectedRidingMove;
     private int riddenLeapChargeStartTick = -1;
+    private boolean riddenLeapFullyCharged;
+    private boolean ridingLeapAimActive;
     private int riddenLeapCooldownDisplayChargeTicks;
     private int riddenSprintStartTick = -1;
     private int riddenSprintCooldownDisplayTicks;
@@ -91,6 +95,8 @@ public class ClientEvents {
 
         if (this.usingRidingMove) this.releaseSelectedRidingMove();
         this.stopRidingAim();
+        this.riddenLeapChargeStartTick = -1;
+        this.riddenLeapFullyCharged = false;
         event.setCanceled(true);
         GuiManager.openFromClient(RiftCreatureGuiFactory.INSTANCE, new RiftCreatureGuiData(minecraft.player, creature));
     }
@@ -128,6 +134,8 @@ public class ClientEvents {
         if (RiftControls.TOGGLE_RIDING_MOVE_HOTBAR.isPressed()) {
             if (this.moveHotbarActive && this.usingRidingMove) this.releaseSelectedRidingMove();
             if (this.moveHotbarActive) this.stopRidingAim();
+            this.riddenLeapChargeStartTick = -1;
+            this.riddenLeapFullyCharged = false;
 
             this.moveHotbarActive = !this.moveHotbarActive;
             //block default mouse actions
@@ -154,7 +162,7 @@ public class ClientEvents {
         boolean keyPressed = Keyboard.getEventKeyState();
 
         //use keybinds for hotbar for manual move selection
-        if (this.moveHotbarActive && minecraft.currentScreen == null && keyPressed) {
+        if (this.moveHotbarActive && minecraft.currentScreen == null && keyPressed && !this.riddenLeapFullyCharged) {
             int moveCount = riddenCreature.getCreatureMoves().getUsableMoves().size();
             for (int hotbarSlot = 0; hotbarSlot < minecraft.gameSettings.keyBindsHotbar.length; hotbarSlot++) {
                 KeyBinding hotbarBinding = minecraft.gameSettings.keyBindsHotbar[hotbarSlot];
@@ -172,8 +180,9 @@ public class ClientEvents {
         //make ridden creature jump
         if (eventKey == minecraft.gameSettings.keyBindJump.getKeyCode()) {
             if (keyPressed) {
-                if (this.riddenLeapChargeStartTick < 0 && riddenCreature.canChargeRiddenLeap(minecraft.player)) {
+                if (this.riddenLeapChargeStartTick < 0 && riddenCreature.getCreatureMoveHelper().getLeapHelper().canChargeRiddenLeap(minecraft.player)) {
                     this.riddenLeapChargeStartTick = minecraft.player.ticksExisted;
+                    this.riddenLeapFullyCharged = false;
                 }
             }
             else if (this.riddenLeapChargeStartTick >= 0) {
@@ -182,10 +191,14 @@ public class ClientEvents {
                         1, RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS
                 );
                 boolean movingForward = minecraft.gameSettings.keyBindForward.isKeyDown() || minecraft.player.movementInput.moveForward > 0f;
-                this.riddenLeapCooldownDisplayChargeTicks = chargeTicks;
-                riddenCreature.jumpFromRider(minecraft.player, chargeTicks, movingForward);
-                RiftMessages.WRAPPER.sendToServer(new RiftRidingActionMessage(RiftRidingActionMessage.Action.JUMP, chargeTicks, movingForward));
+                if (!riddenCreature.getCreatureMoveHelper().getLeapHelper().isRiddenLeapPendingOrActive()) {
+                    if (this.ridingLeapAimActive) this.stopRidingAim();
+                    this.riddenLeapCooldownDisplayChargeTicks = chargeTicks;
+                    riddenCreature.getCreatureMoveHelper().getLeapHelper().jumpFromRider(minecraft.player, new RiddenLeapRequest.Charged(chargeTicks, movingForward));
+                    RiftMessages.WRAPPER.sendToServer(new RiftRidingActionMessage(RiftRidingActionMessage.Action.JUMP, chargeTicks, movingForward));
+                }
                 this.riddenLeapChargeStartTick = -1;
+                this.riddenLeapFullyCharged = false;
             }
         }
 
@@ -207,6 +220,27 @@ public class ClientEvents {
         Minecraft minecraft = Minecraft.getMinecraft();
         RiftCreature riddenCreature = this.updateRidingState(minecraft);
 
+        if (riddenCreature != null && this.riddenLeapChargeStartTick >= 0
+                && riddenCreature.getCreatureMoveHelper().getLeapHelper().isRiddenLeap()) {
+            this.riddenLeapChargeStartTick = -1;
+            this.riddenLeapFullyCharged = false;
+        }
+        if (this.riddenLeapChargeStartTick >= 0) {
+            if (riddenCreature == null || minecraft.currentScreen != null
+                    || !minecraft.gameSettings.keyBindJump.isKeyDown()
+                    || !riddenCreature.getCreatureMoveHelper().getLeapHelper().canChargeRiddenLeap(minecraft.player) && !riddenCreature.getCreatureMoveHelper().getLeapHelper().isRiddenLeapPendingOrActive()) {
+                this.riddenLeapChargeStartTick = -1;
+                this.riddenLeapFullyCharged = false;
+                if (this.ridingLeapAimActive && (riddenCreature == null || !riddenCreature.getCreatureMoveHelper().getLeapHelper().isRiddenLeapPendingOrActive())) {
+                    this.stopRidingAim();
+                }
+            }
+            else {
+                this.riddenLeapFullyCharged = minecraft.player.ticksExisted - this.riddenLeapChargeStartTick + 1
+                        >= RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS;
+            }
+        }
+
         //---tick custom camera stuff---
         if (this.ridingAimActive && riddenCreature == null) {
             this.stopRidingAim();
@@ -214,14 +248,15 @@ public class ClientEvents {
         else if (this.ridingAimActive) {
             List<ImmutablePair<String, CreatureMoveBuilder>> moves = riddenCreature.getCreatureMoves().getUsableMoves();
             if (!this.moveHotbarActive || minecraft.currentScreen != null
-                    || this.ridingAimMove < 0 || this.ridingAimMove >= moves.size()
-                    || moves.get(this.ridingAimMove).getValue().getRiddenAimingType() == RiddenAimingType.NONE
+                    || !this.ridingLeapAimActive && (this.ridingAimMove < 0 || this.ridingAimMove >= moves.size()
+                    || moves.get(this.ridingAimMove).getValue().getRiddenAimingType() == RiddenAimingType.NONE)
             ) {
                 this.stopRidingAim();
             }
         }
         this.cameraHandler.update(minecraft, riddenCreature, this.moveHotbarActive, this.ridingAimActive);
-        if (riddenCreature != null && this.ridingAimActive) {
+        if (riddenCreature != null && this.ridingAimActive
+                && (!this.ridingLeapAimActive || this.riddenLeapFullyCharged && !riddenCreature.getCreatureMoveHelper().getLeapHelper().isRiddenLeapPendingOrActive())) {
             this.cameraHandler.sendRidingAimUpdate(minecraft, riddenCreature, this.ridingAimMove);
         }
 
@@ -264,6 +299,48 @@ public class ClientEvents {
 
         RiftCreature riddenCreature = this.updateRidingState(minecraft);
         if (riddenCreature == null) return;
+
+        // Releasing aim always leaves the camera, including after the jump charge has been consumed.
+        if (this.ridingLeapAimActive && event.getButton() == 1 && !event.isButtonstate()) {
+            this.stopRidingAim();
+            event.setCanceled(true);
+            return;
+        }
+        boolean leapFullyCharged = this.riddenLeapChargeStartTick >= 0
+                && minecraft.player.ticksExisted - this.riddenLeapChargeStartTick + 1
+                >= RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS;
+        // Holding aim keeps the view through landing, without starting a move or retargeting the leap.
+        if (this.ridingLeapAimActive && (!leapFullyCharged || riddenCreature.getCreatureMoveHelper().getLeapHelper().isRiddenLeapPendingOrActive())) {
+            if (event.getButton() >= 0 || event.getDwheel() != 0) event.setCanceled(true);
+            return;
+        }
+        // A full jump charge owns mouse input until released, independently of the selected move.
+        if (leapFullyCharged) {
+            this.riddenLeapFullyCharged = true;
+            if (event.getButton() == 1) {
+                if (event.isButtonstate()) {
+                    if (this.usingRidingMove) this.releaseSelectedRidingMove();
+                    this.stopRidingAim();
+                    this.ridingAimActive = true;
+                    this.ridingLeapAimActive = true;
+                    this.ridingAimMove = -1;
+                    this.cameraHandler.beginRidingAim(riddenCreature, this.ridingAimMove, true);
+                    this.cameraHandler.sendRidingAimUpdate(minecraft, riddenCreature, this.ridingAimMove);
+                }
+                else this.stopRidingAim();
+            }
+            else if (event.getButton() == 0 && event.isButtonstate() && this.ridingLeapAimActive
+                    && !riddenCreature.getCreatureMoveHelper().getLeapHelper().isRiddenLeapPendingOrActive()
+            ) {
+                RiddenAimTarget target = this.cameraHandler.sendRidingAimUpdate(minecraft, riddenCreature, this.ridingAimMove);
+                if (riddenCreature.getCreatureMoveHelper().getLeapHelper().jumpFromRider(minecraft.player, new RiddenLeapRequest.Aimed(target)) != null) {
+                    this.riddenLeapCooldownDisplayChargeTicks = RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS;
+                    RiftMessages.WRAPPER.sendToServer(new RiftRidingLeapMessage(riddenCreature.getEntityId(), target));
+                }
+            }
+            if (event.getButton() >= 0 || event.getDwheel() != 0) event.setCanceled(true);
+            return;
+        }
         int moveCount = riddenCreature.getCreatureMoves().getUsableMoves().size();
         if (moveCount == 0) return;
 
@@ -297,7 +374,7 @@ public class ClientEvents {
                     this.ridingAimActive = true;
                     this.ridingAimMove = this.selectedRidingMove;
                     this.riddenLeapChargeStartTick = -1;
-                    this.cameraHandler.beginRidingAim(riddenCreature, this.ridingAimMove);
+                    this.cameraHandler.beginRidingAim(riddenCreature, this.ridingAimMove, false);
                     this.cameraHandler.sendRidingAimUpdate(minecraft, riddenCreature, this.ridingAimMove);
                 }
                 else {
@@ -336,7 +413,7 @@ public class ClientEvents {
                         minecraft.player.ticksExisted - this.riddenLeapChargeStartTick + 1,
                         0, RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS
                 );
-                boolean riddenLeapPendingOrActive = riddenCreature.isRiddenLeapPendingOrActive();
+                boolean riddenLeapPendingOrActive = riddenCreature.getCreatureMoveHelper().getLeapHelper().isRiddenLeapPendingOrActive();
                 int leapCooldownTicks = riddenCreature.getLeapCooldown();
                 if (chargeTicks == 0 && !riddenLeapPendingOrActive && leapCooldownTicks == 0) {
                     this.riddenLeapCooldownDisplayChargeTicks = 0;
@@ -375,7 +452,7 @@ public class ClientEvents {
 
             this.ridingCreatureHUD.renderControls(
                     minecraft, riddenCreature, this.moveHotbarActive, this.ridingAimActive,
-                    this.selectedRidingMove, width, height
+                    this.ridingLeapAimActive, this.riddenLeapFullyCharged, this.selectedRidingMove, width, height
             );
         }
     }
@@ -447,11 +524,11 @@ public class ClientEvents {
         int screenWidth = event.getResolution().getScaledWidth();
         int screenHeight = event.getResolution().getScaledHeight();
 
-        //render aim crosshair
-        this.cameraHandler.renderRidingAimCrosshair(minecraft, riddenCreature, screenWidth, screenHeight);
+        //renderWideCrosshair aim crosshair
+        this.cameraHandler.renderRidingAimCrosshair(minecraft, riddenCreature, this.riddenLeapFullyCharged, screenWidth, screenHeight);
         if (minecraft.player == null || minecraft.gameSettings.hideGUI || minecraft.objectMouseOver == null) return;
 
-        //render tame progress hud
+        //renderWideCrosshair tame progress hud
         TameProgressHUD.renderTamingProgress(minecraft, screenWidth, screenHeight);
     }
 
@@ -475,6 +552,7 @@ public class ClientEvents {
         }
         this.cameraHandler.endRidingAim();
         this.ridingAimActive = false;
+        this.ridingLeapAimActive = false;
         this.ridingAimMove = -1;
     }
 
@@ -492,6 +570,8 @@ public class ClientEvents {
             this.usingRidingMove = false;
             this.selectedRidingMove = 0;
             this.riddenLeapChargeStartTick = -1;
+            this.riddenLeapFullyCharged = false;
+            this.ridingLeapAimActive = false;
             this.riddenLeapCooldownDisplayChargeTicks = 0;
             this.riddenSprintStartTick = -1;
             this.riddenSprintCooldownDisplayTicks = riddenCreature != null && riddenCreature.getSprintCooldown() > 0

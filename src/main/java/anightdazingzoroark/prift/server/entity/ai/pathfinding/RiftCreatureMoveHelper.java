@@ -77,11 +77,8 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
     @Override
     protected void onLeap() {
         this.continuePathMovementThroughControlGap = false;
-        if (this.leapHelper.isRiddenLeap()) {
-            this.stopWalkingControls();
-            return;
-        }
-        if (this.leapHelper.tryStartLeap()) this.leapHelper.continueLeap();
+        this.stopWalkingControls();
+        if (!this.leapHelper.isLeapActive()) this.leapHelper.tryStartLeap();
     }
 
     /**

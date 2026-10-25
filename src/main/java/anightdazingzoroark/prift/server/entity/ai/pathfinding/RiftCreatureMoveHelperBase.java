@@ -94,10 +94,6 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
                 || this.creatureAction == CreatureAction.LEAP;
     }
 
-    public CreatureAction getCreatureAction() {
-        return this.creatureAction;
-    }
-
     @Override
     public void read(EntityMoveHelper that) {
         this.posX = that.getX();
@@ -117,8 +113,7 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
     }
 
     public void stopMovement() {
-        this.creatureAction = CreatureAction.WAIT;
-        this.leapHelper.resetDelay();
+        this.leapHelper.cancelLeap();
         this.stopWalkingControls();
     }
 

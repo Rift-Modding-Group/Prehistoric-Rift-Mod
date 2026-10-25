@@ -25,13 +25,16 @@ import java.util.List;
  * */
 @SideOnly(Side.CLIENT)
 public class RidingAimTargeting {
-    public static void sendUpdate(
+    @NotNull
+    public static RiddenAimTarget sendUpdate(
             @NotNull Minecraft minecraft, @NotNull RiftCreature riddenCreature, int ridingAimMove,
             @NotNull CameraFrame frame, @NotNull RidingAimSettings settings, float cameraFov, double aimDistance
     ) {
         double meleeReachSquared = settings.meleeReach() * settings.meleeReach();
         Vec3d aimStart = frame.position();
         Vec3d aimEnd = aimStart.add(frame.lookVector().scale(aimDistance));
+        // An empty crosshair selects the leap focus itself, rather than the distant projectile horizon.
+        if (settings.leap()) aimEnd = frame.focusPosition();
         RayTraceResult blockHit = minecraft.world.rayTraceBlocks(aimStart, aimEnd, false, true, false);
         Vec3d aimPosition = blockHit == null ? aimEnd : blockHit.hitVec;
         double closestDistanceSquared = aimStart.squareDistanceTo(aimPosition);
@@ -72,7 +75,7 @@ public class RidingAimTargeting {
             aimPosition = frame.focusPosition();
         }
         //--block hit to break blocks--
-        if (!settings.melee() || hasCrosshairTarget) {
+        if (!settings.leap() && (!settings.melee() || hasCrosshairTarget)) {
             RayTraceResult creatureBlockHit = minecraft.world.rayTraceBlocks(
                     creatureAimOrigin, aimPosition, false, true, false
             );
@@ -100,9 +103,12 @@ public class RidingAimTargeting {
                 aimedEntity == null && blockHit != null ? blockHit.getBlockPos() : null,
                 aimedEntity == null && blockHit != null ? blockHit.sideHit : null
         );
-        riddenCreature.setRiddenAimingFromClient(aimTarget, ridingAimMove);
-        RiftMessages.WRAPPER.sendToServer(new RiftRidingStartAimMessage(
-                ridingAimMove, targetlessRanged, aimTarget, aimArea
-        ));
+        riddenCreature.setRiddenAimingFromClient(aimTarget, ridingAimMove, settings.leap());
+        if (!settings.leap()) {
+            RiftMessages.WRAPPER.sendToServer(new RiftRidingStartAimMessage(
+                    ridingAimMove, targetlessRanged, aimTarget, aimArea
+            ));
+        }
+        return aimTarget;
     }
 }

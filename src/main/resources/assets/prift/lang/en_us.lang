@@ -78,6 +78,9 @@ hud.prift.riding.aim_move=Hold to aim
 hud.prift.riding.shoot_move=Shoot
 hud.prift.riding.sprint=Sprint
 hud.prift.riding.jump=Leap
+hud.prift.riding.aim_leap=Hold to aim leap
+hud.prift.riding.leap_to_target=Leap to aimed spot
+hud.prift.riding.release_aim=Release to stop aiming
 hud.prift.riding.block_break_enable=Enable block break
 hud.prift.riding.block_break_disable=Disable block break
 

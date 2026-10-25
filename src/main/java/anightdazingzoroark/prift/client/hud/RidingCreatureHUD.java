@@ -69,7 +69,7 @@ public class RidingCreatureHUD {
         this.sprintCooldownDisplayTicks = Math.max(0, cooldownDisplayTicks);
     }
 
-    //---render---
+    //---renderWideCrosshair---
     //reimplementation of ridden creature health that uses creature health percentage
     public void renderCreatureHealth(@NotNull Minecraft minecraft, @NotNull RiftCreature creature, int width, int height) {
         int healthLevel = 0;
@@ -259,7 +259,7 @@ public class RidingCreatureHUD {
 
     public void renderControls(
             @NotNull Minecraft minecraft, @NotNull RiftCreature creature, boolean moveHotbarActive,
-            boolean ridingAimActive, int selectedMove, int width, int height
+            boolean ridingAimActive, boolean leapAimActive, boolean leapFullyCharged, int selectedMove, int width, int height
     ) {
         GlStateManager.pushMatrix();
         GlStateManager.translate(width / 2f, height / 2f, 0f);
@@ -328,7 +328,18 @@ public class RidingCreatureHUD {
         }
 
         //-----left side-----
-        if (moveHotbarActive) {
+        if (moveHotbarActive && (leapFullyCharged || leapAimActive)) {
+            String aimInstruction;
+            if (leapAimActive) aimInstruction = I18n.format("hud.prift.riding.release_aim");
+            else aimInstruction = I18n.format("hud.prift.riding.aim_leap");
+            this.drawControl(minecraft, minecraft.gameSettings.keyBindUseItem.getKeyCode(),
+                    aimInstruction, false, 0);
+            if (leapAimActive && leapFullyCharged && !creature.getCreatureMoveHelper().getLeapHelper().isRiddenLeapPendingOrActive()) {
+                this.drawControl(minecraft, minecraft.gameSettings.keyBindAttack.getKeyCode(),
+                        I18n.format("hud.prift.riding.leap_to_target"), false, 1);
+            }
+        }
+        else if (moveHotbarActive) {
             int leftRow = 0;
             CreatureMoveBuilder selectedMoveBuilder = creature.getCreatureMoves().getUsableMoves().isEmpty()
                     ? null : creature.getCreatureMoves().getUsableMoves().get(selectedMove).getValue();

@@ -1,7 +1,6 @@
 package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.pathfinding.PathNodeType;
@@ -11,6 +10,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -390,13 +390,7 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
                 )
         );
         return obstacleHeight <= this.creature.getNavigationBuilder().getLeapHeight() + 1E-3D
-                && leapHelper.hasClearPlannedLeap(
-                        startBounds,
-                        landingX,
-                        landing.y,
-                        landingZ,
-                        obstacleHeight
-                );
+                && CreatureLeapPlan.navigation(this.creature, startBounds, new Vec3d(landingX, landing.y, landingZ), obstacleHeight) != null;
     }
 
     @Nullable

@@ -31,14 +31,14 @@ public enum Element {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.WATER, Element.EARTH);
+                    return Set.of(Element.WATER, Element.EARTH, Element.WIND);
                 }
             },
             new DeferredElementSet() {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.GRASS, Element.ICE, Element.WIND);
+                    return Set.of(Element.GRASS, Element.ICE, Element.LIGHT);
                 }
             },
             new DeferredElementSet() {
@@ -89,7 +89,7 @@ public enum Element {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.WIND, Element.ICE);
+                    return Set.of(Element.ICE);
                 }
             },
             Set.of()
@@ -100,7 +100,7 @@ public enum Element {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.ICE, Element.MESOZOIC);
+                    return Set.of(Element.ICE, Element.MESOZOIC, Element.LIGHT);
                 }
             },
             new DeferredElementSet() {
@@ -118,7 +118,7 @@ public enum Element {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.EARTH, Element.WIND);
+                    return Set.of(Element.WIND);
                 }
             },
             Set.of(),
@@ -164,13 +164,12 @@ public enum Element {
             },
             Set.of()
     ),
-    //Moving air is blocked by earth and steel, and disperses fumes and sound.
     WIND(0x898F96,
             new DeferredElementSet() {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.EARTH, Element.STEEL);
+                    return Set.of(Element.ELECTRIC, Element.ICE);
                 }
             },
             new DeferredElementSet() {
@@ -219,20 +218,30 @@ public enum Element {
             Set.of(),
             Set.of()
     ),
-    //bright lights basically
-    //Polished steel reflects light.
+    //bright lights, or the concept of "fairies" and "good" basically
     LIGHT(0xE216FC,
             new DeferredElementSet() {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.DARK, Element.STEEL);
+                    return Set.of(Element.FIRE, Element.STEEL);
                 }
             },
-            Set.of(),
-            Set.of()
+            new DeferredElementSet() {
+                @Override
+                @NotNull
+                protected Set<Element> elements() {
+                    return Set.of(Element.MESOZOIC);
+                }
+            },
+            new DeferredElementSet() {
+                @Override
+                @NotNull
+                protected Set<Element> elements() {
+                    return Set.of(Element.DARK);
+                }
+            }
     ),
-    //Metal melts, conducts electricity, corrodes, and buckles, but blocks gusts and cannot be poisoned.
     STEEL(0xCDC7DC,
             new DeferredElementSet() {
                 @Override
@@ -245,14 +254,14 @@ public enum Element {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.NEUTRAL, Element.ICE, Element.GRASS, Element.LIGHT, Element.WIND, Element.ELECTRIC, Element.WATER, Element.MESOZOIC, Element.SONIC, Element.DARK, Element.STEEL, Element.EARTH);
+                    return Set.of(Element.NEUTRAL, Element.ICE, Element.GRASS, Element.WIND, Element.MESOZOIC, Element.SONIC, Element.STEEL, Element.EARTH);
                 }
             },
             new DeferredElementSet() {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.POISON);
+                    return Set.of(Element.POISON, Element.LIGHT);
                 }
             }
     ),
