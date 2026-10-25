@@ -12,10 +12,16 @@ import java.util.Set;
  * should be obvious to explain lol
  * */
 public enum Element {
-    //no weaknesses nor resistances lol
+    //no resistances nor super effectivenesses lol
     NEUTRAL(
             0xFFFFFF,
-            Set.of(),
+            new DeferredElementSet() {
+                @Override
+                @NotNull
+                protected Set<Element> elements() {
+                    return Set.of(Element.DARK);
+                }
+            },
             Set.of(),
             Set.of()
     ),
@@ -101,7 +107,7 @@ public enum Element {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.FIRE, Element.WATER, Element.ELECTRIC, Element.GRASS);
+                    return Set.of(Element.NEUTRAL, Element.FIRE, Element.WATER, Element.ELECTRIC, Element.GRASS);
                 }
             },
             Set.of()
