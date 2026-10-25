@@ -10,6 +10,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -70,13 +71,24 @@ public class ServerEvents {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void gainCreatureXPFromKill(LivingDeathEvent event) {
+    public void livingDeathEvent(LivingDeathEvent event) {
         if (event.getEntityLiving().world.isRemote) return;
-        if (!(event.getSource().getTrueSource() instanceof RiftCreature creature) || !creature.isTamed()) return;
+        if (event.getSource().getTrueSource() instanceof RiftCreature creature && creature.isTamed()) {
+            EntityLivingBase defeatedEntity = event.getEntityLiving();
+            EntityPlayer owner = creature.getOwner() instanceof EntityPlayer player ? player : null;
 
-        EntityLivingBase defeatedEntity = event.getEntityLiving();
-        EntityPlayer owner = creature.getOwner() instanceof EntityPlayer player ? player : null;
-        creature.addXP(defeatedEntity.getExperiencePoints(owner));
+            //alert owner about killing
+            //vanilla death message in place of this
+            if (owner != null && (!(defeatedEntity instanceof EntityTameable tameable) || !tameable.isTamed())) {
+                owner.sendStatusMessage(
+                        new TextComponentTranslation("party.warning.killed_mob", creature.getName(), defeatedEntity.getName()),
+                        false
+                );
+            }
+
+            //give xp from dead entity to creature
+            creature.addXP(defeatedEntity.getExperiencePoints(owner));
+        }
     }
 
     @SubscribeEvent

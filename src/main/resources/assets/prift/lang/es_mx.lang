@@ -83,6 +83,7 @@ party.warning.cannot_summon=¡Esta criatura no se puede invocar en tu ubicación
 party.warning.cannot_summon_dead=¡Esta criatura está muerta y no se puede invocar!
 party.warning.summon_success=Criatura invocada correctamente
 party.warning.dismiss_success=Criatura retirada correctamente
+party.warning.killed_mob=¡%s ha asesinado a %s!
 
 reminder.incorrect_taming_method=¡Eso no es como tameas a una criatura, tonto! Debes lucharla hasta que esté baja su salud, y luego lanzarle bombas tranquilizantes hasta que se duerma, y alimentarle para tamearla al fin!
 reminder.taming_finished=¡Has tameado a %s!
