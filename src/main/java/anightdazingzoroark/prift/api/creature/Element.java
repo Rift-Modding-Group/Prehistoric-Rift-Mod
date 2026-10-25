@@ -76,14 +76,14 @@ public enum Element {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.FIRE, Element.EARTH, Element.STEEL, Element.SONIC);
+                    return Set.of(Element.FIRE, Element.STEEL, Element.SONIC);
                 }
             },
             new DeferredElementSet() {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.WIND);
+                    return Set.of(Element.WIND, Element.ICE);
                 }
             },
             Set.of()
@@ -123,7 +123,7 @@ public enum Element {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.WATER, Element.GRASS, Element.ICE);
+                    return Set.of(Element.WATER, Element.GRASS, Element.ICE, Element.STEEL);
                 }
             },
             new DeferredElementSet() {
@@ -232,14 +232,14 @@ public enum Element {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.FIRE, Element.EARTH);
+                    return Set.of(Element.FIRE);
                 }
             },
             new DeferredElementSet() {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.NEUTRAL, Element.ICE, Element.GRASS, Element.LIGHT, Element.WIND, Element.ELECTRIC, Element.WATER, Element.MESOZOIC);
+                    return Set.of(Element.NEUTRAL, Element.ICE, Element.GRASS, Element.LIGHT, Element.WIND, Element.ELECTRIC, Element.WATER, Element.MESOZOIC, Element.SONIC, Element.DARK, Element.STEEL, Element.EARTH);
                 }
             },
             new DeferredElementSet() {
@@ -257,7 +257,7 @@ public enum Element {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.SONIC, Element.POISON);
+                    return Set.of(Element.SONIC, Element.POISON, Element.MESOZOIC, Element.DARK);
                 }
             },
             new DeferredElementSet() {
