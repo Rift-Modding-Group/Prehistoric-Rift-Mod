@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.api.creature.Element;
+import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creature.builders.StegosaurusBuilder;
@@ -16,6 +18,7 @@ import java.util.Map;
 
 //this registers creatures
 public class RiftCreatureRegistry {
+    public static final String PLACEHOLDER_CREATURE = "placeholder";
     public static final String DEFAULT_CREATURE = "tyrannosaurus";
 
     //all creatures are stored here
@@ -47,7 +50,7 @@ public class RiftCreatureRegistry {
     }
 
     public static RiftCreature createCreature(World world, String name) {
-        String resolvedName = creatureBuilderMap.containsKey(name) ? name : DEFAULT_CREATURE;
+        String resolvedName = creatureBuilderMap.containsKey(name) ? name : PLACEHOLDER_CREATURE;
         if (creatureUsesHitboxes(resolvedName)) return new RiftCreatureHitboxed(world, resolvedName);
         return new RiftCreature(world, resolvedName);
     }
@@ -101,6 +104,22 @@ public class RiftCreatureRegistry {
         if (builtInCreaturesRegistered || registeringBuiltInCreatures) return;
         registeringBuiltInCreatures = true;
 
+        registerCreatureType(new RiftCreatureBuilder()
+                .setName(PLACEHOLDER_CREATURE)
+                .setCreatureCategory(RiftCreatureEnums.CreatureCategory.DINOSAUR)
+                .setCreatureDiet(RiftCreatureEnums.CreatureDiet.CARNIVORE)
+                .setCreatureElement(Element.NEUTRAL)
+                .setTributeItemPartName("stuffing")
+                .setStats(1, 1, 1, 1, 1)
+                .setScaleRangeForAge(1f, 1f)
+                .setSpawnEggColors(0x4F7942, 0xD9C7A3)
+                .setMainHitboxSize(1f, 1.375f)
+                // Registration requires a move, even for the harmless plush placeholder.
+                .addMove("placeholder", new CreatureMoveBuilder()
+                        .setMoveType(CreatureMoveBuilder.MoveType.STATUS)
+                        .setAnimNames("placeholder")
+                )
+        );
         registerCreatureType(new TyrannosaurusBuilder());
         registerCreatureType(new StegosaurusBuilder());
         /*

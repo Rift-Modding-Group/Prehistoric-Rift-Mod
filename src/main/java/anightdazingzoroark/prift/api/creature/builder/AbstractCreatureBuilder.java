@@ -63,8 +63,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private int sprintCooldown = 300;
     @Nullable
     private CreatureDomesticationBuilder domestication;
-    @NotNull
-    private CreatureNavigationBuilder navigation = new CreatureNavigationBuilder().setCanWalk();
+    @Nullable
+    private CreatureNavigationBuilder navigation;
     private CreatureMoveSelectorBuilder moveSelector = new CreatureMoveSelectorBuilder();
     @Nullable
     private Map<String, Integer> blockBreakLevelMap;
@@ -510,7 +510,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     }
 
     /**
-     * Set how the creature can navigate in the world. By default its just walking.
+     * Set how the creature can navigate in the world. No navigation means it just does nothing.
      * */
     public T setNavigation(@NotNull CreatureNavigationBuilder navigation) {
         this.checkIfLocked();
@@ -520,7 +520,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
         return this.getThis();
     }
 
-    @NotNull
+    @Nullable
     public CreatureNavigationBuilder getNavigation() {
         return this.navigation;
     }
@@ -705,7 +705,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
                 && this.creatureDiet != null
                 && this.spawnEggColors != null
                 && this.scaleRangeForAge != null
-                && this.navigation.isValid()
+                && (this.navigation == null || this.navigation.isValid())
                 && (this.domestication == null || this.domestication.isValid())
                 && this.tributeItemPartName != null
                 && !this.moves.isEmpty();

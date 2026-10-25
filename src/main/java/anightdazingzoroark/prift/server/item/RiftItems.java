@@ -100,7 +100,7 @@ public class RiftItems {
                             ));
                         }
                     },
-                    tributeItemName, true
+                    tributeItemName, !RiftCreatureRegistry.PLACEHOLDER_CREATURE.equals(creatureName)
             ));
         }
         itemsRegistered = true;

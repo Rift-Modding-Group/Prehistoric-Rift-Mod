@@ -89,7 +89,7 @@ public interface ICreature {
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean isHerdLeader();
 
-    @NotNull
+    @Nullable
     CreatureNavigationBuilder getNavigationBuilder();
 
     <I extends AbstractPropertyValue<?>> I getProperty(String key);

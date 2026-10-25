@@ -20,7 +20,7 @@ public class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUs
     private MultiHitboxList<RiftCreatureHitboxed> multiHitboxList;
 
     public RiftCreatureHitboxed(World worldIn) {
-        this(worldIn, RiftCreatureRegistry.DEFAULT_CREATURE);
+        this(worldIn, RiftCreatureRegistry.PLACEHOLDER_CREATURE);
     }
 
     public RiftCreatureHitboxed(World worldIn, String creatureName) {

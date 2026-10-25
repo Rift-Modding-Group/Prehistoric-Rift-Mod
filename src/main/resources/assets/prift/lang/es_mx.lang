@@ -1,4 +1,6 @@
 entity.unknown.spawn_description=???
+entity.placeholder.name=Muñeco de peluche
+entity.placeholder.spawn_description=Un muñeco de peluche que representa a una criatura desconocida.
 entity.tyrannosaurus.name=Tyrannosaurus
 entity.tyrannosaurus.spawn_description=Un depredador alfa colosal que posee fuerza física inmensa, atletismo, y aliento de fuego.
 entity.stegosaurus.name=Stegosaurus
@@ -18,6 +20,7 @@ item.stink_bomb.tooltip=Se lanza a mobs para que se largan.
 item.poison_bomb.name=Bomba venenosa
 item.poison_bomb.tooltip=Se lanza a mobs para que se envenenan.
 
+item.placeholder_stuffing.name=Relleno de peluche
 item.tyrannosaurus_arm.name=Brazo de Tyrannosaurus
 item.stegosaurus_plate.name=Placa de Stegosaurus
 item.tribute_item.tooltip=El/La %s de un/una %s. Un recurso escaso y exclusivo utilizado en recetas especializadas.
@@ -203,6 +206,8 @@ gui.prift.element.resistant_to=Resistente a
 gui.prift.element.immune_to=Inmune a
 gui.prift.element.none=Ninguno
 
+move.creature.placeholder=No hacer nada
+move.creature.placeholder.description=Permanece como un inofensivo muñeco de peluche.
 move.creature.bite=Mordisco
 move.creature.bite.description=Muerde a un objetivo con sus poderosas mandíbulas.
 move.creature.stomp=Pisotón

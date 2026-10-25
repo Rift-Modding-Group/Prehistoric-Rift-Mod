@@ -227,7 +227,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     protected Map<String, TriConsumer<ICreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
 
     public RiftCreature(World worldIn) {
-        this(worldIn, RiftCreatureRegistry.DEFAULT_CREATURE);
+        this(worldIn, RiftCreatureRegistry.PLACEHOLDER_CREATURE);
     }
 
     public RiftCreature(World worldIn, String creatureName) {
@@ -252,7 +252,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @NotNull
     private static RiftCreatureBuilder resolveCreatureBuilder(String creatureName) {
         RiftCreatureBuilder builder = RiftCreatureRegistry.getCreatureBuilder(creatureName);
-        if (builder == null) builder = RiftCreatureRegistry.getCreatureBuilder(RiftCreatureRegistry.DEFAULT_CREATURE);
+        if (builder == null) builder = RiftCreatureRegistry.getCreatureBuilder(RiftCreatureRegistry.PLACEHOLDER_CREATURE);
         if (builder == null) throw new IllegalStateException("Creature type " + creatureName + " is not registered!");
         return builder;
     }
@@ -411,7 +411,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         }
         this.targetTasks.addTask(2, new RiftFindTarget(this, true));
 
-        if (this.creatureType.getFleePredicate() != null) {
+        if (this.getNavigationBuilder() != null && this.creatureType.getFleePredicate() != null) {
             this.tasks.addTask(0, new EntityAIAvoidEntity<EntityLivingBase>(
                     this, EntityLivingBase.class,
                     this::shouldFleeFrom, this.creatureType.getFleeSearchDistance(),
@@ -439,13 +439,13 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             });
         }
         this.tasks.addTask(1, new RiftUnmountedUseMove(this));
-        if (!this.creatureType.getNavigation().getCanSwim()) {
+        if (this.getNavigationBuilder() != null && !this.getNavigationBuilder().getCanSwim()) {
             this.tasks.addTask(2, new RiftGoToLandFromWater(this));
         }
-        if (this.creatureType.isHerder()) {
+        if (this.getNavigationBuilder() != null && this.creatureType.isHerder()) {
             this.tasks.addTask(3, new RiftFollowHerdLeader(this));
         }
-        if (this.creatureType.getDomestication() != null) {
+        if (this.getNavigationBuilder() != null && this.creatureType.getDomestication() != null) {
             this.tasks.addTask(3, new EntityAIFollowOwner(this, 1D, 10f, 4f) {
                 @Override
                 public boolean shouldExecute() {
@@ -462,49 +462,51 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 }
             });
         }
-        this.tasks.addTask(4, new EntityAIWander(this, 1D) {
-            @Override
-            public boolean shouldExecute() {
-                return !RiftCreature.this.isTamed() && !RiftCreature.this.isStaggered() && RiftCreature.this.canLeadHerdBehavior() && super.shouldExecute();
-            }
+        if (this.getNavigationBuilder() != null) {
+            this.tasks.addTask(4, new EntityAIWander(this, 1D) {
+                @Override
+                public boolean shouldExecute() {
+                    return !RiftCreature.this.isTamed() && !RiftCreature.this.isStaggered() && RiftCreature.this.canLeadHerdBehavior() && super.shouldExecute();
+                }
 
-            @Override
-            public boolean shouldContinueExecuting() {
-                return !RiftCreature.this.isTamed()  && !RiftCreature.this.isStaggered() && RiftCreature.this.canLeadHerdBehavior() && super.shouldContinueExecuting();
-            }
+                @Override
+                public boolean shouldContinueExecuting() {
+                    return !RiftCreature.this.isTamed()  && !RiftCreature.this.isStaggered() && RiftCreature.this.canLeadHerdBehavior() && super.shouldContinueExecuting();
+                }
 
-            @Override
-            public void resetTask() {
-                if (RiftCreature.this.isTamed() || RiftCreature.this.isStaggered() || !RiftCreature.this.canLeadHerdBehavior()) RiftCreature.this.getNavigator().clearPath();
-                super.resetTask();
-            }
-        });
-        this.tasks.addTask(5, new EntityAILookIdle(this) {
-            @Override
-            public boolean shouldExecute() {
-                return RiftCreature.this.getAttackTarget() == null && !RiftCreature.this.getIsSleeping()
-                        && !RiftCreature.this.isBeingRidden() && !RiftCreature.this.isStaggered()
-                        && RiftCreature.this.getRNG().nextFloat() < 0.15f;
-            }
+                @Override
+                public void resetTask() {
+                    if (RiftCreature.this.isTamed() || RiftCreature.this.isStaggered() || !RiftCreature.this.canLeadHerdBehavior()) RiftCreature.this.getNavigator().clearPath();
+                    super.resetTask();
+                }
+            });
+            this.tasks.addTask(5, new EntityAILookIdle(this) {
+                @Override
+                public boolean shouldExecute() {
+                    return RiftCreature.this.getAttackTarget() == null && !RiftCreature.this.getIsSleeping()
+                            && !RiftCreature.this.isBeingRidden() && !RiftCreature.this.isStaggered()
+                            && RiftCreature.this.getRNG().nextFloat() < 0.15f;
+                }
 
-            @Override
-            public boolean shouldContinueExecuting() {
-                return RiftCreature.this.getAttackTarget() == null && !RiftCreature.this.getIsSleeping()
-                        && !RiftCreature.this.isBeingRidden() && !RiftCreature.this.isStaggered()
-                        && super.shouldContinueExecuting();
-            }
+                @Override
+                public boolean shouldContinueExecuting() {
+                    return RiftCreature.this.getAttackTarget() == null && !RiftCreature.this.getIsSleeping()
+                            && !RiftCreature.this.isBeingRidden() && !RiftCreature.this.isStaggered()
+                            && super.shouldContinueExecuting();
+                }
 
-            @Override
-            public void resetTask() {
-                this.idleTime = 0;
-            }
-        });
+                @Override
+                public void resetTask() {
+                    this.idleTime = 0;
+                }
+            });
+        }
     }
 
     @Override
     public void onLivingUpdate() {
         //submit before vanilla consumes look requests; idle goals yield to combat targets.
-        if (!this.world.isRemote && !this.isAIDisabled()) {
+        if (!this.world.isRemote && !this.isAIDisabled() && this.getNavigationBuilder() != null) {
             EntityLivingBase target = this.getAttackTarget();
             CreatureMoveBuilder move = this.getCreatureMoves().getMoveBuilderCurrentMove();
             CreatureMoveChargeupBuilder charge = move == null ? null : move.getMoveChargeupBuilder();
@@ -2172,7 +2174,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     //-----navigation management-----
-    @NotNull
+    @Nullable
     public CreatureNavigationBuilder getNavigationBuilder() {
         return this.creatureType.getNavigation();
     }
@@ -2907,7 +2909,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                         .addAnimation("animation."+this.creatureType.getName()+".staggered")
                         .addStateTransition("default", animData -> !this.isStaggered())
         ));
-        if (this.creatureType.getNavigation().getCanLeap()) {
+        if (this.getNavigationBuilder() != null && this.getNavigationBuilder().getCanLeap()) {
             animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntityLiving>(this, "leaping", "default",
                     new AnimationControllerState<AnimationDataEntityLiving>("default", 0.1)
                             .addStateTransition("leaping", animData -> !this.getIsSleeping() && this.isLeaping()),

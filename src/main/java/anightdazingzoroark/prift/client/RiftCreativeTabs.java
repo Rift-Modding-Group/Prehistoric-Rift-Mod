@@ -7,6 +7,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -29,7 +30,13 @@ public class RiftCreativeTabs {
         @Override
         @SideOnly(Side.CLIENT)
         public ItemStack createIcon() {
-            return new ItemStack(RiftItems.CREATURE_SPAWN_EGG == null ? Items.BONE : RiftItems.CREATURE_SPAWN_EGG);
+            if (RiftItems.CREATURE_SPAWN_EGG == null) return new ItemStack(Items.BONE);
+
+            ItemStack stack = new ItemStack(RiftItems.CREATURE_SPAWN_EGG);
+            NBTTagCompound tag = new NBTTagCompound();
+            tag.setString("CreatureType", RiftCreatureRegistry.DEFAULT_CREATURE);
+            stack.setTagCompound(tag);
+            return stack;
         }
 
         @Override

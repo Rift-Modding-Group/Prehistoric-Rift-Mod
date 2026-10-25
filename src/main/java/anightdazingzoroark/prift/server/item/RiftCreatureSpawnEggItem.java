@@ -37,13 +37,13 @@ public class RiftCreatureSpawnEggItem extends ItemMonsterPlacer {
 
     //static helper class for creature name in use by stack
     public static String getCreatureName(ItemStack stack) {
-        if (!stack.hasTagCompound()) return RiftCreatureRegistry.DEFAULT_CREATURE;
+        if (!stack.hasTagCompound()) return RiftCreatureRegistry.PLACEHOLDER_CREATURE;
 
         NBTTagCompound tag = stack.getTagCompound();
-        if (tag == null || !tag.hasKey(CREATURE_KEY)) return RiftCreatureRegistry.DEFAULT_CREATURE;
+        if (tag == null || !tag.hasKey(CREATURE_KEY)) return RiftCreatureRegistry.PLACEHOLDER_CREATURE;
 
         String creatureName = tag.getString(CREATURE_KEY);
-        return RiftCreatureRegistry.hasCreatureBuilder(creatureName) ? creatureName : RiftCreatureRegistry.DEFAULT_CREATURE;
+        return RiftCreatureRegistry.hasCreatureBuilder(creatureName) ? creatureName : RiftCreatureRegistry.PLACEHOLDER_CREATURE;
     }
 
     @Override
@@ -66,6 +66,7 @@ public class RiftCreatureSpawnEggItem extends ItemMonsterPlacer {
         if (!this.isInCreativeTab(tab)) return;
 
         List<String> creatureNames = new ArrayList<>(RiftCreatureRegistry.getCreatureNames());
+        creatureNames.remove(RiftCreatureRegistry.PLACEHOLDER_CREATURE);
         Collections.sort(creatureNames);
 
         for (String creatureName : creatureNames) {

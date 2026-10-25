@@ -1,0 +1,29 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.placeholder.look": {
+      "loop": true,
+      "bones": {}
+    },
+    "animation.placeholder.walk": {
+      "loop": true,
+      "bones": {}
+    },
+    "animation.placeholder.sprint_pose": {
+      "loop": true,
+      "bones": {}
+    },
+    "animation.placeholder.sleep": {
+      "loop": true,
+      "bones": {}
+    },
+    "animation.placeholder.staggered": {
+      "loop": true,
+      "bones": {}
+    },
+    "animation.placeholder.placeholder": {
+      "animation_length": 0.5,
+      "bones": {}
+    }
+  }
+}

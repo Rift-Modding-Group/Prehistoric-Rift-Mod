@@ -48,6 +48,7 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                 .setMaxFallHeight(4)
                 .setFallCreatesImpact()
                 .setDaysUntilAdult(3)
+                .setNavigation(new CreatureNavigationBuilder().setCanWalk())
                 .setDomestication(new CreatureDomesticationBuilder()
                         .setTamingMethod(RiftCreatureEnums.TamingMethod.TRANQ_THEN_FEED)
                         .setLevelupRate(RiftCreatureEnums.LevelupRate.NORMAL)
