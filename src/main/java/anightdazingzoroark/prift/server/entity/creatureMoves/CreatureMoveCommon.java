@@ -9,7 +9,7 @@ public class CreatureMoveCommon {
     //-----templates for common creature moves-----
     public static final CreatureMoveBuilder standardMeleeMove = new CreatureMoveBuilder()
             .setMakesContact()
-            .setPhysical()
+            .setMoveType(CreatureMoveBuilder.MoveType.PHYSICAL)
             .setRequireFindTargetToUse()
             .setStaminaCost(0.02f);
 }

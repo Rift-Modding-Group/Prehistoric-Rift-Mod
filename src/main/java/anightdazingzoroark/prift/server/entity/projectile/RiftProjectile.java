@@ -1,11 +1,11 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
 import anightdazingzoroark.prift.RiftInitialize;
-import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.projectile.IProjectile;
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
+import anightdazingzoroark.prift.server.entity.RiftDamage;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
@@ -169,14 +169,10 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
     @Override
     @NotNull
     public DamageSource getDamageSource() {
-        DamageSource toReturn = super.getDamageSource();
-
-        //apply element effects from move
-        if (this.creatureMoveBuilder.getElement() != null) {
-            if (this.creatureMoveBuilder.getElement() == Element.FIRE) toReturn.setFireDamage();
-        }
-
-        return toReturn;
+        return RiftDamage.getElementDamageSource(
+                "arrow", this, this.shootingEntity == null ? this : this.shootingEntity,
+                this.creatureMoveBuilder.getElement()
+        ).setProjectile();
     }
 
     @Override

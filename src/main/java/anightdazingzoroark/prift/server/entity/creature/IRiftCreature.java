@@ -74,7 +74,7 @@ public interface IRiftCreature {
     default String getDisplayString(@NotNull RiftCreatureEnums.Stats stat) {
         return switch (stat) {
             case HEALTH -> Math.round(this.getHealth()) + " / " + Math.round(this.getMaxHealth());
-            case MELEE_DAMAGE, ELEMENTAL_DAMAGE -> String.valueOf(this.getCreatureStats().getValueForStat(stat, this.getLevel(), this.getNature(), true));
+            case MELEE_DAMAGE, SPECIAL_DAMAGE -> String.valueOf(this.getCreatureStats().getValueForStat(stat, this.getLevel(), this.getNature(), true));
             case STAMINA -> Math.round(this.getStamina()) + " / " + Math.round(this.getMaxStamina());
             case SPEED -> {
                 double statValue = this.getCreatureStats().getValueForStat(stat, this.getLevel(), this.getNature(), true);

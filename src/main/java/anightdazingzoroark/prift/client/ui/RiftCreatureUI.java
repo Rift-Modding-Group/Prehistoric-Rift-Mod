@@ -314,6 +314,11 @@ public class RiftCreatureUI {
                                 .child(IKey.lang("gui.prift.creature_summary.species", creature.getCreatureType().getLocalizedName()).scale(0.8f)
                                         .asWidget().textAlign(Alignment.CenterLeft).widthRel(1f)
                                 )
+                                .child(Flow.row().coverChildren().childPadding(2)
+                                        .crossAxisAlignment(Alignment.CrossAxis.CENTER)
+                                        .child(IKey.lang("gui.prift.creature_summary.elements").scale(0.8f).asWidget())
+                                        .child(MoveIconTextures.getCreatureElementWidget(creature.getCreatureType().getElement()))
+                                )
                                 .child(IKey.lang("gui.prift.creature_summary.level", creature.getLevel()).scale(0.8f).asWidget().textAlign(Alignment.CenterLeft).widthRel(1f))
                                 .child(IKey.lang("gui.prift.creature_summary.xp", creature.getXP(), creature.getMaxXP()).scale(0.8f)
                                         .asWidget().textAlign(Alignment.CenterLeft).widthRel(1f))
@@ -360,17 +365,8 @@ public class RiftCreatureUI {
                                                             .mainAxisAlignment(Alignment.MainAxis.SPACE_BETWEEN)
                                                             .child(Flow.row().coverChildren()
                                                                     .child(MoveIconTextures.getTextureForMoveType(moveEntry.getValue().getMoveType()))
-                                                                    .childIf(
-                                                                            moveEntry.getValue().getMoveType() == CreatureMoveBuilder.MoveType.ELEMENTAL,
-                                                                            IKey.SPACE::asWidget
-                                                                    )
-                                                                    .childIf(
-                                                                            moveEntry.getValue().getMoveType() == CreatureMoveBuilder.MoveType.ELEMENTAL,
-                                                                            () -> MoveIconTextures.getTextureForElementType(
-                                                                                    moveEntry.getValue().getElement(),
-                                                                                    moveEntry.getValue().getElementEffectStrength()
-                                                                            )
-                                                                    )
+                                                                    .child(IKey.SPACE.asWidget())
+                                                                    .child(MoveIconTextures.getTextureForElementType(moveEntry.getValue().getElement()))
                                                             )
                                                             .child(IKey.lang(
                                                                     "gui.prift.creature_moves.base_power",

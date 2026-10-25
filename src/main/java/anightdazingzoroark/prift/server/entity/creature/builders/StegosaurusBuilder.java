@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature.builders;
 
+import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.BoundingBoxDetectionRule;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.VerticalDistanceFromUserDetectionRule;
@@ -38,6 +39,7 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
         this.setName("stegosaurus")
                 .setCreatureCategory(RiftCreatureEnums.CreatureCategory.DINOSAUR)
                 .setCreatureDiet(RiftCreatureEnums.CreatureDiet.HERBIVORE)
+                .setCreatureElement(Element.GUARD)
                 .setTributeItemPartName("plate")
                 .setStats(5.5, 5, 2, 4, 2)
                 .setScaleRangeForAge(0.3f, 2.125f)
@@ -80,7 +82,7 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                 )
                 .addMove("tail_slam", new CreatureMoveBuilder()
                         .setMakesContact()
-                        .setPhysical()
+                        .setMoveType(CreatureMoveBuilder.MoveType.PHYSICAL)
                         .setRequireFindTargetToUse()
                         .setStaminaCost(0.15f)
                         .setBasePower(70)
@@ -91,7 +93,7 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                 )
                 .addMove("thagomize", new CreatureMoveBuilder()
                         .setMakesContact()
-                        .setPhysical()
+                        .setMoveType(CreatureMoveBuilder.MoveType.PHYSICAL)
                         .setRequireFindTargetToUse()
                         .setStaminaCost(0.08f)
                         .setStaminaDrainPerSecond(0.02f)
@@ -177,7 +179,7 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                 )
                 .addMove("plate_fling", new CreatureMoveBuilder()
                         .setStaminaCost(0.08f)
-                        .setPhysical()
+                        .setMoveType(CreatureMoveBuilder.MoveType.PHYSICAL)
                         .setBasePower(30)
                         .setRequireFindTargetToUse()
                         .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)

@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.prift.client.ui.RiftCreatureUI;
 import anightdazingzoroark.prift.server.config.RiftGeneralConfig;
+import anightdazingzoroark.prift.server.entity.RiftDamage;
 import anightdazingzoroark.prift.server.entity.projectile.RiftProjectile;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntityLiving;
 import anightdazingzoroark.riftlib.ridePositionLogic.DynamicRidePosList;
@@ -988,12 +989,27 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     /**
-     * the vanilla receive damage method. for blocking damage from related entities.
+     * Blocks friendly damage and applies the attack element against each distinct creature element.
      * */
     @Override
     public boolean attackEntityFrom(DamageSource source, float amount) {
         if (source != null && (this.isRelatedToEntity(source.getTrueSource()) || this.isRelatedToEntity(source.getImmediateSource()))) {
             return false;
+        }
+
+        if (source != null) {
+            Element attackElement;
+            if (source instanceof RiftDamage.RiftElementDamageSource elementalSource) attackElement = elementalSource.element;
+            else if (source.isFireDamage()) attackElement = Element.FIRE;
+            else if (source == DamageSource.LIGHTNING_BOLT) attackElement = Element.ELECTRIC;
+            else if (source.getTrueSource() != null || source.getImmediateSource() != null) attackElement = Element.NEUTRAL;
+            else return super.attackEntityFrom(source, amount);
+
+            double multiplier = Arrays.stream(this.getCreatureType().getElement()).distinct()
+                    .mapToDouble(element -> element.damageMultiplierFromAttackElement(attackElement))
+                    .reduce(1D, (combined, effectiveness) -> combined * effectiveness);
+            if (multiplier == 0D) return false;
+            amount *= (float) multiplier;
         }
 
         return super.attackEntityFrom(source, amount);
@@ -1015,8 +1031,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (creatureMoveBuilder == null) return false;
 
         //get damagesource and modify based on some stuff, like element
-        DamageSource damageSource = DamageSource.causeMobDamage(this);
-        if (creatureMoveBuilder.getElement() == Element.FIRE) damageSource.setFireDamage();
+        DamageSource damageSource = RiftDamage.getElementDamageSource("mob", this, this, creatureMoveBuilder.getElement());
 
         //apply damage
         double damage = CreatureMoveHelper.calculateDamage(this);
@@ -1029,11 +1044,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             if (creatureMoveBuilder.getMoveChargeupBuilder() != null && creatureMoveBuilder.getMoveChargeupBuilder().getOnHitEntityDuringRelease() != null) {
                 creatureMoveBuilder.getMoveChargeupBuilder().getOnHitEntityDuringRelease().accept(this, this.getCreatureMoves().getCurrentMoveChargeUpTicks(), entityIn);
             }
-        }
-
-        //apply elemental effects
-        if (creatureMoveBuilder.getElement() != null) {
-            creatureMoveBuilder.getElement().applyElementEffect.accept(entityIn, creatureMoveBuilder.getElementEffectStrength());
         }
 
         //other stuff

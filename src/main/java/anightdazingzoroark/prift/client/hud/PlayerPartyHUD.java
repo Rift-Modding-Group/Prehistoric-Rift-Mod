@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.client.hud;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
+import anightdazingzoroark.prift.client.ui.widgets.MoveIconTextures;
 import anightdazingzoroark.prift.server.config.RiftGeneralConfig;
 import anightdazingzoroark.prift.server.entity.creature.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.CreatureStorage;
@@ -146,6 +147,11 @@ public class PlayerPartyHUD {
             GlStateManager.pushMatrix();
             GlStateManager.scale(scale, scale, scale);
             Gui.drawModalRectWithCustomSizedTexture(iconX, iconY, 0, 0, 24, 24, 24, 24);
+            MoveIconTextures.drawCreatureElements(
+                    creature.getCreatureType().getElement(),
+                    backgroundX + 38 - creature.getCreatureType().getElement().length * 13,
+                    backgroundY + 26, 12
+            );
             GlStateManager.popMatrix();
         }
         GlStateManager.disableBlend();

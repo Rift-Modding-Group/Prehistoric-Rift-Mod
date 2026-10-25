@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.entity.creature.info;
 
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.api.util.MathUtil;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.nbt.NBTTagCompound;
@@ -10,7 +9,6 @@ import net.minecraft.nbt.NBTTagList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -23,7 +21,7 @@ public class CreatureStatsStorage {
     private final Map<RiftCreatureEnums.Stats, StatValueHolder> stats = Map.of(
             RiftCreatureEnums.Stats.HEALTH, new StatValueHolder(RiftCreatureEnums.Stats.HEALTH),
             RiftCreatureEnums.Stats.MELEE_DAMAGE, new StatValueHolder(RiftCreatureEnums.Stats.MELEE_DAMAGE),
-            RiftCreatureEnums.Stats.ELEMENTAL_DAMAGE, new StatValueHolder(RiftCreatureEnums.Stats.ELEMENTAL_DAMAGE),
+            RiftCreatureEnums.Stats.SPECIAL_DAMAGE, new StatValueHolder(RiftCreatureEnums.Stats.SPECIAL_DAMAGE),
             RiftCreatureEnums.Stats.STAMINA, new StatValueHolder(RiftCreatureEnums.Stats.STAMINA),
             RiftCreatureEnums.Stats.SPEED, new StatValueHolder(RiftCreatureEnums.Stats.SPEED)
     );
@@ -55,7 +53,7 @@ public class CreatureStatsStorage {
         creature.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(finalMeleeAttack);
 
         //-----apply elemental attack-----
-        double finalElementalAttack = this.getValueForStat(RiftCreatureEnums.Stats.ELEMENTAL_DAMAGE, creature.getLevel(), creature.getNature(), true);
+        double finalElementalAttack = this.getValueForStat(RiftCreatureEnums.Stats.SPECIAL_DAMAGE, creature.getLevel(), creature.getNature(), true);
         creature.getEntityAttribute(RiftCreature.ELEMENTAL_DAMAGE_ATTRIBUTE).setBaseValue(finalElementalAttack);
 
         //-----apply stamina-----

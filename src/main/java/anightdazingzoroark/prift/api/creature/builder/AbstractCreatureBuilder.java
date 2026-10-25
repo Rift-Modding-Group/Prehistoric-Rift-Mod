@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.api.creature.builder;
 
+import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.config.RiftCreatureFood;
 import anightdazingzoroark.prift.api.creature.CreatureMoveResult;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.DetectionRule;
@@ -29,6 +30,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     //all the following variables are required and must not be null, validated in isValid()
     private Map<RiftCreatureEnums.Stats, Double> stats;
+    private Element[] element;
     private RiftCreatureEnums.CreatureCategory creatureCategory;
     private RiftCreatureEnums.CreatureDiet creatureDiet;
     private int[] spawnEggColors;
@@ -107,7 +109,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
         this.stats = Map.of(
                 RiftCreatureEnums.Stats.HEALTH, health,
                 RiftCreatureEnums.Stats.MELEE_DAMAGE, meleeAttack,
-                RiftCreatureEnums.Stats.ELEMENTAL_DAMAGE, elementalAttack,
+                RiftCreatureEnums.Stats.SPECIAL_DAMAGE, elementalAttack,
                 RiftCreatureEnums.Stats.STAMINA, stamina,
                 RiftCreatureEnums.Stats.SPEED, speed
         );
@@ -116,6 +118,30 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     public Map<RiftCreatureEnums.Stats, Double> getStats() {
         return this.stats;
+    }
+
+    /**
+     * Set the element of this creature, make it mono element
+     * */
+    public T setCreatureElement(@NotNull Element element) {
+        this.checkIfLocked();
+
+        this.element = new Element[]{element};
+        return this.getThis();
+    }
+
+    /**
+     * Same as above, but for dual element
+     * */
+    public T setCreatureElement(@NotNull Element primaryElement, @NotNull Element secondaryElement) {
+        this.checkIfLocked();
+
+        this.element = new Element[]{primaryElement, secondaryElement};
+        return this.getThis();
+    }
+
+    public Element[] getElement() {
+        return this.element;
     }
 
     /**
@@ -674,6 +700,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * */
     public boolean isValid() {
         return this.stats != null
+                && this.element != null
                 && this.creatureCategory != null
                 && this.creatureDiet != null
                 && this.spawnEggColors != null

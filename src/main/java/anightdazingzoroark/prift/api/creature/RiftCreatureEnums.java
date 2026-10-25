@@ -4,7 +4,6 @@ import anightdazingzoroark.prift.api.util.MathUtil;
 import net.minecraft.client.resources.I18n;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Locale;
 import java.util.function.Function;
 
 public class RiftCreatureEnums {
@@ -74,13 +73,13 @@ public class RiftCreatureEnums {
                 base -> MathUtil.slopeResult(base, false, 0, 10, 0, 200),
                 true, 0xFF0000
         ),
-        //melee damage is damage from charge attacks, physical moves, and physical projectiles
+        //melee damage is damage involving physical attributes, like charging, slamming, biting, etc
         MELEE_DAMAGE(
                 base -> MathUtil.slopeResult(base, false, 0, 10, 0, 200),
                 true, 0x800000
         ),
-        //elemental damage is damage from attacks with elemental properties, like breathing fire or exploding
-        ELEMENTAL_DAMAGE(
+        //special damage is damage from supernatural abilities, like breathing fire or exploding
+        SPECIAL_DAMAGE(
                 base -> MathUtil.slopeResult(base, false, 0, 10, 0, 200),
                 true, 0xFFA500
         ),
@@ -159,33 +158,33 @@ public class RiftCreatureEnums {
     public enum Nature {
         STEADY(Stats.HEALTH, Stats.HEALTH),
         COMPOSED(Stats.MELEE_DAMAGE, Stats.MELEE_DAMAGE),
-        TEMPERATE(Stats.ELEMENTAL_DAMAGE, Stats.ELEMENTAL_DAMAGE),
+        TEMPERATE(Stats.SPECIAL_DAMAGE, Stats.SPECIAL_DAMAGE),
         PATIENT(Stats.STAMINA, Stats.STAMINA),
         ADAPTABLE(Stats.SPEED, Stats.SPEED),
 
         GUARDED(Stats.HEALTH, Stats.MELEE_DAMAGE),
-        GROUNDED(Stats.HEALTH, Stats.ELEMENTAL_DAMAGE),
+        GROUNDED(Stats.HEALTH, Stats.SPECIAL_DAMAGE),
         STOUT(Stats.HEALTH, Stats.STAMINA),
         CAREFUL(Stats.HEALTH, Stats.SPEED),
 
         RECKLESS(Stats.MELEE_DAMAGE, Stats.HEALTH),
-        BLUNT(Stats.MELEE_DAMAGE, Stats.ELEMENTAL_DAMAGE),
+        BLUNT(Stats.MELEE_DAMAGE, Stats.SPECIAL_DAMAGE),
         IMPETUOUS(Stats.MELEE_DAMAGE, Stats.STAMINA),
         BRUTISH(Stats.MELEE_DAMAGE, Stats.SPEED),
 
-        FERVID(Stats.ELEMENTAL_DAMAGE, Stats.HEALTH),
-        SPIRITUAL(Stats.ELEMENTAL_DAMAGE, Stats.MELEE_DAMAGE),
-        INTENSE(Stats.ELEMENTAL_DAMAGE, Stats.STAMINA),
-        FOCUSED(Stats.ELEMENTAL_DAMAGE, Stats.SPEED),
+        FERVID(Stats.SPECIAL_DAMAGE, Stats.HEALTH),
+        SPIRITUAL(Stats.SPECIAL_DAMAGE, Stats.MELEE_DAMAGE),
+        INTENSE(Stats.SPECIAL_DAMAGE, Stats.STAMINA),
+        FOCUSED(Stats.SPECIAL_DAMAGE, Stats.SPEED),
 
         TENACIOUS(Stats.STAMINA, Stats.HEALTH),
         DISCIPLINED(Stats.STAMINA, Stats.MELEE_DAMAGE),
-        RESERVED(Stats.STAMINA, Stats.ELEMENTAL_DAMAGE),
+        RESERVED(Stats.STAMINA, Stats.SPECIAL_DAMAGE),
         CALM(Stats.STAMINA, Stats.SPEED),
 
         SKITTISH(Stats.SPEED, Stats.HEALTH),
         NIMBLE(Stats.SPEED, Stats.MELEE_DAMAGE),
-        RESTLESS(Stats.SPEED, Stats.ELEMENTAL_DAMAGE),
+        RESTLESS(Stats.SPEED, Stats.SPECIAL_DAMAGE),
         HASTY(Stats.SPEED, Stats.STAMINA);
 
         @NotNull

@@ -23,7 +23,7 @@ public class CreatureMoveHelper {
         if (moveBuilder.getMoveType() == CreatureMoveBuilder.MoveType.PHYSICAL) {
             statValueToUse = attackingCreature.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
         }
-        else if (moveBuilder.getMoveType() == CreatureMoveBuilder.MoveType.ELEMENTAL) {
+        else if (moveBuilder.getMoveType() == CreatureMoveBuilder.MoveType.SPECIAL) {
             statValueToUse = attackingCreature.getEntityAttribute(RiftCreature.ELEMENTAL_DAMAGE_ATTRIBUTE).getAttributeValue();
         }
 

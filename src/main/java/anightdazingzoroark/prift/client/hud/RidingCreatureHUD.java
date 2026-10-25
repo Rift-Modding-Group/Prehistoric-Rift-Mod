@@ -1,9 +1,11 @@
 package anightdazingzoroark.prift.client.hud;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.util.MathUtil;
 import anightdazingzoroark.prift.client.RiftControls;
+import anightdazingzoroark.prift.client.ui.widgets.MoveIconTextures;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureLeapHelper;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureSprintHelper;
@@ -179,13 +181,20 @@ public class RidingCreatureHUD {
             String translatedName = I18n.format("move.creature." + move.getKey());
             String abbreviation = translatedName.substring(0, Math.min(2, translatedName.length())).toUpperCase(Locale.ROOT);
             FontRenderer fontRenderer = minecraft.fontRenderer;
+            float moveTextScale = 0.75f;
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(moveTextScale, moveTextScale, 1f);
             fontRenderer.drawStringWithShadow(
                     abbreviation,
-                    slotLeft + (SLOT_SIZE - fontRenderer.getStringWidth(abbreviation)) / 2f,
-                    top + (SLOT_SIZE - fontRenderer.FONT_HEIGHT) / 2f,
+                    (slotLeft + (SLOT_SIZE - fontRenderer.getStringWidth(abbreviation) * moveTextScale) / 2f) / moveTextScale,
+                    (top + 10) / moveTextScale,
                     0xFFFFFF
             );
-            fontRenderer.drawString(Integer.toString(moveIndex + 1), slotLeft + 2, top + 2, 0xB0B0B0);
+            fontRenderer.drawString(
+                    Integer.toString(moveIndex + 1), (slotLeft + 2) / moveTextScale,
+                    (top + 2) / moveTextScale, 0xB0B0B0, false
+            );
+            GlStateManager.popMatrix();
 
             //show cooldown and time
             int cooldown = moveStorage.moveCurrentCooldown(move.getKey());
@@ -220,15 +229,21 @@ public class RidingCreatureHUD {
                         0xFF60E060
                 );
             }
+
+            //Keep the element badge visible above cooldown shading.
+            MoveIconTextures.drawElementIcon(move.getValue().getElement(), slotLeft + SLOT_SIZE - 9, top + 1, 8);
         }
 
         //show currently selected move above move hotbar
-        String selectedMoveName = I18n.format("move.creature." + moves.get(selectedMove).getKey());
-        int selectedMoveNameLeft = (width - minecraft.fontRenderer.getStringWidth(selectedMoveName)) / 2;
+        Element selectedElement = moves.get(selectedMove).getValue().getElement();
+        String selectedMoveLabel = I18n.format("move.creature." + moves.get(selectedMove).getKey());
+        int selectedMoveLabelLeft = (width - minecraft.fontRenderer.getStringWidth(selectedMoveLabel) - 16) / 2;
+        int selectedMoveLabelTop = top - minecraft.fontRenderer.FONT_HEIGHT - 30;
+        MoveIconTextures.drawElementIcon(selectedElement, selectedMoveLabelLeft, selectedMoveLabelTop - 2, 12);
         minecraft.fontRenderer.drawStringWithShadow(
-                selectedMoveName,
-                selectedMoveNameLeft,
-                top - minecraft.fontRenderer.FONT_HEIGHT - 30,
+                selectedMoveLabel,
+                selectedMoveLabelLeft + 16,
+                selectedMoveLabelTop,
                 0xFFFFFF
         );
 

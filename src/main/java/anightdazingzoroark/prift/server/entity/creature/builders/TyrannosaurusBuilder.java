@@ -44,6 +44,7 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
         this.setName("tyrannosaurus")
                 .setCreatureCategory(RiftCreatureEnums.CreatureCategory.DINOSAUR)
                 .setCreatureDiet(RiftCreatureEnums.CreatureDiet.CARNIVORE)
+                .setCreatureElement(Element.FIRE)
                 .setTributeItemPartName("arm")
                 .setStats(9, 7, 5, 7, 3)
                 .setScaleRangeForAge(0.5f, 3.25f)
@@ -165,7 +166,7 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                         .setStaminaCost(0.02f)
                         .setBasePower(30)
                         .setRequireFindTargetToUse()
-                        .setPhysical()
+                        .setMoveType(CreatureMoveBuilder.MoveType.PHYSICAL)
                         .setOnMoveHitEffect(creature -> {
                             if (!(creature instanceof IRayCreator<?> rayCreator)) return;
                             RiftLibRayHelper.createRay(rayCreator, "footStompRay", "stompOrigin");
@@ -176,7 +177,8 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                         .setStaminaCost(0.15f)
                         .setBasePower(40)
                         .setRequireFindTargetToUse()
-                        .setElemental(Element.FIRE, 0)
+                        .setElement(Element.FIRE)
+                        .setMoveType(CreatureMoveBuilder.MoveType.SPECIAL)
                         .setOnMoveBeginEffect((creature, target) -> this.captureHeadAttackLook(creature, "flame_spit"))
                         .setUseLookBasedFacing()
                         .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.TARGETED_MELEE)
@@ -188,7 +190,8 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                         .setStaminaCost(0.15f)
                         .setBasePower(20)
                         .setRequireFindTargetToUse()
-                        .setElemental(Element.NEUTRAL, 0)
+                        .setMoveType(CreatureMoveBuilder.MoveType.SPECIAL)
+                        .setElement(Element.SONIC)
                         .setOnMoveHitEffect(creature -> {
                             if (!(creature instanceof IRayCreator<?> rayCreator)) return;
                             RiftLibRayHelper.createRay(rayCreator, "roarRay", "centerPoint");
@@ -205,7 +208,8 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                         .setStaminaDrainPerSecond(0.0125f)
                         .setBasePower(90)
                         .setRequireFindTargetToUse()
-                        .setElemental(Element.FIRE, 0)
+                        .setMoveType(CreatureMoveBuilder.MoveType.SPECIAL)
+                        .setElement(Element.FIRE)
                         .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                                 .setChargeUpWhileUse(true)
                                 .setCanLookWhileUsing(true)

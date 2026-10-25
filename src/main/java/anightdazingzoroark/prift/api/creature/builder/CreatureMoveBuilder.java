@@ -30,7 +30,8 @@ public class CreatureMoveBuilder {
     private boolean requireFindTargetToUse;
     private boolean makesContact;
     private boolean useLookBasedFacing;
-    private Element element;
+    @NotNull
+    private Element element = Element.NEUTRAL;
     private int elementEffectStrength;
     private Consumer<ICreature> onMoveHitEffect;
     @Nullable
@@ -207,55 +208,27 @@ public class CreatureMoveBuilder {
     }
 
     /**
-     *set move to be physical
+     * set move type of move
      * */
-    public CreatureMoveBuilder setPhysical() {
+    public CreatureMoveBuilder setMoveType(@NotNull MoveType moveType) {
         this.checkIfLocked();
-        if (this.moveType != null) throw new IllegalCallerException("This move builder already has a move type!");
-
-        this.moveType = MoveType.PHYSICAL;
+        this.moveType = moveType;
         return this;
     }
 
-    /**
-     * set move to be elemental and also add the chance its effect gets added
-     * as well as the strength of that effect
-     * if not defined, physical damage will be used instead
-     * */
-    public CreatureMoveBuilder setElemental(Element element, int elementEffectStrength) {
-        this.checkIfLocked();
-        if (this.moveType != null) throw new IllegalCallerException("This move builder already has a move type!");
-
-        this.moveType = MoveType.ELEMENTAL;
-        this.element = element;
-        this.elementEffectStrength = elementEffectStrength;
-        return this;
-    }
-
-    public Element getElement() {
-        return this.element;
-    }
-
-    public int getElementEffectStrength() {
-        return this.elementEffectStrength;
-    }
-
-    /**
-     * Set move to be status
-     * */
-    public CreatureMoveBuilder setStatus() {
-        this.checkIfLocked();
-        if (this.moveType != null) throw new IllegalCallerException("This move builder already has a move type!");
-
-        this.moveType = MoveType.STATUS;
-        return this;
-    }
-
-    /**
-     * general getter for move type
-     * */
     public MoveType getMoveType() {
         return this.moveType;
+    }
+
+    public CreatureMoveBuilder setElement(@NotNull Element element) {
+        this.checkIfLocked();
+        this.element = element;
+        return this;
+    }
+
+    @NotNull
+    public Element getElement() {
+        return this.element;
     }
 
     /**
@@ -412,7 +385,7 @@ public class CreatureMoveBuilder {
 
     public enum MoveType {
         PHYSICAL,
-        ELEMENTAL,
+        SPECIAL,
         STATUS;
 
         @NotNull

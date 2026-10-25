@@ -174,10 +174,11 @@ public class PartyMemberButton extends ContextMenuButton<PartyMemberButton> {
 
         IKey.str(creature.getName(false)).scale(0.5f).alignment(Alignment.CenterLeft).draw(context, 43, 5, 69, 10, theme);
         IKey.lang("gui.prift.creature_summary.level", creature.getLevel()).scale(0.4f).alignment(Alignment.CenterLeft)
-                .draw(context, 43, 15, 69, 9, theme);
-        this.drawBar(context, theme, 43, 27, creature.getHealth(), creature.getMaxHealth(), 0xFFFF0000);
-        this.drawBar(context, theme, 43, 33, creature.getStamina(), creature.getMaxStamina(), 0xFFFFFF00);
-        this.drawBar(context, theme, 43, 39, creature.getXP(), creature.getMaxXP(), 0xFF90EE90);
+                .draw(context, 43, 13, 69, 9, theme);
+        MoveIconTextures.drawCreatureElements(creature.getCreatureType().getElement(), 43, 21, 8);
+        this.drawBar(context, theme, 43, 31, creature.getHealth(), creature.getMaxHealth(), 0xFFFF0000);
+        this.drawBar(context, theme, 43, 36, creature.getStamina(), creature.getMaxStamina(), 0xFFFFFF00);
+        this.drawBar(context, theme, 43, 41, creature.getXP(), creature.getMaxXP(), 0xFF90EE90);
     }
 
     private void drawBar(
