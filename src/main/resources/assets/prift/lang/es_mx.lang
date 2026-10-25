@@ -19,6 +19,7 @@ item.stink_bomb.name=Bomba fétida
 item.stink_bomb.tooltip=Se lanza a mobs para que se largan.
 item.poison_bomb.name=Bomba venenosa
 item.poison_bomb.tooltip=Se lanza a mobs para que se envenenan.
+item.rift_shard.name=Fragmento del Rift
 
 item.placeholder_stuffing.name=Relleno de peluche
 item.tyrannosaurus_arm.name=Brazo de Tyrannosaurus
@@ -29,6 +30,9 @@ itemGroup.prift_items=Items de Prehistoric Rift
 itemGroup.prift_spawn_eggs=Generadores de Prehistoric Rift
 
 tile.smokenut_bush.name=Arbusto de nuez de humo
+tile.rifted_stone.name=Piedra del Rift
+tile.rifted_cobblestone.name=Adoquín del Rift
+tile.rift_shard_ore.name=Mena de fragmentos del Rift
 
 sounds.subtitle.tyrannosaurus_idle=Tyrannosaurus brama
 sounds.subtitle.tyrannosaurus_hurt=Tyrannosaurus herido

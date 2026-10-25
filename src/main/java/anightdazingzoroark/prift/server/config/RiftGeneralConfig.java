@@ -46,20 +46,41 @@ public class RiftGeneralConfig {
     }
 
     public static class WorldGen {
+        @Config.Name("Rifted Stone Mound Spawn Weight")
+        @Config.Comment({
+                "Percentage chance per Overworld chunk to attempt a Rifted Stone mound.",
+                "Higher values make mounds more likely. 0 disables generation; 100 attempts one in every chunk.",
+                "The default weight of 10 gives a 10% chance per chunk.",
+                "Mounds only generate on suitable dry terrain with room for the entire mound inside the chunk."
+        })
+        @Config.RangeInt(min = 0, max = 100)
+        public int riftedMoundWeight = 10;
+
+        @Config.Name("Rifted Stone Mound Biomes")
+        @Config.Comment({
+                "Biomes where Rifted Stone mounds can generate.",
+                "Entries containing a colon are biome identifiers, such as minecraft:forest.",
+                "Other entries are biome dictionary tags, such as FOREST.",
+                "The exact entry \"all\" allows every biome."
+        })
+        public String[] riftedMoundBiomes = {"all"};
+
         @Config.Name("Smokenut Bush Generation Weight")
         @Config.Comment({
-                "Controls how often a smokenut bush patch generates.",
-                "A value of 0 disables generation, 1 generates in one out of every eight chunks,",
-                "and 8 generates in every chunk. Higher values make patches more likely."
+                "Percentage chance per Overworld chunk to attempt a smokenut bush patch.",
+                "Higher values make patches more likely. 0 disables generation; 100 attempts one in every chunk.",
+                "The default weight of 13 gives a 13% chance per chunk.",
+                "Patches only generate in configured biomes on suitable ground."
         })
-        @Config.RangeInt(min = 0, max = 8)
-        public int smokenutBushWeight = 1;
+        @Config.RangeInt(min = 0, max = 100)
+        public int smokenutBushWeight = 13;
 
         @Config.Name("Smokenut Bush Biomes")
         @Config.Comment({
                 "Biomes where smokenut bushes can generate.",
                 "Entries containing a colon are biome identifiers, such as minecraft:forest.",
-                "Other entries are biome dictionary tags, such as FOREST."
+                "Other entries are biome dictionary tags, such as FOREST.",
+                "The exact entry \"all\" allows every biome."
         })
         public String[] smokenutBushBiomes = {"FOREST"};
 

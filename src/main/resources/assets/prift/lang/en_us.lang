@@ -19,6 +19,7 @@ item.stink_bomb.name=Stink Bomb
 item.stink_bomb.tooltip=Throw at mobs to make them go away.
 item.poison_bomb.name=Poison Bomb
 item.poison_bomb.tooltip=Throw at mobs to poison them.
+item.rift_shard.name=Rift Shard
 
 item.placeholder_stuffing.name=Plush Stuffing
 item.tyrannosaurus_arm.name=Tyrannosaurus Arm
@@ -29,6 +30,9 @@ itemGroup.prift_items=Prehistoric Rift Items
 itemGroup.prift_spawn_eggs=Prehistoric Rift Spawn Eggs
 
 tile.smokenut_bush.name=Smokenut Bush
+tile.rifted_stone.name=Rifted Stone
+tile.rifted_cobblestone.name=Rifted Cobblestone
+tile.rift_shard_ore.name=Rift Shard Ore
 
 sounds.subtitle.tyrannosaurus_idle=Tyrannosaurus bellows
 sounds.subtitle.tyrannosaurus_hurt=Tyrannosaurus hurts

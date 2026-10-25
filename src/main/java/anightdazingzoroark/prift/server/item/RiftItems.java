@@ -19,6 +19,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.registries.IForgeRegistry;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,6 +46,7 @@ public class RiftItems {
     public static Item POISON_BOMB; //throw to make poison cloud
     public static Item SMOKE_BOMB; //creates smoke in where it was created to make enemies forget you, allows for quick escape, requires gunpowder
     public static Item BLAZE_BOMB; //throw to make a small explosion, requires gunpowder + blaze powder
+    public static Item RIFT_SHARD;
 
     public static Item getTributeItem(@NotNull String creatureName) {
         return TRIBUTE_ITEMS.get(creatureName);
@@ -84,6 +86,7 @@ public class RiftItems {
         TRANQ_BOMB = registerItem(new RiftTranqBomb(), "tranq_bomb", true);
         STINK_BOMB = registerItem(new RiftStinkBomb(), "stink_bomb", true);
         POISON_BOMB = registerItem(new RiftPoisonBomb(), "poison_bomb", true);
+        RIFT_SHARD = registerItem(new Item(), "rift_shard", true);
 
         for (Map.Entry<String, RiftCreatureBuilder> creatureEntry : RiftCreatureRegistry.getCreatureBuilders().entrySet()) {
             String creatureName = creatureEntry.getKey();
@@ -105,10 +108,6 @@ public class RiftItems {
         }
         itemsRegistered = true;
     }
-
-    /*
-    public static void registerOreDictionaryTags() {}
-     */
 
     /**
      * waitin for that json furnace recipe proposal for cleanroom to be added...
@@ -137,5 +136,9 @@ public class RiftItems {
     public void onItemRegistry(RegistryEvent.Register<Item> e) {
         IForgeRegistry<Item> reg = e.getRegistry();
         reg.registerAll(ITEMS.toArray(new Item[0]));
+
+        //oredic registry for blocks r to be put here... for now...
+        OreDictionary.registerOre("stone", RiftBlocks.RIFTED_STONE);
+        OreDictionary.registerOre("cobblestone", RiftBlocks.RIFTED_COBBLESTONE);
     }
 }
