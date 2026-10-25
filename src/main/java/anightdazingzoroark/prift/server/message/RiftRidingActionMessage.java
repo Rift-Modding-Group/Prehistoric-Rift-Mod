@@ -47,7 +47,7 @@ public class RiftRidingActionMessage extends RiftLibMessage<RiftRidingActionMess
             case START_MOVE -> creature.useMoveFromRider(player, message.value);
             case RELEASE_MOVE -> creature.releaseMoveFromRider(player);
             case JUMP -> creature.getCreatureMoveHelper().getLeapHelper().jumpFromRider(player, new RiddenLeapRequest.Charged(message.value, message.active));
-            case SET_SPRINTING -> creature.setSprintingFromRider(player, message.active);
+            case SET_SPRINTING -> creature.getSprintHelper().setSprintingFromRider(player, message.active);
             case SET_BLOCK_BREAK -> creature.setUseBlockBreak(message.active);
         }
     }

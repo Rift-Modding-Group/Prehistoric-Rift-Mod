@@ -137,7 +137,7 @@ public class RiftCreatureLeapHelper {
         this.creature.isAirBorne = true;
         this.creature.velocityChanged = true;
         this.creature.getCreaturePathNavigate().clearPath();
-        this.creature.setSprinting(false);
+        this.creature.getSprintHelper().endSprint();
         this.moveHelper.stopWalkingControls();
         ForgeHooks.onLivingJump(this.creature);
         return true;
@@ -224,7 +224,7 @@ public class RiftCreatureLeapHelper {
             this.moveHelper.creatureAction = RiftCreatureMoveHelperBase.CreatureAction.LEAP;
             this.creature.rotationYaw = this.creature.renderYawOffset;
             this.creature.getCreaturePathNavigate().clearPath();
-            this.creature.setSprinting(false);
+            this.creature.getSprintHelper().endSprint();
             this.creature.setLeaping(true);
         }
         return plan;

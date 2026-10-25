@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,35 +27,59 @@ public class RiftCreatureSprintHelper {
         this.creature = creature;
     }
 
-    public void beginSprint(boolean sprinting, boolean riddenSprint) {
-        this.sprintTicks = 0;
-        this.hitEntities.clear();
-        this.riddenSprint = sprinting && riddenSprint;
-        if (this.riddenSprint) this.creature.rotationYaw = this.creature.renderYawOffset;
-        this.creature.setSprinting(sprinting);
+    public void setSprintingFromRider(@NotNull EntityPlayer rider, boolean sprinting) {
+        if (this.creature.world.isRemote || this.creature.getControllingPassenger() != rider) return;
+        boolean shouldSprint = sprinting && this.creature.riderCanControl() && !this.creature.isLeaping()
+                && this.creature.getStamina() > 0f && this.canSprint();
+        if (shouldSprint) {
+            if (!this.creature.isSprinting()) this.beginSprint(true, true);
+        }
+        else this.endSprint();
     }
 
-    public boolean updateSprint() {
+    /**
+     * Advances either controller's sprint through the same hit detection and duration tracking.
+     */
+    public void updateSprint(@NotNull UpdatePhase phase) {
+        if (phase == UpdatePhase.TRAVEL) {
+            if (this.creature.isSprinting() && this.creature.isBeingRidden() && this.creature.riderCanControl()
+                    && this.creature.getControllingPassenger() instanceof EntityPlayer) {
+                this.creature.rotationYaw = this.creature.renderYawOffset;
+            }
+            return;
+        }
+        if (this.creature.world.isRemote) return;
+        if (this.creature.getSprintCooldown() > 0) {
+            this.setCooldown(this.creature.getSprintCooldown() - 1);
+        }
+        if (this.riddenSprint && (!this.creature.isBeingRidden() || !this.creature.isSprinting()
+                || !this.creature.riderCanControl() || this.creature.isLeaping() || this.creature.getStamina() <= 0f)) {
+            this.endSprint();
+            return;
+        }
+        if (!this.creature.isSprinting()) return;
+
         this.sprintTicks++;
         List<EntityLivingBase> newlyHitEntities = new ArrayList<>();
         List<AnimatedBoundingBox> frontZones = this.creature.getAnimationData().getAnimatedBoundingBoxesByTag().get("frontZone");
-        if (frontZones == null) return false;
 
         //find entities in front zone to hit
-        for (AnimatedBoundingBox frontZone : frontZones) {
-            AxisAlignedBB frontBounds = this.creature.getAnimationData().getWorldSpaceAABB(frontZone.getName());
-            if (frontBounds == null) continue;
+        if (frontZones != null) {
+            for (AnimatedBoundingBox frontZone : frontZones) {
+                AxisAlignedBB frontBounds = this.creature.getAnimationData().getWorldSpaceAABB(frontZone.getName());
+                if (frontBounds == null) continue;
 
-            for (EntityLivingBase hitEntity : this.creature.world.getEntitiesWithinAABB(EntityLivingBase.class, frontBounds)) {
-                if (hitEntity == this.creature
-                        || newlyHitEntities.contains(hitEntity)
-                        || this.hitEntities.contains(hitEntity)
-                        || !hitEntity.isEntityAlive()
-                        || this.creature.isRelatedToEntity(hitEntity)
-                ) {
-                    continue;
+                for (EntityLivingBase hitEntity : this.creature.world.getEntitiesWithinAABB(EntityLivingBase.class, frontBounds)) {
+                    if (hitEntity == this.creature
+                            || newlyHitEntities.contains(hitEntity)
+                            || this.hitEntities.contains(hitEntity)
+                            || !hitEntity.isEntityAlive()
+                            || this.creature.isRelatedToEntity(hitEntity)
+                    ) {
+                        continue;
+                    }
+                    newlyHitEntities.add(hitEntity);
                 }
-                newlyHitEntities.add(hitEntity);
             }
         }
 
@@ -79,11 +104,33 @@ public class RiftCreatureSprintHelper {
             hitEntity.velocityChanged = true;
         }
         this.hitEntities.addAll(newlyHitEntities);
-        return !newlyHitEntities.isEmpty();
+
+        if (this.riddenSprint) {
+            boolean hitBreakableBlocks = this.creature.hasBreakableBlocksInFront();
+            if (hitBreakableBlocks) this.creature.breakBlocksInFrontInPathing();
+            if (!newlyHitEntities.isEmpty() || hitBreakableBlocks || !this.canContinueSprinting()) {
+                this.endSprint();
+            }
+        }
+    }
+
+    public void beginSprint(boolean sprinting, boolean riddenSprint) {
+        this.sprintTicks = 0;
+        this.hitEntities.clear();
+        this.riddenSprint = sprinting && riddenSprint;
+        if (this.riddenSprint) this.creature.rotationYaw = this.creature.renderYawOffset;
+        this.creature.setSprinting(sprinting);
     }
 
     public boolean canContinueSprinting() {
         return this.creature.isSprinting() && this.sprintTicks < MAXIMUM_SPRINT_TICKS && !this.creature.collidedHorizontally;
+    }
+
+    /**
+     * Interruptions charge a cooldown for an advanced rider sprint; AI cooldowns belong to its move ticker.
+     * */
+    public void endSprint() {
+        this.endSprint(this.riddenSprint && this.sprintTicks > 0);
     }
 
     public void endSprint(boolean startCooldown) {
@@ -92,14 +139,6 @@ public class RiftCreatureSprintHelper {
         this.sprintTicks = 0;
         this.hitEntities.clear();
         this.riddenSprint = false;
-    }
-
-    public boolean isRiddenSprint() {
-        return this.riddenSprint;
-    }
-
-    public boolean hasSprintTicks() {
-        return this.sprintTicks > 0;
     }
 
     public boolean canSprint() {
@@ -116,5 +155,15 @@ public class RiftCreatureSprintHelper {
 
     public void resetCooldown() {
         this.setCooldown(this.creature.getCreatureType().getSprintCooldown());
+    }
+
+    /**
+     * Selects which creature update hook is calling the helper, keeping sprint progression from advancing twice per tick.
+     * */
+    public enum UpdatePhase {
+        //called from onLivingUpdate for server cooldowns, AI or rider sprint progression, and hit detection.
+        TICK,
+        //called from travel to align ridden sprint direction on either side without advancing its lifetime.
+        TRAVEL
     }
 }
