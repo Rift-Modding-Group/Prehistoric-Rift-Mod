@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.prift.client.ui.RiftCreatureUI;
+import anightdazingzoroark.prift.client.rendering.block.CreatureBoxRangeRenderer;
 import anightdazingzoroark.prift.server.config.RiftGeneralConfig;
 import anightdazingzoroark.prift.server.creatureBox.CreatureBoxTileEntity;
 import anightdazingzoroark.prift.server.entity.RiftDamage;
@@ -117,6 +118,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
@@ -2345,6 +2347,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Nullable
     public BlockPos getCreatureBoxHome() {
         return this.creatureBoxHome;
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public boolean isGlowing() {
+        return super.isGlowing() || this.world.isRemote && CreatureBoxRangeRenderer.isHighlighted(this);
     }
 
     public void setCreatureBoxHome(@Nullable BlockPos position) {

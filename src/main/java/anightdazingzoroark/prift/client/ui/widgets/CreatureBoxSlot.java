@@ -164,8 +164,8 @@ public class CreatureBoxSlot extends ContextMenuButton<CreatureBoxSlot> {
             fillColor = 0xFF208620;
         }
         int size = this.getArea().width;
-        int radius = Math.max(1, Math.round(size * 0.2f));
-        int iconSize = Math.max(1, size - 6);
+        int radius = Math.clamp(Math.round(size * 0.2f), 1, 6);
+        int iconSize = Math.max(1, Math.round(size * 0.75f) - 2);
         int iconOffset = (size - iconSize) / 2;
         new Rectangle().color(borderColor).cornerRadius(radius).draw(context, 0, 0, size, size, theme);
         new Rectangle().color(fillColor).cornerRadius(radius - 1).draw(context, 1, 1, size - 2, size - 2, theme);

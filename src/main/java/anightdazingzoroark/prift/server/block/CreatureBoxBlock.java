@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.server.block;
 
-import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.client.rendering.block.CreatureBoxRangeRenderer;
 import anightdazingzoroark.prift.server.creatureBox.CreatureBoxGuiFactory;
 import anightdazingzoroark.prift.server.creatureBox.CreatureBoxLocations;
@@ -44,8 +43,9 @@ public class CreatureBoxBlock extends Block implements ITileEntityProvider {
             if (world.isRemote && hand == EnumHand.MAIN_HAND) {
                 CreatureBoxRangeRenderer.toggle(position);
             }
+            return true;
         }
-        else if (!world.isRemote) CreatureBoxGuiFactory.INSTANCE.open(player, position, 0);
+        if (!world.isRemote) CreatureBoxGuiFactory.INSTANCE.open(player, position, 0);
         return true;
     }
 
@@ -76,8 +76,10 @@ public class CreatureBoxBlock extends Block implements ITileEntityProvider {
     }
 
     @Override
-    public boolean removedByPlayer(@NotNull IBlockState state, @NotNull World world, @NotNull BlockPos position,
-                                   @NotNull EntityPlayer player, boolean willHarvest) {
+    public boolean removedByPlayer(
+            @NotNull IBlockState state, @NotNull World world, @NotNull BlockPos position,
+            @NotNull EntityPlayer player, boolean willHarvest
+    ) {
         if (isOccupied(world, position)) return false;
         return super.removedByPlayer(state, world, position, player, willHarvest);
     }

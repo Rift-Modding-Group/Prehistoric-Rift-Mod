@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.rendering.entity;
 
 import anightdazingzoroark.prift.api.util.MathUtil;
+import anightdazingzoroark.prift.client.rendering.block.CreatureBoxRangeRenderer;
 import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.RiddenAimArea;
 import anightdazingzoroark.riftlib.geo.GeoBone;
 import anightdazingzoroark.riftlib.geo.GeoCube;
@@ -53,6 +54,29 @@ public class RiftCreatureRenderer extends GeoEntityLivingRenderer<RiftCreature> 
 
     public RiftCreatureRenderer(RenderManager renderManager) {
         super(renderManager, new CreatureModel());
+    }
+
+    @Override
+    public void doRender(@NotNull RiftCreature creature, double x, double y, double z, float entityYaw, float partialTicks) {
+        // RiftLibrary draws the model itself, so enable vanilla's solid outline color around that draw.
+        boolean outlines = this.renderOutlines;
+        if (outlines) {
+            int color = this.getTeamColor(creature);
+            if (CreatureBoxRangeRenderer.isHighlighted(creature)) color = 0xFFFF00;
+            GlStateManager.enableColorMaterial();
+            GlStateManager.enableOutlineMode(color);
+        }
+        super.doRender(creature, x, y, z, entityYaw, partialTicks);
+        if (outlines) {
+            GlStateManager.disableOutlineMode();
+            GlStateManager.disableColorMaterial();
+            GlStateManager.color(1f, 1f, 1f, 1f);
+        }
+    }
+
+    @Override
+    protected boolean setDoRenderBrightness(@NotNull RiftCreature creature, float partialTicks) {
+        return !this.renderOutlines && super.setDoRenderBrightness(creature, partialTicks);
     }
 
     @Override

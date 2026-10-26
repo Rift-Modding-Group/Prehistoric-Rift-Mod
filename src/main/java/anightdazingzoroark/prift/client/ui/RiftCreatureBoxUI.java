@@ -126,19 +126,19 @@ public class RiftCreatureBoxUI {
         syncManager.syncValue("selected_slot", new IntSyncValue(() -> data.selectedSlot, value -> {
             if (data.isClient()) data.selectedSlot = value;
         }));
-        return new ModularPanel("rift_creature_box").size(320, 180)
+        return new ModularPanel("rift_creature_box").size(392, 200)
                 .background(IDrawable.EMPTY).disableHoverBackground()
                 //draw the side panels first so the main panel covers their joining edges
-                .child(Flow.column().size(66, 108).left(0).top(8)
-                        .padding(2, 14, 6, 6).childPadding(3)
+                .child(Flow.column().size(78, 120).left(22).top(8)
+                        .padding(2, 16, 6, 6).childPadding(3)
                         .background(GuiTextures.MC_BACKGROUND)
                         .child(IKey.lang("gui.prift.party.title").scale(0.75f).asWidget().widthRel(1f).height(15))
                         .child(new CreatureStorageGrid(
                                 data, CreatureStorageGrid.syncValue(party::getCreatureStorage),
-                                2, 22, inventoryWarning
+                                2, 26, inventoryWarning
                         ))
                 )
-                .child(Flow.column().size(100, 132).left(220).top(8)
+                .child(Flow.column().size(100, 132).left(292).top(8)
                         .padding(14, 6, 6, 6).childPadding(3)
                         .background(GuiTextures.MC_BACKGROUND)
                         .child(IKey.lang("gui.prift.box.deployed").scale(0.65f).asWidget().widthRel(1f).height(15))
@@ -147,7 +147,7 @@ public class RiftCreatureBoxUI {
                                 4, 18, inventoryWarning
                         ))
                 )
-                .child(Flow.column().size(172, 180).left(58).top(0)
+                .child(Flow.column().size(214, 200).left(88).top(0)
                         .padding(8).childPadding(4)
                         .background(GuiTextures.MC_BACKGROUND)
                         .child(Flow.row().widthRel(1f).height(20).childPadding(2)
@@ -193,7 +193,7 @@ public class RiftCreatureBoxUI {
                                         .size(18, 20).overlay(GuiTextures.REFRESH.asIcon().size(12))
                                         .addTooltipLine(IKey.lang("gui.prift.box.swap")))
                         )
-                        .child(Flow.column().widthRel(1f).height(136).padding(4)
+                        .child(Flow.column().widthRel(1f).height(160).padding(4)
                                 .background((context, x, y, width, height, theme) -> {
                                     Platform.setupDrawColor();
                                     Platform.startDrawing(Platform.DrawMode.TRIANGLE_STRIP, Platform.VertexFormat.POS_COLOR, buffer -> {
@@ -216,8 +216,8 @@ public class RiftCreatureBoxUI {
                                 })
                                 .child(new CreatureStorageGrid(
                                         data, CreatureStorageGrid.syncValue(() -> boxes.getBox(data.selectedBox)),
-                                        5, 27, inventoryWarning
-                                ))
+                                        5, 34, inventoryWarning
+                                ).minElementMargin(2))
                         )
                 );
     }
