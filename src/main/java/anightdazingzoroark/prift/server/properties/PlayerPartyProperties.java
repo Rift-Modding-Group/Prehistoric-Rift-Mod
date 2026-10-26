@@ -3,6 +3,8 @@ package anightdazingzoroark.prift.server.properties;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.server.entity.creature.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.CreatureStorage;
+import anightdazingzoroark.prift.server.entity.creature.CreatureStorageTransfer;
+import anightdazingzoroark.prift.server.entity.creature.CreatureStorageTransfer.Slot;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.server.entity.creature.IRiftCreature;
@@ -22,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer> {
     public static final String PROPERTY_NAME = "PlayerParty";
+    public static final String STORAGE_IDENTIFIER = "Creatures";
     public static final int MAX_SIZE = 6;
 
     public PlayerPartyProperties(@NotNull String propertyName, @NotNull EntityPlayer entityHolder) {
@@ -37,10 +40,10 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
     @Override
     protected void registerDefaults(@NotNull EntityPlayer entity) {
         this.register(new ObjectPropertyValue<>(
-                "Creatures", new CreatureStorage(MAX_SIZE), CreatureStorage.class,
+                STORAGE_IDENTIFIER, new CreatureStorage(STORAGE_IDENTIFIER, MAX_SIZE), CreatureStorage.class,
                 CreatureStorage::getAsNBT,
                 nbtBase -> {
-                    CreatureStorage creatureStorage = new CreatureStorage(MAX_SIZE);
+                    CreatureStorage creatureStorage = new CreatureStorage(STORAGE_IDENTIFIER, MAX_SIZE);
                     if (nbtBase instanceof NBTTagCompound nbtTagCompound) creatureStorage.readFromNBT(nbtTagCompound);
                     return creatureStorage;
                 }
@@ -60,28 +63,25 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
             if (storedCreature.nbtTagCompound().isEmpty()) continue;
 
             if (storedCreature.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.PARTY_INACTIVE) {
-                if (storedCreature.advanceInactiveTicks(1L)) this.syncToClientMultiple("Creatures");
+                if (storedCreature.advanceInactiveTicks(1L)) this.syncToClientMultiple(creatureStorage.getIdentifier());
             }
         }
     }
 
     @NotNull
     public CreatureStorage getCreatureStorage() {
-        return this.get("Creatures");
+        return this.get(STORAGE_IDENTIFIER);
     }
 
     public boolean addPartyMember(@NotNull RiftCreature creature) {
         if (this.getEntityHolder().world.isRemote) return false;
 
         CreatureStorage creatureStorage = this.getCreatureStorage();
-        for (int index = 0; index < creatureStorage.getSize(); index++) {
-            if (!creatureStorage.getCreature(index).nbtTagCompound().isEmpty()) continue;
-
-            creature.setDeploymentType(RiftCreatureEnums.CreatureDeployment.PARTY);
-            this.storeCreatureAt(index, creature);
-            return true;
-        }
-        return false;
+        int index = creatureStorage.getFirstEmptySlot();
+        if (index < 0) return false;
+        creature.setDeploymentType(RiftCreatureEnums.CreatureDeployment.PARTY);
+        this.storeCreatureAt(index, creature);
+        return true;
     }
 
     public void updatePartyMember(@NotNull RiftCreature creature) {
@@ -132,7 +132,7 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
                 storedCreature.setDeploymentType(RiftCreatureEnums.CreatureDeployment.PARTY_INACTIVE);
                 CreatureStorage creatureStorage = this.getCreatureStorage();
                 creatureStorage.setCreature(selectedPosition, storedCreature);
-                this.set("Creatures", creatureStorage);
+                this.set(creatureStorage.getIdentifier(), creatureStorage);
             }
             this.getEntityHolder().sendStatusMessage(new TextComponentTranslation("party.warning.dismiss_success"), false);
             return;
@@ -164,7 +164,7 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
 
         CreatureStorage creatureStorage = this.getCreatureStorage();
         creatureStorage.setCreature(selectedPosition, storedCreature);
-        this.set("Creatures", creatureStorage);
+        this.set(creatureStorage.getIdentifier(), creatureStorage);
         this.getEntityHolder().sendStatusMessage(new TextComponentTranslation("party.warning.summon_success"), false);
     }
 
@@ -182,13 +182,20 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
 
         CreatureStorage creatureStorage = this.getCreatureStorage();
         CreatureNBT firstCreature = creatureStorage.getCreature(firstPosition);
-        creatureStorage.setCreature(firstPosition, creatureStorage.getCreature(secondPosition));
-        creatureStorage.setCreature(secondPosition, firstCreature);
-        this.set("Creatures", creatureStorage);
-
-        int selectedPosition = this.getSelectedPosition();
-        if (selectedPosition == firstPosition) this.set("SelectedPosition", secondPosition);
-        else if (selectedPosition == secondPosition) this.set("SelectedPosition", firstPosition);
+        CreatureNBT secondCreature = creatureStorage.getCreature(secondPosition);
+        if (firstCreature.nbtTagCompound().isEmpty()) {
+            if (secondCreature.nbtTagCompound().isEmpty()) return;
+            CreatureStorageTransfer.swap(
+                    this.getEntityHolder(), Slot.party(secondPosition), Slot.party(firstPosition),
+                    secondCreature.getUniqueID(), null, false
+            );
+        }
+        else {
+            CreatureStorageTransfer.swap(
+                    this.getEntityHolder(), Slot.party(firstPosition), Slot.party(secondPosition),
+                    firstCreature.getUniqueID(), secondCreature.nbtTagCompound().isEmpty() ? null : secondCreature.getUniqueID(), false
+            );
+        }
     }
 
     public void savePartyMember(int index, @NotNull IRiftCreature creature) {
@@ -204,7 +211,7 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
         if (creature instanceof CreatureNBT storedCreature) {
             CreatureStorage creatureStorage = this.getCreatureStorage();
             creatureStorage.setCreature(index, storedCreature);
-            this.set("Creatures", creatureStorage);
+            this.set(creatureStorage.getIdentifier(), creatureStorage);
         }
     }
 
@@ -214,6 +221,6 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
 
         CreatureStorage creatureStorage = this.getCreatureStorage();
         creatureStorage.setCreature(index, new CreatureNBT(nbtTagCompound));
-        this.set("Creatures", creatureStorage);
+        this.set(creatureStorage.getIdentifier(), creatureStorage);
     }
 }

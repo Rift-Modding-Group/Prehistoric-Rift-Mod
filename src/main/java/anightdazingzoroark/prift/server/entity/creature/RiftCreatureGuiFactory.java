@@ -1,11 +1,13 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.api.creature.RiftCreatureEnums.CreatureDeployment;
 import anightdazingzoroark.prift.client.ui.RiftCreatureUI;
 import anightdazingzoroark.prift.server.properties.PlayerPartyProperties;
 import anightdazingzoroark.prift.server.properties.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.creatureBox.CreatureBoxGuiData;
 import anightdazingzoroark.prift.server.creatureBox.CreatureBoxGuiFactory;
+import anightdazingzoroark.prift.server.creatureBox.CreatureBoxTileEntity;
 import anightdazingzoroark.prift.util.RiftUtil;
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.factory.AbstractUIFactory;
@@ -82,11 +84,20 @@ public class RiftCreatureGuiFactory extends AbstractUIFactory<RiftCreatureGuiDat
     @SideOnly(Side.CLIENT)
     @NotNull
     public ModularScreen createScreen(@NotNull RiftCreatureGuiData data, @NotNull ModularPanel mainPanel) {
-        return new ModularScreen(RiftInitialize.MODID, mainPanel).openParentOnClose(data.isPartyMember() || data.isBoxed());
+        return new ModularScreen(RiftInitialize.MODID, mainPanel)
+                .openParentOnClose(data.isPartyMember() || data.isBoxed() || data.isDeployedFromBox());
     }
 
     @Override
     public void writeGuiData(RiftCreatureGuiData data, PacketBuffer buffer) {
+        buffer.writeBoolean(data.isDeployedFromBox());
+        if (data.isDeployedFromBox()) {
+            buffer.writeByte(data.getDeployedSlot());
+            buffer.writeByte(data.getInitialPage());
+            buffer.writeBlockPos(Objects.requireNonNull(data.getBoxPosition()));
+            buffer.writeUniqueId(data.getCreature().getUniqueID());
+            return;
+        }
         buffer.writeBoolean(data.isBoxed());
         if (data.isBoxed()) {
             buffer.writeByte(data.getBoxIndex());
@@ -113,6 +124,29 @@ public class RiftCreatureGuiFactory extends AbstractUIFactory<RiftCreatureGuiDat
     @Override
     @NotNull
     public RiftCreatureGuiData readGuiData(EntityPlayer player, PacketBuffer buffer) {
+        if (buffer.readBoolean()) {
+            int slot = buffer.readUnsignedByte();
+            int page = buffer.readUnsignedByte();
+            BlockPos position = buffer.readBlockPos();
+            UUID expected = buffer.readUniqueId();
+            if (slot >= CreatureBoxTileEntity.CAPACITY
+                    || !CreatureBoxGuiFactory.INSTANCE.canInteractWith(player, new CreatureBoxGuiData(player, position, 0))
+                    || !(player.world.getTileEntity(position) instanceof CreatureBoxTileEntity tile)) {
+                throw new IllegalArgumentException("Invalid deployed creature access!");
+            }
+            if (!player.world.isRemote) tile.refreshCreatures();
+            CreatureNBT stored = tile.getDeployedCreatures().getCreature(slot);
+            if (stored.nbtTagCompound().isEmpty() || !stored.getUniqueID().equals(expected) || !stored.isOwner(player)) {
+                throw new IllegalArgumentException("Deployed slot does not contain the expected owned creature!");
+            }
+            Entity entity = RiftUtil.getEntityWithUUID(player.world, expected);
+            if (!player.world.isRemote && stored.getDeploymentType() == CreatureDeployment.BASE
+                    && (!(entity instanceof RiftCreature live) || live.isDead)) {
+                throw new IllegalArgumentException("The deployed creature must be loaded before editing it!");
+            }
+            IRiftCreature creature = entity instanceof RiftCreature live && !live.isDead ? live : new CreatureNBT(stored.nbtTagCompound().copy());
+            return new RiftCreatureGuiData(player, creature, slot, page, position);
+        }
         if (buffer.readBoolean()) {
             int box = buffer.readUnsignedByte();
             int slot = buffer.readUnsignedByte();
@@ -162,6 +196,13 @@ public class RiftCreatureGuiFactory extends AbstractUIFactory<RiftCreatureGuiDat
 
     @Override
     public boolean canInteractWith(EntityPlayer player, RiftCreatureGuiData data) {
+        if (data.isDeployedFromBox()) {
+            if (data.getDeployedSlot() >= CreatureBoxTileEntity.CAPACITY || data.getBoxPosition() == null
+                    || !CreatureBoxGuiFactory.INSTANCE.canInteractWith(player, new CreatureBoxGuiData(player, data.getBoxPosition(), 0))
+                    || !(player.world.getTileEntity(data.getBoxPosition()) instanceof CreatureBoxTileEntity tile)) return false;
+            CreatureNBT stored = tile.getDeployedCreatures().getCreature(data.getDeployedSlot());
+            return !stored.nbtTagCompound().isEmpty() && stored.isOwner(player) && stored.getUniqueID().equals(data.getCreature().getUniqueID());
+        }
         if (data.isBoxed()) {
             PlayerCreatureBoxProperties boxes = PlayerCreatureBoxProperties.get(player);
             if (boxes == null || data.getBoxIndex() >= PlayerCreatureBoxProperties.BOX_COUNT

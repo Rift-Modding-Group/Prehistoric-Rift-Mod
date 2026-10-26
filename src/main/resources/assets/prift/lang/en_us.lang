@@ -35,6 +35,7 @@ tile.rifted_cobblestone.name=Rifted Cobblestone
 tile.rift_shard_ore.name=Rift Shard Ore
 tile.rift_shard_block.name=Block of Rift Shards
 tile.creature_box.name=Creature Box
+creature_box.warning.overlap=This spot is in the range of another Creature Box! Move somewhere further!
 
 sounds.subtitle.tyrannosaurus_idle=Tyrannosaurus bellows
 sounds.subtitle.tyrannosaurus_hurt=Tyrannosaurus hurts
@@ -252,6 +253,8 @@ gui.prift.box.tamed_to_box=Your party is full! The recently tamed creature was s
 gui.prift.box.all_full=Your party and all creature boxes are full. The tamed creature will stay in the world.
 gui.prift.box.rename=Rename box
 gui.prift.box.swap=Swap
+gui.prift.box.deployed=Deployed
+gui.prift.box.no_deployment_space=No safe space to deploy this creature near the Creature Box.
 gui.prift.box.rename_tooltip=Rename box
 gui.prift.box.previous=Previous box
 gui.prift.box.next=Next box

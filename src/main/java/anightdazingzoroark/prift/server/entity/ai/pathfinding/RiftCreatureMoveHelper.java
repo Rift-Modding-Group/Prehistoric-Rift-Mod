@@ -92,6 +92,7 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
         boolean directlyApproachingAttackTarget = false;
         if (requestedAction == CreatureAction.MOVE_TO && !this.creature.getUseBlockBreak()
                 && attackTarget != null && attackTarget.isEntityAlive()
+                && this.creature.isWithinDeploymentRange(attackTarget.posX, attackTarget.posY, attackTarget.posZ)
                 && !(this.creature.getCreaturePathNavigate().getPath() instanceof AttackApproachPath)
         ) {
             Path currentPath = this.creature.getCreaturePathNavigate().getPath();

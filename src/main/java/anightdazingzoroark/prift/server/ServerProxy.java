@@ -1,8 +1,12 @@
 package anightdazingzoroark.prift.server;
 
+import anightdazingzoroark.prift.RiftInitialize;
+
 import anightdazingzoroark.prift.api.creature.RiftCreatureRegistrationEvent;
 import anightdazingzoroark.prift.server.block.RiftBlocks;
 import anightdazingzoroark.prift.server.creatureBox.CreatureBoxGuiFactory;
+import anightdazingzoroark.prift.server.creatureBox.CreatureBoxTileEntity;
+import net.minecraft.util.ResourceLocation;
 import anightdazingzoroark.prift.server.config.RiftJsonConfigParser;
 import anightdazingzoroark.prift.server.dataSerializers.InternalRegistryPrimer;
 import anightdazingzoroark.prift.server.dataSerializers.PrimerEventHandler;
@@ -81,6 +85,7 @@ public class ServerProxy {
 
         //register blocks
         RiftBlocks.registerBlocks();
+        GameRegistry.registerTileEntity(CreatureBoxTileEntity.class, new ResourceLocation(RiftInitialize.MODID, "creature_box"));
         MinecraftForge.EVENT_BUS.register(new RiftBlocks());
 
         //register items

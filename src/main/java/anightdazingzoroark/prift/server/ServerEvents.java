@@ -13,6 +13,12 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
+import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.fml.common.eventhandler.Event;
+import anightdazingzoroark.prift.server.block.CreatureBoxBlock;
+import anightdazingzoroark.prift.api.creature.RiftCreatureEnums.CreatureDeployment;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
@@ -22,6 +28,24 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 public class ServerEvents {
+    @SubscribeEvent
+    public void allowCreatureBoxRangeInteraction(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getEntityPlayer().isSneaking() && event.getWorld().getBlockState(event.getPos()).getBlock() instanceof CreatureBoxBlock) {
+            event.setUseBlock(Event.Result.ALLOW);
+            event.setUseItem(Event.Result.DENY);
+        }
+    }
+
+    @SubscribeEvent
+    public void protectDeployedCreatureBox(BlockEvent.BreakEvent event) {
+        if (event.getState().getBlock() instanceof CreatureBoxBlock && CreatureBoxBlock.isOccupied(event.getWorld(), event.getPos())) event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public void restrictDeployedCreatureTravel(EntityTravelToDimensionEvent event) {
+        if (event.getEntity() instanceof RiftCreature creature && creature.getDeploymentType() == CreatureDeployment.BASE) event.setCanceled(true);
+    }
+
     @SubscribeEvent
     public void addStinkBombGoal(EntityJoinWorldEvent event) {
         if (event.getWorld().isRemote || !(event.getEntity() instanceof EntityLiving entityLiving)) return;

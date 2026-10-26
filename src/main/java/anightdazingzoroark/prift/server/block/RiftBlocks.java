@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.block;
 
 import anightdazingzoroark.prift.client.RiftCreativeTabs;
 import anightdazingzoroark.prift.server.item.RiftItems;
-import anightdazingzoroark.prift.server.creatureBox.CreatureBoxGuiFactory;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockOre;
@@ -11,9 +10,6 @@ import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -89,15 +85,7 @@ public class RiftBlocks {
                 "rift_shard_block", true, true
         );
 
-        CREATURE_BOX = registerBlock(new Block(Material.ROCK) {
-            @Override
-            public boolean onBlockActivated(@NotNull World world, @NotNull BlockPos pos, @NotNull IBlockState state,
-                                            @NotNull EntityPlayer player, @NotNull EnumHand hand, @NotNull EnumFacing facing,
-                                            float hitX, float hitY, float hitZ) {
-                if (!world.isRemote) CreatureBoxGuiFactory.INSTANCE.open(player, pos, 0);
-                return true;
-            }
-        }.setHardness(7.5f), "creature_box", true, true);
+        CREATURE_BOX = registerBlock(new CreatureBoxBlock(), "creature_box", true, true);
         CREATURE_BOX.setHarvestLevel("pickaxe", 1);
 
         blocksRegistered = true;

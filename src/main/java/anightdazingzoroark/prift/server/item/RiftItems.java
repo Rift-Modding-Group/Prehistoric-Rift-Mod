@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.client.RiftCreativeTabs;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.server.block.RiftBlocks;
+import anightdazingzoroark.prift.server.block.CreatureBoxBlock;
 import net.minecraft.block.Block;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -128,7 +129,8 @@ public class RiftItems {
     }
 
     public static void registerBlockItem(Block block, String registryName, boolean canBeInCreative) {
-        Item blockItem = registerItem(new ItemBlock(block), registryName, canBeInCreative);
+        Item blockItem = registerItem(block instanceof CreatureBoxBlock creatureBox
+                ? new CreatureBoxItem(creatureBox) : new ItemBlock(block), registryName, canBeInCreative);
         BLOCK_ITEMS.put(block, blockItem);
     }
 

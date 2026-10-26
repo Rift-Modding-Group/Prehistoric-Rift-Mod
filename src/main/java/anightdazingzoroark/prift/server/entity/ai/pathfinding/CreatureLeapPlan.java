@@ -273,6 +273,7 @@ public record CreatureLeapPlan(
         int samples = this.durationTicks * SAMPLES_PER_TICK;
         for (int sample = 1; sample <= samples; sample++) {
             Vec3d position = this.position((double) sample / samples);
+            if (!creature.isWithinDeploymentRange(position.x, position.y, position.z)) return false;
             AxisAlignedBB bounds = initialBounds.offset(position.subtract(this.start));
             AxisAlignedBB swept = previousBounds.union(bounds);
             if (!creature.world.isAreaLoaded(new BlockPos(swept.minX, swept.minY, swept.minZ),

@@ -22,6 +22,11 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
     @Override
     public void setMoveTo(double x, double y, double z, double speedIn) {
         if (this.isLeaping()) return;
+        if (!this.creature.isWithinDeploymentRange(x, y, z)) {
+            this.creatureAction = CreatureAction.WAIT;
+            this.stopMovement();
+            return;
+        }
         this.posX = x;
         this.posY = y;
         this.posZ = z;
@@ -31,6 +36,11 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
 
     public void setChargeTo(double x, double y, double z, double speedIn) {
         if (this.isLeaping()) return;
+        if (!this.creature.isWithinDeploymentRange(x, y, z)) {
+            this.creatureAction = CreatureAction.WAIT;
+            this.stopMovement();
+            return;
+        }
         this.posX = x;
         this.posY = y;
         this.posZ = z;

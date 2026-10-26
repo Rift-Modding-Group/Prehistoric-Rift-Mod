@@ -101,6 +101,7 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
     @Override
     @Nullable
     public Path getPathToEntityLiving(Entity target) {
+        if (!this.creature.isWithinDeploymentRange(target.posX, target.posY, target.posZ)) return null;
         this.riftNodeProcessor.setWaterPathingAllowed(true);
         Path path = super.getPathToEntityLiving(target);
         this.riftNodeProcessor.setWaterPathingAllowed(false);
@@ -108,10 +109,32 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
     }
 
     public boolean tryMoveToPositionUsingWater(BlockPos target, double speed) {
+        if (!this.creature.isWithinDeploymentRange(target.getX() + 0.5D, target.getY(), target.getZ() + 0.5D)) return false;
         this.riftNodeProcessor.setWaterPathingAllowed(true);
         Path path = super.getPathToPos(target);
         this.riftNodeProcessor.setWaterPathingAllowed(false);
         return path != null && this.setPath(path, speed);
+    }
+
+    @Override
+    @Nullable
+    public Path getPathToPos(@NotNull BlockPos target) {
+        if (!this.creature.isWithinDeploymentRange(target.getX() + 0.5D, target.getY(), target.getZ() + 0.5D)) return null;
+        return super.getPathToPos(target);
+    }
+
+    @Override
+    public boolean setPath(@Nullable Path path, double speed) {
+        if (path != null && this.creature.getDeploymentBounds() != null) {
+            for (int index = 0; index < path.getCurrentPathLength(); index++) {
+                Vec3d point = path.getVectorFromIndex(this.creature, index);
+                if (!this.creature.isWithinDeploymentRange(point.x, point.y, point.z)) {
+                    this.clearPath();
+                    return false;
+                }
+            }
+        }
+        return super.setPath(path, speed);
     }
 
     @Override

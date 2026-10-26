@@ -48,27 +48,13 @@ public class CreatureBoxGuiFactory extends AbstractUIFactory<CreatureBoxGuiData>
 
     @Override
     public void writeGuiData(CreatureBoxGuiData data, PacketBuffer buffer) {
-        buffer.writeBlockPos(data.getBlockPos());
-        buffer.writeByte(data.selectedBox);
-        buffer.writeBoolean(data.swapping);
-        buffer.writeBoolean(data.selectedCreature != null);
-        if (data.selectedCreature != null) {
-            buffer.writeByte(data.selectedStorage);
-            buffer.writeByte(data.selectedSlot);
-            buffer.writeUniqueId(data.selectedCreature);
-        }
+        CreatureBoxGuiData.write(buffer, data);
     }
 
     @Override
     @NotNull
     public CreatureBoxGuiData readGuiData(EntityPlayer player, PacketBuffer buffer) {
-        CreatureBoxGuiData data = new CreatureBoxGuiData(player, buffer.readBlockPos(), buffer.readUnsignedByte());
-        data.swapping = buffer.readBoolean();
-        if (buffer.readBoolean()) {
-            data.selectedStorage = buffer.readByte();
-            data.selectedSlot = buffer.readUnsignedByte();
-            data.selectedCreature = buffer.readUniqueId();
-        }
+        CreatureBoxGuiData data = CreatureBoxGuiData.read(player, buffer);
         if (!this.canInteractWith(player, data)) throw new IllegalArgumentException("Creature box is out of reach!");
         return data;
     }
@@ -78,6 +64,7 @@ public class CreatureBoxGuiFactory extends AbstractUIFactory<CreatureBoxGuiData>
         return player.isEntityAlive() && data.getSquaredDistance(player) <= 64D
                 && player.world.isBlockLoaded(data.getBlockPos())
                 && player.world.getBlockState(data.getBlockPos()).getBlock() == RiftBlocks.CREATURE_BOX
+                && player.world.getTileEntity(data.getBlockPos()) instanceof CreatureBoxTileEntity
                 && PlayerCreatureBoxProperties.get(player) != null;
     }
 }

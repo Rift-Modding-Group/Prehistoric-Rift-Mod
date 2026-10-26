@@ -181,20 +181,19 @@ public enum Element {
             },
             Set.of()
     ),
-    //Earth absorbs toxins, purifying light breaks them down, and wind disperses fumes.
     POISON(0x068630,
             new DeferredElementSet() {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.EARTH, Element.LIGHT, Element.WIND);
+                    return Set.of(Element.EARTH, Element.WIND);
                 }
             },
             new DeferredElementSet() {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.GRASS);
+                    return Set.of(Element.GRASS, Element.LIGHT);
                 }
             },
             new DeferredElementSet() {
@@ -219,6 +218,7 @@ public enum Element {
             Set.of()
     ),
     //bright lights, or the concept of "fairies" and "good" basically
+    //todo: rename to aura type which should fit more
     LIGHT(0xE216FC,
             new DeferredElementSet() {
                 @Override

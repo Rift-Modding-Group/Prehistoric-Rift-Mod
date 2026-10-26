@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.creatureBox;
 
 import anightdazingzoroark.prift.server.properties.PlayerCreatureBoxProperties;
-import anightdazingzoroark.prift.server.properties.PlayerCreatureBoxProperties.StoragePosition;
+import anightdazingzoroark.prift.server.entity.creature.CreatureStorageTransfer.Slot;
 import anightdazingzoroark.prift.server.entity.creature.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.CreatureStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureBoxRecovery;
@@ -23,14 +23,15 @@ import java.util.stream.IntStream;
 public class CreatureBoxGuiData extends PosGuiData {
     public int selectedBox;
     public boolean swapping;
-    public int selectedStorage = -2;
+    @NotNull
+    public String selectedStorage = "";
     public int selectedSlot = -1;
     @Nullable
     public UUID selectedCreature;
     @Nullable
-    public StoragePosition pendingSource;
+    public Slot pendingSource;
     @Nullable
-    public StoragePosition pendingDestination;
+    public Slot pendingDestination;
     @Nullable
     public UUID pendingCreature;
     @Nullable
@@ -43,6 +44,30 @@ public class CreatureBoxGuiData extends PosGuiData {
     public CreatureBoxGuiData(@NotNull EntityPlayer player, @NotNull BlockPos position, int box) {
         super(player, position);
         this.selectedBox = Math.clamp(box, 0, PlayerCreatureBoxProperties.BOX_COUNT - 1);
+    }
+
+    public static void write(@NotNull PacketBuffer buffer, @NotNull CreatureBoxGuiData data) {
+        buffer.writeBlockPos(data.getBlockPos());
+        buffer.writeByte(data.selectedBox);
+        buffer.writeBoolean(data.swapping);
+        buffer.writeBoolean(data.selectedCreature != null);
+        if (data.selectedCreature != null) {
+            buffer.writeString(data.selectedStorage);
+            buffer.writeByte(data.selectedSlot);
+            buffer.writeUniqueId(data.selectedCreature);
+        }
+    }
+
+    @NotNull
+    public static CreatureBoxGuiData read(@NotNull EntityPlayer player, @NotNull PacketBuffer buffer) {
+        CreatureBoxGuiData data = new CreatureBoxGuiData(player, buffer.readBlockPos(), buffer.readUnsignedByte());
+        data.swapping = buffer.readBoolean();
+        if (buffer.readBoolean()) {
+            data.selectedStorage = buffer.readString(64);
+            data.selectedSlot = buffer.readUnsignedByte();
+            data.selectedCreature = buffer.readUniqueId();
+        }
+        return data;
     }
 
     public record RevivalCountdown(@Nullable UUID creature, int seconds) {

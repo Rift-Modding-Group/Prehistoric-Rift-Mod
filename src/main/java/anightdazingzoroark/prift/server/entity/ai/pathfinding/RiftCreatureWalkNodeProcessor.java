@@ -165,7 +165,7 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
                 || currentPoint.nodeType == PathNodeType.WATER
                 || this.isWaterSurfaceNode(currentPoint.x, currentPoint.y, currentPoint.z)
         ) {
-            return count;
+            return this.restrictDeploymentOptions(pathOptions, count);
         }
 
         int walkingOptionCount = count;
@@ -180,7 +180,18 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
             count = this.addLeapOption(pathOptions, count, currentPoint,
                     this.findLevelLeapLanding(currentPoint, facing, maxDistance), targetPoint, maxDistance);
         }
-        return count;
+        return this.restrictDeploymentOptions(pathOptions, count);
+    }
+
+    private int restrictDeploymentOptions(PathPoint[] options, int count) {
+        if (this.creature.getDeploymentBounds() == null) return count;
+        int kept = 0;
+        for (int index = 0; index < count; index++) {
+            PathPoint point = options[index];
+            if (this.creature.isWithinDeploymentRange(point.x + this.entitySizeX * 0.5D, point.y,
+                    point.z + this.entitySizeZ * 0.5D)) options[kept++] = point;
+        }
+        return kept;
     }
 
     private boolean containsWalkingOption(PathPoint[] points, int count, PathPoint currentPoint, EnumFacing facing) {

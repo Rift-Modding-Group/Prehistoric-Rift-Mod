@@ -35,6 +35,7 @@ tile.rifted_cobblestone.name=Adoquín del Rift
 tile.rift_shard_ore.name=Mena de fragmentos del Rift
 tile.rift_shard_block.name=Bloque de fragmentos del Rift
 tile.creature_box.name=Caja de criaturas
+creature_box.warning.overlap=Los rangos de las cajas de criaturas no pueden superponerse. Coloca esta caja más lejos.
 
 sounds.subtitle.tyrannosaurus_idle=Tyrannosaurus brama
 sounds.subtitle.tyrannosaurus_hurt=Tyrannosaurus herido
@@ -252,6 +253,8 @@ gui.prift.box.tamed_to_box=¡Tu equipo está lleno! La criatura recien tameada s
 gui.prift.box.all_full=Tu equipo y todas las cajas están llenos. La criatura tameada permanecerá en el mundo.
 gui.prift.box.rename=Renombrar caja
 gui.prift.box.swap=Intercambiar
+gui.prift.box.deployed=Desplegadas
+gui.prift.box.no_deployment_space=¡Este lugar está muy cerca de una otra caja de criaturas! Ponla en un otro lugar!
 gui.prift.box.rename_tooltip=Renombrar caja
 gui.prift.box.previous=Caja anterior
 gui.prift.box.next=Caja siguiente

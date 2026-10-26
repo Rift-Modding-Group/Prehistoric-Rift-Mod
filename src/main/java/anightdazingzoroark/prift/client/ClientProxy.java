@@ -2,9 +2,9 @@ package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.client.rendering.ItemRenderer;
 import anightdazingzoroark.prift.client.rendering.block.SmokenutBushBlockRenderer;
+import anightdazingzoroark.prift.client.rendering.block.CreatureBoxRangeRenderer;
 import anightdazingzoroark.prift.client.rendering.entity.RiftCreatureRenderer;
 import anightdazingzoroark.prift.client.rendering.entity.RiftProjectileRenderer;
-import anightdazingzoroark.prift.client.hud.RidingCreatureHUD;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.block.RiftBlocks;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -36,6 +36,7 @@ public class ClientProxy extends ServerProxy {
 
         //register events
         MinecraftForge.EVENT_BUS.register(new ClientEvents());
+        MinecraftForge.EVENT_BUS.register(new CreatureBoxRangeRenderer());
     }
 
     @SideOnly(Side.CLIENT)
