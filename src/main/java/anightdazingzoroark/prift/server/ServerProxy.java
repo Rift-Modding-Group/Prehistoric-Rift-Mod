@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.api.creature.RiftCreatureRegistrationEvent;
 import anightdazingzoroark.prift.server.block.RiftBlocks;
+import anightdazingzoroark.prift.server.creatureBox.CreatureBoxGuiFactory;
 import anightdazingzoroark.prift.server.config.RiftJsonConfigParser;
 import anightdazingzoroark.prift.server.dataSerializers.InternalRegistryPrimer;
 import anightdazingzoroark.prift.server.dataSerializers.PrimerEventHandler;
@@ -14,6 +15,7 @@ import anightdazingzoroark.prift.server.item.RiftItems;
 import anightdazingzoroark.prift.server.message.*;
 import anightdazingzoroark.prift.server.properties.OtherEntityProperties;
 import anightdazingzoroark.prift.server.properties.PlayerPartyProperties;
+import anightdazingzoroark.prift.server.properties.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.prift.server.world.RiftWorldGenerator;
 import anightdazingzoroark.riftlib.model.ServerModelRegistry;
@@ -44,6 +46,10 @@ public class ServerProxy {
                 new PropertyRegistry.ClassPropertyPair<>(EntityPlayer.class, PlayerPartyProperties::new)
         );
         PropertyRegistry.register(
+                PlayerCreatureBoxProperties.PROPERTY_NAME,
+                new PropertyRegistry.ClassPropertyPair<>(EntityPlayer.class, PlayerCreatureBoxProperties::new)
+        );
+        PropertyRegistry.register(
                 OtherEntityProperties.PROPERTY_NAME,
                 new PropertyRegistry.ClassPropertyPair<>(EntityLivingBase.class, OtherEntityProperties::new)
         );
@@ -68,6 +74,7 @@ public class ServerProxy {
 
         //register GUIs
         GuiManager.registerFactory(RiftCreatureGuiFactory.INSTANCE);
+        GuiManager.registerFactory(CreatureBoxGuiFactory.INSTANCE);
 
         //register configs
         jsonConfigParser = new RiftJsonConfigParser(e.getModConfigurationDirectory().toPath());

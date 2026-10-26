@@ -10,9 +10,13 @@ import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.creature.IRiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiData;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiFactory;
+import anightdazingzoroark.prift.server.creatureBox.CreatureBoxGuiFactory;
+import anightdazingzoroark.prift.server.properties.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureAcquisitionInfo;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
 import com.cleanroommc.modularui.api.drawable.IKey;
+import com.cleanroommc.modularui.api.IPanelHandler;
 import com.cleanroommc.modularui.drawable.GuiDraw;
 import com.cleanroommc.modularui.drawable.GuiTextures;
 import com.cleanroommc.modularui.drawable.ItemDrawable;
@@ -22,6 +26,7 @@ import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.sync.*;
 import com.cleanroommc.modularui.widgets.CycleButtonWidget;
+import com.cleanroommc.modularui.widgets.ButtonWidget;
 import com.cleanroommc.modularui.widgets.ListWidget;
 import com.cleanroommc.modularui.widgets.SlotGroupWidget;
 import com.cleanroommc.modularui.widgets.TextWidget;
@@ -33,6 +38,7 @@ import com.cleanroommc.modularui.widgets.textfield.TextFieldWidget;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.util.text.TextComponentTranslation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.IntStream;
@@ -40,7 +46,15 @@ import java.util.stream.IntStream;
 public class RiftCreatureUI {
     @NotNull
     public static ModularPanel show(RiftCreatureGuiData data, PanelSyncManager syncManager, UISettings settings) {
+        if (data.isBoxed()) settings.getRecipeViewerSettings().disable();
         IRiftCreature creature = data.getCreature();
+        IPanelHandler releaseWarning = RiftConfirmationUI.register(syncManager, "gui.prift.box.release_warning", () -> {
+            if (!data.isBoxed() || !RiftCreatureGuiFactory.INSTANCE.canInteractWith(data.getPlayer(), data)) return;
+            if (PlayerCreatureBoxProperties.releaseCreature(data.getPlayer(), data.getBoxIndex(), data.getBoxSlot(), creature.getUniqueID())) {
+                data.getPlayer().sendStatusMessage(new TextComponentTranslation("gui.prift.box.released"), false);
+                CreatureBoxGuiFactory.INSTANCE.open(data.getPlayer(), data.getBoxPosition(), data.getBoxIndex());
+            }
+        }, () -> {});
 
         //inventory
         RiftLibInventoryHandler creatureInventory = creature.getCreatureInventory();
@@ -54,6 +68,7 @@ public class RiftCreatureUI {
                 syncManager.itemSlot(
                         "creature_inventory", index,
                         new ModularSlot(creatureInventory, index).slotGroup("creature_inventory")
+                                .accessibility(!data.isBoxed(), !data.isBoxed()).canDragInto(!data.isBoxed())
                                 .changeListener((stack, onlyAmountChanged, client, init) -> {
                                     if (!client && !init) data.saveInventory(creatureInventory);
                                 })
@@ -64,6 +79,7 @@ public class RiftCreatureUI {
             syncManager.itemSlot(
                     "creature_gear", 0,
                     new ModularSlot(creatureGear, 0)
+                            .accessibility(!data.isBoxed(), !data.isBoxed()).canDragInto(!data.isBoxed())
                             .filter(stack -> stack.getItem() == Items.SADDLE)
                             .changeListener((stack, onlyAmountChanged, client, init) -> {
                                 if (!client && creature instanceof RiftCreature deployedCreature) {
@@ -120,7 +136,7 @@ public class RiftCreatureUI {
         DynamicPagedWidget.Controller tabController = new DynamicPagedWidget.Controller(data.getInitialPage());
         return new ModularPanel("rift_creature").width(176).coverChildrenHeight()
                 .child(Flow.row().coverChildrenHeight().topRel(0f, 4, 1f).widthRel(1f)
-                        .child(new DynamicPageButton(0, tabController)
+                        .childIf(!data.isBoxed(), () -> new DynamicPageButton(0, tabController)
                                 .tab(GuiTextures.TAB_TOP, -1)
                                 .overlay(new ItemDrawable(Blocks.CHEST).asIcon())
                                 .addTooltipLine(IKey.lang("gui.prift.creature_inventory")))
@@ -136,6 +152,14 @@ public class RiftCreatureUI {
                                 .tab(GuiTextures.TAB_TOP, 0)
                                 .overlay(new ItemDrawable(Items.IRON_SWORD).asIcon())
                                 .addTooltipLine(IKey.lang("gui.prift.creature_moves")))
+                        .childIf(data.isBoxed(), () -> new ButtonWidget<>().size(28, 28)
+                                .overlay(IKey.str("<"))
+                                .addTooltipLine(IKey.lang("gui.prift.box.back"))
+                                .syncHandler(new InteractionSyncHandler().setOnMousePressed(mouse -> {
+                                    if (!mouse.isClient() && RiftCreatureGuiFactory.INSTANCE.canInteractWith(data.getPlayer(), data)) {
+                                        CreatureBoxGuiFactory.INSTANCE.open(data.getPlayer(), data.getBoxPosition(), data.getBoxIndex());
+                                    }
+                                })))
                 )
                 .child(new DynamicPagedWidget<>()
                         .widthRel(1f)
@@ -237,6 +261,13 @@ public class RiftCreatureUI {
                                                         .addTooltip(1, IKey.lang("gui.prift.eat_from_inventory_true"))
                                         )
                                 )
+                                .childIf(data.isBoxed(), () -> new ButtonWidget<>().widthRel(1f).height(20)
+                                        .overlay(IKey.lang("gui.prift.box.release"))
+                                        .syncHandler(new InteractionSyncHandler().setOnMousePressed(mouse -> {
+                                            if (!mouse.isClient() && RiftCreatureGuiFactory.INSTANCE.canInteractWith(data.getPlayer(), data)) {
+                                                RiftConfirmationUI.open(releaseWarning);
+                                            }
+                                        })))
                         )
                         //page 3: summary
                         .addPage(Flow.column()

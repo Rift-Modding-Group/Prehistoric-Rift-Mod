@@ -46,6 +46,7 @@ import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.config.RiftListsConfig;
 import anightdazingzoroark.prift.server.item.RiftItems;
 import anightdazingzoroark.prift.server.properties.PlayerPartyProperties;
+import anightdazingzoroark.prift.server.properties.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
@@ -1505,7 +1506,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         PlayerPartyProperties playerParty = PlayerPartyProperties.get(player);
         if (playerParty != null && !playerParty.addPartyMember(this)) {
-            player.sendStatusMessage(new TextComponentTranslation("party.warning.party_full"), false);
+            if (PlayerCreatureBoxProperties.addTamedCreature(player, this)) {
+                player.sendStatusMessage(new TextComponentTranslation("gui.prift.box.tamed_to_box"), false);
+            }
+            else {
+                player.sendStatusMessage(new TextComponentTranslation("gui.prift.box.all_full"), false);
+            }
         }
     }
 

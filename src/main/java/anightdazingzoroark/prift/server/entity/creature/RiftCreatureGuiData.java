@@ -1,9 +1,12 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.server.properties.PlayerPartyProperties;
+import anightdazingzoroark.prift.server.properties.PlayerCreatureBoxProperties;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
 import com.cleanroommc.modularui.factory.GuiData;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -16,6 +19,10 @@ public class RiftCreatureGuiData extends GuiData {
     private final IRiftCreature creature;
     private final int partyIndex;
     private final int initialPage;
+    private int boxIndex = -1;
+    private int boxSlot = -1;
+    @Nullable
+    private BlockPos boxPosition;
 
     public RiftCreatureGuiData(@NotNull EntityPlayer player, @NotNull IRiftCreature creature) {
         this(player, creature, -1, 0);
@@ -29,6 +36,33 @@ public class RiftCreatureGuiData extends GuiData {
         this.creature = Objects.requireNonNull(creature);
         this.partyIndex = partyIndex;
         this.initialPage = Math.clamp(initialPage, 0, 3);
+    }
+
+    public RiftCreatureGuiData(
+            @NotNull EntityPlayer player, @NotNull CreatureNBT creature,
+            int boxIndex, int boxSlot, int initialPage, @NotNull BlockPos boxPosition
+    ) {
+        this(player, creature, -1, Math.clamp(initialPage, 1, 3));
+        this.boxIndex = boxIndex;
+        this.boxSlot = boxSlot;
+        this.boxPosition = boxPosition;
+    }
+
+    public boolean isBoxed() {
+        return this.boxIndex >= 0;
+    }
+
+    public int getBoxIndex() {
+        return this.boxIndex;
+    }
+
+    public int getBoxSlot() {
+        return this.boxSlot;
+    }
+
+    @Nullable
+    public BlockPos getBoxPosition() {
+        return this.boxPosition;
     }
 
     @NotNull
@@ -49,7 +83,14 @@ public class RiftCreatureGuiData extends GuiData {
     }
 
     public void saveChanges() {
-        if (this.isClient() || !this.isPartyMember()) return;
+        if (this.isClient()) return;
+        if (this.isBoxed() && this.creature instanceof CreatureNBT storedCreature) {
+            if (!RiftCreatureGuiFactory.INSTANCE.canInteractWith(this.getPlayer(), this)) return;
+            PlayerCreatureBoxProperties boxes = PlayerCreatureBoxProperties.get(this.getPlayer());
+            if (boxes != null) boxes.saveCreature(this.boxIndex, this.boxSlot, storedCreature);
+            return;
+        }
+        if (!this.isPartyMember()) return;
         PlayerPartyProperties playerParty = PlayerPartyProperties.get(this.getPlayer());
         if (playerParty != null) playerParty.savePartyMember(this.partyIndex, this.creature);
     }

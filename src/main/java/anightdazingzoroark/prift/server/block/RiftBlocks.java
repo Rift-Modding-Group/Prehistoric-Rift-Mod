@@ -2,13 +2,18 @@ package anightdazingzoroark.prift.server.block;
 
 import anightdazingzoroark.prift.client.RiftCreativeTabs;
 import anightdazingzoroark.prift.server.item.RiftItems;
+import anightdazingzoroark.prift.server.creatureBox.CreatureBoxGuiFactory;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockOre;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -29,6 +34,8 @@ public class RiftBlocks {
     public static Block RIFTED_STONE;
     public static Block RIFTED_COBBLESTONE;
     public static Block RIFT_SHARD_ORE;
+    public static Block RIFT_SHARD_BLOCK;
+    public static Block CREATURE_BOX;
 
     //-----registry stuff-----
     public static void registerBlocks() {
@@ -76,6 +83,22 @@ public class RiftBlocks {
                 "rift_shard_ore", true, true
         );
         RIFT_SHARD_ORE.setHarvestLevel("pickaxe", 1);
+
+        RIFT_SHARD_BLOCK = registerBlock(
+                new Block(Material.GLASS, MapColor.MAGENTA).setHardness(5f).setSoundType(SoundType.GLASS),
+                "rift_shard_block", true, true
+        );
+
+        CREATURE_BOX = registerBlock(new Block(Material.ROCK) {
+            @Override
+            public boolean onBlockActivated(@NotNull World world, @NotNull BlockPos pos, @NotNull IBlockState state,
+                                            @NotNull EntityPlayer player, @NotNull EnumHand hand, @NotNull EnumFacing facing,
+                                            float hitX, float hitY, float hitZ) {
+                if (!world.isRemote) CreatureBoxGuiFactory.INSTANCE.open(player, pos, 0);
+                return true;
+            }
+        }.setHardness(7.5f), "creature_box", true, true);
+        CREATURE_BOX.setHarvestLevel("pickaxe", 1);
 
         blocksRegistered = true;
     }
