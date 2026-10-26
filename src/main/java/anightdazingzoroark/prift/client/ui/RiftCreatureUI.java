@@ -93,6 +93,19 @@ public class RiftCreatureUI {
         syncManager.bindPlayerInventory(data.getPlayer());
 
         //settings options
+        boolean boxDeployed = creature.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.BASE;
+        if (boxDeployed) {
+            syncManager.syncValue("base_deployment_behavior", new EnumSyncValue<>(
+                    RiftCreatureEnums.BaseDeploymentBehavior.class,
+                    creature::getBaseDeploymentBehavior,
+                    value -> {
+                        if (creature.getDeploymentType() != RiftCreatureEnums.CreatureDeployment.BASE) return;
+                        if (!data.isClient() && !RiftCreatureGuiFactory.INSTANCE.canInteractWith(data.getPlayer(), data)) return;
+                        creature.setBaseDeploymentBehavior(value);
+                        data.saveChanges();
+                    }
+            ));
+        }
         syncManager.syncValue("tame_targeting", new EnumSyncValue<>(
                 RiftCreatureEnums.TameTargeting.class,
                 creature::getTameTargeting,
@@ -253,6 +266,15 @@ public class RiftCreatureUI {
                                                         .addTooltip(1, IKey.lang("gui.prift.eat_from_inventory_true"))
                                         )
                                 )
+                                .childIf(boxDeployed, () -> Flow.row().widthRel(1f).height(20)
+                                        .child(IKey.lang("gui.prift.base_deployment_behavior").asWidget().size(82, 20).padding(1))
+                                        .child(new CycleButtonWidget().syncHandler("base_deployment_behavior").size(80, 20)
+                                                .stateOverlay(RiftCreatureEnums.BaseDeploymentBehavior.WANDER, IKey.lang("info.base_deployment_behavior.wander"))
+                                                .stateOverlay(RiftCreatureEnums.BaseDeploymentBehavior.FOLLOW, IKey.lang("info.base_deployment_behavior.follow"))
+                                                .stateOverlay(RiftCreatureEnums.BaseDeploymentBehavior.SIT, IKey.lang("info.base_deployment_behavior.sit"))
+                                                .addTooltip(RiftCreatureEnums.BaseDeploymentBehavior.WANDER.ordinal(), IKey.lang("info.base_deployment_behavior.wander.description"))
+                                                .addTooltip(RiftCreatureEnums.BaseDeploymentBehavior.FOLLOW.ordinal(), IKey.lang("info.base_deployment_behavior.follow.description"))
+                                                .addTooltip(RiftCreatureEnums.BaseDeploymentBehavior.SIT.ordinal(), IKey.lang("info.base_deployment_behavior.sit.description"))))
                                 .childIf(data.isBoxed(), () -> new ButtonWidget<>().widthRel(1f).height(20)
                                         .overlay(IKey.lang("gui.prift.box.release"))
                                         .syncHandler(new InteractionSyncHandler().setOnMousePressed(mouse -> {

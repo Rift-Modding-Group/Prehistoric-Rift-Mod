@@ -101,7 +101,7 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
     @Override
     @Nullable
     public Path getPathToEntityLiving(Entity target) {
-        if (!this.creature.isWithinDeploymentRange(target.posX, target.posY, target.posZ)) return null;
+        if (this.creature.isBoxSitting() || !this.creature.isWithinDeploymentRange(target.posX, target.posY, target.posZ)) return null;
         this.riftNodeProcessor.setWaterPathingAllowed(true);
         Path path = super.getPathToEntityLiving(target);
         this.riftNodeProcessor.setWaterPathingAllowed(false);
@@ -109,7 +109,7 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
     }
 
     public boolean tryMoveToPositionUsingWater(BlockPos target, double speed) {
-        if (!this.creature.isWithinDeploymentRange(target.getX() + 0.5D, target.getY(), target.getZ() + 0.5D)) return false;
+        if (this.creature.isBoxSitting() || !this.creature.isWithinDeploymentRange(target.getX() + 0.5D, target.getY(), target.getZ() + 0.5D)) return false;
         this.riftNodeProcessor.setWaterPathingAllowed(true);
         Path path = super.getPathToPos(target);
         this.riftNodeProcessor.setWaterPathingAllowed(false);
@@ -119,12 +119,16 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
     @Override
     @Nullable
     public Path getPathToPos(@NotNull BlockPos target) {
-        if (!this.creature.isWithinDeploymentRange(target.getX() + 0.5D, target.getY(), target.getZ() + 0.5D)) return null;
+        if (this.creature.isBoxSitting() || !this.creature.isWithinDeploymentRange(target.getX() + 0.5D, target.getY(), target.getZ() + 0.5D)) return null;
         return super.getPathToPos(target);
     }
 
     @Override
     public boolean setPath(@Nullable Path path, double speed) {
+        if (this.creature.isBoxSitting()) {
+            this.clearPath();
+            return false;
+        }
         if (path != null && this.creature.getDeploymentBounds() != null) {
             for (int index = 0; index < path.getCurrentPathLength(); index++) {
                 Vec3d point = path.getVectorFromIndex(this.creature, index);
@@ -386,11 +390,13 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
     }
 
     public boolean hasStraightWalkingPathTo(Entity target) {
+        if (this.creature.isBoxSitting()) return false;
         this.updateWalkingPathCache(target);
         return this.cachedWalkingPathResult;
     }
 
     public boolean hasSafeDownwardWalkingPathTo(Entity target) {
+        if (this.creature.isBoxSitting()) return false;
         double creatureY = this.creature.getEntityBoundingBox().minY;
         double targetY = target.getEntityBoundingBox().minY;
         if (MathHelper.floor(creatureY + 1E-3D) <= MathHelper.floor(targetY + 1E-3D)
@@ -407,6 +413,7 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
      * shorter route than the creature's normal path, including any available leap path.
      */
     public boolean shouldUseBlockBreakPath(@NotNull Entity target) {
+        if (this.creature.isBoxSitting()) return false;
         this.clearExpiredBlockBreakDenials();
 
         int creatureY = MathHelper.floor(this.creature.getEntityBoundingBox().minY + 1E-3D);

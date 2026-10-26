@@ -13,6 +13,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -201,7 +202,27 @@ public record CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) implements IRi
 
     @Override
     public void setDeploymentType(RiftCreatureEnums.CreatureDeployment value) {
+        RiftCreatureEnums.CreatureDeployment previous = this.getDeploymentType();
         CreatureNBTKeyword.DEPLOYMENT_TYPE.setValueInNBT(this.nbtTagCompound, value);
+        if (value != RiftCreatureEnums.CreatureDeployment.BASE || previous != RiftCreatureEnums.CreatureDeployment.BASE) {
+            this.setBaseDeploymentBehavior(RiftCreatureEnums.BaseDeploymentBehavior.WANDER);
+        }
+    }
+
+    @Override
+    @NotNull
+    public RiftCreatureEnums.BaseDeploymentBehavior getBaseDeploymentBehavior() {
+        if (this.nbtTagCompound.isEmpty()) return RiftCreatureEnums.BaseDeploymentBehavior.WANDER;
+        if (this.getDeploymentType() != RiftCreatureEnums.CreatureDeployment.BASE) return RiftCreatureEnums.BaseDeploymentBehavior.WANDER;
+        return CreatureNBTKeyword.BASE_DEPLOYMENT_BEHAVIOR.getValueFromNBT(this.nbtTagCompound);
+    }
+
+    @Override
+    public void setBaseDeploymentBehavior(@Nullable RiftCreatureEnums.BaseDeploymentBehavior value) {
+        if (value == null || this.getDeploymentType() != RiftCreatureEnums.CreatureDeployment.BASE) {
+            value = RiftCreatureEnums.BaseDeploymentBehavior.WANDER;
+        }
+        CreatureNBTKeyword.BASE_DEPLOYMENT_BEHAVIOR.setValueInNBT(this.nbtTagCompound, value);
     }
 
     @Override

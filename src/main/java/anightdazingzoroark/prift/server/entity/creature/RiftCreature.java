@@ -22,6 +22,8 @@ import anightdazingzoroark.prift.api.creature.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.server.entity.ai.RiftFollowHerdLeader;
+import anightdazingzoroark.prift.server.entity.ai.RiftFollowBoxOwner;
+import anightdazingzoroark.prift.server.entity.ai.RiftCreatureLookHelper;
 import anightdazingzoroark.prift.server.entity.ai.RiftGoToLandFromWater;
 import anightdazingzoroark.prift.server.entity.ai.RiftHurtByTarget;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureAcquisitionInfo;
@@ -164,6 +166,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private static final DataParameter<Float> TAMING_PROGRESS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
     private static final DataParameter<Byte> TAME_TARGETING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Byte> DEPLOYMENT_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
+    private static final DataParameter<Byte> BASE_DEPLOYMENT_BEHAVIOR = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Boolean> EAT_FROM_INVENTORY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> LEAP_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> SPRINT_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
@@ -208,6 +211,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private int tirednessCountdown;
     private int staminaRegenCountdown;
     private int inactiveStaminaRegenTicks;
+    private int baseFollowOutOfRangeTicks;
     @NotNull
     private CreatureAcquisitionInfo acquisitionInfo = CreatureAcquisitionInfo.NONE;
     private RiftCreatureEnums.@Nullable SleepCause sleepCause;
@@ -241,6 +245,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.creatureGear = new CreatureGearInventoryHandler(this);
         CreatureDomesticationBuilder domestication = this.creatureType.getDomestication();
         this.creatureInventory = new RiftLibInventoryHandler(domestication == null ? 1 : domestication.getInventorySize());
+        this.lookHelper = new RiftCreatureLookHelper(this);
         this.moveHelper = new RiftCreatureMoveHelper(this);
         this.navigator = new RiftCreaturePathNavigate(this, worldIn);
         this.applyCreatureTypeSettings();
@@ -343,6 +348,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.dataManager.register(TAMING_PROGRESS, 0f);
         this.dataManager.register(TAME_TARGETING, (byte) 0);
         this.dataManager.register(DEPLOYMENT_TYPE, (byte) -1);
+        this.dataManager.register(BASE_DEPLOYMENT_BEHAVIOR, (byte) RiftCreatureEnums.BaseDeploymentBehavior.WANDER.ordinal());
         this.dataManager.register(EAT_FROM_INVENTORY, false);
         this.dataManager.register(LEAP_COOLDOWN, 0);
         this.dataManager.register(SPRINT_COOLDOWN, 0);
@@ -459,6 +465,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             this.tasks.addTask(3, new RiftFollowHerdLeader(this));
         }
         if (this.getNavigationBuilder() != null && this.creatureType.getDomestication() != null) {
+            this.tasks.addTask(3, new RiftFollowBoxOwner(this));
             this.tasks.addTask(3, new EntityAIFollowOwner(this, 1D, 10f, 4f) {
                 @Override
                 public boolean shouldExecute() {
@@ -481,19 +488,22 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             this.tasks.addTask(4, new EntityAIWander(this, 1D) {
                 @Override
                 public boolean shouldExecute() {
-                    return (!RiftCreature.this.isTamed() || RiftCreature.this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.BASE)
+                    return (!RiftCreature.this.isTamed() || RiftCreature.this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.BASE
+                            && RiftCreature.this.getBaseDeploymentBehavior() == RiftCreatureEnums.BaseDeploymentBehavior.WANDER)
                             && !RiftCreature.this.getIsSleeping() && !RiftCreature.this.isStaggered() && RiftCreature.this.canLeadHerdBehavior() && super.shouldExecute();
                 }
 
                 @Override
                 public boolean shouldContinueExecuting() {
-                    return (!RiftCreature.this.isTamed() || RiftCreature.this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.BASE)
+                    return (!RiftCreature.this.isTamed() || RiftCreature.this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.BASE
+                            && RiftCreature.this.getBaseDeploymentBehavior() == RiftCreatureEnums.BaseDeploymentBehavior.WANDER)
                             && !RiftCreature.this.getIsSleeping() && !RiftCreature.this.isStaggered() && RiftCreature.this.canLeadHerdBehavior() && super.shouldContinueExecuting();
                 }
 
                 @Override
                 public void resetTask() {
                     if (RiftCreature.this.isTamed() && RiftCreature.this.getDeploymentType() != RiftCreatureEnums.CreatureDeployment.BASE
+                            || RiftCreature.this.getBaseDeploymentBehavior() != RiftCreatureEnums.BaseDeploymentBehavior.WANDER
                             || RiftCreature.this.isStaggered() || !RiftCreature.this.canLeadHerdBehavior()) RiftCreature.this.getNavigator().clearPath();
                     super.resetTask();
                 }
@@ -523,21 +533,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void onLivingUpdate() {
-        this.enforceCreatureBoxRange();
-        //submit before vanilla consumes look requests; idle goals yield to combat targets.
-        if (!this.world.isRemote && !this.isAIDisabled() && this.getNavigationBuilder() != null) {
-            EntityLivingBase target = this.getAttackTarget();
-            CreatureMoveBuilder move = this.getCreatureMoves().getMoveBuilderCurrentMove();
-            CreatureMoveChargeupBuilder charge = move == null ? null : move.getMoveChargeupBuilder();
-            boolean canLookWhileUsing = charge != null && charge.getCanLookWhileUsing();
-            if (target != null && target.isEntityAlive() && !this.isBeingRidden()
-                    && !this.getIsSleeping() && !this.isStaggered()
-                    && (this.getCurrentMove().isEmpty() || this.canRotateWhileCharging() || canLookWhileUsing)
-            ) {
-                this.getLookHelper().setLookPositionWithEntity(target, 30f, this.getVerticalFaceSpeed());
-            }
-        }
-
         super.onLivingUpdate();
 
         //disable default growth system
@@ -549,6 +544,24 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 this.setDead();
                 return;
             }
+
+            //go back to wandering when owner is out of range after some time
+            if (this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.BASE
+                    && this.getBaseDeploymentBehavior() == RiftCreatureEnums.BaseDeploymentBehavior.FOLLOW
+            ) {
+                EntityLivingBase owner = this.getOwner();
+                AxisAlignedBB bounds = this.getDeploymentBounds();
+                if (owner != null && owner.isEntityAlive() && owner.world == this.world
+                        && bounds != null && bounds.contains(owner.getPositionVector())
+                ) {
+                    this.baseFollowOutOfRangeTicks = 0;
+                }
+                else if (++this.baseFollowOutOfRangeTicks >= 10) {
+                    this.setBaseDeploymentBehavior(RiftCreatureEnums.BaseDeploymentBehavior.WANDER);
+                }
+            }
+            else this.baseFollowOutOfRangeTicks = 0;
+            this.enforceCreatureBoxRange();
 
             this.getCreatureMoveHelper().getLeapHelper().updateLeap(RiftCreatureLeapHelper.UpdatePhase.TICK);
 
@@ -831,13 +844,34 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         //tamed only effects
         if (this.isTamed()) {
             if (this.isOwner(player)) {
-                //mount a saddled creature or open its ui
                 if (heldItem.isEmpty() && !this.world.isRemote) {
+                    //mount a saddled creature
                     if (this.getDeploymentType() != RiftCreatureEnums.CreatureDeployment.BASE
                             && this.canBeRidden() && this.isSaddled() && !player.isSneaking() && !this.getIsSleeping()
                     ) {
                         player.startRiding(this);
                     }
+                    //switch between creature base behavior when in base
+                    else if (this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.BASE && !player.isSneaking()) {
+                        RiftCreatureEnums.BaseDeploymentBehavior current = this.getBaseDeploymentBehavior();
+                        int nextEnum;
+                        if (current.ordinal() + 1 < RiftCreatureEnums.BaseDeploymentBehavior.values().length) {
+                            nextEnum = current.ordinal() + 1;
+                        }
+                        else nextEnum = 0;
+
+                        RiftCreatureEnums.BaseDeploymentBehavior next = RiftCreatureEnums.BaseDeploymentBehavior.values()[nextEnum];
+                        this.setBaseDeploymentBehavior(next);
+
+                        //send message
+                        player.sendStatusMessage(
+                                new TextComponentTranslation(
+                                        "party.warning.base_creature_behavior", this.getName(), next.getTranslatedName()
+                                ),
+                                false
+                        );
+                    }
+                    //open creature ui
                     else RiftCreatureGuiFactory.INSTANCE.open(player, this);
                 }
                 //feed tamed creatures for healing
@@ -2263,6 +2297,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void move(MoverType type, double x, double y, double z) {
+        if (this.isBoxSitting()) {
+            x = 0D;
+            z = 0D;
+            this.motionX = 0D;
+            this.motionZ = 0D;
+        }
         if (this.isMovementLockedByMove()) {
             this.motionX = 0D;
             this.motionY = 0D;
@@ -2275,6 +2315,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void travel(float strafe, float vertical, float forward) {
+        if (this.isBoxSitting()) {
+            this.getNavigator().clearPath();
+            this.getCreatureMoveHelper().stopMovement();
+            this.motionX = 0D;
+            this.motionZ = 0D;
+            super.travel(0f, 0f, 0f);
+            return;
+        }
         if (this.isMovementLockedByMove()) {
             this.getNavigator().clearPath();
             this.getCreatureMoveHelper().stopMovement();
@@ -2579,7 +2627,44 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void setDeploymentType(RiftCreatureEnums.CreatureDeployment value) {
+        RiftCreatureEnums.CreatureDeployment previous = this.getDeploymentType();
         this.dataManager.set(DEPLOYMENT_TYPE, value != null ? (byte) value.ordinal() : (byte) -1);
+        if (value != RiftCreatureEnums.CreatureDeployment.BASE || previous != RiftCreatureEnums.CreatureDeployment.BASE) {
+            this.setBaseDeploymentBehavior(RiftCreatureEnums.BaseDeploymentBehavior.WANDER);
+        }
+    }
+
+    @Override
+    @NotNull
+    public RiftCreatureEnums.BaseDeploymentBehavior getBaseDeploymentBehavior() {
+        if (this.getDeploymentType() != RiftCreatureEnums.CreatureDeployment.BASE) return RiftCreatureEnums.BaseDeploymentBehavior.WANDER;
+        byte ordinal = this.dataManager.get(BASE_DEPLOYMENT_BEHAVIOR);
+        RiftCreatureEnums.BaseDeploymentBehavior[] behaviors = RiftCreatureEnums.BaseDeploymentBehavior.values();
+        if (ordinal < 0 || ordinal >= behaviors.length) return RiftCreatureEnums.BaseDeploymentBehavior.WANDER;
+        return behaviors[ordinal];
+    }
+
+    @Override
+    public void setBaseDeploymentBehavior(RiftCreatureEnums.@Nullable BaseDeploymentBehavior value) {
+        if (value == null || this.getDeploymentType() != RiftCreatureEnums.CreatureDeployment.BASE) {
+            value = RiftCreatureEnums.BaseDeploymentBehavior.WANDER;
+        }
+        byte previous = this.dataManager.get(BASE_DEPLOYMENT_BEHAVIOR);
+        this.dataManager.set(BASE_DEPLOYMENT_BEHAVIOR, (byte) value.ordinal());
+        if (previous != value.ordinal()) {
+            this.baseFollowOutOfRangeTicks = 0;
+            if (!this.world.isRemote) {
+                this.getNavigator().clearPath();
+                if (this.moveHelper instanceof RiftCreatureMoveHelperBase helper) helper.stopMovement();
+                this.motionX = 0D;
+                this.motionZ = 0D;
+            }
+        }
+    }
+
+    public boolean isBoxSitting() {
+        return this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.BASE
+                && this.getBaseDeploymentBehavior() == RiftCreatureEnums.BaseDeploymentBehavior.SIT;
     }
 
     @Override
@@ -2979,11 +3064,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         creatureMovesStates.add(initialState);
 
         //define anim controller name
-        final String controllerName = "moveUse" + phase;
+        String controllerName = "moveUse" + phase;
 
         //iterate over each move
         for (ImmutablePair<String, CreatureMoveBuilder> moveEntry : moveBuilderMap) {
-            final String moveName = moveEntry.getKey();
+            String moveName = moveEntry.getKey();
             CreatureMoveBuilder moveBuilder = moveEntry.getValue();
             CreatureMoveChargeupBuilder chargeupBuilder = moveBuilder.getMoveChargeupBuilder();
 

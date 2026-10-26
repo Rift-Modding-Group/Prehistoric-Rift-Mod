@@ -152,9 +152,11 @@ public class RiftCreatureEnums {
         }
     }
 
-    //just like how it works in pokemon, some creatures have a nature that
-    //boosts one stat but lowers another, and some natures do nothing
-    //soon this will be used to affect creature ai when tamed or wild
+    /**
+     * just like how it works in pokemon, some creatures have a nature that
+     * boosts one stat but lowers another, and some natures do nothing
+     * soon this will be used to affect creature ai when tamed or wild
+     * */
     public enum Nature {
         STEADY(Stats.HEALTH, Stats.HEALTH),
         COMPOSED(Stats.MELEE_DAMAGE, Stats.MELEE_DAMAGE),
@@ -228,5 +230,16 @@ public class RiftCreatureEnums {
         PARTY, //with player in party
         BASE, //wandering around box
         BASE_INACTIVE; //sitting in box
+    }
+
+    public enum BaseDeploymentBehavior {
+        WANDER,
+        FOLLOW,
+        SIT;
+
+        @NotNull
+        public String getTranslatedName() {
+            return I18n.format("info.base_deployment_behavior."+this.name().toLowerCase());
+        }
     }
 }

@@ -21,8 +21,11 @@ public class RiftGoToLandFromWater extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
+        //cannot do anything if no navigation
+        if (this.creature.getCreatureType().getNavigation() == null) return false;
+
         //cannot search when staggered
-        if (this.creature.isStaggered()) return false;
+        if (this.creature.isStaggered() || this.creature.isBoxSitting()) return false;
 
         //cannot search when ridden
         if (this.creature.isBeingRidden()) return false;
@@ -40,7 +43,7 @@ public class RiftGoToLandFromWater extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        if (this.creature.isBeingRidden() || this.creature.isStaggered()) return false;
+        if (this.creature.isBeingRidden() || this.creature.isStaggered() || this.creature.isBoxSitting()) return false;
         BlockPos creaturePos = this.creature.getPosition();
         return this.creature.world.getBlockState(creaturePos).getMaterial() != Material.AIR
                 || !this.creature.world.getBlockState(creaturePos.down()).getMaterial().isSolid();
@@ -55,7 +58,7 @@ public class RiftGoToLandFromWater extends EntityAIBase {
 
     @Override
     public void updateTask() {
-        if (this.landBlockPos == null) return;
+        if (this.landBlockPos == null || this.creature.isBoxSitting()) return;
 
         double displacementX = this.landBlockPos.getX() - this.creature.posX;
         double displacementZ = this.landBlockPos.getZ() - this.creature.posZ;

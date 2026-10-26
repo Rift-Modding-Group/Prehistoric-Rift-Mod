@@ -40,6 +40,7 @@ public interface IRiftCreature {
                 CreatureNBTKeyword.TAME_TARGETING,
                 CreatureNBTKeyword.ACQUISITION_INFO,
                 CreatureNBTKeyword.DEPLOYMENT_TYPE,
+                CreatureNBTKeyword.BASE_DEPLOYMENT_BEHAVIOR,
                 CreatureNBTKeyword.EAT_FROM_INVENTORY,
                 CreatureNBTKeyword.LEAP_COOLDOWN,
                 CreatureNBTKeyword.SPRINT_COOLDOWN,
@@ -119,6 +120,9 @@ public interface IRiftCreature {
     void setAcquisitionInfo(@NotNull CreatureAcquisitionInfo value);
     RiftCreatureEnums.CreatureDeployment getDeploymentType();
     void setDeploymentType(@Nullable RiftCreatureEnums.CreatureDeployment value);
+    @NotNull
+    RiftCreatureEnums.BaseDeploymentBehavior getBaseDeploymentBehavior();
+    void setBaseDeploymentBehavior(@Nullable RiftCreatureEnums.BaseDeploymentBehavior value);
     boolean getEatFromInventory();
     void setEatFromInventory(boolean value);
     int getLeapCooldown();

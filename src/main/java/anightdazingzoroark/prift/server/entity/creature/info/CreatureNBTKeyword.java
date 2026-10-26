@@ -83,6 +83,11 @@ public class CreatureNBTKeyword<T> {
             IRiftCreature::getEatFromInventory,
             IRiftCreature::setEatFromInventory
     );
+    public static final CreatureNBTKeyword<RiftCreatureEnums.BaseDeploymentBehavior> BASE_DEPLOYMENT_BEHAVIOR = new CreatureNBTKeyword<>(
+            "BaseDeploymentBehavior", RiftCreatureEnums.BaseDeploymentBehavior.class,
+            IRiftCreature::getBaseDeploymentBehavior,
+            IRiftCreature::setBaseDeploymentBehavior
+    );
     public static final CreatureNBTKeyword<Integer> LEAP_COOLDOWN = new CreatureNBTKeyword<>(
             "LeapCooldown", Integer.class,
             IRiftCreature::getLeapCooldown,
