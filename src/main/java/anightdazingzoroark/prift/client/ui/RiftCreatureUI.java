@@ -141,7 +141,7 @@ public class RiftCreatureUI {
                                 .overlay(new ItemDrawable(Blocks.CHEST).asIcon())
                                 .addTooltipLine(IKey.lang("gui.prift.creature_inventory")))
                         .child(new DynamicPageButton(1, tabController)
-                                .tab(GuiTextures.TAB_TOP, 0)
+                                .tab(GuiTextures.TAB_TOP, data.isBoxed() ? -1 : 0)
                                 .overlay(GuiTextures.GEAR.asIcon())
                                 .addTooltipLine(IKey.lang("gui.prift.creature_settings")))
                         .child(new DynamicPageButton(2, tabController)
@@ -152,14 +152,6 @@ public class RiftCreatureUI {
                                 .tab(GuiTextures.TAB_TOP, 0)
                                 .overlay(new ItemDrawable(Items.IRON_SWORD).asIcon())
                                 .addTooltipLine(IKey.lang("gui.prift.creature_moves")))
-                        .childIf(data.isBoxed(), () -> new ButtonWidget<>().size(28, 28)
-                                .overlay(IKey.str("<"))
-                                .addTooltipLine(IKey.lang("gui.prift.box.back"))
-                                .syncHandler(new InteractionSyncHandler().setOnMousePressed(mouse -> {
-                                    if (!mouse.isClient() && RiftCreatureGuiFactory.INSTANCE.canInteractWith(data.getPlayer(), data)) {
-                                        CreatureBoxGuiFactory.INSTANCE.open(data.getPlayer(), data.getBoxPosition(), data.getBoxIndex());
-                                    }
-                                })))
                 )
                 .child(new DynamicPagedWidget<>()
                         .widthRel(1f)

@@ -4,7 +4,11 @@ import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.server.entity.creature.CreatureNBT;
 import anightdazingzoroark.prift.server.entity.creature.CreatureStorage;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureBoxRecovery;
+import anightdazingzoroark.prift.server.creatureBox.CreatureBoxGuiData;
+import anightdazingzoroark.prift.server.creatureBox.CreatureBoxGuiFactory;
 import anightdazingzoroark.prift.util.RiftUtil;
+import com.cleanroommc.modularui.screen.ModularContainer;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertySystem.AbstractEntityProperties;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertySystem.RiftLibProperty;
@@ -52,7 +56,27 @@ public class PlayerCreatureBoxProperties extends AbstractEntityProperties<Entity
     }
 
     @Override
-    public void onTickProperty() {}
+    public void onTickProperty() {
+        EntityPlayer player = this.getEntityHolder();
+        if (player.world.isRemote) return;
+        if (player.openContainer instanceof ModularContainer container
+                && container.getGuiData() instanceof CreatureBoxGuiData data
+                && CreatureBoxGuiFactory.INSTANCE.canInteractWith(player, data)) {
+            this.updateBox(data.selectedBox, false);
+        }
+    }
+
+    /** Closed boxes are caught up only on access; this never visits another box. */
+    public void updateBox(int box, boolean sync) {
+        if (this.getEntityHolder().world.isRemote || box < 0 || box >= BOX_COUNT) return;
+        CreatureStorage storage = this.getBox(box);
+        long now = CreatureBoxRecovery.currentTime(this.getEntityHolder());
+        boolean changed = false;
+        for (int slot = 0; slot < BOX_SIZE; slot++) {
+            if (CreatureBoxRecovery.update(storage.getCreature(slot), now)) changed = true;
+        }
+        if (sync || changed) this.set("Box" + box, storage);
+    }
 
     @NotNull
     public CreatureStorage getBox(int index) {
@@ -74,11 +98,17 @@ public class PlayerCreatureBoxProperties extends AbstractEntityProperties<Entity
 
     public void saveCreature(int box, int slot, @NotNull CreatureNBT creature) {
         if (this.getEntityHolder().world.isRemote || box < 0 || box >= BOX_COUNT || slot < 0 || slot >= BOX_SIZE) return;
+        this.updateBox(box, false);
         CreatureStorage storage = this.getBox(box);
         CreatureNBT current = storage.getCreature(slot);
         if (current.nbtTagCompound().isEmpty() || !current.getUniqueID().equals(creature.getUniqueID())
                 || !creature.isOwner(this.getEntityHolder())) return;
-        storage.setCreature(slot, new CreatureNBT(creature.nbtTagCompound().copy()));
+        NBTTagCompound edited = creature.nbtTagCompound().copy();
+        // Detail pages hold a snapshot. Editing a nickname must not roll back recovery or revival.
+        for (String key : new String[]{"Health", "DeathTime", "HurtTime", "Stamina", "InactiveStaminaRegen", "LeapCooldown", "SprintCooldown", "CreatureMoves", CreatureBoxRecovery.TAG}) {
+            if (current.nbtTagCompound().hasKey(key)) edited.setTag(key, current.nbtTagCompound().getTag(key).copy());
+        }
+        storage.setCreature(slot, new CreatureNBT(edited));
         this.set("Box" + box, storage);
     }
 
@@ -92,7 +122,9 @@ public class PlayerCreatureBoxProperties extends AbstractEntityProperties<Entity
                 creature.setDeploymentType(RiftCreatureEnums.CreatureDeployment.BASE_INACTIVE);
                 NBTTagCompound tag = new NBTTagCompound();
                 creature.writeToNBT(tag);
-                storage.setCreature(slot, new CreatureNBT(tag));
+                CreatureNBT stored = new CreatureNBT(tag);
+                CreatureBoxRecovery.update(stored, CreatureBoxRecovery.currentTime(player));
+                storage.setCreature(slot, stored);
                 boxes.set("Box" + box, storage);
                 creature.setDead();
                 return true;
@@ -137,6 +169,8 @@ public class PlayerCreatureBoxProperties extends AbstractEntityProperties<Entity
                 return DepositResult.UNAVAILABLE;
             }
         }
+        if (first.box() >= 0) boxes.updateBox(first.box(), true);
+        if (second.box() >= 0 && second.box() != first.box()) boxes.updateBox(second.box(), true);
         CreatureStorage firstStorage = first.box() == -1 ? party.getCreatureStorage() : boxes.getBox(first.box());
         CreatureStorage secondStorage = second.box() == -1 ? party.getCreatureStorage() : boxes.getBox(second.box());
         CreatureNBT firstCreature = firstStorage.getCreature(first.slot());
@@ -165,6 +199,8 @@ public class PlayerCreatureBoxProperties extends AbstractEntityProperties<Entity
         StoragePosition boxPosition = first.box() == -1 ? second : first;
         CreatureNBT outgoing = party.getCreatureStorage().getCreature(partyPosition.slot());
         CreatureNBT incoming = boxes.getBox(boxPosition.box()).getCreature(boxPosition.slot());
+        long now = CreatureBoxRecovery.currentTime(player);
+        if (CreatureBoxRecovery.remainingSeconds(incoming, now) > 0) return DepositResult.REVIVING;
         Entity entity = null;
         if (!outgoing.nbtTagCompound().isEmpty()) {
             entity = RiftUtil.getEntityWithUUID(player.world, outgoing.getUniqueID());
@@ -188,6 +224,8 @@ public class PlayerCreatureBoxProperties extends AbstractEntityProperties<Entity
             }
             outgoing.setCreatureInventory(inventory);
             outgoing.setDeploymentType(RiftCreatureEnums.CreatureDeployment.BASE_INACTIVE);
+            outgoing.nbtTagCompound().removeTag(CreatureBoxRecovery.TAG);
+            CreatureBoxRecovery.update(outgoing, now);
             if (entity instanceof RiftCreature creature) {
                 creature.setCreatureInventory(inventory);
                 creature.setDeploymentType(RiftCreatureEnums.CreatureDeployment.BASE_INACTIVE);
@@ -197,6 +235,7 @@ public class PlayerCreatureBoxProperties extends AbstractEntityProperties<Entity
         if (!incoming.nbtTagCompound().isEmpty()) {
             incoming = new CreatureNBT(incoming.nbtTagCompound().copy());
             incoming.setDeploymentType(RiftCreatureEnums.CreatureDeployment.PARTY_INACTIVE);
+            incoming.nbtTagCompound().removeTag(CreatureBoxRecovery.TAG);
         }
         party.getCreatureStorage().setCreature(partyPosition.slot(), incoming);
         boxes.getBox(boxPosition.box()).setCreature(boxPosition.slot(), outgoing);
@@ -214,13 +253,8 @@ public class PlayerCreatureBoxProperties extends AbstractEntityProperties<Entity
         if (creature.nbtTagCompound().isEmpty() || !creature.getUniqueID().equals(expectedCreature) || !creature.isOwner(player)) return false;
         for (int partySlot = 0; partySlot < PlayerPartyProperties.MAX_SIZE; partySlot++) {
             if (!party.getCreatureStorage().getCreature(partySlot).nbtTagCompound().isEmpty()) continue;
-            CreatureNBT withdrawn = new CreatureNBT(creature.nbtTagCompound().copy());
-            withdrawn.setDeploymentType(RiftCreatureEnums.CreatureDeployment.PARTY_INACTIVE);
-            party.getCreatureStorage().setCreature(partySlot, withdrawn);
-            storage.removeCreature(slot);
-            boxes.set("Box" + box, storage);
-            party.set("Creatures", party.getCreatureStorage());
-            return true;
+            return swapCreatures(player, new StoragePosition(box, slot), new StoragePosition(-1, partySlot),
+                    expectedCreature, null, false) == DepositResult.SUCCESS;
         }
         return false;
     }
@@ -238,6 +272,6 @@ public class PlayerCreatureBoxProperties extends AbstractEntityProperties<Entity
     }
 
     public enum DepositResult {
-        SUCCESS, NEEDS_CONFIRMATION, NO_SPACE, UNAVAILABLE
+        SUCCESS, NEEDS_CONFIRMATION, NO_SPACE, UNAVAILABLE, REVIVING
     }
 }

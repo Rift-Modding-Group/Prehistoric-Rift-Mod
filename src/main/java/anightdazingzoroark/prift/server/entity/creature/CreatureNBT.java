@@ -262,6 +262,30 @@ public record CreatureNBT(@NotNull NBTTagCompound nbtTagCompound) implements IRi
     }
 
     //-----helper nbt code incoming-----
+    /**
+     * Advances stored recovery in one operation, including long periods spent in closed boxes.
+     * */
+    public boolean advanceInactiveTicks(long elapsedTicks) {
+        if (this.nbtTagCompound.isEmpty() || elapsedTicks <= 0) return false;
+        float previousStamina = this.getStamina();
+        if (previousStamina < this.getMaxStamina()) {
+            int progress = Math.clamp(this.getInactiveStaminaRegen(), 0, MAX_INACTIVITY_STAMINA_REGEN);
+            if (elapsedTicks >= (long) MAX_INACTIVITY_STAMINA_REGEN + 1 - progress) {
+                this.setStamina(this.getMaxStamina());
+                this.setInactiveStaminaRegen(0);
+            }
+            else this.setInactiveStaminaRegen(progress + (int) elapsedTicks);
+        }
+        this.setLeapCooldown((int) Math.max(0L, this.getLeapCooldown() - elapsedTicks));
+        this.setSprintCooldown((int) Math.max(0L, this.getSprintCooldown() - elapsedTicks));
+        CreatureMoveStorage moves = this.getCreatureMoves();
+        if (moves != null) {
+            moves.tickCooldowns(elapsedTicks);
+            this.setCreatureMoves(moves);
+        }
+        return previousStamina != this.getStamina();
+    }
+
     @Override
     public UUID getUniqueID() {
         return this.nbtTagCompound.getUniqueId("UUID");

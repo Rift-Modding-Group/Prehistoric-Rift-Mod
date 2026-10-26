@@ -506,18 +506,14 @@ public class CreatureMoveStorage {
     }
 
     public void tickCooldowns() {
-        List<String> movesToRemoveFromCooldown = new ArrayList<>();
-        for (Map.Entry<String, Integer> moveCooldownDef : this.moveCooldowns.entrySet()) {
-            int tickedCooldownVal = moveCooldownDef.getValue() - 1;
+        this.tickCooldowns(1L);
+    }
 
-            if (tickedCooldownVal <= 0) movesToRemoveFromCooldown.add(moveCooldownDef.getKey());
-            else this.moveCooldowns.put(moveCooldownDef.getKey(), tickedCooldownVal);
-        }
-
-        for (String moveToRemove : movesToRemoveFromCooldown) {
-            this.moveCooldowns.remove(moveToRemove);
-            this.moveMaximumCooldowns.remove(moveToRemove);
-        }
+    public void tickCooldowns(long elapsedTicks) {
+        if (elapsedTicks <= 0) return;
+        this.moveCooldowns.replaceAll((move, remaining) -> (int) Math.max(0L, remaining - elapsedTicks));
+        this.moveCooldowns.values().removeIf(remaining -> remaining <= 0);
+        this.moveMaximumCooldowns.keySet().retainAll(this.moveCooldowns.keySet());
     }
 
     //-------for nbt related stuff-------

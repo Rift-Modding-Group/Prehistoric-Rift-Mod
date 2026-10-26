@@ -2,8 +2,10 @@ package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.client.ui.widgets.CreatureBoxSlot;
 import anightdazingzoroark.prift.server.creatureBox.CreatureBoxGuiData;
+import anightdazingzoroark.prift.server.creatureBox.CreatureBoxGuiData.RevivalSnapshot;
 import anightdazingzoroark.prift.server.creatureBox.CreatureBoxGuiFactory;
 import anightdazingzoroark.prift.server.entity.creature.CreatureNBT;
+import anightdazingzoroark.prift.server.entity.creature.info.CreatureBoxRecovery;
 import anightdazingzoroark.prift.server.properties.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.properties.PlayerCreatureBoxProperties.StoragePosition;
 import anightdazingzoroark.prift.server.properties.PlayerPartyProperties;
@@ -18,6 +20,7 @@ import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.utils.Platform;
 import com.cleanroommc.modularui.value.sync.BooleanSyncValue;
+import com.cleanroommc.modularui.value.sync.GenericSyncValue;
 import com.cleanroommc.modularui.value.sync.IntSyncValue;
 import com.cleanroommc.modularui.value.sync.InteractionSyncHandler;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
@@ -38,6 +41,18 @@ public class RiftCreatureBoxUI {
         PlayerCreatureBoxProperties boxes = PlayerCreatureBoxProperties.get(data.getPlayer());
         PlayerPartyProperties party = PlayerPartyProperties.get(data.getPlayer());
         if (boxes == null || party == null) throw new IllegalArgumentException("Player storage is unavailable!");
+        boxes.updateBox(data.selectedBox, true);
+        // Apply every displayed timer atomically; the client never uses its own world clock.
+        syncManager.syncValue("revival", GenericSyncValue.builder(RevivalSnapshot.class)
+                .getter(() -> {
+                    if (data.isClient()) return data.revivalSnapshot;
+                    return RevivalSnapshot.capture(boxes.getBox(data.selectedBox), CreatureBoxRecovery.currentTime(data.getPlayer()));
+                })
+                .setter(snapshot -> {
+                    if (data.isClient()) data.revivalSnapshot = snapshot;
+                })
+                .serializer(RevivalSnapshot::write).deserializer(RevivalSnapshot::read)
+                .copyImmutable().build());
         IPanelHandler inventoryWarning = RiftConfirmationUI.register(syncManager, "gui.prift.box.drop_warning", () -> {
             if (data.pendingCreature == null || data.pendingSource == null || data.pendingDestination == null
                     || !CreatureBoxGuiFactory.INSTANCE.canInteractWith(data.getPlayer(), data)) return;
@@ -47,7 +62,8 @@ public class RiftCreatureBoxUI {
             );
             data.pendingCreature = null;
             if (result != PlayerCreatureBoxProperties.DepositResult.SUCCESS) {
-                data.getPlayer().sendStatusMessage(new TextComponentTranslation("gui.prift.box.transfer_failed"), false);
+                data.getPlayer().sendStatusMessage(new TextComponentTranslation(result == PlayerCreatureBoxProperties.DepositResult.REVIVING
+                        ? "gui.prift.box.reviving" : "gui.prift.box.transfer_failed"), false);
             }
         }, () -> data.pendingCreature = null);
         IPanelHandler rename = syncManager.syncedPanel("rename_box", true, (panelSync, handler) -> {
@@ -205,7 +221,8 @@ public class RiftCreatureBoxUI {
                 RiftConfirmationUI.open(inventoryWarning);
             }
             else if (result != PlayerCreatureBoxProperties.DepositResult.SUCCESS) {
-                data.getPlayer().sendStatusMessage(new TextComponentTranslation("gui.prift.box.transfer_failed"), false);
+                data.getPlayer().sendStatusMessage(new TextComponentTranslation(result == PlayerCreatureBoxProperties.DepositResult.REVIVING
+                        ? "gui.prift.box.reviving" : "gui.prift.box.transfer_failed"), false);
             }
         }
         data.selectedStorage = -2;

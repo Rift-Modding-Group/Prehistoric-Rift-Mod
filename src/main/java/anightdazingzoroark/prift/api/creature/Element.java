@@ -224,7 +224,7 @@ public enum Element {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.FIRE, Element.STEEL);
+                    return Set.of(Element.FIRE, Element.STEEL, Element.POISON);
                 }
             },
             new DeferredElementSet() {
@@ -272,7 +272,7 @@ public enum Element {
                 @Override
                 @NotNull
                 protected Set<Element> elements() {
-                    return Set.of(Element.SONIC, Element.POISON, Element.MESOZOIC, Element.DARK);
+                    return Set.of(Element.SONIC, Element.POISON, Element.DARK);
                 }
             },
             new DeferredElementSet() {

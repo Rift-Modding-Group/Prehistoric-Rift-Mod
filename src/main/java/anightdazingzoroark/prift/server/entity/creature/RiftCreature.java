@@ -98,6 +98,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.CombatTracker;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
@@ -108,6 +109,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -237,6 +239,15 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.applyCreatureTypeSettings();
         this.animData = new AnimationDataEntityLiving(this);
         this.dynamicRidePosList = new DynamicRidePosList(this, this.animData);
+        this.combatTracker = new CombatTracker(this) {
+            @Override
+            @NotNull
+            public ITextComponent getDeathMessage() {
+                ITextComponent message = super.getDeathMessage();
+                if (!RiftCreature.this.isTamed()) return message;
+                return new TextComponentTranslation("party.warning.creature_died", message);
+            }
+        };
 
         if (worldIn != null && !worldIn.isRemote) {
             this.herdHelper = this.canDoHerding() ? new RiftCreatureHerdHelper(this) : null;

@@ -19,6 +19,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -33,11 +35,6 @@ public class RiftCreatureGuiFactory extends AbstractUIFactory<RiftCreatureGuiDat
                 RiftCreatureGuiData data, PanelSyncManager syncManager, UISettings settings
         ) {
             return RiftCreatureUI.show(data, syncManager, settings);
-        }
-
-        @Override
-        public ModularScreen createScreen(RiftCreatureGuiData data, ModularPanel mainPanel) {
-            return new ModularScreen(RiftInitialize.MODID, mainPanel);
         }
     };
 
@@ -82,6 +79,13 @@ public class RiftCreatureGuiFactory extends AbstractUIFactory<RiftCreatureGuiDat
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
+    @NotNull
+    public ModularScreen createScreen(@NotNull RiftCreatureGuiData data, @NotNull ModularPanel mainPanel) {
+        return new ModularScreen(RiftInitialize.MODID, mainPanel).openParentOnClose(data.isPartyMember() || data.isBoxed());
+    }
+
+    @Override
     public void writeGuiData(RiftCreatureGuiData data, PacketBuffer buffer) {
         buffer.writeBoolean(data.isBoxed());
         if (data.isBoxed()) {
@@ -121,6 +125,7 @@ public class RiftCreatureGuiFactory extends AbstractUIFactory<RiftCreatureGuiDat
             ) {
                 throw new IllegalArgumentException("Invalid creature box access!");
             }
+            boxes.updateBox(box, true);
             CreatureNBT creature = boxes.getBox(box).getCreature(slot);
             if (creature.nbtTagCompound().isEmpty() || !creature.isOwner(player) || !creature.getUniqueID().equals(expectedCreature)) {
                 throw new IllegalArgumentException("Box position does not contain the expected owned creature!");
@@ -163,7 +168,10 @@ public class RiftCreatureGuiFactory extends AbstractUIFactory<RiftCreatureGuiDat
                     || data.getBoxSlot() < 0 || data.getBoxSlot() >= PlayerCreatureBoxProperties.BOX_SIZE
                     || data.getBoxPosition() == null
                     || !CreatureBoxGuiFactory.INSTANCE.canInteractWith(player,
-                    new CreatureBoxGuiData(player, data.getBoxPosition(), data.getBoxIndex()))) return false;
+                    new CreatureBoxGuiData(player, data.getBoxPosition(), data.getBoxIndex()))
+            ) {
+                return false;
+            }
             CreatureNBT creature = boxes.getBox(data.getBoxIndex()).getCreature(data.getBoxSlot());
             return !creature.nbtTagCompound().isEmpty() && creature.isOwner(player)
                     && creature.getUniqueID().equals(data.getCreature().getUniqueID());

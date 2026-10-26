@@ -170,6 +170,16 @@ public class CreatureBoxSlot extends ContextMenuButton<CreatureBoxSlot> {
         new Rectangle().color(borderColor).cornerRadius(radius).draw(context, 0, 0, size, size, theme);
         new Rectangle().color(fillColor).cornerRadius(radius - 1).draw(context, 1, 1, size - 2, size - 2, theme);
         if (!empty) CreatureIconTextures.getTextureForCreature(creature).draw(context, iconOffset, iconOffset, iconSize, iconSize, theme);
+        if (!empty && this.storage >= 0) {
+            CreatureBoxGuiData.RevivalCountdown countdown = this.data.revivalSnapshot.countdowns().get(this.index);
+            if (countdown.seconds() > 0 && creature.getUniqueID().equals(countdown.creature())) {
+                String seconds = Integer.toString(countdown.seconds() % 60);
+                if (countdown.seconds() % 60 < 10) seconds = "0" + seconds;
+                new Rectangle().color(0xC0000000).cornerRadius(2).draw(context, 1, size / 2 - 5, size - 2, 10, theme);
+                IKey.str(countdown.seconds() / 60 + ":" + seconds).color(0xFFFFFFFF).scale(0.65f)
+                        .alignment(Alignment.CENTER).draw(context, 1, size / 2 - 5, size - 2, 10, theme);
+            }
+        }
     }
 
     @Override

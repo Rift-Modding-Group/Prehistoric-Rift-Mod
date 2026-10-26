@@ -6,7 +6,6 @@ import anightdazingzoroark.prift.server.entity.creature.CreatureStorage;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.server.entity.creature.IRiftCreature;
-import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.util.RiftUtil;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertySystem.AbstractEntityProperties;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertySystem.RiftLibProperty;
@@ -61,24 +60,7 @@ public class PlayerPartyProperties extends AbstractEntityProperties<EntityPlayer
             if (storedCreature.nbtTagCompound().isEmpty()) continue;
 
             if (storedCreature.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.PARTY_INACTIVE) {
-                if (storedCreature.getStamina() < storedCreature.getMaxStamina()) {
-                    storedCreature.regenerateStaminaInactive();
-                    if (storedCreature.getStamina() >= storedCreature.getMaxStamina()) {
-                        //needed to update stamina amnt on client
-                        this.syncToClientMultiple("Creatures");
-                    }
-                }
-                if (storedCreature.getLeapCooldown() > 0) {
-                    storedCreature.setLeapCooldown(storedCreature.getLeapCooldown() - 1);
-                }
-                if (storedCreature.getSprintCooldown() > 0) {
-                    storedCreature.setSprintCooldown(storedCreature.getSprintCooldown() - 1);
-                }
-                if (storedCreature.getCreatureMoves() != null) {
-                    CreatureMoveStorage creatureMoveStorage = storedCreature.getCreatureMoves();
-                    creatureMoveStorage.tickCooldowns();
-                    storedCreature.setCreatureMoves(creatureMoveStorage);
-                }
+                if (storedCreature.advanceInactiveTicks(1L)) this.syncToClientMultiple("Creatures");
             }
         }
     }

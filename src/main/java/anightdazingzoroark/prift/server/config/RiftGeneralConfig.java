@@ -43,6 +43,11 @@ public class RiftGeneralConfig {
         })
         @Config.RangeInt(min = 1)
         public int levelUpFactor = 100;
+
+        @Config.Name("Creature Box Revival Time")
+        @Config.Comment("World-time seconds required to revive a boxed creature. 0 or negative revives immediately.")
+        @Config.RangeInt(min = 0)
+        public int boxRevivalTimeSeconds = 300;
     }
 
     public static class WorldGen {
