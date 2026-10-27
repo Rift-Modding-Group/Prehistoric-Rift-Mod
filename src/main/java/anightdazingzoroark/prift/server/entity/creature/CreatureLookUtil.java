@@ -6,14 +6,19 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
 import anightdazingzoroark.prift.api.util.MathUtil;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntityLiving;
+import anightdazingzoroark.riftlib.core.processor.IBone;
 import anightdazingzoroark.riftlib.core.snapshot.BoneSnapshot;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.builder.Animation;
 import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
 import anightdazingzoroark.riftlib.model.AnimatedGeoModel;
+import anightdazingzoroark.riftlib.model.AnimatedLocator;
 import anightdazingzoroark.riftlib.model.AnimationPoseSampler;
 import anightdazingzoroark.riftlib.model.AnimationHitboxTimeline;
 import anightdazingzoroark.riftlib.model.ServerModelRegistry;
+import anightdazingzoroark.riftlib.ray.RiftLibRay;
+import anightdazingzoroark.riftlib.util.QuaternionUtils;
+import anightdazingzoroark.riftlib.util.VectorUtils;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.MathHelper;
@@ -21,12 +26,14 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.lwjglx.util.vector.Quaternion;
 
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 
 public class CreatureLookUtil {
     //head pitch min and max bounds
@@ -35,11 +42,69 @@ public class CreatureLookUtil {
     public static final float HEAD_PITCH_MAX = 15f;
 
     /**
+     * Predict a locator's world-space ray from a sampled pose without changing the live animation.
+     * Uses the same model-to-world conversion as RiftLibrary's ray emission.
+     * */
+    @NotNull
+    public static RiftLibRay.RayPose getRayPose(
+            @NotNull AnimationDataEntityLiving data, @NotNull AnimatedLocator locator,
+            @NotNull Map<String, BoneSnapshot> pose
+    ) {
+        Map<IBone, BoneSnapshot> previousPose = new HashMap<>();
+        pose.forEach((name, snapshot) -> {
+            IBone bone = data.getBoneSnapshotCollection().get(name).getLeft();
+            previousPose.put(bone, new BoneSnapshot(bone));
+            bone.getRotation().set(snapshot.getRotation());
+            bone.getPosition().set(snapshot.getPosition());
+            bone.getScale().set(snapshot.getScale());
+        });
+        Vec3d mouth = locator.getModelSpacePosition();
+        Quaternion orientation = locator.getModelSpaceYXZQuaternion();
+        Vec3d forward = VectorUtils.rotateVectorWithQuaternion(new Vec3d(0D, 0D, -1D), orientation);
+        Vec3d up = VectorUtils.rotateVectorWithQuaternion(new Vec3d(0D, 1D, 0D), orientation);
+        previousPose.forEach((bone, snapshot) -> {
+            bone.getRotation().set(snapshot.getRotation());
+            bone.getPosition().set(snapshot.getPosition());
+            bone.getScale().set(snapshot.getScale());
+        });
+
+        // Model coordinates are in pixels, with X and Z opposite to entity coordinates.
+        Quaternion yaw = QuaternionUtils.createYXZQuaternion(0D, -Math.toRadians(data.getModelYaw()), 0D);
+        Vec3d origin = data.getHolder().getPositionVector().add(VectorUtils.rotateVectorWithQuaternion(
+                new Vec3d(-mouth.x, mouth.y, -mouth.z).scale(data.getScale() / 16D), yaw));
+        Vec3d direction = VectorUtils.rotateVectorWithQuaternion(new Vec3d(-forward.x, forward.y, -forward.z), yaw);
+        Vec3d worldUp = VectorUtils.rotateVectorWithQuaternion(new Vec3d(-up.x, up.y, -up.z), yaw);
+        return new RiftLibRay.RayPose(origin, direction, worldUp);
+    }
+
+    /**
      * Clamp input as well as interpolation history so excess mouse movement cannot accumulate.
      * */
     public static void clampRiddenAimPitch(@NotNull EntityPlayer rider) {
-        rider.rotationPitch = Math.clamp(rider.rotationPitch, HEAD_PITCH_MIN, HEAD_PITCH_MAX);
-        rider.prevRotationPitch = Math.clamp(rider.prevRotationPitch, HEAD_PITCH_MIN, HEAD_PITCH_MAX);
+        clampRiddenAimPitch(rider, null, null);
+    }
+
+    public static void clampRiddenAimPitch(
+            @NotNull EntityPlayer rider, @Nullable ICreature creature, @Nullable String moveName
+    ) {
+        float[] bounds = getRiddenAimPitchBounds(creature, moveName);
+        rider.rotationPitch = Math.clamp(rider.rotationPitch, bounds[0], bounds[1]);
+        rider.prevRotationPitch = Math.clamp(rider.prevRotationPitch, bounds[0], bounds[1]);
+    }
+
+    public static float @NotNull [] getRiddenAimPitchBounds(@Nullable ICreature creature, @Nullable String moveName) {
+        CreatureMoveBuilder move = getRiddenAimMove(creature, moveName);
+        return move == null ? new float[]{HEAD_PITCH_MIN, HEAD_PITCH_MAX} : move.getRiddenPitchBounds();
+    }
+
+    @Nullable
+    public static CreatureMoveBuilder getRiddenAimMove(@Nullable ICreature creature, @Nullable String moveName) {
+        if (creature == null || moveName == null) return null;
+        AbstractCreatureBuilder<?> configuration = creature.getCreatureType();
+        if (!creature.getPhase().isEmpty()) configuration = creature.getCreatureType().getPhaseBuilderMaps().get(creature.getPhase());
+        if (configuration == null) return null;
+        AbstractCreatureBuilder.MoveDefinition definition = configuration.getMoveDefinitions().get(moveName);
+        return definition == null ? null : definition.moveBuilder();
     }
 
     /**

@@ -249,7 +249,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.moveHelper = new RiftCreatureMoveHelper(this);
         this.navigator = new RiftCreaturePathNavigate(this, worldIn);
         this.applyCreatureTypeSettings();
-        this.animData = new AnimationDataEntityLiving(this);
+        this.animData = new CreatureAnimationData(this);
         this.dynamicRidePosList = new DynamicRidePosList(this, this.animData);
         this.combatTracker = new CombatTracker(this) {
             @Override
@@ -315,7 +315,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         CreatureDomesticationBuilder domestication = this.creatureType.getDomestication();
         this.creatureInventory.setSize(domestication == null ? 1 : domestication.getInventorySize());
         this.applyCreatureTypeSettings();
-        this.animData = new AnimationDataEntityLiving(this);
+        this.animData = new CreatureAnimationData(this);
         this.dynamicRidePosList = new DynamicRidePosList(this, this.animData);
         this.onCreatureTypeChanged();
 
@@ -2832,10 +2832,24 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     @Override
+    public float getRenderYaw(float partialTicks) {
+        CreatureMoveBuilder move = CreatureLookUtil.getRiddenAimMove(this, this.getCurrentMove());
+        CreatureMoveChargeupBuilder charge = move == null ? null : move.getMoveChargeupBuilder();
+        if (charge != null && charge.getCanLookWhileUsing() && this.canRotateMounted()
+                && this.getControllingPassenger() instanceof EntityPlayer rider) {
+            float turn = MathHelper.wrapDegrees(rider.rotationYaw - rider.prevRotationYaw);
+            return (float) MathUtil.slopeResult(partialTicks, true, 0D, 1D,
+                    rider.prevRotationYaw, rider.prevRotationYaw + turn);
+        }
+        return IDynamicRideUser.super.getRenderYaw(partialTicks);
+    }
+
+    @Override
     public void updatePassenger(Entity passenger) {
         IDynamicRideUser.super.updatePassenger(passenger);
         if (passenger == this.getControllingPassenger() && this.canRotateMounted() && this.isRiddenAiming()) {
-            this.rotationPitch = Math.clamp(passenger.rotationPitch, CreatureLookUtil.HEAD_PITCH_MIN, CreatureLookUtil.HEAD_PITCH_MAX);
+            float[] bounds = CreatureLookUtil.getRiddenAimPitchBounds(this, this.riddenAimingMoveName);
+            this.rotationPitch = Math.clamp(passenger.rotationPitch, bounds[0], bounds[1]);
         }
     }
 

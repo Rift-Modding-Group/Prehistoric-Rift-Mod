@@ -156,7 +156,8 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
 
     @Override
     protected void pathFollow() {
-        if (this.currentPath != null && this.currentPath.getCurrentPathIndex() == 0 && this.currentPath.getCurrentPathLength() > 1) {
+        if (this.currentPath != null && this.currentPath.getCurrentPathIndex() == 0
+                && (this.currentPath.getCurrentPathLength() > 1 || this.currentPath == this.blockedAttackApproachPath)) {
             Vec3d position = this.getEntityPosition();
             Vec3d start = this.currentPath.getVectorFromIndex(this.creature, 0);
             double radius = Math.max(0.75D, this.creature.width * 0.5D);
@@ -164,6 +165,11 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
             if (Math.abs(position.x - start.x) < radius && Math.abs(position.z - start.z) < radius
                     && Math.abs(position.y - start.y) < 1D) {
                 this.currentPath.incrementPathIndex();
+                // A lone obstruction-approach node also represents the footprint already occupied at the lip.
+                if (this.currentPath == this.blockedAttackApproachPath && this.currentPath.isFinished()) {
+                    this.creature.setUnableToPathToTarget(true);
+                    return;
+                }
             }
         }
         if (this.currentPath instanceof AttackApproachPath approachPath && !this.currentPath.isFinished()
@@ -296,7 +302,7 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
                     if (this.world.collidesWithAnyBlock(body)
                             || !this.world.collidesWithAnyBlock(body.offset(0D, -0.125D, 0D))) break;
                     PathNodeType type = this.riftNodeProcessor.getPathNodeType(this.world, x, lipStart.y, z,
-                            this.creature, nodeSize, MathHelper.floor(this.creature.height + 1F), nodeSize,
+                            this.creature, nodeSize, MathHelper.ceil(this.creature.height), nodeSize,
                             this.nodeProcessor.getCanOpenDoors(), this.nodeProcessor.getCanEnterDoors());
                     if (type != PathNodeType.OPEN && type != PathNodeType.WALKABLE) break;
                     PathPoint lipPoint = new PathPoint(x, lipStart.y, z);
@@ -316,6 +322,8 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
             this.blockedAttackApproachPath = blockedAttackRoute && startedPath ? this.currentPath : null;
             this.creature.setUnableToPathToTarget(!startedPath
                     || !blockedAttackRoute && path.getCurrentPathLength() <= 1
+                    // A partial route to the wall does not reach a target standing above it.
+                    || !blockedAttackRoute && path.getFinalPathPoint().y < MathHelper.floor(target.getEntityBoundingBox().minY)
                     || !this.pathIsSafe(path));
         }
         return startedPath;

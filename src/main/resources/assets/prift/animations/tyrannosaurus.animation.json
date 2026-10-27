@@ -162,16 +162,22 @@
 			"loop": "hold_on_last_frame",
 			"animation_length": 0.32,
 			"bones": {
+				"head": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.32": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, 0]
+					}
+				},
 				"body": {
 					"rotation": {
 						"0.0": [0, 0, 0],
-						"0.32": [-20, 0, 0]
+						"0.32": ["flamethrower_body_aim ? -10 * flamethrower_aim_swing : -10 * math.clamp(query.head_x_rotation / 15, -1, 1)", 0, 0]
 					}
 				},
 				"neck": {
 					"rotation": {
 						"0.0": ["math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0],
-						"0.32": ["20 + math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
+						"0.32": ["(flamethrower_body_aim ? 5 * flamethrower_aim_swing : 0) + math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
 					}
 				},
 				"lowerJaw": {
@@ -191,14 +197,14 @@
 			"bones": {
 				"body": {
 					"rotation": {
-						"0.0": [-20, 0, 0],
-						"0.32": [15, 0, 0]
+						"0.0": ["flamethrower_body_aim ? -10 * flamethrower_aim_swing : -10 * math.clamp(query.head_x_rotation / 15, -1, 1)", 0, 0],
+						"0.32": ["flamethrower_body_aim ? flamethrower_release_pitch : math.clamp(query.head_x_rotation, -75, 35) - math.clamp(query.head_x_rotation, -15, 15)", 0, 0]
 					}
 				},
 				"neck": {
 					"rotation": {
-						"0.0": ["20 + math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0],
-						"0.32": ["-15 + math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
+						"0.0": ["(flamethrower_body_aim ? 5 * flamethrower_aim_swing : 0) + math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0],
+						"0.32": ["(flamethrower_body_aim ? 2.5 * flamethrower_aim_swing : 0) + math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
 					}
 				},
 				"lowerJaw": {
@@ -209,8 +215,8 @@
 				},
 				"head": {
 					"rotation": {
-						"0.0": [0, 0, 0],
-						"0.32": [0, 0, -7.5]
+						"0.0": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, 0],
+						"0.32": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, -7.5]
 					}
 				}
 			},
@@ -229,18 +235,18 @@
 			"animation_length": 0.64,
 			"bones": {
 				"body": {
-					"rotation": [15, 0, 0]
+					"rotation": ["flamethrower_body_aim ? flamethrower_release_pitch : math.clamp(query.head_x_rotation, -75, 35) - math.clamp(query.head_x_rotation, -15, 15)", 0, 0]
 				},
 				"neck": {
-					"rotation": ["-15 + math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
+					"rotation": ["(flamethrower_body_aim ? 2.5 * flamethrower_aim_swing : 0) + math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
 				},
 				"head": {
 					"rotation": {
-						"0.0": [0, 0, -7.5],
-						"0.16": [0, 0, 7.5],
-						"0.32": [0, 0, -7.5],
-						"0.48": [0, 0, 7.5],
-						"0.64": [0, 0, -7.5]
+						"0.0": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, -7.5],
+						"0.16": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, 7.5],
+						"0.32": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, -7.5],
+						"0.48": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, 7.5],
+						"0.64": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, -7.5]
 					}
 				},
 				"lowerJaw": {
@@ -266,19 +272,19 @@
 			"bones": {
 				"body": {
 					"rotation": {
-						"0.0": [15, 0, 0],
+						"0.0": ["flamethrower_body_aim ? flamethrower_release_pitch : math.clamp(query.head_x_rotation, -75, 35) - math.clamp(query.head_x_rotation, -15, 15)", 0, 0],
 						"0.24": [0, 0, 0]
 					}
 				},
 				"neck": {
 					"rotation": {
-						"0.0": ["-15 + math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0],
+						"0.0": ["(flamethrower_body_aim ? 2.5 * flamethrower_aim_swing : 0) + math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0],
 						"0.24": ["math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
 					}
 				},
 				"head": {
 					"rotation": {
-						"0.0": [0, 0, 0],
+						"0.0": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, 0],
 						"0.24": [0, 0, 0]
 					}
 				},

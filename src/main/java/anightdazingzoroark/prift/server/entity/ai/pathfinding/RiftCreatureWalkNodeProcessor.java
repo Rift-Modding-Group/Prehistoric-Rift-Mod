@@ -33,8 +33,10 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
     }
 
     @Override
-    public void init(IBlockAccess source, EntityLiving mob) {
+    public void init(@NotNull IBlockAccess source, @NotNull EntityLiving mob) {
         super.init(source, mob);
+        // An integral body height fits below a ceiling at that height without an extra air block.
+        this.entitySizeY = MathHelper.ceil(mob.height);
         if (!this.waterPathingAllowed) mob.setPathPriority(PathNodeType.WATER, -1f);
     }
 

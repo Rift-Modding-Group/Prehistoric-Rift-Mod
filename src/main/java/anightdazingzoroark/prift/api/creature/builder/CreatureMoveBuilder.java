@@ -48,6 +48,7 @@ public class CreatureMoveBuilder {
     private RiddenAimingType riddenAimingType = RiddenAimingType.NONE;
     @NotNull
     private RiddenCrosshairType riddenCrosshairType = RiddenCrosshairType.POINT;
+    private float @NotNull [] riddenPitchBounds = new float[]{-15f, 15f};
 
     /**
      * This locks this object so that when accessing any instances of this, it can never be modified ever
@@ -330,6 +331,23 @@ public class CreatureMoveBuilder {
     }
 
     /**
+     * Vertical mouse limits, in degrees; negative pitch aims upward.
+     * */
+    @NotNull
+    public CreatureMoveBuilder setRiddenPitchBounds(float min, float max) {
+        this.checkIfLocked();
+        if (min < -90f || max > 90f || min > max) {
+            throw new IllegalArgumentException("Ridden pitch bounds must be ordered within -90 and 90 degrees!");
+        }
+        this.riddenPitchBounds = new float[]{min, max};
+        return this;
+    }
+
+    public float @NotNull [] getRiddenPitchBounds() {
+        return this.riddenPitchBounds.clone();
+    }
+
+    /**
      * Get validity based on if some params are not null
      * */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -372,6 +390,7 @@ public class CreatureMoveBuilder {
         toReturn.preventMovement = this.preventMovement;
         toReturn.riddenAimingType = this.riddenAimingType;
         toReturn.riddenCrosshairType = this.riddenCrosshairType;
+        toReturn.riddenPitchBounds = this.riddenPitchBounds.clone();
 
         return toReturn;
     }

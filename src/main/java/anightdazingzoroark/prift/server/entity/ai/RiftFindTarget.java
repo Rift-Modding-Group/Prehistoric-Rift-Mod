@@ -97,7 +97,7 @@ public class RiftFindTarget extends EntityAITarget {
     }
 
     protected AxisAlignedBB getTargetableArea(double targetDistance) {
-        return this.creature.getEntityBoundingBox().grow(targetDistance, 4D, targetDistance);
+        return this.creature.getEntityBoundingBox().grow(targetDistance, targetDistance / 4D, targetDistance);
     }
 
     //will use creature config info and relation to user to determine target suitability then return super of this method

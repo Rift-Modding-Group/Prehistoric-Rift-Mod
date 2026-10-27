@@ -72,8 +72,7 @@ public class CameraHandler {
         boolean melee = riddenCreature.isTargetedMeleeRiddenMove(ridingAimMove);
         double meleeReach = melee ? riddenCreature.calculateRiddenMeleeAimReach(ridingAimMove) : 0D;
         this.ridingAimActive = true;
-        String focusMove = melee ? selectedMove.getKey() : null;
-        this.aimSettings = new RidingAimSettings(melee, move.getRiddenCrosshairType(), focusMove, meleeReach, false);
+        this.aimSettings = new RidingAimSettings(melee, move.getRiddenCrosshairType(), selectedMove.getKey(), meleeReach, false);
     }
 
     public void endRidingAim() {
@@ -100,7 +99,7 @@ public class CameraHandler {
             this.restorePreviousCamera(minecraft);
             return;
         }
-        if (shouldEnable) CreatureLookUtil.clampRiddenAimPitch(minecraft.player);
+        if (shouldEnable) CreatureLookUtil.clampRiddenAimPitch(minecraft.player, riddenCreature, this.aimSettings.moveName());
 
         if (shouldEnable && riddenCreature != null && this.cameraCreatureId != riddenCreature.getEntityId()) {
             this.cameraCreatureId = riddenCreature.getEntityId();
@@ -160,7 +159,7 @@ public class CameraHandler {
         //vanilla has already probed camera collisions using these input angles.
         float yaw = minecraft.player.rotationYaw;
         float pitch = minecraft.player.rotationPitch;
-        if (this.ridingAimActive) CreatureLookUtil.clampRiddenAimPitch(minecraft.player);
+        if (this.ridingAimActive) CreatureLookUtil.clampRiddenAimPitch(minecraft.player, riddenCreature, this.aimSettings.moveName());
 
         double transition = MathUtil.slopeResult(
                 partialTicks, true, 0D, 1D,
@@ -235,7 +234,7 @@ public class CameraHandler {
     //target selection and HUD drawing use the same camera and move settings.
     @NotNull
     public RiddenAimTarget sendRidingAimUpdate(@NotNull Minecraft minecraft, @NotNull RiftCreature riddenCreature, int ridingAimMove) {
-        CreatureLookUtil.clampRiddenAimPitch(minecraft.player);
+        CreatureLookUtil.clampRiddenAimPitch(minecraft.player, riddenCreature, this.aimSettings.moveName());
         CameraFrame frame = this.getCameraFrame(minecraft, riddenCreature, 1D, this.cameraTransition);
         RiddenAimTarget target = RidingAimTargeting.sendUpdate(
                 minecraft, riddenCreature, ridingAimMove, frame, this.aimSettings,
@@ -308,12 +307,12 @@ public class CameraHandler {
         if (this.aimSettings.leap()) {
             focusPosition = getLeapAimFocusPosition(riddenCreature, this.getInterpolatedEyePosition(riddenCreature, partialTicks), forward);
         }
-        if (this.aimSettings.focusMove() != null) {
+        if (this.aimSettings.melee() && this.aimSettings.moveName() != null) {
             float headPitch = (float) MathUtil.slopeResult(partialTicks, true, 0D, 1D,
                     minecraft.player.prevRotationPitch, minecraft.player.rotationPitch);
             float bodyYaw = (float) Math.toDegrees(Math.atan2(-forward.x, forward.z));
             Vec3d strikePosition = CreatureLookUtil.getRiddenAimHitboxPosition(
-                    riddenCreature, this.aimSettings.focusMove(), headPitch, bodyYaw, partialTicks);
+                    riddenCreature, this.aimSettings.moveName(), headPitch, bodyYaw, partialTicks);
             if (strikePosition != null) focusPosition = strikePosition;
         }
         Vec3d capturedAim = riddenCreature.getRiddenAimPosition();
@@ -395,7 +394,7 @@ public class CameraHandler {
 
     public record RidingAimSettings(
             boolean melee, @NotNull RiddenCrosshairType crosshairType,
-            @Nullable String focusMove, double meleeReach, boolean leap
+            @Nullable String moveName, double meleeReach, boolean leap
     ) {}
 
     public record CameraFrame(@NotNull Vec3d position, @NotNull Vec3d focusPosition, @NotNull Vec3d lookVector) {}

@@ -18,9 +18,11 @@ import anightdazingzoroark.riftlib.core.builder.Animation;
 import anightdazingzoroark.riftlib.core.snapshot.BoneSnapshot;
 import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
 import anightdazingzoroark.riftlib.model.AnimatedGeoModel;
+import anightdazingzoroark.riftlib.model.AnimatedLocator;
 import anightdazingzoroark.riftlib.model.AnimationPoseSampler;
 import anightdazingzoroark.riftlib.model.ServerModelRegistry;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
+import anightdazingzoroark.riftlib.ray.RiftLibRay;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
 import anightdazingzoroark.riftlib.ray.rayShape.impact.RiftLibRayEllipsoidImpactShape;
@@ -32,14 +34,18 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
-
+import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.List;
 
 public class TyrannosaurusBuilder extends RiftCreatureBuilder {
+    private static final double FLAMETHROWER_MAX_MOTION_DISTANCE = 16D;
+
     public TyrannosaurusBuilder() {
         this.setName("tyrannosaurus")
                 .setCreatureCategory(RiftCreatureEnums.CreatureCategory.DINOSAUR)
@@ -124,7 +130,7 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                                         3, 12, false, false
                                 ))
                                 .setMotionSpeed(1D)
-                                .setMaxMotionDistance(16D)
+                                .setMaxMotionDistance(FLAMETHROWER_MAX_MOTION_DISTANCE)
                                 .setBlockBreakCheck(((rayCreator, pos) -> {
                                     World world = rayCreator.getRayCreator().world;
                                     IBlockState blockState = world.getBlockState(pos);
@@ -210,6 +216,8 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                         .setRequireFindTargetToUse()
                         .setMoveType(CreatureMoveBuilder.MoveType.SPECIAL)
                         .setElement(Element.FIRE)
+                        .setOnMoveBeginEffect(this::captureFlamethrowerLook)
+                        .setWhileMoveUseEffect(this::captureFlamethrowerLook)
                         .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                                 .setChargeUpWhileUse(true)
                                 .setCanLookWhileUsing(true)
@@ -222,6 +230,7 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                                 })
                         )
                         .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
+                        .setRiddenPitchBounds(-75f, 35f)
                         .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.POINT)
                 )
                 //---attack ai---
@@ -276,6 +285,66 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
     }
 
     //-----helpers for moves-----
+    /** Keep bite's initial swing, then fit the body pitch to an unobstructed flame direction. */
+    private void captureFlamethrowerLook(@NotNull ICreature creature, @Nullable Entity target) {
+        AnimationDataEntityLiving data = creature.getAnimationData();
+        data.setVariable("flamethrower_body_aim", data.getHolder().isBeingRidden() ? 0D : 1D);
+        data.setVariable("flamethrower_aim_swing", MathUtil.slopeResult(data.getHeadPitch(1f), true,
+                CreatureLookUtil.HEAD_PITCH_MIN, 0D, -1D, 1D));
+        data.setVariable("flamethrower_release_pitch", 20D * data.getVariable("flamethrower_aim_swing"));
+        if (data.getHolder().isBeingRidden() || !(target instanceof EntityLivingBase livingTarget)
+                || !livingTarget.isEntityAlive()
+                || !(data.getHolder() instanceof IAnimatable<?> animatable)
+                || !data.getBoneSnapshotCollection().containsKey("body")) return;
+        AnimatedGeoModel<?> model = ServerModelRegistry.getServerModel(animatable);
+        AnimatedLocator locator = data.getAnimatedLocator("flamethrowerAimLocator");
+        if (model == null || locator == null) return;
+        Animation animation = model.getAnimations("animation.tyrannosaurus.flamethrower_releasing", animatable);
+        if (animation == null) return;
+
+        boolean elevatedTarget = livingTarget.posY > data.getHolder().getPositionEyes(1f).y;
+        double aimSwing = MathUtil.slopeResult(data.getHeadPitch(1f), true,
+                CreatureLookUtil.HEAD_PITCH_MIN, CreatureLookUtil.HEAD_PITCH_MAX, -1D, 1D);
+        if (elevatedTarget) aimSwing = -1D;
+        data.setVariable("flamethrower_aim_swing", aimSwing);
+        int bestAngle = 0;
+        data.setVariable("flamethrower_release_pitch", -bestAngle);
+        Map<String, BoneSnapshot> pose = AnimationPoseSampler.sample(animation, data, 0D);
+        BoneSnapshot body = pose.get("body");
+        float restingBodyPitch = data.getBoneSnapshotCollection().get("body").getLeft().getInitialSnapshot().getRotation().x;
+        AxisAlignedBB targetBounds = livingTarget.getEntityBoundingBox();
+        double closestDistance = Double.MAX_VALUE;
+        for (int angle = -20; angle <= 60; angle++) {
+            // RiftLibrary bone rotations use positive radians for the upward body tilt.
+            body.getRotation().x = restingBodyPitch + (float) Math.toRadians(angle);
+            RiftLibRay.RayPose flame = CreatureLookUtil.getRayPose(data, locator, pose);
+            Vec3d origin = flame.origin();
+            // Aim at the near side of the head so a tower cannot hide the chosen target point.
+            Vec3d targetPosition = new Vec3d(Math.clamp(origin.x, targetBounds.minX, targetBounds.maxX),
+                    livingTarget.getPositionEyes(1f).y, Math.clamp(origin.z, targetBounds.minZ, targetBounds.maxZ));
+            if (data.getHolder().world.rayTraceBlocks(origin, targetPosition, false, true, false) != null) continue;
+            Vec3d endpoint = origin.add(flame.direction().scale(FLAMETHROWER_MAX_MOTION_DISTANCE));
+            RayTraceResult hit = targetBounds.calculateIntercept(origin, endpoint);
+            // Stop at a body tilt whose locator direction reaches the target.
+            if (hit != null && data.getHolder().world.rayTraceBlocks(origin, hit.hitVec, false, true, false) == null) {
+                bestAngle = angle;
+                break;
+            }
+            double alongFlame = Math.clamp(targetPosition.subtract(origin).dotProduct(flame.direction()),
+                    0D, FLAMETHROWER_MAX_MOTION_DISTANCE);
+            if (alongFlame <= 0D) continue;
+            Vec3d closestPoint = origin.add(flame.direction().scale(alongFlame));
+            double distance = closestPoint.squareDistanceTo(targetPosition);
+            // Aim the locator toward the target, using only the configured reach and clear terrain.
+            if (distance < closestDistance
+                    && data.getHolder().world.rayTraceBlocks(origin, closestPoint, false, true, false) == null) {
+                closestDistance = distance;
+                bestAngle = angle;
+            }
+        }
+        data.setVariable("flamethrower_release_pitch", -bestAngle);
+    }
+
     /**
      * Shared by bite and flame spit, including reach prediction, to capture the same neck pose.
      * */
