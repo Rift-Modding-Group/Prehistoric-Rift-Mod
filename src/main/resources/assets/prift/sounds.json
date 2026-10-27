@@ -41,6 +41,27 @@
     ],
     "subtitle": "sounds.subtitle.tyrannosaurus_warn"
   },
+  "prift.tyrannosaurus.flame_spit": {
+    "category": "neutral",
+    "sounds": [
+      "mob/ghast/fireball4"
+    ],
+    "subtitle": "sounds.subtitle.tyrannosaurus_flame_spit"
+  },
+  "prift.tyrannosaurus.flamethrower_start": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/tyrannosaurus/tyrannosaurus_flamethrower_start"
+    ],
+    "subtitle": "sounds.subtitle.tyrannosaurus_flamethrower_start"
+  },
+  "prift.tyrannosaurus.flamethrower_breathe": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/tyrannosaurus/tyrannosaurus_flamethrower_breathe"
+    ],
+    "subtitle": "sounds.subtitle.tyrannosaurus_flamethrower_breathe"
+  },
 
   "prift.stegosaurus.idle": {
     "category": "neutral",

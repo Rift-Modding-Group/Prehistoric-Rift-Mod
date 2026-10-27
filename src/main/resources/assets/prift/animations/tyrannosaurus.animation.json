@@ -214,6 +214,12 @@
 					}
 				}
 			},
+			"sound_effects": {
+				"0.32": {
+					"effect": "prift.tyrannosaurus.flamethrower_start",
+					"locator": "centerPoint"
+				}
+			},
 			"timeline": {
 				"0.32": "function.send_message('moveChargeupPrereleasingFinished');"
 			}
@@ -239,6 +245,12 @@
 				},
 				"lowerJaw": {
 					"rotation": [22.5, 0, 0]
+				}
+			},
+			"sound_effects": {
+				"0.0": {
+					"effect": "prift.tyrannosaurus.flamethrower_breathe",
+					"locator": "centerPoint"
 				}
 			},
 			"particle_effects": {
@@ -527,6 +539,12 @@
 				"0.375": {
 					"effect": "prift:flame_spit",
 					"locator": "flameLocator"
+				}
+			},
+			"sound_effects": {
+				"0.375": {
+					"effect": "prift.tyrannosaurus.flame_spit",
+					"locator": "centerPoint"
 				}
 			},
 			"timeline": {
