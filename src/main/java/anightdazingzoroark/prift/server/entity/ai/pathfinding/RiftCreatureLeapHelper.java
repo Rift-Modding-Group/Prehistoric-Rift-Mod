@@ -129,6 +129,7 @@ public class RiftCreatureLeapHelper {
         this.phaseTicks = 0;
         this.queuedCharge = null;
         this.moveHelper.creatureAction = RiftCreatureMoveHelperBase.CreatureAction.LEAP;
+        if (!this.creature.world.isRemote) this.creature.setLeaping(true);
         Vec3d velocity = plan.velocity(0D);
         this.creature.motionX = velocity.x;
         this.creature.motionY = velocity.y;
@@ -250,12 +251,21 @@ public class RiftCreatureLeapHelper {
             if (this.creature.getLeapCooldown() > 0) this.creature.setLeapCooldown(this.creature.getLeapCooldown() - 1);
             if (this.phase == LeapPhase.REMOTE_TAKEOFF || this.phase == LeapPhase.REMOTE_AIRBORNE) {
                 this.phaseTicks++;
-                boolean supported = CreatureLeapPlan.hasTakeoffSupport(this.creature);
+                // Vehicle packets can leave onGround stale in either direction.
+                AxisAlignedBB bounds = this.creature.getEntityBoundingBox();
+                boolean supported = this.creature.world.collidesWithAnyBlock(new AxisAlignedBB(
+                        bounds.minX + 1E-4D, bounds.minY - 0.05D, bounds.minZ + 1E-4D,
+                        bounds.maxX - 1E-4D, bounds.minY, bounds.maxZ - 1E-4D));
                 if (!supported) this.phase = LeapPhase.REMOTE_AIRBORNE;
-                boolean landed = this.phase == LeapPhase.REMOTE_AIRBORNE && supported;
+                CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
+                // A short leap can take off and land between server observations.
+                boolean flightElapsed = this.leapPlan != null && navigation != null
+                        && this.phaseTicks >= navigation.getLeapDelay() + this.leapPlan.durationTicks();
+                boolean landed = supported && (this.phase == LeapPhase.REMOTE_AIRBORNE || flightElapsed);
                 boolean blocked = this.phase == LeapPhase.REMOTE_AIRBORNE && this.creature.collidedHorizontally;
                 if (landed || blocked) this.creature.setLeapCooldown(MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS);
-                if (this.creature.bodyTouchingLiquid() || this.phaseTicks > 80 || landed || blocked) this.cancelLeap();
+                if (!this.creature.isBeingRidden() || this.creature.bodyTouchingLiquid()
+                        || this.phaseTicks > 80 || landed || blocked) this.cancelLeap();
             }
             this.creature.setLeaping(this.isLeaping());
             return false;
@@ -443,6 +453,7 @@ public class RiftCreatureLeapHelper {
 
     public void cancelLeap() {
         this.moveHelper.creatureAction = RiftCreatureMoveHelperBase.CreatureAction.WAIT;
+        if (!this.creature.world.isRemote) this.creature.setLeaping(false);
         this.phase = LeapPhase.IDLE;
         this.phaseTicks = 0;
         this.riddenLeap = false;

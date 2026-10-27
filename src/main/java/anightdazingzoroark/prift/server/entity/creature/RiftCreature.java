@@ -2214,16 +2214,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         return (RiftCreatureMoveHelperBase) this.moveHelper;
     }
 
-    // Replicates the pose; the leap helper owns the movement lifecycle.
+    //just indicate that it is indeed leaping, meant to sync w client of course
     public void setLeaping(boolean value) {
         this.dataManager.set(LEAPING, value);
     }
 
     //client friendly query for leaping
     public boolean isLeaping() {
-        return this.world.isRemote
-                ? this.dataManager.get(LEAPING) || this.getCreatureMoveHelper().isLeaping()
-                : this.getCreatureMoveHelper().isLeaping();
+        return this.world.isRemote ? this.dataManager.get(LEAPING) : this.getCreatureMoveHelper().isLeaping();
     }
 
     public boolean isUnableToPathToTarget() {

@@ -57,6 +57,7 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
         this.posY = y;
         this.posZ = z;
         this.creatureAction = CreatureAction.LEAP;
+        if (!this.creature.world.isRemote) this.creature.setLeaping(true);
         this.creature.setUnableToPathToTarget(false);
         return true;
     }
@@ -124,6 +125,7 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
         if (that instanceof RiftCreatureMoveHelperBase helper) {
             this.creatureAction = helper.creatureAction;
             this.leapHelper.read(helper.leapHelper);
+            if (!this.creature.world.isRemote) this.creature.setLeaping(this.isLeaping());
         }
     }
 
