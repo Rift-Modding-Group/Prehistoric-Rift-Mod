@@ -388,7 +388,7 @@ public class CreatureMoveStorage {
             @NotNull ChargeupPhase finishedPhase
     ) {
         if (finishedPhase == ChargeupPhase.WINDUP && chargeupBuilder.getWindupEndEffect() != null) {
-            chargeupBuilder.getWindupEndEffect().accept(creature);
+            chargeupBuilder.getWindupEndEffect().accept(creature, this.currentMoveChargeUpTicks);
         }
         else if (finishedPhase == ChargeupPhase.PRERELEASING && chargeupBuilder.getPrereleaseEndEffect() != null) {
             chargeupBuilder.getPrereleaseEndEffect().accept(creature);

@@ -107,7 +107,7 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                         .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                                 .setChargeUpThenRelease()
                                 .setCanRotateWhileCharging(true)
-                                .setWindupEndEffect(creature -> this.captureThagomizeLook(creature, creature.getAttackTarget()))
+                                .setWindupEndEffect((creature, charge) -> this.captureThagomizeLook(creature, creature.getAttackTarget()))
                                 .setMaxChargeUp(100)
                                 .setCooldownMultiplier(6D)
                                 .setBasePowerMultiplier((creature, basePower, chargeUp) -> {

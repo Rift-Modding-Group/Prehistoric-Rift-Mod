@@ -5,7 +5,9 @@ import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.creature.builder.*;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.AnimatedHitboxDetectionRule;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.BoundingBoxDetectionRule;
+import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
+import anightdazingzoroark.prift.api.util.MathUtil;
 import anightdazingzoroark.prift.util.RiftUtil;
 import anightdazingzoroark.riftlib.ray.IRayCreator;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
@@ -93,6 +95,26 @@ public class TriceratopsBuilder extends RiftCreatureBuilder {
                         })
                         .setAnimNames("stomp")
                 )
+                .addMove("charge", new CreatureMoveBuilder()
+                        .setMakesContact()
+                        .setMoveType(CreatureMoveBuilder.MoveType.PHYSICAL)
+                        .setRequireFindTargetToUse()
+                        .setStaminaCost(0.05f)
+                        .setBasePower(100)
+                        .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
+                        .setRiddenPitchBounds(0f, 0f)
+                        .setOnMoveBeginEffect((creature, target) -> creature.prepareRush(4D, 10))
+                        .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
+                                .setChargeUpThenRelease()
+                                .setCanRotateWhileCharging(true)
+                                .setMaxChargeUp(100)
+                                .setCooldownMultiplier(4D)
+                                .setWindupEndEffect((creature, charge) -> {
+                                    int maximumRushTicks = (int) Math.ceil(MathUtil.slopeResult(charge, true, 0, 100, 0, 100));
+                                    creature.prepareRush(4D, maximumRushTicks);
+                                })
+                        )
+                )
                 //---attack ai---
                 .setMoveSelector(new CreatureMoveSelectorBuilder()
                         .setMoveRule(
@@ -111,6 +133,16 @@ public class TriceratopsBuilder extends RiftCreatureBuilder {
                                         })
                                         .addDetectionRule(new BoundingBoxDetectionRule("stompHitZone"))
                                         .setDontPathToTarget()
+                        )
+                        .setMoveRule(new MoveRuleBuilder("charge")
+                                .setPriorityPredicate((creature, target) -> {
+                                    return target != null && target.isEntityAlive() && creature.isOnGround()
+                                            && !creature.bodyTouchingLiquid() && creature.hasStraightWalkingPathTo(target)
+                                            && creature.horizontalDistanceFromEntity(target) >= 6D
+                                            && creature.horizontalDistanceFromEntity(target) <= 16D ? 4 : -1;
+                                })
+                                .addDetectionRule(new HorizontalDistanceFromUserDetectionRule(6D, 16D))
+                                .setDontPathToTarget()
                         )
                         .setCanSprintToAttack(1, 2D, 16D)
                         .setCanLeapToAttack(1, 6D, 12D, false)

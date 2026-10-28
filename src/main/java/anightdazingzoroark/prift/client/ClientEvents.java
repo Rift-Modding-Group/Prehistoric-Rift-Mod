@@ -53,6 +53,8 @@ public class ClientEvents {
     private boolean usingRidingMove;
     private boolean ridingAimActive;
     private int ridingAimMove = -1;
+    @NotNull
+    private String releasedRidingAimMove = "";
     private int selectedRidingMove;
     private int riddenLeapChargeStartTick = -1;
     private boolean riddenLeapFullyCharged;
@@ -162,7 +164,8 @@ public class ClientEvents {
         boolean keyPressed = Keyboard.getEventKeyState();
 
         //use keybinds for hotbar for manual move selection
-        if (this.moveHotbarActive && minecraft.currentScreen == null && keyPressed && !this.riddenLeapFullyCharged) {
+        if (this.moveHotbarActive && minecraft.currentScreen == null && keyPressed && !this.riddenLeapFullyCharged
+                && this.releasedRidingAimMove.isEmpty()) {
             int moveCount = riddenCreature.getCreatureMoves().getUsableMoves().size();
             for (int hotbarSlot = 0; hotbarSlot < minecraft.gameSettings.keyBindsHotbar.length; hotbarSlot++) {
                 KeyBinding hotbarBinding = minecraft.gameSettings.keyBindsHotbar[hotbarSlot];
@@ -248,6 +251,7 @@ public class ClientEvents {
         else if (this.ridingAimActive) {
             List<ImmutablePair<String, CreatureMoveBuilder>> moves = riddenCreature.getCreatureMoves().getUsableMoves();
             if (!this.moveHotbarActive || minecraft.currentScreen != null
+                    || !this.releasedRidingAimMove.isEmpty() && !this.releasedRidingAimMove.equals(riddenCreature.getCurrentMove())
                     || !this.ridingLeapAimActive && (this.ridingAimMove < 0 || this.ridingAimMove >= moves.size()
                     || moves.get(this.ridingAimMove).getValue().getRiddenAimingType() == RiddenAimingType.NONE)
             ) {
@@ -299,6 +303,12 @@ public class ClientEvents {
 
         RiftCreature riddenCreature = this.updateRidingState(minecraft);
         if (riddenCreature == null) return;
+
+        // A released ranged charge keeps its camera and selected move until recovery finishes.
+        if (!this.releasedRidingAimMove.isEmpty()) {
+            if (event.getButton() >= 0 || event.getDwheel() != 0) event.setCanceled(true);
+            return;
+        }
 
         // Releasing aim always leaves the camera, including after the jump charge has been consumed.
         if (this.ridingLeapAimActive && event.getButton() == 1 && !event.isButtonstate()) {
@@ -355,21 +365,31 @@ public class ClientEvents {
         //make left click use selected move
         if (event.getButton() == 0) {
             if (event.isButtonstate()) {
-                this.usingRidingMove = true;
-                if (this.ridingAimActive) {
-                    this.cameraHandler.sendRidingAimUpdate(minecraft, riddenCreature, this.ridingAimMove);
+                CreatureMoveBuilder selectedMove = riddenCreature.getCreatureMoves().getUsableMoves().get(this.selectedRidingMove).getValue();
+                //make sure that on ranged moves left click fails unless already aiming
+                if (selectedMove.getRiddenAimingType() == RiddenAimingType.RANGED
+                        && (!this.ridingAimActive || this.ridingLeapAimActive || this.ridingAimMove != this.selectedRidingMove)
+                ) {
+                    event.setCanceled(true);
                 }
-                RiftMessages.WRAPPER.sendToServer(new RiftRidingActionMessage(
-                        RiftRidingActionMessage.Action.START_MOVE, this.selectedRidingMove, false
-                ));
+                else {
+                    this.usingRidingMove = true;
+                    if (this.ridingAimActive) {
+                        this.cameraHandler.sendRidingAimUpdate(minecraft, riddenCreature, this.ridingAimMove);
+                    }
+                    RiftMessages.WRAPPER.sendToServer(new RiftRidingActionMessage(
+                            RiftRidingActionMessage.Action.START_MOVE, this.selectedRidingMove, false
+                    ));
+                }
             }
-            else this.releaseSelectedRidingMove();
+            else if (this.usingRidingMove) this.releaseSelectedRidingMove();
             event.setCanceled(true);
         }
         //hold right click to aim moves that opt into ridden aiming
         else if (event.getButton() == 1 && !riddenCreature.isLeaping()) {
             CreatureMoveBuilder selectedMove = riddenCreature.getCreatureMoves().getUsableMoves().get(this.selectedRidingMove).getValue();
             if (selectedMove.getRiddenAimingType() != RiddenAimingType.NONE) {
+                //set aim
                 if (event.isButtonstate()) {
                     this.ridingAimActive = true;
                     this.ridingAimMove = this.selectedRidingMove;
@@ -379,10 +399,23 @@ public class ClientEvents {
                 }
                 else {
                     CreatureMoveChargeupBuilder chargeupBuilder = selectedMove.getMoveChargeupBuilder();
-                    if (this.usingRidingMove && chargeupBuilder != null && chargeupBuilder.getChargeUpWhileUse()) {
+                    String moveName = riddenCreature.getCreatureMoves().getUsableMoves().get(this.selectedRidingMove).getKey();
+                    boolean retainChargedAim = this.ridingAimActive && this.ridingAimMove == this.selectedRidingMove
+                            && selectedMove.getRiddenAimingType() == RiddenAimingType.RANGED
+                            && chargeupBuilder != null && chargeupBuilder.getChargeUpThenRelease()
+                            && moveName.equals(riddenCreature.getCurrentMove());
+                    //make sure that releasing aim button while charging means instant release
+                    if (retainChargedAim) {
+                        this.cameraHandler.sendRidingAimUpdate(minecraft, riddenCreature, this.ridingAimMove);
+                        this.releasedRidingAimMove = moveName;
                         this.releaseSelectedRidingMove();
                     }
-                    this.stopRidingAim();
+                    else {
+                        if (this.usingRidingMove && chargeupBuilder != null && chargeupBuilder.getChargeUpWhileUse()) {
+                            this.releaseSelectedRidingMove();
+                        }
+                        this.stopRidingAim();
+                    }
                 }
             }
             event.setCanceled(true);
@@ -541,6 +574,7 @@ public class ClientEvents {
     }
 
     private void stopRidingAim() {
+        this.releasedRidingAimMove = "";
         if (!this.ridingAimActive) return;
 
         Minecraft minecraft = Minecraft.getMinecraft();

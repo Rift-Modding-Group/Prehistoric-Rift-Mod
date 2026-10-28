@@ -68,6 +68,8 @@ public interface ICreature {
 
     boolean canSprintToAttack();
 
+    void prepareRush(double speedMultiplier, int maximumTicks);
+
     boolean canLeapToAttack();
 
     boolean atFrustrationThreshold();

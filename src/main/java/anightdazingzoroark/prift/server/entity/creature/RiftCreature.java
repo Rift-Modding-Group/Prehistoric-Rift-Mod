@@ -31,6 +31,7 @@ import anightdazingzoroark.prift.server.entity.ai.RiftHurtByTarget;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureAcquisitionInfo;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreatureChargeHelper.RushState;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.ai.RiftFindTarget;
 import anightdazingzoroark.prift.server.entity.ai.RiftUnmountedUseMove;
@@ -174,6 +175,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private static final DataParameter<Integer> LEAP_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> SPRINT_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> RIDDEN_AIMING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<RushState> RUSH_STATE = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.RUSH_STATE);
 
     //--custom property values, which can be called and manipulated from a creature builder--
     @NotNull
@@ -186,6 +188,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //--server side primitive params and objects--
     @NotNull
     private final RiftCreatureSprintHelper sprintHelper;
+    @NotNull
+    private final RiftCreatureChargeHelper chargeHelper;
     private int staminaDrainTicks;
     private float pendingStaminaDrain;
     @Nullable
@@ -250,6 +254,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         CreatureDomesticationBuilder domestication = this.creatureType.getDomestication();
         this.creatureInventory = new RiftLibInventoryHandler(domestication == null ? 1 : domestication.getInventorySize());
         this.lookHelper = new RiftCreatureLookHelper(this);
+        this.chargeHelper = new RiftCreatureChargeHelper(this);
         this.moveHelper = new RiftCreatureMoveHelper(this);
         this.navigator = new RiftCreaturePathNavigate(this, worldIn);
         this.applyCreatureTypeSettings();
@@ -357,6 +362,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.dataManager.register(LEAP_COOLDOWN, 0);
         this.dataManager.register(SPRINT_COOLDOWN, 0);
         this.dataManager.register(RIDDEN_AIMING, false);
+        this.dataManager.register(RUSH_STATE, RushState.EMPTY);
     }
 
     //this is gonna be mostly for registering the custom attributes
@@ -763,6 +769,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             if (!cancelCurrentMoveForMissingTarget && !staminaStoppedCurrentMove) {
                 creatureMoveStorage.tickCurrentMove(this, this.getAttackTarget());
             }
+            this.chargeHelper.updateCharge(RiftCreatureChargeHelper.UpdatePhase.TICK);
             if (this.isBeingRidden()) this.dataManager.setDirty(CREATURE_MOVES);
 
             //when out of stamina, creature will go into a staggered pose and recover after 10-20 seconds
@@ -1516,6 +1523,38 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @NotNull
     public RiftCreatureSprintHelper getSprintHelper() {
         return this.sprintHelper;
+    }
+
+    @NotNull
+    public RiftCreatureChargeHelper getChargeHelper() {
+        return this.chargeHelper;
+    }
+
+    @Override
+    public void prepareRush(double speedMultiplier, int maximumTicks) {
+        if (this.world.isRemote || this.getCurrentMove().isEmpty()) return;
+        if (speedMultiplier <= 0D || maximumTicks <= 0) return;
+        float heading = this.getAnimationData().getModelYaw();
+        if (this.getControllingPassenger() instanceof EntityPlayer rider) heading = rider.rotationYaw;
+        else {
+            EntityLivingBase target = this.getAttackTarget();
+            if (target != null && target.isEntityAlive()) {
+                heading = (float) Math.toDegrees(Math.atan2(this.posX - target.posX, target.posZ - this.posZ));
+            }
+        }
+        this.rotationYaw = this.prevRotationYaw = heading;
+        this.renderYawOffset = this.prevRenderYawOffset = heading;
+        this.rotationYawHead = this.prevRotationYawHead = heading;
+        this.setRushState(new RushState(this.getCurrentMove(), speedMultiplier, maximumTicks, heading));
+    }
+
+    @NotNull
+    public RushState getRushState() {
+        return this.dataManager.get(RUSH_STATE);
+    }
+
+    public void setRushState(@NotNull RushState state) {
+        this.dataManager.set(RUSH_STATE, state);
     }
 
     //-----leap management-----
@@ -2388,6 +2427,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             return;
         }
         boolean riddenMoveActive = this.isBeingRidden() && !this.getCurrentMove().isEmpty();
+        if (this.chargeHelper.updateCharge(RiftCreatureChargeHelper.UpdatePhase.TRAVEL)) {
+            super.travel(0f, 0f, 0f);
+            return;
+        }
 
         //make sure staggering and ridden moves cannot retain walking input
         if (this.isStaggered() || riddenMoveActive) {

@@ -27,7 +27,8 @@ public class CreatureMoveChargeupBuilder {
     @NotNull
     private Function<ICreature, Double> cooldownMultiplier = creature -> 2D;
 
-    private Consumer<ICreature> windupEndEffect;
+    @Nullable
+    private BiConsumer<ICreature, Integer> windupEndEffect;
     private Consumer<ICreature> prereleaseEndEffect;
     private Consumer<ICreature> releaseEndEffect;
     private BiConsumer<ICreature, Integer> windupEffect;
@@ -135,13 +136,17 @@ public class CreatureMoveChargeupBuilder {
         return this.cooldownMultiplier;
     }
 
-    public CreatureMoveChargeupBuilder setWindupEndEffect(@NotNull Consumer<ICreature> windupEndEffect) {
+    /**
+     * Sets the effect called when windup ends, receiving the creature and its accumulated charge ticks.
+     */
+    @NotNull
+    public CreatureMoveChargeupBuilder setWindupEndEffect(@NotNull BiConsumer<ICreature, Integer> windupEndEffect) {
         this.windupEndEffect = windupEndEffect;
         return this;
     }
 
     @Nullable
-    public Consumer<ICreature> getWindupEndEffect() {
+    public BiConsumer<ICreature, Integer> getWindupEndEffect() {
         return this.windupEndEffect;
     }
 
