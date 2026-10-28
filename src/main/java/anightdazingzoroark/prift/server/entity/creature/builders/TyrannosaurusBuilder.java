@@ -217,7 +217,11 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                         .setMoveType(CreatureMoveBuilder.MoveType.SPECIAL)
                         .setElement(Element.FIRE)
                         .setOnMoveBeginEffect(this::captureFlamethrowerLook)
-                        .setWhileMoveUseEffect(this::captureFlamethrowerLook)
+                        .setWhileMoveUseEffect((creature, target) -> {
+                            if (!creature.getAnimationData().getHolder().isBeingRidden()
+                                    && (target == null || !target.isEntityAlive())) return;
+                            this.captureFlamethrowerLook(creature, target);
+                        })
                         .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                                 .setChargeUpWhileUse(true)
                                 .setCanLookWhileUsing(true)
@@ -285,13 +289,28 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
     }
 
     //-----helpers for moves-----
-    /** Keep bite's initial swing, then fit the body pitch to an unobstructed flame direction. */
+    /**
+     * Keep bite's initial swing, then fit the body pitch to an unobstructed flame direction.
+     * */
     private void captureFlamethrowerLook(@NotNull ICreature creature, @Nullable Entity target) {
         AnimationDataEntityLiving data = creature.getAnimationData();
         data.setVariable("flamethrower_body_aim", data.getHolder().isBeingRidden() ? 0D : 1D);
-        data.setVariable("flamethrower_aim_swing", MathUtil.slopeResult(data.getHeadPitch(1f), true,
-                CreatureLookUtil.HEAD_PITCH_MIN, 0D, -1D, 1D));
+        data.setVariable(
+                "flamethrower_aim_swing",
+                MathUtil.slopeResult(
+                        data.getHeadPitch(1f), true,
+                        CreatureLookUtil.HEAD_PITCH_MIN, 0D, -1D, 1D
+                )
+        );
         data.setVariable("flamethrower_release_pitch", 20D * data.getVariable("flamethrower_aim_swing"));
+        double windupPitch;
+        if (data.getHeadPitch(1f) < 0f) {
+            windupPitch = data.getVariable("flamethrower_release_pitch") + 30D;
+        }
+        else {
+            windupPitch = data.getVariable("flamethrower_release_pitch") - 30D;
+        }
+        data.setVariable("flamethrower_windup_pitch", windupPitch);
         if (data.getHolder().isBeingRidden() || !(target instanceof EntityLivingBase livingTarget)
                 || !livingTarget.isEntityAlive()
                 || !(data.getHolder() instanceof IAnimatable<?> animatable)
@@ -343,6 +362,13 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
             }
         }
         data.setVariable("flamethrower_release_pitch", -bestAngle);
+        if (data.getHeadPitch(1f) < 0f || aimSwing < 0D) {
+            windupPitch = Math.max(10D, -bestAngle + 30D);
+        }
+        else {
+            windupPitch = -bestAngle - 30D;
+        }
+        data.setVariable("flamethrower_windup_pitch", windupPitch);
     }
 
     /**
@@ -354,6 +380,8 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
         data.setVariable("head_attack_pitch", look.pitch());
         data.setVariable("head_attack_yaw", look.yaw());
         data.setVariable("head_attack_swing", MathUtil.slopeResult(look.pitch(), true, CreatureLookUtil.HEAD_PITCH_MIN, 0D, -1D, 1D));
+        // Keep the stroke direction fixed while fitting the neck pitch to the strike height.
+        data.setVariable("head_attack_upward", look.pitch() < 0f ? 1D : 0D);
 
         Vec3d target = CreatureLookUtil.getRiddenAttackPosition(creature);
         if (target == null || !(data.getHolder() instanceof IAnimatable<?> animatable)) return;

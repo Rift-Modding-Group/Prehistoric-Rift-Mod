@@ -130,6 +130,9 @@
 		"animation.stegosaurus.plate_fling": {
 			"animation_length": 1,
 			"bones": {
+				"neck": {
+					"rotation": ["plate_fling_shot ? plate_fling_pitch : math.clamp(query.head_x_rotation, -15, 15)", "plate_fling_shot ? plate_fling_yaw : math.clamp(query.head_y_rotation, -15, 15)", 0]
+				},
 				"bodyFront": {
 					"rotation": {
 						"0.0": [0, 0, 0],

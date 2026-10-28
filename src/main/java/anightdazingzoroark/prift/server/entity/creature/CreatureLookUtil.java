@@ -155,10 +155,12 @@ public class CreatureLookUtil {
         double previousPitch = data.getVariable("head_attack_pitch");
         double previousYaw = data.getVariable("head_attack_yaw");
         double previousSwing = data.getVariable("head_attack_swing");
+        double previousUpward = data.getVariable("head_attack_upward");
         headPitch = Math.clamp(headPitch, HEAD_PITCH_MIN, HEAD_PITCH_MAX);
         data.setVariable("head_attack_pitch", headPitch);
         data.setVariable("head_attack_yaw", 0D);
         data.setVariable("head_attack_swing", MathUtil.slopeResult(headPitch, true, HEAD_PITCH_MIN, 0D, -1D, 1D));
+        data.setVariable("head_attack_upward", headPitch < 0f ? 1D : 0D);
         List<AnimationHitboxTimeline.HitboxWindow> windows = AnimationHitboxTimeline.getHitboxWindows(animations, hitboxes, data);
         Vec3d result = null;
         if (!windows.isEmpty()) {
@@ -199,6 +201,7 @@ public class CreatureLookUtil {
         data.setVariable("head_attack_pitch", previousPitch);
         data.setVariable("head_attack_yaw", previousYaw);
         data.setVariable("head_attack_swing", previousSwing);
+        data.setVariable("head_attack_upward", previousUpward);
         return result;
     }
 

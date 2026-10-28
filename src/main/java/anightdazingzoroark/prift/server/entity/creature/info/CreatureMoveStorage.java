@@ -271,7 +271,10 @@ public class CreatureMoveStorage {
             this.currentMoveTicks++;
 
             //well
-            if (currentMoveBuilder.getWhileMoveUseEffect() != null) currentMoveBuilder.getWhileMoveUseEffect().accept(creature, target);
+            if (this.currentMoveChargeupPhase != ChargeupPhase.FINISHING
+                    && currentMoveBuilder.getWhileMoveUseEffect() != null) {
+                currentMoveBuilder.getWhileMoveUseEffect().accept(creature, target);
+            }
 
             //chargeup stuff
             CreatureMoveChargeupBuilder chargeupBuilder = currentMoveBuilder.getMoveChargeupBuilder();

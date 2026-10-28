@@ -68,6 +68,7 @@ import anightdazingzoroark.riftlib.core.AnimatableRunValue;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
+import anightdazingzoroark.riftlib.core.easing.EasingType;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
 import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
 import anightdazingzoroark.riftlib.model.AnimatedLocator;
@@ -2836,10 +2837,13 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         CreatureMoveBuilder move = CreatureLookUtil.getRiddenAimMove(this, this.getCurrentMove());
         CreatureMoveChargeupBuilder charge = move == null ? null : move.getMoveChargeupBuilder();
         if (charge != null && charge.getCanLookWhileUsing() && this.canRotateMounted()
-                && this.getControllingPassenger() instanceof EntityPlayer rider) {
+                && this.getControllingPassenger() instanceof EntityPlayer rider
+        ) {
             float turn = MathHelper.wrapDegrees(rider.rotationYaw - rider.prevRotationYaw);
-            return (float) MathUtil.slopeResult(partialTicks, true, 0D, 1D,
-                    rider.prevRotationYaw, rider.prevRotationYaw + turn);
+            return (float) MathUtil.slopeResult(
+                    partialTicks, true, 0D, 1D,
+                    rider.prevRotationYaw, rider.prevRotationYaw + turn
+            );
         }
         return IDynamicRideUser.super.getRenderYaw(partialTicks);
     }
@@ -2946,7 +2950,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //-----create animation controllers-----
         //---for normal stuff---
-        animationData.addAnimation("animation."+this.creatureType.getName()+".look", data -> this.getCurrentMove().isEmpty());
         animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntityLiving>(this, "movement", "default",
                 new AnimationControllerState<AnimationDataEntityLiving>("default")
                         .addStateTransition("moving", animData -> !this.getIsSleeping() && this.getCurrentMove().isEmpty()
@@ -3072,7 +3075,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         else moveBuilderMap = this.creatureType.getPhaseBuilderMaps().get(phase).getMoves();
 
         //add the initial state
-        AnimationControllerState<AnimationDataEntityLiving> initialState = new AnimationControllerState<>("default");
+        AnimationControllerState<AnimationDataEntityLiving> initialState = new AnimationControllerState<AnimationDataEntityLiving>("default")
+                .addAnimation("animation." + this.creatureType.getName() + ".look", animData -> this.getPhase().equals(phase));
         creatureMovesStates.add(initialState);
 
         //define anim controller name
@@ -3095,7 +3099,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                             && this.getCreatureMoves().currentMoveMatches(moveName, currentChargeupPhase));
 
                     //---define corresponding state---
-                    AnimationControllerState<AnimationDataEntityLiving> stateToAdd = new AnimationControllerState<AnimationDataEntityLiving>(controllerStateName)
+                    double transitionLength = currentChargeupPhase == ChargeupPhase.FINISHING ? 0.15D : 0D;
+                    AnimationControllerState<AnimationDataEntityLiving> stateToAdd = new AnimationControllerState<AnimationDataEntityLiving>(controllerStateName, transitionLength, EasingType.EaseInOutSine)
                             .addAnimation("animation."+this.creatureType.getName()+"."+controllerStateName);
 
                     //and loop again xd
@@ -3131,7 +3136,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 initialState.addStateTransition(moveName, animData -> !this.getIsSleeping() && this.getCurrentMove().equals(moveName));
 
                 //create state for move
-                AnimationControllerState<AnimationDataEntityLiving> moveState = new AnimationControllerState<AnimationDataEntityLiving>(moveName)
+                AnimationControllerState<AnimationDataEntityLiving> moveState = new AnimationControllerState<AnimationDataEntityLiving>(moveName, 0.15D, EasingType.EaseInOutSine)
                         .addStateTransition("default", animData -> this.getIsSleeping()
                                 || animData.allAnimationsFinished(controllerName))
                         .addExitEffect(animData -> this.onMoveFinish(moveName));
