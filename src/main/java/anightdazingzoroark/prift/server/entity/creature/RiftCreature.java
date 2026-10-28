@@ -219,6 +219,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //herd helper
     @Nullable
     private RiftCreatureHerdHelper herdHelper;
+    private int recentlyHitTimer;
 
     //target pathing state
     private boolean unableToPathToTarget;
@@ -431,6 +432,29 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         }
         this.targetTasks.addTask(2, new RiftFindTarget(this, true));
 
+        if (this.getNavigationBuilder() != null && this.creatureType.getPanicOnHit()) {
+            this.tasks.addTask(0, new EntityAIPanic(this, 1.25D) {
+                @Override
+                public boolean shouldExecute() {
+                    if (RiftCreature.this.isTamed() || RiftCreature.this.isStaggered()) return false;
+
+                    //special case for herders
+                    if (RiftCreature.this.herdHelper != null) {
+                        return RiftCreature.this.herdHelper.getMembers().stream().anyMatch(member -> {
+                            return member != RiftCreature.this && member.canDoHerding() && member.getRevengeTarget() != null;
+                        }) && this.findRandomPosition();
+                    }
+
+                    //other
+                    return super.shouldExecute();
+                }
+
+                @Override
+                public boolean shouldContinueExecuting() {
+                    return !RiftCreature.this.isTamed() && !RiftCreature.this.isStaggered() && super.shouldContinueExecuting();
+                }
+            });
+        }
         if (this.getNavigationBuilder() != null && this.creatureType.getFleePredicate() != null) {
             this.tasks.addTask(0, new EntityAIAvoidEntity<EntityLivingBase>(
                     this, EntityLivingBase.class,
@@ -539,6 +563,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         //disable default growth system
         if (this.getGrowingAge() < 0) this.setGrowingAge(0);
 
+        //for slow fall entities, reduce fall speed
+        if (this.creatureType.getFallSlowly() && !this.onGround && this.motionY < 0D) {
+            this.motionY *= 0.6D;
+        }
+
         //server only operations
         if (!this.world.isRemote) {
             if (this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.PARTY_INACTIVE) {
@@ -596,6 +625,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
             //tick herding
             if (this.herdHelper != null) this.herdHelper.onUpdate();
+
+            //tick recently hit timer
+            if (this.recentlyHitTimer >= 0) this.recentlyHitTimer--;
 
             //creatures must drop threats that they are configured to flee
             if (this.shouldFleeFrom(this.getAttackTarget())) this.setAttackTarget(null);
@@ -1025,7 +1057,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             else if (source.isFireDamage()) attackElement = Element.FIRE;
             else if (source == DamageSource.LIGHTNING_BOLT) attackElement = Element.ELECTRIC;
             else if (source.getTrueSource() != null || source.getImmediateSource() != null) attackElement = Element.NEUTRAL;
-            else return super.attackEntityFrom(source, amount);
+            else {
+                if (!this.world.isRemote) this.recentlyHitTimer = 200;
+                return super.attackEntityFrom(source, amount);
+            }
 
             double multiplier = Arrays.stream(this.getCreatureType().getElement()).distinct()
                     .mapToDouble(element -> element.damageMultiplierFromAttackElement(attackElement))
@@ -1034,7 +1069,26 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             amount *= (float) multiplier;
         }
 
+        if (!this.world.isRemote) this.recentlyHitTimer = 200;
         return super.attackEntityFrom(source, amount);
+    }
+
+    @Override
+    public void onDeath(DamageSource cause) {
+        if (!this.world.isRemote && this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.BASE && this.creatureBoxHome != null) {
+            this.setDeploymentType(RiftCreatureEnums.CreatureDeployment.BASE_INACTIVE);
+            if (this.world.getTileEntity(this.creatureBoxHome) instanceof CreatureBoxTileEntity tile) {
+                tile.updateCreature(this);
+            }
+        }
+        if (!this.world.isRemote && this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.PARTY) {
+            this.setDeploymentType(RiftCreatureEnums.CreatureDeployment.PARTY_INACTIVE);
+            if (this.getOwner() instanceof EntityPlayer player) {
+                PlayerPartyProperties playerParty = PlayerPartyProperties.get(player);
+                if (playerParty != null) playerParty.updatePartyMember(this);
+            }
+        }
+        super.onDeath(cause);
     }
 
     /**
@@ -1153,6 +1207,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void fall(float distance, float damageMultiplier) {
+        if (this.creatureType.getFallSlowly()) return;
         float adjustedDistance = distance - this.getMaxFallHeight() + 3f;
         super.fall(adjustedDistance, damageMultiplier);
     }
@@ -2687,21 +2742,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     @Override
-    public void onDeath(DamageSource cause) {
-        if (!this.world.isRemote && this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.BASE && this.creatureBoxHome != null) {
-            this.setDeploymentType(RiftCreatureEnums.CreatureDeployment.BASE_INACTIVE);
-            if (this.world.getTileEntity(this.creatureBoxHome) instanceof CreatureBoxTileEntity tile) {
-                tile.updateCreature(this);
-            }
-        }
-        if (!this.world.isRemote && this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.PARTY) {
-            this.setDeploymentType(RiftCreatureEnums.CreatureDeployment.PARTY_INACTIVE);
-            if (this.getOwner() instanceof EntityPlayer player) {
-                PlayerPartyProperties playerParty = PlayerPartyProperties.get(player);
-                if (playerParty != null) playerParty.updatePartyMember(this);
-            }
-        }
-        super.onDeath(cause);
+    public boolean getWasRecentlyHit() {
+        return this.recentlyHitTimer > 0;
     }
 
     //-----nbt parsing related stuff-----
@@ -2952,12 +2994,23 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         //---for normal stuff---
         animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntityLiving>(this, "movement", "default",
                 new AnimationControllerState<AnimationDataEntityLiving>("default")
-                        .addStateTransition("moving", animData -> !this.getIsSleeping() && this.getCurrentMove().isEmpty()
-                                && !this.isLeaping() && animData.isMoving()),
+                        .addStateTransition("moving", animData -> {
+                            return !this.getIsSleeping() && this.getCurrentMove().isEmpty() && !this.isLeaping() && animData.isMoving();
+                        })
+                        .addStateTransition("falling", data -> {
+                            return !this.getIsSleeping() && this.creatureType.getFallSlowly() && !this.onGround;
+                        }),
                 new AnimationControllerState<AnimationDataEntityLiving>("moving", 0.1)
                         .addAnimation("animation."+this.creatureType.getName()+".walk")
-                        .addStateTransition("default", animData -> this.getIsSleeping() || !this.getCurrentMove().isEmpty()
-                                || this.isLeaping() || !animData.isMoving())
+                        .addStateTransition("default", animData -> {
+                            return this.getIsSleeping() || !this.getCurrentMove().isEmpty() || this.isLeaping() || !animData.isMoving();
+                        })
+                        .addStateTransition("falling", data -> {
+                            return !this.getIsSleeping() && this.creatureType.getFallSlowly() && !this.onGround;
+                        }),
+                new AnimationControllerState<AnimationDataEntityLiving>("falling")
+                        .addAnimation("animation." + this.creatureType.getName() + ".fall")
+                        .addStateTransition("default", data -> this.onGround)
         ));
         animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntityLiving>(this, "sprintPosing", "default",
                 new AnimationControllerState<AnimationDataEntityLiving>("default", 0.2)

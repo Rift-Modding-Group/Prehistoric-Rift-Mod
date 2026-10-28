@@ -26,6 +26,7 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     private float fleeSearchDistance;
     @Nullable
     private BiPredicate<ICreature, EntityLivingBase> fleePredicate;
+    private boolean setPanicOnHit;
 
     /**
      * Set the name of the species of the creature, is to be required
@@ -49,9 +50,7 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
      * Make the creature flee matching nearby entities while the predicate is satisfied.
      * The predicate can include conditions such as health and whether a herder is currently solitary.
      */
-    public RiftCreatureBuilder setFleeBehavior(
-            float searchDistance, @NotNull BiPredicate<ICreature, EntityLivingBase> fleePredicate
-    ) {
+    public RiftCreatureBuilder setFleeBehavior(float searchDistance, @NotNull BiPredicate<ICreature, EntityLivingBase> fleePredicate) {
         this.checkIfLocked();
         if (searchDistance <= 0f) throw new IllegalArgumentException("Flee search distance must be greater than 0!");
 
@@ -67,6 +66,20 @@ public class RiftCreatureBuilder extends AbstractCreatureBuilder<RiftCreatureBui
     @Nullable
     public BiPredicate<ICreature, EntityLivingBase> getFleePredicate() {
         return this.fleePredicate;
+    }
+
+    /**
+     * Make the creature panic when hit, like most vanilla animals
+     * */
+    public RiftCreatureBuilder setPanicOnHit() {
+        this.checkIfLocked();
+
+        this.setPanicOnHit = true;
+        return this;
+    }
+
+    public boolean getPanicOnHit() {
+        return this.setPanicOnHit;
     }
 
     /**

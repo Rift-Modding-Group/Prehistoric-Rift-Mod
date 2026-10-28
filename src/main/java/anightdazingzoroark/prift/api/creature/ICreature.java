@@ -84,6 +84,8 @@ public interface ICreature {
 
     boolean getUseBlockBreak();
 
+    boolean getWasRecentlyHit();
+
     boolean isTamed();
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

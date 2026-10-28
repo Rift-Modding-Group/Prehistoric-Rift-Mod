@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -173,7 +174,12 @@ public class RiftCreatureHerdHelper {
     }
 
     public int getSize() {
-        return this.state.members.size();
+        return this.getMembers().size();
+    }
+
+    @NotNull
+    public Set<RiftCreature> getMembers() {
+        return Collections.unmodifiableSet(this.state.members);
     }
 
     public boolean isRetreating() {

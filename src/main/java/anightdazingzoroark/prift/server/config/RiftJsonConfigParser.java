@@ -208,6 +208,31 @@ public class RiftJsonConfigParser {
                 )
         );
         defaultList.foodGroups.put(
+                "seed",
+                Arrays.asList(
+                        new RiftCreatureFood.Builder("minecraft:wheat_seeds")
+                                .setPercentHealed(0.1f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
+                                .build(),
+                        new RiftCreatureFood.Builder("minecraft:pumpkin_seeds")
+                                .setPercentHealed(0.1f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
+                                .build(),
+                        new RiftCreatureFood.Builder("minecraft:melon_seeds")
+                                .setPercentHealed(0.1f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
+                                .build(),
+                        new RiftCreatureFood.Builder("minecraft:beetroot_seeds")
+                                .setPercentHealed(0.1f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
+                                .build(),
+                        new RiftCreatureFood.Builder("prift:smokenut_seeds")
+                                .setPercentHealed(0.1f)
+                                .setTamingEffectiveness(0.1f, 0.15f)
+                                .build()
+                )
+        );
+        defaultList.foodGroups.put(
                 "vegetable",
                 Arrays.asList(
                         new RiftCreatureFood.Builder("minecraft:carrot")

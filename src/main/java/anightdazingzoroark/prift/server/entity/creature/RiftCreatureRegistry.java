@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+import anightdazingzoroark.prift.server.entity.creature.builders.DodoBuilder;
 import anightdazingzoroark.prift.server.entity.creature.builders.StegosaurusBuilder;
 import anightdazingzoroark.prift.server.entity.creature.builders.TyrannosaurusBuilder;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
@@ -114,7 +115,7 @@ public class RiftCreatureRegistry {
                 .setScaleRangeForAge(1f, 1f)
                 .setSpawnEggColors(0x4F7942, 0xD9C7A3)
                 .setMainHitboxSize(1f, 1.375f)
-                // Registration requires a move, even for the harmless plush placeholder.
+                //registration requires a move, even for the harmless plush placeholder.
                 .addMove("placeholder", new CreatureMoveBuilder()
                         .setMoveType(CreatureMoveBuilder.MoveType.STATUS)
                         .setAnimNames("placeholder")
@@ -122,18 +123,8 @@ public class RiftCreatureRegistry {
         );
         registerCreatureType(new TyrannosaurusBuilder());
         registerCreatureType(new StegosaurusBuilder());
+        registerCreatureType(new DodoBuilder());
         /*
-        registerCreatureType(
-                "dodo",
-                RiftCreature.class,
-                new RiftCreatureBuilder().setCreatureCategory(RiftCreatureEnums.CreatureCategory.BIRD)
-                        .setCreatureDiet(RiftCreatureEnums.CreatureDiet.HERBIVORE)
-                        .setMovementOptions(RiftCreatureEnums.Movement.SLOW_FALL)
-                        .setStats(20, 10, 5, 30)
-                        .setScaleRangeForAge(0.5f, 0.75f)
-                        .setSpawnEggColors(7828853, 6184028)
-                        .setIsHerder()
-        );
         registerCreatureType(
                 "triceratops",
                 RiftCreature.class,

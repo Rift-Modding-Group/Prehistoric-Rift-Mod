@@ -59,6 +59,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private boolean canRetreat;
     private int daysUntilAdult = 1;
     private boolean fallCreatesImpact;
+    private boolean fallSlowly;
     private int sprintBasePower = 10;
     private int sprintCooldown = 300;
     @Nullable
@@ -296,6 +297,11 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * */
     public T setMaxFallHeight(int maxFallHeight) {
         this.checkIfLocked();
+        if (this.fallSlowly) {
+            //todo: replace w logger
+            System.out.println("This creature is set to fall slowly! This will be ignored");
+            return this.getThis();
+        }
         if (maxFallHeight < 0) throw new IllegalArgumentException("Maximum fall height cannot be negative!");
 
         this.maxFallHeight = maxFallHeight;
@@ -311,6 +317,11 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * */
     public T setFallCreatesImpact() {
         this.checkIfLocked();
+        if (this.fallSlowly) {
+            //todo: replace w logger
+            System.out.println("This creature is set to fall slowly! This will be ignored");
+            return this.getThis();
+        }
 
         this.fallCreatesImpact = true;
         return this.getThis();
@@ -318,6 +329,22 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     public boolean getFallCreatesImpact() {
         return this.fallCreatesImpact;
+    }
+
+    /**
+     * Make it so that this creature falls down slowly similar to vanilla chickens
+     * and be immune to fall damage
+     * */
+    public T setFallSlowly() {
+        this.checkIfLocked();
+
+        this.fallSlowly = true;
+        this.fallCreatesImpact = false;
+        return this.getThis();
+    }
+
+    public boolean getFallSlowly() {
+        return this.fallSlowly;
     }
 
     /**
