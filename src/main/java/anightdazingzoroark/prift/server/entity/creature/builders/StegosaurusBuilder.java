@@ -4,7 +4,7 @@ import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.BoundingBoxDetectionRule;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.VerticalDistanceFromUserDetectionRule;
-import anightdazingzoroark.prift.server.entity.creature.CreatureLookUtil;
+import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.creature.builder.*;
@@ -61,7 +61,6 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                         "tail", creature -> 0.25D
                 ))
                 .setIsHerder(8)
-                .setCanRetreat()
                 .setFleeBehavior(
                         16f,
                         (creature, threat) -> {
@@ -247,7 +246,6 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                 .addDefaultFoodItemWhitelistEntry("fruit")
                 .addDefaultFoodItemWhitelistEntry("vegetable")
                 .addDefaultFoodItemWhitelistEntry("grass")
-                .addDefaultFoodItemWhitelistEntry("leaves")
                 .setRetaliateWhenAttacked()
                 .setRememberPlayerAttacker();
     }

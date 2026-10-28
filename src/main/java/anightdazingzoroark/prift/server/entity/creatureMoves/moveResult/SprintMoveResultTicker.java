@@ -40,7 +40,7 @@ public class SprintMoveResultTicker extends AbstractMoveResultTicker {
     @Override
     public void onUpdate() {
         if (this.creature.getMoveHelper() instanceof RiftCreatureMoveHelperBase moveHelper) {
-            moveHelper.setChargeTo(this.destinationX, this.destinationY, this.destinationZ, 1D);
+            moveHelper.setChargeTo(this.destinationX, this.destinationY, this.destinationZ, 1.75D);
         }
     }
 

@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity.ai.pathfinding;
 
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.AnimatedHitboxDetectionRule;
-import anightdazingzoroark.prift.server.entity.creature.CreatureLookUtil;
+import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.pathfinding.Path;

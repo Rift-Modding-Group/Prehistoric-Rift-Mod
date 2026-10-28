@@ -1,10 +1,9 @@
-package anightdazingzoroark.prift.server.entity.creature;
+package anightdazingzoroark.prift.api.util;
 
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
-import anightdazingzoroark.prift.api.util.MathUtil;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntityLiving;
 import anightdazingzoroark.riftlib.core.processor.IBone;
 import anightdazingzoroark.riftlib.core.snapshot.BoneSnapshot;
@@ -280,6 +279,57 @@ public class CreatureLookUtil {
         float targetYaw = (float) Math.toDegrees(Math.atan2(-offset.x, offset.z));
         float lookYaw = getLookPose(creature).yaw();
         return bodyYaw + MathHelper.wrapDegrees(targetYaw - lookYaw - bodyYaw);
+    }
+
+
+    /**
+     * Captures a head-driven strike for playback and prediction, fitting its hitbox height to ridden aim.
+     */
+    public static void captureHeadAttackLook(
+            @NotNull ICreature creature, @NotNull String moveName, @NotNull String hitboxTag, double strikeTick
+    ) {
+        AnimationDataEntityLiving data = creature.getAnimationData();
+        LookPose look = getAttackLookPose(creature);
+        data.setVariable("head_attack_pitch", look.pitch());
+        data.setVariable("head_attack_yaw", look.yaw());
+        data.setVariable("head_attack_swing", MathUtil.slopeResult(look.pitch(), true, HEAD_PITCH_MIN, 0D, -1D, 1D));
+        data.setVariable("head_attack_upward", look.pitch() < 0f ? 1D : 0D);
+
+        Vec3d target = getRiddenAttackPosition(creature);
+        if (target == null || !(data.getHolder() instanceof IAnimatable<?> animatable)) return;
+        AnimatedGeoModel<?> model = ServerModelRegistry.getServerModel(animatable);
+        if (model == null || data.getBoneSnapshotCollection().isEmpty()) return;
+        Animation animation = model.getAnimations("animation." + creature.getCreatureType().getName() + "." + moveName, animatable);
+        List<AnimatedBoundingBox> hitboxes = data.getAnimatedBoundingBoxesByTag().get(hitboxTag);
+        if (animation == null || hitboxes == null || hitboxes.isEmpty()) return;
+        HeadStrikePose strike = new HeadStrikePose(data, animation, hitboxes, strikeTick);
+
+        float lowerPitch = HEAD_PITCH_MIN;
+        float upperPitch = HEAD_PITCH_MAX;
+        double lowerHeight = strike.sampleHeight(lowerPitch);
+        double upperHeight = strike.sampleHeight(upperPitch);
+        double targetHeight = Math.clamp(target.y, Math.min(lowerHeight, upperHeight), Math.max(lowerHeight, upperHeight));
+        for (int step = 0; step < 10; step++) {
+            float pitch = (lowerPitch + upperPitch) / 2f;
+            double height = strike.sampleHeight(pitch);
+            if ((height < targetHeight) == (upperHeight > lowerHeight)) lowerPitch = pitch;
+            else upperPitch = pitch;
+        }
+        strike.sampleHeight((lowerPitch + upperPitch) / 2f);
+    }
+
+    private record HeadStrikePose(
+            @NotNull AnimationDataEntityLiving data, @NotNull Animation animation,
+            @NotNull List<AnimatedBoundingBox> hitboxes, double tick
+    ) {
+        private double sampleHeight(float pitch) {
+            this.data.setVariable("head_attack_pitch", pitch);
+            this.data.setVariable("head_attack_swing", MathUtil.slopeResult(pitch, true, HEAD_PITCH_MIN, 0D, -1D, 1D));
+            Map<String, BoneSnapshot> pose = AnimationPoseSampler.sample(this.animation, this.data, this.tick);
+            return this.hitboxes.stream().mapToDouble(hitbox -> hitbox.getWorldSpaceBounds(
+                    this.data.getScale(), this.data.getModelYaw(), this.data.getHolder().getPositionVector(), pose
+            ).getCenter().y).average().orElseThrow();
+        }
     }
 
     public record LookPose(float pitch, float yaw) {}

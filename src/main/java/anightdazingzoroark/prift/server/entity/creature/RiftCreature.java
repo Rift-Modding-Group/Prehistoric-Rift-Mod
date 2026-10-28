@@ -1,5 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.api.util.CreatureLookUtil;
+
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.prift.client.ui.RiftCreatureUI;
 import anightdazingzoroark.prift.client.rendering.block.CreatureBoxRangeRenderer;
@@ -2408,6 +2410,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             this.stepHeight = 1f;
             this.jumpMovementFactor = this.getAIMoveSpeed() * 0.1f;
             float moveSpeed = (float) Math.max(0, this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue());
+            if (this.isSprinting()) moveSpeed *= 1.75f;
             this.setAIMoveSpeed(moveSpeed);
 
         }

@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.api.creature.builder.detectionRule;
 
-import anightdazingzoroark.prift.server.entity.creature.CreatureLookUtil;
+import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
@@ -36,7 +36,7 @@ import java.util.function.BiConsumer;
  * Predicts contact with tagged hitboxes during an animation's damage window.
  * */
 public class AnimatedHitboxDetectionRule extends DetectionRule {
-    private static final int SAMPLE_INTERVALS = 8;
+    private static final int SWEEP_SAMPLE_INTERVALS = 4;
     @NotNull
     private final String hitboxTag;
     @NotNull
@@ -114,9 +114,17 @@ public class AnimatedHitboxDetectionRule extends DetectionRule {
         Map<AnimatedBoundingBox, List<Map<String, BoneSnapshot>>> poses = new HashMap<>();
         for (AnimationHitboxTimeline.HitboxWindow window : AnimationHitboxTimeline.getHitboxWindows(animations, hitboxes, data)) {
             List<Map<String, BoneSnapshot>> hitboxPoses = poses.computeIfAbsent(window.hitbox(), hitbox -> new ArrayList<>());
-            for (int step = 0; step <= SAMPLE_INTERVALS; step++) {
-                double tick = MathUtil.slopeResult(step, false, 0D, SAMPLE_INTERVALS, window.startTick(), window.endTick());
-                hitboxPoses.add(AnimationPoseSampler.sample(window.animation(), data, tick));
+            Map<String, BoneSnapshot> previousPose = null;
+            for (double tick = Math.ceil(window.startTick()); tick <= Math.ceil(window.endTick()); tick++) {
+                Map<String, BoneSnapshot> pose = AnimationPoseSampler.sample(window.animation(), data, tick);
+                if (previousPose == null) hitboxPoses.add(pose);
+                else {
+                    for (int step = 1; step <= SWEEP_SAMPLE_INTERVALS; step++) {
+                        float progress = (float) MathUtil.slopeResult(step, false, 0D, SWEEP_SAMPLE_INTERVALS, 0D, 1D);
+                        hitboxPoses.add(AnimationPoseSampler.interpolate(previousPose, pose, progress));
+                    }
+                }
+                previousPose = pose;
             }
         }
         if (poses.isEmpty()) return null;

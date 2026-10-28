@@ -1,6 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves.moveResult;
 
-import anightdazingzoroark.prift.server.entity.creature.CreatureLookUtil;
+import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreaturePathNavigate;
@@ -121,6 +121,8 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 this.lastPrevRotationPitch = this.creature.prevRotationPitch;
             }
             this.wasRotatingWhileCharging = rotatingWhileCharging;
+            // Release stale pitch history after target loss while the animation finishes its strike.
+            if (target == null || !target.isEntityAlive()) this.hasLastLookDirection = false;
             if (charge != null && charge.getCanLookWhileUsing()) {
                 // Live head tracking replaces the heading frozen at move start.
                 this.hasLastLookDirection = false;

@@ -8,6 +8,8 @@ entity.stegosaurus.spawn_description=Dedicado al pastoreo y va en manadas, lleva
 entity.dodo.name=Dodo
 entity.dodo.spawn_description=A small flightless bird. Weak and fragile, but easy to domesticate.
 entity.dodo.spawn_description=Un ave pequeño incapaz de volar. Débil y frágil, pero fácil de tamear.
+entity.triceratops.name=Triceratops
+entity.triceratops.spawn_description=Dedicado al pastoreo y va en manadas. Lleva una volante duro como un escudo, y es dispuesto a arrojarse contra amenazas potenciales en cualquiera forma posible.
 
 item.spawn_egg.name=Generar - %s
 item.raw_exotic_meat.name=Carne cruda exótica
@@ -239,6 +241,8 @@ move.creature.placeholder=No hacer nada
 move.creature.placeholder.description=Permanece como un inofensivo muñeco de peluche.
 move.creature.bite=Mordisco
 move.creature.bite.description=Muerde a un objetivo con sus poderosas mandíbulas.
+move.creature.headbutt=Cabezazo
+move.creature.headbutt.description=Golpea a un objetivo con la cabeza y los cuernos.
 move.creature.peck=Picotazo
 move.creature.peck.description=Picotea a un objetivo cercano con su pico.
 move.creature.stomp=Pisotón

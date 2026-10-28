@@ -7,6 +7,8 @@ entity.stegosaurus.name=Stegosaurus
 entity.stegosaurus.spawn_description=A herding grazer with protective plates on its back and tail and sharp thagomizers on the tip of its tail. The plates on its tail can be thrown at potential threats.
 entity.dodo.name=Dodo
 entity.dodo.spawn_description=A small flightless bird. Weak and fragile, but easy to domesticate.
+entity.triceratops.name=Triceratops
+entity.triceratops.spawn_description=A herding grazer with a tough frill for a shield, willing to hurl itself towards potential threats in any form possible.
 
 item.spawn_egg.name=Spawn %s
 item.raw_exotic_meat.name=Raw Exotic Meat
@@ -238,6 +240,8 @@ move.creature.placeholder=Do Nothing
 move.creature.placeholder.description=Remains a harmless plush doll.
 move.creature.bite=Bite
 move.creature.bite.description=Bites a target with its powerful jaws.
+move.creature.headbutt=Headbutt
+move.creature.headbutt.description=Strikes a target with its head and horns.
 move.creature.peck=Peck
 move.creature.peck.description=Pecks a nearby target with its beak.
 move.creature.stomp=Stomp

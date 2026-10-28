@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creature.builders.DodoBuilder;
 import anightdazingzoroark.prift.server.entity.creature.builders.StegosaurusBuilder;
+import anightdazingzoroark.prift.server.entity.creature.builders.TriceratopsBuilder;
 import anightdazingzoroark.prift.server.entity.creature.builders.TyrannosaurusBuilder;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import net.minecraft.world.World;
@@ -124,19 +125,8 @@ public class RiftCreatureRegistry {
         registerCreatureType(new TyrannosaurusBuilder());
         registerCreatureType(new StegosaurusBuilder());
         registerCreatureType(new DodoBuilder());
+        registerCreatureType(new TriceratopsBuilder());
         /*
-        registerCreatureType(
-                "triceratops",
-                RiftCreature.class,
-                new RiftCreatureBuilder().setCreatureCategory(RiftCreatureEnums.CreatureCategory.DINOSAUR)
-                        .setCreatureDiet(RiftCreatureEnums.CreatureDiet.HERBIVORE)
-                        .setStats(120, 80, 30, 120)
-                        .setScaleRangeForAge(0.3f, 1.75f)
-                        .setSpawnEggColors(935177, 3631923)
-                        .setDaysUntilAdult(3)
-                        .setIsHerder()
-                        .setRetaliateWhenAttacked(true)
-        );
         registerCreatureType(
                 "utahraptor",
                 RiftCreature.class,

@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.client;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenCrosshairType;
-import anightdazingzoroark.prift.server.entity.creature.CreatureLookUtil;
+import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.api.util.MathUtil;
 import anightdazingzoroark.prift.client.camera.RidingAimCrosshair;
 import anightdazingzoroark.prift.client.camera.RidingAimTargeting;

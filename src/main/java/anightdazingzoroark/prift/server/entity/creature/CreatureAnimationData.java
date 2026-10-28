@@ -1,5 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.api.util.CreatureLookUtil;
+
 import anightdazingzoroark.prift.api.util.MathUtil;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;

@@ -116,7 +116,7 @@ public class RiftJsonConfigParser {
         );
         defaultList.targetGroups.put(
                 "herbivoreCreature",
-                List.of("prift:stegosaurus")
+                List.of("prift:stegosaurus", "prift:triceratops")
         );
         defaultList.targetGroups.put(
                 "carnivoreCreature",

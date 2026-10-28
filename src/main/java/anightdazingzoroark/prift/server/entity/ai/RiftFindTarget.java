@@ -109,7 +109,7 @@ public class RiftFindTarget extends EntityAITarget {
         if (this.creature.isRelatedToEntity(target)) return false;
 
         if (!this.creature.isTamed() && target instanceof EntityPlayer player && this.creature.isRememberedPlayerTarget(player)) {
-            return true;
+            return super.isSuitableTarget(target, includeInvincibles);
         }
 
         if (!this.creature.isTamed() && !this.isAllowedByConfig(target)) return false;
