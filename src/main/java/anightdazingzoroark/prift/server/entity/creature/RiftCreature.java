@@ -231,6 +231,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private boolean unableToPathToTarget;
     private int blockBreakEffectAttemptCount;
     private int moveFinishCount;
+    private long lastStartedMoveUseId = -1L;
     private final Map<BlockPos, BlockBreakPlanEntry> activeBlockBreakPlan = new HashMap<>();
 
     //fall impact state
@@ -603,6 +604,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
             this.getCreatureMoveHelper().getLeapHelper().updateLeap(RiftCreatureLeapHelper.UpdatePhase.TICK);
 
+            //refresh AI posing through its own parameter throughout windup, flight, and landing
+            if (!this.isBeingRidden()) this.dataManager.setDirty(LEAPING);
+
             if (this.isBeingRidden()) {
                 if (!this.isSaddled()) this.removePassengers();
                 else {
@@ -770,7 +774,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 creatureMoveStorage.tickCurrentMove(this, this.getAttackTarget());
             }
             this.chargeHelper.updateCharge(RiftCreatureChargeHelper.UpdatePhase.TICK);
-            if (this.isBeingRidden()) this.dataManager.setDirty(CREATURE_MOVES);
+            this.dataManager.setDirty(CREATURE_MOVES);
 
             //when out of stamina, creature will go into a staggered pose and recover after 10-20 seconds
             if (this.getStamina() <= 0f && !this.isStaggered()) {
@@ -1945,6 +1949,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (this.isLeaping() && !name.isEmpty()) return;
         CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
         creatureMoveStorage.setCurrentMove(name);
+        if (!this.world.isRemote) this.dataManager.setDirty(CREATURE_MOVES);
     }
 
     public void useMoveFromRider(@NotNull EntityPlayer rider, int moveIndex) {
@@ -3033,6 +3038,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void initializeAnimationData(@NotNull AnimationDataEntityLiving animationData) {
+        this.lastStartedMoveUseId = -1L;
         //-----set scale-----
         animationData.setScale(holder -> this.scale());
 
@@ -3195,11 +3201,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
                     //---add transition in initial state---
                     initialState.addStateTransition(controllerStateName, animData -> !this.getIsSleeping()
+                            && this.getPhase().equals(phase)
+                            && this.getCreatureMoves().getCurrentMoveUseId() != this.lastStartedMoveUseId
                             && this.getCreatureMoves().currentMoveMatches(moveName, currentChargeupPhase));
 
                     //---define corresponding state---
                     double transitionLength = currentChargeupPhase == ChargeupPhase.FINISHING ? 0.15D : 0D;
                     AnimationControllerState<AnimationDataEntityLiving> stateToAdd = new AnimationControllerState<AnimationDataEntityLiving>(controllerStateName, transitionLength, EasingType.EaseInOutSine)
+                            .addEntryEffect(animData -> this.lastStartedMoveUseId = this.getCreatureMoves().getCurrentMoveUseId())
                             .addAnimation("animation."+this.creatureType.getName()+"."+controllerStateName);
 
                     //and loop again xd
@@ -3232,10 +3241,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             //for non chargeup moves, add other anim states for each move to a single anim controller
             else {
                 //transition from initial state to a state associated with the move
-                initialState.addStateTransition(moveName, animData -> !this.getIsSleeping() && this.getCurrentMove().equals(moveName));
+                initialState.addStateTransition(moveName, animData -> !this.getIsSleeping()
+                        && this.getPhase().equals(phase)
+                        && this.getCreatureMoves().getCurrentMoveUseId() != this.lastStartedMoveUseId
+                        && this.getCurrentMove().equals(moveName));
 
                 //create state for move
                 AnimationControllerState<AnimationDataEntityLiving> moveState = new AnimationControllerState<AnimationDataEntityLiving>(moveName, 0.15D, EasingType.EaseInOutSine)
+                        .addEntryEffect(animData -> this.lastStartedMoveUseId = this.getCreatureMoves().getCurrentMoveUseId())
                         .addStateTransition("default", animData -> this.getIsSleeping()
                                 || animData.allAnimationsFinished(controllerName))
                         .addExitEffect(animData -> this.onMoveFinish(moveName));
@@ -3275,17 +3288,20 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //small helper method for defining what happens when a move finishes
     private void onMoveFinish(@NotNull String moveName) {
+        //client animation completion must not erase a newer server move snapshot
+        if (this.world.isRemote) return;
+
         CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
-        if (!this.world.isRemote) this.moveFinishCount++;
+        this.moveFinishCount++;
         if (!creatureMoveStorage.hasCurrentMoveEndEffectFired()) {
-            //use moveName, as it might have been erased on server after being cleared on client
             CreatureMoveBuilder creatureMoveBuilder = creatureMoveStorage.getUsableMoveBuilder(moveName);
-            if (!this.world.isRemote && creatureMoveBuilder != null && creatureMoveBuilder.getOnMoveEndEffect() != null) {
+            if (creatureMoveBuilder != null && creatureMoveBuilder.getOnMoveEndEffect() != null) {
                 creatureMoveBuilder.getOnMoveEndEffect().accept(this);
             }
             creatureMoveStorage.markCurrentMoveEndEffectFired();
         }
         creatureMoveStorage.resetCurrentMove(this);
+        this.dataManager.setDirty(CREATURE_MOVES);
         if (moveName.equals(this.riddenAimingMoveName)) {
             if (!this.isRiddenAiming()) {
                 this.riddenAimingMoveName = "";

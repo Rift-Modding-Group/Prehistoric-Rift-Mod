@@ -811,6 +811,13 @@
     ],
     "subtitle": "sounds.subtitle.generic_kick_move"
   },
+  "prift.generic_move.burp": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_burp_move"
+    ],
+    "subtitle": "sounds.subtitle.generic_burp_move"
+  },
   "prift.generic_move.self_destruction": {
     "category": "neutral",
     "sounds": [

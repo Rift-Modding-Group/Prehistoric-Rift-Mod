@@ -65,8 +65,12 @@ public class RiftDataSerializers {
         }
 
         @Override
-        public CreatureMoveStorage copyValue(CreatureMoveStorage value) {
-            return value;
+        @NotNull
+        public CreatureMoveStorage copyValue(@NotNull CreatureMoveStorage value) {
+            // Preserve queued metadata while the live move continues ticking.
+            CreatureMoveStorage copy = new CreatureMoveStorage();
+            copy.readFromSyncNBT(value.getAsSyncNBT());
+            return copy;
         }
     };
 

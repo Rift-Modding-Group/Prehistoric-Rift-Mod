@@ -45,6 +45,7 @@ public class CreatureMoveStorage {
     //the name of the move that is currently being used
     @NotNull
     private String currentMove = "";
+    private long currentMoveUseId;
     @Nullable
     private ChargeupPhase currentMoveChargeupPhase;
     private int currentMoveTicks;
@@ -227,6 +228,10 @@ public class CreatureMoveStorage {
         return this.currentMove;
     }
 
+    public long getCurrentMoveUseId() {
+        return this.currentMoveUseId;
+    }
+
     public boolean currentMoveMatches(@NotNull String moveName) {
         return this.currentMoveMatches(moveName, null);
     }
@@ -245,6 +250,7 @@ public class CreatureMoveStorage {
     public void setCurrentMove(@NotNull String moveName) {
         if (moveName.isEmpty()) this.clearCurrentMove();
         else {
+            this.currentMoveUseId++;
             this.currentMove = moveName;
             this.currentMoveTicks = 0;
             this.currentMoveChargeUpTicks = 0;
@@ -566,6 +572,7 @@ public class CreatureMoveStorage {
     public NBTTagCompound getAsSyncNBT() {
         NBTTagCompound toReturn = this.getAsNBT();
         toReturn.setString("CurrentMove", this.currentMove);
+        toReturn.setLong("CurrentMoveUseId", this.currentMoveUseId);
         toReturn.setByte(
                 "CurrentMoveChargeupPhase",
                 this.currentMoveChargeupPhase == null ? (byte) -1 : (byte) this.currentMoveChargeupPhase.ordinal()
@@ -581,6 +588,7 @@ public class CreatureMoveStorage {
     public void readFromSyncNBT(@NotNull NBTTagCompound nbtTagCompound) {
         this.readFromNBT(nbtTagCompound);
         this.currentMove = nbtTagCompound.getString("CurrentMove");
+        this.currentMoveUseId = nbtTagCompound.getLong("CurrentMoveUseId");
         byte phaseOrdinal = nbtTagCompound.getByte("CurrentMoveChargeupPhase");
         this.currentMoveChargeupPhase = phaseOrdinal >= 0 && phaseOrdinal < ChargeupPhase.values().length
                 ? ChargeupPhase.values()[phaseOrdinal] : null;
