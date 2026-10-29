@@ -1,6 +1,5 @@
 package anightdazingzoroark.prift.server.entity.projectile;
 
-import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.projectile.IProjectile;
@@ -8,10 +7,9 @@ import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.prift.server.entity.RiftDamage;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
-import anightdazingzoroark.riftlib.core.controller.AnimationController;
-import anightdazingzoroark.riftlib.core.controller.AnimationControllerState;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataProjectile;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
+import anightdazingzoroark.riftlib.particle.ParticleBuilder;
 import anightdazingzoroark.riftlib.projectile.RiftLibProjectile;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -33,7 +31,7 @@ import java.util.function.Function;
 public class RiftProjectile extends RiftLibProjectile implements IProjectile {
     private static final DataParameter<String> NAME = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.STRING);
     private static final DataParameter<Boolean> USE_CUBE_MODEL = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> HAS_PARTICLE_TAIL = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<NBTTagCompound> PARTICLE_TRAIL = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.COMPOUND_TAG);
     @Nullable
     private AnimationDataProjectile data;
     @NotNull
@@ -88,7 +86,7 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
     private void setFromBuilder(@NotNull ProjectileBuilder builder) {
         this.dataManager.set(NAME, builder.getName());
         this.dataManager.set(USE_CUBE_MODEL, builder.getUseCubeModel());
-        this.dataManager.set(HAS_PARTICLE_TAIL, builder.getHasParticleTrail());
+        if (builder.getProjectileTrail() != null) this.dataManager.set(PARTICLE_TRAIL, ParticleBuilder.toNBT(builder.getProjectileTrail()));
         if (builder.getPropertyValueMap() != null) this.propertyValueMap = Map.copyOf(builder.getPropertyValueMap());
     }
 
@@ -97,7 +95,7 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
         super.entityInit();
         this.dataManager.register(NAME, "");
         this.dataManager.register(USE_CUBE_MODEL, false);
-        this.dataManager.register(HAS_PARTICLE_TAIL, false);
+        this.dataManager.register(PARTICLE_TRAIL, new NBTTagCompound());
     }
 
     @Override
@@ -129,8 +127,8 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
         return this.dataManager.get(USE_CUBE_MODEL);
     }
 
-    public boolean getHasParticleTrail() {
-        return this.dataManager.get(HAS_PARTICLE_TAIL);
+    public NBTTagCompound getParticleTrailNBT() {
+        return this.dataManager.get(PARTICLE_TRAIL);
     }
 
     //-----properties management-----
@@ -203,11 +201,10 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
 
     @Override
     public void initializeAnimationData(@NotNull AnimationDataProjectile animData) {
-        if (!this.getHasParticleTrail()) return;
-        animData.addAnimationController(new AnimationController<RiftProjectile, AnimationDataProjectile>(this, "particleTrail", "default",
-                new AnimationControllerState<AnimationDataProjectile>("default")
-                        .addParticleEffect(RiftInitialize.MODID + ":" + this.getName(), "center")
-        ));
+        NBTTagCompound particleTrailNBT = this.getParticleTrailNBT();
+        if (!particleTrailNBT.isEmpty()) {
+            animData.addParticleEffect(ParticleBuilder.fromNBT(particleTrailNBT), "center");
+        }
     }
 
     @Override

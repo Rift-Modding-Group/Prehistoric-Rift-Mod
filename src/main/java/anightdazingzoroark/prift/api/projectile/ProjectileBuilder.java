@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.api.util.TriConsumer;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.BooleanPropertyValue;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.IntegerPropertyValue;
+import anightdazingzoroark.riftlib.particle.ParticleBuilder;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.SoundEvent;
@@ -20,6 +21,7 @@ import java.util.function.Consumer;
 
 public class ProjectileBuilder {
     //important
+    @NotNull
     private String name = "";
 
     //can be left alone
@@ -35,6 +37,8 @@ public class ProjectileBuilder {
     private boolean rotateAlongPitch;
     private boolean useCubeModel;
     private boolean hasParticleTrail;
+    @Nullable
+    private ParticleBuilder projectileTrail;
     @Nullable
     private SoundEvent impactSoundEvent;
     @Nullable
@@ -149,11 +153,13 @@ public class ProjectileBuilder {
      * Makes the projectile leave a trail of particles
      * Note that you have to define it yourself by making a particle file of the same name in the resources folder
      * */
+    @Deprecated
     public ProjectileBuilder setHasParticleTrail() {
         this.hasParticleTrail = true;
         return this;
     }
 
+    @Deprecated
     public boolean getHasParticleTrail() {
         return this.hasParticleTrail;
     }
@@ -161,6 +167,17 @@ public class ProjectileBuilder {
     public ProjectileBuilder setImpactSoundEvent(@Nullable SoundEvent soundEvent) {
         this.impactSoundEvent = soundEvent;
         return this;
+    }
+
+    public ProjectileBuilder setProjectileTrail(@NotNull ParticleBuilder projectileTrail) {
+        projectileTrail.setIdentifier("prift:"+this.name+"_trail"); //todo: make mod id be accessible in API too
+        this.projectileTrail = projectileTrail;
+        return this;
+    }
+
+    @Nullable
+    public ParticleBuilder getProjectileTrail() {
+        return this.projectileTrail;
     }
 
     @Nullable

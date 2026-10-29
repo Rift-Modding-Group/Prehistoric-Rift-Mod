@@ -115,6 +115,19 @@ public class TriceratopsBuilder extends RiftCreatureBuilder {
                                 })
                         )
                 )
+                /*
+                .addMove("belch", new CreatureMoveBuilder()
+                        .setStaminaCost(0.2f)
+                        .setElement(Element.POISON)
+                        .setMoveType(CreatureMoveBuilder.MoveType.SPECIAL)
+                        .setBasePower(50)
+                        .setRequireFindTargetToUse()
+                        .setUseLookBasedFacing()
+                        .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
+                        .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.POINT)
+                        .setCooldown(300)
+                )
+                 */
                 //---attack ai---
                 .setMoveSelector(new CreatureMoveSelectorBuilder()
                         .setMoveRule(
