@@ -184,6 +184,7 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                         .setBasePower(30)
                         .setRequireFindTargetToUse()
                         .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
+                        .setRiddenPitchBounds(-75f, 35f)
                         .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.POINT)
                         .setOnMoveBeginEffect((creature, target) -> creature.getAnimationData().setVariable("plate_fling_shot", 0D))
                         .setOnMoveHitEffect(creature -> {

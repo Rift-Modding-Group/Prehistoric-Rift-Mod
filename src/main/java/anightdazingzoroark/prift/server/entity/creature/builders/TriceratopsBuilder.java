@@ -135,6 +135,7 @@ public class TriceratopsBuilder extends RiftCreatureBuilder {
                         })
                         .setUseLookBasedFacing()
                         .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
+                        .setRiddenPitchBounds(-75f, 35f)
                         .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.POINT)
                         .setOnMoveHitEffect(creature -> {
                             ProjectileBuilder belchProjectile = new ProjectileBuilder().setName("belch")
@@ -156,7 +157,7 @@ public class TriceratopsBuilder extends RiftCreatureBuilder {
                                 creature.launchProjectile(belchProjectile, target, 3f, 0f);
                             }
                         })
-                        .setCooldown(300)
+                        //.setCooldown(300)
                         .setAnimNames("belch")
                 )
                 //---attack ai---
@@ -191,7 +192,7 @@ public class TriceratopsBuilder extends RiftCreatureBuilder {
                         .setMoveRule(
                                 new MoveRuleBuilder("belch")
                                         .setPriorityPredicate((creature, target) -> {
-                                            return (target != null && target.isEntityAlive() && (creature.atRageThreshold() || creature.isUnableToPathToTarget())) ? 0 : -1;
+                                            return (target != null && target.isEntityAlive() /*&& (creature.atRageThreshold() || creature.isUnableToPathToTarget())*/ ) ? 0 : -1;
                                         })
                                         .addDetectionRule(new HorizontalDistanceFromUserDetectionRule(6D, 16D))
                                         .addDetectionRule(new VerticalDistanceFromUserDetectionRule(5D, 16D))
