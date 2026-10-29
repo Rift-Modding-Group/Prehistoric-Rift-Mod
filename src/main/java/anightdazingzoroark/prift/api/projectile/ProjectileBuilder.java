@@ -149,26 +149,14 @@ public class ProjectileBuilder {
         return this.useCubeModel;
     }
 
-    /**
-     * Makes the projectile leave a trail of particles
-     * Note that you have to define it yourself by making a particle file of the same name in the resources folder
-     * */
-    @Deprecated
-    public ProjectileBuilder setHasParticleTrail() {
-        this.hasParticleTrail = true;
-        return this;
-    }
-
-    @Deprecated
-    public boolean getHasParticleTrail() {
-        return this.hasParticleTrail;
-    }
-
     public ProjectileBuilder setImpactSoundEvent(@Nullable SoundEvent soundEvent) {
         this.impactSoundEvent = soundEvent;
         return this;
     }
 
+    /**
+     * define a particle that will constantly form when the projectile flies
+     * */
     public ProjectileBuilder setProjectileTrail(@NotNull ParticleBuilder projectileTrail) {
         projectileTrail.setIdentifier("prift:"+this.name+"_trail"); //todo: make mod id be accessible in API too
         this.projectileTrail = projectileTrail;

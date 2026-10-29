@@ -238,6 +238,51 @@
 					}
 				}
 			}
+		},
+		"animation.triceratops.belch": {
+			"animation_length": 0.5,
+			"bones": {
+				"bodyFront": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [7.5, 0, 0],
+						"0.375": [-5, 0, 0],
+						"0.5": [0, 0, 0]
+					}
+				},
+				"neck": {
+					"rotation": {
+						"0.0": ["head_attack_pitch", "head_attack_yaw", 0],
+						"0.25": ["head_attack_pitch + 15", "head_attack_yaw", 0],
+						"0.375": ["head_attack_pitch - 20", "head_attack_yaw", 0],
+						"0.5": ["head_attack_pitch", "head_attack_yaw", 0]
+					}
+				},
+				"lowerBeak": {
+					"rotation": {
+						"0.25": [0, 0, 0],
+						"0.375": [32.5, 0, 0],
+						"0.5": [0, 0, 0]
+					}
+				},
+				"leftFrontLeg": {
+					"rotation": {
+						"0.25": [0, 0, 0],
+						"0.375": [17.5, 0, 0],
+						"0.5": [0, 0, 0]
+					}
+				},
+				"rightFrontLeg": {
+					"rotation": {
+						"0.25": [0, 0, 0],
+						"0.375": [17.5, 0, 0],
+						"0.5": [0, 0, 0]
+					}
+				}
+			},
+			"timeline": {
+				"0.375": "function.send_message('moveHitEffect');"
+			}
 		}
 	}
 }
