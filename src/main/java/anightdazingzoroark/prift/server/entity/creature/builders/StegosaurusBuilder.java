@@ -50,6 +50,7 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                 .setDaysUntilAdult(3)
                 .setNavigation(new CreatureNavigationBuilder().setCanWalk())
                 .setDomestication(new CreatureDomesticationBuilder()
+                        .setTameFactor(0.75f)
                         .setTamingMethod(RiftCreatureEnums.TamingMethod.TRANQ_THEN_FEED)
                         .setLevelupRate(RiftCreatureEnums.LevelupRate.NORMAL)
                         .setControllerRideLocator("controllerPos")

@@ -44,6 +44,7 @@ public class TriceratopsBuilder extends RiftCreatureBuilder {
                 .setSprintBasePower(60)
                 .setSprintCooldown(100)
                 .setDomestication(new CreatureDomesticationBuilder()
+                        .setTameFactor(0.75f)
                         .setTamingMethod(RiftCreatureEnums.TamingMethod.TRANQ_THEN_FEED)
                         .setLevelupRate(RiftCreatureEnums.LevelupRate.NORMAL)
                         .setControllerRideLocator("controllerPos")

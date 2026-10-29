@@ -9,6 +9,11 @@ import java.util.List;
  * meant for each individual creature that has been registered
  * */
 public class RiftCreatureConfig {
+    //individual tame factor that affects taming effectiveness
+    //in addition to level
+    @SerializedName("tameFactor")
+    public Float tameFactor;
+
     //target groups or individual entities by their id this creature can target
     //target group prioritized first
     @SerializedName("targetWhitelist")

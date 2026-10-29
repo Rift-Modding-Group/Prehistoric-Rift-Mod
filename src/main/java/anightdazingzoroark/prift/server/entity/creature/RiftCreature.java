@@ -957,9 +957,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                         || (this.getIsSleeping() && this.sleepCause == RiftCreatureEnums.SleepCause.TRANQ_BOMB))
                 ) {
                     float effectiveness = this.rand.nextFloat(creatureFood.tameEffectiveness[0], creatureFood.tameEffectiveness[1]);
-                    if (this.getIsSleeping() && this.sleepCause == RiftCreatureEnums.SleepCause.TRANQ_BOMB) {
-                        effectiveness *= this.getTamingEffectivenessForLevel();
-                    }
+                    effectiveness *= this.getTamingEffectivenessForLevel();
 
                     float updatedProgress = Math.clamp(this.getTamingProgress() + effectiveness, 0f, 1f);
                     boolean completesTaming = updatedProgress >= 1f;
@@ -1685,9 +1683,12 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     //exponentially reduce taming effectiveness from food
-    //and tiredness from tranq bombs based on level
+    //and tiredness from tranq bombs based on level and
+    //individual taming factor
     public float getTamingEffectivenessForLevel() {
-        return Math.max(0.25f, 1f / (1f + Math.max(0, this.getLevel() - 1) * 0.1f));
+        float effectivenessForLevel = Math.max(0.25f, 1f / (1f + Math.max(0, this.getLevel() - 1) * 0.1f));
+        if (this.getCreatureConfig().tameFactor != null) effectivenessForLevel *= this.getCreatureConfig().tameFactor;
+        return effectivenessForLevel;
     }
 
     @NotNull

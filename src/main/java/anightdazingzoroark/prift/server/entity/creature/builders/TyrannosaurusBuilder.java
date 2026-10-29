@@ -59,6 +59,7 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                 .setFallCreatesImpact()
                 .setDaysUntilAdult(7)
                 .setDomestication(new CreatureDomesticationBuilder()
+                        .setTameFactor(0.33f)
                         .setTamingMethod(RiftCreatureEnums.TamingMethod.TRANQ_THEN_FEED)
                         .setLevelupRate(RiftCreatureEnums.LevelupRate.SLOW)
                         .setControllerRideLocator("controllerPos")
@@ -216,8 +217,7 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                         .setElement(Element.FIRE)
                         .setOnMoveBeginEffect(this::captureFlamethrowerLook)
                         .setWhileMoveUseEffect((creature, target) -> {
-                            if (!creature.getAnimationData().getHolder().isBeingRidden()
-                                    && (target == null || !target.isEntityAlive())) return;
+                            if (!creature.getAnimationData().getHolder().isBeingRidden() && (target == null || !target.isEntityAlive())) return;
                             this.captureFlamethrowerLook(creature, target);
                         })
                         .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()

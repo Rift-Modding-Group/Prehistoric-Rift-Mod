@@ -14,6 +14,7 @@ public class CreatureDomesticationBuilder {
     private RiftCreatureEnums.LevelupRate levelupRate;
 
     //can be left alone
+    private float tameFactor = 1f;
     private int inventorySize = 27;
     private String controllerRideLocator;
 
@@ -43,6 +44,19 @@ public class CreatureDomesticationBuilder {
 
     public RiftCreatureEnums.LevelupRate getLevelupRate() {
         return this.levelupRate;
+    }
+
+    /**
+     * Set the effectiveness of taming with food and tranq bombs
+     * Lower value means less effective
+     * */
+    public CreatureDomesticationBuilder setTameFactor(float value) {
+        this.tameFactor = value;
+        return this;
+    }
+
+    public float getTameFactor() {
+        return this.tameFactor;
     }
 
     /**

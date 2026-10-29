@@ -70,6 +70,7 @@ public class RiftJsonConfigParser {
 
             //define default riftcreatureconfig
             RiftCreatureConfig defaultValue = new RiftCreatureConfig();
+            if (builder.getDomestication() != null) defaultValue.tameFactor = builder.getDomestication().getTameFactor();
             if (builder.hasDefaultTargetWhitelist()) defaultValue.targetWhitelist = builder.getDefaultTargetWhitelist();
             if (builder.hasDefaultTargetBlacklist()) defaultValue.targetBlacklist = builder.getDefaultTargetBlacklist();
             if (builder.hasDefaultFoodItemWhitelist()) defaultValue.foodItemWhitelist = builder.getDefaultFoodItemWhitelist();
@@ -164,6 +165,14 @@ public class RiftJsonConfigParser {
                                 .setTamingEffectiveness(0.05f, 0.1f)
                                 .build(),
                         new RiftCreatureFood.Builder("minecraft:cooked_rabbit")
+                                .setPercentHealed(0.25f)
+                                .setTamingEffectiveness(0.15f, 0.2f)
+                                .build(),
+                        new RiftCreatureFood.Builder("prift:raw_exotic_meat")
+                                .setPercentHealed(0.125f)
+                                .setTamingEffectiveness(0.05f, 0.1f)
+                                .build(),
+                        new RiftCreatureFood.Builder("prift:cooked_exotic_meat")
                                 .setPercentHealed(0.25f)
                                 .setTamingEffectiveness(0.15f, 0.2f)
                                 .build()
