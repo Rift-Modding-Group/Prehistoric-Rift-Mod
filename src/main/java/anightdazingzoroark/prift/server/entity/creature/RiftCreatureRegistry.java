@@ -1,17 +1,15 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.entity.creatureMoves.RiftMoves;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
-import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
-import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.server.entity.creature.builders.DodoBuilder;
 import anightdazingzoroark.prift.server.entity.creature.builders.StegosaurusBuilder;
 import anightdazingzoroark.prift.server.entity.creature.builders.TriceratopsBuilder;
 import anightdazingzoroark.prift.server.entity.creature.builders.TyrannosaurusBuilder;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import net.minecraft.world.World;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -80,22 +78,7 @@ public class RiftCreatureRegistry {
             RiftInitialize.logger.warn("Builder for creature type {} is invalid!", name);
             return;
         }
-        //-----verify creature move builders next-----
-        for (ImmutablePair<String, CreatureMoveBuilder> moveEntry : builder.getMoves()) {
-            if (!moveEntry.getValue().isValid()) {
-                RiftInitialize.logger.warn("Move {} for creature type {} in phase '{}' is invalid!", moveEntry.getKey(), name, moveEntry.getKey());
-                return;
-            }
-        }
-        for (Map.Entry<String, CreaturePhaseBuilder> phaseEntry : builder.getPhaseBuilderMaps().entrySet()) {
-            for (ImmutablePair<String, CreatureMoveBuilder> moveEntry: phaseEntry.getValue().getMoves()) {
-                if (!moveEntry.getValue().isValid()) {
-                    RiftInitialize.logger.warn("Move {} for creature type {} in phase '{}' is invalid!", moveEntry.getKey(), name, moveEntry.getKey());
-                    return;
-                }
-            }
-        }
-        //-----finalize creature info and lock them-----
+        // Resolve registered moves and validate slot limits and species animation bindings.
         builder.setName(name);
         builder.lock();
         creatureBuilderMap.put(name, builder);
@@ -104,6 +87,7 @@ public class RiftCreatureRegistry {
     //default creatures
     public static void createCreatures() {
         if (builtInCreaturesRegistered || registeringBuiltInCreatures) return;
+        RiftMoves.registerMoves();
         registeringBuiltInCreatures = true;
 
         registerCreatureType(new RiftCreatureBuilder()
@@ -116,11 +100,9 @@ public class RiftCreatureRegistry {
                 .setScaleRangeForAge(1f, 1f)
                 .setSpawnEggColors(0x4F7942, 0xD9C7A3)
                 .setMainHitboxSize(1f, 1.375f)
-                //registration requires a move, even for the harmless plush placeholder.
-                .addMove("placeholder", new CreatureMoveBuilder()
-                        .setMoveType(CreatureMoveBuilder.MoveType.STATUS)
-                        .setAnimNames("placeholder")
-                )
+                .setMaximumMoveSlots(1)
+                .setSpawnMoves("placeholder")
+                .setMoveAnimations("placeholder", "placeholder")
         );
         registerCreatureType(new TyrannosaurusBuilder());
         registerCreatureType(new StegosaurusBuilder());

@@ -161,22 +161,24 @@ public class RidingCreatureHUD {
 
     public void renderMoveHotbar(@NotNull Minecraft minecraft, @NotNull RiftCreature creature, int selectedMove, int width, int height) {
         List<ImmutablePair<String, CreatureMoveBuilder>> moves = creature.getCreatureMoves().getUsableMoves();
-        if (moves.isEmpty()) return;
+        int maximumMoveSlots = creature.getMaximumMoveSlots();
+        if (maximumMoveSlots == 0) return;
 
-        int hotbarWidth = moves.size() * SLOT_SIZE + (moves.size() - 1) * SLOT_SPACING;
+        int hotbarWidth = maximumMoveSlots * SLOT_SIZE + (maximumMoveSlots - 1) * SLOT_SPACING;
         int left = (width - hotbarWidth) / 2;
         int top = height - SLOT_SIZE - 3;
         CreatureMoveStorage moveStorage = creature.getCreatureMoves();
 
         //go over each available move
-        for (int moveIndex = 0; moveIndex < moves.size(); moveIndex++) {
-            ImmutablePair<String, CreatureMoveBuilder> move = moves.get(moveIndex);
+        for (int moveIndex = 0; moveIndex < maximumMoveSlots; moveIndex++) {
             int slotLeft = left + moveIndex * (SLOT_SIZE + SLOT_SPACING);
             Gui.drawRect(
                     slotLeft, top, slotLeft + SLOT_SIZE, top + SLOT_SIZE,
-                    moveIndex == selectedMove ? 0xFFFFFFFF : 0xFFC0C0C0
+                    moveIndex == selectedMove && moveIndex < moves.size() ? 0xFFFFFFFF : 0xFFC0C0C0
             );
             Gui.drawRect(slotLeft + 1, top + 1, slotLeft + SLOT_SIZE - 1, top + SLOT_SIZE - 1, 0xC0101010);
+            if (moveIndex >= moves.size()) continue;
+            ImmutablePair<String, CreatureMoveBuilder> move = moves.get(moveIndex);
 
             String translatedName = I18n.format("move.creature." + move.getKey());
             String abbreviation = translatedName.substring(0, Math.min(2, translatedName.length())).toUpperCase(Locale.ROOT);
@@ -235,6 +237,7 @@ public class RidingCreatureHUD {
         }
 
         //show currently selected move above move hotbar
+        if (selectedMove < 0 || selectedMove >= moves.size()) return;
         Element selectedElement = moves.get(selectedMove).getValue().getElement();
         String selectedMoveLabel = I18n.format("move.creature." + moves.get(selectedMove).getKey());
         int selectedMoveLabelLeft = (width - minecraft.fontRenderer.getStringWidth(selectedMoveLabel) - 16) / 2;

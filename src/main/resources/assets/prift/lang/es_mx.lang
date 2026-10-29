@@ -141,6 +141,7 @@ gui.prift.eat_from_inventory_true=Esta criatura consumirá alimentos en su inven
 gui.prift.eat_from_inventory_false=Esta criatura no consumirá alimentos en su inventario
 gui.prift.creature_summary=Resumen de criatura
 gui.prift.creature_moves=Movimientos de criatura
+gui.prift.creature_moves.slots=Espacios de movimientos: %s / %s
 gui.prift.creature_moves.type=Tipo: %s
 gui.prift.creature_moves.base_power=Poder: %s
 gui.prift.creature_moves.stamina=Resistencia:

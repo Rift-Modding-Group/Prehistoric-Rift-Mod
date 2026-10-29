@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.api.creature.builder.detectionRule;
 
+import anightdazingzoroark.prift.api.creature.CreatureMoveRegistry.MoveDefinition;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
+import anightdazingzoroark.prift.api.util.CreatureMoveUtil;
 import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
@@ -76,7 +78,7 @@ public class AnimatedHitboxDetectionRule extends DetectionRule {
         }
         if (configuration == null) return null;
 
-        AbstractCreatureBuilder.MoveDefinition definition = configuration.getDetectionOwners().get(this);
+        MoveDefinition definition = configuration.getDetectionOwners().get(this);
         if (definition == null) return null;
         CreatureMoveBuilder move = definition.moveBuilder();
 
@@ -84,10 +86,10 @@ public class AnimatedHitboxDetectionRule extends DetectionRule {
         List<String> animationSuffixes;
         if (move.getMoveChargeupBuilder() != null) {
             animationSuffixes = Arrays.stream(ChargeupPhase.values())
-                    .map(phase -> definition.name() + "_" + phase.name().toLowerCase()).toList();
+                    .flatMap(phase -> CreatureMoveUtil.getAnimationNames(user, user.getPhase(), definition.name(), phase).stream()).toList();
         }
         else {
-            String[] names = move.getAnimNames();
+            String[] names = CreatureMoveUtil.getAnimationNames(user, user.getPhase(), definition.name(), null).toArray(String[]::new);
             if (names == null || names.length == 0) return null;
             int index = 0;
             if (user.getCurrentMove().equals(definition.name()) && names.length > 1) {
@@ -106,7 +108,7 @@ public class AnimatedHitboxDetectionRule extends DetectionRule {
         if (model == null) return null;
         List<Animation> animations = new ArrayList<>();
         for (String suffix : animationSuffixes) {
-            Animation animation = model.getAnimations("animation." + user.getCreatureType().getName() + "." + suffix, animatable);
+            Animation animation = model.getAnimations(suffix, animatable);
             if (animation == null) return null;
             animations.add(animation);
         }

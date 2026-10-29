@@ -19,7 +19,6 @@ public class CreatureMoveBuilder {
     //all the following variables are required and must not be null, validated in isValid()
     private MoveType moveType;
     private BiConsumer<ICreature, EntityLivingBase> onMoveBeginEffect;
-    private String[] animNames;
 
     //the following can be left alone
     private int movePower;
@@ -54,6 +53,7 @@ public class CreatureMoveBuilder {
      * This locks this object so that when accessing any instances of this, it can never be modified ever
      * */
     public void lock() {
+        if (this.moveChargeupBuilder != null) this.moveChargeupBuilder.lock();
         this.locked = true;
     }
 
@@ -276,24 +276,10 @@ public class CreatureMoveBuilder {
     }
 
     /**
-     * Sets the name of the animations to use when using this move.
-     * If multiple names are provided, it will randomly switch between the animations.s
-     * */
-    public CreatureMoveBuilder setAnimNames(@NotNull String... animNames) {
-        this.checkIfLocked();
-
-        this.animNames = animNames;
-        return this;
-    }
-
-    public String[] getAnimNames() {
-        return this.animNames;
-    }
-
-    /**
      * Set what will happen exclusively while the move is being used, start to end
      * */
     public CreatureMoveBuilder setWhileMoveUseEffect(@NotNull BiConsumer<ICreature, Entity> whileMoveUseEffect) {
+        this.checkIfLocked();
         this.whileMoveUseEffect = whileMoveUseEffect;
         return this;
     }
@@ -357,7 +343,7 @@ public class CreatureMoveBuilder {
         if (this.moveChargeupBuilder != null) {
             return this.moveChargeupBuilder.getChargeUpThenRelease() || this.moveChargeupBuilder.getChargeUpWhileUse();
         }
-        return this.animNames != null && this.animNames.length > 0;
+        return true;
     }
 
     /**
@@ -368,7 +354,6 @@ public class CreatureMoveBuilder {
         CreatureMoveBuilder toReturn = new CreatureMoveBuilder();
 
         toReturn.moveType = this.moveType;
-        toReturn.animNames = this.animNames;
         toReturn.onMoveBeginEffect = this.onMoveBeginEffect;
 
         toReturn.movePower = this.movePower;

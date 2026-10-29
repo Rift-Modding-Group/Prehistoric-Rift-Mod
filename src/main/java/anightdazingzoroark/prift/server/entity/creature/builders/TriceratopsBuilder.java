@@ -3,23 +3,6 @@ package anightdazingzoroark.prift.server.entity.creature.builders;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.creature.builder.*;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.AnimatedHitboxDetectionRule;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.BoundingBoxDetectionRule;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.VerticalDistanceFromUserDetectionRule;
-import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
-import anightdazingzoroark.prift.api.projectile.ProjectileTrail;
-import anightdazingzoroark.prift.api.util.CreatureLookUtil;
-import anightdazingzoroark.prift.api.util.MathUtil;
-import anightdazingzoroark.prift.util.RiftUtil;
-import anightdazingzoroark.riftlib.core.manager.AnimationDataEntityLiving;
-import anightdazingzoroark.riftlib.particle.particleComponent.particleAppearance.AppearanceTintingComponent;
-import anightdazingzoroark.riftlib.ray.IRayCreator;
-import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
-import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
-import anightdazingzoroark.riftlib.ray.rayShape.impact.RiftLibRayEllipsoidImpactShape;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 
 import java.util.Map;
 
@@ -54,150 +37,21 @@ public class TriceratopsBuilder extends RiftCreatureBuilder {
                         16f,
                         (creature, threat) -> {
                             return creature.getHealth() <= creature.getMaxHealth() * 0.15f && !creature.isInHerd()
-                                    && (RiftUtil.entityInTargetGroup(threat, "human")
-                                    || RiftUtil.entityInTargetGroup(threat, "carnivoreCreature"));
+                                    && (creature.entityInTargetGroup(threat, "human")
+                                    || creature.entityInTargetGroup(threat, "carnivoreCreature"));
                         }
                 )
                 .addBlockBreakLevel("axe", 2)
                 .addBlockBreakLevel("pickaxe", 0)
                 .addBlockBreakLevel("shovel", 0)
-                //---rays---
-                .addUsableRay(
-                        "stompRay",
-                        new RiftLibRayBuilder()
-                                .setImpactOnly()
-                                .setImpactShape(() -> new RiftLibRayEllipsoidImpactShape(1D, 0.2D, 1D).topOnly())
-                                .setMaxMotionDistance(8D)
-                                .setOnlyOneSegment()
-                                .setMotionSpeed(1.5D),
-                        (creature, rayOrigin, rayHitResult) -> {
-                            for (Entity hitEntity : rayHitResult.hitEntities()) {
-                                if (!(hitEntity instanceof EntityLivingBase hitEntityLivingBase)) continue;
-                                creature.attackEntityAsMob(hitEntityLivingBase);
-                            }
-                        }
-                )
                 //---moves---
-                .addMove("headbutt", new CreatureMoveBuilder()
-                        .setMakesContact()
-                        .setMoveType(CreatureMoveBuilder.MoveType.PHYSICAL)
-                        .setRequireFindTargetToUse()
-                        .setStaminaCost(0.02f)
-                        .setBasePower(50)
-                        .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureHeadAttackLook(creature, "headbutt", "headAttack", 7.5D))
-                        .setUseLookBasedFacing()
-                        .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.TARGETED_MELEE)
-                        .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.WIDE)
-                        .setAnimNames("headbutt")
-                )
-                .addMove("stomp", new CreatureMoveBuilder()
-                        .setStaminaCost(0.02f)
-                        .setBasePower(30)
-                        .setRequireFindTargetToUse()
-                        .setMoveType(CreatureMoveBuilder.MoveType.PHYSICAL)
-                        .setOnMoveHitEffect(creature -> {
-                            if (!(creature instanceof IRayCreator<?> rayCreator)) return;
-                            RiftLibRayHelper.createRay(rayCreator, "stompRay", "stompOrigin");
-                        })
-                        .setAnimNames("stomp")
-                )
-                .addMove("charge", new CreatureMoveBuilder()
-                        .setMakesContact()
-                        .setMoveType(CreatureMoveBuilder.MoveType.PHYSICAL)
-                        .setRequireFindTargetToUse()
-                        .setStaminaCost(0.05f)
-                        .setBasePower(100)
-                        .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
-                        .setRiddenPitchBounds(0f, 0f)
-                        .setOnMoveBeginEffect((creature, target) -> creature.prepareRush(4D, 10))
-                        .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
-                                .setChargeUpThenRelease()
-                                .setCanRotateWhileCharging(true)
-                                .setMaxChargeUp(100)
-                                .setCooldownMultiplier(4D)
-                                .setWindupEndEffect((creature, charge) -> {
-                                    int maximumRushTicks = (int) Math.ceil(MathUtil.slopeResult(charge, true, 0, 100, 0, 100));
-                                    creature.prepareRush(4D, maximumRushTicks);
-                                })
-                        )
-                )
-                .addMove("belch", new CreatureMoveBuilder()
-                        .setStaminaCost(0.2f)
-                        .setElement(Element.POISON)
-                        .setMoveType(CreatureMoveBuilder.MoveType.SPECIAL)
-                        .setBasePower(50)
-                        .setRequireFindTargetToUse()
-                        .setOnMoveBeginEffect((creature, target) -> {
-                            AnimationDataEntityLiving data = creature.getAnimationData();
-                            CreatureLookUtil.LookPose look = CreatureLookUtil.getAttackLookPose(creature);
-                            data.setVariable("head_attack_pitch", look.pitch());
-                            data.setVariable("head_attack_yaw", look.yaw());
-                        })
-                        .setUseLookBasedFacing()
-                        .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
-                        .setRiddenPitchBounds(-75f, 35f)
-                        .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.POINT)
-                        .setOnMoveHitEffect(creature -> {
-                            ProjectileBuilder belchProjectile = new ProjectileBuilder().setName("belch")
-                                    .setRotateAlongPitch().setUseCubeModel()
-                                    .setProjectileTrail(ProjectileTrail.makeBuilderForParticleTrail()
-                                            .addParticleComponent(ProjectileTrail.DUST_APPEARANCE.setSize(0.5D, 0.5D))
-                                            .addParticleComponent(new AppearanceTintingComponent.Builder().setColor(0x3B5817, false))
-                                    );
-
-                            //when ridden, shoot forward
-                            if (creature.getControllingPassenger() != null) {
-                                creature.launchProjectile(belchProjectile, 3f, 0f);
-                            }
-                            //otherwise, hit target
-                            else {
-                                EntityLivingBase target = creature.getAttackTarget();
-                                if (target == null || !target.isEntityAlive()) return;
-
-                                creature.launchProjectile(belchProjectile, target, 3f, 0f);
-                            }
-                        })
-                        //.setCooldown(300)
-                        .setAnimNames("belch")
-                )
-                //---attack ai---
+                .setMaximumMoveSlots(4)
+                .setSpawnMoves("headbutt", "stomp", "charge", "belch")
+                .setMoveAnimations("headbutt", "headbutt")
+                .setMoveAnimations("stomp", "stomp")
+                .setMoveAnimations("charge", "charge")
+                .setMoveAnimations("belch", "belch")
                 .setMoveSelector(new CreatureMoveSelectorBuilder()
-                        .setMoveRule(
-                                new MoveRuleBuilder("headbutt")
-                                        .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                                        .addDetectionRule(new AnimatedHitboxDetectionRule("headAttack", creature -> CreatureLookUtil.captureHeadAttackLook(creature, "headbutt", "headAttack", 7.5D)))
-                                        .setUseBlockBreak()
-                        )
-                        .setMoveRule(
-                                new MoveRuleBuilder("stomp")
-                                        .setPriorityPredicate((creature, target) -> {
-                                            return (target != null && target.isEntityAlive() && !creature.bodyTouchingLiquid()
-                                                    && creature.isOnGround()
-                                                    && creature.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), "stompHitZone")) ?
-                                                    0 : -1;
-                                        })
-                                        .addDetectionRule(new BoundingBoxDetectionRule("stompHitZone"))
-                                        .setDontPathToTarget()
-                        )
-                        .setMoveRule(new MoveRuleBuilder("charge")
-                                .setPriorityPredicate((creature, target) -> {
-                                    return target != null && target.isEntityAlive() && creature.isOnGround()
-                                            && !creature.bodyTouchingLiquid() && creature.hasStraightWalkingPathTo(target)
-                                            && creature.horizontalDistanceFromEntity(target) >= 6D
-                                            && creature.horizontalDistanceFromEntity(target) <= 16D ? 4 : -1;
-                                })
-                                .addDetectionRule(new HorizontalDistanceFromUserDetectionRule(6D, 16D))
-                                .setDontPathToTarget()
-                        )
-                        .setMoveRule(
-                                new MoveRuleBuilder("belch")
-                                        .setPriorityPredicate((creature, target) -> {
-                                            return (target != null && target.isEntityAlive() /*&& (creature.atRageThreshold() || creature.isUnableToPathToTarget())*/ ) ? 0 : -1;
-                                        })
-                                        .addDetectionRule(new HorizontalDistanceFromUserDetectionRule(6D, 16D))
-                                        .addDetectionRule(new VerticalDistanceFromUserDetectionRule(5D, 16D))
-                                        .setUseWhenFrustrated()
-                        )
                         .setCanSprintToAttack(1, 2D, 16D)
                         .setCanLeapToAttack(1, 6D, 12D, false)
                 )

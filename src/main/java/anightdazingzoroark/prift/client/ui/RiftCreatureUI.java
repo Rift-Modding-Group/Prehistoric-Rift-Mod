@@ -395,6 +395,9 @@ public class RiftCreatureUI {
                                 .crossAxisAlignment(Alignment.CrossAxis.START)
                                 .childPadding(2)
                                 .child(IKey.lang("gui.prift.creature_moves").asWidget())
+                                .child(IKey.dynamic(() -> I18n.format("gui.prift.creature_moves.slots",
+                                        creature.getCreatureMoves().getUsableMoves().size(),
+                                        creature.getCreatureMoves().getMaximumMoveSlots())).scale(0.8f).asWidget())
                                 .child(new ListWidget<>().widthRel(1f).expanded()
                                         .crossAxisAlignment(Alignment.CrossAxis.START)
                                         .children(creature.getCreatureMoves().getUsableMoves(), moveEntry -> {

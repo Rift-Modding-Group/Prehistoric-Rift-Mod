@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.api.util;
 
+import anightdazingzoroark.prift.api.creature.CreatureMoveRegistry.MoveDefinition;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
@@ -102,7 +103,7 @@ public class CreatureLookUtil {
         AbstractCreatureBuilder<?> configuration = creature.getCreatureType();
         if (!creature.getPhase().isEmpty()) configuration = creature.getCreatureType().getPhaseBuilderMaps().get(creature.getPhase());
         if (configuration == null) return null;
-        AbstractCreatureBuilder.MoveDefinition definition = configuration.getMoveDefinitions().get(moveName);
+        MoveDefinition definition = configuration.getMoveDefinitions().get(moveName);
         return definition == null ? null : definition.moveBuilder();
     }
 
@@ -118,7 +119,7 @@ public class CreatureLookUtil {
         AbstractCreatureBuilder<?> configuration = creature.getCreatureType();
         if (!creature.getPhase().isEmpty()) configuration = creature.getCreatureType().getPhaseBuilderMaps().get(creature.getPhase());
         if (configuration == null) return null;
-        AbstractCreatureBuilder.MoveDefinition definition = configuration.getMoveDefinitions().get(moveName);
+        MoveDefinition definition = configuration.getMoveDefinitions().get(moveName);
         if (definition == null) return null;
         CreatureMoveBuilder move = definition.moveBuilder();
 
@@ -133,10 +134,10 @@ public class CreatureLookUtil {
         List<String> animationSuffixes;
         if (move.getMoveChargeupBuilder() != null) {
             animationSuffixes = Arrays.stream(ChargeupPhase.values())
-                    .map(phase -> moveName + "_" + phase.name().toLowerCase()).toList();
+                    .flatMap(phase -> CreatureMoveUtil.getAnimationNames(creature, creature.getPhase(), moveName, phase).stream()).toList();
         }
         else {
-            String[] names = move.getAnimNames();
+            String[] names = CreatureMoveUtil.getAnimationNames(creature, creature.getPhase(), moveName, null).toArray(String[]::new);
             if (names == null || names.length == 0) return null;
             int index = 0;
             if (creature.getCurrentMove().equals(moveName) && names.length > 1) {
@@ -146,7 +147,7 @@ public class CreatureLookUtil {
         }
         List<Animation> animations = new ArrayList<>();
         for (String suffix : animationSuffixes) {
-            Animation animation = model.getAnimations("animation." + creature.getCreatureType().getName() + "." + suffix, animatable);
+            Animation animation = model.getAnimations(suffix, animatable);
             if (animation == null) return null;
             animations.add(animation);
         }
@@ -299,7 +300,9 @@ public class CreatureLookUtil {
         if (target == null || !(data.getHolder() instanceof IAnimatable<?> animatable)) return;
         AnimatedGeoModel<?> model = ServerModelRegistry.getServerModel(animatable);
         if (model == null || data.getBoneSnapshotCollection().isEmpty()) return;
-        Animation animation = model.getAnimations("animation." + creature.getCreatureType().getName() + "." + moveName, animatable);
+        List<String> animationNames = CreatureMoveUtil.getAnimationNames(creature, creature.getPhase(), moveName, null);
+        if (animationNames.isEmpty()) return;
+        Animation animation = model.getAnimations(animationNames.getFirst(), animatable);
         List<AnimatedBoundingBox> hitboxes = data.getAnimatedBoundingBoxesByTag().get(hitboxTag);
         if (animation == null || hitboxes == null || hitboxes.isEmpty()) return;
         HeadStrikePose strike = new HeadStrikePose(data, animation, hitboxes, strikeTick);

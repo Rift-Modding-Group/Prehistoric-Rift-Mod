@@ -33,6 +33,14 @@ public class CreatureMoveSelectorBuilder {
         return this;
     }
 
+    public CreatureMoveSelectorBuilder setMoveRules(@NotNull List<MoveRule> rules) {
+        this.checkIfLocked();
+        rules.forEach(rule -> rule.moveRuleBuilder().lock());
+        this.moveRules.clear();
+        this.moveRules.addAll(rules);
+        return this;
+    }
+
     /**
      * Make it so that sprinting can be used as an attack by this creature.
      * Note that its only for when its on its own, when controlled by a rider

@@ -1,26 +1,27 @@
 package anightdazingzoroark.prift.api.creature.builder;
 
 import anightdazingzoroark.prift.api.creature.Element;
+import anightdazingzoroark.prift.api.creature.CreatureMoveRegistry;
+import anightdazingzoroark.prift.api.creature.CreatureMoveRegistry.MoveDefinition;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
 import anightdazingzoroark.prift.api.creature.config.RiftCreatureFood;
 import anightdazingzoroark.prift.api.creature.CreatureMoveResult;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.DetectionRule;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
-import anightdazingzoroark.prift.api.util.TriConsumer;
 import anightdazingzoroark.prift.api.util.CreatureMoveUtil;
-import anightdazingzoroark.riftlib.ray.RiftLibRay;
-import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.BiFunction;
 
 //this class defines creature information
@@ -45,6 +46,17 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     @NotNull
     private List<CreatureMoveSelectorBuilder.MoveRule> moveRules = List.of();
 
+    private Map<String, MoveDefinition> resolvedMoves = Map.of();
+    private Map<DetectionRule, MoveDefinition> resolvedDetectionOwners = Map.of();
+    private List<CreatureMoveSelectorBuilder.MoveRule> resolvedMoveRules = List.of();
+    private int maximumMoveSlots = -1;
+    @Nullable
+    private List<String> spawnMoves;
+    @NotNull
+    private Map<Integer, List<String>> levelupMoves = Map.of();
+    private final Map<String, List<String>> moveAnimations = new LinkedHashMap<>();
+    private final Map<String, Map<ChargeupPhase, List<String>>> chargeupMoveAnimations = new LinkedHashMap<>();
+
     //the following can be left alone
     private float[] mainHitboxSize = new float[]{1f, 1f};
     private int maxFallHeight = 3;
@@ -68,15 +80,13 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private CreatureMoveSelectorBuilder moveSelector = new CreatureMoveSelectorBuilder();
     @Nullable
     private Map<String, Integer> blockBreakLevelMap;
-    private Map<String, RiftLibRayBuilder> rayMap;
-    private Map<String, TriConsumer<ICreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
     private List<String> defaultTargetWhitelist;
     private List<String> defaultTargetBlacklist;
     private List<Object> defaultFoodItemWhitelist;
     private List<String> defaultFoodItemBlacklist;
 
     @SuppressWarnings("unchecked")
-    protected final T getThis() {
+    protected T getThis() {
         return (T) this;
     }
 
@@ -86,8 +96,29 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     public void lock() {
         if (this.locked) return;
         this.setMoveSelector(this.moveSelector);
+        if (this.getSpawnMoves().size() > this.getMaximumMoveSlots()) {
+            throw new IllegalArgumentException("Spawn moves exceed the maximum move slots");
+        }
+        for (String name : this.moveAnimations.keySet()) {
+            if (CreatureMoveRegistry.getMove(name) == null) {
+                throw new IllegalArgumentException("Unknown registered move: " + name);
+            }
+        }
+        for (String name : this.getSpawnMoves()) {
+            if (!this.getMoveDefinitions().containsKey(name) || this.getMoveAnimations(name).isEmpty()) {
+                throw new IllegalArgumentException("Spawn move has no definition or animation mapping: " + name);
+            }
+        }
+        for (Map.Entry<Integer, List<String>> entry : this.levelupMoves.entrySet()) {
+            for (String name : entry.getValue()) {
+                if (!this.getMoveDefinitions().containsKey(name) || this.getMoveAnimations(name).isEmpty()) {
+                    throw new IllegalArgumentException("Levelup move at level " + entry.getKey()
+                            + " has no definition or animation mapping: " + name);
+                }
+            }
+        }
         for (CreatureMoveSelectorBuilder.MoveRule rule : this.moveRules) {
-            if (rule.moveResult() == CreatureMoveResult.USE_MOVE && !this.moves.containsKey(rule.moveRuleBuilder().getMoveName())) {
+            if (rule.moveResult() == CreatureMoveResult.USE_MOVE && !this.getMoveDefinitions().containsKey(rule.moveRuleBuilder().getMoveName())) {
                 throw new IllegalArgumentException("No move is registered for rule " + rule.moveRuleBuilder().getMoveName());
             }
         }
@@ -95,6 +126,21 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
             for (CreaturePhaseBuilder phase : creature.getPhaseBuilderMaps().values()) phase.lock();
         }
         if (this.domestication != null) this.domestication.lock();
+        for (MoveDefinition move : this.moves.values()) {
+            if (!move.moveBuilder().isValid()) throw new IllegalArgumentException("Invalid move: " + move.name());
+        }
+        for (String name : this.chargeupMoveAnimations.keySet()) {
+            MoveDefinition move = this.getMoveDefinitions().get(name);
+            if (move == null || move.moveBuilder().getMoveChargeupBuilder() == null) {
+                throw new IllegalArgumentException("Charge phase animations require a mapped chargeup move: " + name);
+            }
+        }
+        this.resolvedMoves = this.getMoveDefinitions();
+        this.resolvedDetectionOwners = this.getDetectionOwners();
+        this.resolvedMoveRules = this.getMoveRules();
+        this.moves.values().forEach(move -> move.moveBuilder().lock());
+        this.moveSelector = new CreatureMoveSelectorBuilder().setMoveRules(this.resolvedMoveRules);
+        this.moveSelector.lock();
         this.locked = true;
     }
 
@@ -217,9 +263,10 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     }
 
     /**
-     * Set a map containing the moves that this creature can use. Key is the name,
-     * value is the move builder for that move.
+     * Legacy creature-local declaration. Prefer CreatureMoveRegistry.registerMove,
+     * setSpawnMoves and setMoveAnimations for shared moves.
      * */
+    @Deprecated
     public T addMove(@NotNull String name, @NotNull CreatureMoveBuilder moveBuilder) {
         this.checkIfLocked();
         if (this.moves.containsKey(name)) throw new IllegalArgumentException("Move " + name + " is already registered!");
@@ -231,7 +278,6 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
         Map<DetectionRule, MoveDefinition> owners = CreatureMoveUtil.indexDetectionOwners(moves);
         List<ImmutablePair<String, CreatureMoveBuilder>> orderedMoves = new ArrayList<>(this.orderedMoves);
         orderedMoves.add(new ImmutablePair<>(name, moveBuilder));
-        moveBuilder.lock();
 
         this.moves = moves;
         this.detectionOwners = owners;
@@ -242,16 +288,24 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     }
 
     /**
-     * Ordered rider slots, retained for callers that address moves by index.
+     * Ordered spawn moves. An individual's current moves are stored separately.
      * */
     @NotNull
     public List<ImmutablePair<String, CreatureMoveBuilder>> getMoves() {
-        return this.orderedMoves;
+        return this.getSpawnMoves().stream()
+                .map(name -> new ImmutablePair<>(name, this.getMoveDefinitions().get(name).moveBuilder())).toList();
     }
 
     @NotNull
     public Map<String, MoveDefinition> getMoveDefinitions() {
-        return this.moves;
+        if (this.locked) return this.resolvedMoves;
+        Map<String, MoveDefinition> definitions = new LinkedHashMap<>();
+        for (String name : this.moveAnimations.keySet()) {
+            MoveDefinition definition = CreatureMoveRegistry.getMove(name);
+            if (definition != null) definitions.put(name, definition);
+        }
+        definitions.putAll(this.moves);
+        return java.util.Collections.unmodifiableMap(definitions);
     }
 
     /**
@@ -259,7 +313,8 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * */
     @NotNull
     public Map<DetectionRule, MoveDefinition> getDetectionOwners() {
-        return this.detectionOwners;
+        if (this.locked) return this.resolvedDetectionOwners;
+        return CreatureMoveUtil.indexDetectionOwners(this.getMoveDefinitions());
     }
 
     /**
@@ -267,13 +322,107 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * */
     @NotNull
     public List<CreatureMoveSelectorBuilder.MoveRule> getMoveRules() {
-        return this.moveRules;
+        if (this.locked) return this.resolvedMoveRules;
+        List<CreatureMoveSelectorBuilder.MoveRule> rules = new ArrayList<>();
+        for (MoveDefinition definition : this.getMoveDefinitions().values()) {
+            for (MoveRuleBuilder rule : definition.rules()) {
+                rules.add(new CreatureMoveSelectorBuilder.MoveRule(CreatureMoveResult.USE_MOVE, rule));
+            }
+        }
+        for (CreatureMoveSelectorBuilder.MoveRule rule : this.moveRules) {
+            if (rule.moveResult() != CreatureMoveResult.USE_MOVE) rules.add(rule);
+        }
+        return List.copyOf(rules);
     }
 
-    public record MoveDefinition(@NotNull String name, @NotNull CreatureMoveBuilder moveBuilder, @NotNull List<MoveRuleBuilder> rules) {
-        public MoveDefinition {
-            rules = List.copyOf(rules);
+    /**
+     * The number of moves an individual may hold, independent of its starting moves.
+     * */
+    public T setMaximumMoveSlots(int maximumMoveSlots) {
+        this.checkIfLocked();
+        if (maximumMoveSlots < 0) throw new IllegalArgumentException("Maximum move slots cannot be negative");
+        this.maximumMoveSlots = maximumMoveSlots;
+        return this.getThis();
+    }
+
+    public int getMaximumMoveSlots() {
+        return this.maximumMoveSlots < 0 ? this.orderedMoves.size() : this.maximumMoveSlots;
+    }
+
+    /**
+     * Assign moves to the creature that it will always spawn with
+     * */
+    public T setSpawnMoves(@NotNull String... moves) {
+        this.checkIfLocked();
+        List<String> names = List.of(moves);
+        if (names.stream().distinct().count() != names.size()) {
+            throw new IllegalArgumentException("Spawn moves cannot contain duplicates");
         }
+        this.spawnMoves = names;
+        return this.getThis();
+    }
+
+    @NotNull
+    public List<String> getSpawnMoves() {
+        if (this.spawnMoves != null) return this.spawnMoves;
+        return this.orderedMoves.stream().map(ImmutablePair::getKey).toList();
+    }
+
+    /**
+     * Replace the level-to-moves schedule for future levelup learning.
+     * Multiple moves may be assigned to one level, in the supplied list order.
+     * The schedule is independent of spawn moves and maximum equipped move slots;
+     * setting it does not teach or equip any moves.
+     * */
+    public T setLevelupMoves(@NotNull Map<Integer, List<String>> levelupMoves) {
+        this.checkIfLocked();
+
+        Map<Integer, List<String>> movesByLevel = new TreeMap<>();
+        for (Map.Entry<Integer, List<String>> entry : levelupMoves.entrySet()) {
+            if (entry.getKey() < 1) throw new IllegalArgumentException("Levelup move levels must be at least 1");
+            List<String> names = List.copyOf(entry.getValue());
+            if (names.stream().anyMatch(String::isBlank)) {
+                throw new IllegalArgumentException("Levelup move names cannot be blank");
+            }
+            if (names.stream().distinct().count() != names.size()) {
+                throw new IllegalArgumentException("Levelup moves cannot contain duplicates at level " + entry.getKey());
+            }
+            movesByLevel.put(entry.getKey(), names);
+        }
+        this.levelupMoves = Collections.unmodifiableMap(movesByLevel);
+        return this.getThis();
+    }
+
+    /**
+     * Immutable schedule in ascending level order, with immutable move lists.
+     * */
+    @NotNull
+    public Map<Integer, List<String>> getLevelupMoves() {
+        return this.levelupMoves;
+    }
+
+    /**
+     * Map a shared move to this creature's animation suffixes (or complete animation names).
+     * */
+    public T setMoveAnimations(@NotNull String moveName, @NotNull String... animations) {
+        this.checkIfLocked();
+        if (animations.length == 0 || java.util.Arrays.stream(animations).anyMatch(String::isBlank)) {
+            throw new IllegalArgumentException("A move requires at least one animation");
+        }
+        this.moveAnimations.put(moveName, List.of(animations));
+        return this.getThis();
+    }
+
+    @NotNull
+    public List<String> getMoveAnimations(@NotNull String moveName) {
+        return this.moveAnimations.getOrDefault(moveName, List.of());
+    }
+
+    @NotNull
+    public List<String> getMoveAnimations(@NotNull String moveName, @NotNull ChargeupPhase phase) {
+        Map<ChargeupPhase, List<String>> phases = this.chargeupMoveAnimations.get(moveName);
+        if (phases != null && phases.containsKey(phase)) return phases.get(phase);
+        return this.getMoveAnimations(moveName).stream().map(name -> name + "_" + phase.name().toLowerCase()).toList();
     }
 
     /**
@@ -576,33 +725,6 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     }
 
     /**
-     * Create a map of RiftLibrary rays that this creature will use.
-     * */
-    public T addUsableRay(@NotNull String name, @NotNull RiftLibRayBuilder builder, @NotNull TriConsumer<ICreature, BlockPos, RiftLibRay.RayHitResult> rayHitEffect) {
-        this.checkIfLocked();
-
-        if (this.rayMap == null || this.rayHitEffectMap == null) {
-            this.rayMap = new HashMap<>();
-            this.rayHitEffectMap = new HashMap<>();
-        }
-        this.rayMap.put(name, builder);
-        this.rayHitEffectMap.put(name, rayHitEffect);
-        return this.getThis();
-    }
-
-    @Nullable
-    public Map<String, RiftLibRayBuilder> getRayMap() {
-        if (this.rayMap == null) return null;
-        return Map.copyOf(this.rayMap);
-    }
-
-    @Nullable
-    public Map<String, TriConsumer<ICreature, BlockPos, RiftLibRay.RayHitResult>> getRayHitEffectMap() {
-        if (this.rayHitEffectMap == null) return null;
-        return Map.copyOf(this.rayHitEffectMap);
-    }
-
-    /**
      * Put a new entry in the whitelist for entities to attack or
      * a list defined in lists.json. This will be the default
      * value in the associated config.
@@ -719,8 +841,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
                 && this.scaleRangeForAge != null
                 && (this.navigation == null || this.navigation.isValid())
                 && (this.domestication == null || this.domestication.isValid())
-                && this.tributeItemPartName != null
-                && !this.moves.isEmpty();
+                && this.tributeItemPartName != null;
     }
 
     /**

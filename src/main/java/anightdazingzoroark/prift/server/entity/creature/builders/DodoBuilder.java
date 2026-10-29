@@ -3,18 +3,11 @@ package anightdazingzoroark.prift.server.entity.creature.builders;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.creature.builder.CreatureDomesticationBuilder;
-import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
-import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.DistanceFromUserDetectionRule;
-import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveCommon;
-import net.minecraft.entity.EntityLivingBase;
 
 public class DodoBuilder extends RiftCreatureBuilder {
     public DodoBuilder() {
-        DistanceFromUserDetectionRule peckRange = new DistanceFromUserDetectionRule(2D);
-
         this.setName("dodo")
                 .setCreatureCategory(RiftCreatureEnums.CreatureCategory.BIRD)
                 .setCreatureDiet(RiftCreatureEnums.CreatureDiet.HERBIVORE)
@@ -36,27 +29,9 @@ public class DodoBuilder extends RiftCreatureBuilder {
                 .setIsHerder(8)
                 .setPanicOnHit()
                 //---moves---
-                .addMove("peck", CreatureMoveCommon.standardMeleeMove.copy()
-                        .setBasePower(40)
-                        .setUseLookBasedFacing()
-                        .setAnimNames("peck")
-                        .setOnMoveHitEffect(creature -> {
-                            EntityLivingBase target = creature.getAttackTarget();
-                            if (!creature.getEntityWorld().isRemote && target != null && target.isEntityAlive()
-                                    && peckRange.targetWithinRange(creature, target)
-                            ) {
-                                creature.attackEntityAsMob(target);
-                            }
-                        })
-                )
-                //---attack ai---
-                .setMoveSelector(new CreatureMoveSelectorBuilder()
-                        .setMoveRule(
-                                new MoveRuleBuilder("peck")
-                                        .setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                                        .addDetectionRule(peckRange)
-                        )
-                )
+                .setMaximumMoveSlots(1)
+                .setSpawnMoves("peck")
+                .setMoveAnimations("peck", "peck")
                 //---food---
                 .addDefaultFoodItemWhitelistEntry("seed")
                 .addDefaultFoodItemWhitelistEntry("fruit");

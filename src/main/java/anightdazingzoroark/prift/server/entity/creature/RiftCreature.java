@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.api.creature.CreatureMoveRegistry.MoveDefinition;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
@@ -43,6 +44,7 @@ import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreaturePathNa
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+import anightdazingzoroark.prift.api.util.CreatureMoveUtil;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenAimingType;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenCrosshairType;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
@@ -76,8 +78,6 @@ import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
 import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
 import anightdazingzoroark.riftlib.model.AnimatedLocator;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
-import anightdazingzoroark.riftlib.ray.IRayCreator;
-import anightdazingzoroark.riftlib.ray.RiftLibRay;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
 import anightdazingzoroark.riftlib.ray.rayShape.impact.RiftLibRayEllipsoidImpactShape;
@@ -136,7 +136,7 @@ import java.util.*;
 /**
  * le heart and soul of this mod
  * */
-public class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntityLiving>, IDynamicRideUser<RiftCreature>, IRiftCreature, ICreature, IRayCreator<RiftCreature>, IEntityAdditionalSpawnData, IGuiHolder<RiftCreatureGuiData> {
+public class RiftCreature extends EntityTameable implements IAnimatable<AnimationDataEntityLiving>, IDynamicRideUser<RiftCreature>, IRiftCreature, ICreature, IEntityAdditionalSpawnData, IGuiHolder<RiftCreatureGuiData> {
     @Nullable
     private BlockPos creatureBoxHome;
     @Nullable
@@ -238,10 +238,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private boolean trackingFallImpact;
     private double highestAirborneY;
     private double lastFallImpactYDelta;
-
-    //ray specific params
-    protected Map<String, RiftLibRayBuilder> rayMap;
-    protected Map<String, TriConsumer<ICreature, BlockPos, RiftLibRay.RayHitResult>> rayHitEffectMap;
+    @Nullable
+    private RiftLibRayBuilder fallImpactRayBuilder;
 
     public RiftCreature(World worldIn) {
         this(worldIn, RiftCreatureRegistry.PLACEHOLDER_CREATURE);
@@ -291,29 +289,29 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         else this.propertyValueMap = Map.of();
 
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(this.creatureType.getCanBeKnockedBack() ? 0D : 1D);
-        Map<String, RiftLibRayBuilder> configuredRays = this.creatureType.getRayMap();
-        this.rayMap = configuredRays == null ? new HashMap<>() : new HashMap<>(configuredRays);
-        Map<String, TriConsumer<ICreature, BlockPos, RiftLibRay.RayHitResult>> configuredRayEffects = this.creatureType.getRayHitEffectMap();
-        this.rayHitEffectMap = configuredRayEffects == null ? new HashMap<>() : new HashMap<>(configuredRayEffects);
 
         this.trackingFallImpact = false;
         this.lastFallImpactYDelta = 0D;
+        this.fallImpactRayBuilder = null;
         if (this.creatureType.getFallCreatesImpact()) {
-            this.rayMap.put("fallImpactRay", new RiftLibRayBuilder()
-                    .setImpactOnly()
-                    .setImpactShape(() -> new RiftLibRayEllipsoidImpactShape(1D, 0.2D, 1D).topOnly())
-                    .setMaxMotionDistance(Math.max(1D, this.width * 1.5D))
-                    .setOnlyOneSegment()
-                    .setMotionSpeed(1.5D)
-            );
-            this.rayHitEffectMap.put("fallImpactRay", (creature, rayOrigin, rayHitResult) -> {
-                if (creature.getEntityWorld().isRemote) return;
-                for (Entity hitEntity : rayHitResult.hitEntities()) {
-                    if (hitEntity instanceof EntityLivingBase) {
-                        this.attackEntityFromFallImpact(hitEntity, this.lastFallImpactYDelta);
-                    }
-                }
-            });
+            String rayName = "prift:fall_impact/" + this.creatureType.getName();
+            this.fallImpactRayBuilder = RiftLibRayBuilder.getByName(rayName);
+            if (this.fallImpactRayBuilder == null) {
+                this.fallImpactRayBuilder = new RiftLibRayBuilder(rayName)
+                        .setImpactOnly()
+                        .setImpactShape(() -> new RiftLibRayEllipsoidImpactShape(1D, 0.2D, 1D).topOnly())
+                        .setMaxMotionDistance(Math.max(1D, this.width * 1.5D))
+                        .setOnlyOneSegment()
+                        .setMotionSpeed(1.5D)
+                        .setHitHandler((rayCreator, rayOrigin, rayHitResult) -> {
+                            if (!(rayCreator instanceof RiftCreature creature)) return;
+                            for (Entity hitEntity : rayHitResult.hitEntities()) {
+                                if (hitEntity instanceof EntityLivingBase) {
+                                    creature.attackEntityFromFallImpact(hitEntity, creature.lastFallImpactYDelta);
+                                }
+                            }
+                        });
+            }
         }
     }
 
@@ -658,7 +656,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 double landingYDelta = this.highestAirborneY - this.posY;
                 if (landingYDelta > 2D) { //falling down more than 2 blocks should create fall impacts
                     this.lastFallImpactYDelta = landingYDelta;
-                    RiftLibRayHelper.createRay(this, "fallImpactRay", "centerPoint");
+                    if (this.fallImpactRayBuilder != null) {
+                        this.createRay(this.fallImpactRayBuilder, "centerPoint");
+                    }
                 }
             }
 
@@ -1716,6 +1716,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     public void setPhase(String value) {
         if (value == null) return;
+        this.getCreatureMoves().setCreaturePhase(value);
         this.dataManager.set(CREATURE_PHASE, value);
     }
 
@@ -2077,7 +2078,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         AbstractCreatureBuilder<?> configuration = this.creatureType;
         if (!this.getPhase().isEmpty()) configuration = this.creatureType.getPhaseBuilderMaps().get(this.getPhase());
         if (configuration == null) return 0D;
-        AbstractCreatureBuilder.MoveDefinition definition = configuration.getMoveDefinitions().get(moves.get(moveIndex).getKey());
+        MoveDefinition definition = configuration.getMoveDefinitions().get(moves.get(moveIndex).getKey());
         if (definition == null) return 0D;
 
         //for attacks with anim detection
@@ -2709,6 +2710,33 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     @Override
+    public void createRay(@NotNull RiftLibRayBuilder rayBuilder, @NotNull String locatorName) {
+        RiftLibRayHelper.createRay(rayBuilder, locatorName, this);
+    }
+
+    @Override
+    @NotNull
+    public List<String> getMoves() {
+        return this.getCreatureMoves().getUsableMoves().stream().map(ImmutablePair::getKey).toList();
+    }
+
+    @Override
+    public void setMoves(@NotNull List<String> moves) {
+        this.getCreatureMoves().setMoves(moves);
+        if (!this.world.isRemote) this.dataManager.setDirty(CREATURE_MOVES);
+    }
+
+    @Override
+    public int getMaximumMoveSlots() {
+        return this.getCreatureMoves().getMaximumMoveSlots();
+    }
+
+    @Override
+    public boolean entityInTargetGroup(@NotNull Entity entity, @NotNull String group) {
+        return RiftUtil.entityInTargetGroup(entity, group);
+    }
+
+    @Override
     public void setCreatureMoves(CreatureMoveStorage value) {
         this.dataManager.set(CREATURE_MOVES, value);
     }
@@ -3011,25 +3039,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         }
     }
 
-    //-----ray related methods-----
-    @Override
-    @NotNull
-    public RiftCreature getRayCreator() {
-        return this;
-    }
-
-    @Override
-    @NotNull
-    public Map<String, RiftLibRayBuilder> getRayBuilders() {
-        return this.rayMap;
-    }
-
-    @Override
-    public void applyRaySegments(String rayName, BlockPos rayOrigin, RiftLibRay.RayHitResult rayHitResult) {
-        if (this.rayHitEffectMap == null) return;
-        this.rayHitEffectMap.get(rayName).accept(this, rayOrigin, rayHitResult);
-    }
-
     //-----animation related methods-----
     @Override
     @NotNull
@@ -3177,8 +3186,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private void initAnimControllerForPhase(AnimationDataEntityLiving animationData, @NotNull String phase) {
         List<AnimationControllerState<AnimationDataEntityLiving>> creatureMovesStates = new ArrayList<>();
         List<ImmutablePair<String, CreatureMoveBuilder>> moveBuilderMap;
-        if (phase.isEmpty()) moveBuilderMap = this.creatureType.getMoves();
-        else moveBuilderMap = this.creatureType.getPhaseBuilderMaps().get(phase).getMoves();
+        AbstractCreatureBuilder<?> configuration = this.creatureType;
+        if (!phase.isEmpty()) configuration = this.creatureType.getPhaseBuilderMaps().get(phase);
+        if (configuration == null) return;
+        moveBuilderMap = configuration.getMoveDefinitions().values().stream()
+                .map(move -> new ImmutablePair<>(move.name(), move.moveBuilder())).toList();
 
         //add the initial state
         AnimationControllerState<AnimationDataEntityLiving> initialState = new AnimationControllerState<AnimationDataEntityLiving>("default")
@@ -3209,8 +3221,16 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                     //---define corresponding state---
                     double transitionLength = currentChargeupPhase == ChargeupPhase.FINISHING ? 0.15D : 0D;
                     AnimationControllerState<AnimationDataEntityLiving> stateToAdd = new AnimationControllerState<AnimationDataEntityLiving>(controllerStateName, transitionLength, EasingType.EaseInOutSine)
-                            .addEntryEffect(animData -> this.lastStartedMoveUseId = this.getCreatureMoves().getCurrentMoveUseId())
-                            .addAnimation("animation."+this.creatureType.getName()+"."+controllerStateName);
+                            .addEntryEffect(animData -> this.lastStartedMoveUseId = this.getCreatureMoves().getCurrentMoveUseId());
+                    List<String> phaseAnimations = CreatureMoveUtil.getAnimationNames(this, phase, moveName, currentChargeupPhase);
+                    if (phaseAnimations.size() > 1) {
+                        stateToAdd.addEntryEffect(animData -> animData.setVariable("chosenMovePhase", this.rand.nextInt(phaseAnimations.size())));
+                    }
+                    for (int index = 0; index < phaseAnimations.size(); index++) {
+                        int animationIndex = index;
+                        stateToAdd.addAnimation(phaseAnimations.get(index), animData -> phaseAnimations.size() == 1
+                                || animData.getVariable("chosenMovePhase") == animationIndex);
+                    }
 
                     //and loop again xd
                     for (ChargeupPhase otherChargeupPhase : ChargeupPhase.values()) {
@@ -3256,14 +3276,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
                 //if the move state has multiple animation names, make it so that upon entry it
                 //generates a random number to then use
-                String[] moveAnimNames = moveBuilder.getAnimNames();
+                String[] moveAnimNames = CreatureMoveUtil.getAnimationNames(this, phase, moveName, null).toArray(String[]::new);
                 if (moveAnimNames.length > 1) {
                     moveState.addEntryEffect(animData -> animData.setVariable("chosenMove", this.rand.nextInt(moveAnimNames.length)));
                 }
 
                 //iterate over each of the anim names and put them in the state for the move
                 for (int index = 0; index < moveAnimNames.length; index++) {
-                    String moveAnimName = "animation." + this.creatureType.getName() + "." + moveAnimNames[index];
+                    String moveAnimName = moveAnimNames[index];
 
                     //only 1 move, just add the move anim name
                     if (moveAnimNames.length == 1) moveState.addAnimation(moveAnimName);

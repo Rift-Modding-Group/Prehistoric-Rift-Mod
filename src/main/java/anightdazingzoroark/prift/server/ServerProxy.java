@@ -3,6 +3,9 @@ package anightdazingzoroark.prift.server;
 import anightdazingzoroark.prift.RiftInitialize;
 
 import anightdazingzoroark.prift.api.creature.RiftCreatureRegistrationEvent;
+import anightdazingzoroark.prift.api.creature.RiftMoveRegistrationEvent;
+import anightdazingzoroark.prift.api.creature.CreatureMoveRegistry;
+import anightdazingzoroark.prift.server.entity.creatureMoves.RiftMoves;
 import anightdazingzoroark.prift.server.block.RiftBlocks;
 import anightdazingzoroark.prift.server.creatureBox.CreatureBoxGuiFactory;
 import anightdazingzoroark.prift.server.creatureBox.CreatureBoxTileEntity;
@@ -69,6 +72,11 @@ public class ServerProxy {
         MinecraftForge.EVENT_BUS.register(new PrimerEventHandler(registryPrimer));
         MinecraftForge.EVENT_BUS.register(new ServerEvents());
         MinecraftForge.EVENT_BUS.register(new RiftSounds());
+
+        // Moves must exist before any creature references them.
+        RiftMoves.registerMoves();
+        MinecraftForge.EVENT_BUS.post(new RiftMoveRegistrationEvent());
+        CreatureMoveRegistry.finishRegistration();
 
         //register entities
         RiftCreatureRegistry.createCreatures();

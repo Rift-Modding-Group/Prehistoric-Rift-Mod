@@ -140,6 +140,7 @@ gui.prift.eat_from_inventory_true=This creature will eat food items placed in it
 gui.prift.eat_from_inventory_false=This creature will not eat food items placed in its inventory
 gui.prift.creature_summary=Creature Summary
 gui.prift.creature_moves=Creature Moves
+gui.prift.creature_moves.slots=Move slots: %s / %s
 gui.prift.creature_moves.type=Type: %s
 gui.prift.creature_moves.base_power=Power: %s
 gui.prift.creature_moves.stamina=Stamina:

@@ -6,7 +6,7 @@ import anightdazingzoroark.prift.api.creature.config.RiftCreatureConfig;
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntityLiving;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractPropertyValue;
-import anightdazingzoroark.riftlib.ray.IRayCreator;
+import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
+import java.util.List;
 
 /**
  * api version of RiftCreature
@@ -25,6 +26,15 @@ public interface ICreature {
     World getEntityWorld();
 
     Random getRNG();
+
+    @NotNull
+    List<String> getMoves();
+
+    void setMoves(@NotNull List<String> moves);
+
+    int getMaximumMoveSlots();
+
+    boolean entityInTargetGroup(@NotNull Entity entity, @NotNull String group);
 
     AxisAlignedBB getEntityBoundingBox();
 
@@ -58,13 +68,8 @@ public interface ICreature {
     @NotNull
     AnimationDataEntityLiving getAnimationData();
 
-    /**
-     * Returns this creature as a RiftLib ray creator.
-     */
-    default IRayCreator<?> asRayCreator() {
-        if (this instanceof IRayCreator<?> rayCreator) return rayCreator;
-        throw new IllegalStateException("This creature does not support rays");
-    }
+    /** Create a ray from an explicit definition at one of this entity's animated locators. */
+    void createRay(@NotNull RiftLibRayBuilder rayBuilder, @NotNull String locatorName);
 
     boolean canSprintToAttack();
 

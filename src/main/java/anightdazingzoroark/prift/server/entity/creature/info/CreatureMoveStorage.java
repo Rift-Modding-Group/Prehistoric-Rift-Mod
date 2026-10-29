@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature.info;
 
+import anightdazingzoroark.prift.api.creature.CreatureMoveRegistry.MoveDefinition;
 import anightdazingzoroark.prift.api.creature.CreatureMoveResult;
 import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -18,6 +19,7 @@ import anightdazingzoroark.prift.util.PriorityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +36,7 @@ import java.util.Map;
 public class CreatureMoveStorage {
     //creature builder will be used to determine the moves
     private RiftCreatureBuilder creatureType;
+    private Map<String, List<String>> learnedMoves = new HashMap<>();
     //cooldowns of the moves that are used
     private final Map<String, Integer> moveCooldowns = new HashMap<>();
     private final Map<String, Integer> moveMaximumCooldowns = new HashMap<>();
@@ -59,8 +62,15 @@ public class CreatureMoveStorage {
     /**
      * to be used upon initialization
      * */
-    public void setCreatureUser(RiftCreatureBuilder creatureUser) {
+    public void setCreatureUser(@Nullable RiftCreatureBuilder creatureUser) {
+        if (this.creatureType != creatureUser) {
+            for (CreatureMoveSelectorBuilder.MoveRule rule : this.getUsableMoveRules()) this.prioritizedUsableMoves.remove(rule);
+            this.learnedMoves.clear();
+        }
         this.creatureType = creatureUser;
+        if (creatureUser == null) return;
+        this.learnedMoves.putIfAbsent("", creatureUser.getSpawnMoves());
+        creatureUser.getPhaseBuilderMaps().forEach((name, phase) -> this.learnedMoves.putIfAbsent(name, phase.getSpawnMoves()));
     }
 
     /**
@@ -80,7 +90,7 @@ public class CreatureMoveStorage {
         if (!this.isInitialized()) return;
 
         CreatureMoveSelectorBuilder.MoveRule blockBreakMoveRule = this.getBlockBreakMoveRule(creature, target);
-        for (CreatureMoveSelectorBuilder.MoveRule moveRule : this.creatureType.getMoveRules()) {
+        for (CreatureMoveSelectorBuilder.MoveRule moveRule : this.getUsableMoveRules()) {
             MoveRuleBuilder moveRuleBuilder = moveRule.moveRuleBuilder();
 
             boolean useDueToFrustration = moveRule.moveResult() == CreatureMoveResult.USE_MOVE
@@ -146,7 +156,7 @@ public class CreatureMoveStorage {
 
         CreatureMoveSelectorBuilder.MoveRule bestRule = null;
         int bestPriority = Integer.MAX_VALUE;
-        for (CreatureMoveSelectorBuilder.MoveRule moveRule : this.creatureType.getMoveRules()) {
+        for (CreatureMoveSelectorBuilder.MoveRule moveRule : this.getUsableMoveRules()) {
             if (moveRule.moveResult() != CreatureMoveResult.USE_MOVE) continue;
 
             MoveRuleBuilder ruleBuilder = moveRule.moveRuleBuilder();
@@ -189,12 +199,70 @@ public class CreatureMoveStorage {
      * This is to be used by creatures when on their own
      * note that phase name has no use yet since no creatures have phases yet
      * */
+    @NotNull
     public List<ImmutablePair<String, CreatureMoveBuilder>> getUsableMoves() {
         if (!this.isInitialized()) return Collections.emptyList();
-        if (this.creaturePhase.isEmpty()) return this.creatureType.getMoves();
+        AbstractCreatureBuilder<?> configuration = this.getMoveConfiguration(this.creaturePhase);
+        if (configuration == null) return List.of();
+        return this.learnedMoves.getOrDefault(this.creaturePhase, configuration.getSpawnMoves()).stream()
+                .filter(configuration.getMoveDefinitions()::containsKey)
+                .map(name -> new ImmutablePair<>(name, configuration.getMoveDefinitions().get(name).moveBuilder())).toList();
+    }
 
-        CreaturePhaseBuilder phaseBuilder = this.creatureType.getPhaseBuilderMaps().get(this.creaturePhase);
-        return phaseBuilder == null ? Collections.emptyList() : phaseBuilder.getMoves();
+    @NotNull
+    public List<CreatureMoveSelectorBuilder.MoveRule> getUsableMoveRules() {
+        AbstractCreatureBuilder<?> configuration = this.getMoveConfiguration(this.creaturePhase);
+        if (configuration == null) return List.of();
+        List<String> names = this.learnedMoves.getOrDefault(this.creaturePhase, configuration.getSpawnMoves());
+        return configuration.getMoveRules().stream()
+                .filter(rule -> rule.moveResult() != CreatureMoveResult.USE_MOVE
+                        || names.contains(rule.moveRuleBuilder().getMoveName())).toList();
+    }
+
+    /** Replace an individual's moves without modifying its species or shared move definitions. */
+    public void setMoves(@NotNull List<String> moves) {
+        this.setMoves(this.creaturePhase, moves);
+    }
+
+    public void setMoves(@NotNull String phase, @NotNull List<String> moves) {
+        AbstractCreatureBuilder<?> configuration = this.getMoveConfiguration(phase);
+        if (configuration == null) throw new IllegalArgumentException("Unknown creature phase: " + phase);
+        if (moves.size() > configuration.getMaximumMoveSlots()) {
+            throw new IllegalArgumentException("Moves exceed this creature's maximum slots");
+        }
+        if (moves.stream().distinct().count() != moves.size()) {
+            throw new IllegalArgumentException("A creature cannot hold duplicate moves");
+        }
+        for (String name : moves) {
+            if (!configuration.getMoveDefinitions().containsKey(name) || configuration.getMoveAnimations(name).isEmpty()) {
+                throw new IllegalArgumentException("Move has no definition or animation mapping for this creature: " + name);
+            }
+        }
+        if (phase.equals(this.creaturePhase) && !this.currentMove.isEmpty() && !moves.contains(this.currentMove)) {
+            throw new IllegalStateException("The active move must finish before it can be removed");
+        }
+        for (CreatureMoveSelectorBuilder.MoveRule rule : this.getUsableMoveRules()) {
+            this.prioritizedUsableMoves.remove(rule);
+        }
+        this.learnedMoves.put(phase, List.copyOf(moves));
+    }
+
+    public int getMaximumMoveSlots() {
+        AbstractCreatureBuilder<?> configuration = this.getMoveConfiguration(this.creaturePhase);
+        return configuration == null ? 0 : configuration.getMaximumMoveSlots();
+    }
+
+    public void setCreaturePhase(@NotNull String phase) {
+        if (phase.equals(this.creaturePhase)) return;
+        for (CreatureMoveSelectorBuilder.MoveRule rule : this.getUsableMoveRules()) this.prioritizedUsableMoves.remove(rule);
+        this.creaturePhase = phase;
+    }
+
+    @Nullable
+    public AbstractCreatureBuilder<?> getMoveConfiguration(@NotNull String phase) {
+        if (!this.isInitialized()) return null;
+        if (phase.isEmpty()) return this.creatureType;
+        return this.creatureType.getPhaseBuilderMaps().get(phase);
     }
 
     @Nullable
@@ -203,21 +271,15 @@ public class CreatureMoveStorage {
     }
 
     @Nullable
-    public CreatureMoveBuilder getUsableMoveBuilder(String moveName) {
-        return this.getUsableMoveBuilder("", moveName);
+    public CreatureMoveBuilder getUsableMoveBuilder(@NotNull String moveName) {
+        return this.getUsableMoveBuilder(this.creaturePhase, moveName);
     }
 
-    /**
-     * note that phase name has no use yet since no creatures have phases yet
-     * */
     @Nullable
-    public CreatureMoveBuilder getUsableMoveBuilder(String phaseName, String moveName) {
-        if (!this.isInitialized()) return null;
-
-        AbstractCreatureBuilder<?> configuration = this.creatureType;
-        if (!phaseName.isEmpty()) configuration = this.creatureType.getPhaseBuilderMaps().get(phaseName);
-        if (configuration == null) return null;
-        AbstractCreatureBuilder.MoveDefinition definition = configuration.getMoveDefinitions().get(moveName);
+    public CreatureMoveBuilder getUsableMoveBuilder(@NotNull String phaseName, @NotNull String moveName) {
+        AbstractCreatureBuilder<?> configuration = this.getMoveConfiguration(phaseName);
+        if (configuration == null || !this.learnedMoves.getOrDefault(phaseName, configuration.getSpawnMoves()).contains(moveName)) return null;
+        MoveDefinition definition = configuration.getMoveDefinitions().get(moveName);
         return definition == null ? null : definition.moveBuilder();
     }
 
@@ -532,6 +594,15 @@ public class CreatureMoveStorage {
         //-----for creature move user-----
         toReturn.setString("MoveUser", this.creatureType == null ? "" : this.creatureType.getName());
 
+        NBTTagCompound movesNBT = new NBTTagCompound();
+        this.learnedMoves.forEach((phase, moves) -> {
+            NBTTagList names = new NBTTagList();
+            moves.forEach(name -> names.appendTag(new NBTTagString(name)));
+            movesNBT.setTag(phase, names);
+        });
+        toReturn.setTag("LearnedMoves", movesNBT);
+        toReturn.setString("CreaturePhase", this.creaturePhase);
+
         //-----for move cooldowns-----
         NBTTagList cooldownList = new NBTTagList();
         for (Map.Entry<String, Integer> cooldownEntry : this.moveCooldowns.entrySet()) {
@@ -548,12 +619,31 @@ public class CreatureMoveStorage {
     }
 
     public void readFromNBT(@NotNull NBTTagCompound nbtTagCompound) {
+        for (CreatureMoveSelectorBuilder.MoveRule rule : this.getUsableMoveRules()) this.prioritizedUsableMoves.remove(rule);
+        this.learnedMoves.clear();
         this.moveCooldowns.clear();
         this.moveMaximumCooldowns.clear();
 
         //-----for creature move user-----
         String creatureTypeName = nbtTagCompound.getString("MoveUser");
         this.creatureType = creatureTypeName.isEmpty() ? null : RiftCreatureRegistry.getCreatureBuilder(creatureTypeName);
+
+        this.creaturePhase = nbtTagCompound.getString("CreaturePhase");
+        if (this.creatureType != null) {
+            this.setCreatureUser(this.creatureType);
+            NBTTagCompound movesNBT = nbtTagCompound.getCompoundTag("LearnedMoves");
+            for (String phase : movesNBT.getKeySet()) {
+                AbstractCreatureBuilder<?> configuration = this.getMoveConfiguration(phase);
+                if (configuration == null) continue;
+                NBTTagList names = movesNBT.getTagList(phase, 8);
+                List<String> moves = new ArrayList<>();
+                for (int index = 0; index < names.tagCount() && moves.size() < configuration.getMaximumMoveSlots(); index++) {
+                    String name = names.getStringTagAt(index);
+                    if (configuration.getMoveDefinitions().containsKey(name) && !moves.contains(name)) moves.add(name);
+                }
+                this.learnedMoves.put(phase, List.copyOf(moves));
+            }
+        }
 
         //-----for move cooldowns-----
         NBTTagList cooldownList = nbtTagCompound.getTagList("MoveCooldowns", 10);
