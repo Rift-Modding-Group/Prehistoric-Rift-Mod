@@ -1,11 +1,15 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
-import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
-import anightdazingzoroark.prift.client.ClientEnums;
+import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.client.ui.widgets.DynamicPageButton;
 import anightdazingzoroark.prift.client.ui.widgets.DynamicPagedWidget;
 import anightdazingzoroark.prift.client.ui.widgets.MoveIconTextures;
+import anightdazingzoroark.prift.client.ui.widgets.CreatureMoveButton;
+import anightdazingzoroark.prift.client.ui.syncValues.CreatureMovesSyncHandler;
+import com.cleanroommc.modularui.value.BoolValue;
+import com.cleanroommc.modularui.widgets.ToggleButton;
+import com.cleanroommc.modularui.widget.sizer.Unit;
 import anightdazingzoroark.prift.server.dataSerializers.RiftDataSerializers;
 import anightdazingzoroark.prift.server.entity.creature.IRiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -16,6 +20,7 @@ import anightdazingzoroark.prift.server.properties.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureAcquisitionInfo;
 import anightdazingzoroark.riftlib.inventory.RiftLibInventoryHandler;
 import com.cleanroommc.modularui.api.drawable.IKey;
+import com.cleanroommc.modularui.api.drawable.IDrawable;
 import com.cleanroommc.modularui.api.IPanelHandler;
 import com.cleanroommc.modularui.drawable.GuiDraw;
 import com.cleanroommc.modularui.drawable.GuiTextures;
@@ -23,6 +28,8 @@ import com.cleanroommc.modularui.drawable.ItemDrawable;
 import com.cleanroommc.modularui.drawable.Rectangle;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.UISettings;
+import com.cleanroommc.modularui.screen.viewport.ModularGuiContext;
+import com.cleanroommc.modularui.theme.WidgetThemeEntry;
 import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.value.sync.*;
 import com.cleanroommc.modularui.widgets.CycleButtonWidget;
@@ -140,6 +147,15 @@ public class RiftCreatureUI {
                 .copyImmutable().build();
         syncManager.syncValue("acquisition_info", acquisitionInfoValue);
 
+        CreatureMovesSyncHandler moveLists = new CreatureMovesSyncHandler(data);
+        syncManager.syncValue("move_lists", moveLists);
+        int maximumMoveSlots = Math.max(creature.getCreatureType().getMaximumMoveSlots(),
+                creature.getCreatureType().getPhaseBuilderMaps().values().stream()
+                        .mapToInt(AbstractCreatureBuilder::getMaximumMoveSlots).max().orElse(0));
+        int maximumBankSize = Math.max(creature.getCreatureType().getMoveDefinitions().size(),
+                creature.getCreatureType().getPhaseBuilderMaps().values().stream()
+                        .mapToInt(phase -> phase.getMoveDefinitions().size()).max().orElse(0));
+
         //for stat table
         int statsNameColumnWidth = 72;
         int statsValueColumnWidth = 63;
@@ -147,7 +163,8 @@ public class RiftCreatureUI {
 
         //final return value
         DynamicPagedWidget.Controller tabController = new DynamicPagedWidget.Controller(data.getInitialPage());
-        return new ModularPanel("rift_creature").width(176).coverChildrenHeight()
+        return new ModularPanel("rift_creature")
+                .width(() -> tabController.getActivePageIndex() == 3 ? 350 : 176, Unit.Measure.PIXEL).coverChildrenHeight()
                 .child(Flow.row().coverChildrenHeight().topRel(0f, 4, 1f).widthRel(1f)
                         .childIf(!data.isBoxed(), () -> new DynamicPageButton(0, tabController)
                                 .tab(GuiTextures.TAB_TOP, -1)
@@ -388,58 +405,59 @@ public class RiftCreatureUI {
                                         .scale(0.8f).asWidget().textAlign(Alignment.CenterLeft).widthRel(1f)
                                 )
                         )
-                        //page 4: move information
-                        .addPage(Flow.column()
-                                .size(176, 175)
-                                .padding(7, 8)
-                                .crossAxisAlignment(Alignment.CrossAxis.START)
-                                .childPadding(2)
-                                .child(IKey.lang("gui.prift.creature_moves").asWidget())
-                                .child(IKey.dynamic(() -> I18n.format("gui.prift.creature_moves.slots",
-                                        creature.getCreatureMoves().getUsableMoves().size(),
-                                        creature.getCreatureMoves().getMaximumMoveSlots())).scale(0.8f).asWidget())
-                                .child(new ListWidget<>().widthRel(1f).expanded()
+                        //page 4: equipped moves and the move bank
+                        .addPage(Flow.column().widthRel(1f).coverChildrenHeight().padding(7, 8).childPadding(3).collapseDisabledChild()
+                                .child(Flow.row().widthRel(1f).height(20)
+                                        .mainAxisAlignment(Alignment.MainAxis.SPACE_BETWEEN)
+                                        .child(IKey.lang("gui.prift.creature_moves").asWidget().height(20))
+                                        .child(
+                                                new ToggleButton() {
+                                                        @Override
+                                                        @NotNull
+                                                        public Result onMousePressed(int mouseButton) {
+                                                            if (!moveLists.canSwap()) return Result.STOP;
+                                                            return super.onMousePressed(mouseButton);
+                                                        }
+
+                                                        @Override
+                                                        public IDrawable getCurrentBackground(@NotNull WidgetThemeEntry<?> widgetTheme) {
+                                                            if (moveLists.getSnapshot().busy()) return GuiTextures.MC_BUTTON_DISABLED;
+                                                            return super.getCurrentBackground(widgetTheme);
+                                                        }
+
+                                                        @Override
+                                                        public void drawOverlay(@NotNull ModularGuiContext context, @NotNull WidgetThemeEntry<?> widgetTheme) {
+                                                            super.drawOverlay(context, widgetTheme);
+                                                            if (moveLists.getSnapshot().busy()) {
+                                                                new Rectangle().color(0x80888888).draw(
+                                                                        context, 0, 0, this.getArea().width, this.getArea().height,
+                                                                        this.getActiveWidgetTheme(widgetTheme, false)
+                                                                );
+                                                            }
+                                                        }
+                                                }.size(20)
+                                                        .value(new BoolValue.Dynamic(moveLists::isSwapping, moveLists::setSwapping))
+                                                        .background(false, GuiTextures.MC_BUTTON)
+                                                        .background(true, GuiTextures.MC_BUTTON_PRESSED)
+                                                        .hoverBackground(false, GuiTextures.MC_BUTTON_HOVERED)
+                                                        .hoverBackground(true, GuiTextures.MC_BUTTON_HOVERED_PRESSED)
+                                                        .overlay(GuiTextures.REFRESH.asIcon().size(12))
+                                                        .addTooltipLine(IKey.lang("gui.prift.creature_moves.swap"))
+                                        )
+                                )
+                                .child(Flow.row().widthRel(1f).coverChildrenHeight().childPadding(5)
                                         .crossAxisAlignment(Alignment.CrossAxis.START)
-                                        .children(creature.getCreatureMoves().getUsableMoves(), moveEntry -> {
-                                            float staminaConsumption = Math.max(
-                                                    moveEntry.getValue().getStaminaCost(),
-                                                    moveEntry.getValue().getStaminaDrainPerSecond()
-                                            );
-                                            ClientEnums.StaminaUse staminaUse = ClientEnums.StaminaUse.getUse(staminaConsumption);
-                                            return Flow.column().widthRel(1f).coverChildrenHeight()
-                                                    .padding(2, 1).crossAxisAlignment(Alignment.CrossAxis.START)
-                                                    .child(IKey.lang("move.creature." + moveEntry.getKey()).scale(0.8f).asWidget())
-                                                    .child(Flow.row().widthRel(1f).coverChildrenHeight()
-                                                            .mainAxisAlignment(Alignment.MainAxis.SPACE_BETWEEN)
-                                                            .child(Flow.row().coverChildren()
-                                                                    .child(MoveIconTextures.getTextureForMoveType(moveEntry.getValue().getMoveType()))
-                                                                    .child(IKey.SPACE.asWidget())
-                                                                    .child(MoveIconTextures.getTextureForElementType(moveEntry.getValue().getElement()))
-                                                            )
-                                                            .child(IKey.lang(
-                                                                    "gui.prift.creature_moves.base_power",
-                                                                    moveEntry.getValue().getMoveType() == CreatureMoveBuilder.MoveType.STATUS
-                                                                            ? " " + I18n.format("gui.prift.not_applicable")
-                                                                            : Integer.toString(moveEntry.getValue().getBasePower())
-                                                            ).scale(0.65f).asWidget())
-                                                    )
-                                                    .child(Flow.row().coverChildren().childPadding(1)
-                                                            .child(IKey.lang(
-                                                                    "gui.prift.creature_moves.stamina",
-                                                                    staminaUse == ClientEnums.StaminaUse.NONE
-                                                                            ? I18n.format("gui.prift.not_applicable")
-                                                                            : ""
-                                                            ).scale(0.65f).asWidget())
-                                                            .children(
-                                                                    staminaUse.ordinal(),
-                                                                    ignored -> MoveIconTextures.getStaminaIcon()
-                                                            )
-                                                    )
-                                                    .child(IKey.lang("move.creature." + moveEntry.getKey() + ".description")
-                                                            .scale(0.65f).asWidget().widthRel(1f).textAlign(Alignment.CenterLeft))
-                                                    .child(new Rectangle().color(0xFF555555).asWidget()
-                                                            .widthRel(1f).height(1).marginTop(1));
-                                        })
+                                        .child(Flow.column().expanded().coverChildrenHeight().childPadding(3)
+                                                .child(IKey.lang("gui.prift.creature_moves.current")
+                                                        .scale(0.7f).asWidget().widthRel(1f).height(12).textAlign(Alignment.CENTER))
+                                                .child(new ListWidget<>().widthRel(1f).maxSize(150)
+                                                        .children(maximumMoveSlots, index -> new CreatureMoveButton(moveLists, creature, false, index))))
+                                        .child(new Rectangle().color(0xFF555555).asWidget().width(1).heightRel(1f))
+                                        .child(Flow.column().expanded().coverChildrenHeight().childPadding(3)
+                                                .child(IKey.lang("gui.prift.creature_moves.bank")
+                                                        .scale(0.7f).asWidget().widthRel(1f).height(12).textAlign(Alignment.CENTER))
+                                                .child(new ListWidget<>().widthRel(1f).maxSize(150)
+                                                        .children(maximumBankSize + 1, index -> new CreatureMoveButton(moveLists, creature, true, index))))
                                 )
                         )
                 );

@@ -3,6 +3,8 @@ package anightdazingzoroark.prift.server.entity.creature.builders;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.creature.builder.*;
+
+import java.util.List;
 import java.util.Map;
 
 public class TyrannosaurusBuilder extends RiftCreatureBuilder {
@@ -47,12 +49,25 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                 .addBlockBreakLevel("axe", 2)
                 //---moves---
                 .setMaximumMoveSlots(5)
-                .setSpawnMoves("bite", "stomp", "flame_spit", "power_roar", "flamethrower")
+                .setSpawnMoves("bite", "stomp", "fire_fang", "power_roar", "flamethrower")
+                .setLevelupMoves(Map.of(
+                        1, List.of("fireball", "thunder_fang"),
+                        3, List.of("toxic_haze", "flame_spit"),
+                        5, List.of("willowisp", "flame_charge"),
+                        6, List.of("tremor")
+                ))
                 .setMoveAnimations("bite", "bite")
+                .setMoveAnimations("fire_fang", "bite")
+                .setMoveAnimations("thunder_fang", "bite")
                 .setMoveAnimations("stomp", "stomp")
                 .setMoveAnimations("flame_spit", "flame_spit")
+                .setMoveAnimations("willowisp", "flame_spit")
                 .setMoveAnimations("power_roar", "power_roar")
                 .setMoveAnimations("flamethrower", "flamethrower")
+                .setMoveAnimations("fireball", "flame_spit")
+                .setMoveAnimations("toxic_haze", "flamethrower")
+                .setMoveAnimations("tremor", "stomp")
+                .setMoveAnimations("flame_charge", "charge")
                 .setMoveSelector(new CreatureMoveSelectorBuilder()
                         .setCanSprintToAttack(1, 8D, 16D)
                         .setCanLeapToAttack(1, 6D, 12D, false)

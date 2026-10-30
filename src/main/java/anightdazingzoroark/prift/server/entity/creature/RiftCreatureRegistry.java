@@ -87,7 +87,6 @@ public class RiftCreatureRegistry {
     //default creatures
     public static void createCreatures() {
         if (builtInCreaturesRegistered || registeringBuiltInCreatures) return;
-        RiftMoves.registerMoves();
         registeringBuiltInCreatures = true;
 
         registerCreatureType(new RiftCreatureBuilder()

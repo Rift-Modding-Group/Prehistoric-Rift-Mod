@@ -136,14 +136,13 @@
 				}
 			},
 			"sound_effects": {
-				"0.425": {
+				"0.375": {
 					"effect": "prift.generic_move.head",
 					"locator": "centerPoint"
 				}
 			},
 			"timeline": {
-				"0.325": "function.create_offense_hitbox_by_tag('headAttack'); function.send_message('riddenTargetedMeleeHitEffect');",
-				"0.425": "function.destroy_offense_hitbox_by_tag('headAttack'); function.send_message('moveBlockBreakEffect');"
+				"0.375": "function.send_message('moveHitEffect'); function.send_message('riddenTargetedMeleeHitEffect'); function.send_message('moveBlockBreakEffect');"
 			}
 		},
 		"animation.triceratops.charge_prewindup": {

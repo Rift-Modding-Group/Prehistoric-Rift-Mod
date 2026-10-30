@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.prift.client.ui.RiftCreatureUI;
 import anightdazingzoroark.prift.client.rendering.block.CreatureBoxRangeRenderer;
 import anightdazingzoroark.prift.server.config.RiftGeneralConfig;
+import anightdazingzoroark.prift.server.effect.RiftEffects;
 import anightdazingzoroark.prift.server.creatureBox.CreatureBoxTileEntity;
 import anightdazingzoroark.prift.server.entity.RiftDamage;
 import anightdazingzoroark.prift.server.entity.projectile.RiftProjectile;
@@ -132,6 +133,7 @@ import org.jspecify.annotations.Nullable;
 import org.lwjglx.util.vector.Quaternion;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * le heart and soul of this mod
@@ -582,6 +584,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 return;
             }
 
+            if (this.isParalyzed()) this.interruptActionsForParalysis();
+
             //go back to wandering when owner is out of range after some time
             if (this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.BASE
                     && this.getBaseDeploymentBehavior() == RiftCreatureEnums.BaseDeploymentBehavior.FOLLOW
@@ -667,6 +671,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
             //-----tick creature move storage-----
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+            creatureMoveStorage.unlockLevelupMoves(this.getLevel());
             creatureMoveStorage.updateUsableMoves(this, this.getAttackTarget());
             creatureMoveStorage.tickCooldowns();
             boolean cancelCurrentMoveForMissingTarget = creatureMoveStorage.shouldCancelCurrentMoveForMissingTarget(this);
@@ -1037,10 +1042,13 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     @Override
-    public double verticalDistanceFromEntity(@NotNull Entity entity) {
-        double thisMidY = this.posY + this.height / 2D;
-        double entityMidY = entity.posY + entity.height / 2D;
-        return this.height / 2D + Math.abs(thisMidY - entityMidY);
+    public double verticalDistanceFromEntity(@NotNull Entity entity, boolean useCenter) {
+        if (useCenter) {
+            double thisMidY = this.posY + this.height / 2D;
+            double entityMidY = entity.posY + entity.height / 2D;
+            return this.height / 2D + Math.abs(thisMidY - entityMidY);
+        }
+        else return Math.abs(this.posY - entity.posY);
     }
     //---misc ICreature implementations from the api ends here---
 
@@ -1534,7 +1542,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void prepareRush(double speedMultiplier, int maximumTicks) {
-        if (this.world.isRemote || this.getCurrentMove().isEmpty()) return;
+        if (this.world.isRemote || this.getCurrentMove().isEmpty() || this.isParalyzed()) return;
         if (speedMultiplier <= 0D || maximumTicks <= 0) return;
         float heading = this.getAnimationData().getModelYaw();
         if (this.getControllingPassenger() instanceof EntityPlayer rider) heading = rider.rotationYaw;
@@ -1572,7 +1580,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public boolean canLeapToAttack() {
-        return this.getLeapCooldown() == 0;
+        return this.getLeapCooldown() == 0 && !this.isParalyzed();
     }
 
     public void removeLeapToAttackCooldown() {
@@ -1638,7 +1646,46 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     protected boolean isMovementBlocked() {
-        return this.getIsSleeping() || this.isStaggered() || super.isMovementBlocked();
+        return this.getIsSleeping() || this.isStaggered() || this.isParalyzed() || super.isMovementBlocked();
+    }
+
+    public boolean isParalyzed() {
+        return this.isPotionActive(RiftEffects.PARALYSIS);
+    }
+
+    /**
+     * Cancels active actions while leaving downward motion to normal gravity.
+     * */
+    public void interruptActionsForParalysis() {
+        if (!this.world.isRemote) {
+            CreatureMoveStorage moves = this.getCreatureMoves();
+            if (!this.getCurrentMove().isEmpty()) {
+                moves.finishCurrentMoveUse(this);
+                CreatureMoveBuilder move = moves.getMoveBuilderCurrentMove();
+                if (move != null && !moves.hasCurrentMoveEndEffectFired()) {
+                    moves.markCurrentMoveEndEffectFired();
+                    if (move.getOnMoveEndEffect() != null) move.getOnMoveEndEffect().accept(this);
+                }
+                moves.resetCurrentMove(this);
+                this.dataManager.setDirty(CREATURE_MOVES);
+            }
+            this.setRushState(RushState.EMPTY);
+            this.setUseBlockBreak(false);
+        }
+
+        RiftCreatureLeapHelper leap = this.getCreatureMoveHelper().getLeapHelper();
+        boolean wasLeaping = leap.isLeaping() || leap.isRiddenLeapPendingOrActive();
+        this.getNavigator().clearPath();
+        this.getCreatureMoveHelper().stopMovement();
+        this.sprintHelper.endSprint();
+        this.stopRiddenAim();
+        this.setJumping(false);
+        this.motionX = 0D;
+        this.motionZ = 0D;
+        if (wasLeaping) {
+            this.motionY = Math.min(0D, this.motionY);
+            this.velocityChanged = true;
+        }
     }
 
     //-----taming management-----
@@ -1948,10 +1995,18 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     public void setCurrentMove(@NotNull String name) {
-        if (this.isLeaping() && !name.isEmpty()) return;
+        if ((this.isLeaping() || this.isParalyzed()) && !name.isEmpty()) return;
         CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
         creatureMoveStorage.setCurrentMove(name);
-        if (!this.world.isRemote) this.dataManager.setDirty(CREATURE_MOVES);
+        if (!this.world.isRemote) {
+            // Choose before move-begin effects capture aim; playback uses this same synced variant.
+            if (!name.isEmpty()) {
+                List<String> animations = CreatureMoveUtil.getAnimationNames(this, this.getPhase(), name, null);
+                int index = animations.size() > 1 ? this.rand.nextInt(animations.size()) : 0;
+                this.animData.setVariable("chosenMove", index);
+            }
+            this.dataManager.setDirty(CREATURE_MOVES);
+        }
     }
 
     public void useMoveFromRider(@NotNull EntityPlayer rider, int moveIndex) {
@@ -2394,7 +2449,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     public boolean isMovementLockedByMove() {
         CreatureMoveBuilder move = this.getCreatureMoves().getMoveBuilderCurrentMove();
-        return move != null && move.getPreventMovement();
+        return !this.isParalyzed() && move != null && move.getPreventMovement();
     }
 
     @Override
@@ -2417,6 +2472,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void travel(float strafe, float vertical, float forward) {
+        if (this.isParalyzed()) {
+            this.interruptActionsForParalysis();
+            super.travel(0f, 0f, 0f);
+            return;
+        }
         if (this.isBoxSitting()) {
             this.getNavigator().clearPath();
             this.getCreatureMoveHelper().stopMovement();
@@ -2496,7 +2556,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     public boolean riderCanControl() {
         return this.getControllingPassenger() != null && this.isSaddled() && !this.getIsSleeping() && !this.isStaggered()
-                && this.getCreatureMoves().getCurrentMove().isEmpty();
+                && !this.isParalyzed() && this.getCreatureMoves().getCurrentMove().isEmpty();
     }
 
     @Nullable
@@ -2562,6 +2622,17 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     public RiftCreatureBuilder getCreatureType() {
         return this.creatureType;
     }
+
+    @Override
+    public boolean hasCollisionHitboxes() {
+        return false;
+    }
+
+    @Override
+    public void createOffenseHitboxesByTag(@NotNull String tagName, int lifetime) {}
+
+    @Override
+    public void createOffenseHitboxesByTag(@NotNull String tagName, int lifetime, @Nullable Consumer<Entity> entityHitEffect) {}
 
     @Override
     public int getLevel() {
@@ -2955,6 +3026,18 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     @Override
+    public float getRenderPitch(float partialTicks) {
+        CreatureMoveBuilder move = CreatureLookUtil.getRiddenAimMove(this, this.getCurrentMove());
+        CreatureMoveChargeupBuilder charge = move == null ? null : move.getMoveChargeupBuilder();
+        Entity rider = this.getControllingPassenger();
+        if (charge != null && charge.getCanLookWhileUsing() && this.canRotateMounted() && rider != null) {
+            return (float) MathUtil.slopeResult(
+                    partialTicks, true, 0D, 1D, rider.prevRotationPitch, rider.rotationPitch);
+        }
+        return IDynamicRideUser.super.getRenderPitch(partialTicks);
+    }
+
+    @Override
     public float getRenderYaw(float partialTicks) {
         CreatureMoveBuilder move = CreatureLookUtil.getRiddenAimMove(this, this.getCurrentMove());
         CreatureMoveChargeupBuilder charge = move == null ? null : move.getMoveChargeupBuilder();
@@ -3100,10 +3183,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (this.getNavigationBuilder() != null && this.getNavigationBuilder().getCanLeap()) {
             animationData.addAnimationController(new AnimationController<RiftCreature, AnimationDataEntityLiving>(this, "leaping", "default",
                     new AnimationControllerState<AnimationDataEntityLiving>("default", 0.1)
-                            .addStateTransition("leaping", animData -> !this.getIsSleeping() && this.isLeaping()),
+                            .addStateTransition("leaping", animData -> !this.getIsSleeping() && !this.isParalyzed() && this.isLeaping()),
                     new AnimationControllerState<AnimationDataEntityLiving>("leaping", 0.1)
                             .addAnimation("animation."+this.creatureType.getName()+".leap")
-                            .addStateTransition("default", animData -> this.getIsSleeping() || !this.isLeaping())
+                            .addStateTransition("default", animData -> this.getIsSleeping() || this.isParalyzed() || !this.isLeaping())
             ));
         }
         //---for moves---
@@ -3213,7 +3296,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                     String controllerStateName = moveName + "_" + chargeupPhaseName;
 
                     //---add transition in initial state---
-                    initialState.addStateTransition(controllerStateName, animData -> !this.getIsSleeping()
+                    initialState.addStateTransition(controllerStateName, animData -> !this.getIsSleeping() && !this.isParalyzed()
                             && this.getPhase().equals(phase)
                             && this.getCreatureMoves().getCurrentMoveUseId() != this.lastStartedMoveUseId
                             && this.getCreatureMoves().currentMoveMatches(moveName, currentChargeupPhase));
@@ -3240,19 +3323,20 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                         String otherControllerStateName = moveName + "_" + otherChargeupPhaseName;
 
                         stateToAdd.addStateTransition(
-                                otherControllerStateName, animData -> !this.getIsSleeping()
+                                otherControllerStateName, animData -> !this.getIsSleeping() && !this.isParalyzed()
                                         && this.getCreatureMoves().currentMoveMatches(moveName, otherChargeupPhase)
                         );
                     }
 
                     //exclusive for finish, to transition back to default
                     if (currentChargeupPhase == ChargeupPhase.FINISHING) {
-                        stateToAdd.addStateTransition("default", animData -> this.getIsSleeping()
+                        stateToAdd.addStateTransition("default", animData -> this.getIsSleeping() || this.isParalyzed()
+                                        || this.getCurrentMove().isEmpty()
                                         || animData.allAnimationsFinished(controllerName))
                                 .addExitEffect(animData -> this.onMoveFinish(moveName));
                     }
                     //emergency exit condition for other phases, mostly for client
-                    else stateToAdd.addStateTransition("default", animData -> this.getIsSleeping()
+                    else stateToAdd.addStateTransition("default", animData -> this.getIsSleeping() || this.isParalyzed()
                             || this.getCreatureMoves().getCurrentMove().isEmpty());
 
                     //add the state
@@ -3262,7 +3346,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             //for non chargeup moves, add other anim states for each move to a single anim controller
             else {
                 //transition from initial state to a state associated with the move
-                initialState.addStateTransition(moveName, animData -> !this.getIsSleeping()
+                initialState.addStateTransition(moveName, animData -> !this.getIsSleeping() && !this.isParalyzed()
                         && this.getPhase().equals(phase)
                         && this.getCreatureMoves().getCurrentMoveUseId() != this.lastStartedMoveUseId
                         && this.getCurrentMove().equals(moveName));
@@ -3270,16 +3354,13 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 //create state for move
                 AnimationControllerState<AnimationDataEntityLiving> moveState = new AnimationControllerState<AnimationDataEntityLiving>(moveName, 0.15D, EasingType.EaseInOutSine)
                         .addEntryEffect(animData -> this.lastStartedMoveUseId = this.getCreatureMoves().getCurrentMoveUseId())
-                        .addStateTransition("default", animData -> this.getIsSleeping()
+                        .addStateTransition("default", animData -> this.getIsSleeping() || this.isParalyzed()
+                                || this.getCurrentMove().isEmpty()
                                 || animData.allAnimationsFinished(controllerName))
                         .addExitEffect(animData -> this.onMoveFinish(moveName));
 
-                //if the move state has multiple animation names, make it so that upon entry it
-                //generates a random number to then use
+                // The variant was chosen at move start, before its aim was captured.
                 String[] moveAnimNames = CreatureMoveUtil.getAnimationNames(this, phase, moveName, null).toArray(String[]::new);
-                if (moveAnimNames.length > 1) {
-                    moveState.addEntryEffect(animData -> animData.setVariable("chosenMove", this.rand.nextInt(moveAnimNames.length)));
-                }
 
                 //iterate over each of the anim names and put them in the state for the move
                 for (int index = 0; index < moveAnimNames.length; index++) {
@@ -3310,7 +3391,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     //small helper method for defining what happens when a move finishes
     private void onMoveFinish(@NotNull String moveName) {
         //client animation completion must not erase a newer server move snapshot
-        if (this.world.isRemote) return;
+        if (this.world.isRemote || !moveName.equals(this.getCurrentMove())) return;
 
         CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
         this.moveFinishCount++;

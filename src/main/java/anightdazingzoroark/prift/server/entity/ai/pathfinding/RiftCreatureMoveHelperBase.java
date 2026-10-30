@@ -36,7 +36,7 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
     }
 
     public void setChargeTo(double x, double y, double z, double speedIn) {
-        if (this.creature.isBoxSitting()) return;
+        if (this.creature.isBoxSitting() || this.creature.isParalyzed()) return;
         if (this.isLeaping()) return;
         if (!this.creature.isWithinDeploymentRange(x, y, z)) {
             this.creatureAction = CreatureAction.WAIT;
@@ -87,7 +87,7 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
 
     @Override
     public final void onUpdateMoveHelper() {
-        if (this.creature.isBoxSitting()) {
+        if (this.creature.isBoxSitting() || this.creature.isParalyzed()) {
             this.creatureAction = CreatureAction.WAIT;
             this.stopMovement();
             return;

@@ -13,6 +13,7 @@ import net.minecraft.util.ResourceLocation;
 import anightdazingzoroark.prift.server.config.RiftJsonConfigParser;
 import anightdazingzoroark.prift.server.dataSerializers.InternalRegistryPrimer;
 import anightdazingzoroark.prift.server.dataSerializers.PrimerEventHandler;
+import anightdazingzoroark.prift.server.effect.RiftEffects;
 import anightdazingzoroark.prift.server.entity.RiftEntities;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiFactory;
@@ -72,6 +73,10 @@ public class ServerProxy {
         MinecraftForge.EVENT_BUS.register(new PrimerEventHandler(registryPrimer));
         MinecraftForge.EVENT_BUS.register(new ServerEvents());
         MinecraftForge.EVENT_BUS.register(new RiftSounds());
+
+        //register effects
+        RiftEffects.registerEffects();
+        MinecraftForge.EVENT_BUS.register(new RiftEffects());
 
         // Moves must exist before any creature references them.
         RiftMoves.registerMoves();

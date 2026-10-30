@@ -2,6 +2,7 @@ package anightdazingzoroark.prift;
 
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.commands.RiftBleedCommand;
+import anightdazingzoroark.prift.server.commands.RiftLevelupCreatureCommand;
 import anightdazingzoroark.riftlib.RiftLib;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -68,5 +69,6 @@ public class RiftInitialize {
     @Mod.EventHandler
     public void serverLoad(FMLServerStartingEvent event) {
         event.registerServerCommand(new RiftBleedCommand());
+        event.registerServerCommand(new RiftLevelupCreatureCommand());
     }
 }

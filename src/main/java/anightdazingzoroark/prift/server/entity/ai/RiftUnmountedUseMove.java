@@ -33,7 +33,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
         if (this.creature.isBeingRidden()) return false;
 
         //cannot execute if staggered
-        if (this.creature.isStaggered()) return false;
+        if (this.creature.isStaggered() || this.creature.isParalyzed()) return false;
 
         //cannot execute if the creature has no moves
         if (!this.creature.getCreatureMoves().isInitialized()) return false;
@@ -59,6 +59,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     public boolean shouldContinueExecuting() {
         return !this.creature.isBeingRidden()
                 && !this.creature.isStaggered()
+                && !this.creature.isParalyzed()
                 && (!this.creature.isLeaping() || this.isUsingLeapAttack())
                 && this.moveResultTicker != null
                 && (!this.moveResultTicker.isOverridableWhileUsed() || this.createMoveRule() != null)
@@ -76,6 +77,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
      * */
     @Override
     public void updateTask() {
+        if (this.creature.isParalyzed()) return;
         if (this.creature.isLeaping() && !this.isUsingLeapAttack()) return;
 
         //switch before the current ticker can request a pathfinding leap

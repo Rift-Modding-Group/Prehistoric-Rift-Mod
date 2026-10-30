@@ -4,8 +4,6 @@ import anightdazingzoroark.prift.api.creature.CreatureMoveRegistry.MoveDefinitio
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.api.util.CreatureMoveUtil;
 import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
-import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
-import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.util.MathUtil;
 import anightdazingzoroark.riftlib.model.AnimationHitboxTimeline;
@@ -27,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +42,7 @@ public class AnimatedHitboxDetectionRule extends DetectionRule {
     private final BiConsumer<ICreature, EntityLivingBase> preparePose;
 
     /**
-     * Animation names and hitbox lifetimes come from the owning move and its animation effects.
+     * Predicts the existing tagged geometry at the owning move's animation hit cue.
      * preparePose sets only prediction variables and must not start the move or its effects.
      */
     public AnimatedHitboxDetectionRule(@NotNull String hitboxTag, @NotNull Consumer<ICreature> preparePose) {
@@ -55,6 +52,11 @@ public class AnimatedHitboxDetectionRule extends DetectionRule {
     public AnimatedHitboxDetectionRule(@NotNull String hitboxTag, @NotNull BiConsumer<ICreature, EntityLivingBase> preparePose) {
         this.hitboxTag = hitboxTag;
         this.preparePose = preparePose;
+    }
+
+    @NotNull
+    public String getHitboxTag() {
+        return this.hitboxTag;
     }
 
     @Override
@@ -80,27 +82,13 @@ public class AnimatedHitboxDetectionRule extends DetectionRule {
 
         MoveDefinition definition = configuration.getDetectionOwners().get(this);
         if (definition == null) return null;
-        CreatureMoveBuilder move = definition.moveBuilder();
 
         AnimationDataEntityLiving data = user.getAnimationData();
-        List<String> animationSuffixes;
-        if (move.getMoveChargeupBuilder() != null) {
-            animationSuffixes = Arrays.stream(ChargeupPhase.values())
-                    .flatMap(phase -> CreatureMoveUtil.getAnimationNames(user, user.getPhase(), definition.name(), phase).stream()).toList();
-        }
-        else {
-            String[] names = CreatureMoveUtil.getAnimationNames(user, user.getPhase(), definition.name(), null).toArray(String[]::new);
-            if (names == null || names.length == 0) return null;
-            int index = 0;
-            if (user.getCurrentMove().equals(definition.name()) && names.length > 1) {
-                index = Math.clamp((int) data.getVariable("chosenMove"), 0, names.length - 1);
-            }
-            animationSuffixes = List.of(names[index]);
-        }
+        List<String> animationSuffixes = CreatureMoveUtil.getPreviewAnimationNames(user, definition.name());
 
         //once the move starts, prediction must keep its captured aim.
         if (user.getCurrentMove().isEmpty()) this.preparePose.accept(user, target);
-        List<AnimatedBoundingBox> hitboxes = data.getAnimatedBoundingBoxesByTag().get(this.hitboxTag);
+        List<AnimatedBoundingBox> hitboxes = data.getAnimatedBoundingBoxesByTag().get(this.getHitboxTag());
         if (hitboxes == null || hitboxes.isEmpty() || data.getBoneSnapshotCollection().isEmpty()) return null;
 
         if (!(data.getHolder() instanceof IAnimatable<?> animatable)) return null;
@@ -114,10 +102,16 @@ public class AnimatedHitboxDetectionRule extends DetectionRule {
         }
 
         Map<AnimatedBoundingBox, List<Map<String, BoneSnapshot>>> poses = new HashMap<>();
-        for (AnimationHitboxTimeline.HitboxWindow window : AnimationHitboxTimeline.getHitboxWindows(animations, hitboxes, data)) {
+        for (AnimationHitboxTimeline.HitboxWindow window : CreatureMoveUtil.getHitboxWindows(user, definition.moveBuilder(), animations, hitboxes, data)) {
             List<Map<String, BoneSnapshot>> hitboxPoses = poses.computeIfAbsent(window.hitbox(), hitbox -> new ArrayList<>());
+            if (window.startTick() == window.endTick()) {
+                hitboxPoses.add(AnimationPoseSampler.sample(window.animation(), data, window.startTick()));
+                continue;
+            }
             Map<String, BoneSnapshot> previousPose = null;
-            for (double tick = Math.ceil(window.startTick()); tick <= Math.ceil(window.endTick()); tick++) {
+            int steps = Math.max(1, (int) Math.ceil(window.endTick() - window.startTick()));
+            for (int sample = 0; sample <= steps; sample++) {
+                double tick = MathUtil.slopeResult(sample, true, 0D, steps, window.startTick(), window.endTick());
                 Map<String, BoneSnapshot> pose = AnimationPoseSampler.sample(window.animation(), data, tick);
                 if (previousPose == null) hitboxPoses.add(pose);
                 else {

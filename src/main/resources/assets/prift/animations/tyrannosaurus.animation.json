@@ -48,15 +48,14 @@
 					}
 				}
 			},
-			"timeline": {
-				"0.15": "function.create_offense_hitbox_by_tag('jaw'); function.send_message('riddenTargetedMeleeHitEffect');",
-				"0.25": "function.destroy_offense_hitbox_by_tag('jaw'); function.send_message('moveBlockBreakEffect');"
-			},
 			"sound_effects": {
-				"0.15": {
+				"0.25": {
 					"effect": "prift.generic_move.bite",
 					"locator": "centerPoint"
 				}
+			},
+			"timeline": {
+				"0.25": "function.send_message('moveHitEffect'); function.send_message('riddenTargetedMeleeHitEffect'); function.send_message('moveBlockBreakEffect');"
 			}
 		},
 		"animation.tyrannosaurus.stomp": {
@@ -162,30 +161,28 @@
 			"loop": "hold_on_last_frame",
 			"animation_length": 0.32,
 			"bones": {
+				"base": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.32": [0, "ray_aim_yaw", 0]
+					}
+				},
 				"head": {
 					"rotation": {
 						"0.0": [0, 0, 0],
-						"0.32": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, 0]
+						"0.32": ["22.5 * ray_body_aim * ray_aim_swing", 0, 0]
 					}
 				},
 				"body": {
 					"rotation": {
 						"0.0": [0, 0, 0],
-						"0.32": [
-							"flamethrower_body_aim ? flamethrower_windup_pitch : (query.head_x_rotation < 0 ? 10 : math.clamp(query.head_x_rotation, -75, 35) - math.clamp(query.head_x_rotation, -15, 15) - 30)",
-							0,
-							0
-						]
+						"0.32": ["ray_windup_pitch", 0, 0]
 					}
 				},
 				"neck": {
 					"rotation": {
 						"0.0": ["math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0],
-						"0.32": [
-							"math.clamp(query.head_x_rotation, -15, 15) - (flamethrower_body_aim ? flamethrower_windup_pitch : (query.head_x_rotation < 0 ? 10 : math.clamp(query.head_x_rotation, -75, 35) - math.clamp(query.head_x_rotation, -15, 15) - 30))",
-							"math.clamp(query.head_y_rotation, -15, 15)",
-							0
-						]
+						"0.32": ["math.clamp(query.head_x_rotation, -15, 15) - (ray_windup_pitch)", 0, 0]
 					}
 				},
 				"lowerJaw": {
@@ -203,15 +200,14 @@
 			"loop": "hold_on_last_frame",
 			"animation_length": 0.32,
 			"bones": {
+				"base": {
+					"rotation": [0, "ray_aim_yaw", 0]
+				},
 				"body": {
 					"rotation": {
-						"0.0": [
-							"flamethrower_body_aim ? flamethrower_windup_pitch : (query.head_x_rotation < 0 ? 10 : math.clamp(query.head_x_rotation, -75, 35) - math.clamp(query.head_x_rotation, -15, 15) - 30)",
-							0,
-							0
-						],
+						"0.0": ["ray_windup_pitch", 0, 0],
 						"0.32": [
-							"flamethrower_body_aim ? flamethrower_release_pitch : math.clamp(query.head_x_rotation, -75, 35) - math.clamp(query.head_x_rotation, -15, 15)",
+							"(ray_body_aim ? ray_release_pitch : query.head_x_rotation) - math.clamp(query.head_x_rotation, -15, 15) - 25 * ray_body_aim * ray_aim_swing",
 							0,
 							0
 						]
@@ -219,16 +215,8 @@
 				},
 				"neck": {
 					"rotation": {
-						"0.0": [
-							"math.clamp(query.head_x_rotation, -15, 15) - (flamethrower_body_aim ? flamethrower_windup_pitch : (query.head_x_rotation < 0 ? 10 : math.clamp(query.head_x_rotation, -75, 35) - math.clamp(query.head_x_rotation, -15, 15) - 30))",
-							"math.clamp(query.head_y_rotation, -15, 15)",
-							0
-						],
-						"0.32": [
-							"(flamethrower_body_aim ? 2.5 * flamethrower_aim_swing : 0) + math.clamp(query.head_x_rotation, -15, 15)",
-							"math.clamp(query.head_y_rotation, -15, 15)",
-							0
-						]
+						"0.0": ["math.clamp(query.head_x_rotation, -15, 15) - (ray_windup_pitch)", 0, 0],
+						"0.32": ["(ray_body_aim ? 2.5 * ray_aim_swing : 0) + math.clamp(query.head_x_rotation, -15, 15)", 0, 0]
 					}
 				},
 				"lowerJaw": {
@@ -239,8 +227,8 @@
 				},
 				"head": {
 					"rotation": {
-						"0.0": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, 0],
-						"0.32": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, -7.5]
+						"0.0": ["22.5 * ray_body_aim * ray_aim_swing", 0, 0],
+						"0.32": ["22.5 * ray_body_aim * ray_aim_swing", 0, -7.5]
 					}
 				}
 			},
@@ -258,27 +246,26 @@
 			"loop": true,
 			"animation_length": 0.64,
 			"bones": {
+				"base": {
+					"rotation": [0, "ray_aim_yaw", 0]
+				},
 				"body": {
 					"rotation": [
-						"flamethrower_body_aim ? flamethrower_release_pitch : math.clamp(query.head_x_rotation, -75, 35) - math.clamp(query.head_x_rotation, -15, 15)",
+						"(ray_body_aim ? ray_release_pitch : query.head_x_rotation) - math.clamp(query.head_x_rotation, -15, 15) - 25 * ray_body_aim * ray_aim_swing",
 						0,
 						0
 					]
 				},
 				"neck": {
-					"rotation": [
-						"(flamethrower_body_aim ? 2.5 * flamethrower_aim_swing : 0) + math.clamp(query.head_x_rotation, -15, 15)",
-						"math.clamp(query.head_y_rotation, -15, 15)",
-						0
-					]
+					"rotation": ["(ray_body_aim ? 2.5 * ray_aim_swing : 0) + math.clamp(query.head_x_rotation, -15, 15)", 0, 0]
 				},
 				"head": {
 					"rotation": {
-						"0.0": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, -7.5],
-						"0.16": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, 7.5],
-						"0.32": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, -7.5],
-						"0.48": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, 7.5],
-						"0.64": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, -7.5]
+						"0.0": ["22.5 * ray_body_aim * ray_aim_swing", 0, -7.5],
+						"0.16": ["22.5 * ray_body_aim * ray_aim_swing", 0, 7.5],
+						"0.32": ["22.5 * ray_body_aim * ray_aim_swing", 0, -7.5],
+						"0.48": ["22.5 * ray_body_aim * ray_aim_swing", 0, 7.5],
+						"0.64": ["22.5 * ray_body_aim * ray_aim_swing", 0, -7.5]
 					}
 				},
 				"lowerJaw": {
@@ -290,21 +277,21 @@
 					"effect": "prift.tyrannosaurus.flamethrower_breathe",
 					"locator": "centerPoint"
 				}
-			},
-			"particle_effects": {
-				"0.0": {
-					"effect": "prift:flamethrower_fire",
-					"locator": "flamethrowerAimLocator"
-				}
 			}
 		},
 		"animation.tyrannosaurus.flamethrower_finishing": {
 			"animation_length": 0.24,
 			"bones": {
+				"base": {
+					"rotation": {
+						"0.0": [0, "ray_aim_yaw", 0],
+						"0.24": [0, 0, 0]
+					}
+				},
 				"body": {
 					"rotation": {
 						"0.0": [
-							"flamethrower_body_aim ? flamethrower_release_pitch : math.clamp(query.head_x_rotation, -75, 35) - math.clamp(query.head_x_rotation, -15, 15)",
+							"(ray_body_aim ? ray_release_pitch : query.head_x_rotation) - math.clamp(query.head_x_rotation, -15, 15) - 25 * ray_body_aim * ray_aim_swing",
 							0,
 							0
 						],
@@ -313,17 +300,13 @@
 				},
 				"neck": {
 					"rotation": {
-						"0.0": [
-							"(flamethrower_body_aim ? 2.5 * flamethrower_aim_swing : 0) + math.clamp(query.head_x_rotation, -15, 15)",
-							"math.clamp(query.head_y_rotation, -15, 15)",
-							0
-						],
+						"0.0": ["(ray_body_aim ? 2.5 * ray_aim_swing : 0) + math.clamp(query.head_x_rotation, -15, 15)", 0, 0],
 						"0.24": ["math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
 					}
 				},
 				"head": {
 					"rotation": {
-						"0.0": ["22.5 * flamethrower_body_aim * flamethrower_aim_swing", 0, 0],
+						"0.0": ["22.5 * ray_body_aim * ray_aim_swing", 0, 0],
 						"0.24": [0, 0, 0]
 					}
 				},
@@ -580,12 +563,6 @@
 					}
 				}
 			},
-			"particle_effects": {
-				"0.375": {
-					"effect": "prift:flame_spit",
-					"locator": "flameLocator"
-				}
-			},
 			"sound_effects": {
 				"0.375": {
 					"effect": "prift.tyrannosaurus.flame_spit",
@@ -593,8 +570,7 @@
 				}
 			},
 			"timeline": {
-				"0.375": "function.create_offense_hitbox_by_tag('flame_spit'); function.send_message('riddenTargetedMeleeHitEffect');",
-				"0.5": "function.destroy_offense_hitbox_by_tag('flame_spit'); function.send_message('moveBlockBreakEffect');"
+				"0.375": "function.send_message('moveHitEffect'); function.send_message('moveBlockBreakEffect'); function.send_message('riddenTargetedMeleeHitEffect');"
 			}
 		},
 		"animation.tyrannosaurus.look": {
@@ -602,6 +578,101 @@
 			"bones": {
 				"neck": {
 					"rotation": ["math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
+				}
+			}
+		},
+		"animation.tyrannosaurus.charge_prewindup": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.25,
+			"bones": {
+				"neck": {
+					"rotation": {
+						"0.0": ["math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0],
+						"0.25": [20, 0, 0]
+					}
+				},
+				"head": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [17.5, 0, 0]
+					}
+				}
+			},
+			"timeline": {
+				"0.25": "function.send_message('moveChargeupPrewindupFinished');"
+			}
+		},
+		"animation.tyrannosaurus.charge_windup": {
+			"loop": true,
+			"animation_length": 1,
+			"bones": {
+				"neck": {
+					"rotation": [20, 0, 0]
+				},
+				"head": {
+					"rotation": [17.5, 0, 0]
+				},
+				"leftLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [37.5, 0, 0],
+						"0.5": [0, 0, 0]
+					}
+				},
+				"leftFoot": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [37.5, 0, 0],
+						"0.5": [0, 0, 0]
+					}
+				}
+			}
+		},
+		"animation.tyrannosaurus.charge_prereleasing": {
+			"animation_length": 0.15,
+			"bones": {
+				"neck": {
+					"rotation": [20, 0, 0]
+				},
+				"head": {
+					"rotation": [17.5, 0, 0]
+				}
+			},
+			"timeline": {
+				"0.15": "function.send_message('moveChargeupPrereleasingFinished');"
+			}
+		},
+		"animation.tyrannosaurus.charge_releasing": {
+			"loop": true,
+			"bones": {
+				"neck": {
+					"rotation": [20, 0, 0]
+				},
+				"head": {
+					"rotation": [17.5, 0, 0]
+				},
+				"leftLeg": {
+					"rotation": ["-math.sin(query.anim_time * 720) * -22.5", 0, 0]
+				},
+				"rightLeg": {
+					"rotation": ["-math.sin(query.anim_time * 720) * 22.5", 0, 0]
+				}
+			}
+		},
+		"animation.tyrannosaurus.charge_finishing": {
+			"animation_length": 0.35,
+			"bones": {
+				"neck": {
+					"rotation": {
+						"0.0": [20, 0, 0],
+						"0.375": [0, 0, 0]
+					}
+				},
+				"head": {
+					"rotation": {
+						"0.0": [17.5, 0, 0],
+						"0.375": [0, 0, 0]
+					}
 				}
 			}
 		}

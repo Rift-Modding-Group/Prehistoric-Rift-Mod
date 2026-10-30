@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.server.config.RiftGeneralConfig;
+import anightdazingzoroark.prift.server.effect.RiftEffects;
 import anightdazingzoroark.prift.server.entity.ai.RiftAvoidStinkBomb;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.properties.OtherEntityProperties;
@@ -24,8 +25,16 @@ import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
+import org.jetbrains.annotations.NotNull;
 
 public class ServerEvents {
+    @SubscribeEvent
+    public void onBreakSpeed(@NotNull net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed event) {
+        if (event.getEntityPlayer().isPotionActive(RiftEffects.PARALYSIS)) {
+            event.setNewSpeed(0f);
+        }
+    }
+
     //make sure that a creature box cannot be broken
     //no matter what when it has creatures inside
     @SubscribeEvent

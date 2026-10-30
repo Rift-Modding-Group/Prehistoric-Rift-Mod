@@ -21,23 +21,32 @@ public class BoundingBoxDetectionRule extends DetectionRule {
         this.useTagName = useTagName;
     }
 
+    @NotNull
+    public String getBoundingBoxName() {
+        return this.boundingBoxName;
+    }
+
+    public boolean getUseTagName() {
+        return this.useTagName;
+    }
+
     @Override
     public boolean targetWithinRange(@NotNull ICreature user, @NotNull EntityLivingBase target) {
         //test hitboxes first
         if (target instanceof IEntityMultiPart) {
             for (Entity part : target.getParts()) {
                 if (!(part instanceof MultiPartEntityPart multiPartEntityPart)) continue;
-                if (this.useTagName && user.aabbIntersectsBoundingBoxTag(multiPartEntityPart.getEntityBoundingBox(), this.boundingBoxName)) {
+                if (this.getUseTagName() && user.aabbIntersectsBoundingBoxTag(multiPartEntityPart.getEntityBoundingBox(), this.getBoundingBoxName())) {
                     return true;
                 }
-                else if (user.aabbIntersectsBoundingBox(multiPartEntityPart.getEntityBoundingBox(), this.boundingBoxName)) {
+                else if (user.aabbIntersectsBoundingBox(multiPartEntityPart.getEntityBoundingBox(), this.getBoundingBoxName())) {
                     return true;
                 }
             }
         }
 
         //back to entity
-        if (this.useTagName) return user.aabbIntersectsBoundingBoxTag(target.getEntityBoundingBox(), this.boundingBoxName);
-        return user.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), this.boundingBoxName);
+        if (this.getUseTagName()) return user.aabbIntersectsBoundingBoxTag(target.getEntityBoundingBox(), this.getBoundingBoxName());
+        return user.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), this.getBoundingBoxName());
     }
 }

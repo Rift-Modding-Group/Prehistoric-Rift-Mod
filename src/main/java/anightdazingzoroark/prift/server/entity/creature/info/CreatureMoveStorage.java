@@ -36,7 +36,9 @@ import java.util.Map;
 public class CreatureMoveStorage {
     //creature builder will be used to determine the moves
     private RiftCreatureBuilder creatureType;
-    private Map<String, List<String>> learnedMoves = new HashMap<>();
+    private final Map<String, List<String>> learnedMoves = new HashMap<>();
+    private final Map<String, List<String>> moveBanks = new HashMap<>();
+    private int checkedLevelupLevel = -1;
     //cooldowns of the moves that are used
     private final Map<String, Integer> moveCooldowns = new HashMap<>();
     private final Map<String, Integer> moveMaximumCooldowns = new HashMap<>();
@@ -66,6 +68,8 @@ public class CreatureMoveStorage {
         if (this.creatureType != creatureUser) {
             for (CreatureMoveSelectorBuilder.MoveRule rule : this.getUsableMoveRules()) this.prioritizedUsableMoves.remove(rule);
             this.learnedMoves.clear();
+            this.moveBanks.clear();
+            this.checkedLevelupLevel = -1;
         }
         this.creatureType = creatureUser;
         if (creatureUser == null) return;
@@ -210,6 +214,64 @@ public class CreatureMoveStorage {
     }
 
     @NotNull
+    public List<String> getMoveBank() {
+        return this.moveBanks.getOrDefault(this.creaturePhase, List.of());
+    }
+
+    @NotNull
+    public String getCreaturePhase() {
+        return this.creaturePhase;
+    }
+
+    /** Add every eligible levelup move without changing the equipped slots. */
+    public boolean unlockLevelupMoves(int level) {
+        if (!this.isInitialized() || level == this.checkedLevelupLevel) return false;
+        boolean changed = false;
+        for (String phase : this.learnedMoves.keySet()) {
+            AbstractCreatureBuilder<?> configuration = this.getMoveConfiguration(phase);
+            if (configuration == null) continue;
+            List<String> equipped = this.learnedMoves.get(phase);
+            List<String> bank = new ArrayList<>(this.moveBanks.getOrDefault(phase, List.of()));
+            for (Map.Entry<Integer, List<String>> entry : configuration.getLevelupMoves().entrySet()) {
+                if (entry.getKey() > level) continue;
+                for (String name : entry.getValue()) {
+                    if (configuration.getMoveDefinitions().containsKey(name) && !equipped.contains(name) && !bank.contains(name)) {
+                        bank.add(name);
+                        changed = true;
+                    }
+                }
+            }
+            this.moveBanks.put(phase, List.copyOf(bank));
+        }
+        this.checkedLevelupLevel = level;
+        return changed;
+    }
+
+    /** Swap occupied slots or move an entry to an empty destination, preserving all learned moves. */
+    public boolean swapMoves(boolean sourceBank, int sourceIndex, boolean destinationBank, int destinationIndex) {
+        if (!this.isInitialized() || !this.currentMove.isEmpty() || sourceIndex < 0 || destinationIndex < 0) return false;
+        List<String> equipped = new ArrayList<>(this.getUsableMoves().stream().map(ImmutablePair::getKey).toList());
+        List<String> bank = new ArrayList<>(this.getMoveBank());
+        List<String> source = sourceBank ? bank : equipped;
+        List<String> destination = destinationBank ? bank : equipped;
+        int destinationCapacity = destinationBank ? bank.size() + 1 : Math.min(this.getMaximumMoveSlots(), equipped.size() + 1);
+        if (sourceIndex >= source.size() || destinationIndex >= destinationCapacity) return false;
+        if (sourceBank == destinationBank && sourceIndex == destinationIndex) return false;
+        String move = source.get(sourceIndex);
+        if (destinationIndex < destination.size()) {
+            source.set(sourceIndex, destination.get(destinationIndex));
+            destination.set(destinationIndex, move);
+        }
+        else {
+            source.remove(sourceIndex);
+            destination.add(move);
+        }
+        this.setMoves(equipped);
+        this.moveBanks.put(this.creaturePhase, List.copyOf(bank));
+        return true;
+    }
+
+    @NotNull
     public List<CreatureMoveSelectorBuilder.MoveRule> getUsableMoveRules() {
         AbstractCreatureBuilder<?> configuration = this.getMoveConfiguration(this.creaturePhase);
         if (configuration == null) return List.of();
@@ -238,12 +300,19 @@ public class CreatureMoveStorage {
                 throw new IllegalArgumentException("Move has no definition or animation mapping for this creature: " + name);
             }
         }
-        if (phase.equals(this.creaturePhase) && !this.currentMove.isEmpty() && !moves.contains(this.currentMove)) {
-            throw new IllegalStateException("The active move must finish before it can be removed");
+        List<String> previousMoves = this.learnedMoves.getOrDefault(phase, configuration.getSpawnMoves());
+        if (phase.equals(this.creaturePhase) && !this.currentMove.isEmpty() && !moves.equals(previousMoves)) {
+            throw new IllegalStateException("The active move must finish before equipped moves can change");
         }
         for (CreatureMoveSelectorBuilder.MoveRule rule : this.getUsableMoveRules()) {
             this.prioritizedUsableMoves.remove(rule);
         }
+        List<String> bank = new ArrayList<>(this.moveBanks.getOrDefault(phase, List.of()));
+        for (String name : previousMoves) {
+            if (!moves.contains(name) && !bank.contains(name)) bank.add(name);
+        }
+        bank.removeAll(moves);
+        this.moveBanks.put(phase, List.copyOf(bank));
         this.learnedMoves.put(phase, List.copyOf(moves));
     }
 
@@ -601,6 +670,13 @@ public class CreatureMoveStorage {
             movesNBT.setTag(phase, names);
         });
         toReturn.setTag("LearnedMoves", movesNBT);
+        NBTTagCompound banksNBT = new NBTTagCompound();
+        this.moveBanks.forEach((phase, moves) -> {
+            NBTTagList names = new NBTTagList();
+            moves.forEach(name -> names.appendTag(new NBTTagString(name)));
+            banksNBT.setTag(phase, names);
+        });
+        toReturn.setTag("MoveBanks", banksNBT);
         toReturn.setString("CreaturePhase", this.creaturePhase);
 
         //-----for move cooldowns-----
@@ -621,6 +697,8 @@ public class CreatureMoveStorage {
     public void readFromNBT(@NotNull NBTTagCompound nbtTagCompound) {
         for (CreatureMoveSelectorBuilder.MoveRule rule : this.getUsableMoveRules()) this.prioritizedUsableMoves.remove(rule);
         this.learnedMoves.clear();
+        this.moveBanks.clear();
+        this.checkedLevelupLevel = -1;
         this.moveCooldowns.clear();
         this.moveMaximumCooldowns.clear();
 
@@ -642,6 +720,19 @@ public class CreatureMoveStorage {
                     if (configuration.getMoveDefinitions().containsKey(name) && !moves.contains(name)) moves.add(name);
                 }
                 this.learnedMoves.put(phase, List.copyOf(moves));
+            }
+            NBTTagCompound banksNBT = nbtTagCompound.getCompoundTag("MoveBanks");
+            for (String phase : banksNBT.getKeySet()) {
+                AbstractCreatureBuilder<?> configuration = this.getMoveConfiguration(phase);
+                if (configuration == null) continue;
+                List<String> equipped = this.learnedMoves.getOrDefault(phase, configuration.getSpawnMoves());
+                List<String> bank = new ArrayList<>();
+                NBTTagList names = banksNBT.getTagList(phase, 8);
+                for (int index = 0; index < names.tagCount(); index++) {
+                    String name = names.getStringTagAt(index);
+                    if (configuration.getMoveDefinitions().containsKey(name) && !equipped.contains(name) && !bank.contains(name)) bank.add(name);
+                }
+                this.moveBanks.put(phase, List.copyOf(bank));
             }
         }
 

@@ -8,8 +8,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -50,6 +52,21 @@ public class RiftCreatureHitboxed extends RiftCreature implements IMultiHitboxUs
         if (!this.multiHitboxList.hasCollisionHitboxes()) return false;
         RiftLibCollisionHitbox<RiftCreatureHitboxed> bodyHitbox = this.multiHitboxList.getCollisionHitboxByName("body");
         return bodyHitbox.isInWater() || bodyHitbox.isInLava();
+    }
+
+    @Override
+    public boolean hasCollisionHitboxes() {
+        return true;
+    }
+
+    @Override
+    public void createOffenseHitboxesByTag(@NotNull String tagName, int lifetime) {
+        this.multiHitboxList.createOffenseHitboxesByTag(tagName, lifetime);
+    }
+
+    @Override
+    public void createOffenseHitboxesByTag(@NotNull String tagName, int lifetime, @Nullable Consumer<Entity> entityHitEffect) {
+        this.multiHitboxList.createOffenseHitboxesByTag(tagName, lifetime, entityHitEffect);
     }
 
     //-----methods from IMultiHitboxUser start here-----

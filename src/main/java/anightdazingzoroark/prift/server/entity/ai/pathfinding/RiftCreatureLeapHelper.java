@@ -55,7 +55,7 @@ public class RiftCreatureLeapHelper {
      * Prepares a safe AI destination using the same plan consumed by rider-controlled leaps.
      * */
     public boolean prepareLeapTo(double x, double y, double z) {
-        if (this.phase != LeapPhase.IDLE || this.isLeaping()) return false;
+        if (this.phase != LeapPhase.IDLE || this.isLeaping() || this.creature.isParalyzed()) return false;
         CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
         this.resetDelay();
         if (navigation == null || !navigation.getCanLeap() || this.creature.getStamina() <= 0f
@@ -114,7 +114,7 @@ public class RiftCreatureLeapHelper {
     private boolean startLeap(@NotNull CreatureLeapPlan plan, boolean ridden, float fallbackYaw) {
         CreatureNavigationBuilder navigation = this.creature.getNavigationBuilder();
         if (navigation == null || !navigation.getCanLeap() || !CreatureLeapPlan.hasTakeoffSupport(this.creature)
-                || this.creature.bodyTouchingLiquid()
+                || this.creature.bodyTouchingLiquid() || this.creature.isParalyzed()
         ) {
             return false;
         }
@@ -158,7 +158,7 @@ public class RiftCreatureLeapHelper {
      * */
     @Nullable
     public CreatureLeapPlan jumpFromRider(@NotNull EntityPlayer rider, @NotNull RiddenLeapRequest request) {
-        if (this.creature.getControllingPassenger() != rider) return null;
+        if (this.creature.getControllingPassenger() != rider || this.creature.isParalyzed()) return null;
         if (request instanceof RiddenLeapRequest.Approval(CreatureLeapPlan acceptedPlan)) {
             if (!this.creature.world.isRemote || this.phase != LeapPhase.AWAITING_APPROVAL) return null;
             this.cancelLeap();
@@ -236,6 +236,7 @@ public class RiftCreatureLeapHelper {
         return navigation != null && navigation.getCanLeap() && this.creature.getControllingPassenger() == rider
                 && this.phase == LeapPhase.IDLE && !this.isLeaping()
                 && !this.creature.getIsSleeping() && !this.creature.isStaggered()
+                && !this.creature.isParalyzed()
                 && CreatureLeapPlan.hasTakeoffSupport(this.creature) && !this.creature.bodyTouchingLiquid()
                 && this.creature.getCurrentMove().isEmpty() && this.creature.getLeapCooldown() <= 0 && this.creature.getStamina() > 0f;
     }

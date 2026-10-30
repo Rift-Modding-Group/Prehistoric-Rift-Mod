@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * api version of RiftCreature
@@ -54,7 +55,7 @@ public interface ICreature {
 
     double horizontalDistanceFromEntity(@NotNull Entity entity);
 
-    double verticalDistanceFromEntity(@NotNull Entity entity);
+    double verticalDistanceFromEntity(@NotNull Entity entity, boolean useCenter);
 
     boolean bodyTouchingLiquid();
 
@@ -131,6 +132,12 @@ public interface ICreature {
     float getStamina();
 
     float getMaxStamina();
+
+    boolean hasCollisionHitboxes();
+
+    void createOffenseHitboxesByTag(@NotNull String tagName, int lifetime);
+
+    void createOffenseHitboxesByTag(@NotNull String tagName, int lifetime, @Nullable Consumer<Entity> entityHitEffect);
 
     @Nullable
     Vec3d getRiddenAimPosition();

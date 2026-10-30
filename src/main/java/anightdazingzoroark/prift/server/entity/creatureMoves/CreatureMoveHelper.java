@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves;
 
 import anightdazingzoroark.prift.api.creature.ICreature;
+import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -9,7 +10,18 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+
 public class CreatureMoveHelper {
+    public static boolean hasSameElementAttackBonus(@NotNull CreatureMoveBuilder move, @NotNull Element[] userElements) {
+        return move.getMoveType() != CreatureMoveBuilder.MoveType.STATUS && move.getBasePower() > 0
+                && Arrays.stream(userElements).anyMatch(element -> element == move.getElement());
+    }
+
+    public static double getBasePowerWithElementBonus(@NotNull CreatureMoveBuilder move, @NotNull Element[] userElements) {
+        return move.getBasePower() * (hasSameElementAttackBonus(move, userElements) ? 1.5D : 1D);
+    }
+
     //calculate the damage a move will do to hit targets
     public static double calculateDamage(@NotNull RiftCreature attackingCreature) {
         return calculateDamage(attackingCreature, attackingCreature.getCreatureMoves().getMoveBuilderCurrentMove());
@@ -29,15 +41,14 @@ public class CreatureMoveHelper {
 
         //get base power
         int basePower = moveBuilder.getBasePower();
-        double finalBasePower;
+        double finalBasePower = getBasePowerWithElementBonus(moveBuilder, attackingCreature.getCreatureType().getElement());
         if (moveBuilder.getMoveChargeupBuilder() != null) {
             int chargeUpTicks = attackingCreature.getCreatureMoves().getCurrentMoveChargeUpTicks();
             double basePowerMultiplier = moveBuilder.getMoveChargeupBuilder().getBasePowerMultiplier().apply(
                     attackingCreature, basePower, chargeUpTicks
             );
-            finalBasePower = basePower * basePowerMultiplier;
+            finalBasePower *= basePowerMultiplier;
         }
-        else finalBasePower = basePower;
         finalBasePower *= 0.005D; //small multiplier
 
         return statValueToUse * finalBasePower;
