@@ -8,6 +8,7 @@ import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.VerticalDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
+import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.jsonParsing.raw.RawMolangValue;
 import anightdazingzoroark.riftlib.molang.math.Constant;
@@ -25,13 +26,16 @@ import anightdazingzoroark.riftlib.particle.particleComponent.particleMotion.Par
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
 import anightdazingzoroark.riftlib.ray.rayShape.motion.RiftLibRayConeMotionShape;
+import anightdazingzoroark.riftlib.sounds.RiftLibSoundHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public class FlamethrowerBuilder extends CreatureMoveBuilder {
@@ -44,8 +48,7 @@ public class FlamethrowerBuilder extends CreatureMoveBuilder {
                 .setElement(Element.FIRE)
                 .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureRayLook(creature, target, "flamethrowerAimLocator"))
                 .setWhileMoveUseEffect((creature, target) -> {
-                    if (!creature.getAnimationData().getHolder().isBeingRidden() && (target == null || !target.isEntityAlive()))
-                        return;
+                    if (!creature.getAnimationData().getHolder().isBeingRidden() && (target == null || !target.isEntityAlive())) return;
                     CreatureLookUtil.captureRayLook(creature, target, "flamethrowerAimLocator");
                 })
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
@@ -103,7 +106,8 @@ public class FlamethrowerBuilder extends CreatureMoveBuilder {
                                                             && source.getRNG().nextInt(4) == 0
                                                     ) {
                                                         world.setBlockState(hitBlockPos, Blocks.FIRE.getDefaultState(), 3);
-                                                    } else if (!world.isAirBlock(hitBlockPos)
+                                                    }
+                                                    else if (!world.isAirBlock(hitBlockPos)
                                                             && world.isAirBlock(hitBlockPos.up())
                                                             && Blocks.FIRE.canPlaceBlockAt(world, hitBlockPos.up())
                                                             && source.getRNG().nextInt(4) == 0
@@ -114,8 +118,27 @@ public class FlamethrowerBuilder extends CreatureMoveBuilder {
                                             }),
                                     "flamethrowerAimLocator"
                             );
+
+                            //play the sound
+                            Vec3d creaturePos = creature.getPositionVector();
+                            creature.getEntityWorld().playSound(
+                                    null, creaturePos.x, creaturePos.y, creaturePos.z,
+                                    RiftSounds.getSound("flamethrower.breathe_start"),
+                                    SoundCategory.NEUTRAL, 1f, 1f
+                            );
+
+                            RiftLibSoundHelper.playLoopingSound(
+                                    creature.getAnimationData().getHolder(),
+                                    RiftSounds.getSound("flamethrower.breathe_loop"),
+                                    SoundCategory.NEUTRAL
+                            );
                         })
                         .setReleaseEndEffect(creature -> {
+                            RiftLibSoundHelper.stopLoopingSound(
+                                    creature.getAnimationData().getHolder(),
+                                    RiftSounds.getSound("flamethrower.breathe_loop"),
+                                    SoundCategory.NEUTRAL
+                            );
                             RiftLibParticleHelper.killParticle(
                                     (Entity & IAnimatable<?>) creature.getAnimationData().getHolder(),
                                     "prift:flamethrower_fire", "flamethrowerAimLocator"

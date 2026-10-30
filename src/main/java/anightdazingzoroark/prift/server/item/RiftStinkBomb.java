@@ -46,7 +46,7 @@ public class RiftStinkBomb extends RiftThrowableItem {
     @NotNull
     public ProjectileBuilder getProjectileBuilder() {
         return new ProjectileBuilder().setName("stink_bomb")
-                .setUseCubeModel()
+                .setProjectileModel(ProjectileBuilder.ProjectileModel.CUBE)
                 .setProjectileTrail(ProjectileTrail.makeBuilderForParticleTrail()
                         .addParticleComponent(new AppearanceTintingComponent.Builder().setColor(0xC4A484, false))
                         .addParticleComponent(ProjectileTrail.DUST_APPEARANCE)

@@ -36,7 +36,8 @@ public class ProjectileBuilder {
     private boolean stayAfterImpact;
     private boolean rotateAlongPitch;
     private boolean useCubeModel;
-    private boolean hasParticleTrail;
+    @NotNull
+    private ProjectileModel projectileModel = ProjectileModel.NONE;
     @Nullable
     private ParticleBuilder projectileTrail;
     @Nullable
@@ -136,17 +137,19 @@ public class ProjectileBuilder {
         return this.rotateAlongPitch;
     }
 
-    /**
-     * Makes the projectile's model be a default 8 x 8 x 8 cube
-     * Textures still have to be supplied by you
-     * */
-    public ProjectileBuilder setUseCubeModel() {
-        this.useCubeModel = true;
+    @Deprecated
+    public boolean getUseCubeModel() {
+        return this.useCubeModel;
+    }
+
+    public ProjectileBuilder setProjectileModel(@NotNull ProjectileModel projectileModel) {
+        this.projectileModel = projectileModel;
         return this;
     }
 
-    public boolean getUseCubeModel() {
-        return this.useCubeModel;
+    @NotNull
+    public ProjectileModel getProjectileModel() {
+        return this.projectileModel;
     }
 
     public ProjectileBuilder setImpactSoundEvent(@Nullable SoundEvent soundEvent) {
@@ -189,5 +192,12 @@ public class ProjectileBuilder {
     @Nullable
     public Map<String, AbstractPropertyValue<?>> getPropertyValueMap() {
         return this.propertyValueMap;
+    }
+
+    public enum ProjectileModel {
+        CUBE, //8 x 8 cube
+        FLAT, //flat
+        NONE, //no model at all, completely invisible
+        CUSTOM; //model has to be supplied, must have identifier of same name
     }
 }

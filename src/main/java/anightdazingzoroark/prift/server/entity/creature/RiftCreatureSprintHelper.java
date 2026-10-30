@@ -43,7 +43,8 @@ public class RiftCreatureSprintHelper {
     public void updateSprint(@NotNull UpdatePhase phase) {
         if (phase == UpdatePhase.TRAVEL) {
             if (this.creature.isSprinting() && this.creature.isBeingRidden() && this.creature.riderCanControl()
-                    && this.creature.getControllingPassenger() instanceof EntityPlayer) {
+                    && this.creature.getControllingPassenger() instanceof EntityPlayer
+            ) {
                 this.creature.rotationYaw = this.creature.renderYawOffset;
             }
             return;
@@ -53,7 +54,8 @@ public class RiftCreatureSprintHelper {
             this.setCooldown(this.creature.getSprintCooldown() - 1);
         }
         if (this.riddenSprint && (!this.creature.isBeingRidden() || !this.creature.isSprinting()
-                || !this.creature.riderCanControl() || this.creature.isLeaping() || this.creature.getStamina() <= 0f)) {
+                || !this.creature.riderCanControl() || this.creature.isLeaping() || this.creature.getStamina() <= 0f)
+        ) {
             this.endSprint();
             return;
         }

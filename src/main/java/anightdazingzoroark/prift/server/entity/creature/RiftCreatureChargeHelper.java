@@ -144,21 +144,26 @@ public class RiftCreatureChargeHelper {
             if (firstContact <= 1D) {
                 this.creature.move(MoverType.SELF, movement.x * firstContact, 0D, movement.z * firstContact);
                 Set<Integer> hitVictims = new HashSet<>();
+                //attack hit entities
                 for (Map.Entry<Entity, Double> hit : entities.entrySet()) {
                     if (hit.getValue() > firstContact + 1E-6D) continue;
                     Entity entity = hit.getKey();
                     Entity victim = entity instanceof MultiPartEntityPart part ? (Entity) part.parent : entity;
                     if (this.creature.isRelatedToEntity(entity) || !hitVictims.add(victim.getEntityId())) continue;
-                    if (this.creature.attackEntityWithMove(entity)) {
+                    if (this.creature.attackEntityWithMove(entity) && rushState.includeKnockback()) {
                         victim.addVelocity(-Math.sin(radians) * 2D, 0.5D, Math.cos(radians) * 2D);
                         victim.velocityChanged = true;
                     }
                 }
+                //break hit blocks
                 if (ForgeEventFactory.getMobGriefingEvent(this.creature.world, this.creature)) {
                     for (Map.Entry<BlockPos, Double> hit : blocks.entrySet()) {
                         BlockPos position = hit.getKey();
                         if (hit.getValue() > firstContact + 1E-6D || !this.creature.canBreakBlock(position)
-                                || this.creature.getCreaturePathNavigate().isBlockBreakTemporarilyDenied(position)) continue;
+                                || this.creature.getCreaturePathNavigate().isBlockBreakTemporarilyDenied(position)
+                        ) {
+                            continue;
+                        }
                         IBlockState state = this.creature.world.getBlockState(position);
                         if (ForgeEventFactory.onEntityDestroyBlock(this.creature, position, state)) {
                             this.creature.world.destroyBlock(position, true);
@@ -197,8 +202,8 @@ public class RiftCreatureChargeHelper {
     }
 
     //transient data between server and client
-    public record RushState(@NotNull String move, double speedMultiplier, int maxTicks, float yaw) {
+    public record RushState(@NotNull String move, double speedMultiplier, int maxTicks, float yaw, boolean includeKnockback) {
         @NotNull
-        public static final RushState EMPTY = new RushState("", 0D, 0, 0f);
+        public static final RushState EMPTY = new RushState("", 0D, 0, 0f, false);
     }
 }

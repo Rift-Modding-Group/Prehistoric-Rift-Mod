@@ -31,7 +31,7 @@ public class BelchBuilder extends CreatureMoveBuilder {
                 .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.POINT)
                 .setOnMoveHitEffect(creature -> {
                     ProjectileBuilder belchProjectile = new ProjectileBuilder().setName("belch")
-                            .setRotateAlongPitch().setUseCubeModel()
+                            .setRotateAlongPitch().setProjectileModel(ProjectileBuilder.ProjectileModel.CUBE)
                             .setProjectileTrail(ProjectileTrail.makeBuilderForParticleTrail()
                                     .addParticleComponent(ProjectileTrail.DUST_APPEARANCE.setSize(0.5D, 0.5D))
                                     .addParticleComponent(new AppearanceTintingComponent.Builder().setColor(0x3B5817, false))

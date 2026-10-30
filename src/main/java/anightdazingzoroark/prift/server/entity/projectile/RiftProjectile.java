@@ -30,7 +30,7 @@ import java.util.function.Function;
 
 public class RiftProjectile extends RiftLibProjectile implements IProjectile {
     private static final DataParameter<String> NAME = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.STRING);
-    private static final DataParameter<Boolean> USE_CUBE_MODEL = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Byte> MODEL = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.BYTE);
     private static final DataParameter<NBTTagCompound> PARTICLE_TRAIL = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.COMPOUND_TAG);
     @Nullable
     private AnimationDataProjectile data;
@@ -85,7 +85,7 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
 
     private void setFromBuilder(@NotNull ProjectileBuilder builder) {
         this.dataManager.set(NAME, builder.getName());
-        this.dataManager.set(USE_CUBE_MODEL, builder.getUseCubeModel());
+        this.dataManager.set(MODEL, (byte) builder.getProjectileModel().ordinal());
         if (builder.getProjectileTrail() != null) this.dataManager.set(PARTICLE_TRAIL, ParticleBuilder.toNBT(builder.getProjectileTrail()));
         if (builder.getPropertyValueMap() != null) this.propertyValueMap = Map.copyOf(builder.getPropertyValueMap());
     }
@@ -94,7 +94,7 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
     protected void entityInit() {
         super.entityInit();
         this.dataManager.register(NAME, "");
-        this.dataManager.register(USE_CUBE_MODEL, false);
+        this.dataManager.register(MODEL, (byte) 2);
         this.dataManager.register(PARTICLE_TRAIL, new NBTTagCompound());
     }
 
@@ -123,8 +123,8 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
         return this.dataManager.get(NAME);
     }
 
-    public boolean getUseCubeModel() {
-        return this.dataManager.get(USE_CUBE_MODEL);
+    public ProjectileBuilder.ProjectileModel getProjectileModel() {
+        return ProjectileBuilder.ProjectileModel.values()[this.dataManager.get(MODEL)];
     }
 
     public NBTTagCompound getParticleTrailNBT() {
@@ -237,6 +237,12 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
     @Nullable
     public EntityPlayer getPlayerShooter() {
         return (EntityPlayer) this.shootingEntity;
+    }
+
+    @NotNull
+    @Override
+    public Vec3d getMotionVector() {
+        return new Vec3d(this.motionX, this.motionY, this.motionZ);
     }
 
     private enum ProjectileSourceType {

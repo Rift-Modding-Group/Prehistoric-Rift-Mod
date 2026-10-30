@@ -25,21 +25,17 @@ public class PlateFlingBuilder extends CreatureMoveBuilder {
                     data.setVariable("plate_fling_shot", 1D);
 
                     //when ridden, shoot forward
+                    ProjectileBuilder projectileBuilder = new ProjectileBuilder().setName("thrown_stegosaurus_plate")
+                            .setRotateAlongPitch().setProjectileModel(ProjectileBuilder.ProjectileModel.CUSTOM);
                     if (creature.getControllingPassenger() != null) {
-                        creature.launchProjectile(
-                                new ProjectileBuilder().setName("thrown_stegosaurus_plate").setRotateAlongPitch(),
-                                3f, 0f
-                        );
+                        creature.launchProjectile(projectileBuilder, 3f, 0f);
                     }
                     //otherwise, hit target
                     else {
                         EntityLivingBase target = creature.getAttackTarget();
                         if (target == null || !target.isEntityAlive()) return;
 
-                        creature.launchProjectile(
-                                new ProjectileBuilder().setName("thrown_stegosaurus_plate").setRotateAlongPitch(),
-                                target, 3f, 0f
-                        );
+                        creature.launchProjectile(projectileBuilder, target, 3f, 0f);
                     }
                 });
     }

@@ -25,6 +25,9 @@ public interface IProjectile {
 
     Vec3d getPositionVector();
 
+    @NotNull
+    Vec3d getMotionVector();
+
     @Nullable
     ICreature getCreatureShooter();
 

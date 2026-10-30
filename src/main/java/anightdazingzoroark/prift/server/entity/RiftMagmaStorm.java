@@ -46,7 +46,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-/** A moving, particle-only spell that retains the launching move's damage and creator. */
+/**
+ * A moving, particle-only spell that retains the launching move's damage and creator.
+ * */
 public class RiftMagmaStorm extends Entity implements IAnimatable<AnimationDataEntityNonLiving>, IEntityAdditionalSpawnData {
     public static final double MAXIMUM_DISTANCE = 16D;
     public static final float HEIGHT = 16f;
@@ -231,7 +233,10 @@ public class RiftMagmaStorm extends Entity implements IAnimatable<AnimationDataE
                     || victim.getLowestRidingEntity() == this.creator.getLowestRidingEntity()
                     || this.creator.isRelatedToEntity(victim) || this.hitEntities.contains(victim.getUniqueID())
                     || (contactProgress(horizontalStart, target.getEntityBoundingBox(), actualMovement) > 1D
-                    && verticalSweeps.stream().noneMatch(box -> box.intersects(target.getEntityBoundingBox())))) continue;
+                    && verticalSweeps.stream().noneMatch(box -> box.intersects(target.getEntityBoundingBox())))
+            ) {
+                continue;
+            }
             this.hitEntities.add(victim.getUniqueID());
             if (target.attackEntityFrom(RiftDamage.getElementDamageSource("mob", this, this.creator, this.move.getElement()), (float) this.damage)) {
                 victim.setFire(5);
@@ -251,11 +256,13 @@ public class RiftMagmaStorm extends Entity implements IAnimatable<AnimationDataE
             AxisAlignedBB breakingStart = horizontalStart.grow(0D, 0.01D, 0D);
             for (BlockPos position : BlockPos.getAllInBoxMutable(
                     new BlockPos(travelledArea.minX, travelledArea.minY - 0.01D, travelledArea.minZ),
-                    new BlockPos(Math.ceil(travelledArea.maxX) - 1D, Math.ceil(travelledArea.maxY) - 1D, Math.ceil(travelledArea.maxZ) - 1D))) {
+                    new BlockPos(Math.ceil(travelledArea.maxX) - 1D, Math.ceil(travelledArea.maxY) - 1D, Math.ceil(travelledArea.maxZ) - 1D))
+            ) {
                 if (!isFlammable(this.world, position, this.world.getBlockState(position))) continue;
                 AxisAlignedBB blockBounds = new AxisAlignedBB(position);
                 if (contactProgress(breakingStart, blockBounds, actualMovement) <= 1D
-                        || verticalSweeps.stream().anyMatch(box -> box.grow(0D, 0.01D, 0D).intersects(blockBounds))) {
+                        || verticalSweeps.stream().anyMatch(box -> box.grow(0D, 0.01D, 0D).intersects(blockBounds))
+                ) {
                     this.world.destroyBlock(position, true);
                 }
             }
@@ -270,7 +277,9 @@ public class RiftMagmaStorm extends Entity implements IAnimatable<AnimationDataE
         if (blocked || this.travelledDistance >= MAXIMUM_DISTANCE - 1E-8D) this.setDead();
     }
 
-    /** Returns a finite sentinel beyond the movement when the swept volumes do not meet. */
+    /**
+     * Returns a finite sentinel beyond the movement when the swept volumes do not meet.
+     * */
     public static double contactProgress(@NotNull AxisAlignedBB moving, @NotNull AxisAlignedBB collider, @NotNull Vec3d movement) {
         if (!moving.expand(movement.x, movement.y, movement.z).intersects(collider)) return 2D;
         if (moving.intersects(collider)) return 0D;

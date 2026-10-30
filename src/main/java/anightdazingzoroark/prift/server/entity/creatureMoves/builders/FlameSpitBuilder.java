@@ -55,7 +55,7 @@ public class FlameSpitBuilder extends CreatureMoveBuilder {
                     );
 
                     //flame spit hitbox
-                    creature.createOffenseHitboxesByTag("flame_spit", 4, entity -> entity.setFire(100));
+                    creature.createOffenseHitboxesByTag("flame_spit", 4, entity -> entity.setFire(5));
                 })
                 .setUseLookBasedFacing()
                 .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.TARGETED_MELEE)

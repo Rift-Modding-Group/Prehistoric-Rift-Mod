@@ -77,6 +77,8 @@ public interface ICreature {
 
     void prepareRush(double speedMultiplier, int maximumTicks);
 
+    void prepareRush(double speedMultiplier, int maximumTicks, boolean includeKnockback);
+
     boolean canLeapToAttack();
 
     boolean atFrustrationThreshold();

@@ -41,27 +41,6 @@
     ],
     "subtitle": "sounds.subtitle.tyrannosaurus_warn"
   },
-  "prift.tyrannosaurus.flame_spit": {
-    "category": "neutral",
-    "sounds": [
-      "mob/ghast/fireball4"
-    ],
-    "subtitle": "sounds.subtitle.tyrannosaurus_flame_spit"
-  },
-  "prift.tyrannosaurus.flamethrower_start": {
-    "category": "neutral",
-    "sounds": [
-      "prift:entities/tyrannosaurus/tyrannosaurus_flamethrower_start"
-    ],
-    "subtitle": "sounds.subtitle.tyrannosaurus_flamethrower_start"
-  },
-  "prift.tyrannosaurus.flamethrower_breathe": {
-    "category": "neutral",
-    "sounds": [
-      "prift:entities/tyrannosaurus/tyrannosaurus_flamethrower_breathe"
-    ],
-    "subtitle": "sounds.subtitle.tyrannosaurus_flamethrower_breathe"
-  },
 
   "prift.stegosaurus.idle": {
     "category": "neutral",
@@ -852,6 +831,51 @@
       "prift:entities/generic_move/generic_chargeup_strong"
     ],
     "subtitle": "sounds.subtitle.generic_chargeup_strong"
+  },
+  "prift.generic_move.charge_chargeup": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_charge_chargeup_1",
+      "prift:entities/generic_move/generic_charge_chargeup_2",
+      "prift:entities/generic_move/generic_charge_chargeup_3",
+      "prift:entities/generic_move/generic_charge_chargeup_4"
+    ],
+    "subtitle": "sounds.subtitle.generic_charge_chargeup"
+  },
+  "prift.generic_move.fire": {
+    "category": "neutral",
+    "sounds": [
+      "mob/ghast/fireball4"
+    ],
+    "subtitle": "sounds.subtitle.generic_move_fire"
+  },
+  "prift.generic_move.charge_release": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_charge_release"
+    ],
+    "subtitle": "sounds.subtitle.generic_charge_release"
+  },
+  "prift.flamethrower.breathe_start": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_flamethrower_start"
+    ],
+    "subtitle": "sounds.subtitle.generic_flamethrower_start"
+  },
+  "prift.flamethrower.breathe_loop": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_flamethrower_breathe"
+    ],
+    "subtitle": "sounds.subtitle.generic_flamethrower_breathe"
+  },
+  "prift.sonic_blast.use_loop": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_sonic_blast"
+    ],
+    "subtitle": "sounds.subtitle.generic_sonic_blast"
   },
   "prift.tranq_bomb.impact": {
     "category": "neutral",

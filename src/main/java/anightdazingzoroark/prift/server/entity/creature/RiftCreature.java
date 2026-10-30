@@ -1543,6 +1543,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void prepareRush(double speedMultiplier, int maximumTicks) {
+        this.prepareRush(speedMultiplier, maximumTicks, true);
+    }
+
+    @Override
+    public void prepareRush(double speedMultiplier, int maximumTicks, boolean includeKnockback) {
         if (this.world.isRemote || this.getCurrentMove().isEmpty() || this.isParalyzed()) return;
         if (speedMultiplier <= 0D || maximumTicks <= 0) return;
         float heading = this.getAnimationData().getModelYaw();
@@ -1556,7 +1561,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.rotationYaw = this.prevRotationYaw = heading;
         this.renderYawOffset = this.prevRenderYawOffset = heading;
         this.rotationYawHead = this.prevRotationYawHead = heading;
-        this.setRushState(new RushState(this.getCurrentMove(), speedMultiplier, maximumTicks, heading));
+        this.setRushState(new RushState(this.getCurrentMove(), speedMultiplier, maximumTicks, heading, includeKnockback));
     }
 
     @NotNull

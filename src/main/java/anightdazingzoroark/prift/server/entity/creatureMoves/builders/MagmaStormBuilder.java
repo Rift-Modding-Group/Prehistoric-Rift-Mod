@@ -24,8 +24,7 @@ public class MagmaStormBuilder extends CreatureMoveBuilder {
             this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive()
                             && creature.verticalDistanceFromEntity(target, false) <= 16D ? 0 : -1)
                     .addDetectionRule(new HorizontalDistanceFromUserDetectionRule(16D))
-                    .setDontPathToTarget()
-                    .setUseWhenFrustrated();
+                    .setDontPathToTarget();
         }
     }
 }
