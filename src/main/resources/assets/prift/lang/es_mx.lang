@@ -1,4 +1,5 @@
 entity.unknown.spawn_description=???
+entity.magma_storm.name=Tormenta de magma
 entity.placeholder.name=Muñeco de peluche
 entity.placeholder.spawn_description=Un muñeco de peluche que representa a una criatura desconocida.
 entity.tyrannosaurus.name=Tyrannosaurus
@@ -280,6 +281,8 @@ move.creature.plate_fling.description=Lanza una de las placas de su lomo hacia u
 move.creature.belch=Eructo
 move.creature.belch.description=Escupe una bola débil de vomito hacia un objetivo distante.
 move.creature.fireball=Bola de fuego
+move.creature.magma_storm=Tormenta de magma
+move.creature.magma_storm.description=Invoca dos tornados de magma y fuego que abrasan todo a su paso.
 move.creature.fireball.description=Escupe una bola débil de fuego hacia un objetivo distante.
 move.creature.toxic_haze=Bruma tóxica
 move.creature.toxic_haze.description=Exhala una corriente continua de fumo que ralentiza al objetivo y hace difícil ver.
@@ -297,6 +300,12 @@ move.creature.willowisp=Will-O-Wisp
 move.creature.willowisp.description=Escupe orbes de fuego que queman al objetivo al instante.
 move.creature.flame_charge=Embestida ígnea
 move.creature.flame_charge.description=Se carga para hacer una embestida mientras envuelto en fuego. Se detiene al impactar, empujando y posiblemente quemando a los objetivos y rompiendo bloques adecuados.
+move.creature.crunch=Triturada
+move.creature.crunch.description=Muerde a un objetivo fuertemente que se rompen sus huesos, debilitándolo y ralentizándolo por un rato.
+move.creature.snarl=Gruñido
+move.creature.snark.description=Gruñe al objetivo, desalentándolo y debilitándolo.
+move.creature.sonic_blast=Explosión sónica
+move.creature.sonic_blast.description=Exhala una oleada sostenida de ruido hacia un objetivo.
 
 priftcommands.bleed.usage=/priftbleed <jugador|entidad> <segundos> [fuerza]
 priftcommands.bleed.successful=Se aplicó sangrado a %s

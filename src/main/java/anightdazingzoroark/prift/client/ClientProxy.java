@@ -5,10 +5,12 @@ import anightdazingzoroark.prift.client.rendering.block.SmokenutBushBlockRendere
 import anightdazingzoroark.prift.client.rendering.block.CreatureBoxRangeRenderer;
 import anightdazingzoroark.prift.client.rendering.entity.RiftCreatureRenderer;
 import anightdazingzoroark.prift.client.rendering.entity.RiftProjectileRenderer;
+import anightdazingzoroark.prift.client.rendering.entity.RiftMagmaStormRenderer;
 import anightdazingzoroark.prift.server.ServerProxy;
 import anightdazingzoroark.prift.server.block.RiftBlocks;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.projectile.RiftProjectile;
+import anightdazingzoroark.prift.server.entity.RiftMagmaStorm;
 import anightdazingzoroark.riftlib.renderers.geo.GeoBlockRenderer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -30,6 +32,7 @@ public class ClientProxy extends ServerProxy {
         //register entity renderers
         RenderingRegistry.registerEntityRenderingHandler(RiftCreature.class, RiftCreatureRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(RiftProjectile.class, RiftProjectileRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(RiftMagmaStorm.class, RiftMagmaStormRenderer::new);
 
         //register block renderers
         GeoBlockRenderer.registerBlockRenderer(RiftBlocks.SMOKENUT_BUSH, new SmokenutBushBlockRenderer());

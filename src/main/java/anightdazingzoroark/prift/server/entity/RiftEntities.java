@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class RiftEntities {
     //builder friendly implementation of entity registry
-    //only 2 classes r used, sweet
     public static void registerEntities() {
         for (String creatureName : RiftCreatureRegistry.getCreatureNames()) {
             ResourceLocation registryName = new ResourceLocation(RiftInitialize.MODID, creatureName);
@@ -50,6 +49,14 @@ public class RiftEntities {
                 .tracker(64, 1, true)
                 .build()
         );
+
+        ForgeRegistries.ENTITIES.register(EntityEntryBuilder.<RiftMagmaStorm>create()
+                .entity(RiftMagmaStorm.class)
+                .factory(RiftMagmaStorm::new)
+                .id(new ResourceLocation(RiftInitialize.MODID, "magma_storm"), 3)
+                .name("magma_storm")
+                .tracker(64, 1, true)
+                .build());
     }
 
     private static class CreatureTypeEntry extends EntityEntry {

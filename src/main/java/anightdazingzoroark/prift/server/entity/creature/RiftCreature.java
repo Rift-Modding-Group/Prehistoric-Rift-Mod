@@ -1178,6 +1178,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
      * this is for testing if another entity is related to this creature
      * such as if its tamed to its owner or if it is a herdmate or teammate
      * */
+    @Override
     public boolean isRelatedToEntity(@Nullable Entity entity) {
         if (entity instanceof MultiPartEntityPart hitboxPart) {
             Entity hitboxParent = (Entity) hitboxPart.parent;
@@ -2626,6 +2627,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Override
     public boolean hasCollisionHitboxes() {
         return false;
+    }
+
+    @Override
+    public double[] getSize() {
+        return new double[]{this.width, this.height};
     }
 
     @Override

@@ -53,6 +53,8 @@ public interface ICreature {
 
     Vec3d getPositionVector();
 
+    double[] getSize();
+
     double horizontalDistanceFromEntity(@NotNull Entity entity);
 
     double verticalDistanceFromEntity(@NotNull Entity entity, boolean useCenter);
@@ -69,7 +71,6 @@ public interface ICreature {
     @NotNull
     AnimationDataEntityLiving getAnimationData();
 
-    /** Create a ray from an explicit definition at one of this entity's animated locators. */
     void createRay(@NotNull RiftLibRayBuilder rayBuilder, @NotNull String locatorName);
 
     boolean canSprintToAttack();
@@ -134,6 +135,8 @@ public interface ICreature {
     float getMaxStamina();
 
     boolean hasCollisionHitboxes();
+
+    boolean isRelatedToEntity(@Nullable Entity entity);
 
     void createOffenseHitboxesByTag(@NotNull String tagName, int lifetime);
 

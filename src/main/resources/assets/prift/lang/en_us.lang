@@ -1,4 +1,5 @@
 entity.unknown.spawn_description=???
+entity.magma_storm.name=Magma Storm
 entity.placeholder.name=Plush Doll
 entity.placeholder.spawn_description=A plush doll used as a placeholder for an unknown creature.
 entity.tyrannosaurus.name=Tyrannosaurus
@@ -279,6 +280,8 @@ move.creature.plate_fling.description=Launches one of its back plates at a dista
 move.creature.belch=Belch
 move.creature.belch.description=Spits out a weak ball of vomit at a distant target.
 move.creature.fireball=Fireball
+move.creature.magma_storm=Magma Storm
+move.creature.magma_storm.description=Summons twin tornadoes of magma and fire that scorch everything in their path.
 move.creature.fireball.description=Spits out a weak ball of fire at a distant target.
 move.creature.toxic_haze=Toxic Haze
 move.creature.toxic_haze.description=Breathes a sustained cloud of smoke that slows down targets and makes vision dificult.
@@ -296,6 +299,12 @@ move.creature.willowisp=Will-O-Wisp
 move.creature.willowisp.description=Launches orbs of fire that instantly burn the target.
 move.creature.flame_charge=Flame Charge
 move.creature.flame_charge.description=Builds up charge, then rushes straight ahead while coated in fire. Stops on impact, knocking back and possibly burning targets and breaking suitable blocks.
+move.creature.crunch=Crunch
+move.creature.crunch.description=Performs a powerful bite that cracks bones, temporarily slowing down and weakening the target.
+move.creature.snarl=Snarl
+move.creature.snarl.description=Snarls at the target, demotivating them and weakening them.
+move.creature.sonic_blast=Sonic Blast
+move.creature.sonic_blast.description=Blasts a sustained wave of noise at the target.
 
 priftcommands.bleed.usage=/priftbleed <player|entity> <seconds> [strength]
 priftcommands.bleed.successful=Applied bleed to %s

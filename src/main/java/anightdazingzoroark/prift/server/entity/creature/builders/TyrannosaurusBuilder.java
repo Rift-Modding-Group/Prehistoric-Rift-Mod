@@ -51,10 +51,11 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                 .setMaximumMoveSlots(5)
                 .setSpawnMoves("bite", "stomp", "fire_fang", "power_roar", "flamethrower")
                 .setLevelupMoves(Map.of(
-                        1, List.of("fireball", "thunder_fang"),
+                        1, List.of("fireball", "thunder_fang", "snarl"),
                         3, List.of("toxic_haze", "flame_spit"),
                         5, List.of("willowisp", "flame_charge"),
-                        6, List.of("tremor")
+                        6, List.of("tremor", "crunch"),
+                        9, List.of("sonic_blast", "magma_storm")
                 ))
                 .setMoveAnimations("bite", "bite")
                 .setMoveAnimations("fire_fang", "bite")
@@ -68,6 +69,10 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                 .setMoveAnimations("toxic_haze", "flamethrower")
                 .setMoveAnimations("tremor", "stomp")
                 .setMoveAnimations("flame_charge", "charge")
+                .setMoveAnimations("snarl", "flame_spit")
+                .setMoveAnimations("crunch", "bite")
+                .setMoveAnimations("sonic_blast", "flamethrower")
+                .setMoveAnimations("magma_storm", "power_roar")
                 .setMoveSelector(new CreatureMoveSelectorBuilder()
                         .setCanSprintToAttack(1, 8D, 16D)
                         .setCanLeapToAttack(1, 6D, 12D, false)
