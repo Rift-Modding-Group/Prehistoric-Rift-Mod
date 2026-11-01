@@ -38,7 +38,7 @@ public class FireballBuilder extends CreatureMoveBuilder {
                 .setRequireFindTargetToUse()
                 .setElement(Element.FIRE)
                 .setMoveType(CreatureMoveBuilder.MoveType.SPECIAL)
-                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureHeadAttackLook(creature, "fireball"))
+                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureHeadAttackLook(creature))
                 .setOnMoveHitEffect(creature -> {
                     ProjectileBuilder fireballProjectile = new ProjectileBuilder().setName("fireball")
                             .setProjectileModel(ProjectileBuilder.ProjectileModel.FLAT)

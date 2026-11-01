@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.client.camera;
 
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenCrosshairType;
+import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.RiddenAimArea;
 import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.RiddenAimTarget;
 import anightdazingzoroark.prift.client.CameraHandler.CameraFrame;
@@ -33,7 +35,6 @@ public class RidingAimTargeting {
         double meleeReachSquared = settings.meleeReach() * settings.meleeReach();
         Vec3d aimStart = frame.position();
         Vec3d aimEnd = aimStart.add(frame.lookVector().scale(aimDistance));
-        // An empty crosshair selects the leap focus itself, rather than the distant projectile horizon.
         if (settings.leap()) aimEnd = frame.focusPosition();
         RayTraceResult blockHit = minecraft.world.rayTraceBlocks(aimStart, aimEnd, false, true, false);
         Vec3d aimPosition = blockHit == null ? aimEnd : blockHit.hitVec;
@@ -62,6 +63,12 @@ public class RidingAimTargeting {
             closestDistanceSquared = hitDistanceSquared;
             aimedEntity = candidate instanceof MultiPartEntityPart part ? (Entity) part.parent : candidate;
             aimPosition = hitPosition;
+        }
+
+        CreatureMoveBuilder move = CreatureLookUtil.getRiddenAimMove(riddenCreature, settings.moveName());
+        if (move != null && move.getRiddenAimLocator() != null) {
+            Vec3d source = CreatureLookUtil.getSourceLocatorPosition(riddenCreature, move.getRiddenAimLocator(), 1f);
+            if (source != null) creatureAimOrigin = source;
         }
 
         //---apply crosshair hit results---

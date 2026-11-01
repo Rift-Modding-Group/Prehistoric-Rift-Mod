@@ -147,6 +147,7 @@ public class FlamethrowerBuilder extends CreatureMoveBuilder {
                         })
                 )
                 .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
+                .setRiddenAimLocator("flamethrowerAimLocator", 16D)
                 .setRiddenPitchBounds(-75f, 35f)
                 .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.POINT);
     }

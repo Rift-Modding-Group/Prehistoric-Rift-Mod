@@ -856,6 +856,13 @@
     ],
     "subtitle": "sounds.subtitle.generic_charge_release"
   },
+  "prift.generic_move.spray_release": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_spray_breathe"
+    ],
+    "subtitle": "sounds.subtitle.generic_spray_breathe"
+  },
   "prift.flamethrower.breathe_start": {
     "category": "neutral",
     "sounds": [

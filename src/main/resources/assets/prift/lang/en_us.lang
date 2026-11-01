@@ -79,6 +79,7 @@ sounds.subtitle.generic_flamethrower_breathe=Creature breathes fire
 sounds.subtitle.tranq_bomb_impact=Tranq bomb bursts
 sounds.subtitle.stink_bomb_impact=Stink bomb bursts
 sounds.subtitle.poison_bomb_impact=Poison bomb bursts
+sounds.subtitle.generic_spray_breathe=Creature sprays
 
 info.level=Level %s
 info.owner_name=Owner: %s

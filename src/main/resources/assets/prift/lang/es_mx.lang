@@ -80,6 +80,7 @@ sounds.subtitle.generic_flamethrower_breathe=Una criatura lanza fire
 sounds.subtitle.tranq_bomb_impact=La bomba tranquilizante estalla
 sounds.subtitle.stink_bomb_impact=La bomba fétida estalla
 sounds.subtitle.poison_bomb_impact=La bomba venenosa estalla
+sounds.subtitle.generic_spray_breathe=Una criatura fulmiga
 
 info.level=Nivel %s
 info.owner_name=Dueño: %s

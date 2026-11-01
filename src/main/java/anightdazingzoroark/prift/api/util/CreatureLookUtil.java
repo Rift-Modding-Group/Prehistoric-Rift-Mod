@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.api.creature.CreatureMoveRegistry.MoveDefinitio
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntityLiving;
 import anightdazingzoroark.riftlib.core.processor.IBone;
 import anightdazingzoroark.riftlib.core.snapshot.BoneSnapshot;
@@ -34,8 +35,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Comparator;
 import java.util.stream.Stream;
-import java.util.function.DoubleFunction;
-import java.util.function.DoubleUnaryOperator;
 
 public class CreatureLookUtil {
     //head pitch min and max bounds
@@ -77,6 +76,59 @@ public class CreatureLookUtil {
         Vec3d direction = VectorUtils.rotateVectorWithQuaternion(new Vec3d(-forward.x, forward.y, -forward.z), yaw);
         Vec3d worldUp = VectorUtils.rotateVectorWithQuaternion(new Vec3d(-up.x, up.y, -up.z), yaw);
         return new RiftLibRay.RayPose(origin, direction, worldUp);
+    }
+
+    /** Locate a move's source without reading or changing its firing direction. */
+    @Nullable
+    public static Vec3d getSourceLocatorPosition(@NotNull ICreature creature, @NotNull String locatorName, float partialTicks) {
+        AnimationDataEntityLiving data = creature.getAnimationData();
+        AnimatedLocator locator = data.getAnimatedLocator(locatorName);
+        if (locator == null) return null;
+        Entity holder = data.getHolder();
+        Vec3d position = new Vec3d(
+                MathUtil.slopeResult(partialTicks, true, 0D, 1D, holder.prevPosX, holder.posX),
+                MathUtil.slopeResult(partialTicks, true, 0D, 1D, holder.prevPosY, holder.posY),
+                MathUtil.slopeResult(partialTicks, true, 0D, 1D, holder.prevPosZ, holder.posZ));
+        Vec3d modelPosition = locator.getModelSpacePosition();
+        return position.add(VectorUtils.rotateVectorWithQuaternion(
+                new Vec3d(-modelPosition.x, modelPosition.y, -modelPosition.z).scale(data.getScale() / 16D),
+                QuaternionUtils.createYXZQuaternion(0D, -Math.toRadians(data.getModelYaw(partialTicks)), 0D)));
+    }
+
+    /** Keep camera framing independent of the live animation's head sway and windup. */
+    @Nullable
+    public static Vec3d getRiddenAimSourceLocatorPosition(
+            @NotNull ICreature creature, @NotNull String moveName, float partialTicks
+    ) {
+        CreatureMoveBuilder move = getRiddenAimMove(creature, moveName);
+        if (move == null || move.getRiddenAimLocator() == null) return null;
+        AnimationDataEntityLiving data = creature.getAnimationData();
+        if (data.getBoneSnapshotCollection().isEmpty()) return null;
+        AnimatedGeoModel<?> model = ServerModelRegistry.getServerModel(data.getAnimatable());
+        if (model == null) return null;
+        ChargeupPhase phase = move.getMoveChargeupBuilder() == null ? null : ChargeupPhase.RELEASING;
+        List<String> names = CreatureMoveUtil.getAnimationNames(creature, creature.getPhase(), moveName, phase);
+        if (names.isEmpty()) return null;
+        Animation animation = model.getAnimations(names.getFirst(), data.getAnimatable());
+        if (animation == null) return null;
+
+        // Sample a fixed release frame; look queries still follow the rider's input.
+        Map<String, BoneSnapshot> pose = AnimationPoseSampler.sample(animation, data, 0D);
+        Map<IBone, BoneSnapshot> previousPose = new HashMap<>();
+        pose.forEach((name, snapshot) -> {
+            IBone bone = data.getBoneSnapshotCollection().get(name).getLeft();
+            previousPose.put(bone, new BoneSnapshot(bone));
+            bone.getRotation().set(snapshot.getRotation());
+            bone.getPosition().set(snapshot.getPosition());
+            bone.getScale().set(snapshot.getScale());
+        });
+        Vec3d position = getSourceLocatorPosition(creature, move.getRiddenAimLocator(), partialTicks);
+        previousPose.forEach((bone, snapshot) -> {
+            bone.getRotation().set(snapshot.getRotation());
+            bone.getPosition().set(snapshot.getPosition());
+            bone.getScale().set(snapshot.getScale());
+        });
+        return position;
     }
 
     /**
@@ -150,6 +202,18 @@ public class CreatureLookUtil {
             @NotNull ICreature creature, @NotNull String moveName, float headPitch, float bodyYaw, double partialTicks
     ) {
         AnimationDataEntityLiving data = creature.getAnimationData();
+        if (!(data.getHolder() instanceof IAnimatable<?> animatable) || data.getBoneSnapshotCollection().isEmpty()) return null;
+        AnimatedGeoModel<?> model = ServerModelRegistry.getServerModel(animatable);
+        if (model == null) return null;
+        CreatureMoveBuilder move = getRiddenAimMove(creature, moveName);
+        if (move == null) return null;
+        List<Animation> animations = new ArrayList<>();
+        for (String name : CreatureMoveUtil.getPreviewAnimationNames(creature, moveName)) {
+            Animation animation = model.getAnimations(name, animatable);
+            if (animation == null) return null;
+            animations.add(animation);
+        }
+
         double previousPitch = data.getVariable("head_attack_pitch");
         double previousYaw = data.getVariable("head_attack_yaw");
         double previousSwing = data.getVariable("head_attack_swing");
@@ -159,9 +223,11 @@ public class CreatureLookUtil {
         data.setVariable("head_attack_yaw", 0D);
         data.setVariable("head_attack_swing", MathUtil.slopeResult(headPitch, true, HEAD_PITCH_MIN, 0D, -1D, 1D));
         data.setVariable("head_attack_upward", headPitch < 0f ? 1D : 0D);
-        HeadStrikePose strike = getHeadStrikePose(creature, moveName);
+        List<AnimatedBoundingBox> hitboxes = new ArrayList<>(data.getAnimatedBoundingBoxes().values());
+        List<HeadAttackSample> samples = getHeadAttackSamples(CreatureMoveUtil.getHitboxWindows(creature, move, animations, hitboxes, data));
         Vec3d result = null;
-        if (strike != null) {
+        if (!samples.isEmpty()) {
+            HeadStrikePose strike = new HeadStrikePose(data, samples);
             // Tail attacks whose hitboxes do not follow head pitch keep the normal camera focus.
             boolean followsHeadPitch = !strike.sampleBounds(HEAD_PITCH_MIN, 0f, Vec3d.ZERO)
                     .equals(strike.sampleBounds(HEAD_PITCH_MAX, 0f, Vec3d.ZERO));
@@ -198,18 +264,11 @@ public class CreatureLookUtil {
 
     @NotNull
     public static LookPose getAttackLookPose(@NotNull ICreature creature) {
-        Vec3d target = getRiddenAttackPosition(creature);
-        if (target == null) return getLookPose(creature);
-
-        AnimationDataEntityLiving data = creature.getAnimationData();
-        Vec3d offset = target.subtract(data.getHolder().getPositionEyes(1f));
-        double horizontalDistance = Math.hypot(offset.x, offset.z);
-        float pitch = (float) Math.toDegrees(Math.atan2(-offset.y, horizontalDistance));
-        float yaw = 0f;
-        if (horizontalDistance > 1E-6D) {
-            yaw = MathHelper.wrapDegrees((float) Math.toDegrees(Math.atan2(-offset.x, offset.z)) - data.getModelYaw());
+        if (creature.getControllingPassenger() instanceof EntityPlayer rider) {
+            // The camera predicts this pose; its offset target must not turn the neck.
+            return new LookPose(Math.clamp(rider.rotationPitch, HEAD_PITCH_MIN, HEAD_PITCH_MAX), 0f);
         }
-        return new LookPose(Math.clamp(pitch, HEAD_PITCH_MIN, HEAD_PITCH_MAX), Math.clamp(yaw, -15f, 15f));
+        return getLookPose(creature);
     }
 
     /**
@@ -251,28 +310,14 @@ public class CreatureLookUtil {
     }
 
 
-    /**
-     * Captures head aim using the owning move's animation bindings and active hitbox intervals.
-     * Animations without offense hitboxes retain the captured look direction.
-     */
-    public static void captureHeadAttackLook(@NotNull ICreature creature, @NotNull String moveName) {
+    /** Capture the existing look, using the same rider pose as the crosshair prediction. */
+    public static void captureHeadAttackLook(@NotNull ICreature creature) {
         AnimationDataEntityLiving data = creature.getAnimationData();
         LookPose look = getAttackLookPose(creature);
         data.setVariable("head_attack_pitch", look.pitch());
         data.setVariable("head_attack_yaw", look.yaw());
         data.setVariable("head_attack_swing", MathUtil.slopeResult(look.pitch(), true, HEAD_PITCH_MIN, 0D, -1D, 1D));
         data.setVariable("head_attack_upward", look.pitch() < 0f ? 1D : 0D);
-
-        Vec3d target = getRiddenAttackPosition(creature);
-        if (target == null) return;
-        HeadStrikePose strike = getHeadStrikePose(creature, moveName);
-        if (strike == null) return;
-
-        float pitch = fitHeadAttackPitch(target, look.pitch(), value -> strike.sampleBounds(
-                (float) value, data.getModelYaw(), data.getHolder().getPositionVector()));
-        data.setVariable("head_attack_pitch", pitch);
-        data.setVariable("head_attack_swing", MathUtil.slopeResult(pitch, true, HEAD_PITCH_MIN, 0D, -1D, 1D));
-        data.setVariable("head_attack_upward", pitch < 0f ? 1D : 0D);
     }
 
     /** Keep the focus inside an actual attack pose, using the full vertical reach of the sweep. */
@@ -298,67 +343,6 @@ public class CreatureLookUtil {
             }
         }
         return closest;
-    }
-
-    /** Fit contact anywhere in the damage sweep, rather than fitting an averaged hitbox center. */
-    public static float fitHeadAttackPitch(
-            @NotNull Vec3d target, float preferredPitch, @NotNull DoubleFunction<List<AxisAlignedBB>> sampleBounds
-    ) {
-        DoubleUnaryOperator errorAtPitch = pitch -> {
-            double error = Double.MAX_VALUE;
-            for (AxisAlignedBB box : sampleBounds.apply(pitch)) {
-                Vec3d closest = new Vec3d(Math.clamp(target.x, box.minX, box.maxX),
-                        Math.clamp(target.y, box.minY, box.maxY), Math.clamp(target.z, box.minZ, box.maxZ));
-                error = Math.min(error, closest.squareDistanceTo(target));
-            }
-            return error;
-        };
-        float bestPitch = Math.clamp(preferredPitch, HEAD_PITCH_MIN, HEAD_PITCH_MAX);
-        double bestError = errorAtPitch.applyAsDouble(bestPitch);
-        for (int step = 0; step <= 30 && bestError > 1E-8D; step++) {
-            float pitch = (float) MathUtil.slopeResult(step, true, 0D, 30D, HEAD_PITCH_MIN, HEAD_PITCH_MAX);
-            double error = errorAtPitch.applyAsDouble(pitch);
-            if (error < bestError) {
-                bestPitch = pitch;
-                bestError = error;
-            }
-        }
-        double radius = 0.5D;
-        for (int step = 0; step < 10 && bestError > 1E-8D; step++) {
-            float lower = (float) Math.clamp(bestPitch - radius, HEAD_PITCH_MIN, HEAD_PITCH_MAX);
-            float upper = (float) Math.clamp(bestPitch + radius, HEAD_PITCH_MIN, HEAD_PITCH_MAX);
-            double lowerError = errorAtPitch.applyAsDouble(lower);
-            double upperError = errorAtPitch.applyAsDouble(upper);
-            if (lowerError < bestError) {
-                bestPitch = lower;
-                bestError = lowerError;
-            }
-            if (upperError < bestError) {
-                bestPitch = upper;
-                bestError = upperError;
-            }
-            radius *= 0.5D;
-        }
-        return bestPitch;
-    }
-
-    @Nullable
-    private static HeadStrikePose getHeadStrikePose(@NotNull ICreature creature, @NotNull String moveName) {
-        AnimationDataEntityLiving data = creature.getAnimationData();
-        if (!(data.getHolder() instanceof IAnimatable<?> animatable) || data.getBoneSnapshotCollection().isEmpty()) return null;
-        AnimatedGeoModel<?> model = ServerModelRegistry.getServerModel(animatable);
-        if (model == null) return null;
-        CreatureMoveBuilder move = getRiddenAimMove(creature, moveName);
-        if (move == null) return null;
-        List<Animation> animations = new ArrayList<>();
-        for (String name : CreatureMoveUtil.getPreviewAnimationNames(creature, moveName)) {
-            Animation animation = model.getAnimations(name, animatable);
-            if (animation == null) return null;
-            animations.add(animation);
-        }
-        List<AnimatedBoundingBox> hitboxes = new ArrayList<>(data.getAnimatedBoundingBoxes().values());
-        List<HeadAttackSample> samples = getHeadAttackSamples(CreatureMoveUtil.getHitboxWindows(creature, move, animations, hitboxes, data));
-        return samples.isEmpty() ? null : new HeadStrikePose(data, samples);
     }
 
     /** Sample authored damage intervals and animation hit instants without running move effects. */

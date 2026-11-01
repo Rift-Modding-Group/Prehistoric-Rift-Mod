@@ -271,7 +271,14 @@ public class CameraHandler {
     private CameraFrame getCameraFrame(
             @NotNull Minecraft minecraft, @NotNull RiftCreature riddenCreature, double partialTicks, double transition
     ) {
-        Vec3d forward = minecraft.player.getLook((float) partialTicks).normalize();
+        float pitch = (float) MathUtil.slopeResult(partialTicks, true, 0D, 1D,
+                minecraft.player.prevRotationPitch, minecraft.player.rotationPitch);
+        float yawChange = MathHelper.wrapDegrees(minecraft.player.rotationYaw - minecraft.player.prevRotationYaw);
+        double yawRadians = Math.toRadians(MathUtil.slopeResult(partialTicks, true, 0D, 1D,
+                minecraft.player.prevRotationYaw, minecraft.player.prevRotationYaw + yawChange));
+        double pitchRadians = Math.toRadians(pitch);
+        Vec3d forward = new Vec3d(-Math.sin(yawRadians) * Math.cos(pitchRadians),
+                -Math.sin(pitchRadians), Math.cos(yawRadians) * Math.cos(pitchRadians));
         Vec3d cameraRight = this.getCameraRight(minecraft.player, forward, partialTicks);
         Vec3d cameraAnchor = this.interpolateVector(
                 this.getInterpolatedEyePosition(minecraft.player, partialTicks),
@@ -304,21 +311,32 @@ public class CameraHandler {
         // Head-driven attacks derive their focus from their existing animation hitboxes.
         double focusDistance = this.aimSettings.melee() ? Math.max(1D, this.aimSettings.meleeReach()) : RIDING_AIM_DISTANCE;
         Vec3d focusPosition = cameraAnchor.add(forward.scale(focusDistance));
+        CreatureMoveBuilder move = CreatureLookUtil.getRiddenAimMove(riddenCreature, this.aimSettings.moveName());
+        if (move != null && move.getRiddenAimLocator() != null) {
+            Vec3d source = CreatureLookUtil.getRiddenAimSourceLocatorPosition(riddenCreature, this.aimSettings.moveName(), (float) partialTicks);
+            if (source != null) {
+                Vec3d sourceFocus = source.add(forward.scale(move.getRiddenAimDistance()));
+                focusPosition = this.interpolateVector(focusPosition, sourceFocus, transition);
+            }
+        }
         if (this.aimSettings.leap()) {
             focusPosition = getLeapAimFocusPosition(riddenCreature, this.getInterpolatedEyePosition(riddenCreature, partialTicks), forward);
         }
         if (this.aimSettings.melee() && this.aimSettings.moveName() != null) {
-            float headPitch = (float) MathUtil.slopeResult(partialTicks, true, 0D, 1D,
-                    minecraft.player.prevRotationPitch, minecraft.player.rotationPitch);
+            float headPitch = (float) MathUtil.slopeResult(
+                    partialTicks, true, 0D, 1D,
+                    minecraft.player.prevRotationPitch, minecraft.player.rotationPitch
+            );
             float bodyYaw = (float) Math.toDegrees(Math.atan2(-forward.x, forward.z));
             Vec3d strikePosition = CreatureLookUtil.getRiddenAimHitboxPosition(
-                    riddenCreature, this.aimSettings.moveName(), headPitch, bodyYaw, partialTicks);
+                    riddenCreature, this.aimSettings.moveName(), headPitch, bodyYaw, partialTicks
+            );
             if (strikePosition != null) focusPosition = strikePosition;
         }
-        Vec3d capturedAim = riddenCreature.getRiddenAimPosition();
-        if (this.ridingAimActive && riddenCreature.isRiddenAimLocked() && capturedAim != null) focusPosition = capturedAim;
-        return new CameraFrame(cameraPosition, focusPosition,
-                getAimCameraLookVector(cameraPosition, focusPosition, minecraft.player.getLook((float) partialTicks)));
+        return new CameraFrame(
+                cameraPosition, focusPosition,
+                getAimCameraLookVector(cameraPosition, focusPosition, forward)
+        );
     }
 
     @NotNull

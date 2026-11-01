@@ -12,7 +12,7 @@ public class HeadbuttBuilder extends CreatureMoveBuilder {
                 .setRequireFindTargetToUse()
                 .setStaminaCost(0.02f)
                 .setBasePower(50)
-                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureHeadAttackLook(creature, "headbutt"))
+                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureHeadAttackLook(creature))
                 .setOnMoveHitEffect(creature -> creature.createOffenseHitboxesByTag("headAttackZone", 4))
                 .setUseLookBasedFacing()
                 .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.TARGETED_MELEE)
@@ -23,7 +23,7 @@ public class HeadbuttBuilder extends CreatureMoveBuilder {
         public Rule() {
             super("headbutt");
             this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                    .addDetectionRule(new AnimatedHitboxDetectionRule("headAttack", creature -> CreatureLookUtil.captureHeadAttackLook(creature, "headbutt")))
+                    .addDetectionRule(new AnimatedHitboxDetectionRule("headAttack", CreatureLookUtil::captureHeadAttackLook))
                     .setUseBlockBreak();
         }
     }

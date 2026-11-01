@@ -10,7 +10,7 @@ public class IceFangBuilder extends StandardMeleeBuilder {
     public IceFangBuilder() {
         this.setBasePower(50)
                 .setElement(Element.ELECTRIC)
-                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureHeadAttackLook(creature, "bite"))
+                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureHeadAttackLook(creature))
                 .setUseLookBasedFacing()
                 .setOnMoveHitEffect(creature -> creature.createOffenseHitboxesByTag("jaw", 4))
                 .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.TARGETED_MELEE)
@@ -21,7 +21,7 @@ public class IceFangBuilder extends StandardMeleeBuilder {
         public Rule() {
             super("ice_fang");
             this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", creature -> CreatureLookUtil.captureHeadAttackLook(creature, "bite")))
+                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", CreatureLookUtil::captureHeadAttackLook))
                     .setUseBlockBreak();
         }
     }

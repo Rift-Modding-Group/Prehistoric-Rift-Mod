@@ -29,7 +29,7 @@ public class WillOWispBuilder extends CreatureMoveBuilder {
                 .setRequireFindTargetToUse()
                 .setElement(Element.FIRE)
                 .setMoveType(MoveType.STATUS)
-                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureHeadAttackLook(creature, "willowisp"))
+                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureHeadAttackLook(creature))
                 .setOnMoveHitEffect(creature -> {
                     ProjectileBuilder fireballProjectile = new ProjectileBuilder().setName("willowisp")
                             .setRotateAlongPitch()

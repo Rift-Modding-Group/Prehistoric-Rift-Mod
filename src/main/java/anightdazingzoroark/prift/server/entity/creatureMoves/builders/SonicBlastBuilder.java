@@ -124,6 +124,7 @@ public class SonicBlastBuilder extends CreatureMoveBuilder {
                         })
                 )
                 .setRiddenAimingType(RiddenAimingType.RANGED)
+                .setRiddenAimLocator("flamethrowerAimLocator", 16D)
                 .setRiddenPitchBounds(-75f, 35f)
                 .setRiddenCrosshairType(RiddenCrosshairType.POINT);
     }

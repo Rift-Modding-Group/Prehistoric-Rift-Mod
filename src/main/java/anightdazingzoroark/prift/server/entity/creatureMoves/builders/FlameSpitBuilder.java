@@ -29,7 +29,7 @@ public class FlameSpitBuilder extends CreatureMoveBuilder {
                 .setRequireFindTargetToUse()
                 .setElement(Element.FIRE)
                 .setMoveType(CreatureMoveBuilder.MoveType.SPECIAL)
-                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureHeadAttackLook(creature, "flame_spit"))
+                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureHeadAttackLook(creature))
                 .setOnMoveHitEffect(creature -> {
                     //particles
                     RiftLibParticleHelper.createParticle(
@@ -67,7 +67,7 @@ public class FlameSpitBuilder extends CreatureMoveBuilder {
         public Rule() {
             super("flame_spit");
             this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                    .addDetectionRule(new AnimatedHitboxDetectionRule("flame_spit", creature -> CreatureLookUtil.captureHeadAttackLook(creature, "flame_spit")))
+                    .addDetectionRule(new AnimatedHitboxDetectionRule("flame_spit", CreatureLookUtil::captureHeadAttackLook))
                     .setUseBlockBreak();
         }
     }

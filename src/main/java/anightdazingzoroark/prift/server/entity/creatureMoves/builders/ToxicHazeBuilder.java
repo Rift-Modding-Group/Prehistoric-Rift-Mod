@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.VerticalDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
+import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.jsonParsing.raw.RawMolangValue;
 import anightdazingzoroark.riftlib.molang.math.Constant;
@@ -25,11 +26,13 @@ import anightdazingzoroark.riftlib.particle.particleComponent.particleMotion.Par
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
 import anightdazingzoroark.riftlib.ray.rayShape.motion.RiftLibRayConeMotionShape;
+import anightdazingzoroark.riftlib.sounds.RiftLibSoundHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 
 public class ToxicHazeBuilder extends CreatureMoveBuilder {
     public ToxicHazeBuilder() {
@@ -99,8 +102,19 @@ public class ToxicHazeBuilder extends CreatureMoveBuilder {
                                             }),
                                     "flamethrowerAimLocator"
                             );
+
+                            RiftLibSoundHelper.playLoopingSound(
+                                    creature.getAnimationData().getHolder(),
+                                    RiftSounds.getSound("generic_move.spray_release"),
+                                    SoundCategory.NEUTRAL
+                            );
                         })
                         .setReleaseEndEffect(creature -> {
+                            RiftLibSoundHelper.stopLoopingSound(
+                                    creature.getAnimationData().getHolder(),
+                                    RiftSounds.getSound("generic_move.spray_release"),
+                                    SoundCategory.NEUTRAL
+                            );
                             RiftLibParticleHelper.killParticle(
                                     (Entity & IAnimatable<?>) creature.getAnimationData().getHolder(),
                                     "prift:toxic_haze_smoke", "flamethrowerAimLocator"
@@ -109,6 +123,7 @@ public class ToxicHazeBuilder extends CreatureMoveBuilder {
                         })
                 )
                 .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
+                .setRiddenAimLocator("flamethrowerAimLocator", 16D)
                 .setRiddenPitchBounds(-75f, 35f)
                 .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.POINT);
     }

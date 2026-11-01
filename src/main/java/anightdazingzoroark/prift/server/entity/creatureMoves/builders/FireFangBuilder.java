@@ -26,7 +26,7 @@ public class FireFangBuilder extends StandardMeleeBuilder {
         this.setBasePower(50)
                 .setElement(Element.FIRE)
                 .setOnMoveBeginEffect((creature, target) -> {
-                    CreatureLookUtil.captureHeadAttackLook(creature, "bite");
+                    CreatureLookUtil.captureHeadAttackLook(creature);
                     RiftLibParticleHelper.createParticle(
                             new ParticleBuilder().setIdentifier("prift:fire_fang")
                                     .setTexture(new ResourceLocation("textures/particle/particles.png"))
@@ -69,7 +69,7 @@ public class FireFangBuilder extends StandardMeleeBuilder {
         public Rule() {
             super("fire_fang");
             this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", creature -> CreatureLookUtil.captureHeadAttackLook(creature, "bite")))
+                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", CreatureLookUtil::captureHeadAttackLook))
                     .setUseBlockBreak();
         }
     }

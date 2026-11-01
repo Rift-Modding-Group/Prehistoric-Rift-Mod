@@ -48,6 +48,9 @@ public class CreatureMoveBuilder {
     private RiddenAimingType riddenAimingType = RiddenAimingType.NONE;
     @NotNull
     private RiddenCrosshairType riddenCrosshairType = RiddenCrosshairType.POINT;
+    @Nullable
+    private String riddenAimLocator;
+    private double riddenAimDistance;
     private float @NotNull [] riddenPitchBounds = new float[]{-15f, 15f};
 
     /**
@@ -335,6 +338,27 @@ public class CreatureMoveBuilder {
     }
 
     /**
+     * Source position used to align the ridden camera with this move.
+     * */
+    @NotNull
+    public CreatureMoveBuilder setRiddenAimLocator(@NotNull String locatorName, double distance) {
+        this.checkIfLocked();
+        if (distance <= 0D) throw new IllegalArgumentException("The ridden aim distance must be positive!");
+        this.riddenAimLocator = locatorName;
+        this.riddenAimDistance = distance;
+        return this;
+    }
+
+    @Nullable
+    public String getRiddenAimLocator() {
+        return this.riddenAimLocator;
+    }
+
+    public double getRiddenAimDistance() {
+        return this.riddenAimDistance;
+    }
+
+    /**
      * Get validity based on if some params are not null
      * */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -376,6 +400,8 @@ public class CreatureMoveBuilder {
         toReturn.preventMovement = this.preventMovement;
         toReturn.riddenAimingType = this.riddenAimingType;
         toReturn.riddenCrosshairType = this.riddenCrosshairType;
+        toReturn.riddenAimLocator = this.riddenAimLocator;
+        toReturn.riddenAimDistance = this.riddenAimDistance;
         toReturn.riddenPitchBounds = this.riddenPitchBounds.clone();
 
         return toReturn;

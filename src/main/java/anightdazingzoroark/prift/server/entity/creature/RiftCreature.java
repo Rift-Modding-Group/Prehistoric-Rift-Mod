@@ -2236,6 +2236,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //clip targeted aim to intervening blocks, targetless ranged aim keeps its direction endpoint
         Vec3d creatureAimOrigin = this.getPositionEyes(1f);
+        if (selectedMove.getValue().getRiddenAimLocator() != null) {
+            Vec3d source = CreatureLookUtil.getSourceLocatorPosition(this, selectedMove.getValue().getRiddenAimLocator(), 1f);
+            if (source != null) creatureAimOrigin = source;
+        }
         RayTraceResult creatureBlockHit = null;
         if (!targetlessRanged) {
             creatureBlockHit = this.world.rayTraceBlocks(

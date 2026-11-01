@@ -12,7 +12,7 @@ public class CrunchBuilder extends StandardMeleeBuilder {
     public CrunchBuilder() {
         this.setBasePower(70)
                 .setStaminaCost(0.2f)
-                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureHeadAttackLook(creature, "bite"))
+                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureHeadAttackLook(creature))
                 .setUseLookBasedFacing()
                 .setOnMoveHitEffect(creature -> {
                     creature.createOffenseHitboxesByTag("jaw", 4);
@@ -31,7 +31,7 @@ public class CrunchBuilder extends StandardMeleeBuilder {
         public Rule() {
             super("crunch");
             this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", creature -> CreatureLookUtil.captureHeadAttackLook(creature, "bite")))
+                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", CreatureLookUtil::captureHeadAttackLook))
                     .setUseBlockBreak();
         }
     }

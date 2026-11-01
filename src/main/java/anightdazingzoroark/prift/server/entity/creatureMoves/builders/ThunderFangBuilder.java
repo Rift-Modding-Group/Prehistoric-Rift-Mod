@@ -30,7 +30,7 @@ public class ThunderFangBuilder extends StandardMeleeBuilder {
         this.setBasePower(50)
                 .setElement(Element.ELECTRIC)
                 .setOnMoveBeginEffect((creature, target) -> {
-                    CreatureLookUtil.captureHeadAttackLook(creature, "bite");
+                    CreatureLookUtil.captureHeadAttackLook(creature);
                     RiftLibParticleHelper.createParticle(
                             new ParticleBuilder().setIdentifier("prift:thunder_fang")
                                     .setTexture(new ResourceLocation("textures/particle/particles.png"))
@@ -78,7 +78,7 @@ public class ThunderFangBuilder extends StandardMeleeBuilder {
         public Rule() {
             super("thunder_fang");
             this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", creature -> CreatureLookUtil.captureHeadAttackLook(creature, "bite")))
+                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", CreatureLookUtil::captureHeadAttackLook))
                     .setUseBlockBreak();
         }
     }
