@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import org.jetbrains.annotations.NotNull;
@@ -23,11 +24,11 @@ public class CreatureMoveHelper {
     }
 
     //calculate the damage a move will do to hit targets
-    public static double calculateDamage(@NotNull RiftCreature attackingCreature) {
-        return calculateDamage(attackingCreature, attackingCreature.getCreatureMoves().getMoveBuilderCurrentMove());
+    public static double calculateDamage(@NotNull RiftCreature attackingCreature, @Nullable Entity hitEntity) {
+        return calculateDamage(attackingCreature, hitEntity, attackingCreature.getCreatureMoves().getMoveBuilderCurrentMove());
     }
 
-    public static double calculateDamage(@NotNull RiftCreature attackingCreature, @Nullable CreatureMoveBuilder moveBuilder) {
+    public static double calculateDamage(@NotNull RiftCreature attackingCreature, @Nullable Entity hitEntity, @Nullable CreatureMoveBuilder moveBuilder) {
         if (moveBuilder == null || !moveBuilder.isValid() || moveBuilder.getBasePower() <= 0) return 0D;
 
         //get stat value
@@ -42,6 +43,11 @@ public class CreatureMoveHelper {
         //get base power
         int basePower = moveBuilder.getBasePower();
         double finalBasePower = getBasePowerWithElementBonus(moveBuilder, attackingCreature.getCreatureType().getElement());
+        //normal multiplier
+        if (moveBuilder.getMovePowerMultiplier() != null && hitEntity != null) {
+            finalBasePower *= moveBuilder.getMovePowerMultiplier().apply(attackingCreature, hitEntity);
+        }
+        //multiplier from chargeup
         if (moveBuilder.getMoveChargeupBuilder() != null) {
             int chargeUpTicks = attackingCreature.getCreatureMoves().getCurrentMoveChargeUpTicks();
             double basePowerMultiplier = moveBuilder.getMoveChargeupBuilder().getBasePowerMultiplier().apply(

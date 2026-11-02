@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -23,7 +24,8 @@ public class CreatureMoveBuilder {
 
     //the following can be left alone
     private int movePower;
-    private int moveCooldown; //will be overriden by chargeup builder cooldown
+    private BiFunction<ICreature, Entity, Double> movePowerMultiplier;
+    private Function<ICreature, Integer> moveCooldown; //will be overriden by chargeup builder cooldown
     private float staminaCost;
     private float staminaDrainPerSecond;
     private CreatureMoveChargeupBuilder moveChargeupBuilder;
@@ -78,16 +80,37 @@ public class CreatureMoveBuilder {
     }
 
     /**
+     * Set a multiplier for the base power of the move based on some external factors
+     * */
+    public CreatureMoveBuilder setMovePowerMultiplier(@NotNull BiFunction<ICreature, Entity, Double> value) {
+        this.movePowerMultiplier = value;
+        return this;
+    }
+
+    @Nullable
+    public BiFunction<ICreature, Entity, Double> getMovePowerMultiplier() {
+        return this.movePowerMultiplier;
+    }
+
+    /**
      * Set the cooldown in ticks for a move.
      * */
     public CreatureMoveBuilder setCooldown(int value) {
+        this.checkIfLocked();
+
+        this.moveCooldown = creature -> value;
+        return this;
+    }
+
+    public CreatureMoveBuilder setCooldown(@NotNull Function<ICreature, Integer> value) {
         this.checkIfLocked();
 
         this.moveCooldown = value;
         return this;
     }
 
-    public int getMoveCooldown() {
+    @Nullable
+    public Function<ICreature, Integer> getMoveCooldown() {
         return this.moveCooldown;
     }
 
@@ -382,6 +405,7 @@ public class CreatureMoveBuilder {
         toReturn.onMoveBeginEffect = this.onMoveBeginEffect;
 
         toReturn.movePower = this.movePower;
+        toReturn.movePowerMultiplier = this.movePowerMultiplier;
         toReturn.moveCooldown = this.moveCooldown;
         toReturn.staminaCost = this.staminaCost;
         toReturn.staminaDrainPerSecond = this.staminaDrainPerSecond;

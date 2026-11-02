@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.creature.builder.*;
 
+import java.util.List;
 import java.util.Map;
 
 public class StegosaurusBuilder extends RiftCreatureBuilder {
@@ -43,14 +44,25 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                         }
                 )
                 .addBlockBreakLevel("axe", 2)
-                .registerIntegerValue("ChargeUpLevel", 0)
                 //---moves---
                 .setMaximumMoveSlots(4)
                 .setSpawnMoves("tail_stab", "tail_slam", "thagomize", "plate_fling")
+                .setLevelupMoves(Map.of(
+                        1, List.of("belch"),
+                        4, List.of("scale_shed"),
+                        7, List.of("bide", "weakness_exploiter"),
+                        10, List.of("seed_bomb", "hyper_cutter")
+                ))
                 .setMoveAnimations("tail_stab", "tail_stab")
                 .setMoveAnimations("tail_slam", "tail_slam")
                 .setMoveAnimations("thagomize", "thagomize")
                 .setMoveAnimations("plate_fling", "plate_fling")
+                .setMoveAnimations("belch", "spit")
+                .setMoveAnimations("seed_bomb", "spit")
+                .setMoveAnimations("scale_shed", "spit")
+                .setMoveAnimations("hyper_cutter", "tail_stab")
+                .setMoveAnimations("bide", "thagomize")
+                .setMoveAnimations("weakness_exploiter", "tail_stab")
                 //---targeting---
                 .addDefaultFoodItemWhitelistEntry("fruit")
                 .addDefaultFoodItemWhitelistEntry("vegetable")
@@ -58,5 +70,4 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                 .setRetaliateWhenAttacked()
                 .setRememberPlayerAttacker();
     }
-
 }

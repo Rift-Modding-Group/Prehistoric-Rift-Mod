@@ -30,7 +30,7 @@ public class ThagomizeBuilder extends CreatureMoveBuilder {
                 .setOnMoveEndEffect(creature -> creature.setProperty("ChargeUpLevel", 0))
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                         .setChargeUpThenRelease()
-                        .setCanRotateWhileCharging(true)
+                        .setCanRotateWhileCharging()
                         .setWindupEndEffect((creature, charge) -> TailAttackLookUtil.captureThagomizeLook(creature, creature.getAttackTarget()))
                         .setMaxChargeUp(100)
                         .setCooldownMultiplier(6D)
@@ -39,9 +39,16 @@ public class ThagomizeBuilder extends CreatureMoveBuilder {
                             return MathUtil.slopeResult(chargeIntMultiplier, true, 1, 6, 1D, 2D);
                         })
                         .setWindupEffect((creature, chargeUp) -> {
-                            int chargeUpLevel = (int) creature.getProperty("ChargeUpLevel").getValue();
-                            if (chargeUpLevel >= 5 || chargeUp <= 0 || chargeUp > 100 || chargeUp % 20D != 0)
-                                return;
+                            int chargeUpLevel;
+                            if (creature.hasProperty("ChargeUpLevel")) {
+                                chargeUpLevel = (int) creature.getProperty("ChargeUpLevel").getValue();
+                            }
+                            else {
+                                chargeUpLevel = 0;
+                                creature.setProperty("ChargeUpLevel", 0);
+                            }
+
+                            if (chargeUpLevel >= 5 || chargeUp <= 0 || chargeUp > 100 || chargeUp % 20D != 0) return;
 
                             //set chargeup level
                             chargeUpLevel++;

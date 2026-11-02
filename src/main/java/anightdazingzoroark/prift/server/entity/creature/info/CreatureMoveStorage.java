@@ -417,7 +417,7 @@ public class CreatureMoveStorage {
             CreatureMoveChargeupBuilder chargeupBuilder = currentMoveBuilder.getMoveChargeupBuilder();
             if (chargeupBuilder == null || this.currentMoveChargeupPhase == null) return;
 
-            if (this.currentMoveReleaseRequested) {
+            if (this.currentMoveReleaseRequested || this.currentMoveBuildup >= chargeupBuilder.getMaxChargeUp() && chargeupBuilder.getReleaseOnEndWindup()) {
                 if (chargeupBuilder.getChargeUpThenRelease() && this.currentMoveChargeupPhase == ChargeupPhase.WINDUP) {
                     this.finishCurrentMoveChargeupPhase(creature);
                     return;
@@ -560,6 +560,10 @@ public class CreatureMoveStorage {
         return this.currentMoveChargeupPhase == ChargeupPhase.PRERELEASING || this.currentMoveChargeupPhase == ChargeupPhase.RELEASING;
     }
 
+    public boolean isWindingUp() {
+        return this.currentMoveChargeupPhase == ChargeupPhase.WINDUP;
+    }
+
     public boolean canCurrentMoveBreakBlocksFromRider(@NotNull RiftCreature creature) {
         CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
         return creature.isBeingRidden()
@@ -620,7 +624,10 @@ public class CreatureMoveStorage {
             double cooldownMultiplier = Math.max(0D, chargeupBuilder.getCooldownMultiplier().apply(creature));
             return (int) Math.ceil(this.currentMoveChargeUpTicks * cooldownMultiplier);
         }
-        return Math.max(0, currentMoveBuilder.getMoveCooldown());
+        else {
+            int cooldown = currentMoveBuilder.getMoveCooldown() != null ? currentMoveBuilder.getMoveCooldown().apply(creature) : 0;
+            return Math.max(0, cooldown);
+        }
     }
 
     private void clearCurrentMove() {

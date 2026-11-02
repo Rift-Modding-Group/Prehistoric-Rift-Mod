@@ -36,6 +36,7 @@ itemGroup.prift_items=Prehistoric Rift Items
 itemGroup.prift_spawn_eggs=Prehistoric Rift Spawn Eggs
 
 effect.paralysis=Paralysis
+effect.defense_down=Defense Down
 
 tile.smokenut_bush.name=Smokenut Bush
 tile.rifted_stone.name=Rifted Stone
@@ -309,6 +310,16 @@ move.creature.snarl=Snarl
 move.creature.snarl.description=Snarls at the target, demotivating them and weakening them.
 move.creature.sonic_blast=Sonic Blast
 move.creature.sonic_blast.description=Blasts a sustained wave of noise at the target.
+move.creature.seed_bomb=Seed Bomb
+move.creature.seed_bomb.description=Shoots an explosive seed at the target.
+move.creature.scale_shed=Scale Shed
+move.creature.scale_shed.description=Sheds skin to temporarily increase speed but risk receiving more damage.
+move.creature.hyper_cutter=Hyper Cutter
+move.creature.hyper_cutter.description=Deals increased damage for every hit, and on the final hit, the target receives maximum damage and starts bleeding heavily.
+move.creature.bide=Bide
+move.creature.bide.description=Absorbs incoming damage to then release it back, but doubled.
+move.creature.weakness_exploiter=Weakness Exploiter
+move.creature.weakness_exploiter.description=An attack that is more powerful when the target has a harmful effect.
 
 priftcommands.bleed.usage=/priftbleed <player|entity> <seconds> [strength]
 priftcommands.bleed.successful=Applied bleed to %s

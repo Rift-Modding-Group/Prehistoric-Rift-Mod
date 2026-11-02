@@ -92,7 +92,8 @@ public class OtherEntityProperties extends AbstractEntityProperties<EntityLiving
     }
 
     public void setBleeding(int strength, int duration) {
-        this.set("BleedingStrength", strength);
+        int bleedStrength = this.get("BleedingStrength");
+        this.set("BleedingStrength", Math.max(strength, bleedStrength));
         this.set("BleedingDuration", duration);
     }
 }

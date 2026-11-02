@@ -40,9 +40,7 @@ public class RiftParalysisEffect extends Potion {
     }
 
     @Override
-    public void applyAttributesModifiersToEntity(
-            @NotNull EntityLivingBase entity, @NotNull AbstractAttributeMap attributes, int amplifier
-    ) {
+    public void applyAttributesModifiersToEntity(@NotNull EntityLivingBase entity, @NotNull AbstractAttributeMap attributes, int amplifier) {
         super.applyAttributesModifiersToEntity(entity, attributes, amplifier);
         if (entity instanceof RiftCreature creature) creature.interruptActionsForParalysis();
     }

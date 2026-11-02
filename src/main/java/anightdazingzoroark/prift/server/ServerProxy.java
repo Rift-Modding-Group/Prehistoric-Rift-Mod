@@ -78,7 +78,7 @@ public class ServerProxy {
         RiftEffects.registerEffects();
         MinecraftForge.EVENT_BUS.register(new RiftEffects());
 
-        // Moves must exist before any creature references them.
+        //register moves
         RiftMoves.registerMoves();
         MinecraftForge.EVENT_BUS.post(new RiftMoveRegistrationEvent());
         CreatureMoveRegistry.finishRegistration();

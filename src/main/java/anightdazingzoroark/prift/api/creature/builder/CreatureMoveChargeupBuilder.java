@@ -27,6 +27,7 @@ public class CreatureMoveChargeupBuilder {
     private TriFunction<ICreature, Integer, Integer, Double> basePowerMultiplier = (creature, basePower, chargeUp) -> 1D;
     @NotNull
     private Function<ICreature, Double> cooldownMultiplier = creature -> 2D;
+    private boolean releaseOnEndWindup;
 
     @Nullable
     private BiConsumer<ICreature, Integer> windupEndEffect;
@@ -78,10 +79,12 @@ public class CreatureMoveChargeupBuilder {
         return this.canRotateWhileReleasing;
     }
 
-    /** Allow aiming during prewindup and windup, independently of movement. */
-    public CreatureMoveChargeupBuilder setCanRotateWhileCharging(boolean value) {
+    /**
+     * Allow aiming during prewindup and windup, independently of movement.
+     * */
+    public CreatureMoveChargeupBuilder setCanRotateWhileCharging() {
         if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
-        this.canRotateWhileCharging = value;
+        this.canRotateWhileCharging = true;
         return this;
     }
 
@@ -93,9 +96,9 @@ public class CreatureMoveChargeupBuilder {
      * Keep normal head tracking active throughout this move's charge-up, release, and recovery.
      * */
     @NotNull
-    public CreatureMoveChargeupBuilder setCanLookWhileUsing(boolean value) {
+    public CreatureMoveChargeupBuilder setCanLookWhileUsing() {
         if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
-        this.canLookWhileUsing = value;
+        this.canLookWhileUsing = true;
         return this;
     }
 
@@ -145,6 +148,21 @@ public class CreatureMoveChargeupBuilder {
     @NotNull
     public Function<ICreature, Double> getCooldownMultiplier() {
         return this.cooldownMultiplier;
+    }
+
+    /**
+     * Make it so that, the moment that the move windup ends, it instantly releases.
+     * Meant for use on moves with
+     * */
+    public CreatureMoveChargeupBuilder setReleaseOnEndWindup() {
+        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
+        if (!this.chargeUpThenRelease) throw new IllegalCallerException("This can only be defined on moves that charge up to then release!");
+        this.releaseOnEndWindup = true;
+        return this;
+    }
+
+    public boolean getReleaseOnEndWindup() {
+        return this.releaseOnEndWindup;
     }
 
     /**

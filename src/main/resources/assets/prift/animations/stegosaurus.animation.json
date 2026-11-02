@@ -772,6 +772,66 @@
 					"rotation": ["math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
 				}
 			}
+		},
+		"animation.stegosaurus.spit": {
+			"animation_length": 0.5,
+			"bones": {
+				"bodyFront": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [5, 0, 0],
+						"0.375": [5, 0, 0],
+						"0.5": [0, 0, 0]
+					}
+				},
+				"neck": {
+					"rotation": {
+						"0.0": ["head_attack_pitch", "head_attack_yaw", 0],
+						"0.25": ["head_attack_pitch + 15", "head_attack_yaw", 0],
+						"0.375": ["head_attack_pitch - 7.5", "head_attack_yaw", 0],
+						"0.5": ["head_attack_pitch", "head_attack_yaw", 0]
+					}
+				},
+				"head": {
+					"rotation": {
+						"0.25": [0, 0, 0],
+						"0.375": [-7.5, 0, 0],
+						"0.5": [0, 0, 0]
+					}
+				},
+				"lowerJaw": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.375": [25, 0, 0],
+						"0.5": [0, 0, 0]
+					}
+				},
+				"leftFrontLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [5, 0, 0],
+						"0.375": [5, 0, 0],
+						"0.5": [0, 0, 0]
+					}
+				},
+				"rightFrontLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [5, 0, 0],
+						"0.375": [5, 0, 0],
+						"0.5": [0, 0, 0]
+					}
+				}
+			},
+			"sound_effects": {
+				"0.375": {
+					"effect": "prift.generic_move.burp",
+					"locator": "centerPoint"
+				}
+			},
+			"timeline": {
+				"0.375": "function.send_message('moveHitEffect');"
+			}
 		}
 	}
 }

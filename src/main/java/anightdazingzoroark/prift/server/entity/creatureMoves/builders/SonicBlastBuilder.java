@@ -50,7 +50,7 @@ public class SonicBlastBuilder extends CreatureMoveBuilder {
                 })
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                         .setChargeUpWhileUse(true)
-                        .setCanLookWhileUsing(true)
+                        .setCanLookWhileUsing()
                         .setMaxChargeUp(300)
                         .setPrereleaseEndEffect(creature -> {
                             //create the particles

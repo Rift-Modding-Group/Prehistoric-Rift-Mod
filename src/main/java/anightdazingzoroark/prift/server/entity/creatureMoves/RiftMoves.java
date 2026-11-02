@@ -39,6 +39,11 @@ public class RiftMoves {
         CreatureMoveRegistry.registerMove("flame_charge", new FlameChargeBuilder(), new FlameChargeBuilder.Rule());
         CreatureMoveRegistry.registerMove("belch", new BelchBuilder(), new BelchBuilder.Rule());
         CreatureMoveRegistry.registerMove("magma_storm", new MagmaStormBuilder(), new MagmaStormBuilder.Rule());
+        CreatureMoveRegistry.registerMove("seed_bomb", new SeedBombBuilder(), new SeedBombBuilder.Rule());
+        CreatureMoveRegistry.registerMove("scale_shed", new ScaleShedBuilder());
+        CreatureMoveRegistry.registerMove("hyper_cutter", new HyperCutterBuilder(), new HyperCutterBuilder.Rule());
+        CreatureMoveRegistry.registerMove("bide", new BideBuilder());
+        CreatureMoveRegistry.registerMove("weakness_exploiter", new WeaknessExploiterBuilder(), new WeaknessExploiterBuilder.Rule());
 
         registered = true;
     }

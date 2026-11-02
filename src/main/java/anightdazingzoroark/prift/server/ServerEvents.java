@@ -10,28 +10,56 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
+import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.world.BlockEvent;
 import anightdazingzoroark.prift.server.block.CreatureBoxBlock;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums.CreatureDeployment;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
-import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 
 public class ServerEvents {
+    //make paralysis stop block breaking
     @SubscribeEvent
     public void onBreakSpeed(@NotNull net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed event) {
         if (event.getEntityPlayer().isPotionActive(RiftEffects.PARALYSIS)) {
             event.setNewSpeed(0f);
+        }
+    }
+
+    @SubscribeEvent
+    public void onHitEntity(LivingHurtEvent event) {
+        if (event.getEntityLiving() == null) return;
+
+        //grant player immunity to entity attacks when riding
+        if (event.getEntityLiving() instanceof EntityPlayer && event.getEntityLiving().getRidingEntity() instanceof RiftCreature
+                && !(event.getSource().getTrueSource() instanceof EntityPlayer)
+        ) {
+            event.setCanceled(true);
+        }
+
+        //make defense down increase damage taken
+        if (event.getEntityLiving().isPotionActive(RiftEffects.DEFENSE_DOWN)) {
+            PotionEffect defenseDown = event.getEntityLiving().getActivePotionEffect(RiftEffects.DEFENSE_DOWN);
+            if (defenseDown == null) return;
+            float damageMultiplier = (defenseDown.getAmplifier() + 1f) / 10f + 1f;
+            event.setAmount(event.getAmount() * damageMultiplier);
+        }
+
+        //for increasing bide damage
+        if (event.getEntityLiving() instanceof RiftCreature creature && creature.getCurrentMove().equals("bide")
+                && creature.getCreatureMoves().isWindingUp()
+        ) {
+            double newDamage = (double) creature.getProperty("BideReceivedDamage").getValue() + Math.max(event.getAmount(), 0);
+            creature.setProperty("BideReceivedDamage", newDamage);
         }
     }
 

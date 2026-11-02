@@ -7,6 +7,9 @@ import net.minecraft.util.EntityDamageSourceIndirect;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * All custom damage sources are defined here
+ * */
 public class RiftDamage {
     public static DamageSource RIFT_BLEED = new DamageSource("prift_bleed").setDamageBypassesArmor();
 

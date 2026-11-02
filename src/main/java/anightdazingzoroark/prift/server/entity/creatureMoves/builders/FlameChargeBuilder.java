@@ -39,7 +39,7 @@ public class FlameChargeBuilder extends CreatureMoveBuilder {
                 .setOnMoveBeginEffect((creature, target) -> creature.prepareRush(4D, 10))
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                         .setChargeUpThenRelease()
-                        .setCanRotateWhileCharging(true)
+                        .setCanRotateWhileCharging()
                         .setMaxChargeUp(100)
                         .setCooldownMultiplier(4D)
                         .setBasePowerMultiplier((creature, basePower, chargeUp) -> {

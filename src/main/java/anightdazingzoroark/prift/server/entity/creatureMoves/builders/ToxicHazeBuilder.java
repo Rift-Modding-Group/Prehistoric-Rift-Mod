@@ -48,7 +48,7 @@ public class ToxicHazeBuilder extends CreatureMoveBuilder {
                 })
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                         .setChargeUpWhileUse(true)
-                        .setCanLookWhileUsing(true)
+                        .setCanLookWhileUsing()
                         .setMaxChargeUp(100)
                         .setCooldownMultiplier(1D)
                         .setPrereleaseEndEffect(creature -> {

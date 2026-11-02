@@ -179,7 +179,7 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
             return this.damageByPlayer.apply(this.getPlayerShooter());
         }
         else if (this.projectileSource == ProjectileSourceType.CREATURE && this.shootingEntity instanceof RiftCreature shooter) {
-            return CreatureMoveHelper.calculateDamage(shooter, this.creatureMoveBuilder);
+            return CreatureMoveHelper.calculateDamage(shooter, null, this.creatureMoveBuilder);
         }
         return 0;
     }

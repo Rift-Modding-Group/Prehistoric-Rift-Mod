@@ -37,6 +37,7 @@ itemGroup.prift_items=Items de Prehistoric Rift
 itemGroup.prift_spawn_eggs=Generadores de Prehistoric Rift
 
 effect.paralysis=Parálisis
+effect.defense_down=Defensa reducida
 
 tile.smokenut_bush.name=Arbusto de nuez de humo
 tile.rifted_stone.name=Piedra del Rift
@@ -310,6 +311,14 @@ move.creature.snarl=Gruñido
 move.creature.snark.description=Gruñe al objetivo, desalentándolo y debilitándolo.
 move.creature.sonic_blast=Explosión sónica
 move.creature.sonic_blast.description=Exhala una oleada sostenida de ruido hacia un objetivo.
+move.creature.seed_bomb=Bomba de semilla
+move.creature.seed_bomb.description=Escupe una semilla explosiva hacia un objetivo.
+move.creature.hyper_cutter=Hipercortada
+move.creature.hyper_cutter.description=Hace daño que se aumenta por cada golpe, y en el golpe final, el objetivo recibe el daño maximo y empieza a sangrar gravemente.
+move.creature.bide=Venganza
+move.creature.bide.description=Absorbe daño recibido para despues reflejarlo, doblado.
+move.creature.weakness_exploiter=Explotador de debilidades
+move.creature.weakness_exploiter.description=Un ataque que se vuelve mas poderoso cuando el objetivo tiene un efecto debilitante.
 
 priftcommands.bleed.usage=/priftbleed <jugador|entidad> <segundos> [fuerza]
 priftcommands.bleed.successful=Se aplicó sangrado a %s

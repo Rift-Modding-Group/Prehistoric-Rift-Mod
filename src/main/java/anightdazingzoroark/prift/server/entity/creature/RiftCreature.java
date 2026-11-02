@@ -12,6 +12,9 @@ import anightdazingzoroark.prift.server.creatureBox.CreatureBoxTileEntity;
 import anightdazingzoroark.prift.server.entity.RiftDamage;
 import anightdazingzoroark.prift.server.entity.projectile.RiftProjectile;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntityLiving;
+import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.BooleanPropertyValue;
+import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.DoublePropertyValue;
+import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.IntegerPropertyValue;
 import anightdazingzoroark.riftlib.ridePositionLogic.DynamicRidePosList;
 import anightdazingzoroark.riftlib.ridePositionLogic.IDynamicRideUser;
 import com.cleanroommc.modularui.api.IGuiHolder;
@@ -97,6 +100,7 @@ import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.init.Items;
+import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -181,7 +185,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //--custom property values, which can be called and manipulated from a creature builder--
     @NotNull
-    private Map<String, AbstractPropertyValue<?>> propertyValueMap = Map.of();
+    private final Map<String, AbstractPropertyValue<?>> propertyValueMap = new HashMap<>();
 
     //---remembered player targets (server only)---
     @NotNull
@@ -287,8 +291,6 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     private void applyCreatureTypeSettings() {
         this.setSize(this.creatureType.getMainHitboxSize()[0], this.creatureType.getMainHitboxSize()[1]);
-        if (this.creatureType.getPropertyValueMap() != null) this.propertyValueMap = new HashMap<>(this.creatureType.getPropertyValueMap());
-        else this.propertyValueMap = Map.of();
 
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(this.creatureType.getCanBeKnockedBack() ? 0D : 1D);
 
@@ -1129,7 +1131,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         DamageSource damageSource = RiftDamage.getElementDamageSource("mob", this, this, creatureMoveBuilder.getElement());
 
         //apply damage
-        double damage = CreatureMoveHelper.calculateDamage(this);
+        double damage = CreatureMoveHelper.calculateDamage(this, entityIn);
         boolean flag = entityIn.attackEntityFrom(damageSource, (float) damage);
 
         //hit effects that require making contact
@@ -1451,15 +1453,26 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //-----properties management-----
     @SuppressWarnings("unchecked")
-    public <I extends AbstractPropertyValue<?>> I getProperty(String key) {
+    public <I extends AbstractPropertyValue<?>> I getProperty(@NotNull String key) {
         if (!this.propertyValueMap.containsKey(key)) {
             throw new UnsupportedOperationException("Key " + key + " does not exist in property map for " + this.creatureType.getName() + "!");
         }
         return (I) this.propertyValueMap.get(key);
     }
 
-    public <I> void setProperty(String key, I value) {
-        AbstractPropertyValue<I> propertyValue = this.getProperty(key);
+    public boolean hasProperty(@NotNull String key) {
+        return this.propertyValueMap.containsKey(key);
+    }
+
+    public <I> void setProperty(@NotNull String key, I value) {
+        //if no property exists, time to create it
+        AbstractPropertyValue<I> propertyValue = (AbstractPropertyValue<I>) this.propertyValueMap.computeIfAbsent(key, _ -> {
+            if (value.getClass() == Integer.class) return new IntegerPropertyValue(key, (int) value);
+            else if (value.getClass() == Double.class) return new DoublePropertyValue(key, (double) value);
+            else if (value.getClass() == Boolean.class) return new BooleanPropertyValue(key, (boolean) value);
+            else throw new UnsupportedOperationException("Only int, double, and boolean are accepted for property values!");
+        });
+
         if (propertyValue.getHeldClass() != value.getClass()) {
             throw new UnsupportedOperationException("Key " + key + " does not represent given value " + value + "!");
         }
@@ -2793,6 +2806,22 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Override
     public CreatureMoveStorage getCreatureMoves() {
         return this.dataManager.get(CREATURE_MOVES);
+    }
+
+    @Override
+    public void affectEntitiesWithinBounds(double size, @NotNull Consumer<EntityLivingBase> effect) {
+        AxisAlignedBB axisAlignedBB = new AxisAlignedBB(
+                this.posX - (size + this.width / 2D),
+                this.posY,
+                this.posZ - (size + this.width / 2D),
+                this.posX + (size + this.width / 2D),
+                this.posY + (size * 2) + this.height,
+                this.posZ + (size + this.width / 2D)
+        );
+        List<EntityLivingBase> hitEntities = this.world.getEntitiesWithinAABB(EntityLivingBase.class, axisAlignedBB);
+        for (EntityLivingBase entity : hitEntities) {
+            if (!this.isRelatedToEntity(entity)) effect.accept(entity);
+        }
     }
 
     @Override

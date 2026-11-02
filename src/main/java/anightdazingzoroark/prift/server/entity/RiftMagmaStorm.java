@@ -83,7 +83,7 @@ public class RiftMagmaStorm extends Entity implements IAnimatable<AnimationDataE
         this(creator.world);
         this.creator = creator;
         this.move = move;
-        this.damage = CreatureMoveHelper.calculateDamage(creator, move);
+        this.damage = CreatureMoveHelper.calculateDamage(creator, null, move);
         this.setPosition(origin.x, origin.y, origin.z);
         Vec3d velocity = new Vec3d(direction.x, 0D, direction.z).normalize().scale(SPEED);
         this.motionX = velocity.x;

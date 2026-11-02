@@ -9,6 +9,7 @@ import anightdazingzoroark.riftlib.nbtStorageUser.propertyValue.AbstractProperty
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -107,6 +108,8 @@ public interface ICreature {
 
     <I extends AbstractPropertyValue<?>> I getProperty(String key);
 
+    boolean hasProperty(String key);
+
     <I> void setProperty(String key, I value);
 
     @NotNull
@@ -121,6 +124,8 @@ public interface ICreature {
 
     @NotNull
     RiftCreatureConfig getCreatureConfig();
+
+    void affectEntitiesWithinBounds(double size, @NotNull Consumer<EntityLivingBase> effect);
 
     int getLevel();
 
@@ -137,6 +142,8 @@ public interface ICreature {
     float getMaxStamina();
 
     boolean hasCollisionHitboxes();
+
+    void addPotionEffect(PotionEffect potionEffect);
 
     boolean isRelatedToEntity(@Nullable Entity entity);
 
