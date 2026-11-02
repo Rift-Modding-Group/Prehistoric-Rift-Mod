@@ -13,13 +13,7 @@ import anightdazingzoroark.prift.api.creature.builder.detectionRule.AnimatedHitb
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.BoundingBoxDetectionRule;
 import anightdazingzoroark.riftlib.core.builder.Animation;
 import anightdazingzoroark.riftlib.core.keyframe.EventKeyFrame;
-import anightdazingzoroark.riftlib.core.manager.AnimationDataEntityLiving;
-import anightdazingzoroark.riftlib.exceptions.MolangException;
 import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
-import anightdazingzoroark.riftlib.model.AnimationHitboxTimeline;
-import anightdazingzoroark.riftlib.molang.MolangParser;
-import anightdazingzoroark.riftlib.molang.MolangScope;
-import anightdazingzoroark.riftlib.molang.expressions.MolangExpression;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,28 +25,28 @@ import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Shared move declarations, animation bindings, and AI policy indexes.
  * */
 public class CreatureMoveUtil {
-    /**
-     * Samples existing detection geometry at animation hit cues without running Java hit effects.
-     * Animation-declared offense intervals retain their explicitly authored lifetimes.
-     */
+    private static final Pattern HIT_EFFECT_MESSAGE = Pattern.compile(
+            "(?i:function\\.send_message)\\s*\\(\\s*(['\"])moveHitEffect\\1\\s*\\)"
+    );
+
+    /** Samples existing detection geometry at the owning move's first animation hit cue. */
     @NotNull
-    public static List<AnimationHitboxTimeline.HitboxWindow> getHitboxWindows(
+    public static List<HitboxSample> getHitboxSamples(
             @NotNull ICreature creature, @NotNull CreatureMoveBuilder move, @NotNull List<Animation> animations,
-            @NotNull List<AnimatedBoundingBox> hitboxes, @NotNull AnimationDataEntityLiving data
+            @NotNull List<AnimatedBoundingBox> hitboxes
     ) {
-        List<AnimationHitboxTimeline.HitboxWindow> windows = new ArrayList<>(
-                AnimationHitboxTimeline.getHitboxWindows(animations, hitboxes, data));
         AbstractCreatureBuilder<?> configuration = creature.getCreatureType();
         if (!creature.getPhase().isEmpty()) configuration = creature.getCreatureType().getPhaseBuilderMaps().get(creature.getPhase());
-        if (configuration == null) return List.copyOf(windows);
+        if (configuration == null) return List.of();
         MoveDefinition definition = configuration.getMoveDefinitions().values().stream()
                 .filter(candidate -> candidate.moveBuilder() == move).findFirst().orElse(null);
-        if (definition == null) return List.copyOf(windows);
+        if (definition == null) return List.of();
         List<DetectionRule> rules = definition.rules().stream()
                 .flatMap(rule -> rule.getDetectionRules().stream()).toList();
         List<AnimatedBoundingBox> detectionHitboxes = hitboxes.stream().filter(hitbox -> rules.stream().anyMatch(rule -> {
@@ -65,58 +59,34 @@ public class CreatureMoveUtil {
                 }
                 default -> false;
             };
-        })).filter(hitbox -> windows.stream().noneMatch(window -> window.hitbox() == hitbox)).toList();
-        windows.addAll(getHitEffectHitboxWindows(animations, detectionHitboxes, data.getDataScope().getValues()));
-        return List.copyOf(windows);
+        })).toList();
+        return getHitEffectSamples(animations, detectionHitboxes);
     }
 
     /**
-     * Sample the first hit message, matching runtime's once-per-move hit-effect dispatch.
+     * Reads literal hit messages without evaluating Molang or running move effects.
+     * The first cue in playback order matches runtime's once-per-move hit-effect dispatch.
      */
     @NotNull
-    public static List<AnimationHitboxTimeline.HitboxWindow> getHitEffectHitboxWindows(
-            @NotNull List<Animation> animations, @NotNull List<AnimatedBoundingBox> hitboxes,
-            @NotNull Map<String, Double> variables
+    public static List<HitboxSample> getHitEffectSamples(
+            @NotNull List<Animation> animations, @NotNull List<AnimatedBoundingBox> hitboxes
     ) {
         if (hitboxes.isEmpty()) return List.of();
-        HitEffectTimeline parser = new HitEffectTimeline();
-        MolangScope scope = new MolangScope();
-        scope.replaceValues(variables);
         for (Animation animation : animations) {
             for (EventKeyFrame.CustomInstructionKeyFrame event : animation.customInstructionKeyFrames.stream()
                     .sorted(Comparator.comparingDouble(EventKeyFrame::getStartTick)).toList()) {
                 if (event.getStartTick() < 0D || event.getStartTick() > animation.animationLength) continue;
-                parser.tick = event.getStartTick();
-                try {
-                    MolangExpression instruction = parser.parseExpression(event.instruction);
-                    parser.withScope(scope, () -> { instruction.get(); });
-                }
-                catch (MolangException exception) {
-                    return List.of();
-                }
-                if (!parser.hitTicks.isEmpty()) {
-                    double tick = parser.hitTicks.getFirst();
-                    return hitboxes.stream()
-                            .map(hitbox -> new AnimationHitboxTimeline.HitboxWindow(animation, hitbox, tick, tick)).toList();
-                }
+                boolean hitCue = Arrays.stream(event.instruction.split(";"))
+                        .anyMatch(statement -> HIT_EFFECT_MESSAGE.matcher(statement.strip()).matches());
+                if (hitCue) return List.of(new HitboxSample(animation, List.copyOf(hitboxes), event.getStartTick()));
             }
         }
         return List.of();
     }
 
-    private static class HitEffectTimeline extends MolangParser {
-        private double tick;
-        @NotNull
-        private final List<Double> hitTicks = new ArrayList<>();
-
-        private HitEffectTimeline() {
-            this.registerFunction("function.send_message", 1, (arguments, data) -> {
-                if (!arguments[0].getString().equals("moveHitEffect")) return 0D;
-                this.hitTicks.add(this.tick);
-                return 1D;
-            });
-        }
-    }
+    public record HitboxSample(
+            @NotNull Animation animation, @NotNull List<AnimatedBoundingBox> hitboxes, double tick
+    ) {}
 
     /** Select the configured playback variant, or the charge-up sequence, for prediction. */
     @NotNull

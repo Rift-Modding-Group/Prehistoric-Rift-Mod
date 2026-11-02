@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
+import anightdazingzoroark.prift.api.util.CreatureMoveUtil.HitboxSample;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntityLiving;
 import anightdazingzoroark.riftlib.core.processor.IBone;
 import anightdazingzoroark.riftlib.core.snapshot.BoneSnapshot;
@@ -14,7 +15,6 @@ import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
 import anightdazingzoroark.riftlib.model.AnimatedGeoModel;
 import anightdazingzoroark.riftlib.model.AnimatedLocator;
 import anightdazingzoroark.riftlib.model.AnimationPoseSampler;
-import anightdazingzoroark.riftlib.model.AnimationHitboxTimeline;
 import anightdazingzoroark.riftlib.model.ServerModelRegistry;
 import anightdazingzoroark.riftlib.ray.RiftLibRay;
 import anightdazingzoroark.riftlib.util.QuaternionUtils;
@@ -33,8 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Comparator;
-import java.util.stream.Stream;
 
 public class CreatureLookUtil {
     //head pitch min and max bounds
@@ -224,7 +222,7 @@ public class CreatureLookUtil {
         data.setVariable("head_attack_swing", MathUtil.slopeResult(headPitch, true, HEAD_PITCH_MIN, 0D, -1D, 1D));
         data.setVariable("head_attack_upward", headPitch < 0f ? 1D : 0D);
         List<AnimatedBoundingBox> hitboxes = new ArrayList<>(data.getAnimatedBoundingBoxes().values());
-        List<HeadAttackSample> samples = getHeadAttackSamples(CreatureMoveUtil.getHitboxWindows(creature, move, animations, hitboxes, data));
+        List<HitboxSample> samples = CreatureMoveUtil.getHitboxSamples(creature, move, animations, hitboxes);
         Vec3d result = null;
         if (!samples.isEmpty()) {
             HeadStrikePose strike = new HeadStrikePose(data, samples);
@@ -345,55 +343,14 @@ public class CreatureLookUtil {
         return closest;
     }
 
-    /** Sample authored damage intervals and animation hit instants without running move effects. */
-    @NotNull
-    public static List<HeadAttackSample> getHeadAttackSamples(@NotNull List<AnimationHitboxTimeline.HitboxWindow> windows) {
-        List<HeadAttackSample> samples = new ArrayList<>();
-        for (Animation animation : windows.stream().map(AnimationHitboxTimeline.HitboxWindow::animation).distinct().toList()) {
-            List<HeadAttackSample> animationSamples = new ArrayList<>();
-            List<AnimationHitboxTimeline.HitboxWindow> instants = windows.stream()
-                    .filter(window -> window.animation() == animation && window.startTick() == window.endTick()).toList();
-            for (double tick : instants.stream().map(AnimationHitboxTimeline.HitboxWindow::startTick).distinct().sorted().toList()) {
-                List<AnimatedBoundingBox> active = instants.stream().filter(window -> window.startTick() == tick)
-                        .map(AnimationHitboxTimeline.HitboxWindow::hitbox).distinct().toList();
-                animationSamples.add(new HeadAttackSample(animation, active, tick));
-            }
-            List<AnimationHitboxTimeline.HitboxWindow> animationWindows = windows.stream()
-                    .filter(window -> window.animation() == animation && window.endTick() > window.startTick()).toList();
-            List<Double> boundaries = animationWindows.stream()
-                    .flatMap(window -> Stream.of(window.startTick(), window.endTick()))
-                    .distinct().sorted().toList();
-            for (int interval = 1; interval < boundaries.size(); interval++) {
-                double start = boundaries.get(interval - 1);
-                double end = boundaries.get(interval);
-                List<AnimatedBoundingBox> active = animationWindows.stream()
-                        .filter(window -> window.startTick() <= start && window.endTick() >= end)
-                        .map(AnimationHitboxTimeline.HitboxWindow::hitbox).distinct().toList();
-                if (active.isEmpty()) continue;
-                int steps = Math.max(1, (int) Math.ceil(end - start));
-                for (int step = 0; step <= steps; step++) {
-                    double tick = MathUtil.slopeResult(step, true, 0D, steps, start, end);
-                    animationSamples.add(new HeadAttackSample(animation, active, tick));
-                }
-            }
-            animationSamples.sort(Comparator.comparingDouble(HeadAttackSample::tick));
-            samples.addAll(animationSamples);
-        }
-        return List.copyOf(samples);
-    }
-
-    public record HeadAttackSample(
-            @NotNull Animation animation, @NotNull List<AnimatedBoundingBox> hitboxes, double tick
-    ) {}
-
-    private record HeadStrikePose(@NotNull AnimationDataEntityLiving data, @NotNull List<HeadAttackSample> samples) {
+    private record HeadStrikePose(@NotNull AnimationDataEntityLiving data, @NotNull List<HitboxSample> samples) {
         @NotNull
         private List<AxisAlignedBB> sampleBounds(float pitch, float yaw, @NotNull Vec3d position) {
             this.data.setVariable("head_attack_pitch", pitch);
             this.data.setVariable("head_attack_swing", MathUtil.slopeResult(pitch, true, HEAD_PITCH_MIN, 0D, -1D, 1D));
             this.data.setVariable("head_attack_upward", pitch < 0f ? 1D : 0D);
             List<AxisAlignedBB> bounds = new ArrayList<>();
-            for (HeadAttackSample sample : this.samples) {
+            for (HitboxSample sample : this.samples) {
                 Map<String, BoneSnapshot> pose = AnimationPoseSampler.sample(sample.animation(), this.data, sample.tick());
                 for (AnimatedBoundingBox hitbox : sample.hitboxes()) {
                     bounds.add(hitbox.getWorldSpaceBounds(this.data.getScale(), yaw, position, pose));

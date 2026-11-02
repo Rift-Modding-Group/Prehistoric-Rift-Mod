@@ -5,8 +5,7 @@ import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.api.util.CreatureMoveUtil;
 import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.ICreature;
-import anightdazingzoroark.prift.api.util.MathUtil;
-import anightdazingzoroark.riftlib.model.AnimationHitboxTimeline;
+import anightdazingzoroark.prift.api.util.CreatureMoveUtil.HitboxSample;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.core.builder.Animation;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntityLiving;
@@ -32,10 +31,9 @@ import java.util.function.Consumer;
 import java.util.function.BiConsumer;
 
 /**
- * Predicts contact with tagged hitboxes during an animation's damage window.
+ * Predicts contact with tagged hitboxes at an animation's hit cue.
  * */
 public class AnimatedHitboxDetectionRule extends DetectionRule {
-    private static final int SWEEP_SAMPLE_INTERVALS = 4;
     @NotNull
     private final String hitboxTag;
     @NotNull
@@ -102,25 +100,10 @@ public class AnimatedHitboxDetectionRule extends DetectionRule {
         }
 
         Map<AnimatedBoundingBox, List<Map<String, BoneSnapshot>>> poses = new HashMap<>();
-        for (AnimationHitboxTimeline.HitboxWindow window : CreatureMoveUtil.getHitboxWindows(user, definition.moveBuilder(), animations, hitboxes, data)) {
-            List<Map<String, BoneSnapshot>> hitboxPoses = poses.computeIfAbsent(window.hitbox(), hitbox -> new ArrayList<>());
-            if (window.startTick() == window.endTick()) {
-                hitboxPoses.add(AnimationPoseSampler.sample(window.animation(), data, window.startTick()));
-                continue;
-            }
-            Map<String, BoneSnapshot> previousPose = null;
-            int steps = Math.max(1, (int) Math.ceil(window.endTick() - window.startTick()));
-            for (int sample = 0; sample <= steps; sample++) {
-                double tick = MathUtil.slopeResult(sample, true, 0D, steps, window.startTick(), window.endTick());
-                Map<String, BoneSnapshot> pose = AnimationPoseSampler.sample(window.animation(), data, tick);
-                if (previousPose == null) hitboxPoses.add(pose);
-                else {
-                    for (int step = 1; step <= SWEEP_SAMPLE_INTERVALS; step++) {
-                        float progress = (float) MathUtil.slopeResult(step, false, 0D, SWEEP_SAMPLE_INTERVALS, 0D, 1D);
-                        hitboxPoses.add(AnimationPoseSampler.interpolate(previousPose, pose, progress));
-                    }
-                }
-                previousPose = pose;
+        for (HitboxSample sample : CreatureMoveUtil.getHitboxSamples(user, definition.moveBuilder(), animations, hitboxes)) {
+            Map<String, BoneSnapshot> pose = AnimationPoseSampler.sample(sample.animation(), data, sample.tick());
+            for (AnimatedBoundingBox hitbox : sample.hitboxes()) {
+                poses.computeIfAbsent(hitbox, key -> new ArrayList<>()).add(pose);
             }
         }
         if (poses.isEmpty()) return null;
