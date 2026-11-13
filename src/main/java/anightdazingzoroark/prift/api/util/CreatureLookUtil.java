@@ -27,6 +27,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Quaternionf;
 import org.lwjglx.util.vector.Quaternion;
 
 import java.util.List;
@@ -58,7 +59,7 @@ public class CreatureLookUtil {
             bone.getScale().set(snapshot.getScale());
         });
         Vec3d mouth = locator.getModelSpacePosition();
-        Quaternion orientation = locator.getModelSpaceYXZQuaternion();
+        Quaternionf orientation = locator.getModelSpaceYXZQuaternion();
         Vec3d forward = VectorUtils.rotateVectorWithQuaternion(new Vec3d(0D, 0D, -1D), orientation);
         Vec3d up = VectorUtils.rotateVectorWithQuaternion(new Vec3d(0D, 1D, 0D), orientation);
         previousPose.forEach((bone, snapshot) -> {
@@ -68,7 +69,7 @@ public class CreatureLookUtil {
         });
 
         // Model coordinates are in pixels, with X and Z opposite to entity coordinates.
-        Quaternion yaw = QuaternionUtils.createYXZQuaternion(0D, -Math.toRadians(data.getModelYaw()), 0D);
+        Quaternionf yaw = QuaternionUtils.createYXZQuaternion(0D, -Math.toRadians(data.getModelYaw()), 0D);
         Vec3d origin = data.getHolder().getPositionVector().add(VectorUtils.rotateVectorWithQuaternion(
                 new Vec3d(-mouth.x, mouth.y, -mouth.z).scale(data.getScale() / 16D), yaw));
         Vec3d direction = VectorUtils.rotateVectorWithQuaternion(new Vec3d(-forward.x, forward.y, -forward.z), yaw);

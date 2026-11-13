@@ -132,6 +132,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Quaternionf;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.lwjglx.util.vector.Quaternion;
@@ -3474,7 +3475,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         double yawHead = -Math.toRadians(this.rotationYawHead);
         double yawBody = -Math.toRadians(this.rotationYaw);
         double yaw = this.isBeingRidden() ? yawBody : yawHead;
-        Quaternion quaternion = QuaternionUtils.createXYZQuaternion(0f, yaw, 0f);
+        Quaternionf quaternion = QuaternionUtils.createXYZQuaternion(0f, yaw, 0f);
         locatorPos = VectorUtils.rotateVectorWithQuaternion(locatorPos, quaternion);
 
         return new Vec3d(
