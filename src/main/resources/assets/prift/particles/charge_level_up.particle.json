@@ -42,7 +42,7 @@
 				}
 			},
 			"minecraft:particle_appearance_tinting": {
-				"color": [1, 1, 0, 1]
+				"color": "variable.charge_color"
 			}
 		}
 	}

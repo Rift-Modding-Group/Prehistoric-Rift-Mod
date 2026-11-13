@@ -12,6 +12,7 @@ import anightdazingzoroark.riftlib.particle.RiftLibParticleHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 
 public class ThagomizeBuilder extends CreatureMoveBuilder {
     public ThagomizeBuilder() {
@@ -26,7 +27,17 @@ public class ThagomizeBuilder extends CreatureMoveBuilder {
                 .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.TARGETED_MELEE)
                 .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.WIDE)
                 .setOnMoveBeginEffect(TailAttackLookUtil::captureThagomizeLook)
-                .setOnMoveHitEffect(creature -> creature.createOffenseHitboxesByTag("thagomizer", 4))
+                .setOnMoveHitEffect(creature -> {
+                    Vec3d creaturePos = creature.getPositionVector();
+                    creature.getEntityWorld().playSound(
+                            null,
+                            creaturePos.x, creaturePos.y, creaturePos.z,
+                            RiftSounds.getSound("generic_move.tail_strong"),
+                            SoundCategory.NEUTRAL,
+                            1f, 1f
+                    );
+                    creature.createOffenseHitboxesByTag("thagomizer", 4);
+                })
                 .setOnMoveEndEffect(creature -> creature.setProperty("ChargeUpLevel", 0))
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                         .setChargeUpThenRelease()
@@ -55,14 +66,15 @@ public class ThagomizeBuilder extends CreatureMoveBuilder {
                             creature.setProperty("ChargeUpLevel", chargeUpLevel);
 
                             //show particles
-                            AxisAlignedBB creatureAABB = creature.getEntityBoundingBox();
-                            double width = creatureAABB.maxX - creatureAABB.minX;
-                            double height = creatureAABB.maxY - creatureAABB.minY;
+                            double[] creatureSize = creature.getSize();
+                            double width = creatureSize[0];
+                            double height = creatureSize[1];
                             RiftLibParticleHelper.createParticle(
                                     "prift:charge_level_up",
                                     creature.getPositionVector().x, creature.getPositionVector().y + height / 2D, creature.getPositionVector().z,
                                     0, 0,
-                                    "variable.emission_radius", Double.toString(width * 0.005D)
+                                    "variable.emission_radius", Double.toString(width * 0.005D),
+                                    "variable.charge_color", "#FFFF00"
                             );
 
                             //play sound

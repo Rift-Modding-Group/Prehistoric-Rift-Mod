@@ -762,6 +762,13 @@
     ],
     "subtitle": "sounds.subtitle.generic_tail_move"
   },
+  "prift.generic_move.tail_strong": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_tail_move_strong"
+    ],
+    "subtitle": "sounds.subtitle.generic_tail_move_strong"
+  },
   "prift.generic_move.head": {
     "category": "neutral",
     "sounds": [
@@ -796,6 +803,43 @@
       "prift:entities/generic_move/generic_burp_move"
     ],
     "subtitle": "sounds.subtitle.generic_burp_move"
+  },
+  "prift.generic_move.scale_shed": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_scale_shed_move"
+    ],
+    "subtitle": "sounds.subtitle.generic_scale_shed_move"
+  },
+  "prift.generic_move.slash": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_slash_move_1",
+      "prift:entities/generic_move/generic_slash_move_2",
+      "prift:entities/generic_move/generic_slash_move_3"
+    ],
+    "subtitle": "sounds.subtitle.generic_slash_move"
+  },
+  "prift.generic_move.bide_release": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_bide_release"
+    ],
+    "subtitle": "sounds.subtitle.generic_bide_move_release"
+  },
+  "prift.generic_move.weakness_exploiter_1": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_weakness_exploiter_1"
+    ],
+    "subtitle": "sounds.subtitle.generic_weakness_exploiter_1"
+  },
+  "prift.generic_move.weakness_exploiter_2": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_weakness_exploiter_2"
+    ],
+    "subtitle": "sounds.subtitle.generic_weakness_exploiter_2"
   },
   "prift.generic_move.self_destruction": {
     "category": "neutral",

@@ -47,7 +47,7 @@ public class SeedBombBuilder extends CreatureMoveBuilder {
                         creature.getEntityWorld().playSound(
                                 null, creaturePos.x, creaturePos.y, creaturePos.z,
                                 RiftSounds.getSound("generic_move.fire"),
-                                SoundCategory.NEUTRAL, 1f, 1f
+                                SoundCategory.NEUTRAL, 1.5f, 1f
                         );
                         creature.launchProjectile(seedBombProjectile, target, 3f, 0f);
                     }
@@ -56,7 +56,8 @@ public class SeedBombBuilder extends CreatureMoveBuilder {
                 .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
                 .setRiddenPitchBounds(-75f, 35f)
                 .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.POINT)
-                .setCooldown(400);
+                //.setCooldown(400)
+        ;
     }
 
     public static class Rule extends MoveRuleBuilder {

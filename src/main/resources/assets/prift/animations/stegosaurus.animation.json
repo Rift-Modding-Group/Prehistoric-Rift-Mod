@@ -116,12 +116,6 @@
 					}
 				}
 			},
-			"sound_effects": {
-				"0.625": {
-					"effect": "prift.generic_move.tail",
-					"locator": "centerPoint"
-				}
-			},
 			"timeline": {
 				"0.625": "function.send_message('moveHitEffect'); function.send_message('riddenTargetedMeleeHitEffect'); function.send_message('moveBlockBreakEffect');"
 			}
@@ -511,12 +505,6 @@
 					"position": [0, -0.9, 0]
 				}
 			},
-			"sound_effects": {
-				"0.25": {
-					"effect": "prift.generic_move.tail",
-					"locator": "centerPoint"
-				}
-			},
 			"timeline": {
 				"0.25": "function.send_message('moveHitEffect'); function.send_message('riddenTargetedMeleeHitEffect'); function.send_message('moveChargeupReleasingFinished');"
 			}
@@ -755,12 +743,6 @@
 					}
 				}
 			},
-			"sound_effects": {
-				"1.0": {
-					"effect": "prift.generic_move.tail",
-					"locator": "centerPoint"
-				}
-			},
 			"timeline": {
 				"1.0": "function.send_message('moveHitEffect'); function.send_message('riddenTargetedMeleeHitEffect');"
 			}
@@ -823,14 +805,69 @@
 					}
 				}
 			},
-			"sound_effects": {
-				"0.375": {
-					"effect": "prift.generic_move.burp",
-					"locator": "centerPoint"
-				}
-			},
 			"timeline": {
 				"0.375": "function.send_message('moveHitEffect');"
+			}
+		},
+		"animation.stegosaurus.scale_shed": {
+			"animation_length": 1,
+			"bones": {
+				"bodyFront": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [5, 0, 0],
+						"0.875": [5, 0, 0],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"neck": {
+					"rotation": {
+						"0.0": ["math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0],
+						"0.25": [12.5, 0, 0],
+						"0.875": [12.5, 0, 0],
+						"1.0": ["math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
+					}
+				},
+				"leftFrontLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [0, 0, 22.5],
+						"0.875": [0, 0, 22.5],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"rightFrontLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [0, 0, -22.5],
+						"0.875": [0, 0, -22.5],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"bodyFrontCube": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [0, 0, 7.5],
+						"0.375": [0, 0, -7.5],
+						"0.5": [0, 0, 7.5],
+						"0.625": [0, 0, -7.5],
+						"0.75": [0, 0, 7.5],
+						"0.875": [0, 0, 0],
+						"1.0": [0, 0, 0]
+					}
+				},
+				"bodyBackCube": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [0, 0, -5],
+						"0.375": [0, 0, 5],
+						"0.5": [0, 0, -5],
+						"0.625": [0, 0, 5],
+						"0.75": [0, 0, -5],
+						"0.875": [0, 0, 0],
+						"1.0": [0, 0, 0]
+					}
+				}
 			}
 		}
 	}

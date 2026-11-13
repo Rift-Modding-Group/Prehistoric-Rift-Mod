@@ -8,9 +8,12 @@ import anightdazingzoroark.prift.api.creature.builder.detectionRule.VerticalDist
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.prift.api.projectile.ProjectileTrail;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
+import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntityLiving;
 import anightdazingzoroark.riftlib.particle.particleComponent.particleAppearance.AppearanceTintingComponent;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.Vec3d;
 
 public class BelchBuilder extends CreatureMoveBuilder {
     public BelchBuilder() {
@@ -30,6 +33,13 @@ public class BelchBuilder extends CreatureMoveBuilder {
                 .setRiddenPitchBounds(-75f, 35f)
                 .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.POINT)
                 .setOnMoveHitEffect(creature -> {
+                    Vec3d creaturePos = creature.getPositionVector();
+                    creature.getEntityWorld().playSound(
+                            null, creaturePos.x, creaturePos.y, creaturePos.z,
+                            RiftSounds.getSound("generic_move.burp"),
+                            SoundCategory.NEUTRAL, 1f, 1f
+                    );
+
                     ProjectileBuilder belchProjectile = new ProjectileBuilder().setName("belch")
                             .setRotateAlongPitch().setProjectileModel(ProjectileBuilder.ProjectileModel.CUBE)
                             .setProjectileTrail(ProjectileTrail.makeBuilderForParticleTrail()

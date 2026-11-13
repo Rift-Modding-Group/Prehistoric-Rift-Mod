@@ -7,8 +7,24 @@ import anightdazingzoroark.prift.api.creature.builder.detectionRule.AnimatedHitb
 import anightdazingzoroark.prift.server.entity.creatureMoves.TailAttackLookUtil;
 import anightdazingzoroark.prift.server.properties.OtherEntityProperties;
 import anightdazingzoroark.prift.server.sound.RiftSounds;
+import anightdazingzoroark.riftlib.core.IAnimatable;
+import anightdazingzoroark.riftlib.jsonParsing.raw.RawMolangValue;
+import anightdazingzoroark.riftlib.molang.math.Constant;
+import anightdazingzoroark.riftlib.particle.ParticleBuilder;
+import anightdazingzoroark.riftlib.particle.ParticleCameraMode;
+import anightdazingzoroark.riftlib.particle.ParticleMaterial;
+import anightdazingzoroark.riftlib.particle.RiftLibParticleHelper;
+import anightdazingzoroark.riftlib.particle.emitterComponent.emitterLifetime.EmitterLifetimeExpressionComponent;
+import anightdazingzoroark.riftlib.particle.emitterComponent.emitterRate.EmitterSteadyComponent;
+import anightdazingzoroark.riftlib.particle.emitterComponent.emitterShape.EmitterShapePointComponent;
+import anightdazingzoroark.riftlib.particle.particleComponent.particleAppearance.AppearanceBillboardComponent;
+import anightdazingzoroark.riftlib.particle.particleComponent.particleInitialState.ParticleInitialSpeedComponent;
+import anightdazingzoroark.riftlib.particle.particleComponent.particleLifetime.ParticleLifetimeExpressionComponent;
+import anightdazingzoroark.riftlib.particle.particleComponent.particleMotion.ParticleMotionDynamicComponent;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MultiPartEntityPart;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 
 public class HyperCutterBuilder extends CreatureMoveBuilder {
@@ -19,8 +35,9 @@ public class HyperCutterBuilder extends CreatureMoveBuilder {
                 .setElement(Element.NEUTRAL)
                 .setMoveType(CreatureMoveBuilder.MoveType.PHYSICAL)
                 .setCooldown(creature -> {
-                    int hyperCutterCount = (int) creature.getProperty("HyperCutterCount").getValue();
-                    return hyperCutterCount == 0 ? 300: 0; //yeah idk how to explain why this shit works
+                    boolean hyperCutterReset = (boolean) creature.getProperty("HyperCutterReset").getValue();
+                    creature.setProperty("HyperCutterReset", false);
+                    return hyperCutterReset ? 300: 0;
                 })
                 .setMovePowerMultiplier((creature, hitTarget) -> {
                     int hyperCutterCount = (int) creature.getProperty("HyperCutterCount").getValue();
@@ -33,13 +50,45 @@ public class HyperCutterBuilder extends CreatureMoveBuilder {
                     //hyper cutter count set
                     if (!creature.hasProperty("HyperCutterCount")) creature.setProperty("HyperCutterCount", 0);
                     if (!creature.hasProperty("HyperCutterHit")) creature.setProperty("HyperCutterHit", false);
+                    if (!creature.hasProperty("HyperCutterReset")) creature.setProperty("HyperCutterReset", false);
+
+                    //particle effect
+                    int hyperCutterCount = (int) creature.getProperty("HyperCutterCount").getValue();
+                    String chargeColor;
+                    if (hyperCutterCount == 0 || hyperCutterCount == 1) chargeColor = "#FFFFFF";
+                    else if (hyperCutterCount == 2 || hyperCutterCount == 3) chargeColor = "#FFFF00";
+                    else if (hyperCutterCount == 4) chargeColor = "#FF0000";
+                    else chargeColor = "#FFFFFF";
+
+                    RiftLibParticleHelper.createParticle(
+                            "prift:charge_level_up_looping",
+                            "tailEffectLocator",
+                            (Entity & IAnimatable<?>) creature.getAnimationData().getHolder(),
+                            "variable.emission_radius", Double.toString(0.5D),
+                            "variable.charge_color", chargeColor
+                    );
                 })
                 .setOnMoveHitEffect(creature -> {
                     creature.setProperty("HyperCutterHit", false);
+                    creature.getEntityWorld().playSound(
+                            null,
+                            creature.getPositionVector().x,
+                            creature.getPositionVector().y,
+                            creature.getPositionVector().z,
+                            RiftSounds.getSound("generic_move.slash"),
+                            SoundCategory.NEUTRAL,
+                            1f, 1f
+                    );
+
+                    RiftLibParticleHelper.killParticle(
+                            (Entity & IAnimatable<?>) creature.getAnimationData().getHolder(),
+                            "prift:charge_level_up_looping",
+                            "tailEffectLocator"
+                    );
+
                     creature.createOffenseHitboxesByTag("thagomizer", 4, hitEntity -> {
                         int hyperCutterCount = (int) creature.getProperty("HyperCutterCount").getValue();
 
-                        //play sound
                         if (hyperCutterCount == 0 || hyperCutterCount == 1) {
                             creature.getEntityWorld().playSound(
                                     null,
@@ -78,6 +127,7 @@ public class HyperCutterBuilder extends CreatureMoveBuilder {
                         if (hyperCutterCount >= 4) {
                             creature.setProperty("HyperCutterCount", 0);
                             creature.setProperty("HyperCutterHit", true);
+                            creature.setProperty("HyperCutterReset", true);
 
                             EntityLivingBase hitEntityLiving;
                             if (hitEntity instanceof MultiPartEntityPart hitHitbox) hitEntityLiving = (EntityLivingBase) hitHitbox.parent;

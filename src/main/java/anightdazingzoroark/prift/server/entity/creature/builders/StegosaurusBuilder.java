@@ -59,7 +59,7 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                 .setMoveAnimations("plate_fling", "plate_fling")
                 .setMoveAnimations("belch", "spit")
                 .setMoveAnimations("seed_bomb", "spit")
-                .setMoveAnimations("scale_shed", "spit")
+                .setMoveAnimations("scale_shed", "scale_shed")
                 .setMoveAnimations("hyper_cutter", "tail_stab")
                 .setMoveAnimations("bide", "thagomize")
                 .setMoveAnimations("weakness_exploiter", "tail_stab")
