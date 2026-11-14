@@ -6,6 +6,9 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureDomesticationBuild
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 
+import java.util.List;
+import java.util.Map;
+
 public class DodoBuilder extends RiftCreatureBuilder {
     public DodoBuilder() {
         this.setName("dodo")
@@ -31,7 +34,13 @@ public class DodoBuilder extends RiftCreatureBuilder {
                 //---moves---
                 .setMaximumMoveSlots(1)
                 .setSpawnMoves("peck")
+                .setLevelupMoves(Map.of(
+                        4, List.of("bullet_seed"),
+                        8, List.of("drill_peck")
+                ))
                 .setMoveAnimations("peck", "peck")
+                .setMoveAnimations("bullet_seed", "bullet_seed")
+                .setMoveAnimations("drill_peck", "peck")
                 //---food---
                 .addDefaultFoodItemWhitelistEntry("seed")
                 .addDefaultFoodItemWhitelistEntry("fruit");

@@ -5,7 +5,7 @@ import anightdazingzoroark.prift.api.creature.builder.detectionRule.DistanceFrom
 import net.minecraft.entity.EntityLivingBase;
 
 public class PeckBuilder extends StandardMeleeBuilder {
-    private static DistanceFromUserDetectionRule peckRange = new DistanceFromUserDetectionRule(2D);
+    private static final DistanceFromUserDetectionRule peckRange = new DistanceFromUserDetectionRule(2D);
 
     public PeckBuilder() {
         this.setBasePower(40)

@@ -32,6 +32,8 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
     private static final DataParameter<String> NAME = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.STRING);
     private static final DataParameter<Byte> MODEL = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.BYTE);
     private static final DataParameter<NBTTagCompound> PARTICLE_TRAIL = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.COMPOUND_TAG);
+    private static final DataParameter<Float> SCALE = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.FLOAT);
+
     @Nullable
     private AnimationDataProjectile data;
     @NotNull
@@ -86,6 +88,7 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
     private void setFromBuilder(@NotNull ProjectileBuilder builder) {
         this.dataManager.set(NAME, builder.getName());
         this.dataManager.set(MODEL, (byte) builder.getProjectileModel().ordinal());
+        this.dataManager.set(SCALE, builder.getScale());
         if (builder.getProjectileTrail() != null) this.dataManager.set(PARTICLE_TRAIL, ParticleBuilder.toNBT(builder.getProjectileTrail()));
         if (builder.getPropertyValueMap() != null) this.propertyValueMap = Map.copyOf(builder.getPropertyValueMap());
     }
@@ -96,6 +99,7 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
         this.dataManager.register(NAME, "");
         this.dataManager.register(MODEL, (byte) 2);
         this.dataManager.register(PARTICLE_TRAIL, new NBTTagCompound());
+        this.dataManager.register(SCALE, 1f);
     }
 
     @Override
@@ -125,6 +129,10 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
 
     public ProjectileBuilder.ProjectileModel getProjectileModel() {
         return ProjectileBuilder.ProjectileModel.values()[this.dataManager.get(MODEL)];
+    }
+
+    public float getProjectileScale() {
+        return this.dataManager.get(SCALE);
     }
 
     public NBTTagCompound getParticleTrailNBT() {
@@ -201,6 +209,8 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
 
     @Override
     public void initializeAnimationData(@NotNull AnimationDataProjectile animData) {
+        animData.setScale(this.getProjectileScale());
+
         NBTTagCompound particleTrailNBT = this.getParticleTrailNBT();
         if (!particleTrailNBT.isEmpty()) {
             animData.addParticleEffect(ParticleBuilder.fromNBT(particleTrailNBT), "center");

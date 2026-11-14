@@ -99,6 +99,13 @@
     ],
     "subtitle": "sounds.subtitle.dodo_death"
   },
+  "prift.dodo.warn": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/dodo/dodo_warn"
+    ],
+    "subtitle": "sounds.subtitle.dodo_warn"
+  },
 
   "prift.triceratops.idle": {
     "category": "neutral",
@@ -885,6 +892,13 @@
       "prift:entities/generic_move/generic_charge_chargeup_4"
     ],
     "subtitle": "sounds.subtitle.generic_charge_chargeup"
+  },
+  "prift.generic_move.projectile": {
+    "category": "neutral",
+    "sounds": [
+      "random/bow"
+    ],
+    "subtitle": "sounds.subtitle.generic_move_projectile"
   },
   "prift.generic_move.fire": {
     "category": "neutral",

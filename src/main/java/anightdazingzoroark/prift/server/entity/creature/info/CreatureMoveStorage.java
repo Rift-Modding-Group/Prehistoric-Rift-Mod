@@ -429,7 +429,7 @@ public class CreatureMoveStorage {
             }
 
             if (this.currentMoveChargeupPhase == ChargeupPhase.RELEASING && chargeupBuilder.getReleaseDuringUseEffect() != null) {
-                chargeupBuilder.getReleaseDuringUseEffect().accept(creature, creature.getAttackTarget());
+                chargeupBuilder.getReleaseDuringUseEffect().accept(creature, this.currentMoveBuildup, creature.getAttackTarget());
             }
 
             if (chargeupBuilder.getChargeUpThenRelease() && this.currentMoveChargeupPhase == ChargeupPhase.WINDUP) {

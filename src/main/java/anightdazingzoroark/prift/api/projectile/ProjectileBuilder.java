@@ -33,9 +33,9 @@ public class ProjectileBuilder {
     private TriConsumer<IProjectile, EntityLivingBase, Vec3d> onImpactFromDispenserEffect;
     @Nullable
     private Consumer<IProjectile> updateEffect;
+    private float scale;
     private boolean stayAfterImpact;
     private boolean rotateAlongPitch;
-    private boolean useCubeModel;
     @NotNull
     private ProjectileModel projectileModel = ProjectileModel.NONE;
     @Nullable
@@ -113,6 +113,18 @@ public class ProjectileBuilder {
     }
 
     /**
+     * Get the scale of the model of the projectile
+     * */
+    public ProjectileBuilder setScale(float value) {
+        this.scale = value;
+        return this;
+    }
+
+    public float getScale() {
+        return this.scale;
+    }
+
+    /**
      * By default, projectiles despawn after hitting, but this can be used to make them
      * linger for a while upon making contact
      * */
@@ -135,11 +147,6 @@ public class ProjectileBuilder {
 
     public boolean getRotateAlongPitch() {
         return this.rotateAlongPitch;
-    }
-
-    @Deprecated
-    public boolean getUseCubeModel() {
-        return this.useCubeModel;
     }
 
     public ProjectileBuilder setProjectileModel(@NotNull ProjectileModel projectileModel) {

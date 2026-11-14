@@ -309,7 +309,9 @@ public class CreatureLookUtil {
     }
 
 
-    /** Capture the existing look, using the same rider pose as the crosshair prediction. */
+    /**
+     * Capture the existing look, using the same rider pose as the crosshair prediction.
+     * */
     public static void captureHeadAttackLook(@NotNull ICreature creature) {
         AnimationDataEntityLiving data = creature.getAnimationData();
         LookPose look = getAttackLookPose(creature);

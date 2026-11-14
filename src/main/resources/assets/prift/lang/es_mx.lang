@@ -319,6 +319,10 @@ move.creature.bide=Venganza
 move.creature.bide.description=Absorbe daño recibido para despues reflejarlo, doblado.
 move.creature.weakness_exploiter=Explotador de debilidades
 move.creature.weakness_exploiter.description=Un ataque que se vuelve mas poderoso cuando el objetivo tiene un efecto debilitante.
+move.creature.bullet_seed=Bala de semillas
+move.creature.bullet_seed.description=Escupe una racha de semillas hacia un objetivo.
+move.creature.drill_peck=Pico Taladro
+move.creature.drill_peck.description=Picotea al objetivo con la fuerza continuosa de una taladradora.
 
 priftcommands.bleed.usage=/priftbleed <jugador|entidad> <segundos> [fuerza]
 priftcommands.bleed.successful=Se aplicó sangrado a %s

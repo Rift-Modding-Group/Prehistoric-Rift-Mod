@@ -320,6 +320,10 @@ move.creature.bide=Bide
 move.creature.bide.description=Absorbs incoming damage to then release it back, but doubled.
 move.creature.weakness_exploiter=Weakness Exploiter
 move.creature.weakness_exploiter.description=An attack that is more powerful when the target has a harmful effect.
+move.creature.bullet_seed=Bullet Seed
+move.creature.bullet_seed.description=Spits out a flurry of seeds at the target.
+move.creature.drill_peck=Drill Peck
+move.creature.drill_peck.description=Hits the target with a beak with the continuous strength of a drill.
 
 priftcommands.bleed.usage=/priftbleed <player|entity> <seconds> [strength]
 priftcommands.bleed.successful=Applied bleed to %s

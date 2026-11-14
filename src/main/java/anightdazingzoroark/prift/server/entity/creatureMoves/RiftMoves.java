@@ -44,6 +44,8 @@ public class RiftMoves {
         CreatureMoveRegistry.registerMove("hyper_cutter", new HyperCutterBuilder(), new HyperCutterBuilder.Rule());
         CreatureMoveRegistry.registerMove("bide", new BideBuilder());
         CreatureMoveRegistry.registerMove("weakness_exploiter", new WeaknessExploiterBuilder(), new WeaknessExploiterBuilder.Rule());
+        CreatureMoveRegistry.registerMove("bullet_seed", new BulletSeedBuilder(), new BulletSeedBuilder.Rule());
+        CreatureMoveRegistry.registerMove("drill_peck", new DrillPeckMove(), new DrillPeckMove.Rule());
 
         registered = true;
     }

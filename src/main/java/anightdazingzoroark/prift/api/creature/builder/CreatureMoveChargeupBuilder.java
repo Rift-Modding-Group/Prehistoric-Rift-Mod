@@ -34,7 +34,7 @@ public class CreatureMoveChargeupBuilder {
     private Consumer<ICreature> prereleaseEndEffect;
     private Consumer<ICreature> releaseEndEffect;
     private BiConsumer<ICreature, Integer> windupEffect;
-    private BiConsumer<ICreature, EntityLivingBase> releaseDuringUseEffect;
+    private TriConsumer<ICreature, Integer, EntityLivingBase> releaseDuringUseEffect;
     private TriConsumer<ICreature, Integer, Entity> onHitEntityDuringRelease;
 
     public CreatureMoveChargeupBuilder setChargeUpThenRelease() {
@@ -216,14 +216,14 @@ public class CreatureMoveChargeupBuilder {
         return this.windupEffect;
     }
 
-    public CreatureMoveChargeupBuilder setReleaseDuringUseEffect(@NotNull BiConsumer<ICreature, EntityLivingBase> releaseDuringUseEffect) {
+    public CreatureMoveChargeupBuilder setReleaseDuringUseEffect(@NotNull TriConsumer<ICreature, Integer, EntityLivingBase> releaseDuringUseEffect) {
         if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
         this.releaseDuringUseEffect = releaseDuringUseEffect;
         return this;
     }
 
     @Nullable
-    public BiConsumer<ICreature, EntityLivingBase> getReleaseDuringUseEffect() {
+    public TriConsumer<ICreature, Integer, EntityLivingBase> getReleaseDuringUseEffect() {
         return this.releaseDuringUseEffect;
     }
 
