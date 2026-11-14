@@ -74,6 +74,8 @@ public interface ICreature {
 
     void createRay(@NotNull RiftLibRayBuilder rayBuilder, @NotNull String locatorName);
 
+    void createMoveGraphic(@NotNull CreatureMoveGraphic graphic, @Nullable EntityLivingBase target);
+
     boolean canSprintToAttack();
 
     void prepareRush(double speedMultiplier, int maximumTicks);

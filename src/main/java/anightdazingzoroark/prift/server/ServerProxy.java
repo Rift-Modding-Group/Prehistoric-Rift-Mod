@@ -68,6 +68,7 @@ public class ServerProxy {
         RiftMessages.WRAPPER.registerMessage(RiftRidingStartAimMessage.class, RiftLibMessageSide.SERVER);
         RiftMessages.WRAPPER.registerMessage(RiftRidingEndAimMessage.class, RiftLibMessageSide.SERVER);
         RiftMessages.WRAPPER.registerMessage(RiftRidingLeapMessage.class, RiftLibMessageSide.BOTH);
+        RiftMessages.WRAPPER.registerMessage(RiftCreateMoveGraphicMessage.class, RiftLibMessageSide.CLIENT);
 
         //register events
         MinecraftForge.EVENT_BUS.register(new PrimerEventHandler(registryPrimer));

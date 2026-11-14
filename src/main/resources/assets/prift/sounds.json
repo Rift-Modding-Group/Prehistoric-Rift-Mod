@@ -776,6 +776,13 @@
     ],
     "subtitle": "sounds.subtitle.generic_tail_move_strong"
   },
+  "prift.generic_move.drill": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_drill_move"
+    ],
+    "subtitle": "sounds.subtitle.generic_drill_move"
+  },
   "prift.generic_move.head": {
     "category": "neutral",
     "sounds": [

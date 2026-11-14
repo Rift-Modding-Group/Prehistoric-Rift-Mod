@@ -1,0 +1,37 @@
+{
+	"format_version": "1.12.0",
+	"riftlibrary:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.drill",
+				"texture_width": 64,
+				"texture_height": 64,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 2.5,
+				"visible_bounds_offset": [0, 0.75, 0]
+			},
+			"bones": [
+				{
+					"name": "travel",
+					"pivot": [0, 0, 0]
+				},
+				{
+					"name": "aim",
+					"parent": "travel",
+					"pivot": [0, 0, 0]
+				},
+				{
+					"name": "root",
+					"parent": "aim",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{"origin": [-6, -6, -2], "size": [12, 12, 4], "uv": [0, 0]},
+						{"origin": [-5, -5, -6], "size": [10, 10, 4], "uv": [0, 16]},
+						{"origin": [-4, -4, -10], "size": [8, 8, 4], "uv": [28, 16]},
+						{"origin": [-3, -3, -14], "size": [6, 6, 4], "uv": [28, 28]}
+					]
+				}
+			]
+		}
+	]
+}

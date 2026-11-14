@@ -1,6 +1,10 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.api.creature.CreatureMoveRegistry.MoveDefinition;
+import anightdazingzoroark.prift.api.creature.CreatureMoveGraphic;
+import anightdazingzoroark.prift.server.message.RiftCreateMoveGraphicMessage;
+import anightdazingzoroark.prift.server.message.RiftMessages;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
@@ -100,7 +104,6 @@ import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.init.Items;
-import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -2828,6 +2831,29 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Override
     public void createRay(@NotNull RiftLibRayBuilder rayBuilder, @NotNull String locatorName) {
         RiftLibRayHelper.createRay(rayBuilder, locatorName, this);
+    }
+
+    @Override
+    public void createMoveGraphic(@NotNull CreatureMoveGraphic graphic, @Nullable EntityLivingBase target) {
+        if (this.world.isRemote) return;
+
+        Vec3d origin = new Vec3d(this.posX, this.getEntityBoundingBox().maxY, this.posZ);
+        Vec3d destination;
+        if (this.getControllingPassenger() instanceof EntityLivingBase rider) {
+            destination = this.getRiddenAimPosition();
+            if (destination == null) destination = rider.getPositionEyes(1f).add(rider.getLookVec().scale(2D));
+        }
+        else if (target != null && target.isEntityAlive()) {
+            destination = target.getEntityBoundingBox().getCenter();
+        }
+        else destination = this.getPositionEyes(1f).add(this.getLookVec().scale(2D));
+
+        RiftMessages.WRAPPER.sendToAllAround(
+                new RiftCreateMoveGraphicMessage(this.dimension, new CreatureMoveGraphic.Playback(
+                        graphic, origin, destination, this.world.getTotalWorldTime()
+                )),
+                new NetworkRegistry.TargetPoint(this.dimension, this.posX, this.posY, this.posZ, 64D)
+        );
     }
 
     @Override
