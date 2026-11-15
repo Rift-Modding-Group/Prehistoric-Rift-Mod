@@ -609,6 +609,7 @@ public class CreatureMoveStorage {
 
         //now reset
         this.clearCurrentMove();
+        creature.setRecoilDamage(null);
     }
 
     private void addCurrentMoveBuildup(@NotNull RiftCreature creature, @NotNull CreatureMoveChargeupBuilder chargeupBuilder) {

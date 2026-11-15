@@ -19,7 +19,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * api version of RiftCreature
@@ -43,6 +45,10 @@ public interface ICreature {
     EntityLivingBase getAttackTarget();
 
     boolean attackEntityAsMob(Entity entity);
+
+    void setRecoilDamage(@Nullable Function<Double, Double> recoilDamage);
+
+    void knockbackEntity(@NotNull Entity entity, double horizontalStrength, double verticalStrength);
 
     Entity getControllingPassenger();
 
@@ -81,6 +87,8 @@ public interface ICreature {
     void prepareRush(double speedMultiplier, int maximumTicks);
 
     void prepareRush(double speedMultiplier, int maximumTicks, boolean includeKnockback);
+
+    void prepareRush(double speedMultiplier, int maximumTicks, boolean includeKnockback, @Nullable Consumer<ICreature> impactEffect);
 
     boolean canLeapToAttack();
 

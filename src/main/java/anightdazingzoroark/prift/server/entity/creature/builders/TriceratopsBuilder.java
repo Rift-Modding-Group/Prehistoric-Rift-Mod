@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.creature.builder.*;
 
+import java.util.List;
 import java.util.Map;
 
 public class TriceratopsBuilder extends RiftCreatureBuilder {
@@ -46,11 +47,22 @@ public class TriceratopsBuilder extends RiftCreatureBuilder {
                 .addBlockBreakLevel("shovel", 0)
                 //---moves---
                 .setMaximumMoveSlots(4)
-                .setSpawnMoves("headbutt", "stomp", "charge", "belch")
+                .setSpawnMoves("headbutt", "shield_bash", "charge", "belch")
+                .setLevelupMoves(Map.of(
+                        1, List.of("stomp"),
+                        4, List.of("flame_charge", "volt_tackle", "slush_rush"),
+                        6, List.of("tremor", "bide")
+                ))
                 .setMoveAnimations("headbutt", "headbutt")
                 .setMoveAnimations("stomp", "stomp")
                 .setMoveAnimations("charge", "charge")
                 .setMoveAnimations("belch", "belch")
+                .setMoveAnimations("shield_bash", "headbutt")
+                .setMoveAnimations("tremor", "stomp")
+                .setMoveAnimations("bide", "bide")
+                .setMoveAnimations("flame_charge", "charge")
+                .setMoveAnimations("volt_tackle", "charge")
+                .setMoveAnimations("slush_rush", "charge")
                 .setMoveSelector(new CreatureMoveSelectorBuilder()
                         .setCanSprintToAttack(1, 2D, 16D)
                         .setCanLeapToAttack(1, 6D, 12D, false)

@@ -27,12 +27,23 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 
 public class ServerEvents {
-    //make paralysis stop block breaking
     @SubscribeEvent
     public void onBreakSpeed(@NotNull net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed event) {
+        //make paralysis stop block breaking
         if (event.getEntityPlayer().isPotionActive(RiftEffects.PARALYSIS)) {
             event.setNewSpeed(0f);
         }
+
+        //same with being snowed
+        OtherEntityProperties otherEntityProperties = OtherEntityProperties.get(event.getEntityPlayer());
+        if (otherEntityProperties != null && otherEntityProperties.isSnowed()) event.setNewSpeed(0f);
+    }
+
+    @SubscribeEvent
+    public void onLivingAttack(@NotNull LivingAttackEvent event) {
+        if (!(event.getSource().getTrueSource() instanceof EntityLivingBase attacker)) return;
+        OtherEntityProperties properties = OtherEntityProperties.get(attacker);
+        if (properties != null && properties.isSnowed()) event.setCanceled(true);
     }
 
     @SubscribeEvent
@@ -63,10 +74,17 @@ public class ServerEvents {
         }
     }
 
-    //make sure that a creature box cannot be broken
-    //no matter what when it has creatures inside
     @SubscribeEvent
-    public void blockBreakEvent(BlockEvent.BreakEvent event) {
+    public void blockBreakEvent(@NotNull BlockEvent.BreakEvent event) {
+        OtherEntityProperties properties = OtherEntityProperties.get(event.getPlayer());
+        if (event.getPlayer().isPotionActive(RiftEffects.PARALYSIS) || properties != null && properties.isSnowed()) {
+            event.setCanceled(true);
+            return;
+        }
+
+
+        //make sure that a creature box cannot be broken
+        //no matter what when it has creatures inside
         if (event.getState().getBlock() instanceof CreatureBoxBlock && CreatureBoxBlock.isOccupied(event.getWorld(), event.getPos())) {
             event.setCanceled(true);
         }
@@ -103,7 +121,9 @@ public class ServerEvents {
 
         //make sure stink bombing clears targets
         OtherEntityProperties otherEntityProperties = OtherEntityProperties.get(entityLiving);
-        if (otherEntityProperties != null && otherEntityProperties.isStinkBombed()) event.setNewTarget(null);
+        if (otherEntityProperties != null && otherEntityProperties.isStinkBombed()) {
+            event.setNewTarget(null);
+        }
     }
 
     @SubscribeEvent

@@ -37,6 +37,8 @@ public class RiftMoves {
         CreatureMoveRegistry.registerMove("headbutt", new HeadbuttBuilder(), new HeadbuttBuilder.Rule());
         CreatureMoveRegistry.registerMove("charge", new ChargeBuilder(), new ChargeBuilder.Rule());
         CreatureMoveRegistry.registerMove("flame_charge", new FlameChargeBuilder(), new FlameChargeBuilder.Rule());
+        CreatureMoveRegistry.registerMove("volt_tackle", new VoltTackleBuilder(), new VoltTackleBuilder.Rule());
+        CreatureMoveRegistry.registerMove("slush_rush", new SlushRushBuilder(), new SlushRushBuilder.Rule());
         CreatureMoveRegistry.registerMove("belch", new BelchBuilder(), new BelchBuilder.Rule());
         CreatureMoveRegistry.registerMove("magma_storm", new MagmaStormBuilder(), new MagmaStormBuilder.Rule());
         CreatureMoveRegistry.registerMove("seed_bomb", new SeedBombBuilder(), new SeedBombBuilder.Rule());
@@ -46,6 +48,7 @@ public class RiftMoves {
         CreatureMoveRegistry.registerMove("weakness_exploiter", new WeaknessExploiterBuilder(), new WeaknessExploiterBuilder.Rule());
         CreatureMoveRegistry.registerMove("bullet_seed", new BulletSeedBuilder(), new BulletSeedBuilder.Rule());
         CreatureMoveRegistry.registerMove("drill_peck", new DrillPeckMove(), new DrillPeckMove.Rule());
+        CreatureMoveRegistry.registerMove("shield_bash", new ShieldBashBuilder(), new ShieldBashBuilder.Rule());
 
         registered = true;
     }

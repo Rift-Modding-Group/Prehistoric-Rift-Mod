@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server.properties;
 
+import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.server.entity.RiftDamage;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.riftlib.RiftLibMod;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertySystem.AbstractEntityProperties;
 import anightdazingzoroark.riftlib.nbtStorageUser.propertySystem.RiftLibProperty;
@@ -33,6 +35,7 @@ public class OtherEntityProperties extends AbstractEntityProperties<EntityLiving
         this.register(new BooleanPropertyValue("HasStinkBombGoal", false), false);
         this.register(new IntegerPropertyValue("BleedingStrength", 0));
         this.register(new IntegerPropertyValue("BleedingDuration", 0));
+        this.register(new IntegerPropertyValue("SnowedDuration", 0));
     }
 
     @Override
@@ -42,6 +45,17 @@ public class OtherEntityProperties extends AbstractEntityProperties<EntityLiving
             if (this.isBleeding() && this.getEntityHolder().ticksExisted % 20 == 0) {
                 RiftLibMod.PROXY.spawnParticle(
                         "prift:bleed",
+                        this.getEntityHolder().posX,
+                        this.getEntityHolder().posY + this.getEntityHolder().height / 2D,
+                        this.getEntityHolder().posZ,
+                        "variable.emission_radius", Double.toString(this.getEntityHolder().width * 0.75D)
+                );
+            }
+
+            //show snowed particles
+            if (this.isSnowed() && this.getEntityHolder().ticksExisted % 20 == 0) {
+                RiftLibMod.PROXY.spawnParticle(
+                        "prift:snowed",
                         this.getEntityHolder().posX,
                         this.getEntityHolder().posY + this.getEntityHolder().height / 2D,
                         this.getEntityHolder().posZ,
@@ -62,6 +76,10 @@ public class OtherEntityProperties extends AbstractEntityProperties<EntityLiving
                 //tick down
                 this.set("BleedingDuration", bleedingDuration - 1);
             }
+
+            //tick snowed
+            int snowedDuration = this.get("SnowedDuration");
+            if (this.isSnowed()) this.set("SnowedDuration", snowedDuration - 1);
         }
     }
 
@@ -95,5 +113,20 @@ public class OtherEntityProperties extends AbstractEntityProperties<EntityLiving
         int bleedStrength = this.get("BleedingStrength");
         this.set("BleedingStrength", Math.max(strength, bleedStrength));
         this.set("BleedingDuration", duration);
+    }
+
+    //-----snowed-----
+    public boolean isSnowed() {
+        return (int) this.get("SnowedDuration") > 0;
+    }
+
+    public void setSnowed(int duration) {
+        //fire element creatures r immune
+        if (this.getEntityHolder() instanceof RiftCreature creature && creature.hasElement(Element.FIRE)) return;
+
+        this.set("SnowedDuration", duration);
+        if (duration > 0 && !this.getEntityHolder().world.isRemote) {
+            if (this.getEntityHolder() instanceof RiftCreature creature) creature.interruptMoveUse();
+        }
     }
 }

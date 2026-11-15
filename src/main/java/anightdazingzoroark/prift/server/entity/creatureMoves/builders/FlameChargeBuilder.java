@@ -14,13 +14,17 @@ import anightdazingzoroark.riftlib.particle.ParticleCameraMode;
 import anightdazingzoroark.riftlib.particle.ParticleMaterial;
 import anightdazingzoroark.riftlib.particle.RiftLibParticleHelper;
 import anightdazingzoroark.riftlib.particle.emitterComponent.emitterLifetime.EmitterLifetimeLoopingComponent;
+import anightdazingzoroark.riftlib.particle.emitterComponent.emitterLifetime.EmitterLifetimeOnceComponent;
+import anightdazingzoroark.riftlib.particle.emitterComponent.emitterRate.EmitterInstantComponent;
 import anightdazingzoroark.riftlib.particle.emitterComponent.emitterRate.EmitterSteadyComponent;
 import anightdazingzoroark.riftlib.particle.emitterComponent.emitterShape.EmitterShapeBoxComponent;
 import anightdazingzoroark.riftlib.particle.emitterComponent.emitterShape.EmitterShapeDiscComponent;
+import anightdazingzoroark.riftlib.particle.emitterComponent.emitterShape.EmitterShapeSphereComponent;
 import anightdazingzoroark.riftlib.particle.particleComponent.particleAppearance.AppearanceBillboardComponent;
 import anightdazingzoroark.riftlib.particle.particleComponent.particleInitialState.ParticleInitialSpeedComponent;
 import anightdazingzoroark.riftlib.particle.particleComponent.particleLifetime.ParticleLifetimeExpressionComponent;
 import anightdazingzoroark.riftlib.particle.particleComponent.particleMotion.ParticleMotionDynamicComponent;
+import anightdazingzoroark.riftlib.sounds.RiftLibSoundHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
@@ -33,10 +37,9 @@ public class FlameChargeBuilder extends CreatureMoveBuilder {
                 .setMoveType(CreatureMoveBuilder.MoveType.PHYSICAL)
                 .setRequireFindTargetToUse()
                 .setStaminaCost(0.05f)
-                .setBasePower(50)
+                .setBasePower(70)
                 .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
                 .setRiddenPitchBounds(0f, 0f)
-                .setOnMoveBeginEffect((creature, target) -> creature.prepareRush(4D, 10))
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                         .setChargeUpThenRelease()
                         .setCanRotateWhileCharging()
@@ -46,6 +49,11 @@ public class FlameChargeBuilder extends CreatureMoveBuilder {
                             return MathUtil.slopeResult(chargeUp, false, 0, 100, 1D, 2D);
                         })
                         .setWindupEffect((creature, charge) -> {
+                            RiftLibSoundHelper.playLoopingSound(
+                                    creature.getAnimationData().getHolder(),
+                                    RiftSounds.getSound("flamethrower.breathe_loop"),
+                                    SoundCategory.NEUTRAL
+                            );
                             RiftLibParticleHelper.createParticle(
                                     new ParticleBuilder().setIdentifier("prift:flame_charge_prepare")
                                             .setTexture(new ResourceLocation("textures/particle/particles.png"))
@@ -68,19 +76,47 @@ public class FlameChargeBuilder extends CreatureMoveBuilder {
                             );
                         })
                         .setWindupEndEffect((creature, charge) -> {
+                            RiftLibSoundHelper.stopLoopingSound(
+                                    creature.getAnimationData().getHolder(),
+                                    RiftSounds.getSound("flamethrower.breathe_loop"),
+                                    SoundCategory.NEUTRAL
+                            );
                             RiftLibParticleHelper.killParticle(
                                     (Entity & IAnimatable<?>) creature.getAnimationData().getHolder(),
                                     "prift:flame_charge_prepare", "centerPoint"
                             );
 
                             //rush effects
+                            creature.setRecoilDamage(damage -> damage);
                             int maximumRushTicks = (int) Math.ceil(MathUtil.slopeResult(charge, true, 0, 100, 0, 100));
-                            creature.prepareRush(4D, maximumRushTicks, false);
+                            creature.prepareRush(4D, maximumRushTicks, false, impactCreature -> {
+                                Vec3d impactPosition = impactCreature.getLocatorWorldPos("bodyCenter");
+                                RiftLibParticleHelper.createParticle(
+                                        impactCreature.getEntityWorld(),
+                                        new ParticleBuilder().setIdentifier("prift:flame_charge_impact")
+                                                .setTexture(new ResourceLocation("textures/particle/particles.png"))
+                                                .setMaterial(ParticleMaterial.ALPHA)
+                                                .addEmitterComponent(new EmitterInstantComponent.Builder().setParticleCount(64D))
+                                                .addEmitterComponent(new EmitterLifetimeOnceComponent.Builder().setActiveTime(0.1D))
+                                                .addEmitterComponent(new EmitterShapeSphereComponent.Builder()
+                                                        .setRadius(impactCreature.getSize()[0] * 0.5D)
+                                                        .setSurfaceOnly(true).setDirection("outwards"))
+                                                .addParticleComponent(new ParticleLifetimeExpressionComponent.Builder()
+                                                        .setMaxLifetime(RawMolangValue.compileExpression("math.random(0.3, 0.6)")))
+                                                .addParticleComponent(new ParticleInitialSpeedComponent.Builder().setInitialSpeed(6D))
+                                                .addParticleComponent(new ParticleMotionDynamicComponent.Builder())
+                                                .addParticleComponent(new AppearanceBillboardComponent.Builder()
+                                                        .setSize(0.2D, 0.2D).setCameraMode(ParticleCameraMode.ROTATE_XYZ)
+                                                        .setTextureWidth(128).setTextureHeight(128)
+                                                        .setUv(0D, 24D).setUvSize(8D, 8D)),
+                                        impactPosition.x, impactPosition.y, impactPosition.z
+                                );
+                            });
 
                             Vec3d creaturePos = creature.getPositionVector();
                             creature.getEntityWorld().playSound(
                                     null, creaturePos.x, creaturePos.y, creaturePos.z,
-                                    RiftSounds.getSound("generic_move.charge_release"),
+                                    RiftSounds.getSound("flamethrower.breathe_start"),
                                     SoundCategory.NEUTRAL, 1f, 1f
                             );
 
@@ -107,10 +143,17 @@ public class FlameChargeBuilder extends CreatureMoveBuilder {
                             );
                         })
                         .setOnHitEntityDuringRelease((creature, chargeUp, target) -> {
-                            int burnChance = creature.getEntityWorld().rand.nextInt(3);
-                            if (burnChance == 0) target.setFire(5);
+                            target.setFire(15);
                         })
                 )
+                .setOnMoveHitEffect(creature -> {
+                    Vec3d creaturePos = creature.getPositionVector();
+                    creature.getEntityWorld().playSound(
+                            null, creaturePos.x, creaturePos.y, creaturePos.z,
+                            RiftSounds.getSound("generic_move.fire_release"),
+                            SoundCategory.NEUTRAL, 1f, 1f
+                    );
+                })
                 .setOnMoveEndEffect(creature -> {
                     RiftLibParticleHelper.killParticle(
                             (Entity & IAnimatable<?>) creature.getAnimationData().getHolder(),

@@ -135,12 +135,6 @@
 					}
 				}
 			},
-			"sound_effects": {
-				"0.375": {
-					"effect": "prift.generic_move.head",
-					"locator": "centerPoint"
-				}
-			},
 			"timeline": {
 				"0.375": "function.send_message('moveHitEffect'); function.send_message('riddenTargetedMeleeHitEffect'); function.send_message('moveBlockBreakEffect');"
 			}
@@ -293,6 +287,161 @@
 			},
 			"timeline": {
 				"0.375": "function.send_message('moveHitEffect');"
+			}
+		},
+		"animation.triceratops.bide_prewindup": {
+			"animation_length": 0.25,
+			"bones": {
+				"bodyFront": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [10, 0, 0]
+					}
+				},
+				"neck": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [20, 0, 0]
+					}
+				},
+				"leftFrontLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [-9.7675, 2.154, 12.316]
+					}
+				},
+				"rightFrontLeg": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [-9.7675, 2.154, -12.316]
+					}
+				},
+				"tail0": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"0.25": [10, 0, 0]
+					}
+				}
+			},
+			"timeline": {
+				"0.25": "function.send_message('moveChargeupPrewindupFinished');"
+			}
+		},
+		"animation.triceratops.bide_windup": {
+			"loop": true,
+			"bones": {
+				"bodyFront": {
+					"rotation": [10, 0, 0]
+				},
+				"neck": {
+					"rotation": [20, 0, 0]
+				},
+				"leftFrontLeg": {
+					"rotation": [-9.7675, 2.154, 12.316]
+				},
+				"rightFrontLeg": {
+					"rotation": [-9.7675, 2.154, -12.316]
+				},
+				"tail0": {
+					"rotation": [10, 0, 0]
+				}
+			}
+		},
+		"animation.triceratops.bide_prereleasing": {
+			"loop": true,
+			"bones": {
+				"bodyFront": {
+					"rotation": [10, 0, 0]
+				},
+				"neck": {
+					"rotation": [20, 0, 0]
+				},
+				"leftFrontLeg": {
+					"rotation": [-9.7675, 2.154, 12.316]
+				},
+				"rightFrontLeg": {
+					"rotation": [-9.7675, 2.154, -12.316]
+				},
+				"tail0": {
+					"rotation": [10, 0, 0]
+				}
+			},
+			"timeline": {
+				"0.0": "function.send_message('moveChargeupPrereleasingFinished');"
+			}
+		},
+		"animation.triceratops.bide_releasing": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 0.25,
+			"bones": {
+				"bodyFront": {
+					"rotation": {
+						"0.0": [10, 0, 0],
+						"0.25": [-10, 0, 0]
+					}
+				},
+				"neck": {
+					"rotation": {
+						"0.0": [20, 0, 0],
+						"0.25": [-12.5, 0, 0]
+					}
+				},
+				"leftFrontLeg": {
+					"rotation": {
+						"0.0": [-9.7675, 2.154, 12.316],
+						"0.25": [25.2325, 2.154, 12.316]
+					}
+				},
+				"rightFrontLeg": {
+					"rotation": {
+						"0.0": [-9.7675, 2.154, -12.316],
+						"0.25": [27.7325, 2.154, -12.316]
+					}
+				},
+				"tail0": {
+					"rotation": {
+						"0.0": [10, 0, 0],
+						"0.25": [-7.5, 0, 0]
+					}
+				}
+			},
+			"timeline": {
+				"0.25": "function.send_message('moveHitEffect'); function.send_message('moveChargeupReleasingFinished');"
+			}
+		},
+		"animation.triceratops.bide_finishing": {
+			"animation_length": 0.25,
+			"bones": {
+				"bodyFront": {
+					"rotation": {
+						"0.0": [-10, 0, 0],
+						"0.25": [0, 0, 0]
+					}
+				},
+				"neck": {
+					"rotation": {
+						"0.0": [-12.5, 0, 0],
+						"0.25": [0, 0, 0]
+					}
+				},
+				"leftFrontLeg": {
+					"rotation": {
+						"0.0": [25.2325, 2.154, 12.316],
+						"0.25": [0, 0, 0]
+					}
+				},
+				"rightFrontLeg": {
+					"rotation": {
+						"0.0": [27.7325, 2.154, -12.316],
+						"0.25": [0, 0, 0]
+					}
+				},
+				"tail0": {
+					"rotation": {
+						"0.0": [-7.5, 0, 0],
+						"0.25": [0, 0, 0]
+					}
+				}
 			}
 		}
 	}

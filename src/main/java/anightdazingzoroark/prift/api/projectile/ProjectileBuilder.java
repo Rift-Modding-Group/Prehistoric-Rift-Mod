@@ -33,7 +33,7 @@ public class ProjectileBuilder {
     private TriConsumer<IProjectile, EntityLivingBase, Vec3d> onImpactFromDispenserEffect;
     @Nullable
     private Consumer<IProjectile> updateEffect;
-    private float scale;
+    private float scale = 1f;
     private boolean stayAfterImpact;
     private boolean rotateAlongPitch;
     @NotNull

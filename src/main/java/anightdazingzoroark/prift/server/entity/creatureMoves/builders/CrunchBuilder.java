@@ -17,7 +17,7 @@ public class CrunchBuilder extends StandardMeleeBuilder {
                 .setOnMoveHitEffect(creature -> {
                     creature.createOffenseHitboxesByTag("jaw", 4);
                 })
-                .setOnHitTargetEffect((creature, target) -> {
+                .setOnHitTargetEffect((creature, target, damage) -> {
                     if (!(target instanceof EntityLivingBase entityLivingBase)) return;
                     entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.WEAKNESS, 300, 2));
                     entityLivingBase.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 300, 2));

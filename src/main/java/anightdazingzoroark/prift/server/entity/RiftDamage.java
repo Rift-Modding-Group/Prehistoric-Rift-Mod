@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
  * */
 public class RiftDamage {
     public static DamageSource RIFT_BLEED = new DamageSource("prift_bleed").setDamageBypassesArmor();
+    public static DamageSource RIFT_RECOIL = new DamageSource("prift_recoil").setDamageBypassesArmor().setDamageIsAbsolute();
 
     public static RiftElementDamageSource getElementDamageSource(
             @NotNull String damageType, @NotNull Entity immediateSource,

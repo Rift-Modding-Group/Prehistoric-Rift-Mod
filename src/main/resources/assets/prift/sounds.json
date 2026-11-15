@@ -869,6 +869,17 @@
     ],
     "subtitle": "sounds.subtitle.generic_gnash_move_gnashing"
   },
+  "prift.generic_move.shield_bash": {
+    "category": "neutral",
+    "sounds": [
+      "item/shield/block1",
+      "item/shield/block2",
+      "item/shield/block3",
+      "item/shield/block4",
+      "item/shield/block5"
+    ],
+    "subtitle": "sounds.subtitle.generic_shield_bash_move"
+  },
   "prift.generic_move.chargeup_weak": {
     "category": "neutral",
     "sounds": [
@@ -914,6 +925,34 @@
     ],
     "subtitle": "sounds.subtitle.generic_move_fire"
   },
+  "prift.generic_move.fire_release": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_fire_release_move"
+    ],
+    "subtitle": "sounds.subtitle.generic_fire_release_move"
+  },
+  "prift.generic_move.electric_move_loop": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_electric_loop"
+    ],
+    "subtitle": "sounds.subtitle.electric_move_loop"
+  },
+  "prift.generic_move.electric_release": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_electric_release_move"
+    ],
+    "subtitle": "sounds.subtitle.electric_release"
+  },
+  "prift.generic_move.electric_dissipate": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_electric_dissipate"
+    ],
+    "subtitle": "sounds.subtitle.electric_dissipate"
+  },
   "prift.generic_move.charge_release": {
     "category": "neutral",
     "sounds": [
@@ -941,6 +980,27 @@
       "prift:entities/generic_move/generic_flamethrower_breathe"
     ],
     "subtitle": "sounds.subtitle.generic_flamethrower_breathe"
+  },
+  "prift.slush_rush.charging": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/slush_rush_move_charging"
+    ],
+    "subtitle": "sounds.subtitle.slush_rush_move_charging"
+  },
+  "prift.slush_rush.skiing": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/slush_rush_move_skiing"
+    ],
+    "subtitle": "sounds.subtitle.slush_rush_move_skiing"
+  },
+  "prift.slush_rush.hit": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/slush_rush_move_hit"
+    ],
+    "subtitle": "sounds.subtitle.slush_rush_move_hit"
   },
   "prift.sonic_blast.use_loop": {
     "category": "neutral",

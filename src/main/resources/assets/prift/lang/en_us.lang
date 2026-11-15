@@ -1,3 +1,5 @@
+death.attack.prift_recoil=%1$s was defeated by recoil
+
 entity.unknown.spawn_description=???
 entity.magma_storm.name=Magma Storm
 entity.placeholder.name=Plush Doll
@@ -303,7 +305,11 @@ move.creature.tremor.description=Shakes the ground with a powerful force.
 move.creature.willowisp=Will-O-Wisp
 move.creature.willowisp.description=Launches orbs of fire that instantly burn the target.
 move.creature.flame_charge=Flame Charge
-move.creature.flame_charge.description=Builds up charge, then rushes straight ahead while coated in fire. Stops on impact, knocking back and possibly burning targets and breaking suitable blocks.
+move.creature.flame_charge.description=Builds up charge, then rushes straight ahead while coated in fire. Stops on impact, burning targets and breaking suitable blocks. Applies recoil.
+move.creature.volt_tackle=Volt Tackle
+move.creature.volt_tackle.description=Builds up charge, then rushes straight ahead while coated in electricity. Stops on impact, paralyzing targets and breaking suitable blocks. Applies recoil.
+move.creature.slush_rush=Slush Rush
+move.creature.slush_rush.description=Builds up charge, then rushes straight ahead while coated in ice. Stops on impact, snowing targets and breaking suitable blocks. Applies recoil.
 move.creature.crunch=Crunch
 move.creature.crunch.description=Performs a powerful bite that cracks bones, temporarily slowing down and weakening the target.
 move.creature.snarl=Snarl
@@ -324,6 +330,8 @@ move.creature.bullet_seed=Bullet Seed
 move.creature.bullet_seed.description=Spits out a flurry of seeds at the target.
 move.creature.drill_peck=Drill Peck
 move.creature.drill_peck.description=Hits the target with a beak with the continuous strength of a drill.
+move.creature.shield_bash=Shield Bash
+move.creature.shield_bash.description=Knocks back entities.
 
 priftcommands.bleed.usage=/priftbleed <player|entity> <seconds> [strength]
 priftcommands.bleed.successful=Applied bleed to %s

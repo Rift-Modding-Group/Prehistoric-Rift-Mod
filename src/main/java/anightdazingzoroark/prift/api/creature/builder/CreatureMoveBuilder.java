@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.api.creature.builder;
 
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.ICreature;
+import anightdazingzoroark.prift.api.util.TriConsumer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -39,7 +40,7 @@ public class CreatureMoveBuilder {
     @Nullable
     private BiConsumer<ICreature, Entity> whileMoveUseEffect;
     @Nullable
-    private BiConsumer<ICreature, Entity> onTargetHitEffect;
+    private TriConsumer<ICreature, Entity, Double> onTargetHitEffect;
     @Nullable
     private BiConsumer<ICreature, BlockPos> onBlockHitEffect;
     @Nullable
@@ -319,7 +320,7 @@ public class CreatureMoveBuilder {
     /**
      * Set any additional effects that will happen when attacking an entity
      * */
-    public CreatureMoveBuilder setOnHitTargetEffect(@NotNull BiConsumer<ICreature, Entity> onTargetHitEffect) {
+    public CreatureMoveBuilder setOnHitTargetEffect(@NotNull TriConsumer<ICreature, Entity, Double> onTargetHitEffect) {
         this.checkIfLocked();
 
         this.onTargetHitEffect = onTargetHitEffect;
@@ -327,7 +328,7 @@ public class CreatureMoveBuilder {
     }
 
     @Nullable
-    public BiConsumer<ICreature, Entity> getOnTargetHitEffect() {
+    public TriConsumer<ICreature, Entity, Double> getOnTargetHitEffect() {
         return this.onTargetHitEffect;
     }
 

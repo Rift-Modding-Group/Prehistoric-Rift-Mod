@@ -1,3 +1,5 @@
+death.attack.prift_recoil=%1$s fue derrotado por el daño de retroceso
+
 entity.unknown.spawn_description=???
 entity.magma_storm.name=Tormenta de magma
 entity.placeholder.name=Muñeco de peluche
@@ -304,7 +306,11 @@ move.creature.tremor.description=Sacude a la tierra con una fuerza poderosa.
 move.creature.willowisp=Will-O-Wisp
 move.creature.willowisp.description=Escupe orbes de fuego que queman al objetivo al instante.
 move.creature.flame_charge=Embestida ígnea
-move.creature.flame_charge.description=Se carga para hacer una embestida mientras envuelto en fuego. Se detiene al impactar, empujando y posiblemente quemando a los objetivos y rompiendo bloques adecuados.
+move.creature.flame_charge.description=Se carga para hacer una embestida mientras envuelto en fuego. Se detiene al impactar, quemando a los objetivos y rompiendo bloques adecuados. Tiene daño retroceso.
+move.creature.volt_tackle=Tacleada electrica
+move.creature.volt_tackle.description=Se carga para hacer una embestida mientras envuelto en electricidad. Se detiene al impactar, paralizando a los objetivos y rompiendo bloques adecuados. Tiene daño retroceso.
+move.creature.slush_rush=Esquiada congelada
+move.creature.slush_rush.description=Se carga para hacer una embestida mientras envuelto en hielo. Se detiene al impactar, nieveando a los objetivos y rompiendo bloques adecuados. Tiene daño retroceso.
 move.creature.crunch=Triturada
 move.creature.crunch.description=Muerde a un objetivo fuertemente que se rompen sus huesos, debilitándolo y ralentizándolo por un rato.
 move.creature.snarl=Gruñido
@@ -323,6 +329,8 @@ move.creature.bullet_seed=Bala de semillas
 move.creature.bullet_seed.description=Escupe una racha de semillas hacia un objetivo.
 move.creature.drill_peck=Pico Taladro
 move.creature.drill_peck.description=Picotea al objetivo con la fuerza continuosa de una taladradora.
+move.creature.shield_bash=Empujada de escudo
+move.creature.shield_bash.description=Empuja a objetivos.
 
 priftcommands.bleed.usage=/priftbleed <jugador|entidad> <segundos> [fuerza]
 priftcommands.bleed.successful=Se aplicó sangrado a %s

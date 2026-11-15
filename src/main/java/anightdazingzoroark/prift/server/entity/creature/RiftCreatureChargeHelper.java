@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
+import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -143,7 +144,11 @@ public class RiftCreatureChargeHelper {
         ) {
             if (firstContact <= 1D) {
                 this.creature.move(MoverType.SELF, movement.x * firstContact, 0D, movement.z * firstContact);
+                if (this.creature.getRushImpactEffect() != null) {
+                    this.creature.getRushImpactEffect().accept(this.creature);
+                }
                 Set<Integer> hitVictims = new HashSet<>();
+
                 //attack hit entities
                 for (Map.Entry<Entity, Double> hit : entities.entrySet()) {
                     if (hit.getValue() > firstContact + 1E-6D) continue;
@@ -151,25 +156,26 @@ public class RiftCreatureChargeHelper {
                     Entity victim = entity instanceof MultiPartEntityPart part ? (Entity) part.parent : entity;
                     if (this.creature.isRelatedToEntity(entity) || !hitVictims.add(victim.getEntityId())) continue;
                     if (this.creature.attackEntityWithMove(entity) && rushState.includeKnockback()) {
-                        victim.addVelocity(-Math.sin(radians) * 2D, 0.5D, Math.cos(radians) * 2D);
-                        victim.velocityChanged = true;
+                        this.creature.knockbackEntity(victim, 2D, 0.5D);
                     }
                 }
-                //break hit blocks
-                if (ForgeEventFactory.getMobGriefingEvent(this.creature.world, this.creature)) {
-                    for (Map.Entry<BlockPos, Double> hit : blocks.entrySet()) {
-                        BlockPos position = hit.getKey();
-                        if (hit.getValue() > firstContact + 1E-6D || !this.creature.canBreakBlock(position)
-                                || this.creature.getCreaturePathNavigate().isBlockBreakTemporarilyDenied(position)
-                        ) {
-                            continue;
-                        }
-                        IBlockState state = this.creature.world.getBlockState(position);
-                        if (ForgeEventFactory.onEntityDestroyBlock(this.creature, position, state)) {
-                            this.creature.world.destroyBlock(position, true);
-                        }
-                        else this.creature.getCreaturePathNavigate().markBlockBreakDenied(position);
+
+                //block impact effects apply even when block breaking is disallowed
+                boolean canGrief = ForgeEventFactory.getMobGriefingEvent(this.creature.world, this.creature);
+                for (Map.Entry<BlockPos, Double> hit : blocks.entrySet()) {
+                    if (hit.getValue() > firstContact + 1E-6D) continue;
+                    BlockPos position = hit.getKey();
+                    this.creature.applyRecoilDamage(CreatureMoveHelper.calculateDamage(this.creature, null));
+
+                    if (!canGrief || !this.creature.canBreakBlock(position)
+                            || this.creature.getCreaturePathNavigate().isBlockBreakTemporarilyDenied(position)) continue;
+                    IBlockState state = this.creature.world.getBlockState(position);
+                    if (ForgeEventFactory.onEntityDestroyBlock(this.creature, position, state)) {
+                        this.creature.world.destroyBlock(position, true);
                     }
+                    else this.creature.getCreaturePathNavigate().markBlockBreakDenied(position);
+                }
+                if (canGrief) {
                     this.creature.getCreaturePathNavigate().invalidateBlockBreakPathCache();
                 }
             }
