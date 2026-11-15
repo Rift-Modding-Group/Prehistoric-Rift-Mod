@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server;
 
 import anightdazingzoroark.prift.server.config.RiftGeneralConfig;
 import anightdazingzoroark.prift.server.effect.RiftEffects;
+import anightdazingzoroark.prift.server.effect.RiftParalysisEffect;
 import anightdazingzoroark.prift.server.entity.ai.RiftAvoidStinkBomb;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.properties.OtherEntityProperties;
@@ -29,12 +30,9 @@ import org.jetbrains.annotations.NotNull;
 public class ServerEvents {
     @SubscribeEvent
     public void onBreakSpeed(@NotNull net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed event) {
-        //make paralysis stop block breaking
-        if (event.getEntityPlayer().isPotionActive(RiftEffects.PARALYSIS)) {
-            event.setNewSpeed(0f);
-        }
+        //paralysis slows breaking; snowed prevents it
+        event.setNewSpeed(event.getNewSpeed() * (float) RiftParalysisEffect.getSpeedMultiplier(event.getEntityPlayer()));
 
-        //same with being snowed
         OtherEntityProperties otherEntityProperties = OtherEntityProperties.get(event.getEntityPlayer());
         if (otherEntityProperties != null && otherEntityProperties.isSnowed()) event.setNewSpeed(0f);
     }
@@ -77,7 +75,7 @@ public class ServerEvents {
     @SubscribeEvent
     public void blockBreakEvent(@NotNull BlockEvent.BreakEvent event) {
         OtherEntityProperties properties = OtherEntityProperties.get(event.getPlayer());
-        if (event.getPlayer().isPotionActive(RiftEffects.PARALYSIS) || properties != null && properties.isSnowed()) {
+        if (properties != null && properties.isSnowed()) {
             event.setCanceled(true);
             return;
         }

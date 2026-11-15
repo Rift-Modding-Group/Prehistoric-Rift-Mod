@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
+import anightdazingzoroark.prift.server.effect.RiftParalysisEffect;
 import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -32,7 +33,7 @@ public class RiftCreatureChargeHelper {
     private final RiftCreature creature;
     private boolean active;
     private float heading;
-    private int ticks;
+    private double ticks;
     private int maximumTicks;
     @Nullable
     private RushState preparedState;
@@ -91,7 +92,8 @@ public class RiftCreatureChargeHelper {
         this.creature.rotationYawHead = this.creature.prevRotationYawHead = this.heading;
 
         if (phase == UpdatePhase.TICK) {
-            if (!this.creature.world.isRemote && ((!justStarted && ++this.ticks >= this.maximumTicks)
+            if (!justStarted) this.ticks += RiftParalysisEffect.getSpeedMultiplier(this.creature);
+            if (!this.creature.world.isRemote && (this.ticks >= this.maximumTicks
                     || this.creature.collidedHorizontally)) {
                 this.creature.getCreatureMoves().finishCurrentMoveUse(this.creature);
                 this.active = false;

@@ -5,6 +5,8 @@ import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.api.util.MathUtil;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
+import anightdazingzoroark.prift.server.effect.RiftParalysisEffect;
+import anightdazingzoroark.riftlib.core.controller.AnimationController;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +15,16 @@ import org.jetbrains.annotations.NotNull;
 public class CreatureAnimationData extends AnimationDataEntityLiving {
     public CreatureAnimationData(@NotNull RiftCreature creature) {
         super(creature);
+    }
+
+    @Override
+    public void updateOnDataTick() {
+        super.updateOnDataTick();
+        if (this.getWorld() == null || this.getWorld().isRemote) return;
+        double speed = RiftParalysisEffect.getSpeedMultiplier(this.getHolder());
+        for (AnimationController<?, ?> controller : this.getAnimationControllers().values()) {
+            if (controller.getName().startsWith("moveUse")) controller.setAnimationSpeed(speed);
+        }
     }
 
     /**

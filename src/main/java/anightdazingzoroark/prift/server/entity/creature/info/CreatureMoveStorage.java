@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creature.info;
 import anightdazingzoroark.prift.api.creature.CreatureMoveRegistry.MoveDefinition;
 import anightdazingzoroark.prift.api.creature.CreatureMoveResult;
 import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
+import anightdazingzoroark.prift.server.effect.RiftParalysisEffect;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
@@ -401,6 +402,8 @@ public class CreatureMoveStorage {
      * */
     public void tickCurrentMove(@NotNull RiftCreature creature, @Nullable EntityLivingBase target) {
         if (this.currentMove.isEmpty()) return;
+        if (RiftParalysisEffect.getSpeedMultiplier(creature) < 1D
+                && creature.ticksExisted % RiftParalysisEffect.ACTION_INTERVAL_TICKS != 0) return;
 
         CreatureMoveBuilder currentMoveBuilder = this.getMoveBuilderCurrentMove();
         if (currentMoveBuilder == null) this.clearCurrentMove();

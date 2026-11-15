@@ -117,10 +117,6 @@ public class RiftCreatureSprintHelper {
     }
 
     public void beginSprint(boolean sprinting, boolean riddenSprint) {
-        if (sprinting && this.creature.isParalyzed()) {
-            this.endSprint();
-            return;
-        }
         this.sprintTicks = 0;
         this.hitEntities.clear();
         this.riddenSprint = sprinting && riddenSprint;
@@ -129,7 +125,7 @@ public class RiftCreatureSprintHelper {
     }
 
     public boolean canContinueSprinting() {
-        return this.creature.isSprinting() && !this.creature.isParalyzed()
+        return this.creature.isSprinting()
                 && this.sprintTicks < MAXIMUM_SPRINT_TICKS && !this.creature.collidedHorizontally;
     }
 
@@ -149,7 +145,7 @@ public class RiftCreatureSprintHelper {
     }
 
     public boolean canSprint() {
-        return this.creature.getSprintCooldown() == 0 && !this.creature.isParalyzed();
+        return this.creature.getSprintCooldown() == 0;
     }
 
     public void setCooldown(int cooldown) {
