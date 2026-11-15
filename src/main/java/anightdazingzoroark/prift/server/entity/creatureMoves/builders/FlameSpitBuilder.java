@@ -50,7 +50,7 @@ public class FlameSpitBuilder extends CreatureMoveBuilder {
                                             .setSize(0.2D, 0.2D).setCameraMode(ParticleCameraMode.ROTATE_XYZ)
                                             .setTextureWidth(128).setTextureHeight(128)
                                             .setUv(0D, 24D).setUvSize(8D, 8D)),
-                            "flamethrowerAimLocator",
+                            "straightCreatureRaySource",
                             (Entity & IAnimatable<?>) creature.getAnimationData().getHolder()
                     );
 

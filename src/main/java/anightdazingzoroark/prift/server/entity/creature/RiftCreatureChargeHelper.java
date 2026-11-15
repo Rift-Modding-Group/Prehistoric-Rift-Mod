@@ -26,11 +26,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Moves a released charge along its captured heading and resolves the first front-zone impact.
+ * Moves a released rush along its captured heading and resolves front-zone impacts.
  */
 public class RiftCreatureChargeHelper {
     @NotNull
-    private final RiftCreature creature;
+    private RiftCreature creature;
     private boolean active;
     private float heading;
     private double ticks;
@@ -94,7 +94,7 @@ public class RiftCreatureChargeHelper {
         if (phase == UpdatePhase.TICK) {
             if (!justStarted) this.ticks += RiftParalysisEffect.getSpeedMultiplier(this.creature);
             if (!this.creature.world.isRemote && (this.ticks >= this.maximumTicks
-                    || this.creature.collidedHorizontally)) {
+                    || rushState.stopOnImpact() && this.creature.collidedHorizontally)) {
                 this.creature.getCreatureMoves().finishCurrentMoveUse(this.creature);
                 this.active = false;
                 this.creature.motionX = 0D;
@@ -145,7 +145,9 @@ public class RiftCreatureChargeHelper {
                 this.creature.posX + movement.x, this.creature.posY, this.creature.posZ + movement.z))
         ) {
             if (firstContact <= 1D) {
-                this.creature.move(MoverType.SELF, movement.x * firstContact, 0D, movement.z * firstContact);
+                if (rushState.stopOnImpact()) {
+                    this.creature.move(MoverType.SELF, movement.x * firstContact, 0D, movement.z * firstContact);
+                }
                 if (this.creature.getRushImpactEffect() != null) {
                     this.creature.getRushImpactEffect().accept(this.creature);
                 }
@@ -153,7 +155,7 @@ public class RiftCreatureChargeHelper {
 
                 //attack hit entities
                 for (Map.Entry<Entity, Double> hit : entities.entrySet()) {
-                    if (hit.getValue() > firstContact + 1E-6D) continue;
+                    if (rushState.stopOnImpact() && hit.getValue() > firstContact + 1E-6D) continue;
                     Entity entity = hit.getKey();
                     Entity victim = entity instanceof MultiPartEntityPart part ? (Entity) part.parent : entity;
                     if (this.creature.isRelatedToEntity(entity) || !hitVictims.add(victim.getEntityId())) continue;
@@ -165,13 +167,14 @@ public class RiftCreatureChargeHelper {
                 //block impact effects apply even when block breaking is disallowed
                 boolean canGrief = ForgeEventFactory.getMobGriefingEvent(this.creature.world, this.creature);
                 for (Map.Entry<BlockPos, Double> hit : blocks.entrySet()) {
-                    if (hit.getValue() > firstContact + 1E-6D) continue;
+                    if (rushState.stopOnImpact() && hit.getValue() > firstContact + 1E-6D) continue;
                     BlockPos position = hit.getKey();
                     this.creature.applyRecoilDamage(CreatureMoveHelper.calculateDamage(this.creature, null));
 
                     if (!canGrief || !this.creature.canBreakBlock(position)
                             || this.creature.getCreaturePathNavigate().isBlockBreakTemporarilyDenied(position)) continue;
                     IBlockState state = this.creature.world.getBlockState(position);
+                    if (state.getBlockHardness(this.creature.world, position) < 0f) continue;
                     if (ForgeEventFactory.onEntityDestroyBlock(this.creature, position, state)) {
                         this.creature.world.destroyBlock(position, true);
                     }
@@ -181,12 +184,16 @@ public class RiftCreatureChargeHelper {
                     this.creature.getCreaturePathNavigate().invalidateBlockBreakPathCache();
                 }
             }
-            this.creature.getCreatureMoves().finishCurrentMoveUse(this.creature);
-            this.active = false;
-            this.creature.motionX = 0D;
-            this.creature.motionZ = 0D;
+            if (rushState.stopOnImpact() || !this.creature.isWithinDeploymentRange(
+                    this.creature.posX + movement.x, this.creature.posY, this.creature.posZ + movement.z)) {
+                this.creature.getCreatureMoves().finishCurrentMoveUse(this.creature);
+                this.active = false;
+                this.creature.motionX = 0D;
+                this.creature.motionZ = 0D;
+                return true;
+            }
         }
-        else {
+        if (this.active) {
             this.creature.motionX = movement.x;
             this.creature.motionZ = movement.z;
         }
@@ -210,8 +217,8 @@ public class RiftCreatureChargeHelper {
     }
 
     //transient data between server and client
-    public record RushState(@NotNull String move, double speedMultiplier, int maxTicks, float yaw, boolean includeKnockback) {
+    public record RushState(@NotNull String move, double speedMultiplier, int maxTicks, float yaw, boolean includeKnockback, boolean stopOnImpact) {
         @NotNull
-        public static final RushState EMPTY = new RushState("", 0D, 0, 0f, false);
+        public static final RushState EMPTY = new RushState("", 0D, 0, 0f, false, true);
     }
 }

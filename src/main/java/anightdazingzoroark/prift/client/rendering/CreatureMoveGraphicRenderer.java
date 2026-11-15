@@ -2,6 +2,9 @@ package anightdazingzoroark.prift.client.rendering;
 
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.api.creature.CreatureMoveGraphic;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
+import anightdazingzoroark.prift.api.util.MathUtil;
+import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.riftlib.geo.GeoModel;
 import anightdazingzoroark.riftlib.core.builder.Animation;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
@@ -103,9 +106,34 @@ public class CreatureMoveGraphicRenderer implements IGeoRenderer<CreatureMoveGra
                 visual = new MoveGraphicAnimation(minecraft.world, playback, model);
                 graphics.set(visual);
             }
+            Vec3d origin = playback.origin();
+            if (graphic.locator() != null) {
+                if (!(minecraft.world.getEntityByID(playback.sourceEntityId()) instanceof RiftCreature source)
+                        || !source.isEntityAlive()) {
+                    graphics.remove();
+                    continue;
+                }
+                if (source.getCreatureMoves().getCurrentMoveUseId() != playback.moveUseId()
+                        || !source.getCreatureMoves().currentMoveMatches(source.getCurrentMove(), ChargeupPhase.RELEASING)) {
+                    // The graphic packet can arrive just before the move's synced release state.
+                    if (!visual.attached && age < 5D) continue;
+                    graphics.remove();
+                    continue;
+                }
+                visual.attached = true;
+                origin = source.getLocatorWorldPos(graphic.locator()).add(
+                        MathUtil.slopeResult(partialTicks, true, 0D, 1D, source.lastTickPosX, source.posX) - source.posX,
+                        MathUtil.slopeResult(partialTicks, true, 0D, 1D, source.lastTickPosY, source.posY) - source.posY,
+                        MathUtil.slopeResult(partialTicks, true, 0D, 1D, source.lastTickPosZ, source.posZ) - source.posZ
+                );
+                double yaw = Math.toRadians(source.rotationYaw);
+                visual.getAnimationData().setVariable("variable.graphic_target_x", Math.sin(yaw));
+                visual.getAnimationData().setVariable("variable.graphic_target_y", 0D);
+                visual.getAnimationData().setVariable("variable.graphic_target_z", Math.cos(yaw));
+                visual.getAnimationData().setVariable("variable.graphic_scale", source.scale());
+            }
             visual.sample(animation, tick);
 
-            Vec3d origin = playback.origin();
             boolean lighting = GL11.glIsEnabled(GL11.GL_LIGHTING);
             boolean culling = GL11.glIsEnabled(GL11.GL_CULL_FACE);
             int texture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);

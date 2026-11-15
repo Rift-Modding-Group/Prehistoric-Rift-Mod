@@ -51,7 +51,8 @@ public class TriceratopsBuilder extends RiftCreatureBuilder {
                 .setLevelupMoves(Map.of(
                         1, List.of("stomp"),
                         4, List.of("flame_charge", "volt_tackle", "slush_rush"),
-                        6, List.of("tremor", "bide")
+                        6, List.of("tremor", "bide"),
+                        8, List.of("heavy_slam", "drill_rush", "sludge_wave")
                 ))
                 .setMoveAnimations("headbutt", "headbutt")
                 .setMoveAnimations("stomp", "stomp")
@@ -63,6 +64,9 @@ public class TriceratopsBuilder extends RiftCreatureBuilder {
                 .setMoveAnimations("flame_charge", "charge")
                 .setMoveAnimations("volt_tackle", "charge")
                 .setMoveAnimations("slush_rush", "charge")
+                .setMoveAnimations("heavy_slam", "heavy_slam")
+                .setMoveAnimations("drill_rush", "drill_rush")
+                .setMoveAnimations("sludge_wave", "sludge_wave")
                 .setMoveSelector(new CreatureMoveSelectorBuilder()
                         .setCanSprintToAttack(1, 2D, 16D)
                         .setCanLeapToAttack(1, 6D, 12D, false)

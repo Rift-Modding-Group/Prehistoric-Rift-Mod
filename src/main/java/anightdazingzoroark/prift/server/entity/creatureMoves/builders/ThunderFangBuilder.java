@@ -50,13 +50,13 @@ public class ThunderFangBuilder extends StandardMeleeBuilder {
                                             .setFramesPerSecond(20f).setMaxFrame(7D).setLoop(true))
                                     .addParticleComponent(new AppearanceTintingComponent.Builder()
                                             .setRed(1D).setGreen(0.88235D).setBlue(0D).setAlpha(1D)),
-                            "flamethrowerAimLocator",
+                            "straightCreatureRaySource",
                             (Entity & IAnimatable<?>) creature.getAnimationData().getHolder()
                     );
                 })
                 .setOnMoveEndEffect(creature -> RiftLibParticleHelper.killParticle(
                         (Entity & IAnimatable<?>) creature.getAnimationData().getHolder(),
-                        "prift:thunder_fang", "flamethrowerAimLocator"
+                        "prift:thunder_fang", "straightCreatureRaySource"
                 ))
                 .setUseLookBasedFacing()
                 .setOnMoveHitEffect(creature -> {
@@ -64,7 +64,7 @@ public class ThunderFangBuilder extends StandardMeleeBuilder {
                     creature.createOffenseHitboxesByTag(
                             "jaw", 4, entity -> {
                                 if (paralysisChance == 0 && entity instanceof EntityLivingBase entityLivingBase) {
-                                    entityLivingBase.addPotionEffect(new PotionEffect(RiftEffects.PARALYSIS, 100));
+                                    entityLivingBase.addPotionEffect(new PotionEffect(RiftEffects.PARALYSIS, 300));
                                 }
                             }
                     );

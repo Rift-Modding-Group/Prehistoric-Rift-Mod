@@ -1614,6 +1614,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void prepareRush(double speedMultiplier, int maximumTicks, boolean includeKnockback, @Nullable Consumer<ICreature> impactEffect) {
+        this.prepareRush(speedMultiplier, maximumTicks, includeKnockback, true, impactEffect);
+    }
+
+    @Override
+    public void prepareRush(double speedMultiplier, int maximumTicks, boolean includeKnockback, boolean stopOnImpact, @Nullable Consumer<ICreature> impactEffect) {
         if (this.world.isRemote || this.getCurrentMove().isEmpty() || this.isMoveUseBlocked()) return;
         if (speedMultiplier <= 0D || maximumTicks <= 0) return;
         float heading = this.getAnimationData().getModelYaw();
@@ -1628,7 +1633,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.renderYawOffset = this.prevRenderYawOffset = heading;
         this.rotationYawHead = this.prevRotationYawHead = heading;
         this.rushImpactEffect = impactEffect;
-        this.setRushState(new RushState(this.getCurrentMove(), speedMultiplier, maximumTicks, heading, includeKnockback));
+        this.setRushState(new RushState(this.getCurrentMove(), speedMultiplier, maximumTicks, heading, includeKnockback, stopOnImpact));
     }
 
     @Nullable
@@ -2563,7 +2568,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         }
         boolean riddenMoveActive = this.isBeingRidden() && !this.getCurrentMove().isEmpty();
         if (this.chargeHelper.updateCharge(RiftCreatureChargeHelper.UpdatePhase.TRAVEL)) {
+            float previousStepHeight = this.stepHeight;
+            if (!this.getRushState().stopOnImpact()) this.stepHeight = 1f;
             super.travel(0f, 0f, 0f);
+            this.stepHeight = previousStepHeight;
             return;
         }
 
@@ -2891,7 +2899,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         RiftMessages.WRAPPER.sendToAllAround(
                 new RiftCreateMoveGraphicMessage(this.dimension, new CreatureMoveGraphic.Playback(
-                        graphic, origin, destination, this.world.getTotalWorldTime()
+                        graphic, origin, destination, this.world.getTotalWorldTime(), this.getEntityId(), this.getCreatureMoves().getCurrentMoveUseId()
                 )),
                 new NetworkRegistry.TargetPoint(this.dimension, this.posX, this.posY, this.posZ, 64D)
         );

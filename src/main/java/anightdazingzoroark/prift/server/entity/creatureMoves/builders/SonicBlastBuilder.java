@@ -43,10 +43,10 @@ public class SonicBlastBuilder extends CreatureMoveBuilder {
                 .setRequireFindTargetToUse()
                 .setMoveType(MoveType.SPECIAL)
                 .setElement(Element.SONIC)
-                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureRayLook(creature, target, "flamethrowerAimLocator"))
+                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureRayLook(creature, target, "straightCreatureRaySource"))
                 .setWhileMoveUseEffect((creature, target) -> {
                     if (!creature.getAnimationData().getHolder().isBeingRidden() && (target == null || !target.isEntityAlive())) return;
-                    CreatureLookUtil.captureRayLook(creature, target, "flamethrowerAimLocator");
+                    CreatureLookUtil.captureRayLook(creature, target, "straightCreatureRaySource");
                 })
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                         .setChargeUpWhileUse(true)
@@ -78,7 +78,7 @@ public class SonicBlastBuilder extends CreatureMoveBuilder {
                                                     .setTextureWidth(16).setTextureHeight(16)
                                                     .setUv(0D, 0D).setUvSize(16D, 16D))
                                             .addParticleComponent(new AppearanceTintingComponent.Builder().setColor(0x00F9FF, false)),
-                                    "flamethrowerAimLocator",
+                                    "straightCreatureRaySource",
                                     (Entity & IAnimatable<?>) creature.getAnimationData().getHolder()
                             );
 
@@ -101,7 +101,7 @@ public class SonicBlastBuilder extends CreatureMoveBuilder {
                                                     if (hitEntity instanceof EntityLivingBase) source.attackEntityAsMob(hitEntity);
                                                 }
                                             }),
-                                    "flamethrowerAimLocator"
+                                    "straightCreatureRaySource"
                             );
 
                             RiftLibSoundHelper.playLoopingSound(
@@ -118,13 +118,13 @@ public class SonicBlastBuilder extends CreatureMoveBuilder {
                             );
                             RiftLibParticleHelper.killParticle(
                                     (Entity & IAnimatable<?>) creature.getAnimationData().getHolder(),
-                                    "prift:sonic_blast", "flamethrowerAimLocator"
+                                    "prift:sonic_blast", "straightCreatureRaySource"
                             );
                             RiftLibRayHelper.killRay(creature.getAnimationData().getHolder(), "prift:sonic_blast");
                         })
                 )
                 .setRiddenAimingType(RiddenAimingType.RANGED)
-                .setRiddenAimLocator("flamethrowerAimLocator", 16D)
+                .setRiddenAimLocator("straightCreatureRaySource", 16D)
                 .setRiddenPitchBounds(-75f, 35f)
                 .setRiddenCrosshairType(RiddenCrosshairType.POINT);
     }

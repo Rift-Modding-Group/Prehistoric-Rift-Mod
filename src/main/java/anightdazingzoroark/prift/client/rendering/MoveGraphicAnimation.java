@@ -26,6 +26,7 @@ public class MoveGraphicAnimation implements IAnimatable<MoveGraphicAnimation.Da
     public GeoModel model;
     @NotNull
     public Playback playback;
+    public boolean attached;
     @Nullable
     private Data data;
 

@@ -200,7 +200,7 @@
 						{"origin": [-3.5, 15, -29], "size": [7, 9, 7], "uv": [32, 53]}
 					],
 					"locators": {
-						"flamethrowerAimLocator": [0, 18.5, -30]
+						"straightCreatureRaySource": [0, 18.5, -30]
 					},
 					"bounding_boxes": {
 						"head": {

@@ -38,7 +38,6 @@ public class TremorBuilder extends CreatureMoveBuilder {
                                         }
                                         if (!(rayCreator.world instanceof WorldServer world)) return;
                                         for (BlockPos hitBlockPos : rayHitResult.hitBlockPositions()) {
-                                            // The wave also hits air immediately above the ground.
                                             BlockPos particlePos = hitBlockPos;
                                             if (world.isAirBlock(particlePos)) particlePos = particlePos.down();
                                             IBlockState state = world.getBlockState(particlePos);

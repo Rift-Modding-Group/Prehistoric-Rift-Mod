@@ -463,6 +463,10 @@ public class CreatureMoveStorage {
         if (currentMoveBuilder == null) return true;
         if (!currentMoveBuilder.getRequireFindTargetToUse()) return false;
         if (creature.isBeingRidden()) return false;
+        // A sustained rush keeps drilling along its captured heading after its target dies.
+        if (this.currentMoveChargeupPhase == ChargeupPhase.RELEASING
+                && creature.getRushState().move().equals(this.currentMove)
+                && !creature.getRushState().stopOnImpact()) return false;
 
         EntityLivingBase target = creature.getAttackTarget();
         return target == null || !target.isEntityAlive();

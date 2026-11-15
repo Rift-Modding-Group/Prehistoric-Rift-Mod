@@ -17,7 +17,8 @@
 					"locators": {
 						"stompOrigin": [0, 0, -18],
 						"centerPoint": [0, 0, 0],
-						"bodyCenter": [0, 15, 0]
+						"bodyCenter": [0, 15, 0],
+						"drillRush": [0, 16, -44]
 					},
 					"bounding_boxes": {
 						"frontZone0": {
@@ -105,7 +106,8 @@
 						{"origin": [-8, 17.4, -19.5], "size": [16, 15, 2], "pivot": [-6, 19.4, -19], "rotation": [-35, 0, 0], "uv": [52, 0]}
 					],
 					"locators": {
-						"angerparticles": [0, 16, -23]
+						"angerparticles": [0, 16, -23],
+						"straightCreatureRaySource": [0, 13.35, -28]
 					},
 					"bounding_boxes": {
 						"head": {

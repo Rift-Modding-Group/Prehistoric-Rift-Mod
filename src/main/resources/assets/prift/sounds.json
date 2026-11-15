@@ -1002,6 +1002,13 @@
     ],
     "subtitle": "sounds.subtitle.slush_rush_move_hit"
   },
+  "prift.sludge_wave.use_loop": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/generic_sludge_wave_breathe"
+    ],
+    "subtitle": "sounds.subtitle.sludge_wave_use_loop"
+  },
   "prift.sonic_blast.use_loop": {
     "category": "neutral",
     "sounds": [

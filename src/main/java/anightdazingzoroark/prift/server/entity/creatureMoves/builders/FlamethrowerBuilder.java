@@ -46,15 +46,16 @@ public class FlamethrowerBuilder extends CreatureMoveBuilder {
                 .setRequireFindTargetToUse()
                 .setMoveType(CreatureMoveBuilder.MoveType.SPECIAL)
                 .setElement(Element.FIRE)
-                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureRayLook(creature, target, "flamethrowerAimLocator"))
+                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureRayLook(creature, target, "straightCreatureRaySource"))
                 .setWhileMoveUseEffect((creature, target) -> {
                     if (!creature.getAnimationData().getHolder().isBeingRidden() && (target == null || !target.isEntityAlive())) return;
-                    CreatureLookUtil.captureRayLook(creature, target, "flamethrowerAimLocator");
+                    CreatureLookUtil.captureRayLook(creature, target, "straightCreatureRaySource");
                 })
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                         .setChargeUpWhileUse(true)
                         .setCanLookWhileUsing()
-                        .setMaxChargeUp(300)
+                        .setMaxChargeUp(100)
+                        .setCooldownMultiplier(6D)
                         .setPrereleaseEndEffect(creature -> {
                             //create the particles
                             RiftLibParticleHelper.createParticle(
@@ -77,7 +78,7 @@ public class FlamethrowerBuilder extends CreatureMoveBuilder {
                                                     .setSize(0.2D, 0.2D).setCameraMode(ParticleCameraMode.ROTATE_XYZ)
                                                     .setTextureWidth(128).setTextureHeight(128)
                                                     .setUv(0D, 24D).setUvSize(8D, 8D)),
-                                    "flamethrowerAimLocator",
+                                    "straightCreatureRaySource",
                                     (Entity & IAnimatable<?>) creature.getAnimationData().getHolder()
                             );
 
@@ -116,7 +117,7 @@ public class FlamethrowerBuilder extends CreatureMoveBuilder {
                                                     }
                                                 }
                                             }),
-                                    "flamethrowerAimLocator"
+                                    "straightCreatureRaySource"
                             );
 
                             //play the sound
@@ -141,13 +142,13 @@ public class FlamethrowerBuilder extends CreatureMoveBuilder {
                             );
                             RiftLibParticleHelper.killParticle(
                                     (Entity & IAnimatable<?>) creature.getAnimationData().getHolder(),
-                                    "prift:flamethrower_fire", "flamethrowerAimLocator"
+                                    "prift:flamethrower_fire", "straightCreatureRaySource"
                             );
                             RiftLibRayHelper.killRay(creature.getAnimationData().getHolder(), "prift:flamethrower");
                         })
                 )
                 .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
-                .setRiddenAimLocator("flamethrowerAimLocator", 16D)
+                .setRiddenAimLocator("straightCreatureRaySource", 16D)
                 .setRiddenPitchBounds(-75f, 35f)
                 .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.POINT);
     }

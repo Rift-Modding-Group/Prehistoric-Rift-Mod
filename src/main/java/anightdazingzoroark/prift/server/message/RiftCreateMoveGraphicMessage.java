@@ -27,10 +27,11 @@ public class RiftCreateMoveGraphicMessage extends RiftLibMessage<RiftCreateMoveG
     public void fromBytes(@NotNull ByteBuf buffer) {
         this.dimension = buffer.readInt();
         this.playback = new CreatureMoveGraphic.Playback(
-                new CreatureMoveGraphic(ByteBufUtils.readUTF8String(buffer), ByteBufUtils.readUTF8String(buffer)),
+                new CreatureMoveGraphic(ByteBufUtils.readUTF8String(buffer), ByteBufUtils.readUTF8String(buffer),
+                        buffer.readBoolean() ? ByteBufUtils.readUTF8String(buffer) : null),
                 new Vec3d(buffer.readDouble(), buffer.readDouble(), buffer.readDouble()),
                 new Vec3d(buffer.readDouble(), buffer.readDouble(), buffer.readDouble()),
-                buffer.readLong()
+                buffer.readLong(), buffer.readInt(), buffer.readLong()
         );
     }
 
@@ -39,6 +40,8 @@ public class RiftCreateMoveGraphicMessage extends RiftLibMessage<RiftCreateMoveG
         buffer.writeInt(this.dimension);
         ByteBufUtils.writeUTF8String(buffer, this.playback.graphic().name());
         ByteBufUtils.writeUTF8String(buffer, this.playback.graphic().animation());
+        buffer.writeBoolean(this.playback.graphic().locator() != null);
+        if (this.playback.graphic().locator() != null) ByteBufUtils.writeUTF8String(buffer, this.playback.graphic().locator());
         buffer.writeDouble(this.playback.origin().x);
         buffer.writeDouble(this.playback.origin().y);
         buffer.writeDouble(this.playback.origin().z);
@@ -46,6 +49,8 @@ public class RiftCreateMoveGraphicMessage extends RiftLibMessage<RiftCreateMoveG
         buffer.writeDouble(this.playback.destination().y);
         buffer.writeDouble(this.playback.destination().z);
         buffer.writeLong(this.playback.startTime());
+        buffer.writeInt(this.playback.sourceEntityId());
+        buffer.writeLong(this.playback.moveUseId());
     }
 
     @Override

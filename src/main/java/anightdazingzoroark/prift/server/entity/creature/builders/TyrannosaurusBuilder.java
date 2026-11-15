@@ -55,7 +55,7 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                         3, List.of("toxic_haze", "flame_spit"),
                         5, List.of("willowisp", "flame_charge"),
                         6, List.of("tremor", "crunch"),
-                        9, List.of("sonic_blast", "magma_storm")
+                        9, List.of("sonic_blast", "magma_storm", "heavy_slam")
                 ))
                 .setMoveAnimations("bite", "bite")
                 .setMoveAnimations("fire_fang", "bite")
@@ -73,6 +73,7 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                 .setMoveAnimations("crunch", "bite")
                 .setMoveAnimations("sonic_blast", "flamethrower")
                 .setMoveAnimations("magma_storm", "power_roar")
+                .setMoveAnimations("heavy_slam", "heavy_slam")
                 .setMoveSelector(new CreatureMoveSelectorBuilder()
                         .setCanSprintToAttack(1, 8D, 16D)
                         .setCanLeapToAttack(1, 6D, 12D, false)

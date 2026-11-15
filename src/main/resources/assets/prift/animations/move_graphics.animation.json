@@ -1,6 +1,21 @@
 {
   "format_version": "1.8.0",
   "animations": {
+    "animation.move_graphic.drill_rush": {
+      "loop": true,
+      "animation_length": 1,
+      "bones": {
+        "travel": {
+          "scale": ["variable.graphic_scale", "variable.graphic_scale", "variable.graphic_scale"]
+        },
+        "aim": {
+          "rotation": [0, "math.atan2(variable.graphic_target_x, variable.graphic_target_z) - 180", 0]
+        },
+        "root": {
+          "rotation": [0, 0, "query.anim_time * 1440"]
+        }
+      }
+    },
     "animation.move_graphic.drill_peck": {
       "animation_length": 0.475,
       "bones": {

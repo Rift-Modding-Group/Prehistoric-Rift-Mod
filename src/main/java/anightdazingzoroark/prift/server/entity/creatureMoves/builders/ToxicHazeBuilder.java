@@ -41,10 +41,10 @@ public class ToxicHazeBuilder extends CreatureMoveBuilder {
                 .setRequireFindTargetToUse()
                 .setMoveType(CreatureMoveBuilder.MoveType.STATUS)
                 .setElement(Element.POISON)
-                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureRayLook(creature, target, "flamethrowerAimLocator"))
+                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureRayLook(creature, target, "straightCreatureRaySource"))
                 .setWhileMoveUseEffect((creature, target) -> {
                     if (!creature.getAnimationData().getHolder().isBeingRidden() && (target == null || !target.isEntityAlive())) return;
-                    CreatureLookUtil.captureRayLook(creature, target, "flamethrowerAimLocator");
+                    CreatureLookUtil.captureRayLook(creature, target, "straightCreatureRaySource");
                 })
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                         .setChargeUpWhileUse(true)
@@ -81,7 +81,7 @@ public class ToxicHazeBuilder extends CreatureMoveBuilder {
                                                     .setUv(56D, 0D).setUvSize(8D, 8D).setFramesPerSecond(8)
                                                     .setMaxFrame(8).setStretchToLifetime(true).setLoop(false)
                                             ),
-                                    "flamethrowerAimLocator",
+                                    "straightCreatureRaySource",
                                     (Entity & IAnimatable<?>) creature.getAnimationData().getHolder()
                             );
 
@@ -100,7 +100,7 @@ public class ToxicHazeBuilder extends CreatureMoveBuilder {
                                                     hitLiving.addPotionEffect(new PotionEffect(MobEffects.BLINDNESS, 200, 2));
                                                 }
                                             }),
-                                    "flamethrowerAimLocator"
+                                    "straightCreatureRaySource"
                             );
 
                             RiftLibSoundHelper.playLoopingSound(
@@ -117,13 +117,13 @@ public class ToxicHazeBuilder extends CreatureMoveBuilder {
                             );
                             RiftLibParticleHelper.killParticle(
                                     (Entity & IAnimatable<?>) creature.getAnimationData().getHolder(),
-                                    "prift:toxic_haze_smoke", "flamethrowerAimLocator"
+                                    "prift:toxic_haze_smoke", "straightCreatureRaySource"
                             );
                             RiftLibRayHelper.killRay(creature.getAnimationData().getHolder(), "prift:toxic_haze");
                         })
                 )
                 .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
-                .setRiddenAimLocator("flamethrowerAimLocator", 16D)
+                .setRiddenAimLocator("straightCreatureRaySource", 16D)
                 .setRiddenPitchBounds(-75f, 35f)
                 .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.POINT);
     }

@@ -23,12 +23,13 @@ public class RiftDataSerializers {
             buf.writeVarInt(value.maxTicks());
             buf.writeFloat(value.yaw());
             buf.writeBoolean(value.includeKnockback());
+            buf.writeBoolean(value.stopOnImpact());
         }
 
         @Override
         @NotNull
         public RushState read(@NotNull PacketBuffer buf) {
-            return new RushState(buf.readString(32767), buf.readDouble(), buf.readVarInt(), buf.readFloat(), buf.readBoolean());
+            return new RushState(buf.readString(32767), buf.readDouble(), buf.readVarInt(), buf.readFloat(), buf.readBoolean(), buf.readBoolean());
         }
 
         @Override

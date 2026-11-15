@@ -90,6 +90,8 @@ public interface ICreature {
 
     void prepareRush(double speedMultiplier, int maximumTicks, boolean includeKnockback, @Nullable Consumer<ICreature> impactEffect);
 
+    void prepareRush(double speedMultiplier, int maximumTicks, boolean includeKnockback, boolean stopOnImpact, @Nullable Consumer<ICreature> impactEffect);
+
     boolean canLeapToAttack();
 
     boolean atFrustrationThreshold();
