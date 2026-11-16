@@ -2897,6 +2897,28 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         }
         else destination = this.getPositionEyes(1f).add(this.getLookVec().scale(2D));
 
+        if (graphic.placement() == CreatureMoveGraphic.Placement.TARGET_GROUND) {
+            if (this.riddenAreaAttackActive && this.riddenMeleeAimReach > 0D) {
+                Vec3d eyes = this.getPositionEyes(1f);
+                Vec3d offset = destination.subtract(eyes);
+                if (offset.lengthSquared() > this.riddenMeleeAimReach * this.riddenMeleeAimReach) {
+                    destination = eyes.add(offset.normalize().scale(this.riddenMeleeAimReach));
+                }
+            }
+            RayTraceResult ground = this.world.rayTraceBlocks(
+                    destination.add(0D, 0.01D, 0D), new Vec3d(destination.x, 0D, destination.z),
+                    false, true, false
+            );
+            if (ground == null || ground.typeOfHit != RayTraceResult.Type.BLOCK) return;
+            origin = ground.hitVec.add(0D, 0.01D, 0D);
+            Vec3d facing = new Vec3d(destination.x - this.posX, 0D, destination.z - this.posZ).normalize();
+            if (facing.lengthSquared() <= 1E-8D) {
+                double yaw = Math.toRadians(this.rotationYaw);
+                facing = new Vec3d(-Math.sin(yaw), 0D, Math.cos(yaw));
+            }
+            destination = origin.add(facing);
+        }
+
         RiftMessages.WRAPPER.sendToAllAround(
                 new RiftCreateMoveGraphicMessage(this.dimension, new CreatureMoveGraphic.Playback(
                         graphic, origin, destination, this.world.getTotalWorldTime(), this.getEntityId(), this.getCreatureMoves().getCurrentMoveUseId()

@@ -1,9 +1,9 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves.builders;
 
+import anightdazingzoroark.prift.api.creature.CreatureMoveGraphic;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.AnimatedHitboxDetectionRule;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
@@ -12,7 +12,16 @@ public class CrunchBuilder extends StandardMeleeBuilder {
     public CrunchBuilder() {
         this.setBasePower(70)
                 .setStaminaCost(0.2f)
-                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureHeadAttackLook(creature))
+                .setOnMoveBeginEffect((creature, target) -> {
+                    CreatureLookUtil.captureHeadAttackLook(creature);
+                    creature.createMoveGraphic(
+                            new CreatureMoveGraphic(
+                                    "jaws", "animation.move_graphic.crunch",
+                                    null, CreatureMoveGraphic.Placement.TARGET_GROUND
+                            ),
+                            target
+                    );
+                })
                 .setUseLookBasedFacing()
                 .setOnMoveHitEffect(creature -> {
                     creature.createOffenseHitboxesByTag("jaw", 4);

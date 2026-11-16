@@ -103,8 +103,10 @@ public class CreatureMoveGraphicRenderer implements IGeoRenderer<CreatureMoveGra
             double tick = Math.min(age, animation.animationLength);
             if (animation.loop == LoopType.LOOP) tick = age % animation.animationLength;
             if (visual.template != model) {
-                visual = new MoveGraphicAnimation(minecraft.world, playback, model);
-                graphics.set(visual);
+                MoveGraphicAnimation reloaded = new MoveGraphicAnimation(minecraft.world, playback, model);
+                reloaded.attached = visual.attached;
+                visual = reloaded;
+                graphics.set(reloaded);
             }
             Vec3d origin = playback.origin();
             if (graphic.locator() != null) {
