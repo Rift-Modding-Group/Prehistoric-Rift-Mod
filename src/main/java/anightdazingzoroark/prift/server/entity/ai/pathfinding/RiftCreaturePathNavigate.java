@@ -196,7 +196,40 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
         }
 
         if (!this.creature.bodyTouchingLiquid() && !this.isFollowingWaterPath()) {
-            super.pathFollow();
+            Vec3d position = this.getEntityPosition();
+            if (this.currentPath != null && !this.currentPath.isFinished()) {
+                int levelPathEnd = this.currentPath.getCurrentPathLength();
+                for (int index = this.currentPath.getCurrentPathIndex(); index < levelPathEnd; index++) {
+                    if (this.currentPath.getPathPointFromIndex(index).y != Math.floor(position.y)) {
+                        levelPathEnd = index;
+                        break;
+                    }
+                }
+
+                this.maxDistanceToWaypoint = this.creature.width > 0.75f ? this.creature.width * 0.5f : 0.75f - this.creature.width * 0.5f;
+                // Match the footprint center used by the move helper, including on lower waypoints.
+                Vec3d waypoint = this.currentPath.getPosition(this.creature);
+                if (Math.abs(position.x - waypoint.x) < this.maxDistanceToWaypoint
+                        && Math.abs(position.z - waypoint.z) < this.maxDistanceToWaypoint
+                        && Math.abs(this.creature.posY - waypoint.y) < 1D
+                ) {
+                    this.currentPath.incrementPathIndex();
+                }
+
+                int width = MathHelper.ceil(this.creature.width);
+                int height = MathHelper.ceil(this.creature.height);
+                // Keep vanilla's shortcuts on the current level; slopes still require their own waypoints.
+                for (int index = levelPathEnd - 1; index >= this.currentPath.getCurrentPathIndex(); index--) {
+                    if (this.isDirectPathBetweenPoints(
+                            position, this.currentPath.getVectorFromIndex(this.creature, index),
+                            width, height, width)
+                    ) {
+                        this.currentPath.setCurrentPathIndex(index);
+                        break;
+                    }
+                }
+            }
+            this.checkForStuck(position);
             return;
         }
 

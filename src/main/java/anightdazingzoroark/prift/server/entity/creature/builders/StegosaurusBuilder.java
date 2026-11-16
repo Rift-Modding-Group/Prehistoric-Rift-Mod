@@ -49,7 +49,7 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                 .setMoveCategorySelector((creature, target) -> {
                     if (target == null || !target.isEntityAlive()) return new MoveCategory[0];
                     double distance = creature.horizontalDistanceFromEntity(target);
-                    if (distance >= 8D) return new MoveCategory[]{MoveCategory.RANGED};
+                    if (distance >= 12D) return new MoveCategory[]{MoveCategory.RANGED};
                     return new MoveCategory[]{MoveCategory.MELEE};
                 })
                 .setMaximumMoveSlots(4)
