@@ -192,6 +192,16 @@ public class CreatureLookUtil {
     }
 
     /**
+     * Contact attacks and targeted melee strikes use the body's forward direction without aiming.
+     * */
+    public static boolean isMeleeMove(@Nullable CreatureMoveBuilder move) {
+        return move != null && (move.getMakesContact()
+                || move.getRiddenAimingType() == CreatureMoveBuilder.RiddenAimingType.TARGETED_MELEE
+                || (move.getMoveType() == CreatureMoveBuilder.MoveType.PHYSICAL
+                && move.getRiddenAimingType() != CreatureMoveBuilder.RiddenAimingType.RANGED));
+    }
+
+    /**
      * Discover head-driven attack hitboxes from the move's animation effects and aim across
      * their usable height. Attacks unaffected by head pitch retain the normal camera focus.
      * */
@@ -252,11 +262,11 @@ public class CreatureLookUtil {
      * */
     @Nullable
     public static Vec3d getRiddenAttackPosition(@NotNull ICreature creature) {
-        if (!(creature.getControllingPassenger() instanceof EntityPlayer rider)) return null;
+        if (!(creature.getControllingPassenger() instanceof EntityPlayer)) return null;
         Vec3d aim = creature.getRiddenAimPosition();
         if (aim != null) return aim;
 
-        double yaw = Math.toRadians(rider.rotationYaw);
+        double yaw = Math.toRadians(creature.getAnimationData().getModelYaw());
         double reach = 3D * creature.getAnimationData().getScale();
         return creature.getPositionVector().add(-Math.sin(yaw) * reach, 0D, Math.cos(yaw) * reach);
     }
@@ -264,6 +274,11 @@ public class CreatureLookUtil {
     @NotNull
     public static LookPose getAttackLookPose(@NotNull ICreature creature) {
         if (creature.getControllingPassenger() instanceof EntityPlayer rider) {
+            CreatureMoveBuilder move = getRiddenAimMove(creature, creature.getCurrentMove());
+            if (isMeleeMove(move) && creature.getRiddenAimPosition() == null) {
+                // Zero input preserves the authored downward strike instead of the rider's camera pitch.
+                return new LookPose(0f, 0f);
+            }
             // The camera predicts this pose; its offset target must not turn the neck.
             return new LookPose(Math.clamp(rider.rotationPitch, HEAD_PITCH_MIN, HEAD_PITCH_MAX), 0f);
         }
@@ -310,7 +325,7 @@ public class CreatureLookUtil {
 
 
     /**
-     * Capture the existing look, using the same rider pose as the crosshair prediction.
+     * Capture the default strike without aiming, or the rider pose used by crosshair prediction.
      * */
     public static void captureHeadAttackLook(@NotNull ICreature creature) {
         AnimationDataEntityLiving data = creature.getAnimationData();

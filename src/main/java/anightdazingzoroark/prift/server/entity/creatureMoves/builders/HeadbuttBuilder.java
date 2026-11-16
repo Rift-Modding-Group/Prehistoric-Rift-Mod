@@ -24,7 +24,7 @@ public class HeadbuttBuilder extends CreatureMoveBuilder {
                             SoundCategory.NEUTRAL, 1f, 1f
                     );
 
-                    creature.createOffenseHitboxesByTag("headAttackZone", 4);
+                    creature.createOffenseHitboxesByTag("headAttack", 4);
                 })
                 .setUseLookBasedFacing()
                 .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.TARGETED_MELEE)

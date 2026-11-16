@@ -1622,7 +1622,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (this.world.isRemote || this.getCurrentMove().isEmpty() || this.isMoveUseBlocked()) return;
         if (speedMultiplier <= 0D || maximumTicks <= 0) return;
         float heading = this.getAnimationData().getModelYaw();
-        if (this.getControllingPassenger() instanceof EntityPlayer rider) heading = rider.rotationYaw;
+        if (this.getControllingPassenger() instanceof EntityPlayer rider) {
+            if (this.getRiddenAimPosition() != null) heading = rider.rotationYaw;
+        }
         else {
             EntityLivingBase target = this.getAttackTarget();
             if (target != null && target.isEntityAlive()) {
@@ -2097,7 +2099,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         CreatureMoveBuilder moveBuilder = selectedMove.getValue();
         if (moveStorage.moveCurrentCooldown(moveName) > 0) return;
 
-        float attackYaw = rider.rotationYaw;
+        boolean aimingMove = this.isRiddenAiming() && moveName.equals(this.riddenAimingMoveName);
+        float attackYaw = this.getAnimationData().getModelYaw();
+        if (aimingMove || !CreatureLookUtil.isMeleeMove(moveBuilder)) attackYaw = rider.rotationYaw;
         this.rotationYaw = attackYaw;
         this.prevRotationYaw = attackYaw;
         this.renderYawOffset = attackYaw;
@@ -2106,11 +2110,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.prevRotationYawHead = attackYaw;
         this.riddenAreaHitEntities.clear();
         this.riddenAreaAttackActive = false;
-        if (this.isRiddenAiming() && moveName.equals(this.riddenAimingMoveName) && moveBuilder.getRiddenCrosshairType() == RiddenCrosshairType.WIDE) {
+        if (aimingMove && moveBuilder.getRiddenCrosshairType() == RiddenCrosshairType.WIDE) {
             this.riddenMeleeAimReach = this.calculateRiddenMeleeAimReach(moveIndex);
             this.riddenAreaAttackActive = this.riddenMeleeAimReach > 0D;
         }
-        else if (!this.isRiddenAiming() || !moveName.equals(this.riddenAimingMoveName)) {
+        else if (!aimingMove) {
             this.riddenAimingMoveName = "";
             this.riddenAimArea = null;
             this.riddenMeleeAimReach = 0D;
@@ -2890,12 +2894,18 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         Vec3d destination;
         if (this.getControllingPassenger() instanceof EntityLivingBase rider) {
             destination = this.getRiddenAimPosition();
-            if (destination == null) destination = rider.getPositionEyes(1f).add(rider.getLookVec().scale(2D));
+            if (destination == null) {
+                if (CreatureLookUtil.isMeleeMove(this.getCreatureMoves().getMoveBuilderCurrentMove())) {
+                    destination = CreatureLookUtil.getRiddenAttackPosition(this);
+                }
+                else destination = rider.getPositionEyes(1f).add(rider.getLookVec().scale(2D));
+            }
         }
         else if (target != null && target.isEntityAlive()) {
             destination = target.getEntityBoundingBox().getCenter();
         }
         else destination = this.getPositionEyes(1f).add(this.getLookVec().scale(2D));
+        if (destination == null) return;
 
         if (graphic.placement() == CreatureMoveGraphic.Placement.TARGET_GROUND) {
             if (this.riddenAreaAttackActive && this.riddenMeleeAimReach > 0D) {
@@ -3161,6 +3171,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     public boolean canRotateMounted() {
         CreatureMoveBuilder move = this.getCreatureMoves().getMoveBuilderCurrentMove();
         CreatureMoveChargeupBuilder charge = move == null ? null : move.getMoveChargeupBuilder();
+        if (CreatureLookUtil.isMeleeMove(move) && this.getRiddenAimPosition() == null) return false;
         if (move != null && move.getUseLookBasedFacing() && !this.canRotateWhileCharging()) return false;
         if (charge != null && charge.getCanRotateWhileCharging() && !this.canRotateWhileCharging()) return false;
         return !this.getCreatureMoveHelper().getLeapHelper().isRiddenLeap()
