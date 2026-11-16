@@ -22,6 +22,7 @@ public class RiftDataSerializers {
             buf.writeDouble(value.speedMultiplier());
             buf.writeVarInt(value.maxTicks());
             buf.writeFloat(value.yaw());
+            buf.writeFloat(value.travelYaw());
             buf.writeBoolean(value.includeKnockback());
             buf.writeBoolean(value.stopOnImpact());
         }
@@ -29,7 +30,7 @@ public class RiftDataSerializers {
         @Override
         @NotNull
         public RushState read(@NotNull PacketBuffer buf) {
-            return new RushState(buf.readString(32767), buf.readDouble(), buf.readVarInt(), buf.readFloat(), buf.readBoolean(), buf.readBoolean());
+            return new RushState(buf.readString(32767), buf.readDouble(), buf.readVarInt(), buf.readFloat(), buf.readFloat(), buf.readBoolean(), buf.readBoolean());
         }
 
         @Override

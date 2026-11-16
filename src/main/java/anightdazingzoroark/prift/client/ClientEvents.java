@@ -367,8 +367,8 @@ public class ClientEvents {
         if (event.getButton() == 0) {
             if (event.isButtonstate()) {
                 CreatureMoveBuilder selectedMove = riddenCreature.getCreatureMoves().getUsableMoves().get(this.selectedRidingMove).getValue();
-                //make sure that on ranged moves left click fails unless already aiming
-                if (selectedMove.getRiddenAimingType() == RiddenAimingType.RANGED
+                if ((selectedMove.getRiddenAimingType() == RiddenAimingType.RANGED
+                        || selectedMove.getRiddenAimingType() == RiddenAimingType.CHARGE)
                         && (!this.ridingAimActive || this.ridingLeapAimActive || this.ridingAimMove != this.selectedRidingMove)
                 ) {
                     event.setCanceled(true);
@@ -402,7 +402,8 @@ public class ClientEvents {
                     CreatureMoveChargeupBuilder chargeupBuilder = selectedMove.getMoveChargeupBuilder();
                     String moveName = riddenCreature.getCreatureMoves().getUsableMoves().get(this.selectedRidingMove).getKey();
                     boolean retainChargedAim = this.ridingAimActive && this.ridingAimMove == this.selectedRidingMove
-                            && selectedMove.getRiddenAimingType() == RiddenAimingType.RANGED
+                            && (selectedMove.getRiddenAimingType() == RiddenAimingType.RANGED
+                            || selectedMove.getRiddenAimingType() == RiddenAimingType.CHARGE)
                             && chargeupBuilder != null && chargeupBuilder.getChargeType() == ChargeType.CHARGE_UP_THEN_RELEASE
                             && moveName.equals(riddenCreature.getCurrentMove());
                     //make sure that releasing aim button while charging means instant release

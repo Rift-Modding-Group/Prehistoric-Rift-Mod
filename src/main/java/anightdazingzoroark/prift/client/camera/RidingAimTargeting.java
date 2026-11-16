@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client.camera;
 
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenAimingType;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenCrosshairType;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.RiddenAimArea;
@@ -33,9 +34,12 @@ public class RidingAimTargeting {
             @NotNull CameraFrame frame, @NotNull RidingAimSettings settings, float cameraFov, double aimDistance
     ) {
         double meleeReachSquared = settings.meleeReach() * settings.meleeReach();
+        CreatureMoveBuilder move = CreatureLookUtil.getRiddenAimMove(riddenCreature, settings.moveName());
         Vec3d aimStart = frame.position();
         Vec3d aimEnd = aimStart.add(frame.lookVector().scale(aimDistance));
-        if (settings.leap()) aimEnd = frame.focusPosition();
+        if (settings.leap() || move != null && move.getRiddenAimingType() == RiddenAimingType.CHARGE) {
+            aimEnd = frame.focusPosition();
+        }
         RayTraceResult blockHit = minecraft.world.rayTraceBlocks(aimStart, aimEnd, false, true, false);
         Vec3d aimPosition = blockHit == null ? aimEnd : blockHit.hitVec;
         double closestDistanceSquared = aimStart.squareDistanceTo(aimPosition);
@@ -65,7 +69,6 @@ public class RidingAimTargeting {
             aimPosition = hitPosition;
         }
 
-        CreatureMoveBuilder move = CreatureLookUtil.getRiddenAimMove(riddenCreature, settings.moveName());
         if (move != null && move.getRiddenAimLocator() != null) {
             Vec3d source = CreatureLookUtil.getSourceLocatorPosition(riddenCreature, move.getRiddenAimLocator(), 1f);
             if (source != null) creatureAimOrigin = source;
@@ -82,7 +85,8 @@ public class RidingAimTargeting {
             aimPosition = frame.focusPosition();
         }
         //--block hit to break blocks--
-        if (!settings.leap() && (!settings.melee() || hasCrosshairTarget)) {
+        if (!settings.leap() && (move == null || move.getRiddenAimingType() != RiddenAimingType.CHARGE)
+                && (!settings.melee() || hasCrosshairTarget)) {
             RayTraceResult creatureBlockHit = minecraft.world.rayTraceBlocks(
                     creatureAimOrigin, aimPosition, false, true, false
             );

@@ -1623,20 +1623,31 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (this.world.isRemote || this.getCurrentMove().isEmpty() || this.isMoveUseBlocked()) return;
         if (speedMultiplier <= 0D || maximumTicks <= 0) return;
         float heading = this.getAnimationData().getModelYaw();
+        float travelYaw;
         if (this.getControllingPassenger() instanceof EntityPlayer rider) {
-            if (this.getRiddenAimPosition() != null) heading = rider.rotationYaw;
+            CreatureMoveBuilder move = this.getCreatureMoves().getMoveBuilderCurrentMove();
+            Vec3d aimPosition = this.getRiddenAimPosition();
+            if (aimPosition != null) heading = rider.rotationYaw;
+            travelYaw = heading;
+            if (move != null && move.getRiddenAimingType() == RiddenAimingType.CHARGE && aimPosition != null) {
+                Vec3d direction = aimPosition.subtract(this.getPositionVector());
+                if (direction.x * direction.x + direction.z * direction.z > 1E-12D) {
+                    travelYaw = (float) Math.toDegrees(Math.atan2(-direction.x, direction.z));
+                }
+            }
         }
         else {
             EntityLivingBase target = this.getAttackTarget();
             if (target != null && target.isEntityAlive()) {
                 heading = (float) Math.toDegrees(Math.atan2(this.posX - target.posX, target.posZ - this.posZ));
             }
+            travelYaw = heading;
         }
         this.rotationYaw = this.prevRotationYaw = heading;
         this.renderYawOffset = this.prevRenderYawOffset = heading;
         this.rotationYawHead = this.prevRotationYawHead = heading;
         this.rushImpactEffect = impactEffect;
-        this.setRushState(new RushState(this.getCurrentMove(), speedMultiplier, maximumTicks, heading, includeKnockback, stopOnImpact));
+        this.setRushState(new RushState(this.getCurrentMove(), speedMultiplier, maximumTicks, heading, travelYaw, includeKnockback, stopOnImpact));
     }
 
     @Nullable
@@ -2278,7 +2289,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //remove target components unsupported by the aiming type and limit the endpoint distance
         Vec3d riderEyes = rider.getPositionEyes(1f);
-        if (targetlessRanged && aimingType != RiddenAimingType.RANGED) return;
+        if (targetlessRanged && aimingType != RiddenAimingType.RANGED && aimingType != RiddenAimingType.CHARGE) return;
         if (targetlessRanged) {
             aimTarget = new RiddenAimTarget(-1, aimTarget.position(), null, null);
         }
@@ -2307,14 +2318,15 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             return;
         }
 
-        //clip targeted aim to intervening blocks, targetless ranged aim keeps its direction endpoint
+        //Charge aim retains the camera endpoint; movement collisions stop the rush.
+        //Clip other targeted aim to intervening blocks.
         Vec3d creatureAimOrigin = this.getPositionEyes(1f);
         if (selectedMove.getValue().getRiddenAimLocator() != null) {
             Vec3d source = CreatureLookUtil.getSourceLocatorPosition(this, selectedMove.getValue().getRiddenAimLocator(), 1f);
             if (source != null) creatureAimOrigin = source;
         }
         RayTraceResult creatureBlockHit = null;
-        if (!targetlessRanged) {
+        if (!targetlessRanged && aimingType != RiddenAimingType.CHARGE) {
             creatureBlockHit = this.world.rayTraceBlocks(
                     creatureAimOrigin, aimTarget.position(), false, true, false
             );

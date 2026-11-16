@@ -13,7 +13,7 @@ public class ChargeBuilder extends CreatureMoveBuilder {
                 .setRequireFindTargetToUse()
                 .setStaminaCost(0.05f)
                 .setBasePower(50)
-                .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
+                .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.CHARGE)
                 .setRiddenPitchBounds(0f, 0f)
                 .setOnMoveBeginEffect((creature, target) -> creature.prepareRush(4D, 10))
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()

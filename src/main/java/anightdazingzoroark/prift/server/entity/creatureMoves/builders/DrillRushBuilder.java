@@ -19,7 +19,7 @@ public class DrillRushBuilder extends CreatureMoveBuilder {
                 .setStaminaCost(0.25f)
                 .setStaminaDrainPerSecond(0.0125f)
                 .setBasePower(70)
-                .setRiddenAimingType(RiddenAimingType.RANGED)
+                .setRiddenAimingType(RiddenAimingType.CHARGE)
                 .setRiddenPitchBounds(0f, 0f)
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                         .setChargeType(CreatureMoveChargeupBuilder.ChargeType.CHARGE_UP_WHILE_USE)

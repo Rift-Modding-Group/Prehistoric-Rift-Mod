@@ -104,7 +104,7 @@ public class RiftCreatureChargeHelper {
         }
 
         double speed = this.creature.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue() * rushState.speedMultiplier();
-        double radians = Math.toRadians(this.heading);
+        double radians = Math.toRadians(rushState.travelYaw());
         Vec3d movement = new Vec3d(-Math.sin(radians) * speed, 0D, Math.cos(radians) * speed);
         Map<Entity, Double> entities = new HashMap<>();
         Map<BlockPos, Double> blocks = new HashMap<>();
@@ -217,8 +217,11 @@ public class RiftCreatureChargeHelper {
     }
 
     //transient data between server and client
-    public record RushState(@NotNull String move, double speedMultiplier, int maxTicks, float yaw, boolean includeKnockback, boolean stopOnImpact) {
+    public record RushState(
+            @NotNull String move, double speedMultiplier, int maxTicks, float yaw, float travelYaw,
+            boolean includeKnockback, boolean stopOnImpact
+    ) {
         @NotNull
-        public static final RushState EMPTY = new RushState("", 0D, 0, 0f, false, true);
+        public static final RushState EMPTY = new RushState("", 0D, 0, 0f, 0f, false, true);
     }
 }

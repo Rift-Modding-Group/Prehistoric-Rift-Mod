@@ -1,6 +1,7 @@
 package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenAimingType;
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenCrosshairType;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
@@ -37,6 +38,7 @@ public class CameraHandler {
     public static double RIDING_AIM_CAMERA_DISTANCE = 3D;
     public static float RIDING_AIM_CAMERA_HORIZONTAL_OFFSET = -2f;
     public static double RIDING_AIM_DISTANCE = 64D;
+    public static double RIDING_CHARGE_AIM_DISTANCE = 6D;
     public static float RIDING_AIM_FOV_MULTIPLIER = 0.72f;
     public static float RIDING_MELEE_AIM_FOV_MULTIPLIER = 0.9f;
 
@@ -318,6 +320,13 @@ public class CameraHandler {
                 Vec3d sourceFocus = source.add(forward.scale(move.getRiddenAimDistance()));
                 focusPosition = this.interpolateVector(focusPosition, sourceFocus, transition);
             }
+        }
+        if (move != null && move.getRiddenAimingType() == RiddenAimingType.CHARGE) {
+            Vec3d direction = new Vec3d(forward.x, 0D, forward.z).normalize();
+            Vec3d chargeFocus = this.getInterpolatedEyePosition(riddenCreature, partialTicks)
+                    .add(0D, 0.1D - riddenCreature.getEyeHeight(), 0D)
+                    .add(direction.scale(RIDING_CHARGE_AIM_DISTANCE * riddenCreature.getAnimationData().getScale()));
+            focusPosition = this.interpolateVector(focusPosition, chargeFocus, transition);
         }
         if (this.aimSettings.leap()) {
             focusPosition = getLeapAimFocusPosition(riddenCreature, this.getInterpolatedEyePosition(riddenCreature, partialTicks), forward);

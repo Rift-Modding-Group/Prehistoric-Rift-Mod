@@ -348,11 +348,13 @@ public class RidingCreatureHUD {
                     ? null : creature.getCreatureMoves().getUsableMoves().get(selectedMove).getValue();
 
             if (selectedMoveBuilder != null
-                    && selectedMoveBuilder.getRiddenAimingType() == CreatureMoveBuilder.RiddenAimingType.RANGED) {
+                    && (selectedMoveBuilder.getRiddenAimingType() == CreatureMoveBuilder.RiddenAimingType.RANGED
+                    || selectedMoveBuilder.getRiddenAimingType() == CreatureMoveBuilder.RiddenAimingType.CHARGE)) {
                 if (ridingAimActive) {
                     this.drawControl(
                             minecraft, minecraft.gameSettings.keyBindAttack.getKeyCode(),
-                            I18n.format("hud.prift.riding.shoot_move"), false, leftRow++
+                            I18n.format(selectedMoveBuilder.getRiddenAimingType() == CreatureMoveBuilder.RiddenAimingType.CHARGE
+                                    ? "hud.prift.riding.charge_move" : "hud.prift.riding.shoot_move"), false, leftRow++
                     );
                 }
                 else {

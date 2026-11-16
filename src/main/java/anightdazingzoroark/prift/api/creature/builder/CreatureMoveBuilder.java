@@ -462,6 +462,7 @@ public class CreatureMoveBuilder {
     public enum RiddenAimingType {
         NONE,
         RANGED,
+        CHARGE,
         TARGETED_MELEE
     }
 }

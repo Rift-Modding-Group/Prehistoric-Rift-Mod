@@ -38,7 +38,7 @@ public class FlameChargeBuilder extends CreatureMoveBuilder {
                 .setRequireFindTargetToUse()
                 .setStaminaCost(0.05f)
                 .setBasePower(70)
-                .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
+                .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.CHARGE)
                 .setRiddenPitchBounds(0f, 0f)
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                         .setChargeType(CreatureMoveChargeupBuilder.ChargeType.CHARGE_UP_THEN_RELEASE)
