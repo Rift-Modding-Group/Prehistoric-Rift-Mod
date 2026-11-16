@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.AnimatedHitboxDetectionRule;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.server.effect.RiftEffects;
+import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.jsonParsing.raw.RawMolangValue;
 import anightdazingzoroark.riftlib.particle.ParticleBuilder;
@@ -24,6 +25,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.Vec3d;
 
 public class ThunderFangBuilder extends StandardMeleeBuilder {
     public ThunderFangBuilder() {
@@ -31,6 +34,14 @@ public class ThunderFangBuilder extends StandardMeleeBuilder {
                 .setElement(Element.ELECTRIC)
                 .setOnMoveBeginEffect((creature, target) -> {
                     CreatureLookUtil.captureHeadAttackLook(creature);
+
+                    Vec3d creaturePos = creature.getPositionVector();
+                    creature.getEntityWorld().playSound(
+                            null, creaturePos.x, creaturePos.y, creaturePos.z,
+                            RiftSounds.getSound("generic_move.electric_release"),
+                            SoundCategory.NEUTRAL, 1f, 1f
+                    );
+
                     RiftLibParticleHelper.createParticle(
                             new ParticleBuilder().setIdentifier("prift:thunder_fang")
                                     .setTexture(new ResourceLocation("textures/particle/particles.png"))

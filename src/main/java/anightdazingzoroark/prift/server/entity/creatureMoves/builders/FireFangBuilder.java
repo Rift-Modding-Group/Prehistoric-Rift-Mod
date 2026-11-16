@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.AnimatedHitboxDetectionRule;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
+import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.jsonParsing.raw.RawMolangValue;
 import anightdazingzoroark.riftlib.particle.ParticleBuilder;
@@ -20,6 +21,8 @@ import anightdazingzoroark.riftlib.particle.particleComponent.particleLifetime.P
 import anightdazingzoroark.riftlib.particle.particleComponent.particleMotion.ParticleMotionDynamicComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.Vec3d;
 
 public class FireFangBuilder extends StandardMeleeBuilder {
     public FireFangBuilder() {
@@ -27,6 +30,14 @@ public class FireFangBuilder extends StandardMeleeBuilder {
                 .setElement(Element.FIRE)
                 .setOnMoveBeginEffect((creature, target) -> {
                     CreatureLookUtil.captureHeadAttackLook(creature);
+
+                    Vec3d creaturePos = creature.getPositionVector();
+                    creature.getEntityWorld().playSound(
+                            null, creaturePos.x, creaturePos.y, creaturePos.z,
+                            RiftSounds.getSound("flamethrower.breathe_start"),
+                            SoundCategory.NEUTRAL, 1f, 1f
+                    );
+
                     RiftLibParticleHelper.createParticle(
                             new ParticleBuilder().setIdentifier("prift:fire_fang")
                                     .setTexture(new ResourceLocation("textures/particle/particles.png"))
