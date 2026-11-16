@@ -7,7 +7,8 @@ import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 
 public class BiteBuilder extends StandardMeleeBuilder {
     public BiteBuilder() {
-        this.setBasePower(50)
+        this.setUseBlockBreak()
+                .setBasePower(50)
                 .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureHeadAttackLook(creature))
                 .setUseLookBasedFacing()
                 .setOnMoveHitEffect(creature -> creature.createOffenseHitboxesByTag("jaw", 4))
@@ -17,10 +18,9 @@ public class BiteBuilder extends StandardMeleeBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("bite");
-            this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", CreatureLookUtil::captureHeadAttackLook))
-                    .setUseBlockBreak();
+            super("bite", MoveCategory.MELEE);
+            this.setPriorityPredicate((creature, target) -> target != null)
+                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", CreatureLookUtil::captureHeadAttackLook));
         }
     }
 }

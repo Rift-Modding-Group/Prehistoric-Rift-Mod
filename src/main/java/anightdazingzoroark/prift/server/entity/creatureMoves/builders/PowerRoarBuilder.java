@@ -4,7 +4,6 @@ import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import anightdazingzoroark.riftlib.ray.RiftLibRayHelper;
 import anightdazingzoroark.riftlib.ray.rayShape.impact.RiftLibRaySphereImpactShape;
@@ -47,8 +46,8 @@ public class PowerRoarBuilder extends CreatureMoveBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("power_roar");
-            this.addDetectionRule(new HorizontalDistanceFromUserDetectionRule(12D))
+            super("power_roar", MoveCategory.RANGED);
+            this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive() && creature.atFrustrationThreshold())
                     .setUseWhenFrustrated()
                     .setDontPathToTarget();
         }

@@ -54,6 +54,11 @@ public class PriorityList<T> {
 
     @Nullable
     public ImmutablePair<T, Integer> nextWithPriority(@Nullable T preferred) {
+        return this.nextWithPriority(preferred, null);
+    }
+
+    @Nullable
+    public ImmutablePair<T, Integer> nextWithPriority(@Nullable T preferred, @Nullable T fallback) {
         int highestPriority = Integer.MAX_VALUE;
         for (int priority : this.map.keySet()) {
             if (priority < highestPriority) highestPriority = priority;
@@ -62,9 +67,10 @@ public class PriorityList<T> {
         List<T> resultList = this.map.get(highestPriority);
         if (resultList == null || resultList.isEmpty()) return null;
 
-        T next = preferred != null && resultList.contains(preferred)
-                ? preferred
-                : resultList.get(this.random.nextInt(resultList.size()));
+        T next;
+        if (preferred != null && resultList.contains(preferred)) next = preferred;
+        else if (fallback != null && resultList.contains(fallback)) next = fallback;
+        else next = resultList.get(this.random.nextInt(resultList.size()));
         return new ImmutablePair<>(next, highestPriority);
     }
 

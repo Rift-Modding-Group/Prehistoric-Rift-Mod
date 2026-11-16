@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creature.builders;
 
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
+import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder.MoveCategory;
 import anightdazingzoroark.prift.api.creature.builder.*;
 
 import java.util.List;
@@ -46,6 +47,10 @@ public class TriceratopsBuilder extends RiftCreatureBuilder {
                 .addBlockBreakLevel("pickaxe", 0)
                 .addBlockBreakLevel("shovel", 0)
                 //---moves---
+                .setMoveCategorySelector((creature, target) -> {
+                    if (target == null || !target.isEntityAlive()) return new MoveCategory[0];
+                    return new MoveCategory[]{MoveCategory.MELEE, MoveCategory.RANGED};
+                })
                 .setMaximumMoveSlots(4)
                 .setSpawnMoves("headbutt", "shield_bash", "charge", "belch")
                 .setLevelupMoves(Map.of(
@@ -68,8 +73,8 @@ public class TriceratopsBuilder extends RiftCreatureBuilder {
                 .setMoveAnimations("drill_rush", "drill_rush")
                 .setMoveAnimations("sludge_wave", "sludge_wave")
                 .setMoveSelector(new CreatureMoveSelectorBuilder()
-                        .setCanSprintToAttack(1, 2D, 16D)
-                        .setCanLeapToAttack(1, 6D, 12D, false)
+                        .setCanSprintToAttack(2D, 16D)
+                        .setCanLeapToAttack(6D, 12D, false)
                 )
                 //---food---
                 .addDefaultFoodItemWhitelistEntry("fruit")

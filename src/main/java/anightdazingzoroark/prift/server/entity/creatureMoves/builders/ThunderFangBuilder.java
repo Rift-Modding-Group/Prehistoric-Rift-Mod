@@ -30,7 +30,8 @@ import net.minecraft.util.math.Vec3d;
 
 public class ThunderFangBuilder extends StandardMeleeBuilder {
     public ThunderFangBuilder() {
-        this.setBasePower(50)
+        this.setUseBlockBreak()
+                .setBasePower(50)
                 .setElement(Element.ELECTRIC)
                 .setOnMoveBeginEffect((creature, target) -> {
                     CreatureLookUtil.captureHeadAttackLook(creature);
@@ -87,10 +88,9 @@ public class ThunderFangBuilder extends StandardMeleeBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("thunder_fang");
-            this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", CreatureLookUtil::captureHeadAttackLook))
-                    .setUseBlockBreak();
+            super("thunder_fang", MoveCategory.MELEE);
+            this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive())
+                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", CreatureLookUtil::captureHeadAttackLook));
         }
     }
 }

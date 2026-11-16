@@ -61,7 +61,8 @@ public class CreatureMoveHelper {
     }
 
     public static boolean targetMatchesAnyDetectionRule(@NotNull MoveRuleBuilder rule, @NotNull ICreature creature, @NotNull EntityLivingBase target) {
-        return rule.getDetectionRules().stream().anyMatch(detection -> detection.targetWithinRange(creature, target));
+        return rule.getDetectionRules().isEmpty()
+                || rule.getDetectionRules().stream().anyMatch(detection -> detection.targetWithinRange(creature, target));
     }
 
 }

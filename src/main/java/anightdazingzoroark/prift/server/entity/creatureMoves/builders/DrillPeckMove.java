@@ -46,8 +46,8 @@ public class DrillPeckMove extends StandardMeleeBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("drill_peck");
-            this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
+            super("drill_peck", MoveCategory.MELEE);
+            this.setPriorityPredicate((creature, target) -> target != null)
                     .addDetectionRule(peckRange);
         }
     }

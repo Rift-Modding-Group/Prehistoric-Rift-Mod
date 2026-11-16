@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creature.builders;
 
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
+import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder.MoveCategory;
 import anightdazingzoroark.prift.api.creature.builder.*;
 
 import java.util.List;
@@ -45,6 +46,12 @@ public class StegosaurusBuilder extends RiftCreatureBuilder {
                 )
                 .addBlockBreakLevel("axe", 2)
                 //---moves---
+                .setMoveCategorySelector((creature, target) -> {
+                    if (target == null || !target.isEntityAlive()) return new MoveCategory[0];
+                    double distance = creature.horizontalDistanceFromEntity(target);
+                    if (distance >= 8D) return new MoveCategory[]{MoveCategory.RANGED};
+                    return new MoveCategory[]{MoveCategory.MELEE};
+                })
                 .setMaximumMoveSlots(4)
                 .setSpawnMoves("tail_stab", "tail_slam", "thagomize", "plate_fling")
                 .setLevelupMoves(Map.of(

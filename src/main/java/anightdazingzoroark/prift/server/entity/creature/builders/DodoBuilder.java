@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creature.builders;
 
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
+import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder.MoveCategory;
 import anightdazingzoroark.prift.api.creature.builder.CreatureDomesticationBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
@@ -32,6 +33,10 @@ public class DodoBuilder extends RiftCreatureBuilder {
                 .setIsHerder(8)
                 .setPanicOnHit()
                 //---moves---
+                .setMoveCategorySelector((creature, target) -> {
+                    if (target == null || !target.isEntityAlive()) return new MoveCategory[0];
+                    return new MoveCategory[]{MoveCategory.MELEE, MoveCategory.RANGED};
+                })
                 .setMaximumMoveSlots(1)
                 .setSpawnMoves("peck")
                 .setLevelupMoves(Map.of(

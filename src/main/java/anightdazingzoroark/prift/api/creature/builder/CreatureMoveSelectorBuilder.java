@@ -1,8 +1,8 @@
 package anightdazingzoroark.prift.api.creature.builder;
 
 import anightdazingzoroark.prift.api.creature.CreatureMoveResult;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.DetectionRule;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
+import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder.MoveCategory;
+import anightdazingzoroark.prift.api.creature.builder.detectionRule.HitboxDistanceFromUserDetectionRule;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -46,22 +46,24 @@ public class CreatureMoveSelectorBuilder {
      * Note that its only for when its on its own, when controlled by a rider
      * it can spring to attack when commanded to (by simply sprinting lol)
      * */
-    public CreatureMoveSelectorBuilder setCanSprintToAttack(int priority, double minDist, double maxDist) {
+    public CreatureMoveSelectorBuilder setCanSprintToAttack(double minDist, double maxDist) {
         this.checkIfLocked();
         if (minDist > maxDist) throw new IllegalArgumentException(minDist+" is greater than "+maxDist+"!");
 
-        MoveRuleBuilder sprintMoveRuleBuilder = new MoveRuleBuilder("")
+        MoveRuleBuilder sprintMoveRuleBuilder = new MoveRuleBuilder("", MoveCategory.MELEE)
                 .setPriorityPredicate((creature, target) -> {
-                    if (target == null || !target.isEntityAlive()) return -1;
-                    if (!creature.canSprintToAttack() && !creature.atFrustrationThreshold()) return -1;
+                    if (target == null || !target.isEntityAlive()) return false;
+                    if (!creature.canSprintToAttack() && !creature.atFrustrationThreshold()) return false;
                     boolean outsideCreatureAABB = !creature.getEntityBoundingBox().grow(1e-5D).intersects(target.getEntityBoundingBox());
                     boolean outsideInnerBound = !creature.getEntityBoundingBox().grow(minDist).grow(1e-5D).intersects(target.getEntityBoundingBox());
                     boolean withinOuterBound = creature.getEntityBoundingBox().grow(maxDist).grow(1e-5D).intersects(target.getEntityBoundingBox());
 
-                    if (!outsideCreatureAABB || !withinOuterBound || !outsideInnerBound) return -1;
-                    return creature.hasStraightWalkingPathTo(target) ? priority : -1;
+                    if (!outsideCreatureAABB || !withinOuterBound || !outsideInnerBound) return false;
+                    double distance = creature.horizontalDistanceFromEntity(target);
+                    if (distance < minDist || distance > maxDist) return false;
+                    return creature.hasStraightWalkingPathTo(target);
                 })
-                .addDetectionRule(new HorizontalDistanceFromUserDetectionRule(minDist, maxDist))
+                .addDetectionRule(new HitboxDistanceFromUserDetectionRule(4D))
                 .setUseWhenFrustrated();
         sprintMoveRuleBuilder.lock();
 
@@ -75,12 +77,19 @@ public class CreatureMoveSelectorBuilder {
      * damage upon touching the target when leaping. Otherwise it just
      * jumps to the target.
      * */
-    public CreatureMoveSelectorBuilder setCanLeapToAttack(int priority, double minDist, double maxDist, boolean requiresTargetContact) {
+    public CreatureMoveSelectorBuilder setCanLeapToAttack(double minDist, double maxDist, boolean requiresTargetContact) {
         this.checkIfLocked();
         if (minDist > maxDist) throw new IllegalArgumentException(minDist+" is greater than "+maxDist+"!");
 
-        HorizontalDistanceFromUserDetectionRule detectionRule = new HorizontalDistanceFromUserDetectionRule(minDist, maxDist);
-        LeapMoveRuleBuilder leapMoveRuleBuilder = new LeapMoveRuleBuilder(requiresTargetContact).setLeapPriorityPredicate(priority, detectionRule);
+        LeapMoveRuleBuilder leapMoveRuleBuilder = new LeapMoveRuleBuilder(requiresTargetContact);
+        leapMoveRuleBuilder.setPriorityPredicate((creature, target) -> {
+            if (target == null || !target.isEntityAlive()) return false;
+            if (!creature.isOnGround() || creature.bodyTouchingLiquid() || !creature.getNavigationBuilder().getCanLeap()) return false;
+            if (!target.onGround || target.isInWater()) return false;
+            double distance = creature.horizontalDistanceFromEntity(target);
+            if (distance < minDist || distance > maxDist) return false;
+            return creature.canLeapToAttack() || creature.atFrustrationThreshold();
+        });
         leapMoveRuleBuilder.setUseWhenFrustrated();
         leapMoveRuleBuilder.lock();
 
@@ -105,24 +114,12 @@ public class CreatureMoveSelectorBuilder {
     /**
      * Leap-specific move rule data selecting whether target contact deals damage.
      * */
-    public static final class LeapMoveRuleBuilder extends MoveRuleBuilder {
+    public static class LeapMoveRuleBuilder extends MoveRuleBuilder {
         private final boolean requiresTargetContact;
 
         private LeapMoveRuleBuilder(boolean requiresTargetContact) {
-            super("");
+            super("", MoveCategory.MELEE);
             this.requiresTargetContact = requiresTargetContact;
-        }
-
-        private LeapMoveRuleBuilder setLeapPriorityPredicate(int priority, @NotNull DetectionRule detectionRule) {
-            this.setPriorityPredicate((creature, target) -> {
-                if (target == null || !target.isEntityAlive()) return -1;
-                if (!creature.isOnGround() || creature.bodyTouchingLiquid() || !creature.getNavigationBuilder().getCanLeap()) return -1;
-                if (!target.onGround || target.isInWater()) return -1;
-                if (!creature.canLeapToAttack() && !creature.atFrustrationThreshold()) return -1;
-                return detectionRule.targetWithinRange(creature, target) ? priority : -1;
-            });
-            this.addDetectionRule(detectionRule);
-            return this;
         }
 
         public boolean requiresTargetContact() {

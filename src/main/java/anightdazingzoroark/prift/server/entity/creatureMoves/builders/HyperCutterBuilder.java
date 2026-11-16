@@ -29,7 +29,8 @@ import net.minecraft.util.SoundCategory;
 
 public class HyperCutterBuilder extends CreatureMoveBuilder {
     public HyperCutterBuilder() {
-        this.setStaminaCost(0.08f)
+        this.setUseBlockBreak()
+                .setStaminaCost(0.08f)
                 .setBasePower(60)
                 .setRequireFindTargetToUse()
                 .setElement(Element.NEUTRAL)
@@ -150,10 +151,10 @@ public class HyperCutterBuilder extends CreatureMoveBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("hyper_cutter");
-            this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                    .addDetectionRule(new AnimatedHitboxDetectionRule("thagomizer", TailAttackLookUtil::captureTailStabLook))
-                    .setUseBlockBreak();
+            super("hyper_cutter", MoveCategory.MELEE);
+            this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive())
+                    .setAdditionalAIUses(4)
+                    .addDetectionRule(new AnimatedHitboxDetectionRule("thagomizer", TailAttackLookUtil::captureTailStabLook));
         }
     }
 }

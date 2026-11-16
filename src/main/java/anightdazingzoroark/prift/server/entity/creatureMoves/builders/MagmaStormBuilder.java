@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.server.entity.creatureMoves.builders;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
+import anightdazingzoroark.prift.api.creature.builder.detectionRule.HitboxDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.server.entity.RiftMagmaStorm;
 
 public class MagmaStormBuilder extends CreatureMoveBuilder {
@@ -20,10 +20,9 @@ public class MagmaStormBuilder extends CreatureMoveBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("magma_storm");
-            this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive()
-                            && creature.verticalDistanceFromEntity(target, false) <= 16D ? 0 : -1)
-                    .addDetectionRule(new HorizontalDistanceFromUserDetectionRule(16D))
+            super("magma_storm", MoveCategory.RANGED);
+            this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive())
+                    .addDetectionRule(new HitboxDistanceFromUserDetectionRule(4D))
                     .setDontPathToTarget();
         }
     }

@@ -10,7 +10,8 @@ import net.minecraft.potion.PotionEffect;
 
 public class CrunchBuilder extends StandardMeleeBuilder {
     public CrunchBuilder() {
-        this.setBasePower(70)
+        this.setUseBlockBreak()
+                .setBasePower(70)
                 .setStaminaCost(0.2f)
                 .setOnMoveBeginEffect((creature, target) -> {
                     CreatureLookUtil.captureHeadAttackLook(creature);
@@ -38,10 +39,9 @@ public class CrunchBuilder extends StandardMeleeBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("crunch");
-            this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", CreatureLookUtil::captureHeadAttackLook))
-                    .setUseBlockBreak();
+            super("crunch", MoveCategory.MELEE);
+            this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive())
+                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", CreatureLookUtil::captureHeadAttackLook));
         }
     }
 }

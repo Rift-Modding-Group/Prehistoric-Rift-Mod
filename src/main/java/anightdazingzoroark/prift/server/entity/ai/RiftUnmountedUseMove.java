@@ -70,6 +70,7 @@ public class RiftUnmountedUseMove extends EntityAIBase {
     public void resetTask() {
         if (this.moveResultTicker != null && !this.creature.isBeingRidden()) this.moveResultTicker.onEndTicker();
         this.moveResultTicker = null;
+        this.moveRulePair = null;
     }
 
     /**

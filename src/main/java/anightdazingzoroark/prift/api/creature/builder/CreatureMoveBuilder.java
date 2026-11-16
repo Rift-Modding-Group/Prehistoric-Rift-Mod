@@ -32,6 +32,7 @@ public class CreatureMoveBuilder {
     private CreatureMoveChargeupBuilder moveChargeupBuilder;
     private boolean requireFindTargetToUse;
     private boolean makesContact;
+    private boolean useBlockBreak;
     private boolean useLookBasedFacing;
     @NotNull
     private Element element = Element.NEUTRAL;
@@ -192,6 +193,20 @@ public class CreatureMoveBuilder {
 
     public boolean getMakesContact() {
         return this.makesContact;
+    }
+
+    /**
+     * Allow the AI to use this move to clear obstructions while pathing.
+     */
+    @NotNull
+    public CreatureMoveBuilder setUseBlockBreak() {
+        this.checkIfLocked();
+        this.useBlockBreak = true;
+        return this;
+    }
+
+    public boolean getUseBlockBreak() {
+        return this.useBlockBreak;
     }
 
     /**
@@ -413,6 +428,7 @@ public class CreatureMoveBuilder {
         toReturn.moveChargeupBuilder = this.moveChargeupBuilder == null ? null : this.moveChargeupBuilder.copy();
         toReturn.requireFindTargetToUse = this.requireFindTargetToUse;
         toReturn.makesContact = this.makesContact;
+        toReturn.useBlockBreak = this.useBlockBreak;
         toReturn.useLookBasedFacing = this.useLookBasedFacing;
         toReturn.element = this.element;
         toReturn.elementEffectStrength = this.elementEffectStrength;

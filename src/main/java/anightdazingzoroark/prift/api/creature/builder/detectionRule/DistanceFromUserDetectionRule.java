@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
  * Checks three-dimensional distance between positions, independent of entity size.
  */
 public class DistanceFromUserDetectionRule extends DetectionRule {
-    private double maximumDistanceSquared;
+    private final double maximumDistanceSquared;
 
     public DistanceFromUserDetectionRule(double maximumDistance) {
         if (maximumDistance < 0D) throw new IllegalArgumentException("Maximum distance must be nonnegative!");

@@ -22,8 +22,8 @@ public class PeckBuilder extends StandardMeleeBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("peck");
-            this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
+            super("peck", MoveCategory.MELEE);
+            this.setPriorityPredicate((creature, target) -> target != null)
                     .addDetectionRule(peckRange);
         }
     }

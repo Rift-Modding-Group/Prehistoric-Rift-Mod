@@ -8,7 +8,8 @@ import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 
 public class AquaFangBuilder extends StandardMeleeBuilder {
     public AquaFangBuilder() {
-        this.setBasePower(50)
+        this.setUseBlockBreak()
+                .setBasePower(50)
                 .setElement(Element.ELECTRIC)
                 .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureHeadAttackLook(creature))
                 .setUseLookBasedFacing()
@@ -19,10 +20,9 @@ public class AquaFangBuilder extends StandardMeleeBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("aqua_fang");
-            this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", CreatureLookUtil::captureHeadAttackLook))
-                    .setUseBlockBreak();
+            super("aqua_fang", MoveCategory.MELEE);
+            this.setPriorityPredicate((creature, target) -> target != null)
+                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", CreatureLookUtil::captureHeadAttackLook));
         }
     }
 }

@@ -12,7 +12,8 @@ import net.minecraft.util.math.Vec3d;
 
 public class ShieldBashBuilder extends CreatureMoveBuilder {
     public ShieldBashBuilder() {
-        this.setMakesContact()
+        this.setUseBlockBreak()
+                .setMakesContact()
                 .setMoveType(MoveType.PHYSICAL)
                 .setElement(Element.GUARD)
                 .setRequireFindTargetToUse()
@@ -39,10 +40,9 @@ public class ShieldBashBuilder extends CreatureMoveBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("shield_bash");
-            this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                    .addDetectionRule(new AnimatedHitboxDetectionRule("headAttack", CreatureLookUtil::captureHeadAttackLook))
-                    .setUseBlockBreak();
+            super("shield_bash", MoveCategory.MELEE);
+            this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive())
+                    .addDetectionRule(new AnimatedHitboxDetectionRule("headAttack", CreatureLookUtil::captureHeadAttackLook));
         }
     }
 }

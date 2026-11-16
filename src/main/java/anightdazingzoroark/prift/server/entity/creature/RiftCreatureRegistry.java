@@ -9,6 +9,7 @@ import anightdazingzoroark.prift.server.entity.creature.builders.StegosaurusBuil
 import anightdazingzoroark.prift.server.entity.creature.builders.TriceratopsBuilder;
 import anightdazingzoroark.prift.server.entity.creature.builders.TyrannosaurusBuilder;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
+import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder.MoveCategory;
 import net.minecraft.world.World;
 
 import java.util.Collections;
@@ -100,6 +101,7 @@ public class RiftCreatureRegistry {
                 .setSpawnEggColors(0x4F7942, 0xD9C7A3)
                 .setMainHitboxSize(1f, 1.375f)
                 .setMaximumMoveSlots(1)
+                .setMoveCategorySelector((creature, target) -> new MoveCategory[]{MoveCategory.MELEE, MoveCategory.RANGED})
                 .setSpawnMoves("placeholder")
                 .setMoveAnimations("placeholder", "placeholder")
         );

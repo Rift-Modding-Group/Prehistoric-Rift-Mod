@@ -4,8 +4,7 @@ import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.VerticalDistanceFromUserDetectionRule;
+import anightdazingzoroark.prift.api.creature.builder.detectionRule.HitboxDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.riftlib.core.IAnimatable;
@@ -131,14 +130,9 @@ public class ToxicHazeBuilder extends CreatureMoveBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("toxic_haze");
-            this.setPriorityPredicate((creature, target) -> {
-                        if (target != null && target.isEntityAlive()) return 0;
-                        return -1;
-                    })
-                    .addDetectionRule(new HorizontalDistanceFromUserDetectionRule(6D, 16D))
-                    .addDetectionRule(new VerticalDistanceFromUserDetectionRule(5D, 16D))
-                    .setUseWhenFrustrated();
+            super("toxic_haze", MoveCategory.RANGED);
+            this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive())
+                    .addDetectionRule(new HitboxDistanceFromUserDetectionRule(4D));
         }
     }
 }

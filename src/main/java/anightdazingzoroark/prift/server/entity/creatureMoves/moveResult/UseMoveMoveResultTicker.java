@@ -49,7 +49,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
         this.selectedMoveName = moveRuleBuilder.getMoveName();
         this.selectedMoveBuilder = Objects.requireNonNull(this.creature.getCreatureMoves().getUsableMoveBuilder(moveRuleBuilder.getMoveName()));
         this.canUseBlockBreak = creature.hasBlockBreakZone()
-                && moveRuleBuilder.getUseBlockBreak()
+                && this.selectedMoveBuilder.getUseBlockBreak()
                 && !moveRuleBuilder.getDontPathToTarget()
                 && this.selectedMoveBuilder.getRequireFindTargetToUse()
                 && this.selectedMoveBuilder.getMoveType() != CreatureMoveBuilder.MoveType.STATUS
@@ -71,15 +71,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
         else if (this.moveRuleBuilder.getDontPathToTarget()
                 && this.selectedMoveBuilder.getRequireFindTargetToUse()
                 && targetAvailability
-                && !this.selectedMoveUsedDueToFrustration
                 && !CreatureMoveHelper.targetMatchesAnyDetectionRule(this.moveRuleBuilder, this.creature, target)
-        ) {
-            return false;
-        }
-            //when frustration gets high enough, stop current pathing and pick a frustration option
-        else if (!this.selectedMoveUsedDueToFrustration
-                && !this.creature.getUseBlockBreak()
-                && this.creature.atFrustrationThreshold()
         ) {
             return false;
         }
@@ -195,7 +187,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
             boolean breakableBlocksInFront = useBlockBreakPath && this.creature.hasBreakableBlocksInFront();
 
             //execute move when target is in range
-            if (breakableBlocksInFront || !useBlockBreakPath && (targetWithinRange || this.selectedMoveUsedDueToFrustration)) {
+            if (breakableBlocksInFront || !useBlockBreakPath && targetWithinRange) {
                 // Use the same target-facing heading as prediction, without adding saved neck yaw twice.
                 if (this.selectedMoveBuilder.getUseLookBasedFacing()) {
                     float moveYaw = this.creature.getAnimationData().getModelYaw();
@@ -227,6 +219,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
 
                 this.hasExecutedMove = true;
                 this.executingBlockBreak = breakableBlocksInFront;
+                if (!this.executingBlockBreak) this.creature.getCreatureMoves().recordAiMoveUse(this.moveRuleBuilder);
                 if (this.executingBlockBreak) this.creature.snapshotBlockBreakPlan();
                 this.blockBreakEffectAttemptCountAtMoveStart = this.creature.getBlockBreakEffectAttemptCount();
                 this.moveFinishCountAtMoveStart = this.creature.getMoveFinishCount();
@@ -307,6 +300,21 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                     else this.creature.getMoveHelper().setMoveTo(target.posX, target.posY, target.posZ, 1D);
                     this.rememberTargetPos(target);
                 }
+            }
+        }
+        else if (!this.selectedMoveBuilder.getRequireFindTargetToUse()) {
+            this.creature.setCurrentMove(this.selectedMoveName);
+            if (!this.creature.getCurrentMove().equals(this.selectedMoveName)) return;
+            if (!this.creature.useStamina(this.selectedMoveBuilder.getStaminaCost())) {
+                this.creature.setCurrentMove("");
+                return;
+            }
+            this.hasExecutedMove = true;
+            this.creature.getCreatureMoves().recordAiMoveUse(this.moveRuleBuilder);
+            this.moveFinishCountAtMoveStart = this.creature.getMoveFinishCount();
+            this.creature.getCreaturePathNavigate().clearPath();
+            if (this.selectedMoveBuilder.getOnMoveBeginEffect() != null) {
+                this.selectedMoveBuilder.getOnMoveBeginEffect().accept(this.creature, target);
             }
         }
     }

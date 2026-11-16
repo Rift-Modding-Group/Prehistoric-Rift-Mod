@@ -4,8 +4,6 @@ import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.VerticalDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.prift.server.sound.RiftSounds;
 import net.minecraft.util.SoundCategory;
@@ -59,12 +57,10 @@ public class BulletSeedBuilder extends CreatureMoveBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("bullet_seed");
+            super("bullet_seed", MoveCategory.RANGED);
             this.setPriorityPredicate((creature, target) -> {
-                        return (target != null && target.isEntityAlive()) ? 0 : -1;
-                    })
-                    .addDetectionRule(new HorizontalDistanceFromUserDetectionRule(16D))
-                    .addDetectionRule(new VerticalDistanceFromUserDetectionRule(16D));
+                        return (target != null && target.isEntityAlive());
+                    });
         }
     }
 }

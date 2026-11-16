@@ -6,7 +6,6 @@ import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.server.effect.RiftParalysisEffect;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
-import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
@@ -14,6 +13,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilde
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
+import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder.MoveCategory;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.AnimatedHitboxDetectionRule;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
@@ -27,10 +27,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
 * A creature's moves are to be stored and managed here
@@ -46,6 +49,11 @@ public class CreatureMoveStorage {
     private final Map<String, Integer> moveMaximumCooldowns = new HashMap<>();
     //dynamically updated priority list for usable moves
     private final PriorityList<CreatureMoveSelectorBuilder.MoveRule> prioritizedUsableMoves = new PriorityList<>();
+    @Nullable
+    private CreatureMoveSelectorBuilder.MoveRule blockBreakMoveRule;
+    @Nullable
+    private CreatureMoveSelectorBuilder.MoveRule repeatedAiMoveRule;
+    private int remainingAiMoveUses;
     //the phase of the creature that has this
     @NotNull
     private String creaturePhase = "";
@@ -68,6 +76,7 @@ public class CreatureMoveStorage {
      * */
     public void setCreatureUser(@Nullable RiftCreatureBuilder creatureUser) {
         if (this.creatureType != creatureUser) {
+            this.resetAiMoveRepeats();
             for (CreatureMoveSelectorBuilder.MoveRule rule : this.getUsableMoveRules()) this.prioritizedUsableMoves.remove(rule);
             this.learnedMoves.clear();
             this.moveBanks.clear();
@@ -95,61 +104,64 @@ public class CreatureMoveStorage {
     public void updateUsableMoves(@NotNull RiftCreature creature, @Nullable EntityLivingBase target) {
         if (!this.isInitialized()) return;
 
-        CreatureMoveSelectorBuilder.MoveRule blockBreakMoveRule = this.getBlockBreakMoveRule(creature, target);
+        AbstractCreatureBuilder<?> configuration = this.getMoveConfiguration(this.creaturePhase);
+        if (configuration == null) return;
+        List<MoveCategory> categories = Arrays.asList(configuration.getMoveCategorySelector().apply(creature, target));
+        CreatureMoveSelectorBuilder.MoveRule pathClearingRule = this.getBlockBreakMoveRule(creature, target);
+        Set<String> selectedMoves = new HashSet<>();
+        boolean hasTarget = target != null && target.isEntityAlive();
         for (CreatureMoveSelectorBuilder.MoveRule moveRule : this.getUsableMoveRules()) {
             MoveRuleBuilder moveRuleBuilder = moveRule.moveRuleBuilder();
-
-            boolean useDueToFrustration = moveRule.moveResult() == CreatureMoveResult.USE_MOVE
-                    && target != null
-                    && target.isEntityAlive()
-                    && creature.atFrustrationThreshold()
-                    && moveRuleBuilder.getUseWhenFrustrated();
-            int index = useDueToFrustration ? 0 : moveRuleBuilder.getPriorityPredicate().apply(creature, target);
             CreatureMoveBuilder moveBuilder = moveRule.moveResult() == CreatureMoveResult.USE_MOVE
                     ? this.getUsableMoveBuilder(this.creaturePhase, moveRuleBuilder.getMoveName())
                     : null;
+            boolean statusMove = moveRule.moveResult() == CreatureMoveResult.USE_MOVE
+                    && moveRuleBuilder.getMoveCategory() == MoveCategory.STATUS;
+            boolean clearsPath = moveRule.equals(pathClearingRule);
+            boolean eligible = moveRuleBuilder.getPriorityPredicate().apply(creature, target)
+                    && (statusMove || clearsPath || categories.contains(moveRuleBuilder.getMoveCategory()));
             boolean canPathIntoDetectionRange = moveBuilder != null
                     && moveBuilder.getRequireFindTargetToUse()
                     && (moveBuilder.getMakesContact() || moveRuleBuilder.getDetectionRules().stream()
                     .anyMatch(AnimatedHitboxDetectionRule.class::isInstance))
                     && !moveRuleBuilder.getDontPathToTarget();
 
-            if (index >= 0 && (target == null
-                    || !target.isEntityAlive()
-                    || (!canPathIntoDetectionRange && !CreatureMoveHelper.targetMatchesAnyDetectionRule(moveRuleBuilder, creature, target)))
-            ) {
-                index = -1;
+            if (moveRule.moveResult() == CreatureMoveResult.USE_MOVE && moveBuilder == null) eligible = false;
+            if ((moveBuilder == null || moveBuilder.getRequireFindTargetToUse()) && !hasTarget) eligible = false;
+            //Approach actions retain their move until its detection range can be reached.
+            //Path clearing targets the planned obstruction rather than the attack target.
+            if (eligible && !clearsPath && !canPathIntoDetectionRange && !moveRuleBuilder.getDetectionRules().isEmpty()
+                    && (!hasTarget || !CreatureMoveHelper.targetMatchesAnyDetectionRule(moveRuleBuilder, creature, target))) {
+                eligible = false;
             }
 
-            //block-breaking moves r prioritized over attack leaps, ranged
-            //fallbacks, and ordinary attacks until it has opened the shorter corridor
-            if (blockBreakMoveRule != null && !moveRule.equals(blockBreakMoveRule)) index = -1;
+            //STATUS moves may interrupt an approach; other attacks wait for the corridor to open.
+            if (pathClearingRule != null && !clearsPath && !statusMove) eligible = false;
 
-            //let ordinary move pathing take a survivable route down instead of repeatedly
-            //selecting a leap attack across the opening.
-            if (index >= 0 && moveRule.moveResult() == CreatureMoveResult.LEAP
-                    && target != null
-                    && target.isEntityAlive()
-                    && creature.getCreaturePathNavigate().hasSafeDownwardWalkingPathTo(target)
-            ) {
-                index = -1;
+            //Let ordinary pathing take a survivable route down instead of repeatedly leaping.
+            if (eligible && moveRule.moveResult() == CreatureMoveResult.LEAP
+                    && hasTarget && creature.getCreaturePathNavigate().hasSafeDownwardWalkingPathTo(target)) {
+                eligible = false;
             }
 
-            //being on cooldown forcibly changes the index to -1
-            if (this.moveCurrentCooldown(moveRuleBuilder.getMoveName()) > 0) {
-                index = -1;
-            }
-
+            if (this.moveCurrentCooldown(moveRuleBuilder.getMoveName()) > 0) eligible = false;
             float requiredStaminaFraction = MoveResult.valueOf(moveRule.moveResult().name()).staminaConsumption(moveBuilder);
-            //moves selected to open a planned route are navigation work and remain usable without stamina
-            if (index >= 0 && !moveRule.equals(blockBreakMoveRule) && requiredStaminaFraction > 0f && creature.getStamina() <= 0f) {
-                index = -1;
-            }
+            //Clearing planned obstructions remains navigation work and does not consume stamina.
+            if (!clearsPath && requiredStaminaFraction > 0f && creature.getStamina() <= 0f) eligible = false;
 
             this.prioritizedUsableMoves.remove(moveRule);
-
-            //positive indexes can be added
-            if (index >= 0) this.prioritizedUsableMoves.add(index, moveRule);
+            if (!eligible) continue;
+            //Multiple alternative rules must not give one move extra chances in the random pool.
+            if (moveRule.moveResult() == CreatureMoveResult.USE_MOVE && !selectedMoves.add(moveRuleBuilder.getMoveName())) continue;
+            if (moveRule.moveResult() == CreatureMoveResult.USE_MOVE && this.repeatedAiMoveRule != null
+                    && this.repeatedAiMoveRule.moveRuleBuilder().getMoveName().equals(moveRuleBuilder.getMoveName())) {
+                this.repeatedAiMoveRule = moveRule;
+            }
+            int selectionTier;
+            if (statusMove) selectionTier = 0;
+            else if (clearsPath) selectionTier = 1;
+            else selectionTier = 2;
+            this.prioritizedUsableMoves.add(selectionTier, moveRule);
         }
     }
 
@@ -158,46 +170,70 @@ public class CreatureMoveStorage {
             @NotNull RiftCreature creature,
             @Nullable EntityLivingBase target
     ) {
-        if (target == null || !target.isEntityAlive() || !creature.hasBlockBreakZone()) return null;
-
-        CreatureMoveSelectorBuilder.MoveRule bestRule = null;
-        int bestPriority = Integer.MAX_VALUE;
-        for (CreatureMoveSelectorBuilder.MoveRule moveRule : this.getUsableMoveRules()) {
-            if (moveRule.moveResult() != CreatureMoveResult.USE_MOVE) continue;
-
-            MoveRuleBuilder ruleBuilder = moveRule.moveRuleBuilder();
-            if (!ruleBuilder.getUseBlockBreak()
-                    || ruleBuilder.getDontPathToTarget()
-                    || this.moveCurrentCooldown(ruleBuilder.getMoveName()) > 0) {
-                continue;
-            }
-
-            CreatureMoveBuilder moveBuilder = this.getUsableMoveBuilder(this.creaturePhase, ruleBuilder.getMoveName());
-            if (moveBuilder == null
-                    || !moveBuilder.getRequireFindTargetToUse()
-                    || moveBuilder.getMoveType() == CreatureMoveBuilder.MoveType.STATUS
-                    || !moveBuilder.getMakesContact()) {
-                continue;
-            }
-
-            int priority = creature.atFrustrationThreshold() && ruleBuilder.getUseWhenFrustrated()
-                    ? 0
-                    : ruleBuilder.getPriorityPredicate().apply(creature, target);
-            if (priority >= 0 && priority < bestPriority) {
-                bestRule = moveRule;
-                bestPriority = priority;
-            }
+        if (target == null || !target.isEntityAlive() || !creature.hasBlockBreakZone()) {
+            this.blockBreakMoveRule = null;
+            return null;
         }
 
-        return bestRule != null && creature.getCreaturePathNavigate().shouldUseBlockBreakPath(target)
-                ? bestRule : null;
+        List<CreatureMoveSelectorBuilder.MoveRule> candidates = new ArrayList<>();
+        Set<String> moves = new HashSet<>();
+        for (CreatureMoveSelectorBuilder.MoveRule moveRule : this.getUsableMoveRules()) {
+            if (moveRule.moveResult() != CreatureMoveResult.USE_MOVE) continue;
+            MoveRuleBuilder ruleBuilder = moveRule.moveRuleBuilder();
+            if (ruleBuilder.getDontPathToTarget()
+                    || this.moveCurrentCooldown(ruleBuilder.getMoveName()) > 0
+                    || !ruleBuilder.getPriorityPredicate().apply(creature, target)) continue;
+
+            CreatureMoveBuilder moveBuilder = this.getUsableMoveBuilder(this.creaturePhase, ruleBuilder.getMoveName());
+            if (moveBuilder == null || !moveBuilder.getUseBlockBreak()
+                    || !moveBuilder.getRequireFindTargetToUse()
+                    || moveBuilder.getMoveType() == CreatureMoveBuilder.MoveType.STATUS
+                    || !moveBuilder.getMakesContact()) continue;
+            if (moves.add(ruleBuilder.getMoveName())) candidates.add(moveRule);
+        }
+
+        if (candidates.isEmpty() || !creature.getCreaturePathNavigate().shouldUseBlockBreakPath(target)) {
+            this.blockBreakMoveRule = null;
+            return null;
+        }
+        if (!candidates.contains(this.blockBreakMoveRule)) {
+            this.blockBreakMoveRule = candidates.get(creature.getRNG().nextInt(candidates.size()));
+        }
+        return this.blockBreakMoveRule;
     }
 
     @Nullable
     public ImmutablePair<CreatureMoveSelectorBuilder.MoveRule, Integer> getBestMoveRuleUnmounted(
             @Nullable CreatureMoveSelectorBuilder.MoveRule preferredMoveRule
     ) {
+        if (this.repeatedAiMoveRule != null && this.remainingAiMoveUses > 0) {
+            return this.prioritizedUsableMoves.nextWithPriority(this.repeatedAiMoveRule, preferredMoveRule);
+        }
         return this.prioritizedUsableMoves.nextWithPriority(preferredMoveRule);
+    }
+
+    /**
+     * Record a paid AI move start, after pathing and stamina checks have succeeded.
+     * Approaches and block-clearing uses do not advance an offensive repeat sequence.
+     */
+    public void recordAiMoveUse(@NotNull MoveRuleBuilder rule) {
+        if (this.repeatedAiMoveRule != null && this.remainingAiMoveUses > 0
+                && this.repeatedAiMoveRule.moveRuleBuilder().getMoveName().equals(rule.getMoveName())) {
+            this.remainingAiMoveUses--;
+            if (this.remainingAiMoveUses == 0) this.repeatedAiMoveRule = null;
+        }
+        else {
+            this.remainingAiMoveUses = rule.getAdditionalAIUses();
+            if (this.remainingAiMoveUses > 0) {
+                this.repeatedAiMoveRule = new CreatureMoveSelectorBuilder.MoveRule(CreatureMoveResult.USE_MOVE, rule);
+            }
+            else this.repeatedAiMoveRule = null;
+        }
+    }
+
+    public void resetAiMoveRepeats() {
+        this.repeatedAiMoveRule = null;
+        this.remainingAiMoveUses = 0;
     }
 
 
@@ -306,6 +342,7 @@ public class CreatureMoveStorage {
         if (phase.equals(this.creaturePhase) && !this.currentMove.isEmpty() && !moves.equals(previousMoves)) {
             throw new IllegalStateException("The active move must finish before equipped moves can change");
         }
+        if (phase.equals(this.creaturePhase) && !moves.equals(previousMoves)) this.resetAiMoveRepeats();
         for (CreatureMoveSelectorBuilder.MoveRule rule : this.getUsableMoveRules()) {
             this.prioritizedUsableMoves.remove(rule);
         }
@@ -325,6 +362,7 @@ public class CreatureMoveStorage {
 
     public void setCreaturePhase(@NotNull String phase) {
         if (phase.equals(this.creaturePhase)) return;
+        this.resetAiMoveRepeats();
         for (CreatureMoveSelectorBuilder.MoveRule rule : this.getUsableMoveRules()) this.prioritizedUsableMoves.remove(rule);
         this.creaturePhase = phase;
     }
@@ -711,6 +749,7 @@ public class CreatureMoveStorage {
     }
 
     public void readFromNBT(@NotNull NBTTagCompound nbtTagCompound) {
+        this.resetAiMoveRepeats();
         for (CreatureMoveSelectorBuilder.MoveRule rule : this.getUsableMoveRules()) this.prioritizedUsableMoves.remove(rule);
         this.learnedMoves.clear();
         this.moveBanks.clear();

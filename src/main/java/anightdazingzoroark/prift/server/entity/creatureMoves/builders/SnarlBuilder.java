@@ -4,8 +4,6 @@ import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.AnimatedHitboxDetectionRule;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.VerticalDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.jsonParsing.raw.RawMolangValue;
@@ -62,14 +60,10 @@ public class SnarlBuilder extends CreatureMoveBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("snarl");
+            super("snarl", MoveCategory.MELEE);
             this.setPriorityPredicate((creature, target) -> {
-                        if (target != null && target.isEntityAlive() && !creature.bodyTouchingLiquid() && creature.isOnGround()) {
-                            return 0;
-                        }
-                        return -1;
+                        return target != null && target.isEntityAlive() && !creature.bodyTouchingLiquid() && creature.isOnGround();
                     })
-                    .addDetectionRule(new HorizontalDistanceFromUserDetectionRule(12D))
                     .setDontPathToTarget();
         }
     }

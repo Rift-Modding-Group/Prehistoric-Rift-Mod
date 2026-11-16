@@ -5,7 +5,6 @@ import anightdazingzoroark.prift.api.creature.CreatureMoveGraphic;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.riftlib.sounds.RiftLibSoundHelper;
 import net.minecraft.util.SoundCategory;
@@ -52,17 +51,11 @@ public class DrillRushBuilder extends CreatureMoveBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("drill_rush");
+            super("drill_rush", MoveCategory.MELEE);
             this.setPriorityPredicate((creature, target) -> {
-                        if (target != null && target.isEntityAlive() && creature.isOnGround()
-                                && !creature.bodyTouchingLiquid()
-                                && creature.horizontalDistanceFromEntity(target) >= 3D
-                                && creature.horizontalDistanceFromEntity(target) <= 16D) {
-                            return 4;
-                        }
-                        return -1;
+                        return target != null && target.isEntityAlive() && creature.isOnGround()
+                                && !creature.bodyTouchingLiquid() && creature.hasStraightWalkingPathTo(target);
                     })
-                    .addDetectionRule(new HorizontalDistanceFromUserDetectionRule(3D, 16D))
                     .setDontPathToTarget();
         }
     }

@@ -18,15 +18,18 @@ public class MoveRuleBuilder {
     @NotNull
     private final String moveName;
     @NotNull
-    private BiFunction<ICreature, EntityLivingBase, Integer> priorityPredicate = (creature, target) -> -1;
+    private BiFunction<ICreature, EntityLivingBase, Boolean> priorityPredicate = (creature, target) -> false;
+    @NotNull
+    private MoveCategory moveCategory;
     @NotNull
     private final List<DetectionRule> detectionRules = new ArrayList<>();
     private boolean canUseWhenFrustrated;
     private boolean dontPathToTarget;
-    private boolean useBlockBreak;
+    private int additionalAIUses;
 
-    public MoveRuleBuilder(@NotNull String moveName) {
+    public MoveRuleBuilder(@NotNull String moveName, @NotNull MoveCategory moveCategory) {
         this.moveName = moveName;
+        this.moveCategory = moveCategory;
     }
 
     public void lock() {
@@ -38,19 +41,27 @@ public class MoveRuleBuilder {
         return this.moveName;
     }
 
-    public MoveRuleBuilder setPriorityPredicate(int priority) {
+    @NotNull
+    public MoveRuleBuilder setMoveCategory(@NotNull MoveCategory moveCategory) {
         this.checkIfLocked();
-        return this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive() ? priority : -1);
+        this.moveCategory = moveCategory;
+        return this;
     }
 
-    public MoveRuleBuilder setPriorityPredicate(@NotNull BiFunction<ICreature, EntityLivingBase, Integer> priorityPredicate) {
+    @NotNull
+    public MoveCategory getMoveCategory() {
+        return this.moveCategory;
+    }
+
+    @NotNull
+    public MoveRuleBuilder setPriorityPredicate(@NotNull BiFunction<ICreature, EntityLivingBase, Boolean> priorityPredicate) {
         this.checkIfLocked();
         this.priorityPredicate = priorityPredicate;
         return this;
     }
 
     @NotNull
-    public BiFunction<ICreature, EntityLivingBase, Integer> getPriorityPredicate() {
+    public BiFunction<ICreature, EntityLivingBase, Boolean> getPriorityPredicate() {
         return this.priorityPredicate;
     }
 
@@ -89,16 +100,21 @@ public class MoveRuleBuilder {
     }
 
     /**
-     * Make it so this move can be used in clearing paths when pathfinding
+     * Prefer this move for this many additional AI uses after its initial use.
+     * Each use must still be eligible. Zero leaves ordinary move selection unchanged.
      */
-    public MoveRuleBuilder setUseBlockBreak() {
+    @NotNull
+    public MoveRuleBuilder setAdditionalAIUses(int additionalAiUses) {
         this.checkIfLocked();
-        this.useBlockBreak = true;
+        if (additionalAiUses < 0) {
+            throw new IllegalArgumentException("Additional AI uses must be nonnegative!");
+        }
+        this.additionalAIUses = additionalAiUses;
         return this;
     }
 
-    public boolean getUseBlockBreak() {
-        return this.useBlockBreak;
+    public int getAdditionalAIUses() {
+        return this.additionalAIUses;
     }
 
     @Override
@@ -110,5 +126,11 @@ public class MoveRuleBuilder {
         if (this.locked) {
             throw new IllegalCallerException("A setter for a move rule builder cannot be called after the move rule is registered!");
         }
+    }
+
+    public enum MoveCategory {
+        MELEE,
+        RANGED,
+        STATUS
     }
 }

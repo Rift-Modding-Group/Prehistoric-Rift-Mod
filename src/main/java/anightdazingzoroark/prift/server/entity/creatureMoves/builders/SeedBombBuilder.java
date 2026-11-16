@@ -3,8 +3,7 @@ package anightdazingzoroark.prift.server.entity.creatureMoves.builders;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.VerticalDistanceFromUserDetectionRule;
+import anightdazingzoroark.prift.api.creature.builder.detectionRule.HitboxDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.server.entity.RiftMoveExplosion;
@@ -62,12 +61,9 @@ public class SeedBombBuilder extends CreatureMoveBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("seed_bomb");
-            this.setPriorityPredicate((creature, target) -> {
-                        return (target != null && target.isEntityAlive()) ? 0 : -1;
-                    })
-                    .addDetectionRule(new HorizontalDistanceFromUserDetectionRule(12D, 16D))
-                    .addDetectionRule(new VerticalDistanceFromUserDetectionRule(4D, 16D))
+            super("seed_bomb", MoveCategory.RANGED);
+            this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive())
+                    .addDetectionRule(new HitboxDistanceFromUserDetectionRule(4D))
                     .setDontPathToTarget();
         }
     }

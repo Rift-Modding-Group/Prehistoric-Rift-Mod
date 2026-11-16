@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creatureMoves.builders;
 
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.server.effect.RiftEffects;
 import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.riftlib.sounds.RiftLibSoundHelper;
@@ -33,5 +34,12 @@ public class ScaleShedBuilder extends CreatureMoveBuilder {
                 })
                 .setUseLookBasedFacing()
                 .setCooldown(900);
+    }
+
+    public static class Rule extends MoveRuleBuilder {
+        public Rule() {
+            super("scale_shed", MoveCategory.STATUS);
+            this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive());
+        }
     }
 }

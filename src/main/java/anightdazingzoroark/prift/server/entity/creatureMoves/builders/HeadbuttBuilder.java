@@ -10,7 +10,8 @@ import net.minecraft.util.math.Vec3d;
 
 public class HeadbuttBuilder extends CreatureMoveBuilder {
     public HeadbuttBuilder() {
-        this.setMakesContact()
+        this.setUseBlockBreak()
+                .setMakesContact()
                 .setMoveType(CreatureMoveBuilder.MoveType.PHYSICAL)
                 .setRequireFindTargetToUse()
                 .setStaminaCost(0.02f)
@@ -33,10 +34,9 @@ public class HeadbuttBuilder extends CreatureMoveBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("headbutt");
-            this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                    .addDetectionRule(new AnimatedHitboxDetectionRule("headAttack", CreatureLookUtil::captureHeadAttackLook))
-                    .setUseBlockBreak();
+            super("headbutt", MoveCategory.MELEE);
+            this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive())
+                    .addDetectionRule(new AnimatedHitboxDetectionRule("headAttack", CreatureLookUtil::captureHeadAttackLook));
         }
     }
 }

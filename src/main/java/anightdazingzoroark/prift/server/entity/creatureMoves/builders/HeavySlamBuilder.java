@@ -74,15 +74,11 @@ public class HeavySlamBuilder extends CreatureMoveBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("heavy_slam");
+            super("heavy_slam", MoveCategory.MELEE);
             this.setPriorityPredicate((creature, target) -> {
-                        if (target != null && target.isEntityAlive() && !creature.bodyTouchingLiquid()
+                        return target != null && target.isEntityAlive() && !creature.bodyTouchingLiquid()
                                 && creature.isOnGround()
-                                && creature.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), "stompHitZone")
-                        ) {
-                            return 0;
-                        }
-                        return -1;
+                                && creature.aabbIntersectsBoundingBox(target.getEntityBoundingBox(), "stompHitZone");
                     })
                     .addDetectionRule(new BoundingBoxDetectionRule("stompHitZone"))
                     .setDontPathToTarget();

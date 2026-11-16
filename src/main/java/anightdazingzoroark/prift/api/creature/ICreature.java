@@ -112,6 +112,8 @@ public interface ICreature {
 
     boolean isTamed();
 
+    int getTicksExisted();
+
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean isHerdLeader();
 

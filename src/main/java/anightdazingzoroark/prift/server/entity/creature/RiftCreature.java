@@ -1043,6 +1043,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     @Override
+    public int getTicksExisted() {
+        return this.ticksExisted;
+    }
+
+    @Override
     public boolean hasStraightWalkingPathTo(@NotNull EntityLivingBase target) {
         return this.getCreaturePathNavigate().hasStraightWalkingPathTo(target);
     }
@@ -3248,6 +3253,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Override
     protected void addPassenger(Entity passenger) {
         super.addPassenger(passenger);
+        if (!this.world.isRemote) this.getCreatureMoves().resetAiMoveRepeats();
         if (!this.world.isRemote && passenger == this.getControllingPassenger()) {
             this.setAttackTarget(null);
             this.getNavigator().clearPath();

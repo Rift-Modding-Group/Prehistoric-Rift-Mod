@@ -3,7 +3,7 @@ package anightdazingzoroark.prift.server.entity.creatureMoves.builders;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
+import anightdazingzoroark.prift.api.creature.builder.detectionRule.HitboxDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.api.util.MathUtil;
 
 public class ChargeBuilder extends CreatureMoveBuilder {
@@ -33,18 +33,12 @@ public class ChargeBuilder extends CreatureMoveBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("charge");
+            super("charge", MoveCategory.MELEE);
             this.setPriorityPredicate((creature, target) -> {
-                        if (target != null && target.isEntityAlive() && creature.isOnGround()
-                                && !creature.bodyTouchingLiquid() && creature.hasStraightWalkingPathTo(target)
-                                && creature.horizontalDistanceFromEntity(target) >= 6D
-                                && creature.horizontalDistanceFromEntity(target) <= 16D
-                        ) {
-                            return 4;
-                        }
-                        return -1;
+                        return target != null && target.isEntityAlive() && creature.isOnGround()
+                                && !creature.bodyTouchingLiquid() && creature.hasStraightWalkingPathTo(target);
                     })
-                    .addDetectionRule(new HorizontalDistanceFromUserDetectionRule(6D, 16D))
+                    .addDetectionRule(new HitboxDistanceFromUserDetectionRule(4D))
                     .setDontPathToTarget();
         }
     }

@@ -24,7 +24,8 @@ import net.minecraft.util.ResourceLocation;
 
 public class FlameSpitBuilder extends CreatureMoveBuilder {
     public FlameSpitBuilder() {
-        this.setStaminaCost(0.15f)
+        this.setUseBlockBreak()
+                .setStaminaCost(0.15f)
                 .setBasePower(40)
                 .setRequireFindTargetToUse()
                 .setElement(Element.FIRE)
@@ -65,10 +66,9 @@ public class FlameSpitBuilder extends CreatureMoveBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("flame_spit");
-            this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                    .addDetectionRule(new AnimatedHitboxDetectionRule("flame_spit", CreatureLookUtil::captureHeadAttackLook))
-                    .setUseBlockBreak();
+            super("flame_spit", MoveCategory.MELEE);
+            this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive())
+                    .addDetectionRule(new AnimatedHitboxDetectionRule("flame_spit", CreatureLookUtil::captureHeadAttackLook));
         }
     }
 }

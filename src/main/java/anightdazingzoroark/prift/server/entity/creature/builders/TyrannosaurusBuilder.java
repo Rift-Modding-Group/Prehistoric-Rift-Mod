@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creature.builders;
 
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
+import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder.MoveCategory;
 import anightdazingzoroark.prift.api.creature.builder.*;
 
 import java.util.List;
@@ -48,6 +49,11 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                 .addBlockBreakLevel("shovel", 2)
                 .addBlockBreakLevel("axe", 2)
                 //---moves---
+                .setMoveCategorySelector((creature, target) -> {
+                    if (target == null || !target.isEntityAlive()) return new MoveCategory[0];
+                    if (creature.isUnableToPathToTarget()) return new MoveCategory[]{MoveCategory.RANGED};
+                    return new MoveCategory[]{MoveCategory.MELEE, MoveCategory.RANGED};
+                })
                 .setMaximumMoveSlots(5)
                 .setSpawnMoves("bite", "stomp", "fire_fang", "power_roar", "flamethrower")
                 .setLevelupMoves(Map.of(
@@ -75,8 +81,8 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                 .setMoveAnimations("magma_storm", "power_roar")
                 .setMoveAnimations("heavy_slam", "heavy_slam")
                 .setMoveSelector(new CreatureMoveSelectorBuilder()
-                        .setCanSprintToAttack(1, 8D, 16D)
-                        .setCanLeapToAttack(1, 6D, 12D, false)
+                        .setCanSprintToAttack(8D, 16D)
+                        .setCanLeapToAttack(6D, 12D, false)
                 )
                 //---targeting---
                 .addDefaultTargetWhitelistEntry("animal")

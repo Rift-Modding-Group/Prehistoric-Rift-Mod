@@ -124,10 +124,8 @@ public class ThagomizeBuilder extends CreatureMoveBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("thagomize");
-            this.setPriorityPredicate((creature, target) -> {
-                        return target != null && target.isEntityAlive() && creature.atRageThreshold() ? 0 : -1;
-                    })
+            super("thagomize", MoveCategory.MELEE);
+            this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive())
                     .addDetectionRule(new AnimatedHitboxDetectionRule("thagomizer", TailAttackLookUtil::captureThagomizeLook));
         }
     }

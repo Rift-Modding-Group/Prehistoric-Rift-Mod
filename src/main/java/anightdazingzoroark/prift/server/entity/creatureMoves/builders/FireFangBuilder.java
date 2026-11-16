@@ -26,7 +26,8 @@ import net.minecraft.util.math.Vec3d;
 
 public class FireFangBuilder extends StandardMeleeBuilder {
     public FireFangBuilder() {
-        this.setBasePower(50)
+        this.setUseBlockBreak()
+                .setBasePower(50)
                 .setElement(Element.FIRE)
                 .setOnMoveBeginEffect((creature, target) -> {
                     CreatureLookUtil.captureHeadAttackLook(creature);
@@ -78,10 +79,9 @@ public class FireFangBuilder extends StandardMeleeBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("fire_fang");
-            this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", CreatureLookUtil::captureHeadAttackLook))
-                    .setUseBlockBreak();
+            super("fire_fang", MoveCategory.MELEE);
+            this.setPriorityPredicate((creature, target) -> target != null)
+                    .addDetectionRule(new AnimatedHitboxDetectionRule("jaw", CreatureLookUtil::captureHeadAttackLook));
         }
     }
 }

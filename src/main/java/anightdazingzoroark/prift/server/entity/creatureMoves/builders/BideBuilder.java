@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.server.entity.creatureMoves.builders;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
+import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.riftlib.core.IAnimatable;
 import anightdazingzoroark.riftlib.jsonParsing.raw.RawMolangValue;
@@ -90,5 +91,17 @@ public class BideBuilder extends CreatureMoveBuilder {
                         .setReleaseOnEndWindup()
                         .setMaxChargeUp(100)
                 );
+    }
+
+    public static class Rule extends MoveRuleBuilder {
+        public Rule() {
+            super("bide", MoveCategory.MELEE);
+            this.setPriorityPredicate((creature, target) -> {
+                if (target == null || !target.isEntityAlive()) return false;
+                boolean atInterval = creature.getTicksExisted() % 600 == 0;
+                boolean canUse = creature.getEntityWorld().rand.nextInt(4) == 0;
+                return atInterval && canUse;
+            });
+        }
     }
 }

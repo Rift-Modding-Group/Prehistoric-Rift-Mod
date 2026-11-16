@@ -9,7 +9,8 @@ import net.minecraft.util.math.Vec3d;
 
 public class TailSlamBuilder extends CreatureMoveBuilder {
     public TailSlamBuilder() {
-        this.setMakesContact()
+        this.setUseBlockBreak()
+                .setMakesContact()
                 .setMoveType(CreatureMoveBuilder.MoveType.PHYSICAL)
                 .setRequireFindTargetToUse()
                 .setOnMoveHitEffect(creature -> {
@@ -31,10 +32,9 @@ public class TailSlamBuilder extends CreatureMoveBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("tail_slam");
-            this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                    .addDetectionRule(new BoundingBoxDetectionRule("frontZone", true))
-                    .setUseBlockBreak();
+            super("tail_slam", MoveCategory.MELEE);
+            this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive())
+                    .addDetectionRule(new BoundingBoxDetectionRule("frontZone", true));
         }
     }
 }

@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.CreatureMoveRegistry;
 import anightdazingzoroark.prift.api.creature.CreatureMoveRegistry.MoveDefinition;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
+import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder.MoveCategory;
 import anightdazingzoroark.prift.api.creature.config.RiftCreatureFood;
 import anightdazingzoroark.prift.api.creature.CreatureMoveResult;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.DetectionRule;
@@ -37,6 +38,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private int[] spawnEggColors;
     private float[] scaleRangeForAge;
     private String tributeItemPartName;
+    private BiFunction<ICreature, EntityLivingBase, MoveCategory[]> moveCategorySelector;
     @NotNull
     private Map<String, MoveDefinition> moves = Map.of();
     @NotNull
@@ -95,6 +97,9 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
      * */
     public void lock() {
         if (this.locked) return;
+        if (this.moveCategorySelector == null) {
+            throw new IllegalArgumentException("A creature move category selector is required");
+        }
         this.setMoveSelector(this.moveSelector);
         if (this.getSpawnMoves().size() > this.getMaximumMoveSlots()) {
             throw new IllegalArgumentException("Spawn moves exceed the maximum move slots");
@@ -708,6 +713,23 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
         return this.moveSelector;
     }
 
+    /**
+     * Required AI move categories for the current situation. Matching moves have equal chances;
+     * array order does not establish priority. Eligible STATUS moves are always considered first.
+     * Choose categories by distance here; detection rules describe the move's geometry.
+     */
+    @NotNull
+    public T setMoveCategorySelector(@NotNull BiFunction<ICreature, EntityLivingBase, MoveCategory[]> moveCategorySelector) {
+        this.checkIfLocked();
+        this.moveCategorySelector = moveCategorySelector;
+        return this.getThis();
+    }
+
+    @NotNull
+    public BiFunction<ICreature, EntityLivingBase, MoveCategory[]> getMoveCategorySelector() {
+        return this.moveCategorySelector;
+    }
+
     public T addBlockBreakLevel(@NotNull String tool, int level) {
         this.checkIfLocked();
 
@@ -839,6 +861,7 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
                 && this.creatureDiet != null
                 && this.spawnEggColors != null
                 && this.scaleRangeForAge != null
+                && this.moveCategorySelector != null
                 && (this.navigation == null || this.navigation.isValid())
                 && (this.domestication == null || this.domestication.isValid())
                 && this.tributeItemPartName != null;

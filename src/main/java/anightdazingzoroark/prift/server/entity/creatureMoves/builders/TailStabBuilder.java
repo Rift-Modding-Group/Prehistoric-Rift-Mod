@@ -10,7 +10,8 @@ import net.minecraft.util.math.Vec3d;
 
 public class TailStabBuilder extends StandardMeleeBuilder {
     public TailStabBuilder() {
-        this.setBasePower(50)
+        this.setUseBlockBreak()
+                .setBasePower(50)
                 .setOnMoveBeginEffect(TailAttackLookUtil::captureTailStabLook)
                 .setOnMoveHitEffect(creature -> {
                     Vec3d creaturePos = creature.getPositionVector();
@@ -28,10 +29,9 @@ public class TailStabBuilder extends StandardMeleeBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("tail_stab");
-            this.setPriorityPredicate((creature, target) -> target != null ? 3 : -1)
-                    .addDetectionRule(new AnimatedHitboxDetectionRule("thagomizer", TailAttackLookUtil::captureTailStabLook))
-                    .setUseBlockBreak();
+            super("tail_stab", MoveCategory.MELEE);
+            this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive())
+                    .addDetectionRule(new AnimatedHitboxDetectionRule("thagomizer", TailAttackLookUtil::captureTailStabLook));
         }
     }
 }

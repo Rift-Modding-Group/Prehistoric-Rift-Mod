@@ -4,8 +4,6 @@ import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.VerticalDistanceFromUserDetectionRule;
 import anightdazingzoroark.riftlib.ray.RiftLibRayBuilder;
 import anightdazingzoroark.riftlib.ray.rayShape.impact.RiftLibRayEllipsoidImpactShape;
 import net.minecraft.block.Block;
@@ -61,17 +59,13 @@ public class TremorBuilder extends CreatureMoveBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("tremor");
+            super("tremor", MoveCategory.MELEE);
             this.setPriorityPredicate((creature, target) -> {
-                        if (target != null && target.isEntityAlive() && !creature.bodyTouchingLiquid() && creature.isOnGround()) {
-                            return 0;
-                        }
-                        return -1;
+                        return target != null && target.isEntityAlive()
+                                && !creature.bodyTouchingLiquid() && creature.isOnGround()
+                                && target.onGround;
                     })
-                    .addDetectionRule(new HorizontalDistanceFromUserDetectionRule(8D))
-                    .addDetectionRule(new VerticalDistanceFromUserDetectionRule(1D, false))
-                    .setDontPathToTarget()
-                    .setUseWhenFrustrated();
+                    .setDontPathToTarget();
         }
     }
 }

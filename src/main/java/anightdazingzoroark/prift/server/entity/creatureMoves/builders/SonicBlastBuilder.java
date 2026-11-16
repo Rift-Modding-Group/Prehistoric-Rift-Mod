@@ -5,8 +5,7 @@ import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.HorizontalDistanceFromUserDetectionRule;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.VerticalDistanceFromUserDetectionRule;
+import anightdazingzoroark.prift.api.creature.builder.detectionRule.HitboxDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.riftlib.RiftLib;
@@ -52,7 +51,8 @@ public class SonicBlastBuilder extends CreatureMoveBuilder {
                         .setChargeType(CreatureMoveChargeupBuilder.ChargeType.CHARGE_UP_WHILE_USE)
                         .setCanRotate()
                         .setCanLookWhileUsing()
-                        .setMaxChargeUp(300)
+                        .setMaxChargeUp(100)
+                        .setCooldownMultiplier(3D)
                         .setPrereleaseEndEffect(creature -> {
                             //create the particles
                             RiftLibParticleHelper.createParticle(
@@ -132,16 +132,9 @@ public class SonicBlastBuilder extends CreatureMoveBuilder {
 
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
-            super("sonic_blast");
-            this.setPriorityPredicate((creature, target) -> {
-                        if (target != null && target.isEntityAlive() && (creature.atRageThreshold() || creature.isUnableToPathToTarget())) {
-                            return 0;
-                        }
-                        return -1;
-                    })
-                    .addDetectionRule(new HorizontalDistanceFromUserDetectionRule(6D, 16D))
-                    .addDetectionRule(new VerticalDistanceFromUserDetectionRule(5D, 16D))
-                    .setUseWhenFrustrated();
+            super("sonic_blast", MoveCategory.RANGED);
+            this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive())
+                    .addDetectionRule(new HitboxDistanceFromUserDetectionRule(4D));
         }
     }
 }
