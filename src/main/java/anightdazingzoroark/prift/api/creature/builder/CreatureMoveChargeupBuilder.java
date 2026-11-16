@@ -17,8 +17,10 @@ import java.util.function.Function;
  */
 public class CreatureMoveChargeupBuilder {
     private boolean locked;
-    @NotNull
-    private ChargeType chargeType = ChargeType.NONE;
+
+    //must be defined
+    @Nullable
+    private ChargeType chargeType;
     private boolean canRotate;
     private boolean canRotateWhileCharging;
     private boolean canLookWhileUsing;
@@ -29,6 +31,7 @@ public class CreatureMoveChargeupBuilder {
     private Function<ICreature, Double> cooldownMultiplier = creature -> 2D;
     private boolean releaseOnEndWindup;
 
+    //must be left alone
     @Nullable
     private BiConsumer<ICreature, Integer> windupEndEffect;
     private Consumer<ICreature> prereleaseEndEffect;
@@ -38,20 +41,21 @@ public class CreatureMoveChargeupBuilder {
     private TriConsumer<ICreature, Integer, Entity> onHitEntityDuringRelease;
 
     @NotNull
-    public CreatureMoveChargeupBuilder setChargeType(@NotNull ChargeType chargeType) {
-        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
+    public CreatureMoveChargeupBuilder setChargeType(@Nullable ChargeType chargeType) {
+        this.checkIfLocked();
         this.chargeType = chargeType;
         return this;
     }
 
     @NotNull
     public ChargeType getChargeType() {
+        if (this.chargeType == null) throw new IllegalStateException("The charge type must be defined before it can be accessed!");
         return this.chargeType;
     }
 
     @NotNull
     public CreatureMoveChargeupBuilder setCanRotate() {
-        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
+        this.checkIfLocked();
         this.canRotate = true;
         return this;
     }
@@ -64,7 +68,7 @@ public class CreatureMoveChargeupBuilder {
      * Allow aiming during prewindup and windup, independently of movement.
      * */
     public CreatureMoveChargeupBuilder setCanRotateWhileCharging() {
-        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
+        this.checkIfLocked();
         this.canRotateWhileCharging = true;
         return this;
     }
@@ -78,7 +82,7 @@ public class CreatureMoveChargeupBuilder {
      * */
     @NotNull
     public CreatureMoveChargeupBuilder setCanLookWhileUsing() {
-        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
+        this.checkIfLocked();
         this.canLookWhileUsing = true;
         return this;
     }
@@ -88,7 +92,7 @@ public class CreatureMoveChargeupBuilder {
     }
 
     public CreatureMoveChargeupBuilder setMaxChargeUp(int value) {
-        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
+        this.checkIfLocked();
         this.maxChargeUp = value;
         return this;
     }
@@ -101,7 +105,7 @@ public class CreatureMoveChargeupBuilder {
      * Set a base power move multiplier based on the charge
      * */
     public CreatureMoveChargeupBuilder setBasePowerMultiplier(@NotNull TriFunction<ICreature, Integer, Integer, Double> basePowerMultiplier) {
-        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
+        this.checkIfLocked();
         this.basePowerMultiplier = basePowerMultiplier;
         return this;
     }
@@ -115,13 +119,13 @@ public class CreatureMoveChargeupBuilder {
      * Set a cooldown multiplier based on the charge
      * */
     public CreatureMoveChargeupBuilder setCooldownMultiplier(double value) {
-        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
+        this.checkIfLocked();
         this.cooldownMultiplier = creature -> value;
         return this;
     }
 
     public CreatureMoveChargeupBuilder setCooldownMultiplier(@NotNull Function<ICreature, Double> cooldownMultiplier) {
-        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
+        this.checkIfLocked();
         this.cooldownMultiplier = cooldownMultiplier;
         return this;
     }
@@ -136,7 +140,7 @@ public class CreatureMoveChargeupBuilder {
      * Meant for use on moves with
      * */
     public CreatureMoveChargeupBuilder setReleaseOnEndWindup() {
-        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
+        this.checkIfLocked();
         if (this.chargeType != ChargeType.CHARGE_UP_THEN_RELEASE) throw new IllegalCallerException("This can only be defined on moves that charge up to then release!");
         this.releaseOnEndWindup = true;
         return this;
@@ -151,7 +155,7 @@ public class CreatureMoveChargeupBuilder {
      */
     @NotNull
     public CreatureMoveChargeupBuilder setWindupEndEffect(@NotNull BiConsumer<ICreature, Integer> windupEndEffect) {
-        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
+        this.checkIfLocked();
         this.windupEndEffect = windupEndEffect;
         return this;
     }
@@ -162,7 +166,7 @@ public class CreatureMoveChargeupBuilder {
     }
 
     public CreatureMoveChargeupBuilder setPrereleaseEndEffect(@NotNull Consumer<ICreature> prereleaseEndEffect) {
-        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
+        this.checkIfLocked();
         this.prereleaseEndEffect = prereleaseEndEffect;
         return this;
     }
@@ -173,7 +177,7 @@ public class CreatureMoveChargeupBuilder {
     }
 
     public CreatureMoveChargeupBuilder setReleaseEndEffect(@NotNull Consumer<ICreature> releaseEndEffect) {
-        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
+        this.checkIfLocked();
         this.releaseEndEffect = releaseEndEffect;
         return this;
     }
@@ -187,7 +191,7 @@ public class CreatureMoveChargeupBuilder {
      * What happens while a creature is winding up
      * */
     public CreatureMoveChargeupBuilder setWindupEffect(@NotNull BiConsumer<ICreature, Integer> windupEffect) {
-        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
+        this.checkIfLocked();
         this.windupEffect = windupEffect;
         return this;
     }
@@ -198,7 +202,7 @@ public class CreatureMoveChargeupBuilder {
     }
 
     public CreatureMoveChargeupBuilder setReleaseDuringUseEffect(@NotNull TriConsumer<ICreature, Integer, EntityLivingBase> releaseDuringUseEffect) {
-        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
+        this.checkIfLocked();
         this.releaseDuringUseEffect = releaseDuringUseEffect;
         return this;
     }
@@ -212,7 +216,7 @@ public class CreatureMoveChargeupBuilder {
      * What happens when entities are hit while in the release state
      * */
     public CreatureMoveChargeupBuilder setOnHitEntityDuringRelease(@NotNull TriConsumer<ICreature, Integer, Entity> onHitEntityDuringRelease) {
-        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
+        this.checkIfLocked();
         this.onHitEntityDuringRelease = onHitEntityDuringRelease;
         return this;
     }
@@ -224,6 +228,13 @@ public class CreatureMoveChargeupBuilder {
 
     public void lock() {
         this.locked = true;
+    }
+
+    /**
+     * Whether the required charge type has been defined.
+     */
+    public boolean isValid() {
+        return this.chargeType != null;
     }
 
     @NotNull
@@ -243,6 +254,13 @@ public class CreatureMoveChargeupBuilder {
         toReturn.releaseDuringUseEffect = this.releaseDuringUseEffect;
         toReturn.onHitEntityDuringRelease = this.onHitEntityDuringRelease;
         return toReturn;
+    }
+
+    /**
+     * Put this on every setter in builder to protect from post-creation editing
+     * */
+    protected void checkIfLocked() {
+        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
     }
 
     public enum ChargeType {

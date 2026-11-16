@@ -405,7 +405,8 @@ public class CreatureMoveBuilder {
         if (this.moveType == null) return false;
         if (this.staminaDrainPerSecond > 0f && this.moveChargeupBuilder == null) return false;
         if (this.moveChargeupBuilder != null) {
-            return this.moveChargeupBuilder.getChargeType() != CreatureMoveChargeupBuilder.ChargeType.NONE;
+            return this.moveChargeupBuilder.isValid()
+                    && this.moveChargeupBuilder.getChargeType() != CreatureMoveChargeupBuilder.ChargeType.NONE;
         }
         return true;
     }
