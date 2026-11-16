@@ -130,10 +130,26 @@ public class CreatureLookUtil {
     }
 
     /**
+     * Capture the initial ray aim when a move begins.
+     */
+    public static void initializeRayLook(@NotNull ICreature creature, @Nullable Entity target, @NotNull String locatorName) {
+        captureRayLook(creature, target, locatorName, true);
+    }
+
+    /**
+     * Update ray aim during a move, easing AI corrections from the moving locator.
+     */
+    public static void updateRayLook(@NotNull ICreature creature, @Nullable Entity target, @NotNull String locatorName) {
+        captureRayLook(creature, target, locatorName, false);
+    }
+
+    /**
      * Capture a straight ray's aim from its live locator to the AI target, or from the rider's look.
      * Animations distribute ray_release_pitch and ray_aim_yaw across their own bones.
      */
-    public static void captureRayLook(@NotNull ICreature creature, @Nullable Entity target, @NotNull String locatorName) {
+    private static void captureRayLook(
+            @NotNull ICreature creature, @Nullable Entity target, @NotNull String locatorName, boolean initialize
+    ) {
         AnimationDataEntityLiving data = creature.getAnimationData();
         Entity rider = creature.getControllingPassenger();
         double pitch;
@@ -153,14 +169,25 @@ public class CreatureLookUtil {
             pitch = Math.toDegrees(Math.atan2(-direction.y, Math.hypot(direction.x, direction.z)));
             yaw = MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(-direction.x, direction.z)) - data.getModelYaw());
         }
-        double swing = MathUtil.slopeResult(data.getHeadPitch(1f), true, HEAD_PITCH_MIN, 0D, -1D, 1D);
-        data.setVariable("ray_body_aim", rider == null ? 1D : 0D);
-        data.setVariable("ray_aim_swing", swing);
+        float[] bounds = getRiddenAimPitchBounds(creature, creature.getCurrentMove());
+        pitch = Math.clamp(pitch, bounds[0], bounds[1]);
+        double worldYaw = yaw + data.getModelYaw();
+        if (rider == null && !initialize) {
+            // The animated mouth moves as it aims. Ease its correction so that movement cannot
+            // alternate between competing aim poses on successive server ticks.
+            pitch = MathUtil.slopeResult(0.25D, true, 0D, 1D, data.getVariable("ray_release_pitch"), pitch);
+            double previousWorldYaw = data.getVariable("ray_world_aim_yaw");
+            double yawCorrection = MathHelper.wrapDegrees(worldYaw - previousWorldYaw);
+            worldYaw = MathUtil.slopeResult(0.25D, true, 0D, 1D, previousWorldYaw, previousWorldYaw + yawCorrection);
+            yaw = MathHelper.wrapDegrees(worldYaw - data.getModelYaw());
+        }
+        data.setVariable("ray_world_aim_yaw", MathHelper.wrapDegrees(worldYaw));
         data.setVariable("ray_aim_yaw", yaw);
         data.setVariable("ray_release_pitch", pitch);
         double windupPitch;
         if (pitch < 0D) windupPitch = Math.max(10D, pitch + 30D);
-        else windupPitch = pitch - 30D;
+        // Keep a visible upward windup even when a steep downward aim exceeds the recoil offset.
+        else windupPitch = Math.min(-10D, pitch - 30D);
         data.setVariable("ray_windup_pitch", windupPitch);
     }
 

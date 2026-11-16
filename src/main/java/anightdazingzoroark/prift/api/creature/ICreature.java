@@ -106,6 +106,8 @@ public interface ICreature {
 
     boolean isInHerd();
 
+    boolean isBeingRidden();
+
     boolean getUseBlockBreak();
 
     boolean getWasRecentlyHit();

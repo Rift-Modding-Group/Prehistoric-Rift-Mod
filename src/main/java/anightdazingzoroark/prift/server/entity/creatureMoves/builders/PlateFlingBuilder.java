@@ -15,6 +15,7 @@ public class PlateFlingBuilder extends CreatureMoveBuilder {
                 .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
                 .setRiddenPitchBounds(-75f, 35f)
                 .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.POINT)
+                .setCooldown(100)
                 .setOnMoveBeginEffect((creature, target) -> creature.getAnimationData().setVariable("plate_fling_shot", 0D))
                 .setOnMoveHitEffect(creature -> {
                     AnimationDataEntityLiving data = creature.getAnimationData();

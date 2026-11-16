@@ -45,10 +45,10 @@ public class FlamethrowerBuilder extends CreatureMoveBuilder {
                 .setRequireFindTargetToUse()
                 .setMoveType(CreatureMoveBuilder.MoveType.SPECIAL)
                 .setElement(Element.FIRE)
-                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.captureRayLook(creature, target, "straightCreatureRaySource"))
+                .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.initializeRayLook(creature, target, "straightCreatureRaySource"))
                 .setWhileMoveUseEffect((creature, target) -> {
-                    if (!creature.getAnimationData().getHolder().isBeingRidden() && (target == null || !target.isEntityAlive())) return;
-                    CreatureLookUtil.captureRayLook(creature, target, "straightCreatureRaySource");
+                    if (!creature.isBeingRidden() && (target == null || !target.isEntityAlive())) return;
+                    CreatureLookUtil.updateRayLook(creature, target, "straightCreatureRaySource");
                 })
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                         .setChargeType(CreatureMoveChargeupBuilder.ChargeType.CHARGE_UP_WHILE_USE)

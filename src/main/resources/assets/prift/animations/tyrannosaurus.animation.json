@@ -177,7 +177,7 @@
 				"head": {
 					"rotation": {
 						"0.0": [0, 0, 0],
-						"0.32": ["22.5 * ray_body_aim * ray_aim_swing", 0, 0]
+						"0.32": [0, 0, 0]
 					}
 				},
 				"body": {
@@ -214,7 +214,7 @@
 					"rotation": {
 						"0.0": ["ray_windup_pitch", 0, 0],
 						"0.32": [
-							"(ray_body_aim ? ray_release_pitch : query.head_x_rotation) - math.clamp(query.head_x_rotation, -15, 15) - 25 * ray_body_aim * ray_aim_swing",
+							"query.head_x_rotation - math.clamp(query.head_x_rotation, -15, 15)",
 							0,
 							0
 						]
@@ -223,7 +223,7 @@
 				"neck": {
 					"rotation": {
 						"0.0": ["math.clamp(query.head_x_rotation, -15, 15) - (ray_windup_pitch)", 0, 0],
-						"0.32": ["(ray_body_aim ? 2.5 * ray_aim_swing : 0) + math.clamp(query.head_x_rotation, -15, 15)", 0, 0]
+						"0.32": ["math.clamp(query.head_x_rotation, -15, 15)", 0, 0]
 					}
 				},
 				"lowerJaw": {
@@ -234,8 +234,8 @@
 				},
 				"head": {
 					"rotation": {
-						"0.0": ["22.5 * ray_body_aim * ray_aim_swing", 0, 0],
-						"0.32": ["22.5 * ray_body_aim * ray_aim_swing", 0, -7.5]
+						"0.0": [0, 0, 0],
+						"0.32": [0, 0, -7.5]
 					}
 				}
 			},
@@ -258,21 +258,21 @@
 				},
 				"body": {
 					"rotation": [
-						"(ray_body_aim ? ray_release_pitch : query.head_x_rotation) - math.clamp(query.head_x_rotation, -15, 15) - 25 * ray_body_aim * ray_aim_swing",
+						"query.head_x_rotation - math.clamp(query.head_x_rotation, -15, 15)",
 						0,
 						0
 					]
 				},
 				"neck": {
-					"rotation": ["(ray_body_aim ? 2.5 * ray_aim_swing : 0) + math.clamp(query.head_x_rotation, -15, 15)", 0, 0]
+					"rotation": ["math.clamp(query.head_x_rotation, -15, 15)", 0, 0]
 				},
 				"head": {
 					"rotation": {
-						"0.0": ["22.5 * ray_body_aim * ray_aim_swing", 0, -7.5],
-						"0.16": ["22.5 * ray_body_aim * ray_aim_swing", 0, 7.5],
-						"0.32": ["22.5 * ray_body_aim * ray_aim_swing", 0, -7.5],
-						"0.48": ["22.5 * ray_body_aim * ray_aim_swing", 0, 7.5],
-						"0.64": ["22.5 * ray_body_aim * ray_aim_swing", 0, -7.5]
+						"0.0": [0, 0, -7.5],
+						"0.16": [0, 0, 7.5],
+						"0.32": [0, 0, -7.5],
+						"0.48": [0, 0, 7.5],
+						"0.64": [0, 0, -7.5]
 					}
 				},
 				"lowerJaw": {
@@ -298,7 +298,7 @@
 				"body": {
 					"rotation": {
 						"0.0": [
-							"(ray_body_aim ? ray_release_pitch : query.head_x_rotation) - math.clamp(query.head_x_rotation, -15, 15) - 25 * ray_body_aim * ray_aim_swing",
+							"query.head_x_rotation - math.clamp(query.head_x_rotation, -15, 15)",
 							0,
 							0
 						],
@@ -307,13 +307,13 @@
 				},
 				"neck": {
 					"rotation": {
-						"0.0": ["(ray_body_aim ? 2.5 * ray_aim_swing : 0) + math.clamp(query.head_x_rotation, -15, 15)", 0, 0],
+						"0.0": ["math.clamp(query.head_x_rotation, -15, 15)", 0, 0],
 						"0.24": ["math.clamp(query.head_x_rotation, -15, 15)", "math.clamp(query.head_y_rotation, -15, 15)", 0]
 					}
 				},
 				"head": {
 					"rotation": {
-						"0.0": ["22.5 * ray_body_aim * ray_aim_swing", 0, 0],
+						"0.0": [0, 0, 0],
 						"0.24": [0, 0, 0]
 					}
 				},
