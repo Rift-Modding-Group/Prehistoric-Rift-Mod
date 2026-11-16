@@ -10,6 +10,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenAimingType;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeType;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureLeapHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.RiddenAimTarget;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -17,6 +18,7 @@ import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiData;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureGuiFactory;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureSprintHelper;
 import anightdazingzoroark.prift.server.message.*;
+import com.cleanroommc.client.input.mouse.MouseTurnEvent;
 import com.cleanroommc.modularui.factory.GuiManager;
 import com.cleanroommc.modularui.factory.ClientGUI;
 import net.minecraft.client.Minecraft;
@@ -68,6 +70,21 @@ public class ClientEvents {
     @NotNull
     private RiftCreatureRenderer.FadeState riderAimVisibility = new RiftCreatureRenderer.FadeState(false, 1f);
     private int translucentRiderId = -1;
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void onRidingMouseTurn(@NotNull MouseTurnEvent event) {
+        if (!(event.getPlayer().getRidingEntity() instanceof RiftCreature creature)
+                || creature.getControllingPassenger() != event.getPlayer()) return;
+
+        //block rotating while ridin a creature that uses a charge move and is charging
+        CreatureMoveBuilder move = creature.getCreatureMoves().getMoveBuilderCurrentMove();
+        if (move != null && move.getRiddenAimingType() == RiddenAimingType.CHARGE
+                && creature.getCreatureMoves().currentMoveMatches(creature.getCurrentMove(), ChargeupPhase.RELEASING)
+                && creature.getRushState().move().equals(creature.getCurrentMove())
+        ) {
+            event.setCanceled(true);
+        }
+    }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onRiderRenderPre(@NotNull RenderPlayerEvent.Pre event) {
