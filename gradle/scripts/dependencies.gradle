@@ -1,6 +1,5 @@
 repositories {
-    // Other repositories described by default:
-    // CleanroomMC: https://maven.cleanroommc.com
+    // CleanroomGradle supplies CleanroomMC, Maven Central and Mojang repositories.
     maven {
         name = 'CurseMaven'
         url = 'https://cursemaven.com'
@@ -18,11 +17,8 @@ repositories {
 }
 
 dependencies {
-    if (enable_lwjglx.toBoolean()) {
-        compileOnly "com.cleanroommc:lwjglx:1.0.0"
-    }
-    modImplementation 'curse.maven:hei-557549:6187146' // Use for mod Mixin example
-    modImplementation 'curse.maven:mmmmmmmmmmmm-225738:8514387'
+    implementation deobf('curse.maven:hei-557549:6187146')
+    implementation deobf('curse.maven:mmmmmmmmmmmm-225738:8514387')
 
     //compileOnly 'curse.maven:shoulder-surfing-reloaded-243190:4757879'
     //compileOnly "curse.maven:pyrotech-306676:4956838"
@@ -36,6 +32,6 @@ dependencies {
     testRuntimeOnly files("libs/riftlib-2.4.0-dev.jar")
     //compileOnly "curse.maven:serene-seasons-291874:2799213"
     //compileOnly "net.darkhax.gamestages:GameStages-1.12.2:2.0.123"
-    modImplementation ("com.cleanroommc:modularui:3.1.5") { transitive = false }
+    implementation(deobf("com.cleanroommc:modularui:3.1.5")) { transitive = false }
     implementation 'org.jetbrains:annotations:16.0.2'
 }

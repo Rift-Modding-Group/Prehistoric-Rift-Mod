@@ -10,6 +10,9 @@ if (publish_to_maven.toBoolean()) {
         publications {
             mavenJava(MavenPublication) {
                 from components.java // Publish with standard artifacts
+                artifact(tasks.named('reobfJar')) {
+                    classifier = 'srg'
+                }
                 setGroupId(root_package)// Publish with root package as maven group
                 setArtifactId(mod_id) // Publish artifacts with mod id as the artifact id
 

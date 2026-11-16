@@ -16,7 +16,8 @@ import org.apache.logging.log4j.Logger;
         modid = RiftInitialize.MODID,
         name = RiftInitialize.MODNAME,
         version = RiftInitialize.MODVERSION,
-        dependencies = "required-after:forge@[11.16.0.1865,);"
+        dependencies = "required-after:cleanroom@[0.7.0-alpha,);"
+                +"required-after:forge@[11.16.0.1865,);"
                 +"required-after:riftlib@[1.0.0,);"
                 +"required-after:modularui@[3.1.0,);"
                 +"after:harvestcraft@[1.12.2zb,);"

@@ -1,7 +1,8 @@
 {
   "required": true,
   "package": "anightdazingzoroark.prift.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_25",
+  "refmap": "prift.refmap.json",
   "target": "@env(DEFAULT)",
   "client": [
     "RiftMixinIgnoreRiddenEntityTarget"

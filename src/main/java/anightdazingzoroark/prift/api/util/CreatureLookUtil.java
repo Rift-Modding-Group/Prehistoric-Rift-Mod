@@ -28,7 +28,6 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
-import org.lwjglx.util.vector.Quaternion;
 
 import java.util.List;
 import java.util.Map;

@@ -140,7 +140,6 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Quaternionf;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
-import org.lwjglx.util.vector.Quaternion;
 
 import java.util.*;
 import java.util.function.Consumer;

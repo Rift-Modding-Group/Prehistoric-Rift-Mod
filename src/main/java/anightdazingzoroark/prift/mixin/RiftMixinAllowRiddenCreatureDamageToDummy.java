@@ -23,19 +23,19 @@ import testdummy.network.DamageMessage;
  * */
 @Mixin(value = EntityDummy.class)
 public abstract class RiftMixinAllowRiddenCreatureDamageToDummy {
-    @Shadow
+    @Shadow(remap = false)
     private int lastDamageTick;
-    @Shadow
+    @Shadow(remap = false)
     private EntityFloatingNumber myLittleNumber;
-    @Shadow
+    @Shadow(remap = false)
     private float maxDamage;
-    @Shadow
+    @Shadow(remap = false)
     private int damageCounter;
-    @Shadow
+    @Shadow(remap = false)
     private float damageTaken;
-    @Shadow
+    @Shadow(remap = false)
     private int firstDamageTick;
-    @Shadow
+    @Shadow(remap = false)
     private EntityPlayer lastAttacker;
 
     @Inject(method = "attackEntityFrom", at = @At("HEAD"), cancellable = true)

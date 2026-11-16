@@ -104,12 +104,12 @@ public class RiftCreatureRenderer extends GeoEntityLivingRenderer<RiftCreature> 
             }
             FloatBuffer values = BufferUtils.createFloatBuffer(16);
             float[] matrixValues = new float[16];
-            GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, values);
+            GL11.glGetFloatv(GL11.GL_MODELVIEW_MATRIX, values);
             values.get(matrixValues);
             Matrix4f modelView = new Matrix4f(matrixValues);
             modelView.transpose();
             values.clear();
-            GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, values);
+            GL11.glGetFloatv(GL11.GL_PROJECTION_MATRIX, values);
             values.get(matrixValues);
             Matrix4f modelToClip = new Matrix4f(matrixValues);
             modelToClip.transpose();
@@ -158,7 +158,7 @@ public class RiftCreatureRenderer extends GeoEntityLivingRenderer<RiftCreature> 
         int sourceAlpha = GL11.glGetInteger(GL14.GL_BLEND_SRC_ALPHA);
         int destinationAlpha = GL11.glGetInteger(GL14.GL_BLEND_DST_ALPHA);
         FloatBuffer color = BufferUtils.createFloatBuffer(16);
-        GL11.glGetFloat(GL11.GL_CURRENT_COLOR, color);
+        GL11.glGetFloatv(GL11.GL_CURRENT_COLOR, color);
 
         GlStateManager.enableDepth();
         GlStateManager.depthFunc(GL11.GL_LEQUAL);

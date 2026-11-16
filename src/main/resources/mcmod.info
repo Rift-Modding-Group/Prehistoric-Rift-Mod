@@ -11,6 +11,6 @@
     "credits": "Authors of this project",
     "logoFile": "",
     "screenshots": [],
-    "dependencies": ["riftlib@[1.0.0,)", "modularui@[3.1.0,)"]
+    "dependencies": ["cleanroom@[0.7.0-alpha,)", "riftlib@[1.0.0,)", "modularui@[3.1.0,)"]
   }
 ]
