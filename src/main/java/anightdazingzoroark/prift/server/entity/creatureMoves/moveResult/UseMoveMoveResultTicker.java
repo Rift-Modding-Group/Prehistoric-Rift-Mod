@@ -128,7 +128,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
                 this.hasLastLookDirection = false;
                 if (target != null && target.isEntityAlive()) {
                     this.creature.getLookHelper().setLookPositionWithEntity(target, 30f, this.creature.getVerticalFaceSpeed());
-                    if (charge.getCanRotateWhileReleasing()
+                    if (charge.getCanRotate()
                             && this.creature.getCreatureMoves().currentMoveMatches(this.selectedMoveName, ChargeupPhase.RELEASING)) {
                         double targetX = target.posX - this.creature.posX;
                         double targetZ = target.posZ - this.creature.posZ;
@@ -152,7 +152,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
             }
             else if (target != null && target.isEntityAlive()
                     && this.selectedMoveBuilder.getMoveChargeupBuilder() != null
-                    && this.selectedMoveBuilder.getMoveChargeupBuilder().getCanRotateWhileReleasing()
+                    && this.selectedMoveBuilder.getMoveChargeupBuilder().getCanRotate()
                     && this.creature.getCreatureMoves().currentMoveMatches(this.selectedMoveName, ChargeupPhase.RELEASING)
             ) {
                 double targetX = target.posX - this.creature.posX;

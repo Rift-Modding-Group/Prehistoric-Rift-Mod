@@ -56,6 +56,7 @@ import anightdazingzoroark.prift.api.util.CreatureMoveUtil;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenAimingType;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenCrosshairType;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeType;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
 import anightdazingzoroark.prift.server.entity.creatureMoves.CreatureMoveHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResult;
@@ -705,7 +706,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
             if (this.isBeingRidden()
                     && currentMoveChargeupBuilder != null
-                    && currentMoveChargeupBuilder.getChargeUpWhileUse()
+                    && currentMoveChargeupBuilder.getChargeType() == ChargeType.CHARGE_UP_WHILE_USE
                     && currentRiddenChargeupPhase != null
             ) {
                 if (this.riddenMoveChargeupPhase != currentRiddenChargeupPhase) {
@@ -2130,7 +2131,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             return;
         }
         CreatureMoveChargeupBuilder chargeupBuilder = moveBuilder.getMoveChargeupBuilder();
-        if (chargeupBuilder != null && chargeupBuilder.getChargeUpWhileUse()) {
+        if (chargeupBuilder != null && chargeupBuilder.getChargeType() == ChargeType.CHARGE_UP_WHILE_USE) {
             moveStorage.finishCurrentMoveChargeupPhase(this, ChargeupPhase.PREWINDUP);
         }
         if (moveBuilder.getOnMoveBeginEffect() != null) moveBuilder.getOnMoveBeginEffect().accept(this, null);
@@ -3401,7 +3402,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
             CreatureMoveBuilder creatureMoveBuilder = creatureMoveStorage.getMoveBuilderCurrentMove();
             CreatureMoveChargeupBuilder chargeupBuilder = creatureMoveBuilder == null ? null : creatureMoveBuilder.getMoveChargeupBuilder();
-            if (chargeupBuilder != null && chargeupBuilder.getChargeUpWhileUse()) {
+            if (chargeupBuilder != null && chargeupBuilder.getChargeType() == ChargeType.CHARGE_UP_WHILE_USE) {
                 creatureMoveStorage.finishCurrentMoveChargeupPhase(this, ChargeupPhase.WINDUP);
             }
         }, Side.SERVER));
@@ -3413,7 +3414,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
             CreatureMoveBuilder creatureMoveBuilder = creatureMoveStorage.getMoveBuilderCurrentMove();
             CreatureMoveChargeupBuilder chargeupBuilder = creatureMoveBuilder == null ? null : creatureMoveBuilder.getMoveChargeupBuilder();
-            if (chargeupBuilder != null && chargeupBuilder.getChargeUpThenRelease()) {
+            if (chargeupBuilder != null && chargeupBuilder.getChargeType() == ChargeType.CHARGE_UP_THEN_RELEASE) {
                 creatureMoveStorage.finishCurrentMoveChargeupPhase(this, ChargeupPhase.RELEASING);
             }
         }, Side.SERVER));

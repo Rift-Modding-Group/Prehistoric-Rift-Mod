@@ -41,7 +41,7 @@ public class FlameChargeBuilder extends CreatureMoveBuilder {
                 .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
                 .setRiddenPitchBounds(0f, 0f)
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
-                        .setChargeUpThenRelease()
+                        .setChargeType(CreatureMoveChargeupBuilder.ChargeType.CHARGE_UP_THEN_RELEASE)
                         .setCanRotateWhileCharging()
                         .setMaxChargeUp(100)
                         .setCooldownMultiplier(4D)
@@ -87,7 +87,7 @@ public class FlameChargeBuilder extends CreatureMoveBuilder {
                             );
 
                             //rush effects
-                            creature.setRecoilDamage(damage -> damage);
+                            creature.setRecoilDamage(damage -> damage * 0.25D);
                             int maximumRushTicks = (int) Math.ceil(MathUtil.slopeResult(charge, true, 0, 100, 0, 100));
                             creature.prepareRush(4D, maximumRushTicks, false, impactCreature -> {
                                 Vec3d impactPosition = impactCreature.getLocatorWorldPos("bodyCenter");

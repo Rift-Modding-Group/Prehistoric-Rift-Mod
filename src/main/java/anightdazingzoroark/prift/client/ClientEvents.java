@@ -9,6 +9,7 @@ import anightdazingzoroark.prift.client.ui.RiftPartyScreen;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenAimingType;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeType;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureLeapHelper;
 import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.RiddenAimTarget;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
@@ -402,7 +403,7 @@ public class ClientEvents {
                     String moveName = riddenCreature.getCreatureMoves().getUsableMoves().get(this.selectedRidingMove).getKey();
                     boolean retainChargedAim = this.ridingAimActive && this.ridingAimMove == this.selectedRidingMove
                             && selectedMove.getRiddenAimingType() == RiddenAimingType.RANGED
-                            && chargeupBuilder != null && chargeupBuilder.getChargeUpThenRelease()
+                            && chargeupBuilder != null && chargeupBuilder.getChargeType() == ChargeType.CHARGE_UP_THEN_RELEASE
                             && moveName.equals(riddenCreature.getCurrentMove());
                     //make sure that releasing aim button while charging means instant release
                     if (retainChargedAim) {
@@ -411,7 +412,7 @@ public class ClientEvents {
                         this.releaseSelectedRidingMove();
                     }
                     else {
-                        if (this.usingRidingMove && chargeupBuilder != null && chargeupBuilder.getChargeUpWhileUse()) {
+                        if (this.usingRidingMove && chargeupBuilder != null && chargeupBuilder.getChargeType() == ChargeType.CHARGE_UP_WHILE_USE) {
                             this.releaseSelectedRidingMove();
                         }
                         this.stopRidingAim();

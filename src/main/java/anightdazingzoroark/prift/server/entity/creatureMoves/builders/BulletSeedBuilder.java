@@ -20,7 +20,8 @@ public class BulletSeedBuilder extends CreatureMoveBuilder {
                 .setElement(Element.GRASS)
                 .setMoveType(CreatureMoveBuilder.MoveType.PHYSICAL)
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
-                        .setChargeUpWhileUse(true)
+                        .setChargeType(CreatureMoveChargeupBuilder.ChargeType.CHARGE_UP_WHILE_USE)
+                        .setCanRotate()
                         .setCanLookWhileUsing()
                         .setMaxChargeUp(100)
                         .setReleaseDuringUseEffect((creature, charge, target) -> {

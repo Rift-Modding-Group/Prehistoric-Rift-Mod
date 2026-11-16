@@ -49,7 +49,8 @@ public class SludgeWaveBuilder extends CreatureMoveBuilder {
                     CreatureLookUtil.captureRayLook(creature, target, "straightCreatureRaySource");
                 })
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
-                        .setChargeUpWhileUse(true)
+                        .setChargeType(CreatureMoveChargeupBuilder.ChargeType.CHARGE_UP_WHILE_USE)
+                        .setCanRotate()
                         .setCanLookWhileUsing()
                         .setMaxChargeUp(100)
                         .setCooldownMultiplier(6D)

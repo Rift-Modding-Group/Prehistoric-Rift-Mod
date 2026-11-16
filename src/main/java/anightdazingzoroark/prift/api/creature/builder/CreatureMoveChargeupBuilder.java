@@ -17,9 +17,9 @@ import java.util.function.Function;
  */
 public class CreatureMoveChargeupBuilder {
     private boolean locked;
-    private boolean chargeUpThenRelease;
-    private boolean chargeUpWhileUse;
-    private boolean canRotateWhileReleasing;
+    @NotNull
+    private ChargeType chargeType = ChargeType.NONE;
+    private boolean canRotate;
     private boolean canRotateWhileCharging;
     private boolean canLookWhileUsing;
     private int maxChargeUp = 100;
@@ -37,46 +37,27 @@ public class CreatureMoveChargeupBuilder {
     private TriConsumer<ICreature, Integer, EntityLivingBase> releaseDuringUseEffect;
     private TriConsumer<ICreature, Integer, Entity> onHitEntityDuringRelease;
 
-    public CreatureMoveChargeupBuilder setChargeUpThenRelease() {
+    @NotNull
+    public CreatureMoveChargeupBuilder setChargeType(@NotNull ChargeType chargeType) {
         if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
-        return this.setChargeUpThenRelease(false);
-    }
-
-    public CreatureMoveChargeupBuilder setChargeUpThenRelease(boolean canRotateWhileReleasing) {
-        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
-        if (this.chargeUpWhileUse) {
-            throw new IllegalStateException("A chargeup builder can only have one of chargeUpThenRelease and chargeUpWhileUse and not both!");
-        }
-        this.chargeUpThenRelease = true;
-        this.canRotateWhileReleasing = canRotateWhileReleasing;
+        this.chargeType = chargeType;
         return this;
     }
 
-    public boolean getChargeUpThenRelease() {
-        return this.chargeUpThenRelease;
+    @NotNull
+    public ChargeType getChargeType() {
+        return this.chargeType;
     }
 
-    public CreatureMoveChargeupBuilder setChargeUpWhileUse() {
+    @NotNull
+    public CreatureMoveChargeupBuilder setCanRotate() {
         if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
-        return this.setChargeUpWhileUse(false);
-    }
-
-    public CreatureMoveChargeupBuilder setChargeUpWhileUse(boolean canRotateWhileReleasing) {
-        if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
-        if (this.chargeUpThenRelease) {
-            throw new IllegalStateException("A chargeup builder can only have one of chargeUpThenRelease and chargeUpWhileUse and not both!");
-        }
-        this.chargeUpWhileUse = true;
-        this.canRotateWhileReleasing = canRotateWhileReleasing;
+        this.canRotate = true;
         return this;
     }
 
-    public boolean getChargeUpWhileUse() {
-        return this.chargeUpWhileUse;
-    }
-
-    public boolean getCanRotateWhileReleasing() {
-        return this.canRotateWhileReleasing;
+    public boolean getCanRotate() {
+        return this.canRotate;
     }
 
     /**
@@ -156,7 +137,7 @@ public class CreatureMoveChargeupBuilder {
      * */
     public CreatureMoveChargeupBuilder setReleaseOnEndWindup() {
         if (this.locked) throw new IllegalCallerException("A registered move chargeup builder cannot be changed");
-        if (!this.chargeUpThenRelease) throw new IllegalCallerException("This can only be defined on moves that charge up to then release!");
+        if (this.chargeType != ChargeType.CHARGE_UP_THEN_RELEASE) throw new IllegalCallerException("This can only be defined on moves that charge up to then release!");
         this.releaseOnEndWindup = true;
         return this;
     }
@@ -248,9 +229,8 @@ public class CreatureMoveChargeupBuilder {
     @NotNull
     public CreatureMoveChargeupBuilder copy() {
         CreatureMoveChargeupBuilder toReturn = new CreatureMoveChargeupBuilder();
-        toReturn.chargeUpThenRelease = this.chargeUpThenRelease;
-        toReturn.chargeUpWhileUse = this.chargeUpWhileUse;
-        toReturn.canRotateWhileReleasing = this.canRotateWhileReleasing;
+        toReturn.chargeType = this.chargeType;
+        toReturn.canRotate = this.canRotate;
         toReturn.canRotateWhileCharging = this.canRotateWhileCharging;
         toReturn.canLookWhileUsing = this.canLookWhileUsing;
         toReturn.maxChargeUp = this.maxChargeUp;
@@ -263,6 +243,12 @@ public class CreatureMoveChargeupBuilder {
         toReturn.releaseDuringUseEffect = this.releaseDuringUseEffect;
         toReturn.onHitEntityDuringRelease = this.onHitEntityDuringRelease;
         return toReturn;
+    }
+
+    public enum ChargeType {
+        NONE,
+        CHARGE_UP_THEN_RELEASE,
+        CHARGE_UP_WHILE_USE
     }
 
     public enum ChargeupPhase {

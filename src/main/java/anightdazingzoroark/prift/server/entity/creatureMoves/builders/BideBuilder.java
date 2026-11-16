@@ -86,7 +86,7 @@ public class BideBuilder extends CreatureMoveBuilder {
                     );
                 })
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
-                        .setChargeUpThenRelease()
+                        .setChargeType(CreatureMoveChargeupBuilder.ChargeType.CHARGE_UP_THEN_RELEASE)
                         .setReleaseOnEndWindup()
                         .setMaxChargeUp(100)
                 );

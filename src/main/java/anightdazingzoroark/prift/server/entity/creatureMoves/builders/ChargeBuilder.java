@@ -17,7 +17,7 @@ public class ChargeBuilder extends CreatureMoveBuilder {
                 .setRiddenPitchBounds(0f, 0f)
                 .setOnMoveBeginEffect((creature, target) -> creature.prepareRush(4D, 10))
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
-                        .setChargeUpThenRelease()
+                        .setChargeType(CreatureMoveChargeupBuilder.ChargeType.CHARGE_UP_THEN_RELEASE)
                         .setCanRotateWhileCharging()
                         .setMaxChargeUp(100)
                         .setCooldownMultiplier(4D)

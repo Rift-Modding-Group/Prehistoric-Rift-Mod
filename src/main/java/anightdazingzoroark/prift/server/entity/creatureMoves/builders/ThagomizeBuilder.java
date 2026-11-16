@@ -40,7 +40,7 @@ public class ThagomizeBuilder extends CreatureMoveBuilder {
                 })
                 .setOnMoveEndEffect(creature -> creature.setProperty("ChargeUpLevel", 0))
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
-                        .setChargeUpThenRelease()
+                        .setChargeType(CreatureMoveChargeupBuilder.ChargeType.CHARGE_UP_THEN_RELEASE)
                         .setCanRotateWhileCharging()
                         .setWindupEndEffect((creature, charge) -> TailAttackLookUtil.captureThagomizeLook(creature, creature.getAttackTarget()))
                         .setMaxChargeUp(100)

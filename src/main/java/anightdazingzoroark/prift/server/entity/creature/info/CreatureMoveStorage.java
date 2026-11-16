@@ -10,6 +10,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeType;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
@@ -421,11 +422,11 @@ public class CreatureMoveStorage {
             if (chargeupBuilder == null || this.currentMoveChargeupPhase == null) return;
 
             if (this.currentMoveReleaseRequested || this.currentMoveBuildup >= chargeupBuilder.getMaxChargeUp() && chargeupBuilder.getReleaseOnEndWindup()) {
-                if (chargeupBuilder.getChargeUpThenRelease() && this.currentMoveChargeupPhase == ChargeupPhase.WINDUP) {
+                if (chargeupBuilder.getChargeType() == ChargeType.CHARGE_UP_THEN_RELEASE && this.currentMoveChargeupPhase == ChargeupPhase.WINDUP) {
                     this.finishCurrentMoveChargeupPhase(creature);
                     return;
                 }
-                if (chargeupBuilder.getChargeUpWhileUse() && this.currentMoveChargeupPhase == ChargeupPhase.RELEASING) {
+                if (chargeupBuilder.getChargeType() == ChargeType.CHARGE_UP_WHILE_USE && this.currentMoveChargeupPhase == ChargeupPhase.RELEASING) {
                     this.finishCurrentMoveUse(creature);
                     return;
                 }
@@ -435,13 +436,13 @@ public class CreatureMoveStorage {
                 chargeupBuilder.getReleaseDuringUseEffect().accept(creature, this.currentMoveBuildup, creature.getAttackTarget());
             }
 
-            if (chargeupBuilder.getChargeUpThenRelease() && this.currentMoveChargeupPhase == ChargeupPhase.WINDUP) {
+            if (chargeupBuilder.getChargeType() == ChargeType.CHARGE_UP_THEN_RELEASE && this.currentMoveChargeupPhase == ChargeupPhase.WINDUP) {
                 this.addCurrentMoveBuildup(creature, chargeupBuilder);
                 if (!creature.isBeingRidden() && this.currentMoveBuildup >= chargeupBuilder.getMaxChargeUp()) {
                     this.finishCurrentMoveChargeupPhase(creature);
                 }
             }
-            else if (chargeupBuilder.getChargeUpWhileUse() && this.currentMoveChargeupPhase == ChargeupPhase.RELEASING) {
+            else if (chargeupBuilder.getChargeType() == ChargeType.CHARGE_UP_WHILE_USE && this.currentMoveChargeupPhase == ChargeupPhase.RELEASING) {
                 this.addCurrentMoveBuildup(creature, chargeupBuilder);
                 if (this.currentMoveBuildup >= chargeupBuilder.getMaxChargeUp()) {
                     this.finishCurrentMoveUse(creature);

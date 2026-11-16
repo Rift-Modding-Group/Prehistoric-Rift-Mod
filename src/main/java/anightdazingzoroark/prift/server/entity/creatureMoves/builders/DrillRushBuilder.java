@@ -22,7 +22,7 @@ public class DrillRushBuilder extends CreatureMoveBuilder {
                 .setRiddenAimingType(RiddenAimingType.RANGED)
                 .setRiddenPitchBounds(0f, 0f)
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
-                        .setChargeUpWhileUse()
+                        .setChargeType(CreatureMoveChargeupBuilder.ChargeType.CHARGE_UP_WHILE_USE)
                         .setCanRotateWhileCharging()
                         .setMaxChargeUp(20)
                         .setCooldownMultiplier(30D)
