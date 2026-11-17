@@ -116,7 +116,7 @@ public class CreatureMoveButton extends ButtonWidget<CreatureMoveButton> impleme
                         )
                         .child(IKey.dynamic(() -> {
                                     String power;
-                                    if (move.getMoveType() == CreatureMoveBuilder.MoveType.STATUS) {
+                                    if (move.getMoveType() == CreatureMoveBuilder.MoveType.STATUS || move.getBasePower() <= 0) {
                                         power = I18n.format("gui.prift.not_applicable");
                                     }
                                     else {

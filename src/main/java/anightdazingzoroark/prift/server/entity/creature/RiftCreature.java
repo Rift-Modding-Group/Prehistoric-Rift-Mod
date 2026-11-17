@@ -304,6 +304,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     private void applyCreatureTypeSettings() {
         this.setSize(this.creatureType.getMainHitboxSize()[0], this.creatureType.getMainHitboxSize()[1]);
+        this.setScale(1f);
+        this.setPosition(this.posX, this.posY, this.posZ);
 
         this.getEntityAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(this.creatureType.getCanBeKnockedBack() ? 0D : 1D);
 
