@@ -1,13 +1,10 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.RiftInitialize;
+import anightdazingzoroark.prift.server.entity.creature.builders.*;
 import anightdazingzoroark.prift.server.entity.creatureMoves.RiftMoves;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
-import anightdazingzoroark.prift.server.entity.creature.builders.DodoBuilder;
-import anightdazingzoroark.prift.server.entity.creature.builders.StegosaurusBuilder;
-import anightdazingzoroark.prift.server.entity.creature.builders.TriceratopsBuilder;
-import anightdazingzoroark.prift.server.entity.creature.builders.TyrannosaurusBuilder;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder.MoveCategory;
 import net.minecraft.world.World;
@@ -109,6 +106,7 @@ public class RiftCreatureRegistry {
         registerCreatureType(new StegosaurusBuilder());
         registerCreatureType(new DodoBuilder());
         registerCreatureType(new TriceratopsBuilder());
+        //registerCreatureType(new UtahraptorBuilder());
         /*
         registerCreatureType(
                 "utahraptor",

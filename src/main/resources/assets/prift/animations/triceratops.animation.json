@@ -825,6 +825,44 @@
 					}
 				}
 			}
+		},
+		"animation.triceratops.staggered": {
+			"loop": true,
+			"animation_length": 2,
+			"bones": {
+				"bodyFront": {
+					"rotation": [7.5, 0, 0]
+				},
+				"neck": {
+					"rotation": {
+						"0.0": [12.5, 0, 0],
+						"1.0": [17.5, 0, 0],
+						"2.0": [12.5, 0, 0]
+					}
+				},
+				"lowerBeak": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"1.0": [17.5, 0, 0],
+						"2.0": [0, 0, 0]
+					}
+				},
+				"leftFrontLeg": {
+					"rotation": [-7.3873, 1.2988, 9.9161]
+				},
+				"rightFrontLeg": {
+					"rotation": [-7.3873, 1.2988, -9.9161]
+				},
+				"tail0": {
+					"rotation": [-7.5, 0, 0]
+				},
+				"tail1": {
+					"rotation": [-7.5, 0, 0]
+				},
+				"tail2": {
+					"rotation": [-7.5, 0, 0]
+				}
+			}
 		}
 	}
 }
