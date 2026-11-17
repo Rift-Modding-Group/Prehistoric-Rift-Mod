@@ -54,6 +54,7 @@ public class RiftMoves {
         CreatureMoveRegistry.registerMove("sludge_wave", new SludgeWaveBuilder(), new SludgeWaveBuilder.Rule());
         CreatureMoveRegistry.registerMove("scratch", new ScratchBuilder(), new ScratchBuilder.Rule());
         CreatureMoveRegistry.registerMove("pack_call", new PackCallBuilder(), new PackCallBuilder.Rule());
+        CreatureMoveRegistry.registerMove("ally_call", new AllyCallBuilder(), new AllyCallBuilder.Rule());
         CreatureMoveRegistry.registerMove("feather_dart", new FeatherDartBuilder(), new FeatherDartBuilder.Rule());
         CreatureMoveRegistry.registerMove("metal_claw", new MetalClawBuilder(), new MetalClawBuilder.Rule());
         CreatureMoveRegistry.registerMove("kick", new KickBuilder(), new KickBuilder.Rule());

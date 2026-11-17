@@ -179,6 +179,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private static final DataParameter<Boolean> LEAPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USE_BLOCK_BREAK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> SLEEPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static DataParameter<Boolean> TEMPORARY_ALLY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Float> TAMING_PROGRESS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
     private static final DataParameter<Byte> TAME_TARGETING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Byte> DEPLOYMENT_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
@@ -243,6 +244,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Nullable
     private RiftCreatureHerdHelper herdHelper;
     private int recentlyHitTimer;
+    private long temporaryAllyExpiration;
 
     //target pathing state
     private boolean unableToPathToTarget;
@@ -368,6 +370,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.dataManager.register(LEAPING, false);
         this.dataManager.register(USE_BLOCK_BREAK, false);
         this.dataManager.register(SLEEPING, false);
+        this.dataManager.register(TEMPORARY_ALLY, false);
         this.dataManager.register(TAMING_PROGRESS, 0f);
         this.dataManager.register(TAME_TARGETING, (byte) 0);
         this.dataManager.register(DEPLOYMENT_TYPE, (byte) -1);
@@ -592,6 +595,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         //server only operations
         if (!this.world.isRemote) {
+            if (this.isTemporaryAlly() && this.world.getTotalWorldTime() >= this.temporaryAllyExpiration) {
+                this.setDead();
+                return;
+            }
+
             if (this.getDeploymentType() == RiftCreatureEnums.CreatureDeployment.PARTY_INACTIVE) {
                 this.setDead();
                 return;
@@ -902,6 +910,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public boolean processInteract(EntityPlayer player, @NotNull EnumHand hand) {
+        if (this.isTemporaryAlly()) return true;
+
         CreatureDomesticationBuilder domestication = this.creatureType.getDomestication();
         ItemStack heldItem = player.getHeldItem(hand);
 
@@ -1239,10 +1249,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             return true;
         }
         else if (entity instanceof EntityTameable entityTameable) {
-            return entityTameable.isTamed() && this.isTamed() && entityTameable.getOwner() != null && entityTameable.getOwner().equals(this.getOwner());
+            return entityTameable.isTamed() && this.isTamed() && this.getOwnerId() != null
+                    && this.getOwnerId().equals(entityTameable.getOwnerId());
         }
         else if (entity instanceof EntityPlayer entityPlayer) {
-            return this.isTamed() && this.getOwner() != null && this.getOwner().equals(entityPlayer);
+            return this.isTamed() && entityPlayer.getUniqueID().equals(this.getOwnerId());
         }
         return false;
     }
@@ -1460,6 +1471,21 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 0f, 1f
         );
         return 1.25f - maturity * 0.25f + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.05f;
+    }
+
+    //-----temporary allies-----
+    @Override
+    public boolean isTemporaryAlly() {
+        return this.dataManager.get(TEMPORARY_ALLY);
+    }
+
+    public void setTemporaryAllyLifetime(int ticks) {
+        this.dataManager.set(TEMPORARY_ALLY, ticks > 0);
+        this.temporaryAllyExpiration = this.world.getTotalWorldTime() + Math.max(0, ticks);
+        if (ticks > 0) {
+            this.leaveHerd();
+            this.herdHelper = null;
+        }
     }
 
     //-----herding management-----
@@ -3134,6 +3160,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
+        compound.setBoolean("TemporaryAlly", this.isTemporaryAlly());
+        compound.setLong("TemporaryAllyExpiration", this.temporaryAllyExpiration);
         if (this.creatureBoxHome != null) compound.setLong(CreatureBoxTileEntity.HOME_TAG, this.creatureBoxHome.toLong());
 
         //remembered player targets
@@ -3160,6 +3188,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
+        this.dataManager.set(TEMPORARY_ALLY, compound.getBoolean("TemporaryAlly"));
+        this.temporaryAllyExpiration = compound.getLong("TemporaryAllyExpiration");
         this.setCreatureBoxHome(compound.hasKey(CreatureBoxTileEntity.HOME_TAG)
                 ? BlockPos.fromLong(compound.getLong(CreatureBoxTileEntity.HOME_TAG)) : null);
 

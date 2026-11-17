@@ -39,6 +39,10 @@ public class PackCallBuilder extends CreatureMoveBuilder {
             this.setPriorityPredicate((creature, target) -> {
                 if (target == null || !target.isEntityAlive()) return false;
 
+                boolean atInterval = creature.getTicksExisted() % 600 == 0;
+                boolean canUse = creature.getEntityWorld().rand.nextInt(4) == 0;
+                if (!atInterval || !canUse) return false;
+
                 if (creature.isTamed()) return !getHitCreatures(creature).isEmpty();
                 else return creature.isHerdLeader() && creature.isInHerd();
             });

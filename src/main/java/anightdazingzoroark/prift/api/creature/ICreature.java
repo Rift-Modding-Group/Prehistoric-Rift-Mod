@@ -126,6 +126,8 @@ public interface ICreature {
 
     boolean isTamed();
 
+    boolean isTemporaryAlly();
+
     int getTicksExisted();
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

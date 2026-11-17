@@ -21,9 +21,7 @@ public class UtahraptorBuilder extends RiftCreatureBuilder {
                 .setMaxFallHeight(8)
                 .setDaysUntilAdult(3)
                 .setHitboxInformation(Map.of(
-                        "leg", creature -> 0.25D,
-                        "body", creature -> 0.75D,
-                        "head", creature -> 1.25D,
+                        "head", creature -> 1.5D,
                         "tail", creature -> 0.5D
                 ))
                 .setCanBeKnockedBack()
@@ -58,8 +56,8 @@ public class UtahraptorBuilder extends RiftCreatureBuilder {
                 .setLevelupMoves(Map.of(
                         1, List.of("metal_claw", "kick"),
                         4, List.of("backstab"),
-                        7, List.of("hyper_cutter")
-                        //10, List.of("ally_call")
+                        7, List.of("hyper_cutter"),
+                        10, List.of("ally_call")
                 ))
                 .setMoveAnimations("scratch", "scratch_1", "scratch_2")
                 .setMoveAnimations("pack_call", "pack_call")
@@ -68,6 +66,7 @@ public class UtahraptorBuilder extends RiftCreatureBuilder {
                 .setMoveAnimations("backstab", "scratch_1", "scratch_2")
                 .setMoveAnimations("kick", "kick")
                 .setMoveAnimations("hyper_cutter", "scratch_1", "scratch_2")
+                .setMoveAnimations("ally_call", "pack_call")
                 .setMoveSelector(new CreatureMoveSelectorBuilder()
                         .setCanLeapToAttack(6D, 12D, true)
                 )

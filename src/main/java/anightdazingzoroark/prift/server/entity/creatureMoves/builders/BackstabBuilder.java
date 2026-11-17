@@ -14,8 +14,9 @@ import net.minecraft.util.math.Vec3d;
 public class BackstabBuilder extends StandardMeleeBuilder {
     public BackstabBuilder() {
         this.setElement(Element.DARK)
+                .setStaminaCost(0.2f)
                 .setBasePower(120)
-                //.setCooldown(900)
+                .setCooldown(900)
                 .setCanUse(creature -> !creature.isInAnyEntityLineOfSight())
                 .setOnMoveBeginEffect((creature, target) -> {
                     ScratchLookUtil.captureScratchLook(creature, target);

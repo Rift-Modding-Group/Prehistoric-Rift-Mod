@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server;
 
+import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.server.config.RiftGeneralConfig;
 import anightdazingzoroark.prift.server.effect.RiftEffects;
 import anightdazingzoroark.prift.server.effect.RiftParalysisEffect;
@@ -11,6 +12,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.MobEffects;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.text.TextComponentString;
@@ -22,6 +24,7 @@ import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.world.BlockEvent;
 import anightdazingzoroark.prift.server.block.CreatureBoxBlock;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums.CreatureDeployment;
+import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
@@ -175,6 +178,15 @@ public class ServerEvents {
                 && creature.isTamed()
         ) {
             event.setDroppedExperience(0);
+        }
+    }
+
+    @SubscribeEvent
+    public void onAddPotion(PotionEvent.PotionApplicableEvent event) {
+        if (event.getPotionEffect().getPotion() == MobEffects.POISON && event.getEntityLiving() instanceof RiftCreature creature
+                && (creature.hasElement(Element.POISON) || creature.hasElement(Element.STEEL))
+        ) {
+            event.setResult(Event.Result.DENY);
         }
     }
 }
