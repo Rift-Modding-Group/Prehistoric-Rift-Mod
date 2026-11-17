@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.client.ui.widgets;
 
 import anightdazingzoroark.prift.api.creature.CreatureMoveRegistry;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
 import anightdazingzoroark.prift.client.ClientEnums;
 import anightdazingzoroark.prift.client.ui.syncValues.CreatureMovesSyncHandler;
 import anightdazingzoroark.prift.server.entity.creature.IRiftCreature;
@@ -31,7 +32,7 @@ import java.math.BigDecimal;
 public class CreatureMoveButton extends ButtonWidget<CreatureMoveButton> implements IViewport {
     private final CreatureMovesSyncHandler moves;
     @NotNull
-    private IRiftCreature creature;
+    private final IRiftCreature creature;
     private final boolean bank;
     private final int index;
     private String displayedMove = "";
@@ -97,22 +98,22 @@ public class CreatureMoveButton extends ButtonWidget<CreatureMoveButton> impleme
         }
         CreatureMoveBuilder move = definition.moveBuilder();
         ClientEnums.StaminaUse staminaUse = ClientEnums.StaminaUse.getUse(Math.max(move.getStaminaCost(), move.getStaminaDrainPerSecond()));
-        this.child(new Flow(GuiAxis.Y) {
-            @Override
-            public boolean canHover() {
-                return false;
-            }
-        }.sizeRel(1f).padding(4, 3).childPadding(1)
+        this.child(new FlowUnhoverable(GuiAxis.Y).sizeRel(1f).padding(4, 3).childPadding(1)
                 .child(IKey.dynamic(() -> I18n.format("move.creature." + this.displayedMove)).scale(0.75f).asWidget()
                         .widthRel(1f).height(11).textAlign(Alignment.CENTER))
-                .child(new Flow(GuiAxis.X) {
-                    @Override
-                    public boolean canHover() {
-                        return false;
-                    }
-                }.widthRel(1f).height(16).childPadding(2)
+                .child(new FlowUnhoverable(GuiAxis.X).widthRel(1f).height(16).childPadding(2)
                         .child(MoveIconTextures.getTextureForMoveType(move.getMoveType()))
                         .child(MoveIconTextures.getTextureForElementType(move.getElement()))
+                        .childIf(
+                                move.getMoveChargeupBuilder() != null,
+                                () -> {
+                                    //only exists to make intellij shut up about NPEs
+                                    if (move.getMoveChargeupBuilder() == null) {
+                                        throw new RuntimeException("That's not meant to happen...");
+                                    }
+                                    return MoveIconTextures.getTextureForChargeupType(move.getMoveChargeupBuilder().getChargeType());
+                                }
+                        )
                         .child(IKey.dynamic(() -> {
                                     String power;
                                     if (move.getMoveType() == CreatureMoveBuilder.MoveType.STATUS) {
@@ -127,26 +128,24 @@ public class CreatureMoveButton extends ButtonWidget<CreatureMoveButton> impleme
                                     }
                                     return I18n.format("gui.prift.creature_moves.base_power", power);
                                 })
-                                .scale(0.65f).asWidget().left(36).right(0).height(16).textAlign(Alignment.CenterRight)))
-                .child(new Flow(GuiAxis.X) {
-                    @Override
-                    public boolean canHover() {
-                        return false;
-                    }
-                }.widthRel(1f).height(9).childPadding(1)
+                                .scale(0.65f).asWidget().left(36).right(0).height(16).textAlign(Alignment.CenterRight))
+                )
+                .child(new FlowUnhoverable(GuiAxis.X).widthRel(1f).height(9).childPadding(1)
                         .child(IKey.lang("gui.prift.creature_moves.stamina",
                                         staminaUse == ClientEnums.StaminaUse.NONE ? I18n.format("gui.prift.not_applicable") : "")
                                 .scale(0.65f).asWidget())
-                        .children(staminaUse.ordinal(), ignored -> MoveIconTextures.getStaminaIcon())));
+                        .children(staminaUse.ordinal(), ignored -> MoveIconTextures.getStaminaIcon())
+                ));
     }
 
     @Override
     public void postDraw(@NotNull ModularGuiContext context, boolean transformed) {
-        // Tint after the icons and text, while still inside the list's clipping area.
         if (transformed || !this.moves.getSnapshot().busy()) return;
         new Rectangle().color(0x80999999).cornerRadius(6)
-                .draw(context, 0, 0, this.getArea().width, this.getArea().height,
-                        this.getActiveWidgetTheme(this.getWidgetTheme(this.getPanel().getTheme()), false));
+                .draw(
+                        context, 0, 0, this.getArea().width, this.getArea().height,
+                        this.getActiveWidgetTheme(this.getWidgetTheme(this.getPanel().getTheme()), false)
+                );
     }
 
     @Override

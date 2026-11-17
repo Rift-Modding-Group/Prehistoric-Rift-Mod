@@ -250,6 +250,7 @@ move.creature.element.dark=Dark Element
 move.creature.element.light=Light Element
 move.creature.element.steel=Steel Element
 move.creature.element.guard=Guard Element
+
 gui.prift.element.effective_against=Effective Against
 gui.prift.element.not_effective_against=Not Effective Against
 gui.prift.element.does_not_affect=Does Not Affect
@@ -257,6 +258,8 @@ gui.prift.element.weak_to=Weak To
 gui.prift.element.resistant_to=Resistant To
 gui.prift.element.immune_to=Immune To
 gui.prift.element.none=None
+prift.chargeup.charge_up_then_release.description=This move requires building up charge before releasing.
+prift.chargeup.charge_up_while_use.description=This move builds up charge while being used.
 
 move.creature.placeholder=Do Nothing
 move.creature.placeholder.description=Remains a harmless plush doll.

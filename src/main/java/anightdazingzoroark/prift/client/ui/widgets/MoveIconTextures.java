@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.client.ui.widgets;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder;
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.api.drawable.IDrawable;
 import com.cleanroommc.modularui.drawable.GuiDraw;
@@ -25,6 +26,10 @@ public class MoveIconTextures {
     public static final UITexture SPECIAL_MOVE = makeUITexture("special_move", 16, 0);
     @NotNull
     public static final UITexture STATUS_MOVE = makeUITexture("status_move", 32, 0);
+    @NotNull
+    public static final UITexture CHARGE_UP_WHILE_USE = makeUITexture("charge_up_while_use", 48, 0);
+    @NotNull
+    public static final UITexture CHARGE_UP_THEN_RELEASE = makeUITexture("charge_up_then_release", 48, 16);
     @NotNull
     public static final UITexture NEUTRAL_ELEMENT = makeUITexture("neutral_element", 0, 16);
     @NotNull
@@ -76,6 +81,15 @@ public class MoveIconTextures {
                     addElementMatchupSection(tooltip, "gui.prift.element.not_effective_against", effectiveness, value -> value > 0D && value < 1D);
                     addElementMatchupSection(tooltip, "gui.prift.element.does_not_affect", effectiveness, value -> value == 0D);
                 });
+    }
+
+    @NotNull
+    public static Widget<?> getTextureForChargeupType(@NotNull CreatureMoveChargeupBuilder.ChargeType chargeType) {
+        return (switch (chargeType) {
+            case CHARGE_UP_THEN_RELEASE -> CHARGE_UP_THEN_RELEASE;
+            case CHARGE_UP_WHILE_USE -> CHARGE_UP_WHILE_USE;
+            default -> throw new RuntimeException("That's not meant to happen...");
+        }).asWidget().size(16, 16).addTooltipLine(chargeType.getTranslatedDescription());
     }
 
     @NotNull
@@ -169,7 +183,7 @@ public class MoveIconTextures {
     private static UITexture makeUITexture(@NotNull String name, int uvX, int uvY) {
         return UITexture.builder()
                 .location(RiftInitialize.MODID, "ui/move_icons")
-                .imageSize(48, 96)
+                .imageSize(64, 96)
                 .subAreaXYWH(uvX, uvY, 16, 16)
                 .name(name)
                 .build();

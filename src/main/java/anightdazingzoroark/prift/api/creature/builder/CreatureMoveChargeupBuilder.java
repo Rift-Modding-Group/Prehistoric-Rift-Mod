@@ -3,6 +3,7 @@ package anightdazingzoroark.prift.api.creature.builder;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.util.TriConsumer;
 import anightdazingzoroark.riftlib.util.TriFunction;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import org.jetbrains.annotations.NotNull;
@@ -49,7 +50,7 @@ public class CreatureMoveChargeupBuilder {
 
     @NotNull
     public ChargeType getChargeType() {
-        if (this.chargeType == null) throw new IllegalStateException("The charge type must be defined before it can be accessed!");
+        if (this.chargeType == null) throw new IllegalStateException("That's not meant to happen...");
         return this.chargeType;
     }
 
@@ -264,9 +265,13 @@ public class CreatureMoveChargeupBuilder {
     }
 
     public enum ChargeType {
-        NONE,
         CHARGE_UP_THEN_RELEASE,
-        CHARGE_UP_WHILE_USE
+        CHARGE_UP_WHILE_USE;
+
+        @NotNull
+        public String getTranslatedDescription() {
+            return I18n.format("prift.chargeup."+this.name().toLowerCase()+".description");
+        }
     }
 
     public enum ChargeupPhase {
