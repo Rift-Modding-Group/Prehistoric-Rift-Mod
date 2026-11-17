@@ -271,7 +271,7 @@ public class ClientEvents {
             if (!this.moveHotbarActive || minecraft.currentScreen != null
                     || !this.releasedRidingAimMove.isEmpty() && !this.releasedRidingAimMove.equals(riddenCreature.getCurrentMove())
                     || !this.ridingLeapAimActive && (this.ridingAimMove < 0 || this.ridingAimMove >= moves.size()
-                    || moves.get(this.ridingAimMove).getValue().getRiddenAimingType() == RiddenAimingType.NONE)
+                    || moves.get(this.ridingAimMove).getValue().getRiddenAimingType() == null)
             ) {
                 this.stopRidingAim();
             }
@@ -406,7 +406,7 @@ public class ClientEvents {
         //hold right click to aim moves that opt into ridden aiming
         else if (event.getButton() == 1 && !riddenCreature.isLeaping()) {
             CreatureMoveBuilder selectedMove = riddenCreature.getCreatureMoves().getUsableMoves().get(this.selectedRidingMove).getValue();
-            if (selectedMove.getRiddenAimingType() != RiddenAimingType.NONE) {
+            if (selectedMove.getRiddenAimingType() != null) {
                 //set aim
                 if (event.isButtonstate()) {
                     this.ridingAimActive = true;

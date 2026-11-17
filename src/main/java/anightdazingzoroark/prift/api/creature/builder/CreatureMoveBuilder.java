@@ -48,8 +48,8 @@ public class CreatureMoveBuilder {
     private Consumer<ICreature> onMoveEndEffect;
     private boolean useCanStopMovement;
     private boolean preventMovement;
-    @NotNull
-    private RiddenAimingType riddenAimingType = RiddenAimingType.NONE;
+    @Nullable
+    private RiddenAimingType riddenAimingType;
     @NotNull
     private RiddenCrosshairType riddenCrosshairType = RiddenCrosshairType.POINT;
     @Nullable
@@ -246,7 +246,7 @@ public class CreatureMoveBuilder {
         return this;
     }
 
-    @NotNull
+    @Nullable
     public RiddenAimingType getRiddenAimingType() {
         return this.riddenAimingType;
     }
@@ -474,7 +474,6 @@ public class CreatureMoveBuilder {
     }
 
     public enum RiddenAimingType {
-        NONE,
         RANGED,
         CHARGE,
         TARGETED_MELEE

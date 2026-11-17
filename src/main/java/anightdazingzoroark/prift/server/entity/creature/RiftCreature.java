@@ -2281,7 +2281,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (moveIndex < 0 || moveIndex >= moves.size()) return;
         ImmutablePair<String, CreatureMoveBuilder> selectedMove = moves.get(moveIndex);
         RiddenAimingType aimingType = selectedMove.getValue().getRiddenAimingType();
-        if (aimingType == RiddenAimingType.NONE) return;
+        if (aimingType == null) return;
 
         //keep the executing attack associated with its aim until it finishes.
         if (areaAttackActive && !selectedMove.getKey().equals(this.riddenAimingMoveName)) return;
