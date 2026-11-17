@@ -353,6 +353,8 @@ move.creature.metal_claw=Metal Claw
 move.creature.metal_claw.description=Cuts the target with claws as sharp as metal. May cause bleeding.
 move.creature.kick=Kick
 move.creature.kick.description=Kicks back targets in front.
+move.creature.backstab=Backstab
+move.creature.backstab.description=A powerful slash usable only when unseen.
 
 priftcommands.bleed.usage=/priftbleed <player|entity> <seconds> [strength]
 priftcommands.bleed.successful=Applied bleed to %s

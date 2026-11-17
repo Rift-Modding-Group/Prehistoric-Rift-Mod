@@ -67,6 +67,7 @@ public class UseMoveMoveResultTicker extends AbstractMoveResultTicker {
 
         //move execution depends on if current move hasnt been reset
         if (this.hasExecutedMove) return !this.creature.getCurrentMove().isEmpty();
+        else if (!this.selectedMoveBuilder.getCanUse().apply(this.creature)) return false;
         //when move should not path to its target, stop if target is not already in range
         else if (this.moveRuleBuilder.getDontPathToTarget()
                 && this.selectedMoveBuilder.getRequireFindTargetToUse()

@@ -24,6 +24,8 @@ public class CreatureMoveBuilder {
     private BiConsumer<ICreature, EntityLivingBase> onMoveBeginEffect;
 
     //the following can be left alone
+    @NotNull
+    private Function<ICreature, Boolean> canUse = creature -> true;
     private int movePower;
     private BiFunction<ICreature, Entity, Double> movePowerMultiplier;
     private Function<ICreature, Integer> moveCooldown; //will be overriden by chargeup builder cooldown
@@ -63,6 +65,21 @@ public class CreatureMoveBuilder {
     public void lock() {
         if (this.moveChargeupBuilder != null) this.moveChargeupBuilder.lock();
         this.locked = true;
+    }
+
+    /**
+     * Set a condition that must pass before AI or riders can start this move.
+     * */
+    @NotNull
+    public CreatureMoveBuilder setCanUse(@NotNull Function<ICreature, Boolean> canUse) {
+        this.checkIfLocked();
+        this.canUse = canUse;
+        return this;
+    }
+
+    @NotNull
+    public Function<ICreature, Boolean> getCanUse() {
+        return this.canUse;
     }
 
     /**
@@ -418,6 +435,7 @@ public class CreatureMoveBuilder {
         toReturn.moveType = this.moveType;
         toReturn.onMoveBeginEffect = this.onMoveBeginEffect;
 
+        toReturn.canUse = this.canUse;
         toReturn.movePower = this.movePower;
         toReturn.movePowerMultiplier = this.movePowerMultiplier;
         toReturn.moveCooldown = this.moveCooldown;

@@ -1,6 +1,8 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
 import anightdazingzoroark.prift.api.creature.*;
+import anightdazingzoroark.prift.api.creature.AttackGeometry.HitboxTagAttackGeometry;
+import anightdazingzoroark.prift.api.creature.AttackGeometry.LocatorAttackGeometry;
 import anightdazingzoroark.prift.api.creature.CreatureMoveRegistry.MoveDefinition;
 import anightdazingzoroark.prift.server.message.RiftCreateMoveGraphicMessage;
 import anightdazingzoroark.prift.server.message.RiftMessages;
@@ -2085,6 +2087,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     public void setCurrentMove(@NotNull String name) {
         if ((this.isLeaping() || this.isMoveUseBlocked()) && !name.isEmpty()) return;
         CreatureMoveStorage creatureMoveStorage = this.getCreatureMoves();
+        if (!this.world.isRemote && !name.isEmpty()) {
+            CreatureMoveBuilder moveBuilder = creatureMoveStorage.getUsableMoveBuilder(name);
+            if (moveBuilder == null || !moveBuilder.getCanUse().apply(this)) return;
+        }
         creatureMoveStorage.setCurrentMove(name);
         if (!this.world.isRemote) {
             this.setRecoilDamage(null);
@@ -2112,7 +2118,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         ImmutablePair<String, CreatureMoveBuilder> selectedMove = moves.get(moveIndex);
         String moveName = selectedMove.getKey();
         CreatureMoveBuilder moveBuilder = selectedMove.getValue();
-        if (moveStorage.moveCurrentCooldown(moveName) > 0) return;
+        if (moveStorage.moveCurrentCooldown(moveName) > 0 || !moveBuilder.getCanUse().apply(this)) return;
 
         boolean aimingMove = this.isRiddenAiming() && moveName.equals(this.riddenAimingMoveName);
         float attackYaw = this.getAnimationData().getModelYaw();
@@ -2731,7 +2737,41 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public boolean hasAttackGeometry(@NotNull AttackGeometry geometry) {
-        return !this.animData.getAnimatedBoundingBoxesByTag().getOrDefault(geometry.hitboxTag(), List.of()).isEmpty();
+        return switch (geometry) {
+            case HitboxTagAttackGeometry hitboxes -> !this.animData.getAnimatedBoundingBoxesByTag()
+                    .getOrDefault(hitboxes.hitboxTag(), List.of()).isEmpty();
+            case LocatorAttackGeometry locators -> !locators.locators().isEmpty()
+                    && locators.locators().stream().allMatch(name -> this.animData.getAnimatedLocator(name) != null);
+            default -> false;
+        };
+    }
+
+    @Override
+    public int getCurrentMoveAnimationIndex() {
+        return (int) this.animData.getVariable("chosenMove");
+    }
+
+    @Override
+    public boolean isInAnyEntityLineOfSight() {
+        Vec3d eyes = this.getPositionEyes(1f);
+        return this.world.loadedEntityList.stream().anyMatch(entity -> {
+            //block this entity itself
+            if (entity == this) return false;
+
+            //living entities only
+            if (!(entity instanceof EntityLivingBase observer)) return false;
+
+            //alive entities only
+            if (!observer.isEntityAlive()) return false;
+
+            //related entities do not count as observers
+            if (this.isRelatedToEntity(observer)) return false;
+
+            if (this.isRidingSameEntity(observer) || observer instanceof EntityPlayer player && player.isSpectator()) return false;
+
+            Vec3d direction = eyes.subtract(observer.getPositionEyes(1f));
+            return observer.getLookVec().dotProduct(direction) > 0D && observer.canEntityBeSeen(this);
+        });
     }
 
     @NotNull

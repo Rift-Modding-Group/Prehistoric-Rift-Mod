@@ -348,6 +348,8 @@ move.creature.metal_claw=Garra metal
 move.creature.metal_claw.description=Corta al objetivo con garras afiladas como metal. Podría sangrar.
 move.creature.kick=Patada
 move.creature.kick.description=Patea objetivos en frente.
+move.creature.backstab=Puñalada trapera
+move.creature.backstab.description=Un poderoso corte que solo se puede usar cuando no es visto.
 
 priftcommands.bleed.usage=/priftbleed <jugador|entidad> <segundos> [fuerza]
 priftcommands.bleed.successful=Se aplicó sangrado a %s

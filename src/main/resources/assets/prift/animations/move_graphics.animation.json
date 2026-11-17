@@ -1,6 +1,45 @@
 {
   "format_version": "1.8.0",
   "animations": {
+    "animation.move_graphic.backstab": {
+      "animation_length": 0.5,
+      "bones": {
+        "travel": {
+          "position": ["variable.graphic_target_x", "variable.graphic_target_y", "variable.graphic_target_z"]
+        },
+        "aim": {
+          "rotation": [0, "math.atan2(variable.graphic_target_x, variable.graphic_target_z)", 0]
+        },
+        "knife": {
+          "rotation": [45, 0, 0],
+          "position": {
+            "0.0": [0, 32, 32],
+            "0.125": [0, 32, 32],
+            "0.25": [0, 0, 0],
+            "0.5": [0, 0, 0]
+          },
+          "scale": {
+            "0.0": [0, 0, 0],
+            "0.1": [1, 1, 1],
+            "0.35": [1, 1, 1],
+            "0.5": [0, 0, 0]
+          }
+        }
+      }
+    },
+    "animation.move_graphic.metal_claw": {
+      "animation_length": 0.5,
+      "bones": {
+        "claw": {
+          "scale": {
+            "0.0": [0, 0, 0],
+            "0.1": [1, 1, 1],
+            "0.35": [1, 1, 1],
+            "0.5": [0, 0, 0]
+          }
+        }
+      }
+    },
     "animation.move_graphic.crunch": {
       "animation_length": 0.5,
       "bones": {

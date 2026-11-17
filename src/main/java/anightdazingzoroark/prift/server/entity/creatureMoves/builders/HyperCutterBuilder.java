@@ -1,8 +1,9 @@
 package anightdazingzoroark.prift.server.entity.creatureMoves.builders;
 
-import anightdazingzoroark.prift.api.creature.AttackGeometry;
 import anightdazingzoroark.prift.api.creature.Element;
+import anightdazingzoroark.prift.api.creature.AttackGeometry.HitboxTagAttackGeometry;
 import anightdazingzoroark.prift.api.creature.ICreature;
+import anightdazingzoroark.prift.api.creature.AttackGeometry.LocatorAttackGeometry;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.AnimatedHitboxDetectionRule;
@@ -21,11 +22,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class HyperCutterBuilder extends CreatureMoveBuilder {
-    private static final AttackGeometry CLAW_ATTACK = new AttackGeometry(
-            "clawHitZone", List.of("leftClawAim", "rightClawAim"), ScratchLookUtil::captureScratchLook
+    private static final HitboxTagAttackGeometry CLAW_ATTACK = new HitboxTagAttackGeometry(
+            "clawHitZone", ScratchLookUtil::captureScratchLook
     );
-    private static final AttackGeometry TAIL_ATTACK = new AttackGeometry(
-            "thagomizer", List.of("tailEffectLocator"), TailAttackLookUtil::captureTailStabLook
+    private static final HitboxTagAttackGeometry TAIL_ATTACK = new HitboxTagAttackGeometry(
+            "thagomizer", TailAttackLookUtil::captureTailStabLook
+    );
+    private static final LocatorAttackGeometry CLAW_LOCATORS = new LocatorAttackGeometry(
+            List.of("leftClawAim", "rightClawAim"), CLAW_ATTACK.preparePose()
+    );
+    private static final LocatorAttackGeometry TAIL_LOCATORS = new LocatorAttackGeometry(
+            List.of("tailEffectLocator"), TAIL_ATTACK.preparePose()
     );
 
     public HyperCutterBuilder() {
@@ -46,7 +53,7 @@ public class HyperCutterBuilder extends CreatureMoveBuilder {
                 })
                 .setOnMoveBeginEffect((creature, target) -> {
                     //look
-                    AttackGeometry geometry = creature.hasAttackGeometry(CLAW_ATTACK) ? CLAW_ATTACK : TAIL_ATTACK;
+                    LocatorAttackGeometry geometry = creature.hasAttackGeometry(CLAW_ATTACK) ? CLAW_LOCATORS : TAIL_LOCATORS;
                     geometry.preparePose().accept(creature, target);
 
                     //hyper cutter count set
@@ -62,7 +69,7 @@ public class HyperCutterBuilder extends CreatureMoveBuilder {
                     else if (hyperCutterCount == 4) chargeColor = "#FF0000";
                     else chargeColor = "#FFFFFF";
 
-                    for (String locator : geometry.particleLocators()) {
+                    for (String locator : geometry.locators()) {
                         RiftLibParticleHelper.createParticle(
                                 "prift:charge_level_up_looping",
                                 locator,
@@ -86,7 +93,7 @@ public class HyperCutterBuilder extends CreatureMoveBuilder {
 
                     stopChargeParticles(creature);
 
-                    AttackGeometry geometry = creature.hasAttackGeometry(CLAW_ATTACK) ? CLAW_ATTACK : TAIL_ATTACK;
+                    HitboxTagAttackGeometry geometry = creature.hasAttackGeometry(CLAW_ATTACK) ? CLAW_ATTACK : TAIL_ATTACK;
                     creature.createOffenseHitboxesByTag(geometry.hitboxTag(), 4, hitEntity -> {
                         int hyperCutterCount = (int) creature.getProperty("HyperCutterCount").getValue();
 
@@ -155,8 +162,8 @@ public class HyperCutterBuilder extends CreatureMoveBuilder {
     }
 
     private static void stopChargeParticles(@NotNull ICreature creature) {
-        AttackGeometry geometry = creature.hasAttackGeometry(CLAW_ATTACK) ? CLAW_ATTACK : TAIL_ATTACK;
-        for (String locator : geometry.particleLocators()) {
+        LocatorAttackGeometry geometry = creature.hasAttackGeometry(CLAW_ATTACK) ? CLAW_LOCATORS : TAIL_LOCATORS;
+        for (String locator : geometry.locators()) {
             RiftLibParticleHelper.killParticle(
                     (Entity & IAnimatable<?>) creature.getAnimationData().getHolder(),
                     "prift:charge_level_up_looping", locator

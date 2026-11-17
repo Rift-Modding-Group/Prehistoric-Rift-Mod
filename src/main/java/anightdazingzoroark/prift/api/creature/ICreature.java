@@ -51,6 +51,8 @@ public interface ICreature {
 
     EntityLivingBase getAttackTarget();
 
+    boolean isInAnyEntityLineOfSight();
+
     boolean attackEntityAsMob(Entity entity);
 
     void setRecoilDamage(@Nullable Function<Double, Double> recoilDamage);
@@ -79,6 +81,7 @@ public interface ICreature {
 
     boolean aabbIntersectsBoundingBoxTag(@NotNull AxisAlignedBB otherAABB, @NotNull String tagName);
 
+    /** Checks for matching tagged hitboxes or all required attachment locators. */
     boolean hasAttackGeometry(@NotNull AttackGeometry geometry);
 
     @NotNull
@@ -139,6 +142,9 @@ public interface ICreature {
 
     @NotNull
     String getCurrentMove();
+
+    //index of the current move's selected animation variant
+    int getCurrentMoveAnimationIndex();
 
     String getPhase();
 

@@ -104,7 +104,7 @@ public class CreatureMoveUtil {
         if (names.isEmpty()) return List.of();
         int index = 0;
         if (creature.getCurrentMove().equals(moveName)) {
-            index = Math.clamp((int) creature.getAnimationData().getVariable("chosenMove"), 0, names.size() - 1);
+            index = Math.clamp(creature.getCurrentMoveAnimationIndex(), 0, names.size() - 1);
         }
         return List.of(names.get(index));
     }

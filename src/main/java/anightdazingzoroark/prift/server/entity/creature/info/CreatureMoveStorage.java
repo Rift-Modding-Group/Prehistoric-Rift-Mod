@@ -127,6 +127,7 @@ public class CreatureMoveStorage {
                     && !moveRuleBuilder.getDontPathToTarget();
 
             if (moveRule.moveResult() == CreatureMoveResult.USE_MOVE && moveBuilder == null) eligible = false;
+            if (eligible && moveBuilder != null && !moveBuilder.getCanUse().apply(creature)) eligible = false;
             if ((moveBuilder == null || moveBuilder.getRequireFindTargetToUse()) && !hasTarget) eligible = false;
             //Approach actions retain their move until its detection range can be reached.
             //Path clearing targets the planned obstruction rather than the attack target.
@@ -186,6 +187,7 @@ public class CreatureMoveStorage {
 
             CreatureMoveBuilder moveBuilder = this.getUsableMoveBuilder(this.creaturePhase, ruleBuilder.getMoveName());
             if (moveBuilder == null || !moveBuilder.getUseBlockBreak()
+                    || !moveBuilder.getCanUse().apply(creature)
                     || !moveBuilder.getRequireFindTargetToUse()
                     || moveBuilder.getMoveType() == CreatureMoveBuilder.MoveType.STATUS
                     || !moveBuilder.getMakesContact()) continue;

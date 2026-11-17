@@ -57,7 +57,7 @@ public class UtahraptorBuilder extends RiftCreatureBuilder {
                 .setSpawnMoves("scratch", "pack_call", "feather_dart")
                 .setLevelupMoves(Map.of(
                         1, List.of("metal_claw", "kick"),
-                        //4, List.of("backstab"),
+                        4, List.of("backstab"),
                         7, List.of("hyper_cutter")
                         //10, List.of("ally_call")
                 ))
@@ -65,6 +65,7 @@ public class UtahraptorBuilder extends RiftCreatureBuilder {
                 .setMoveAnimations("pack_call", "pack_call")
                 .setMoveAnimations("feather_dart", "feather_dart")
                 .setMoveAnimations("metal_claw", "scratch_1", "scratch_2")
+                .setMoveAnimations("backstab", "scratch_1", "scratch_2")
                 .setMoveAnimations("kick", "kick")
                 .setMoveAnimations("hyper_cutter", "scratch_1", "scratch_2")
                 .setMoveSelector(new CreatureMoveSelectorBuilder()

@@ -3,12 +3,14 @@ package anightdazingzoroark.prift.client.rendering;
 import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.api.creature.CreatureMoveGraphic;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveChargeupBuilder.ChargeupPhase;
+import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.api.util.MathUtil;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.riftlib.geo.GeoModel;
 import anightdazingzoroark.riftlib.core.builder.Animation;
 import anightdazingzoroark.riftlib.core.builder.LoopType;
 import anightdazingzoroark.riftlib.model.provider.GeoModelProvider;
+import anightdazingzoroark.riftlib.model.AnimatedLocator;
 import anightdazingzoroark.riftlib.renderers.geo.IGeoRenderer;
 import anightdazingzoroark.riftlib.resource.client.RiftLibCacheClient;
 import net.minecraft.client.Minecraft;
@@ -22,8 +24,11 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix4f;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -109,6 +114,7 @@ public class CreatureMoveGraphicRenderer implements IGeoRenderer<CreatureMoveGra
                 graphics.set(reloaded);
             }
             Vec3d origin = playback.origin();
+            Matrix4f attachmentTransform = null;
             if (graphic.locator() != null) {
                 if (!(minecraft.world.getEntityByID(playback.sourceEntityId()) instanceof RiftCreature source)
                         || !source.isEntityAlive()) {
@@ -116,18 +122,32 @@ public class CreatureMoveGraphicRenderer implements IGeoRenderer<CreatureMoveGra
                     continue;
                 }
                 if (source.getCreatureMoves().getCurrentMoveUseId() != playback.moveUseId()
-                        || !source.getCreatureMoves().currentMoveMatches(source.getCurrentMove(), ChargeupPhase.RELEASING)) {
-                    // The graphic packet can arrive just before the move's synced release state.
+                        || source.getCurrentMove().isEmpty()
+                        || !source.getCreatureMoves().currentMoveMatches(source.getCurrentMove())
+                        && !source.getCreatureMoves().currentMoveMatches(source.getCurrentMove(), ChargeupPhase.RELEASING)) {
+                    // The graphic packet can arrive just before the move's synced state.
                     if (!visual.attached && age < 5D) continue;
                     graphics.remove();
                     continue;
                 }
                 visual.attached = true;
-                origin = source.getLocatorWorldPos(graphic.locator()).add(
-                        MathUtil.slopeResult(partialTicks, true, 0D, 1D, source.lastTickPosX, source.posX) - source.posX,
-                        MathUtil.slopeResult(partialTicks, true, 0D, 1D, source.lastTickPosY, source.posY) - source.posY,
-                        MathUtil.slopeResult(partialTicks, true, 0D, 1D, source.lastTickPosZ, source.posZ) - source.posZ
-                );
+                if (graphic.placement() == CreatureMoveGraphic.Placement.LOCATOR) {
+                    AnimatedLocator locator = source.getAnimationData().getAnimatedLocator(graphic.locator());
+                    origin = CreatureLookUtil.getSourceLocatorPosition(source, graphic.locator(), partialTicks);
+                    if (locator == null || origin == null) continue;
+                    // Convert RiftLibrary's model axes to world axes before applying the limb's full rotation.
+                    attachmentTransform = new Matrix4f()
+                            .rotationY((float) Math.toRadians(180D - source.getAnimationData().getModelYaw(partialTicks)))
+                            .rotate(locator.getModelSpaceYXZQuaternion())
+                            .scale(source.scale());
+                }
+                else {
+                    origin = source.getLocatorWorldPos(graphic.locator()).add(
+                            MathUtil.slopeResult(partialTicks, true, 0D, 1D, source.lastTickPosX, source.posX) - source.posX,
+                            MathUtil.slopeResult(partialTicks, true, 0D, 1D, source.lastTickPosY, source.posY) - source.posY,
+                            MathUtil.slopeResult(partialTicks, true, 0D, 1D, source.lastTickPosZ, source.posZ) - source.posZ
+                    );
+                }
                 double yaw = Math.toRadians(source.rotationYaw);
                 visual.getAnimationData().setVariable("variable.graphic_target_x", Math.sin(yaw));
                 visual.getAnimationData().setVariable("variable.graphic_target_y", 0D);
@@ -142,6 +162,11 @@ public class CreatureMoveGraphicRenderer implements IGeoRenderer<CreatureMoveGra
 
             GlStateManager.pushMatrix();
             GlStateManager.translate(origin.x - renderManager.viewerPosX, origin.y - renderManager.viewerPosY, origin.z - renderManager.viewerPosZ);
+            if (attachmentTransform != null) {
+                FloatBuffer transform = BufferUtils.createFloatBuffer(16);
+                attachmentTransform.get(transform);
+                GlStateManager.multMatrix(transform);
+            }
             GlStateManager.disableLighting();
             GlStateManager.disableCull();
             minecraft.getTextureManager().bindTexture(this.getTextureLocation(graphic));

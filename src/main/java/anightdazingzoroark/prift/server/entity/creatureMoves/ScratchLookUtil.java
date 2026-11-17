@@ -16,7 +16,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-/** Captures Scratch's vertical arm aim for playback and AI prediction. */
+/**
+ * Captures Scratch's vertical arm aim for playback and AI prediction.
+ * */
 public class ScratchLookUtil {
     public static void captureScratchLook(@NotNull ICreature creature, @Nullable EntityLivingBase target) {
         // The existing melee camera samples this input; only the scratching arm consumes it.

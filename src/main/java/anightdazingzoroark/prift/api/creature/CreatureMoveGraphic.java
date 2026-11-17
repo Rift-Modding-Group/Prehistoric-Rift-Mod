@@ -22,11 +22,16 @@ public record CreatureMoveGraphic(
         if (name.isBlank() || animation.isBlank()) {
             throw new IllegalArgumentException("A move graphic requires a model name and an animation name");
         }
+        if (placement == Placement.LOCATOR && (locator == null || locator.isBlank())) {
+            throw new IllegalArgumentException("A locator-attached move graphic requires a locator");
+        }
     }
 
     public enum Placement {
         USER,
-        TARGET_GROUND
+        TARGET_GROUND,
+        /** Follows the locator's position and rotation, scaled with the creature. */
+        LOCATOR
     }
 
     //captured playback context for a graphic started by a move effect

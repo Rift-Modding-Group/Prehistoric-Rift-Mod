@@ -57,6 +57,7 @@ public class RiftMoves {
         CreatureMoveRegistry.registerMove("feather_dart", new FeatherDartBuilder(), new FeatherDartBuilder.Rule());
         CreatureMoveRegistry.registerMove("metal_claw", new MetalClawBuilder(), new MetalClawBuilder.Rule());
         CreatureMoveRegistry.registerMove("kick", new KickBuilder(), new KickBuilder.Rule());
+        CreatureMoveRegistry.registerMove("backstab", new BackstabBuilder(), new BackstabBuilder.Rule());
 
         registered = true;
     }
