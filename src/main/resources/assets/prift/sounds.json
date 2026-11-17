@@ -1016,6 +1016,13 @@
     ],
     "subtitle": "sounds.subtitle.generic_sonic_blast"
   },
+  "prift.metal_claw.use": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/metal_claw"
+    ],
+    "subtitle": "sounds.subtitle.metal_claw"
+  },
   "prift.tranq_bomb.impact": {
     "category": "neutral",
     "sounds": [

@@ -344,6 +344,10 @@ move.creature.pack_call=Llamada al groupo
 move.creature.pack_call.description=Llama a miembros de su groupo para aumentar su ataque y velocidad.
 move.creature.feather_dart=Dardo pluma
 move.creature.feather_dart.description=Tira sus plumas al objetivo.
+move.creature.metal_claw=Garra metal
+move.creature.metal_claw.description=Corta al objetivo con garras afiladas como metal. Podría sangrar.
+move.creature.kick=Patada
+move.creature.kick.description=Patea objetivos en frente.
 
 priftcommands.bleed.usage=/priftbleed <jugador|entidad> <segundos> [fuerza]
 priftcommands.bleed.successful=Se aplicó sangrado a %s

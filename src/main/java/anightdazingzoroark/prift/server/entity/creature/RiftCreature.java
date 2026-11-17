@@ -1,7 +1,7 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.api.creature.*;
 import anightdazingzoroark.prift.api.creature.CreatureMoveRegistry.MoveDefinition;
-import anightdazingzoroark.prift.api.creature.CreatureMoveGraphic;
 import anightdazingzoroark.prift.server.message.RiftCreateMoveGraphicMessage;
 import anightdazingzoroark.prift.server.message.RiftMessages;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -30,7 +30,6 @@ import anightdazingzoroark.prift.RiftInitialize;
 import anightdazingzoroark.prift.api.creature.builder.CreatureDomesticationBuilder;
 import anightdazingzoroark.prift.api.creature.config.RiftCreatureFood;
 import anightdazingzoroark.prift.api.creature.config.RiftCreatureConfig;
-import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.builder.CreaturePhaseBuilder;
 import anightdazingzoroark.prift.server.entity.ai.RiftFollowHerdLeader;
 import anightdazingzoroark.prift.server.entity.ai.RiftFollowBoxOwner;
@@ -50,7 +49,6 @@ import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureLeapHe
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreaturePathNavigate;
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreaturePathNavigate.BlockBreakPlanEntry;
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
-import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.util.CreatureMoveUtil;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenAimingType;
@@ -68,7 +66,6 @@ import anightdazingzoroark.prift.server.properties.PlayerPartyProperties;
 import anightdazingzoroark.prift.server.properties.PlayerCreatureBoxProperties;
 import anightdazingzoroark.prift.server.sound.RiftSounds;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
-import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.util.MathUtil;
 import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.ProjectileAimUtil;
 import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.RiddenAimArea;
@@ -2730,6 +2727,11 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Override
     public double[] getSize() {
         return new double[]{this.width, this.height};
+    }
+
+    @Override
+    public boolean hasAttackGeometry(@NotNull AttackGeometry geometry) {
+        return !this.animData.getAnimatedBoundingBoxesByTag().getOrDefault(geometry.hitboxTag(), List.of()).isEmpty();
     }
 
     @NotNull

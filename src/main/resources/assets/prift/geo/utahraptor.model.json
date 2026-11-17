@@ -105,13 +105,13 @@
 							"origin": [-3.2, 15.8, -24.2],
 							"size": [6.4, 14.4],
 							"collision": true,
-							"tags": ["neck"]
+							"tags": ["neck", "head"]
 						},
 						"neck_0": {
 							"origin": [-3.2, 19.6, -29.2],
 							"size": [6.4, 12.8],
 							"collision": true,
-							"tags": ["neck"]
+							"tags": ["neck", "head"]
 						}
 					}
 				},

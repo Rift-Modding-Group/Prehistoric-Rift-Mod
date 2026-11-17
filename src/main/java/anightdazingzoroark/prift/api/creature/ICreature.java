@@ -79,6 +79,8 @@ public interface ICreature {
 
     boolean aabbIntersectsBoundingBoxTag(@NotNull AxisAlignedBB otherAABB, @NotNull String tagName);
 
+    boolean hasAttackGeometry(@NotNull AttackGeometry geometry);
+
     @NotNull
     Vec3d getLocatorWorldPos(@NotNull String name);
 

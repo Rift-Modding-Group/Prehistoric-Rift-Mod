@@ -4,6 +4,9 @@ import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.creature.builder.*;
 
+import java.util.List;
+import java.util.Map;
+
 public class UtahraptorBuilder extends RiftCreatureBuilder {
     public UtahraptorBuilder() {
         this.setName("utahraptor")
@@ -17,7 +20,13 @@ public class UtahraptorBuilder extends RiftCreatureBuilder {
                 .setMainHitboxSize(1.25f, 1.5f)
                 .setMaxFallHeight(8)
                 .setDaysUntilAdult(3)
-                .setHitboxInformation()
+                .setHitboxInformation(Map.of(
+                        "leg", creature -> 0.25D,
+                        "body", creature -> 0.75D,
+                        "head", creature -> 1.25D,
+                        "tail", creature -> 0.5D
+                ))
+                .setCanBeKnockedBack()
                 .setNavigation(new CreatureNavigationBuilder().setCanWalk()
                         .setCanLeap(4D, 0, 16D)
                         .setCanClimb()
@@ -46,14 +55,18 @@ public class UtahraptorBuilder extends RiftCreatureBuilder {
                 })
                 .setMaximumMoveSlots(3)
                 .setSpawnMoves("scratch", "pack_call", "feather_dart")
-                /*
                 .setLevelupMoves(Map.of(
-                        1, List.of("metal_claw", "kick")
+                        1, List.of("metal_claw", "kick"),
+                        //4, List.of("backstab"),
+                        7, List.of("hyper_cutter")
+                        //10, List.of("ally_call")
                 ))
-                 */
                 .setMoveAnimations("scratch", "scratch_1", "scratch_2")
                 .setMoveAnimations("pack_call", "pack_call")
                 .setMoveAnimations("feather_dart", "feather_dart")
+                .setMoveAnimations("metal_claw", "scratch_1", "scratch_2")
+                .setMoveAnimations("kick", "kick")
+                .setMoveAnimations("hyper_cutter", "scratch_1", "scratch_2")
                 .setMoveSelector(new CreatureMoveSelectorBuilder()
                         .setCanLeapToAttack(6D, 12D, true)
                 )
