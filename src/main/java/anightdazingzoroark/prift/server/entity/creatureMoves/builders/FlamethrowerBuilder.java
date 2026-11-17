@@ -47,7 +47,7 @@ public class FlamethrowerBuilder extends CreatureMoveBuilder {
                 .setElement(Element.FIRE)
                 .setOnMoveBeginEffect((creature, target) -> CreatureLookUtil.initializeRayLook(creature, target, "straightCreatureRaySource"))
                 .setWhileMoveUseEffect((creature, target) -> {
-                    if (!creature.isBeingRidden() && (target == null || !target.isEntityAlive())) return;
+                    if (creature.getControllingPassenger() == null && (target == null || !target.isEntityAlive())) return;
                     CreatureLookUtil.updateRayLook(creature, target, "straightCreatureRaySource");
                 })
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()

@@ -33,6 +33,8 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
     private static final DataParameter<Byte> MODEL = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.BYTE);
     private static final DataParameter<NBTTagCompound> PARTICLE_TRAIL = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.COMPOUND_TAG);
     private static final DataParameter<Float> SCALE = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.FLOAT);
+    private static final DataParameter<Boolean> VERTICAL_ROTATE = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> DESTROY_ON_HIT = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.BOOLEAN);
 
     @Nullable
     private AnimationDataProjectile data;
@@ -89,6 +91,8 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
         this.dataManager.set(NAME, builder.getName());
         this.dataManager.set(MODEL, (byte) builder.getProjectileModel().ordinal());
         this.dataManager.set(SCALE, builder.getScale());
+        this.dataManager.set(VERTICAL_ROTATE, builder.getRotateAlongPitch());
+        this.dataManager.set(DESTROY_ON_HIT, !builder.getStayAfterImpact());
         if (builder.getProjectileTrail() != null) this.dataManager.set(PARTICLE_TRAIL, ParticleBuilder.toNBT(builder.getProjectileTrail()));
         if (builder.getPropertyValueMap() != null) this.propertyValueMap = Map.copyOf(builder.getPropertyValueMap());
     }
@@ -100,6 +104,8 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
         this.dataManager.register(MODEL, (byte) 2);
         this.dataManager.register(PARTICLE_TRAIL, new NBTTagCompound());
         this.dataManager.register(SCALE, 1f);
+        this.dataManager.register(VERTICAL_ROTATE, false);
+        this.dataManager.register(DESTROY_ON_HIT, false);
     }
 
     @Override
@@ -199,12 +205,12 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
 
     @Override
     public boolean canSelfDestroyUponHit() {
-        return !this.projectileBuilder.getStayAfterImpact();
+        return this.dataManager.get(DESTROY_ON_HIT);
     }
 
     @Override
     public boolean canRotateVertically() {
-        return this.projectileBuilder.getRotateAlongPitch();
+        return this.dataManager.get(VERTICAL_ROTATE);
     }
 
     @Override

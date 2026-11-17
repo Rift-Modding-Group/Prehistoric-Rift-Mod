@@ -11,6 +11,8 @@ public class CreatureNavigationBuilder {
 
     private boolean canWalk;
 
+    private boolean canClimb;
+
     private boolean canSwim;
     private String[] swimmingBlockWhitelist;
 
@@ -39,6 +41,19 @@ public class CreatureNavigationBuilder {
 
     public boolean getCanWalk() {
         return this.canWalk;
+    }
+
+    /**
+     * Allow climbing
+     * */
+    public CreatureNavigationBuilder setCanClimb() {
+        this.checkIfLocked();
+        this.canClimb = true;
+        return this;
+    }
+
+    public boolean getCanClimb() {
+        return this.canClimb;
     }
 
     /**

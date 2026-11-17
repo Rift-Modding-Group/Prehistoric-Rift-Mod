@@ -106,7 +106,7 @@ public class RiftCreatureRegistry {
         registerCreatureType(new StegosaurusBuilder());
         registerCreatureType(new DodoBuilder());
         registerCreatureType(new TriceratopsBuilder());
-        //registerCreatureType(new UtahraptorBuilder());
+        registerCreatureType(new UtahraptorBuilder());
         /*
         registerCreatureType(
                 "utahraptor",

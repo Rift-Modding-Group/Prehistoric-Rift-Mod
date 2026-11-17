@@ -144,6 +144,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * le heart and soul of this mod
@@ -1535,7 +1536,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //-----projectile management-----
     @Override
-    public void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, float velocity, float inaccuracy) {
+    public void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, float velocity, float inaccuracy, float pitchOffset, float yawOffset) {
         CreatureMoveBuilder moveBuilder = this.getCreatureMoves().getUsableMoveBuilder(this.getCurrentMove());
         if (moveBuilder == null) return;
 
@@ -1549,20 +1550,21 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             shootVector = new Vec3d(this.getLookVec().x, 0D, this.getLookVec().z).scale(16D);
         }
 
+        shootVector = ProjectileAimUtil.applyOffsets(shootVector, pitchOffset, yawOffset);
         projectile.shoot(shootVector.x, shootVector.y, shootVector.z, velocity, inaccuracy);
         this.world.spawnEntity(projectile);
     }
 
     @Override
-    public void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, @NotNull EntityLivingBase target, float velocity, float inaccuracy) {
+    public void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, @NotNull EntityLivingBase target, float velocity, float inaccuracy, float pitchOffset, float yawOffset) {
         CreatureMoveBuilder moveBuilder = this.getCreatureMoves().getUsableMoveBuilder(this.getCurrentMove());
         if (moveBuilder == null) return;
 
         RiftProjectile projectile = new RiftProjectile(this, projectileBuilder, moveBuilder);
-        double directionX = target.posX - projectile.posX;
-        double directionY = (target.posY + target.height / 2D) - projectile.posY;
-        double directionZ = target.posZ - projectile.posZ;
-        projectile.shoot(directionX, directionY, directionZ, velocity, inaccuracy);
+        Vec3d shootVector = ProjectileAimUtil.applyOffsets(
+                target.getPositionVector().add(0D, target.height / 2D, 0D).subtract(projectile.getPositionVector()),
+                pitchOffset, yawOffset);
+        projectile.shoot(shootVector.x, shootVector.y, shootVector.z, velocity, inaccuracy);
         this.world.spawnEntity(projectile);
     }
 
@@ -2728,6 +2730,26 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     @Override
     public double[] getSize() {
         return new double[]{this.width, this.height};
+    }
+
+    @NotNull
+    @Override
+    public AxisAlignedBB getAreaAroundCreature(double radius) {
+        return new AxisAlignedBB(
+                this.posX - (radius + this.width / 2D),
+                this.posY,
+                this.posZ - (radius + this.width / 2D),
+                this.posX + (radius + this.width / 2D),
+                this.posY + (radius * 2) + this.height,
+                this.posZ + (radius + this.width / 2D)
+        );
+    }
+
+    @NotNull
+    @Override
+    public List<ICreature> getCreaturesInAABB(@NotNull AxisAlignedBB aabb, Predicate<ICreature> creaturePredicate) {
+        List<RiftCreature> toReturn = this.world.getEntitiesWithinAABB(RiftCreature.class, aabb, creaturePredicate::test);
+        return toReturn.stream().map(creature -> (ICreature) creature).toList();
     }
 
     @Override

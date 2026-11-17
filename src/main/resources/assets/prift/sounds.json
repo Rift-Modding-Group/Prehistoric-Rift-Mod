@@ -1037,6 +1037,13 @@
     ],
     "subtitle": "sounds.subtitle.poison_bomb_impact"
   },
+  "prift.feather_dart.impact": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/projectile/feather_dart_impact"
+    ],
+    "subtitle": "sounds.subtitle.feather_dart_impact"
+  },
   "prift.semi_manual_machine.reset": {
     "category": "block",
     "sounds": [

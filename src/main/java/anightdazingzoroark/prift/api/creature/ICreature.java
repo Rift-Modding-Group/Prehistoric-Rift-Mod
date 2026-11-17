@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * api version of RiftCreature
@@ -41,6 +42,12 @@ public interface ICreature {
     boolean entityInTargetGroup(@NotNull Entity entity, @NotNull String group);
 
     AxisAlignedBB getEntityBoundingBox();
+
+    @NotNull
+    AxisAlignedBB getAreaAroundCreature(double radius);
+
+    @NotNull
+    List<ICreature> getCreaturesInAABB(@NotNull AxisAlignedBB aabb, Predicate<ICreature> creaturePredicate);
 
     EntityLivingBase getAttackTarget();
 
@@ -106,7 +113,7 @@ public interface ICreature {
 
     boolean isInHerd();
 
-    boolean isBeingRidden();
+    ICreature getHerdLeader();
 
     boolean getUseBlockBreak();
 
@@ -170,7 +177,15 @@ public interface ICreature {
     @Nullable
     Vec3d getRiddenAimPosition();
 
-    void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, float velocity, float inaccuracy);
+    default void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, float velocity, float inaccuracy) {
+        this.launchProjectile(projectileBuilder, velocity, inaccuracy, 0f, 0f);
+    }
 
-    void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, @NotNull EntityLivingBase target, float velocity, float inaccuracy);
+    void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, float velocity, float inaccuracy, float pitchOffset, float yawOffset);
+
+    default void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, @NotNull EntityLivingBase target, float velocity, float inaccuracy) {
+        this.launchProjectile(projectileBuilder, target, velocity, inaccuracy, 0f, 0f);
+    }
+
+    void launchProjectile(@NotNull ProjectileBuilder projectileBuilder, @NotNull EntityLivingBase target, float velocity, float inaccuracy, float pitchOffset, float yawOffset);
 }

@@ -31,7 +31,7 @@ public class TriceratopsBuilder extends RiftCreatureBuilder {
                 .setDomestication(new CreatureDomesticationBuilder()
                         .setTameFactor(0.75f)
                         .setTamingMethod(RiftCreatureEnums.TamingMethod.TRANQ_THEN_FEED)
-                        .setLevelupRate(RiftCreatureEnums.LevelupRate.NORMAL)
+                        .setLevelupRate(RiftCreatureEnums.LevelupRate.SLOW)
                         .setControllerRideLocator("controllerPos")
                 )
                 .setIsHerder(8)

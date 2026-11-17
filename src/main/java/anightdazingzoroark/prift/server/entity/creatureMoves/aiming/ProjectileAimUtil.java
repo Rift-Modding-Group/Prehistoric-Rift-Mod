@@ -10,6 +10,20 @@ public class ProjectileAimUtil {
     private static final double AIR_DRAG = 0.99f;
     private static final double GRAVITY = 0.05f;
 
+    /** Apply offsets in degrees to the launch heading; positive pitch points downward. */
+    @NotNull
+    public static Vec3d applyOffsets(@NotNull Vec3d direction, float pitchOffset, float yawOffset) {
+        if (pitchOffset == 0f && yawOffset == 0f) return direction;
+
+        double horizontalLength = Math.hypot(direction.x, direction.z);
+        double length = Math.hypot(horizontalLength, direction.y);
+        double pitch = Math.atan2(-direction.y, horizontalLength) + Math.toRadians(pitchOffset);
+        double yaw = Math.atan2(-direction.x, direction.z) + Math.toRadians(yawOffset);
+        double horizontalSpeed = Math.cos(pitch) * length;
+        return new Vec3d(-Math.sin(yaw) * horizontalSpeed, -Math.sin(pitch) * length,
+                Math.cos(yaw) * horizontalSpeed);
+    }
+
     @NotNull
     public static Vec3d getLaunchVelocity(@NotNull Vec3d origin, @NotNull Vec3d target, double speed) {
         Vec3d offset = target.subtract(origin);

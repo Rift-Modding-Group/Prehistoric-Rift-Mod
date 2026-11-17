@@ -9,10 +9,11 @@ entity.tyrannosaurus.spawn_description=Un depredador alfa colosal que posee fuer
 entity.stegosaurus.name=Stegosaurus
 entity.stegosaurus.spawn_description=Dedicado al pastoreo y va en manadas, lleva placas protectoras en el lomo y la cola y afilados thagomizadores en la punta de la cola. Las placas de su cola se pueden lanzar contra posibles amenazas.
 entity.dodo.name=Dodo
-entity.dodo.spawn_description=A small flightless bird. Weak and fragile, but easy to domesticate.
 entity.dodo.spawn_description=Un ave pequeño incapaz de volar. Débil y frágil, pero fácil de tamear.
 entity.triceratops.name=Triceratops
 entity.triceratops.spawn_description=Dedicado al pastoreo y va en manadas. Lleva una volante duro como un escudo, y es dispuesto a arrojarse contra amenazas potenciales en cualquiera forma posible.
+entity.utahraptor.name=Utahraptor
+entity.utahraptor.spawn_description=Un depredador que caza en grupo con plumas tan duras como acero. Frágil pero ataca rapidamente.
 
 item.spawn_egg.name=Generar - %s
 item.raw_exotic_meat.name=Carne cruda exótica
@@ -337,6 +338,12 @@ move.creature.heavy_slam=Golpe pesado
 move.creature.heavy_slam.description=Se golpea el cuerpo contra el suelo para atacar objetivos. Podría causar un paralisis grave.
 move.creature.sludge_wave=Onda de lodo
 move.creature.sludge_wave.description=Expulsa un chorro continuo de lodo que daña y envenena a los objetivos.
+move.creature.scratch=Rasguño
+move.creature.scratch.description=Rasguña al objetivo con sus garras.
+move.creature.pack_call=Llamada al groupo
+move.creature.pack_call.description=Llama a miembros de su groupo para aumentar su ataque y velocidad.
+move.creature.feather_dart=Dardo pluma
+move.creature.feather_dart.description=Tira sus plumas al objetivo.
 
 priftcommands.bleed.usage=/priftbleed <jugador|entidad> <segundos> [fuerza]
 priftcommands.bleed.successful=Se aplicó sangrado a %s

@@ -36,16 +36,7 @@ public class SnarlBuilder extends CreatureMoveBuilder {
                 .setMoveType(MoveType.STATUS)
                 .setOnMoveHitEffect(creature -> {
                     //make aabb where effects take place
-                    double[] creatureSize = creature.getSize();
-                    double radius = 6D;
-                    AxisAlignedBB axisAlignedBB = new AxisAlignedBB(
-                            creature.getPositionVector().x - (radius + creatureSize[0] / 2D),
-                            creature.getPositionVector().y,
-                            creature.getPositionVector().z - (radius + creatureSize[0] / 2D),
-                            creature.getPositionVector().x + (radius + creatureSize[0] / 2D),
-                            creature.getPositionVector().y + (radius * 2) + creatureSize[1],
-                            creature.getPositionVector().z + (radius + creatureSize[0] / 2D)
-                    );
+                    AxisAlignedBB axisAlignedBB = creature.getAreaAroundCreature(6D);
                     List<EntityLivingBase> hitEntities = creature.getEntityWorld().getEntitiesWithinAABB(
                             EntityLivingBase.class, axisAlignedBB
                     );

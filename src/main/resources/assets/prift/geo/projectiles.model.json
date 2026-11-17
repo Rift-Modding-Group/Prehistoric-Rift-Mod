@@ -31,6 +31,26 @@
 		},
 		{
 			"description": {
+				"identifier": "geometry.thrown_feather_dart",
+				"texture_width": 32,
+				"texture_height": 32,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 1.5,
+				"visible_bounds_offset": [0, 0.25, 0]
+			},
+			"bones": [
+				{
+					"name": "body",
+					"pivot": [0.5, 0, -0.5],
+					"cubes": [
+						{"origin": [0, 0, -5.75], "size": [0, 3, 16], "uv": [0, 0]},
+						{"origin": [0, 0.5, -10.75], "size": [0, 2, 5], "uv": [0, 19]}
+					]
+				}
+			]
+		},
+		{
+			"description": {
 				"identifier": "geometry.generic_cube_projectile",
 				"texture_width": 32,
 				"texture_height": 32,
@@ -69,7 +89,11 @@
 					"name": "bone",
 					"pivot": [0, 4, 0],
 					"cubes": [
-						{"origin": [-8, 0, 0], "size": [16, 16, 0], "uv": [0, 0]}
+						{
+							"origin": [-8, 0, 0],
+							"size": [16, 16, 0],
+							"uv": [0, 0]
+						}
 					],
 					"locators": {
 						"center": [0, 8, 0]

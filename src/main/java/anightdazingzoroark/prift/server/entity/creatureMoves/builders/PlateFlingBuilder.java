@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.server.entity.creatureMoves.builders;
 
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
+import anightdazingzoroark.prift.api.creature.builder.detectionRule.HitboxDistanceFromUserDetectionRule;
 import anightdazingzoroark.prift.api.projectile.ProjectileBuilder;
 import anightdazingzoroark.riftlib.core.manager.AnimationDataEntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -43,7 +44,8 @@ public class PlateFlingBuilder extends CreatureMoveBuilder {
         public Rule() {
             super("plate_fling", MoveCategory.RANGED);
             this.setPriorityPredicate((creature, target) -> target != null && target.isEntityAlive())
-                    .setDontPathToTarget();
+                    .setDontPathToTarget()
+                    .addDetectionRule(new HitboxDistanceFromUserDetectionRule(4D));
         }
     }
 }

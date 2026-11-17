@@ -12,6 +12,8 @@ entity.dodo.name=Dodo
 entity.dodo.spawn_description=A small flightless bird. Weak and fragile, but easy to domesticate.
 entity.triceratops.name=Triceratops
 entity.triceratops.spawn_description=A herding grazer with a tough frill for a shield, willing to hurl itself towards potential threats in any form possible.
+entity.utahraptor.name=Utahraptor
+entity.utahraptor.spawn_description=A pack hunter with feathers as hard as steel. Fragile but can attack rapidly.
 
 item.spawn_egg.name=Spawn %s
 item.raw_exotic_meat.name=Raw Exotic Meat
@@ -341,6 +343,12 @@ move.creature.heavy_slam=Heavy Slam
 move.creature.heavy_slam.description=Slams their body heavily into the ground to attack targets. May cause heavy paralysis.
 move.creature.sludge_wave=Sludge Wave
 move.creature.sludge_wave.description=Sprays a sustained stream of sludge that damages and poisons targets.
+move.creature.scratch=Scratch
+move.creature.scratch.description=Scratches the target with its claws.
+move.creature.pack_call=Pack Call
+move.creature.pack_call.description=Calls up members of its pack to boost their strength and speed.
+move.creature.feather_dart=Feather Dart
+move.creature.feather_dart.description=Hurls its feathers at the target.
 
 priftcommands.bleed.usage=/priftbleed <player|entity> <seconds> [strength]
 priftcommands.bleed.successful=Applied bleed to %s
