@@ -44,7 +44,7 @@ public class CreatureNavigationBuilder {
     }
 
     /**
-     * Allow climbing
+     * Allow AI routes up solid walls and wall climbing while moving against them when ridden.
      * */
     public CreatureNavigationBuilder setCanClimb() {
         this.checkIfLocked();
@@ -140,7 +140,7 @@ public class CreatureNavigationBuilder {
      * A creature needs at least one primary way to navigate.
      * */
     public boolean isValid() {
-        return (this.canWalk || this.canSwim || this.canFly) && (!this.canLeap || this.canWalk);
+        return (this.canWalk || this.canClimb || this.canSwim || this.canFly) && (!this.canLeap || this.canWalk);
     }
 
     /**

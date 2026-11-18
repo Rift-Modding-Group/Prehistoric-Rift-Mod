@@ -10,12 +10,15 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
     @NotNull
     protected final RiftCreatureLeapHelper leapHelper;
     @NotNull
+    protected RiftCreatureClimbHelper climbHelper;
+    @NotNull
     protected CreatureAction creatureAction = CreatureAction.WAIT;
 
     public RiftCreatureMoveHelperBase(@NotNull RiftCreature creature) {
         super(creature);
         this.creature = creature;
         this.leapHelper = new RiftCreatureLeapHelper(this, creature);
+        this.climbHelper = new RiftCreatureClimbHelper(creature);
     }
 
     //-----for setting actions-----
@@ -135,12 +138,18 @@ public abstract class RiftCreatureMoveHelperBase extends EntityMoveHelper {
 
     public void stopMovement() {
         this.leapHelper.cancelLeap();
+        this.climbHelper.updateClimbing(0f, 0f);
         this.stopWalkingControls();
     }
 
     @NotNull
     public RiftCreatureLeapHelper getLeapHelper() {
         return this.leapHelper;
+    }
+
+    @NotNull
+    public RiftCreatureClimbHelper getClimbHelper() {
+        return this.climbHelper;
     }
 
     protected void stopWalkingControls() {

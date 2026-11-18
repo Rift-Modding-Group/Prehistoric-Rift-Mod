@@ -85,6 +85,12 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
     }
 
     @Override
+    @NotNull
+    public RiftCreatureWalkNodeProcessor getNodeProcessor() {
+        return this.riftNodeProcessor;
+    }
+
+    @Override
     public float getPathSearchRange() {
         float range = super.getPathSearchRange();
         Entity target = this.entity.getAttackTarget();
@@ -143,12 +149,13 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
 
     @Override
     protected boolean canNavigate() {
-        return this.creature.getNavigationBuilder().getCanWalk() && (super.canNavigate() || this.creature.bodyTouchingLiquid());
+        return (this.creature.getNavigationBuilder().getCanWalk() || this.creature.getNavigationBuilder().getCanClimb())
+                && (super.canNavigate() || this.creature.bodyTouchingLiquid() || this.creature.isOnLadder());
     }
 
     @Override
     protected Vec3d getEntityPosition() {
-        if (this.creature.bodyTouchingLiquid()) {
+        if (this.creature.bodyTouchingLiquid() || this.riftNodeProcessor.isFollowingClimbPath(this.currentPath)) {
             return new Vec3d(this.creature.posX, this.creature.posY, this.creature.posZ);
         }
         return super.getEntityPosition();
@@ -170,6 +177,16 @@ public class RiftCreaturePathNavigate extends PathNavigateGround {
                     this.creature.setUnableToPathToTarget(true);
                     return;
                 }
+            }
+        }
+        if (this.riftNodeProcessor.isFollowingClimbPath(this.currentPath)) {
+            Vec3d ledge = this.currentPath.getPosition(this.creature);
+            if (this.creature.posY < ledge.y - 1E-3D
+                    || Math.abs(this.creature.posX - ledge.x) > 0.25D
+                    || Math.abs(this.creature.posZ - ledge.z) > 0.25D) {
+                // Reach the ledge before turning, even when a wide body's usual waypoint radius overlaps it.
+                this.checkForStuck(this.getEntityPosition());
+                return;
             }
         }
         if (this.currentPath instanceof AttackApproachPath approachPath && !this.currentPath.isFinished()

@@ -89,13 +89,15 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
         this.creatureAction = CreatureAction.WAIT;
 
         EntityLivingBase attackTarget = this.creature.getAttackTarget();
+        Path currentPath = this.creature.getCreaturePathNavigate().getPath();
+        boolean climbingTransition = this.creature.getCreaturePathNavigate().getNodeProcessor().isFollowingClimbPath(currentPath);
         boolean directlyApproachingAttackTarget = false;
         if (requestedAction == CreatureAction.MOVE_TO && !this.creature.getUseBlockBreak()
                 && attackTarget != null && attackTarget.isEntityAlive()
                 && this.creature.isWithinDeploymentRange(attackTarget.posX, attackTarget.posY, attackTarget.posZ)
                 && !(this.creature.getCreaturePathNavigate().getPath() instanceof AttackApproachPath)
+                && !climbingTransition
         ) {
-            Path currentPath = this.creature.getCreaturePathNavigate().getPath();
             boolean finalPathApproach = currentPath != null
                     && currentPath.getCurrentPathIndex() >= currentPath.getCurrentPathLength() - 1;
             boolean moveTargetIsAttackTarget = Math.abs(this.posX - attackTarget.posX) < 1E-4D
@@ -192,6 +194,7 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
                 }
             }
             boolean leapHandled = !approachingPlannedBlockBreak
+                    && !climbingTransition
                     && !inLiquid && !followingWaterPath && !approachingSafeDownwardTransition
                     && !supportedWalkingApproach
                     && this.leapHelper.tryHandleLeap(this.posX, this.posY, this.posZ, obstacleClearance, requestedAction);
@@ -200,7 +203,8 @@ public class RiftCreatureMoveHelper extends RiftCreatureMoveHelperBase {
                 this.leapHelper.resetDelay();
                 boolean standardJumpTransition = obstacleClearance > this.creature.stepHeight
                         && obstacleClearance <= STANDARD_JUMP_CLEARANCE;
-                if (!inLiquid && !followingWaterPath && navigation.getCanWalk() && this.creature.onGround && standardJumpTransition) {
+                if (!inLiquid && !followingWaterPath && !climbingTransition
+                        && navigation.getCanWalk() && this.creature.onGround && standardJumpTransition) {
                     this.creature.getJumpHelper().setJumping();
                     this.creatureAction = CreatureAction.JUMPING;
                 }

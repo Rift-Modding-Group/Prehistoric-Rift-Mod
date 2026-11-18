@@ -2603,7 +2603,13 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     @Override
+    public boolean isOnLadder() {
+        return (this.moveHelper instanceof RiftCreatureMoveHelperBase helper && helper.getClimbHelper().isClimbing()) || super.isOnLadder();
+    }
+
+    @Override
     public void travel(float strafe, float vertical, float forward) {
+        this.getCreatureMoveHelper().getClimbHelper().updateClimbing(0f, 0f);
         if (this.isBoxSitting()) {
             this.getNavigator().clearPath();
             this.getCreatureMoveHelper().stopMovement();
@@ -2679,6 +2685,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
             //float above water
             if (this.bodyTouchingLiquid()) this.motionY += 0.1D;
+
+            this.getCreatureMoveHelper().getClimbHelper().updateClimbing(strafe, forward);
 
             super.travel(strafe, vertical, forward);
         }

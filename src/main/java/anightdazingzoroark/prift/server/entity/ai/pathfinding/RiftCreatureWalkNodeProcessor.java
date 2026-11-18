@@ -5,6 +5,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.PathPoint;
+import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.WalkNodeProcessor;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -55,6 +56,17 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
     public PathPoint getStart() {
         int x = MathHelper.floor(this.creature.posX - this.entitySizeX * 0.5D);
         int z = MathHelper.floor(this.creature.posZ - this.entitySizeZ * 0.5D);
+
+        if (this.creature.getNavigationBuilder().getCanClimb() && this.creature.isOnLadder()) {
+            // Replanning on a wall starts at the current height rather than at the ground below it.
+            x = (int) Math.round(this.creature.posX - this.entitySizeX * 0.5D);
+            z = (int) Math.round(this.creature.posZ - this.entitySizeZ * 0.5D);
+            int y = MathHelper.floor(this.creature.getEntityBoundingBox().minY);
+            PathPoint start = this.openPoint(x, y, z);
+            start.nodeType = this.getNodeType(x, y, z);
+            start.costMalus = Math.max(0f, this.creature.getPathPriority(start.nodeType));
+            return start;
+        }
 
         if (this.waterPathingAllowed && this.creature.bodyTouchingLiquid()) {
             int surfaceY = this.findWaterSurfaceY(
@@ -162,6 +174,34 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
             }
             count = this.addWaterSurfaceOptions(pathOptions, count, currentPoint, targetPoint, maxDistance);
         }
+        if (this.creature.getNavigationBuilder().getCanClimb() && currentPoint.nodeType != PathNodeType.WATER
+                && !this.creature.bodyTouchingLiquid()) {
+            AxisAlignedBB body = this.creature.getEntityBoundingBox();
+            AxisAlignedBB start = body.offset(
+                    currentPoint.x + this.entitySizeX * 0.5D - this.creature.posX,
+                    currentPoint.y - body.minY,
+                    currentPoint.z + this.entitySizeZ * 0.5D - this.creature.posZ
+            );
+            int maximumHeight = Math.min((int) Math.floor(maxDistance), this.creature.world.getActualHeight() - currentPoint.y - this.entitySizeY);
+            for (EnumFacing facing : EnumFacing.Plane.HORIZONTAL) {
+                int x = currentPoint.x + facing.getXOffset();
+                int z = currentPoint.z + facing.getZOffset();
+                int height = this.creature.getCreatureMoveHelper().getClimbHelper().findClimbHeight(this.blockaccess, start,
+                        facing.getXOffset(), facing.getZOffset(), maximumHeight);
+                if (height <= 0) continue;
+                PathNodeType type = this.getNodeType(x, currentPoint.y + height, z);
+                float priority = this.creature.getPathPriority(type);
+                if (type != PathNodeType.WALKABLE || priority < 0f) continue;
+
+                LeapAwarePathPoint landing = (LeapAwarePathPoint) this.openPoint(x, currentPoint.y + height, z);
+                if (landing.visited || landing.distanceTo(targetPoint) >= maxDistance
+                        || this.contains(pathOptions, count, landing)) continue;
+                landing.nodeType = type;
+                landing.costMalus = Math.max(landing.costMalus, priority + height);
+                landing.climbPredecessorIdentities.add(landing.logicalIdentity(currentPoint));
+                pathOptions[count++] = landing;
+            }
+        }
         if (!this.allowLeaps || !this.creature.getNavigationBuilder().getCanLeap()
                 || this.creature.bodyTouchingLiquid()
                 || currentPoint.nodeType == PathNodeType.WATER
@@ -252,9 +292,19 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
         return count;
     }
 
-    boolean isLeapEdge(@NotNull PathPoint from, @NotNull PathPoint to) {
+    public boolean isLeapEdge(@NotNull PathPoint from, @NotNull PathPoint to) {
         return to instanceof LeapAwarePathPoint leapAwarePathPoint
                 && leapAwarePathPoint.hasLeapPredecessor(from);
+    }
+
+    public boolean isClimbEdge(@NotNull PathPoint from, @NotNull PathPoint to) {
+        return to instanceof LeapAwarePathPoint point && point.climbPredecessorIdentities.contains(point.logicalIdentity(from));
+    }
+
+    public boolean isFollowingClimbPath(@Nullable Path path) {
+        if (path == null || path.isFinished() || path.getCurrentPathIndex() == 0) return false;
+        int index = path.getCurrentPathIndex();
+        return this.isClimbEdge(path.getPathPointFromIndex(index - 1), path.getPathPointFromIndex(index));
     }
 
     @Nullable
@@ -541,6 +591,7 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
     private static final class LeapAwarePathPoint extends PathPoint {
         private final Object logicalIdentity;
         private final Set<Object> leapPredecessorIdentities = new HashSet<>();
+        private Set<Object> climbPredecessorIdentities = new HashSet<>();
 
         private LeapAwarePathPoint(int x, int y, int z) {
             this(x, y, z, new Object());
@@ -580,6 +631,7 @@ public class RiftCreatureWalkNodeProcessor extends WalkNodeProcessor {
             pathPoint.costMalus = this.costMalus;
             pathPoint.nodeType = this.nodeType;
             pathPoint.leapPredecessorIdentities.addAll(this.leapPredecessorIdentities);
+            pathPoint.climbPredecessorIdentities.addAll(this.climbPredecessorIdentities);
             return pathPoint;
         }
     }
