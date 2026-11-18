@@ -34,6 +34,7 @@ item.placeholder_stuffing.name=Plush Stuffing
 item.tyrannosaurus_arm.name=Tyrannosaurus Arm
 item.stegosaurus_plate.name=Stegosaurus Plate
 item.dodo_beak.name=Dodo Beak
+item.utahraptor_claw.name=Utahraptor Claw
 item.tribute_item.tooltip=The %s of a/an %s. A rare exclusive drop used in specialized recipes.
 
 itemGroup.prift_items=Prehistoric Rift Items
@@ -347,6 +348,7 @@ move.creature.scratch=Scratch
 move.creature.scratch.description=Scratches the target with its claws.
 move.creature.pack_call=Pack Call
 move.creature.pack_call.description=Calls up members of its pack to boost their strength and speed.
+move.creature.pack_call.cannot_use=Pack Call requires nearby allies to be used!
 move.creature.ally_call=Ally Call
 move.creature.ally_call.description=Summons allies of the same species.
 move.creature.feather_dart=Feather Dart
@@ -357,6 +359,7 @@ move.creature.kick=Kick
 move.creature.kick.description=Kicks back targets in front.
 move.creature.backstab=Backstab
 move.creature.backstab.description=A powerful slash usable only when unseen.
+move.creature.backstab.cannot_use=Backstab can only be used when out of sight of other mobs!
 
 priftcommands.bleed.usage=/priftbleed <player|entity> <seconds> [strength]
 priftcommands.bleed.successful=Applied bleed to %s

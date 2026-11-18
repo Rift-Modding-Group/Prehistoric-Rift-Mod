@@ -4,6 +4,7 @@ import anightdazingzoroark.prift.api.creature.CreatureMoveGraphic;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
+import net.minecraft.client.resources.I18n;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.AnimatedHitboxDetectionRule;
 import anightdazingzoroark.prift.server.entity.creatureMoves.ScratchLookUtil;
 import anightdazingzoroark.prift.server.sound.RiftSounds;
@@ -17,7 +18,7 @@ public class BackstabBuilder extends StandardMeleeBuilder {
                 .setStaminaCost(0.2f)
                 .setBasePower(120)
                 .setCooldown(900)
-                .setCanUse(creature -> !creature.isInAnyEntityLineOfSight())
+                .setCanUse(creature -> !creature.isInAnyEntityLineOfSight(), I18n.format("move.creature.backstab.cannot_use"))
                 .setOnMoveBeginEffect((creature, target) -> {
                     ScratchLookUtil.captureScratchLook(creature, target);
                     creature.createMoveGraphic(new CreatureMoveGraphic("knife", "animation.move_graphic.backstab"), target);

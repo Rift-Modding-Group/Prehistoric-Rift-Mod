@@ -26,6 +26,8 @@ public class CreatureMoveBuilder {
     //the following can be left alone
     @NotNull
     private Function<ICreature, Boolean> canUse = creature -> true;
+    @Nullable
+    private String unusableMessage;
     private int movePower;
     private BiFunction<ICreature, Entity, Double> movePowerMultiplier;
     private Function<ICreature, Integer> moveCooldown; //will be overriden by chargeup builder cooldown
@@ -72,14 +74,25 @@ public class CreatureMoveBuilder {
      * */
     @NotNull
     public CreatureMoveBuilder setCanUse(@NotNull Function<ICreature, Boolean> canUse) {
+        return this.setCanUse(canUse, null);
+    }
+
+    @NotNull
+    public CreatureMoveBuilder setCanUse(@NotNull Function<ICreature, Boolean> canUse, @Nullable String unusableMessage) {
         this.checkIfLocked();
         this.canUse = canUse;
+        this.unusableMessage = unusableMessage;
         return this;
     }
 
     @NotNull
     public Function<ICreature, Boolean> getCanUse() {
         return this.canUse;
+    }
+
+    @Nullable
+    public String getUnusableMessage() {
+        return this.unusableMessage;
     }
 
     /**
@@ -436,6 +449,7 @@ public class CreatureMoveBuilder {
         toReturn.onMoveBeginEffect = this.onMoveBeginEffect;
 
         toReturn.canUse = this.canUse;
+        toReturn.unusableMessage = this.unusableMessage;
         toReturn.movePower = this.movePower;
         toReturn.movePowerMultiplier = this.movePowerMultiplier;
         toReturn.moveCooldown = this.moveCooldown;

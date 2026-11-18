@@ -126,6 +126,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
@@ -2135,7 +2136,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     public void useMoveFromRider(@NotNull EntityPlayer rider, int moveIndex) {
         if (this.world.isRemote || this.getControllingPassenger() != rider || !this.riderCanControl()
-                || this.isLeaping() || this.isMoveUseBlocked()) {
+                || this.isLeaping() || this.isMoveUseBlocked()
+        ) {
             return;
         }
 
@@ -2146,7 +2148,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         ImmutablePair<String, CreatureMoveBuilder> selectedMove = moves.get(moveIndex);
         String moveName = selectedMove.getKey();
         CreatureMoveBuilder moveBuilder = selectedMove.getValue();
-        if (moveStorage.moveCurrentCooldown(moveName) > 0 || !moveBuilder.getCanUse().apply(this)) return;
+
+        if (moveStorage.moveCurrentCooldown(moveName) > 0) return;
+
+        if (!moveBuilder.getCanUse().apply(this)) {
+            String unusableMessage = moveBuilder.getUnusableMessage();
+            if (unusableMessage != null) rider.sendStatusMessage(new TextComponentString(unusableMessage), false);
+            return;
+        }
 
         boolean aimingMove = this.isRiddenAiming() && moveName.equals(this.riddenAimingMoveName);
         float attackYaw = this.getAnimationData().getModelYaw();

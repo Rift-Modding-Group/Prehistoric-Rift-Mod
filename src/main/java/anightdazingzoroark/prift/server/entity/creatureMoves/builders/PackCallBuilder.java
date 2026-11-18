@@ -4,10 +4,7 @@ import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.ICreature;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
-import anightdazingzoroark.prift.api.creature.builder.detectionRule.AnimatedHitboxDetectionRule;
-import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.server.entity.creatureMoves.ScratchLookUtil;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -21,6 +18,7 @@ public class PackCallBuilder extends CreatureMoveBuilder {
                 .setRequireFindTargetToUse()
                 .setElement(Element.NEUTRAL)
                 .setMoveType(MoveType.STATUS)
+                .setCanUse(creature -> getHitCreatures(creature).size() > 1, I18n.format("move.creature.pack_call.cannot_use"))
                 .setOnMoveHitEffect(creature -> {
                     List<ICreature> hitCreatures = getHitCreatures(creature);
                     for (ICreature hitCreature : hitCreatures) {
@@ -40,7 +38,7 @@ public class PackCallBuilder extends CreatureMoveBuilder {
                 if (target == null || !target.isEntityAlive()) return false;
 
                 if (creature.isTamed()) {
-                    boolean atInterval = creature.getTicksExisted() % 600 == 0;
+                    boolean atInterval = creature.getTicksExisted() % 100 == 0;
                     boolean canUse = creature.getEntityWorld().rand.nextInt(4) == 0;
                     return atInterval && canUse && !getHitCreatures(creature).isEmpty();
                 }
