@@ -38,6 +38,7 @@ import anightdazingzoroark.prift.server.entity.ai.RiftFollowBoxOwner;
 import anightdazingzoroark.prift.server.entity.ai.RiftCreatureLookHelper;
 import anightdazingzoroark.prift.server.entity.ai.RiftGoToLandFromWater;
 import anightdazingzoroark.prift.server.entity.ai.RiftHurtByTarget;
+import anightdazingzoroark.prift.server.entity.ai.RiftOwnerMountTarget;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureAcquisitionInfo;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureMoveStorage;
 import anightdazingzoroark.prift.server.entity.creature.info.CreatureStatsStorage;
@@ -457,6 +458,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                             && super.shouldExecute();
                 }
             });
+            this.targetTasks.addTask(1, new RiftOwnerMountTarget(this));
         }
         this.targetTasks.addTask(2, new RiftFindTarget(this, true));
 
@@ -2186,6 +2188,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             this.setCurrentMove("");
             super.setAttackTarget(null);
             return;
+        }
+        //An accepted attack command lets assisting creatures react before the move hits.
+        if (aimingMove && this.riddenAimTarget != null) {
+            Entity aimedEntity = this.riddenAimTarget.getEntity(this.world);
+            if (aimedEntity instanceof MultiPartEntityPart part) aimedEntity = (Entity) part.parent;
+            if (aimedEntity instanceof EntityLivingBase && !this.isRelatedToEntity(aimedEntity)) {
+                this.setLastAttackedEntity(aimedEntity);
+            }
         }
         CreatureMoveChargeupBuilder chargeupBuilder = moveBuilder.getMoveChargeupBuilder();
         if (chargeupBuilder != null && chargeupBuilder.getChargeType() == ChargeType.CHARGE_UP_WHILE_USE) {
