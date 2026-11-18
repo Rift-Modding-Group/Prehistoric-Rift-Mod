@@ -280,7 +280,7 @@ public class RidingCreatureHUD {
         );
 
         //---ctrl for sprinting---
-        int maximumSprintCooldown = Math.max(0, creature.getCreatureType().getSprintCooldown());
+        int maximumSprintCooldown = creature.getSprintHelper().getRiddenSprintCooldown(this.sprintCooldownDisplayTicks);
         double sprintProgress;
         if (this.sprintTicks > 0) {
             sprintProgress = (double) this.sprintTicks / RiftCreatureSprintHelper.MAXIMUM_SPRINT_TICKS;
@@ -306,11 +306,12 @@ public class RidingCreatureHUD {
 
         //---spacebar for jumping---
         if (creature.getNavigationBuilder().getCanLeap()) {
+            int maximumLeapCooldown = creature.getCreatureMoveHelper().getLeapHelper().getRiddenLeapCooldown(this.jumpCooldownDisplayChargeTicks);
             double leapProgress;
             if (this.jumpChargeTicks > 0) {
                 leapProgress = (double) this.jumpChargeTicks / RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS;
             }
-            else if (this.jumpCooldownTicks > 0) {
+            else if (this.jumpCooldownTicks > 0 && maximumLeapCooldown > 0) {
                 double leapDisplayProgress = MathUtil.slopeResult(
                         this.jumpCooldownDisplayChargeTicks, true,
                         0, RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS,
@@ -318,7 +319,7 @@ public class RidingCreatureHUD {
                 );
                 leapProgress = MathUtil.slopeResult(
                         this.jumpCooldownTicks, true,
-                        0, RiftCreatureLeapHelper.MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS,
+                        0, maximumLeapCooldown,
                         0D, leapDisplayProgress
                 );
             }

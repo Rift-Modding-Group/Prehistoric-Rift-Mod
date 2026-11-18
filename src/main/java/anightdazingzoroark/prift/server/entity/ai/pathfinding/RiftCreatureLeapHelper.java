@@ -7,6 +7,7 @@ import anightdazingzoroark.prift.server.entity.creatureMoves.moveResult.MoveResu
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.WalkNodeProcessor;
 import net.minecraft.entity.MoverType;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
@@ -15,13 +16,16 @@ import net.minecraftforge.common.ForgeHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 /**
  * Everything relating to managing a creature's ability to leap happens here
  * */
 @SuppressWarnings("SuspiciousNameCombination")
 public class RiftCreatureLeapHelper {
     public static final int MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS = 20;
-    public static final int MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS = MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS * 2;
     private static final double GRAVITY = 0.08D; //wherever this came from, we will never know....
     private static final double VERTICAL_DRAG = 0.98D;
     private static final double OBSTACLE_SCAN_STEP = 0.125D;
@@ -41,10 +45,15 @@ public class RiftCreatureLeapHelper {
     private int phaseTicks;
     private float leapYaw;
     private boolean riddenLeap;
+    private int riddenLeapChargeTicks;
     @Nullable
     private CreatureLeapPlan leapPlan;
     @Nullable
     private RiddenLeapRequest.Charged queuedCharge;
+    @NotNull
+    private Set<UUID> leapHitEntities = new HashSet<>();
+    @Nullable
+    private AxisAlignedBB previousRiddenLeapBounds;
 
     public RiftCreatureLeapHelper(@NotNull RiftCreatureMoveHelperBase moveHelper, @NotNull RiftCreature creature) {
         this.moveHelper = moveHelper;
@@ -105,7 +114,9 @@ public class RiftCreatureLeapHelper {
         CreatureLeapPlan selectedPlan = plan;
         if (selectedPlan == null) selectedPlan = CreatureLeapPlan.charged(this.creature, yaw, movingForward, chargeTicks);
         if (selectedPlan == null) return false;
-        return this.startLeap(selectedPlan, true, yaw);
+        if (!this.startLeap(selectedPlan, true, yaw)) return false;
+        this.riddenLeapChargeTicks = Math.clamp(chargeTicks, 1, MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS);
+        return true;
     }
 
     /**
@@ -125,6 +136,8 @@ public class RiftCreatureLeapHelper {
             this.leapYaw = (float) Math.toDegrees(Math.atan2(plan.start().x - plan.landing().x, plan.landing().z - plan.start().z));
         }
         this.creature.setPosition(plan.start().x, plan.start().y, plan.start().z);
+        this.leapHitEntities.clear();
+        this.previousRiddenLeapBounds = this.creature.getEntityBoundingBox();
         this.phase = LeapPhase.ACTIVE;
         this.phaseTicks = 0;
         this.queuedCharge = null;
@@ -149,8 +162,11 @@ public class RiftCreatureLeapHelper {
         this.phaseTicks = that.phaseTicks;
         this.leapYaw = that.leapYaw;
         this.riddenLeap = that.riddenLeap;
+        this.riddenLeapChargeTicks = that.riddenLeapChargeTicks;
         this.leapPlan = that.leapPlan;
         this.queuedCharge = that.queuedCharge;
+        this.leapHitEntities = new HashSet<>(that.leapHitEntities);
+        this.previousRiddenLeapBounds = that.previousRiddenLeapBounds;
     }
 
     /**
@@ -219,9 +235,12 @@ public class RiftCreatureLeapHelper {
             if (aimed) this.creature.stopRiddenAim();
             this.riddenLeap = true;
             this.phase = CreatureLeapPlan.hasTakeoffSupport(this.creature) ? LeapPhase.REMOTE_TAKEOFF : LeapPhase.REMOTE_AIRBORNE;
+            this.riddenLeapChargeTicks = charge == null ? MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS : charge.chargeTicks();
             this.phaseTicks = 0;
             this.leapPlan = plan;
             this.queuedCharge = null;
+            this.leapHitEntities.clear();
+            this.previousRiddenLeapBounds = this.creature.getEntityBoundingBox();
             this.moveHelper.creatureAction = RiftCreatureMoveHelperBase.CreatureAction.LEAP;
             this.creature.rotationYaw = this.creature.renderYawOffset;
             this.creature.getCreaturePathNavigate().clearPath();
@@ -244,6 +263,14 @@ public class RiftCreatureLeapHelper {
         return this.riddenLeap && this.phase != LeapPhase.IDLE;
     }
 
+    public int getRiddenLeapCooldown(int chargeTicks) {
+        return (int) Math.ceil(MathUtil.slopeResult(
+                Math.clamp(chargeTicks, 1, MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS), true,
+                0, MAXIMUM_RIDDEN_LEAP_CHARGE_TICKS,
+                0D, Math.max(0, this.creature.getCreatureType().getLeapCooldown())
+        ));
+    }
+
     /** The tick hook tracks replicated rider movement; the travel hook exclusively advances local leap movement. */
     public boolean updateLeap(@NotNull UpdatePhase updatePhase) {
         if (updatePhase == UpdatePhase.TICK) {
@@ -263,7 +290,9 @@ public class RiftCreatureLeapHelper {
                         && this.phaseTicks >= navigation.getLeapDelay() + this.leapPlan.durationTicks();
                 boolean landed = supported && (this.phase == LeapPhase.REMOTE_AIRBORNE || flightElapsed);
                 boolean blocked = this.phase == LeapPhase.REMOTE_AIRBORNE && this.creature.collidedHorizontally;
-                if (landed || blocked) this.creature.setLeapCooldown(MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS);
+                if (this.phase == LeapPhase.REMOTE_AIRBORNE || flightElapsed) this.damageEntitiesOnRiddenLeap();
+                else this.previousRiddenLeapBounds = bounds;
+                if (landed || blocked) this.creature.setLeapCooldown(this.getRiddenLeapCooldown(this.riddenLeapChargeTicks));
                 if (!this.creature.isBeingRidden() || this.creature.bodyTouchingLiquid()
                         || this.phaseTicks > 80 || landed || blocked) this.cancelLeap();
             }
@@ -423,6 +452,7 @@ public class RiftCreatureLeapHelper {
                 sampleZ = plannedSample.z;
             }
             this.creature.move(MoverType.SELF, sampleX - this.creature.posX, sampleY - this.creature.posY, sampleZ - this.creature.posZ);
+            this.damageEntitiesOnRiddenLeap();
             if (Math.abs(this.creature.posX - sampleX) > 1E-4D || Math.abs(this.creature.posY - sampleY) > 1E-4D
                     || Math.abs(this.creature.posZ - sampleZ) > 1E-4D) break;
         }
@@ -442,7 +472,7 @@ public class RiftCreatureLeapHelper {
             landed = this.creature.onGround;
         }
         if (blocked || landed) {
-            if (this.riddenLeap) this.creature.setLeapCooldown(MAXIMUM_RIDDEN_LEAP_COOLDOWN_TICKS);
+            if (this.riddenLeap) this.creature.setLeapCooldown(this.getRiddenLeapCooldown(this.riddenLeapChargeTicks));
             else this.creature.resetLeapToAttackCooldown();
             this.cancelLeap();
             this.creature.motionX = 0D;
@@ -457,8 +487,50 @@ public class RiftCreatureLeapHelper {
         this.phase = LeapPhase.IDLE;
         this.phaseTicks = 0;
         this.riddenLeap = false;
+        this.riddenLeapChargeTicks = 0;
         this.leapPlan = null;
         this.queuedCharge = null;
+        this.leapHitEntities.clear();
+        this.previousRiddenLeapBounds = null;
+    }
+
+    private void damageEntitiesOnRiddenLeap() {
+        if (this.creature.world.isRemote || !this.isRiddenLeap()) return;
+        AxisAlignedBB currentBounds = this.creature.getEntityBoundingBox();
+        AxisAlignedBB previousBounds = this.previousRiddenLeapBounds;
+        if (previousBounds == null) previousBounds = currentBounds;
+        this.previousRiddenLeapBounds = currentBounds;
+
+        if (!this.creature.getCreatureType().getLeapDealsContactDamage()) return;
+
+        for (EntityLivingBase entity : this.creature.world.getEntitiesWithinAABB(EntityLivingBase.class,
+                previousBounds.union(currentBounds).grow(1E-5D))) {
+            if (entity == this.creature || !entity.isEntityAlive() || this.leapHitEntities.contains(entity.getUniqueID())
+                    || this.creature.isRidingSameEntity(entity) || this.creature.isRelatedToEntity(entity)
+                    || !this.touchesLeapTarget(previousBounds, currentBounds, entity.getEntityBoundingBox())) continue;
+            this.leapHitEntities.add(entity.getUniqueID());
+            this.creature.attackEntityFromLeap(entity);
+        }
+    }
+
+    /**
+     * Check body contact along the actual movement segment, including entities crossed between server updates.
+     */
+    public boolean touchesLeapTarget(@NotNull AxisAlignedBB previousBounds, @NotNull AxisAlignedBB currentBounds,
+                                     @NotNull AxisAlignedBB targetBounds) {
+        AxisAlignedBB target = targetBounds.grow(1E-5D);
+        if (previousBounds.intersects(target) || currentBounds.intersects(target)) return true;
+
+        double halfWidth = (currentBounds.maxX - currentBounds.minX) * 0.5D;
+        double halfDepth = (currentBounds.maxZ - currentBounds.minZ) * 0.5D;
+        double height = currentBounds.maxY - currentBounds.minY;
+        AxisAlignedBB expandedTarget = new AxisAlignedBB(target.minX - halfWidth, target.minY - height,
+                target.minZ - halfDepth, target.maxX + halfWidth, target.maxY, target.maxZ + halfDepth);
+        Vec3d previousFeet = new Vec3d((previousBounds.minX + previousBounds.maxX) * 0.5D, previousBounds.minY,
+                (previousBounds.minZ + previousBounds.maxZ) * 0.5D);
+        Vec3d currentFeet = new Vec3d((currentBounds.minX + currentBounds.maxX) * 0.5D, currentBounds.minY,
+                (currentBounds.minZ + currentBounds.maxZ) * 0.5D);
+        return expandedTarget.calculateIntercept(previousFeet, currentFeet) != null;
     }
 
     private void stopHorizontalMovement() {

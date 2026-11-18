@@ -74,7 +74,7 @@ public class TriceratopsBuilder extends RiftCreatureBuilder {
                 .setMoveAnimations("sludge_wave", "sludge_wave")
                 .setMoveSelector(new CreatureMoveSelectorBuilder()
                         .setCanSprintToAttack(2D, 16D)
-                        .setCanLeapToAttack(6D, 12D, false)
+                        .setCanLeapToAttack(6D, 12D)
                 )
                 //---food---
                 .addDefaultFoodItemWhitelistEntry("fruit")

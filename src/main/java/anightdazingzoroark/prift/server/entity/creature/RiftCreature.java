@@ -1216,7 +1216,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     //this method is to be used when a leap attack makes contact with its target
     public void attackEntityFromLeap(Entity entityIn) {
-        this.attackEntityFromMovement(entityIn, 10);
+        this.attackEntityFromMovement(entityIn, this.creatureType.getLeapBasePower());
     }
 
     //this method is to be used by a configured fall impact
@@ -1718,7 +1718,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     }
 
     public void resetLeapToAttackCooldown() {
-        this.setLeapCooldown(this.world.rand.nextInt(5, 11) * 20);
+        this.setLeapCooldown(this.creatureType.getLeapCooldown());
     }
 
     //-----frustration management-----

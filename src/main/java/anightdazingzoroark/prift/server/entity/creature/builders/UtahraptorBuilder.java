@@ -19,6 +19,8 @@ public class UtahraptorBuilder extends RiftCreatureBuilder {
                 .setSpawnEggColors(5855577, 10439936)
                 .setMainHitboxSize(1.25f, 1.5f)
                 .setMaxFallHeight(8)
+                .setLeapDealsContactDamage(40)
+                .setLeapCooldown(60)
                 .setDaysUntilAdult(3)
                 .setHitboxInformation(Map.of(
                         "head", creature -> 1.5D,
@@ -68,7 +70,7 @@ public class UtahraptorBuilder extends RiftCreatureBuilder {
                 .setMoveAnimations("hyper_cutter", "scratch_1", "scratch_2")
                 .setMoveAnimations("ally_call", "pack_call")
                 .setMoveSelector(new CreatureMoveSelectorBuilder()
-                        .setCanLeapToAttack(6D, 12D, true)
+                        .setCanLeapToAttack(6D, 12D)
                 )
                 //---targeting---
                 .addDefaultTargetWhitelistEntry("animal")

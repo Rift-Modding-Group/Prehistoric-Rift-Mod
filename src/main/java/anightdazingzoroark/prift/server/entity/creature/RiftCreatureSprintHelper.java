@@ -1,5 +1,6 @@
 package anightdazingzoroark.prift.server.entity.creature;
 
+import anightdazingzoroark.prift.api.util.MathUtil;
 import anightdazingzoroark.riftlib.model.AnimatedBoundingBox;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -137,11 +138,22 @@ public class RiftCreatureSprintHelper {
     }
 
     public void endSprint(boolean startCooldown) {
-        if (startCooldown) this.resetCooldown();
+        if (startCooldown) {
+            if (this.riddenSprint) this.setCooldown(this.getRiddenSprintCooldown(this.sprintTicks));
+            else this.resetCooldown();
+        }
         this.creature.setSprinting(false);
         this.sprintTicks = 0;
         this.hitEntities.clear();
         this.riddenSprint = false;
+    }
+
+    public int getRiddenSprintCooldown(int sprintTicks) {
+        return (int) Math.ceil(MathUtil.slopeResult(
+                Math.clamp(sprintTicks, 0, MAXIMUM_SPRINT_TICKS), true,
+                0, MAXIMUM_SPRINT_TICKS,
+                0D, Math.max(0, this.creature.getCreatureType().getSprintCooldown())
+        ));
     }
 
     public boolean canSprint() {

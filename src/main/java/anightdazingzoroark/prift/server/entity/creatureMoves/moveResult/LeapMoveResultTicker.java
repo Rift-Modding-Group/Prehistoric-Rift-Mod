@@ -2,7 +2,6 @@ package anightdazingzoroark.prift.server.entity.creatureMoves.moveResult;
 
 import anightdazingzoroark.prift.server.entity.ai.pathfinding.RiftCreatureMoveHelperBase;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
-import anightdazingzoroark.prift.api.creature.builder.CreatureMoveSelectorBuilder.LeapMoveRuleBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.Vec3d;
@@ -10,8 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class LeapMoveResultTicker extends AbstractMoveResultTicker {
-    @NotNull
-    private final LeapMoveRuleBuilder leapMoveRuleBuilder;
     @Nullable
     private final EntityLivingBase target;
     private final boolean leapPrepared;
@@ -20,11 +17,6 @@ public class LeapMoveResultTicker extends AbstractMoveResultTicker {
 
     public LeapMoveResultTicker(@NotNull RiftCreature creature, @NotNull MoveRuleBuilder moveRuleBuilder) {
         super(creature, moveRuleBuilder);
-        if (!(moveRuleBuilder instanceof LeapMoveRuleBuilder leapMoveRuleBuilder)) {
-            throw new IllegalArgumentException("Leap move results require a leap move rule builder!");
-        }
-        this.leapMoveRuleBuilder = leapMoveRuleBuilder;
-
         EntityLivingBase attackTarget = creature.getAttackTarget();
         this.target = attackTarget != null && attackTarget.isEntityAlive() ? attackTarget : null;
         this.leapPrepared = this.prepareLeap();
@@ -51,13 +43,13 @@ public class LeapMoveResultTicker extends AbstractMoveResultTicker {
         if (!this.leapPrepared) return;
 
         if (!this.creature.onGround) this.hasLeftGround = true;
-        if (this.leapMoveRuleBuilder.requiresTargetContact()) this.tryDamageTargetOnContact();
+        if (this.creature.getCreatureType().getLeapDealsContactDamage()) this.tryDamageTargetOnContact();
     }
 
     @Override
     public void onEndTicker() {
         if (this.leapPrepared && this.hasLeftGround && this.creature.onGround) {
-            if (this.leapMoveRuleBuilder.requiresTargetContact()) this.tryDamageTargetOnContact();
+            if (this.creature.getCreatureType().getLeapDealsContactDamage()) this.tryDamageTargetOnContact();
         }
         this.creature.getCreaturePathNavigate().clearPath();
     }
@@ -70,7 +62,7 @@ public class LeapMoveResultTicker extends AbstractMoveResultTicker {
     private boolean prepareLeap() {
         if (this.target == null) return false;
         RiftCreatureMoveHelperBase moveHelper = this.creature.getCreatureMoveHelper();
-        if (this.leapMoveRuleBuilder.requiresTargetContact()) {
+        if (this.creature.getCreatureType().getLeapDealsContactDamage()) {
             return moveHelper.setLeapTo(
                     this.target.posX,
                     this.target.posY,
@@ -92,7 +84,8 @@ public class LeapMoveResultTicker extends AbstractMoveResultTicker {
 
     private void tryDamageTargetOnContact() {
         if (!this.hasLeftGround || this.hasDamagedTarget || this.target == null || !this.target.isEntityAlive()) return;
-        if (!this.creature.getEntityBoundingBox().grow(1E-5D).intersects(this.target.getEntityBoundingBox())) return;
+        if (!this.creature.getCreatureMoveHelper().getLeapHelper().touchesLeapTarget(
+                this.creature.getEntityBoundingBox(), this.creature.getEntityBoundingBox(), this.target.getEntityBoundingBox())) return;
 
         this.creature.attackEntityFromLeap(this.target);
         this.hasDamagedTarget = true;

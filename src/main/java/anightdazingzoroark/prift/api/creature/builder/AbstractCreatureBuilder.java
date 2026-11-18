@@ -73,6 +73,9 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
     private int daysUntilAdult = 1;
     private boolean fallCreatesImpact;
     private boolean fallSlowly;
+    private boolean leapDealsContactDamage;
+    private int leapBasePower = 10;
+    private int leapCooldown = 300;
     private int sprintBasePower = 10;
     private int sprintCooldown = 300;
     @Nullable
@@ -498,6 +501,41 @@ public abstract class AbstractCreatureBuilder<T extends AbstractCreatureBuilder<
 
     public boolean getFallSlowly() {
         return this.fallSlowly;
+    }
+
+    /**
+     * Enable damage on entity contact when the creature is leaping.
+     */
+    public T setLeapDealsContactDamage() {
+        return this.setLeapDealsContactDamage(10);
+    }
+
+    public T setLeapDealsContactDamage(int basePower) {
+        this.checkIfLocked();
+        this.leapDealsContactDamage = true;
+        this.leapBasePower = basePower;
+        return this.getThis();
+    }
+
+    public boolean getLeapDealsContactDamage() {
+        return this.leapDealsContactDamage;
+    }
+
+    public int getLeapBasePower() {
+        return this.leapBasePower;
+    }
+
+    /**
+     * Set the cooldown for leaping.
+     */
+    public T setLeapCooldown(int leapCooldown) {
+        this.checkIfLocked();
+        this.leapCooldown = leapCooldown;
+        return this.getThis();
+    }
+
+    public int getLeapCooldown() {
+        return this.leapCooldown;
     }
 
     /**

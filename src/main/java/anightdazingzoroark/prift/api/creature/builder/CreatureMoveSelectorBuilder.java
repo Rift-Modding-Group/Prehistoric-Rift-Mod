@@ -72,16 +72,13 @@ public class CreatureMoveSelectorBuilder {
     }
 
     /**
-     * Make it so that leaping can be used as an attack by this creature.
-     * setting requiresTargetContact to true makes it so that it deals
-     * damage upon touching the target when leaping. Otherwise it just
-     * jumps to the target.
+     * Allow the AI to leap toward a target within the given distance range.
      * */
-    public CreatureMoveSelectorBuilder setCanLeapToAttack(double minDist, double maxDist, boolean requiresTargetContact) {
+    public CreatureMoveSelectorBuilder setCanLeapToAttack(double minDist, double maxDist) {
         this.checkIfLocked();
         if (minDist > maxDist) throw new IllegalArgumentException(minDist+" is greater than "+maxDist+"!");
 
-        LeapMoveRuleBuilder leapMoveRuleBuilder = new LeapMoveRuleBuilder(requiresTargetContact);
+        MoveRuleBuilder leapMoveRuleBuilder = new MoveRuleBuilder("", MoveCategory.MELEE);
         leapMoveRuleBuilder.setPriorityPredicate((creature, target) -> {
             if (target == null || !target.isEntityAlive()) return false;
             if (!creature.isOnGround() || creature.bodyTouchingLiquid() || !creature.getNavigationBuilder().getCanLeap()) return false;
@@ -111,19 +108,4 @@ public class CreatureMoveSelectorBuilder {
 
     public record MoveRule(@NotNull CreatureMoveResult moveResult, @NotNull MoveRuleBuilder moveRuleBuilder) {}
 
-    /**
-     * Leap-specific move rule data selecting whether target contact deals damage.
-     * */
-    public static class LeapMoveRuleBuilder extends MoveRuleBuilder {
-        private final boolean requiresTargetContact;
-
-        private LeapMoveRuleBuilder(boolean requiresTargetContact) {
-            super("", MoveCategory.MELEE);
-            this.requiresTargetContact = requiresTargetContact;
-        }
-
-        public boolean requiresTargetContact() {
-            return this.requiresTargetContact;
-        }
-    }
 }

@@ -82,7 +82,7 @@ public class TyrannosaurusBuilder extends RiftCreatureBuilder {
                 .setMoveAnimations("heavy_slam", "heavy_slam")
                 .setMoveSelector(new CreatureMoveSelectorBuilder()
                         .setCanSprintToAttack(8D, 16D)
-                        .setCanLeapToAttack(6D, 12D, false)
+                        .setCanLeapToAttack(6D, 12D)
                 )
                 //---targeting---
                 .addDefaultTargetWhitelistEntry("animal")
