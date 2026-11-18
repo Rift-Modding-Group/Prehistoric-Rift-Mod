@@ -532,6 +532,53 @@
 			"timeline": {
 				"0.6667": "function.send_message('moveHitEffect');"
 			}
+		},
+		"animation.utahraptor.sprint_pose": {
+			"loop": true,
+			"bones": {
+				"hips": {
+					"rotation": [10, 0, 0]
+				},
+				"head": {
+					"rotation": [-10, 0, 0]
+				},
+				"leftElbow": {
+					"rotation": [30, 0, 0]
+				},
+				"rightElbow": {
+					"rotation": [0, 0, 0]
+				}
+			}
+		},
+		"animation.utahraptor.staggered": {
+			"loop": true,
+			"animation_length": 2,
+			"bones": {
+				"neck": {
+					"rotation": {
+						"0.0": [35, 0, 0],
+						"1.0": [45, 0, 0],
+						"2.0": [35, 0, 0]
+					}
+				},
+				"head": {
+					"rotation": [22.5, 0, 0]
+				},
+				"lowerJaw": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"1.0": [22.5, 0, 0],
+						"2.0": [0, 0, 0]
+					}
+				},
+				"tail0": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"1.0": [-7.5, 0, 0],
+						"2.0": [0, 0, 0]
+					}
+				}
+			}
 		}
 	}
 }

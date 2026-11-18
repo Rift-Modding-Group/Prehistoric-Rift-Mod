@@ -107,21 +107,7 @@ public class RiftCreatureRegistry {
         registerCreatureType(new DodoBuilder());
         registerCreatureType(new TriceratopsBuilder());
         registerCreatureType(new UtahraptorBuilder());
-        /*
-        registerCreatureType(
-                "utahraptor",
-                RiftCreature.class,
-                new RiftCreatureBuilder().setCreatureCategory(RiftCreatureEnums.CreatureCategory.DINOSAUR)
-                        .setCreatureDiet(RiftCreatureEnums.CreatureDiet.CARNIVORE)
-                        .setStats(50, 40, 20, 60)
-                        .setScaleRangeForAge(0.3f, 1f)
-                        .setSpawnEggColors(5855577, 10439936)
-                        .setDaysUntilAdult(3)
-                        .setIsHerder()
-                        .setHostileToHumans()
-                        .setRetaliateWhenAttacked(true)
-        );
-         */
+        //registerCreatureType(new ApatosaurusBuilder());
 
         registeringBuiltInCreatures = false;
         builtInCreaturesRegistered = true;
