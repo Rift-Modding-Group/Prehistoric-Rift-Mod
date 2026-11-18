@@ -51,6 +51,7 @@ public class UtahraptorBuilder extends RiftCreatureBuilder {
                 //---moves---
                 .setMoveCategorySelector((creature, target) -> {
                     if (target == null || !target.isEntityAlive()) return new MoveRuleBuilder.MoveCategory[0];
+                    if (creature.isUnableToPathToTarget()) return new MoveRuleBuilder.MoveCategory[]{MoveRuleBuilder.MoveCategory.RANGED};
                     return new MoveRuleBuilder.MoveCategory[]{MoveRuleBuilder.MoveCategory.MELEE, MoveRuleBuilder.MoveCategory.RANGED};
                 })
                 .setMaximumMoveSlots(3)
