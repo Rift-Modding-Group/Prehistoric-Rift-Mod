@@ -36,13 +36,16 @@ public class ThagomizeBuilder extends CreatureMoveBuilder {
                             SoundCategory.NEUTRAL,
                             1f, 1f
                     );
-                    creature.createOffenseHitboxesByTag("thagomizer", 4);
                 })
                 .setOnMoveEndEffect(creature -> creature.setProperty("ChargeUpLevel", 0))
                 .setMoveChargeupBuilder(new CreatureMoveChargeupBuilder()
                         .setChargeType(CreatureMoveChargeupBuilder.ChargeType.CHARGE_UP_THEN_RELEASE)
                         .setCanRotateWhileCharging()
-                        .setWindupEndEffect((creature, charge) -> TailAttackLookUtil.captureThagomizeLook(creature, creature.getAttackTarget()))
+                        .setWindupEndEffect((creature, charge) -> {
+                            TailAttackLookUtil.captureThagomizeLook(creature, creature.getAttackTarget());
+                            //Cover prerelease and the five-tick swing until the animation's cleanup cue.
+                            creature.createOffenseHitboxesByTag("thagomizer", 10);
+                        })
                         .setMaxChargeUp(100)
                         .setCooldownMultiplier(6D)
                         .setBasePowerMultiplier((creature, basePower, chargeUp) -> {
