@@ -95,23 +95,22 @@ public class FlamethrowerBuilder extends CreatureMoveBuilder {
                                                 return blockState.getBlock().isFlammable(world, pos, EnumFacing.UP);
                                             })
                                             .setHitHandler((rayCreator, rayOrigin, rayHitResult) -> {
-                                                if (!(rayCreator instanceof ICreature source)) return;
                                                 for (Entity hitEntity : rayHitResult.hitEntities()) {
-                                                    if (hitEntity instanceof EntityLivingBase)
-                                                        source.attackEntityAsMob(hitEntity);
+                                                    if (creature.isRelatedToEntity(hitEntity)) continue;
+                                                    if (hitEntity instanceof EntityLivingBase) creature.attackEntityAsMob(hitEntity);
                                                 }
                                                 World world = rayCreator.world;
                                                 for (BlockPos hitBlockPos : rayHitResult.hitBlockPositions()) {
                                                     if (world.getBlockState(hitBlockPos).getBlock() == Blocks.SNOW_LAYER
                                                             && Blocks.FIRE.canPlaceBlockAt(world, hitBlockPos)
-                                                            && source.getRNG().nextInt(4) == 0
+                                                            && creature.getRNG().nextInt(4) == 0
                                                     ) {
                                                         world.setBlockState(hitBlockPos, Blocks.FIRE.getDefaultState(), 3);
                                                     }
                                                     else if (!world.isAirBlock(hitBlockPos)
                                                             && world.isAirBlock(hitBlockPos.up())
                                                             && Blocks.FIRE.canPlaceBlockAt(world, hitBlockPos.up())
-                                                            && source.getRNG().nextInt(4) == 0
+                                                            && creature.getRNG().nextInt(4) == 0
                                                     ) {
                                                         world.setBlockState(hitBlockPos.up(), Blocks.FIRE.getDefaultState(), 3);
                                                     }

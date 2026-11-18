@@ -97,9 +97,8 @@ public class SonicBlastBuilder extends CreatureMoveBuilder {
                                                 return blockHardness <= 1 && blockHardness > 0;
                                             })
                                             .setHitHandler((rayCreator, rayOrigin, rayHitResult) -> {
-                                                if (!(rayCreator instanceof ICreature source)) return;
                                                 for (Entity hitEntity : rayHitResult.hitEntities()) {
-                                                    if (hitEntity instanceof EntityLivingBase) source.attackEntityAsMob(hitEntity);
+                                                    if (hitEntity instanceof EntityLivingBase) creature.attackEntityAsMob(hitEntity);
                                                 }
                                             }),
                                     "straightCreatureRaySource"

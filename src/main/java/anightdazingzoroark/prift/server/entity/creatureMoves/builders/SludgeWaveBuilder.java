@@ -95,10 +95,10 @@ public class SludgeWaveBuilder extends CreatureMoveBuilder {
                                             .setMotionSpeed(1D)
                                             .setMaxMotionDistance(16D)
                                             .setHitHandler((rayCreator, rayOrigin, rayHitResult) -> {
-                                                if (!(rayCreator instanceof ICreature source)) return;
                                                 for (Entity hitEntity : rayHitResult.hitEntities()) {
+                                                    if (creature.isRelatedToEntity(hitEntity)) continue;
                                                     if (!(hitEntity instanceof EntityLivingBase hitLiving)) continue;
-                                                    source.attackEntityAsMob(hitEntity);
+                                                    creature.attackEntityAsMob(hitEntity);
                                                     hitLiving.addPotionEffect(new PotionEffect(MobEffects.POISON, 300, 2));
                                                 }
                                             }),

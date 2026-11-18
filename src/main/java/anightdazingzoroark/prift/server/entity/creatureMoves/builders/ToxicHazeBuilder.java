@@ -94,8 +94,8 @@ public class ToxicHazeBuilder extends CreatureMoveBuilder {
                                             .setMaxMotionDistance(16D)
                                             .setHitHandler((rayCreator, rayOrigin, rayHitResult) -> {
                                                 for (Entity hitEntity : rayHitResult.hitEntities()) {
-                                                    if (!(hitEntity instanceof EntityLivingBase hitLiving))
-                                                        continue;
+                                                    if (creature.isRelatedToEntity(hitEntity)) continue;
+                                                    if (!(hitEntity instanceof EntityLivingBase hitLiving)) continue;
                                                     hitLiving.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 200));
                                                     hitLiving.addPotionEffect(new PotionEffect(MobEffects.BLINDNESS, 200, 2));
                                                 }
