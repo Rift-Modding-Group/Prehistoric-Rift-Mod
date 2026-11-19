@@ -1023,6 +1023,45 @@
     ],
     "subtitle": "sounds.subtitle.metal_claw"
   },
+  "prift.solar_beam.charge_loop": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/solar_beam_charge"
+    ],
+    "subtitle": "sounds.subtitle.solar_beam_charge"
+  },
+  "prift.solar_beam.use_loop": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/solar_beam_use"
+    ],
+    "subtitle": "sounds.subtitle.solar_beam_use"
+  },
+  "prift.petal_storm.use_loop": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/petal_storm_use"
+    ],
+    "subtitle": "sounds.subtitle.petal_storm_use"
+  },
+  "prift.generic_water.use": {
+    "category": "neutral",
+    "sounds": [
+      "liquid/swim1",
+      "liquid/swim2",
+      "liquid/swim3",
+      "liquid/swim4"
+    ],
+    "subtitle": "sounds.subtitle.generic_water_use"
+  },
+  "prift.generic_water.hit": {
+    "category": "neutral",
+    "sounds": [
+      "liquid/splash",
+      "liquid/splash2"
+    ],
+    "subtitle": "sounds.subtitle.generic_water_hit"
+  },
   "prift.hydro_pump.use_loop": {
     "category": "neutral",
     "sounds": [

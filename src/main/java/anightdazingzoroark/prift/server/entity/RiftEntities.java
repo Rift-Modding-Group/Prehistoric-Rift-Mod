@@ -57,6 +57,22 @@ public class RiftEntities {
                 .name("magma_storm")
                 .tracker(64, 1, true)
                 .build());
+
+        ForgeRegistries.ENTITIES.register(EntityEntryBuilder.<RiftVineCage>create()
+                .entity(RiftVineCage.class)
+                .factory(RiftVineCage::new)
+                .id(new ResourceLocation(RiftInitialize.MODID, "vine_cage"), 4)
+                .name("vine_cage")
+                .tracker(64, 1, false)
+                .build());
+
+        ForgeRegistries.ENTITIES.register(EntityEntryBuilder.<RiftPetalStorm>create()
+                .entity(RiftPetalStorm.class)
+                .factory(RiftPetalStorm::new)
+                .id(new ResourceLocation(RiftInitialize.MODID, "petal_storm"), 5)
+                .name("petal_storm")
+                .tracker(64, 1, false)
+                .build());
     }
 
     private static class CreatureTypeEntry extends EntityEntry {

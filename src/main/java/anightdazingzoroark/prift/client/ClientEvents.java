@@ -76,11 +76,13 @@ public class ClientEvents {
         if (!(event.getPlayer().getRidingEntity() instanceof RiftCreature creature)
                 || creature.getControllingPassenger() != event.getPlayer()) return;
 
-        //block rotating while ridin a creature that uses a charge move and is charging
+        // Lock both mouse axes during release when the move only permits aiming while charging.
         CreatureMoveBuilder move = creature.getCreatureMoves().getMoveBuilderCurrentMove();
-        if (move != null && move.getRiddenAimingType() == RiddenAimingType.CHARGE
+        if (move != null
                 && creature.getCreatureMoves().currentMoveMatches(creature.getCurrentMove(), ChargeupPhase.RELEASING)
-                && creature.getRushState().move().equals(creature.getCurrentMove())
+                && (creature.isRiddenAimLocked()
+                || move.getRiddenAimingType() == RiddenAimingType.CHARGE
+                && creature.getRushState().move().equals(creature.getCurrentMove()))
         ) {
             event.setCanceled(true);
         }

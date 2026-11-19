@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.server.config.RiftGeneralConfig;
 import anightdazingzoroark.prift.server.effect.RiftEffects;
 import anightdazingzoroark.prift.server.effect.RiftParalysisEffect;
 import anightdazingzoroark.prift.server.entity.ai.RiftAvoidStinkBomb;
+import anightdazingzoroark.prift.server.entity.RiftVineCage;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreature;
 import anightdazingzoroark.prift.server.properties.OtherEntityProperties;
 import net.minecraft.entity.Entity;
@@ -15,6 +16,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.event.ClickEvent;
@@ -22,6 +24,7 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.event.world.GetCollisionBoxesEvent;
 import anightdazingzoroark.prift.server.block.CreatureBoxBlock;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums.CreatureDeployment;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -31,6 +34,15 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 
 public class ServerEvents {
+    @SubscribeEvent
+    public void onGetCollisionBoxes(@NotNull GetCollisionBoxesEvent event) {
+        for (RiftVineCage cage : event.getWorld().getEntitiesWithinAABB(RiftVineCage.class, event.getAabb(), RiftVineCage::isActive)) {
+            for (AxisAlignedBB wall : RiftVineCage.getWallBounds(cage.getEntityBoundingBox())) {
+                if (wall.intersects(event.getAabb())) event.getCollisionBoxesList().add(wall);
+            }
+        }
+    }
+
     @SubscribeEvent
     public void onBreakSpeed(@NotNull net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed event) {
         //paralysis slows breaking; snowed prevents it

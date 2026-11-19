@@ -50,21 +50,33 @@ public class ApatosaurusBuilder extends RiftCreatureBuilder {
                     if (creature.isUnableToPathToTarget()) return new MoveRuleBuilder.MoveCategory[]{MoveRuleBuilder.MoveCategory.RANGED};
                     return new MoveRuleBuilder.MoveCategory[]{MoveRuleBuilder.MoveCategory.MELEE, MoveRuleBuilder.MoveCategory.RANGED};
                 })
-                .setMaximumMoveSlots(3)
-                .setSpawnMoves("stomp", "root_spike", "hydro_pump")
+                .setMaximumMoveSlots(4)
+                .setSpawnMoves("stomp", "tail_whip", "root_spike", "hydro_pump")
                 .setMoveAnimations("stomp", "stomp")
                 .setMoveAnimations("root_spike", "root_spike")
                 .setMoveAnimations("hydro_pump", "hydro_pump")
-                /*
+                .setMoveAnimations("bide", "bide")
+                .setMoveAnimations("tail_whip", "tail_whip")
+                .setMoveAnimations("leaf_dart", "tail_whip")
+                .setMoveAnimations("belch", "spit")
+                .setMoveAnimations("vine_cage", "root_spike")
+                .setMoveAnimations("acid_water", "spit")
+                .setMoveAnimations("heavy_slam", "heavy_slam")
+                .setMoveAnimations("seed_bomb", "spit")
+                .setMoveAnimations("tremor", "stomp")
+                .setMoveAnimations("bubble_bomb", "root_spike")
+                .setMoveAnimations("sludge_wave", "hydro_pump")
+                .setMoveAnimations("solar_beam", "hydro_pump")
+                .setMoveAnimations("petal_storm", "root_spike")
                 .setLevelupMoves(Map.of(
-                        1, List.of("bide", "tail_whip", "leaf_dart", "belch"),
-                        3, List.of("vine_cage", "acid_water"), //note to self: acid water applies defense down to targets, vine cage encages targets in vines and prevent movement
-                        8, List.of("heavy_slam", "seed_bomb", "tremor", "bubble_bomb"), //note to self: creates a bubble that slowly hones towards the targets last position
+                        1, List.of("bide", "leaf_dart", "belch"),
+                        3, List.of("vine_cage" , "acid_water"),
+                        8, List.of("heavy_slam", "seed_bomb", "tremor", "bubble_bomb"),
                         10, List.of("solar_beam", "sludge_wave", "petal_storm")
                 ))
-                 */
                 //---targeting---
                 .addDefaultFoodItemWhitelistEntry("leaves")
+                .addDefaultFoodItemWhitelistEntry("fruit")
                 .setRetaliateWhenAttacked()
                 .setRememberPlayerAttacker();
     }

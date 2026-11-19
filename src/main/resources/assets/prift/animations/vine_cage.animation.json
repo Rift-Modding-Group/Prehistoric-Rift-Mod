@@ -1,0 +1,18 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.vine_cage.grow": {
+			"animation_length": 1,
+			"loop": true,
+			"bones": {
+				"cage": {
+					"scale": [
+						2,
+						"2 * cage_growth",
+						2
+					]
+				}
+			}
+		}
+	}
+}

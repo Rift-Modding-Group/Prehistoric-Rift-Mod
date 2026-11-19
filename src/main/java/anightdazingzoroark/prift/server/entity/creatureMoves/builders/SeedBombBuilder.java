@@ -55,8 +55,7 @@ public class SeedBombBuilder extends CreatureMoveBuilder {
                 .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.RANGED)
                 .setRiddenPitchBounds(-75f, 35f)
                 .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.POINT)
-                //.setCooldown(400)
-        ;
+                .setCooldown(400);
     }
 
     public static class Rule extends MoveRuleBuilder {

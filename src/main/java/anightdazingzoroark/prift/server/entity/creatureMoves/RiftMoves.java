@@ -31,6 +31,7 @@ public class RiftMoves {
         CreatureMoveRegistry.registerMove("toxic_haze", new ToxicHazeBuilder(), new ToxicHazeBuilder.Rule());
         CreatureMoveRegistry.registerMove("tail_stab", new TailStabBuilder(), new TailStabBuilder.Rule());
         CreatureMoveRegistry.registerMove("tail_slam", new TailSlamBuilder(), new TailSlamBuilder.Rule());
+        CreatureMoveRegistry.registerMove("tail_whip", new TailWhipBuilder(), new TailWhipBuilder.Rule());
         CreatureMoveRegistry.registerMove("thagomize", new ThagomizeBuilder(), new ThagomizeBuilder.Rule());
         CreatureMoveRegistry.registerMove("plate_fling", new PlateFlingBuilder(), new PlateFlingBuilder.Rule());
         CreatureMoveRegistry.registerMove("peck", new PeckBuilder(), new PeckBuilder.Rule());
@@ -60,7 +61,13 @@ public class RiftMoves {
         CreatureMoveRegistry.registerMove("kick", new KickBuilder(), new KickBuilder.Rule());
         CreatureMoveRegistry.registerMove("backstab", new BackstabBuilder(), new BackstabBuilder.Rule());
         CreatureMoveRegistry.registerMove("root_spike", new RootSpikeBuilder(), new RootSpikeBuilder.Rule());
+        CreatureMoveRegistry.registerMove("vine_cage", new VineCageBuilder(), new VineCageBuilder.Rule());
         CreatureMoveRegistry.registerMove("hydro_pump", new HydroPumpBuilder(), new HydroPumpBuilder.Rule());
+        CreatureMoveRegistry.registerMove("leaf_dart", new LeafDartBuilder(), new LeafDartBuilder.Rule());
+        CreatureMoveRegistry.registerMove("acid_water", new AcidWaterBuilder(), new AcidWaterBuilder.Rule());
+        CreatureMoveRegistry.registerMove("bubble_bomb", new BubbleBombBuilder(), new BubbleBombBuilder.Rule());
+        CreatureMoveRegistry.registerMove("solar_beam", new SolarBeamBuilder(), new SolarBeamBuilder.Rule());
+        CreatureMoveRegistry.registerMove("petal_storm", new PetalStormBuilder(), new PetalStormBuilder.Rule());
 
         registered = true;
     }

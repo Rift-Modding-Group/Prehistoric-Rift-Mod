@@ -65,6 +65,7 @@ public class CreatureMoveStorage {
     private ChargeupPhase currentMoveChargeupPhase;
     private int currentMoveTicks;
     private int currentMoveChargeUpTicks;
+    private int currentMoveReleaseTicks;
     private int currentMoveBuildup;
     private boolean currentMoveHitEffectFired;
     private boolean currentMoveEndEffectFired;
@@ -427,6 +428,7 @@ public class CreatureMoveStorage {
             this.currentMove = moveName;
             this.currentMoveTicks = 0;
             this.currentMoveChargeUpTicks = 0;
+            this.currentMoveReleaseTicks = 0;
             this.currentMoveBuildup = 0;
             this.currentMoveHitEffectFired = false;
             this.currentMoveEndEffectFired = false;
@@ -472,8 +474,16 @@ public class CreatureMoveStorage {
                 }
             }
 
-            if (this.currentMoveChargeupPhase == ChargeupPhase.RELEASING && chargeupBuilder.getReleaseDuringUseEffect() != null) {
-                chargeupBuilder.getReleaseDuringUseEffect().accept(creature, this.currentMoveBuildup, creature.getAttackTarget());
+            if (this.currentMoveChargeupPhase == ChargeupPhase.RELEASING) {
+                this.currentMoveReleaseTicks++;
+                if (chargeupBuilder.getReleaseDuringUseEffect() != null) {
+                    chargeupBuilder.getReleaseDuringUseEffect().accept(creature, this.currentMoveBuildup, creature.getAttackTarget());
+                }
+                if (chargeupBuilder.getReleaseDuration() > 0
+                        && this.currentMoveReleaseTicks >= chargeupBuilder.getReleaseDuration()) {
+                    this.finishCurrentMoveUse(creature);
+                    return;
+                }
             }
 
             if (chargeupBuilder.getChargeType() == ChargeType.CHARGE_UP_THEN_RELEASE && this.currentMoveChargeupPhase == ChargeupPhase.WINDUP) {
@@ -541,7 +551,12 @@ public class CreatureMoveStorage {
             ChargeupPhase finishedPhase = this.currentMoveChargeupPhase;
             this.runChargeupPhaseEndEffect(creature, chargeupBuilder, finishedPhase);
 
-            if (finishedPhase == ChargeupPhase.PREWINDUP) this.currentMoveChargeupPhase = ChargeupPhase.WINDUP;
+            if (finishedPhase == ChargeupPhase.PREWINDUP) {
+                this.currentMoveChargeupPhase = ChargeupPhase.WINDUP;
+                if (chargeupBuilder.getWindupStartEffect() != null) {
+                    chargeupBuilder.getWindupStartEffect().accept(creature);
+                }
+            }
             else if (finishedPhase == ChargeupPhase.WINDUP) {
                 if (chargeupBuilder.getCanRotateWhileCharging()) {
                     float bodyYaw = creature.getAnimationData().getModelYaw();
@@ -684,6 +699,7 @@ public class CreatureMoveStorage {
         this.currentMoveChargeupPhase = null;
         this.currentMoveTicks = 0;
         this.currentMoveChargeUpTicks = 0;
+        this.currentMoveReleaseTicks = 0;
         this.currentMoveBuildup = 0;
         this.currentMoveHitEffectFired = false;
         this.currentMoveEndEffectFired = false;

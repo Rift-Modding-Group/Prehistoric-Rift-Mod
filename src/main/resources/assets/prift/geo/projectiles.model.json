@@ -43,8 +43,44 @@
 					"name": "body",
 					"pivot": [0.5, 0, -0.5],
 					"cubes": [
-						{"origin": [0, 0, -5.75], "size": [0, 3, 16], "uv": [0, 0]},
-						{"origin": [0, 0.5, -10.75], "size": [0, 2, 5], "uv": [0, 19]}
+						{
+							"origin": [0, 0, -5.75],
+							"size": [0, 3, 16],
+							"uv": [0, 0]
+						},
+						{
+							"origin": [0, 0.5, -10.75],
+							"size": [0, 2, 5],
+							"uv": [0, 19]
+						}
+					]
+				}
+			]
+		},
+		{
+			"description": {
+				"identifier": "geometry.thrown_leaf_dart",
+				"texture_width": 32,
+				"texture_height": 16,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 1.5,
+				"visible_bounds_offset": [0, 0.25, 0]
+			},
+			"bones": [
+				{
+					"name": "body",
+					"pivot": [0.5, 0, -0.5],
+					"cubes": [
+						{
+							"origin": [-4, 3, -3.75],
+							"size": [8, 0, 10],
+							"uv": [-10, 0]
+						},
+						{
+							"origin": [-2, 3, -6.75],
+							"size": [4, 0, 3],
+							"uv": [13, 0]
+						}
 					]
 				}
 			]
@@ -63,11 +99,7 @@
 					"name": "bone",
 					"pivot": [0, 4, 0],
 					"cubes": [
-						{
-							"origin": [-4, 0, -4],
-							"size": [8, 8, 8],
-							"uv": [0, 0]
-						}
+						{"origin": [-4, 0, -4], "size": [8, 8, 8], "uv": [0, 0]}
 					],
 					"locators": {
 						"center": [0, 4, 0]

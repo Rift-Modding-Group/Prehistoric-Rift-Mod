@@ -36,6 +36,7 @@ public class ProjectileBuilder {
     private float scale = 1f;
     private boolean stayAfterImpact;
     private boolean rotateAlongPitch;
+    private boolean straightFlight;
     @NotNull
     private ProjectileModel projectileModel = ProjectileModel.NONE;
     @Nullable
@@ -147,6 +148,19 @@ public class ProjectileBuilder {
 
     public boolean getRotateAlongPitch() {
         return this.rotateAlongPitch;
+    }
+
+    /**
+     * Keeps the launch velocity in air and water without gravity or drag.
+     * */
+    @NotNull
+    public ProjectileBuilder setStraightFlight() {
+        this.straightFlight = true;
+        return this;
+    }
+
+    public boolean getStraightFlight() {
+        return this.straightFlight;
     }
 
     public ProjectileBuilder setProjectileModel(@NotNull ProjectileModel projectileModel) {

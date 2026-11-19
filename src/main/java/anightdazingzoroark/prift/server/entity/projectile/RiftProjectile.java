@@ -35,6 +35,7 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
     private static final DataParameter<Float> SCALE = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.FLOAT);
     private static final DataParameter<Boolean> VERTICAL_ROTATE = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> DESTROY_ON_HIT = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> STRAIGHT_FLIGHT = EntityDataManager.createKey(RiftProjectile.class, DataSerializers.BOOLEAN);
 
     @Nullable
     private AnimationDataProjectile data;
@@ -93,6 +94,8 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
         this.dataManager.set(SCALE, builder.getScale());
         this.dataManager.set(VERTICAL_ROTATE, builder.getRotateAlongPitch());
         this.dataManager.set(DESTROY_ON_HIT, !builder.getStayAfterImpact());
+        this.dataManager.set(STRAIGHT_FLIGHT, builder.getStraightFlight());
+        this.setNoGravity(builder.getStraightFlight());
         if (builder.getProjectileTrail() != null) this.dataManager.set(PARTICLE_TRAIL, ParticleBuilder.toNBT(builder.getProjectileTrail()));
         if (builder.getPropertyValueMap() != null) this.propertyValueMap = Map.copyOf(builder.getPropertyValueMap());
     }
@@ -106,11 +109,19 @@ public class RiftProjectile extends RiftLibProjectile implements IProjectile {
         this.dataManager.register(SCALE, 1f);
         this.dataManager.register(VERTICAL_ROTATE, false);
         this.dataManager.register(DESTROY_ON_HIT, false);
+        this.dataManager.register(STRAIGHT_FLIGHT, false);
     }
 
     @Override
     public void onUpdate() {
+        Vec3d launchMotion = this.getMotionVector();
         super.onUpdate();
+
+        if (this.dataManager.get(STRAIGHT_FLIGHT) && !this.inGround && !this.isDead) {
+            this.motionX = launchMotion.x;
+            this.motionY = launchMotion.y;
+            this.motionZ = launchMotion.z;
+        }
 
         if (this.world.isRemote) return;
         if (this.projectileBuilder.getUpdateEffect() != null) this.projectileBuilder.getUpdateEffect().accept(this);

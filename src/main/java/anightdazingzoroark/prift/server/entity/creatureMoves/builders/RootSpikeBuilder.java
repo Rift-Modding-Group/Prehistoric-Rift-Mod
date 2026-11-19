@@ -23,10 +23,15 @@ public class RootSpikeBuilder extends CreatureMoveBuilder {
     public RootSpikeBuilder() {
         this.setBasePower(50)
                 .setElement(Element.GRASS)
-                .setMoveType(MoveType.SPECIAL)
+                .setMoveType(MoveType.PHYSICAL)
                 .setStaminaCost(0.08f)
                 .setRequireFindTargetToUse()
                 .setUseLookBasedFacing()
+                .setCanUse(creature -> {
+                    if (creature.getControllingPassenger() == null || creature.getRiddenAimPosition() == null) return true;
+                    RayTraceResult hit = creature.getCrosshairTargets();
+                    return hit != null && hit.typeOfHit != RayTraceResult.Type.MISS && isWithinRange(creature, hit.hitVec);
+                })
                 .setOnMoveHitEffect(creature -> {
                     if (creature.getEntityWorld().isRemote) return;
                     RayTraceResult hit = creature.getCrosshairTargets();
@@ -34,7 +39,7 @@ public class RootSpikeBuilder extends CreatureMoveBuilder {
                     if (creature.getControllingPassenger() == null) target = creature.getAttackTarget();
                     else if (hit != null && hit.entityHit instanceof EntityLivingBase living) target = living;
 
-                    Vec3d floor = getStrikeFloor(creature, target, hit);
+                    Vec3d floor = getStrikeFloor(creature, target);
                     if (floor == null || !isWithinRange(creature, floor)) return;
 
                     creature.createMoveGraphic(
@@ -64,24 +69,26 @@ public class RootSpikeBuilder extends CreatureMoveBuilder {
                 .setCooldown(200)
                 .setRiddenAimingType(CreatureMoveBuilder.RiddenAimingType.TARGETED_MELEE)
                 .setRiddenHorizontalRange(8D)
-                .setRiddenPitchBounds(-45f, 90f)
+                .setRiddenPitchBounds(-75f, 35f)
                 .setRiddenCrosshairType(CreatureMoveBuilder.RiddenCrosshairType.POINT);
     }
 
-    private static boolean isWithinRange(@NotNull ICreature creature, @NotNull Vec3d destination) {
+    public static boolean isWithinRange(@NotNull ICreature creature, @NotNull Vec3d destination) {
         Vec3d position = creature.getPositionVector();
         double reach = creature.getSize()[0] * 0.5D + 8D;
         return Math.pow(destination.x - position.x, 2D) + Math.pow(destination.z - position.z, 2D) <= reach * reach + 1E-6D;
     }
 
     @Nullable
-    private static Vec3d getStrikeFloor(@NotNull ICreature creature, @Nullable EntityLivingBase target, @Nullable RayTraceResult hit) {
+    public static Vec3d getStrikeFloor(@NotNull ICreature creature, @Nullable EntityLivingBase target) {
         if (target != null && target.isEntityAlive()) {
             Vec3d feet = new Vec3d(target.posX, target.getEntityBoundingBox().minY, target.posZ);
             return findFloor(creature, feet, feet.y - 1D, feet.y);
         }
-        if (creature.getRiddenAimPosition() != null) {
-            if (hit == null || hit.typeOfHit != RayTraceResult.Type.BLOCK) return null;
+
+        RayTraceResult hit = creature.getCrosshairTargets();
+        if (hit != null) {
+            if (hit.typeOfHit != RayTraceResult.Type.BLOCK) return null;
             BlockPos block = hit.getBlockPos();
             List<AxisAlignedBB> surfaces = new ArrayList<>();
             creature.getEntityWorld().getBlockState(block).addCollisionBoxToList(
@@ -110,7 +117,10 @@ public class RootSpikeBuilder extends CreatureMoveBuilder {
         for (AxisAlignedBB surface : surfaces) {
             if (destination.x < surface.minX || destination.x > surface.maxX
                     || destination.z < surface.minZ || destination.z > surface.maxZ
-                    || surface.maxY < minimumY - 1E-6D || surface.maxY > maximumY + 1E-6D) continue;
+                    || surface.maxY < minimumY - 1E-6D || surface.maxY > maximumY + 1E-6D
+            ) {
+                continue;
+            }
             if (floor == null || surface.maxY > floor.y) floor = new Vec3d(destination.x, surface.maxY, destination.z);
         }
         return floor;
@@ -129,7 +139,7 @@ public class RootSpikeBuilder extends CreatureMoveBuilder {
         ).stream().min(Comparator.comparingDouble(living -> living.getDistanceSq(floor.x, floor.y, floor.z))).orElse(null);
     }
 
-    private static boolean canTarget(@NotNull ICreature creature, @Nullable EntityLivingBase target) {
+    public static boolean canTarget(@NotNull ICreature creature, @Nullable EntityLivingBase target) {
         if (target == null || !target.isEntityAlive() || !isWithinRange(creature, target.getPositionVector())) return false;
         Vec3d feet = new Vec3d(target.posX, target.getEntityBoundingBox().minY, target.posZ);
         return findFloor(creature, feet, feet.y - 1D, feet.y) != null;
@@ -138,7 +148,7 @@ public class RootSpikeBuilder extends CreatureMoveBuilder {
     public static class Rule extends MoveRuleBuilder {
         public Rule() {
             super("root_spike", MoveCategory.RANGED);
-            this.setPriorityPredicate(RootSpikeBuilder::canTarget).setUseWhenFrustrated();
+            this.setPriorityPredicate(RootSpikeBuilder::canTarget);
         }
     }
 }

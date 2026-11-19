@@ -26,15 +26,18 @@ public class CreatureMoveChargeupBuilder {
     private boolean canRotateWhileCharging;
     private boolean canLookWhileUsing;
     private int maxChargeUp = 100;
+    private int releaseDuration;
     @NotNull
     private TriFunction<ICreature, Integer, Integer, Double> basePowerMultiplier = (creature, basePower, chargeUp) -> 1D;
     @NotNull
     private Function<ICreature, Double> cooldownMultiplier = creature -> 2D;
     private boolean releaseOnEndWindup;
 
-    //must be left alone
+    //can be left alone
     @Nullable
     private BiConsumer<ICreature, Integer> windupEndEffect;
+    @Nullable
+    private Consumer<ICreature> windupStartEffect;
     private Consumer<ICreature> prereleaseEndEffect;
     private Consumer<ICreature> releaseEndEffect;
     private BiConsumer<ICreature, Integer> windupEffect;
@@ -103,6 +106,20 @@ public class CreatureMoveChargeupBuilder {
     }
 
     /**
+     * Set a fixed release duration in ticks; zero leaves release timing to the animation.
+     */
+    @NotNull
+    public CreatureMoveChargeupBuilder setReleaseDuration(int ticks) {
+        this.checkIfLocked();
+        this.releaseDuration = Math.max(0, ticks);
+        return this;
+    }
+
+    public int getReleaseDuration() {
+        return this.releaseDuration;
+    }
+
+    /**
      * Set a base power move multiplier based on the charge
      * */
     public CreatureMoveChargeupBuilder setBasePowerMultiplier(@NotNull TriFunction<ICreature, Integer, Integer, Double> basePowerMultiplier) {
@@ -149,6 +166,21 @@ public class CreatureMoveChargeupBuilder {
 
     public boolean getReleaseOnEndWindup() {
         return this.releaseOnEndWindup;
+    }
+
+    /**
+     * Sets the effect called when windup starts.
+     */
+    @NotNull
+    public CreatureMoveChargeupBuilder setWindupStartEffect(@NotNull Consumer<ICreature> windupStartEffect) {
+        this.checkIfLocked();
+        this.windupStartEffect = windupStartEffect;
+        return this;
+    }
+
+    @Nullable
+    public Consumer<ICreature> getWindupStartEffect() {
+        return this.windupStartEffect;
     }
 
     /**
@@ -246,8 +278,10 @@ public class CreatureMoveChargeupBuilder {
         toReturn.canRotateWhileCharging = this.canRotateWhileCharging;
         toReturn.canLookWhileUsing = this.canLookWhileUsing;
         toReturn.maxChargeUp = this.maxChargeUp;
+        toReturn.releaseDuration = this.releaseDuration;
         toReturn.basePowerMultiplier = this.basePowerMultiplier;
         toReturn.cooldownMultiplier = this.cooldownMultiplier;
+        toReturn.windupStartEffect = this.windupStartEffect;
         toReturn.windupEndEffect = this.windupEndEffect;
         toReturn.prereleaseEndEffect = this.prereleaseEndEffect;
         toReturn.releaseEndEffect = this.releaseEndEffect;

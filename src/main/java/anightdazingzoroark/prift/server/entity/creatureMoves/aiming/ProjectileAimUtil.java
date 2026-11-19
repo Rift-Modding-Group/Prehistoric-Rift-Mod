@@ -25,6 +25,12 @@ public class ProjectileAimUtil {
     }
 
     @NotNull
+    public static Vec3d getLaunchVelocity(@NotNull Vec3d origin, @NotNull Vec3d target, double speed, boolean straightFlight) {
+        if (straightFlight) return target.subtract(origin).normalize().scale(Math.max(0D, speed));
+        return getLaunchVelocity(origin, target, speed);
+    }
+
+    @NotNull
     public static Vec3d getLaunchVelocity(@NotNull Vec3d origin, @NotNull Vec3d target, double speed) {
         Vec3d offset = target.subtract(origin);
         if (speed <= 0D || offset.lengthSquared() < 1E-12D) return Vec3d.ZERO;

@@ -1574,7 +1574,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         Vec3d shootVector;
         Vec3d aimPosition = this.getRiddenAimPosition();
         if (aimPosition != null && moveBuilder.getRiddenAimingType() == RiddenAimingType.RANGED) {
-            shootVector = ProjectileAimUtil.getLaunchVelocity(projectile.getPositionVector(), aimPosition, velocity);
+            shootVector = ProjectileAimUtil.getLaunchVelocity(projectile.getPositionVector(), aimPosition, velocity, projectileBuilder.getStraightFlight());
         }
         else {
             shootVector = new Vec3d(this.getLookVec().x, 0D, this.getLookVec().z).scale(16D);
@@ -2326,7 +2326,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     public boolean isRiddenAimLocked() {
         CreatureMoveBuilder move = this.getCreatureMoves().getMoveBuilderCurrentMove();
         CreatureMoveChargeupBuilder charge = move == null ? null : move.getMoveChargeupBuilder();
-        return move != null && move.getUseLookBasedFacing() && !this.canRotateWhileCharging() && (charge == null || !charge.getCanLookWhileUsing());
+        return move != null
+                && (move.getUseLookBasedFacing() || charge != null && charge.getCanRotateWhileCharging())
+                && !this.canRotateWhileCharging() && (charge == null || !charge.getCanLookWhileUsing());
     }
 
     /**
