@@ -360,6 +360,10 @@ move.creature.kick.description=Patea objetivos en frente.
 move.creature.backstab=Puñalada trapera
 move.creature.backstab.description=Un poderoso corte que solo se puede usar cuando no es visto.
 move.creature.backstab.cannot_use=¡Puñalada trapera solo se puede usar cuando otras criaturas no te ven!
+move.creature.root_spike=Púa de Raíz
+move.creature.root_spike.description=Hace crecer raíces para apuñalar al objetivo.
+move.creature.hydro_pump=Hidrobomba
+move.creature.hydro_pump.description=Exhala una corriente continua de agua hacia un objetivo.
 
 priftcommands.bleed.usage=/priftbleed <jugador|entidad> <segundos> [fuerza]
 priftcommands.bleed.successful=Se aplicó sangrado a %s

@@ -12,6 +12,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
@@ -93,6 +94,9 @@ public interface ICreature {
     void createRay(@NotNull RiftLibRayBuilder rayBuilder, @NotNull String locatorName);
 
     void createMoveGraphic(@NotNull CreatureMoveGraphic graphic, @Nullable EntityLivingBase target);
+
+    @Nullable
+    RayTraceResult getCrosshairTargets();
 
     boolean canSprintToAttack();
 

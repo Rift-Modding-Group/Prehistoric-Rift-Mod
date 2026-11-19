@@ -1023,6 +1023,20 @@
     ],
     "subtitle": "sounds.subtitle.metal_claw"
   },
+  "prift.hydro_pump.use_loop": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/hydro_pump_loop"
+    ],
+    "subtitle": "sounds.subtitle.hydro_pump_use_loop"
+  },
+  "prift.root_stab.use": {
+    "category": "neutral",
+    "sounds": [
+      "prift:entities/generic_move/root_stab"
+    ],
+    "subtitle": "sounds.subtitle.root_stab_use"
+  },
   "prift.tranq_bomb.impact": {
     "category": "neutral",
     "sounds": [

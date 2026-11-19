@@ -2242,15 +2242,9 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             if (this.riddenAreaHitEntities.contains(hitEntity.getEntityId())) return false;
             Vec3d hitPosition = this.riddenAimArea.getHitPosition(entityIn.getEntityBoundingBox());
             Vec3d eyes = this.getPositionEyes(1f);
-
-            if (hitPosition == null || hitPosition.squareDistanceTo(eyes) > this.riddenMeleeAimReach * this.riddenMeleeAimReach) {
-                return false;
-            }
-            //both the camera and creature must have an unobstructed path to the selected surface.
+            if (hitPosition == null || hitPosition.squareDistanceTo(eyes) > this.riddenMeleeAimReach * this.riddenMeleeAimReach) return false;
             for (Vec3d origin : List.of(eyes, this.riddenAimArea.origin())) {
-                RayTraceResult wall = this.world.rayTraceBlocks(
-                        origin, hitPosition, false, true, false
-                );
+                RayTraceResult wall = this.world.rayTraceBlocks(origin, hitPosition, false, true, false);
                 if (wall != null && origin.squareDistanceTo(wall.hitVec) + 1E-6D < origin.squareDistanceTo(hitPosition)) return false;
             }
             this.riddenAreaHitEntities.add(hitEntity.getEntityId());
@@ -2267,6 +2261,20 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         return this.attackEntityAsMob(entityIn);
     }
 
+    @Override
+    @Nullable
+    public RayTraceResult getCrosshairTargets() {
+        Vec3d aim = this.getRiddenAimPosition();
+        if (aim == null || this.riddenAimTarget == null) return null;
+        Entity target = this.riddenAimTarget.getEntity(this.world);
+        if (target instanceof MultiPartEntityPart part) target = (Entity) part.parent;
+        if (target != null) return new RayTraceResult(target, aim);
+        if (this.riddenAimTarget.blockPosition() != null) {
+            return new RayTraceResult(aim, this.riddenAimTarget.blockFace(), this.riddenAimTarget.blockPosition());
+        }
+        return new RayTraceResult(RayTraceResult.Type.MISS, aim, null, null);
+    }
+
     public boolean isTargetedMeleeRiddenMove(int moveIndex) {
         List<ImmutablePair<String, CreatureMoveBuilder>> moves = this.getCreatureMoves().getUsableMoves();
         return moveIndex >= 0 && moveIndex < moves.size()
@@ -2281,6 +2289,10 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (configuration == null) return 0D;
         MoveDefinition definition = configuration.getMoveDefinitions().get(moves.get(moveIndex).getKey());
         if (definition == null) return 0D;
+
+        if (definition.moveBuilder().getRiddenHorizontalRange() > 0D) {
+            return Math.hypot(definition.moveBuilder().getRiddenHorizontalRange() + this.width * 0.5D, this.height + 1D);
+        }
 
         //for attacks with anim detection
         Vec3d origin = new Vec3d(0D, this.getEyeHeight(), 0D);
@@ -3028,10 +3040,20 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
         Vec3d origin = new Vec3d(this.posX, this.getEntityBoundingBox().maxY, this.posZ);
         Vec3d destination;
-        if (this.getControllingPassenger() instanceof EntityLivingBase rider) {
+        if (graphic.placement() == CreatureMoveGraphic.Placement.TARGET_GROUND && target != null && target.isEntityAlive()) {
+            destination = new Vec3d(target.posX, target.getEntityBoundingBox().minY, target.posZ);
+        }
+        else if (this.getControllingPassenger() instanceof EntityLivingBase rider) {
             destination = this.getRiddenAimPosition();
             if (destination == null) {
-                if (CreatureLookUtil.isMeleeMove(this.getCreatureMoves().getMoveBuilderCurrentMove())) {
+                CreatureMoveBuilder move = this.getCreatureMoves().getMoveBuilderCurrentMove();
+                if (graphic.placement() == CreatureMoveGraphic.Placement.TARGET_GROUND
+                        && move != null && move.getRiddenHorizontalRange() > 0D) {
+                    double yaw = Math.toRadians(this.animData.getModelYaw());
+                    double front = this.width * 0.5D + 1D;
+                    destination = this.getPositionVector().add(-Math.sin(yaw) * front, 1D, Math.cos(yaw) * front);
+                }
+                else if (CreatureLookUtil.isMeleeMove(move)) {
                     destination = CreatureLookUtil.getRiddenAttackPosition(this);
                 }
                 else destination = rider.getPositionEyes(1f).add(rider.getLookVec().scale(2D));
@@ -3044,6 +3066,23 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         if (destination == null) return;
 
         if (graphic.placement() == CreatureMoveGraphic.Placement.TARGET_GROUND) {
+            if (target == null && this.getRiddenAimPosition() != null) {
+                RayTraceResult hit = this.getCrosshairTargets();
+                if (hit != null && hit.typeOfHit == RayTraceResult.Type.BLOCK) {
+                    BlockPos block = hit.getBlockPos();
+                    List<AxisAlignedBB> surfaces = new ArrayList<>();
+                    this.world.getBlockState(block).addCollisionBoxToList(
+                            this.world, block, new AxisAlignedBB(block).grow(1D), surfaces, null, false
+                    );
+                    Vec3d floor = null;
+                    for (AxisAlignedBB surface : surfaces) {
+                        if (hit.hitVec.x < surface.minX || hit.hitVec.x > surface.maxX
+                                || hit.hitVec.z < surface.minZ || hit.hitVec.z > surface.maxZ) continue;
+                        if (floor == null || surface.maxY > floor.y) floor = new Vec3d(hit.hitVec.x, surface.maxY, hit.hitVec.z);
+                    }
+                    if (floor != null) destination = floor;
+                }
+            }
             if (this.riddenAreaAttackActive && this.riddenMeleeAimReach > 0D) {
                 Vec3d eyes = this.getPositionEyes(1f);
                 Vec3d offset = destination.subtract(eyes);

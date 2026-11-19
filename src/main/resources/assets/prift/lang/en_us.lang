@@ -360,6 +360,10 @@ move.creature.kick.description=Kicks back targets in front.
 move.creature.backstab=Backstab
 move.creature.backstab.description=A powerful slash usable only when unseen.
 move.creature.backstab.cannot_use=Backstab can only be used when out of sight of other mobs!
+move.creature.root_spike=Root Spike
+move.creature.root_spike.description=Makes roots strike the target from below.
+move.creature.hydro_pump=Hydro Pump
+move.creature.hydro_pump.description=Spews out a sustained bust of water at the target.
 
 priftcommands.bleed.usage=/priftbleed <player|entity> <seconds> [strength]
 priftcommands.bleed.successful=Applied bleed to %s

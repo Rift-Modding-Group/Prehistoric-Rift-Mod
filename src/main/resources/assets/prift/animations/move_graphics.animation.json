@@ -118,6 +118,19 @@
           "rotation": [0, 0, "query.anim_time * 1440"]
         }
       }
+    },
+    "animation.move_graphic.root_spike": {
+      "animation_length": 0.8,
+      "bones": {
+        "roots": {
+          "position": {
+            "0.0": [0, -40, 0],
+            "0.12": [0, 0, 0],
+            "0.5": [0, 0, 0],
+            "0.8": [0, -40, 0]
+          }
+        }
+      }
     }
   }
 }

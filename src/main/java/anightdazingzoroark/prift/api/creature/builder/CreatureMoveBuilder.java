@@ -59,6 +59,7 @@ public class CreatureMoveBuilder {
     @Nullable
     private String riddenAimLocator;
     private double riddenAimDistance;
+    private double riddenHorizontalRange;
     private float @NotNull [] riddenPitchBounds = new float[]{-15f, 15f};
 
     /**
@@ -427,6 +428,19 @@ public class CreatureMoveBuilder {
         return this.riddenAimDistance;
     }
 
+    /** Horizontal reach beyond the user's body edge; zero keeps geometry-based aiming. */
+    @NotNull
+    public CreatureMoveBuilder setRiddenHorizontalRange(double range) {
+        this.checkIfLocked();
+        if (range <= 0D) throw new IllegalArgumentException("The horizontal aim range must be positive!");
+        this.riddenHorizontalRange = range;
+        return this;
+    }
+
+    public double getRiddenHorizontalRange() {
+        return this.riddenHorizontalRange;
+    }
+
     /**
      * Get validity based on if some params are not null
      * */
@@ -473,6 +487,7 @@ public class CreatureMoveBuilder {
         toReturn.riddenCrosshairType = this.riddenCrosshairType;
         toReturn.riddenAimLocator = this.riddenAimLocator;
         toReturn.riddenAimDistance = this.riddenAimDistance;
+        toReturn.riddenHorizontalRange = this.riddenHorizontalRange;
         toReturn.riddenPitchBounds = this.riddenPitchBounds.clone();
 
         return toReturn;

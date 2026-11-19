@@ -32,7 +32,6 @@ public class UtahraptorBuilder extends RiftCreatureBuilder {
                         .setCanClimb()
                 )
                 .setDomestication(new CreatureDomesticationBuilder()
-                        .setTameFactor(0.75f)
                         .setInventorySize(9)
                         .setTamingMethod(RiftCreatureEnums.TamingMethod.TRANQ_THEN_FEED)
                         .setLevelupRate(RiftCreatureEnums.LevelupRate.FAST)

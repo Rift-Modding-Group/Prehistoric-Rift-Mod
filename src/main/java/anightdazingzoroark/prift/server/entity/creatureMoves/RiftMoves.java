@@ -59,6 +59,8 @@ public class RiftMoves {
         CreatureMoveRegistry.registerMove("metal_claw", new MetalClawBuilder(), new MetalClawBuilder.Rule());
         CreatureMoveRegistry.registerMove("kick", new KickBuilder(), new KickBuilder.Rule());
         CreatureMoveRegistry.registerMove("backstab", new BackstabBuilder(), new BackstabBuilder.Rule());
+        CreatureMoveRegistry.registerMove("root_spike", new RootSpikeBuilder(), new RootSpikeBuilder.Rule());
+        CreatureMoveRegistry.registerMove("hydro_pump", new HydroPumpBuilder(), new HydroPumpBuilder.Rule());
 
         registered = true;
     }

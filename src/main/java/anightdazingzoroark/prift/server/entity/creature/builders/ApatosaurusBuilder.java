@@ -3,8 +3,12 @@ package anightdazingzoroark.prift.server.entity.creature.builders;
 import anightdazingzoroark.prift.api.creature.Element;
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
 import anightdazingzoroark.prift.api.creature.builder.CreatureDomesticationBuilder;
+import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
+
+import java.util.List;
+import java.util.Map;
 
 public class ApatosaurusBuilder extends RiftCreatureBuilder {
     public ApatosaurusBuilder() {
@@ -17,6 +21,8 @@ public class ApatosaurusBuilder extends RiftCreatureBuilder {
                 .setScaleRangeForAge(0.35f, 2.25f)
                 .setSpawnEggColors(3160621, 16748800)
                 .setMainHitboxSize(4f, 3f)
+                .setHitboxInformation()
+                .setNavigation(new CreatureNavigationBuilder().setCanWalk())
                 .setMaxFallHeight(4)
                 .setFallCreatesImpact()
                 .setDaysUntilAdult(7)
@@ -45,7 +51,21 @@ public class ApatosaurusBuilder extends RiftCreatureBuilder {
                     return new MoveRuleBuilder.MoveCategory[]{MoveRuleBuilder.MoveCategory.MELEE, MoveRuleBuilder.MoveCategory.RANGED};
                 })
                 .setMaximumMoveSlots(3)
-                .setSpawnMoves("stomp", "root_trap", "hydro_pump")
-                .setMoveAnimations("stomp", "stomp");
+                .setSpawnMoves("stomp", "root_spike", "hydro_pump")
+                .setMoveAnimations("stomp", "stomp")
+                .setMoveAnimations("root_spike", "root_spike")
+                .setMoveAnimations("hydro_pump", "hydro_pump")
+                /*
+                .setLevelupMoves(Map.of(
+                        1, List.of("bide", "tail_whip", "leaf_dart", "belch"),
+                        3, List.of("vine_cage", "acid_water"), //note to self: acid water applies defense down to targets, vine cage encages targets in vines and prevent movement
+                        8, List.of("heavy_slam", "seed_bomb", "tremor", "bubble_bomb"), //note to self: creates a bubble that slowly hones towards the targets last position
+                        10, List.of("solar_beam", "sludge_wave", "petal_storm")
+                ))
+                 */
+                //---targeting---
+                .addDefaultFoodItemWhitelistEntry("leaves")
+                .setRetaliateWhenAttacked()
+                .setRememberPlayerAttacker();
     }
 }
