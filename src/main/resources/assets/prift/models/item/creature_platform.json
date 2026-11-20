@@ -1,0 +1,14 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "prift:items/creature_platform"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "prift:platform_attachment": 1
+      },
+      "model": "prift:item/creature_platform_equipped"
+    }
+  ]
+}

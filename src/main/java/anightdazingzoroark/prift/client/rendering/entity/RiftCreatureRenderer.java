@@ -1,6 +1,11 @@
 package anightdazingzoroark.prift.client.rendering.entity;
 
 import anightdazingzoroark.prift.api.util.MathUtil;
+import anightdazingzoroark.prift.api.creature.builder.CreatureDomesticationBuilder.PlatformSaddle;
+import anightdazingzoroark.prift.server.item.RiftItems;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import anightdazingzoroark.prift.client.rendering.block.CreatureBoxRangeRenderer;
 import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.RiddenAimArea;
 import anightdazingzoroark.riftlib.geo.GeoBone;
@@ -54,6 +59,41 @@ public class RiftCreatureRenderer extends GeoEntityLivingRenderer<RiftCreature> 
 
     public RiftCreatureRenderer(RenderManager renderManager) {
         super(renderManager, new CreatureModel());
+    }
+
+    @Override
+    @NotNull
+    public ItemStack getItemForLocator(@NotNull RiftCreature creature, @NotNull String locator, float partialTicks) {
+        if (!creature.isPlatformEquipped() || !creature.supportsPlatformSaddle()) return ItemStack.EMPTY;
+        if (!creature.getCreatureType().getDomestication().getPlatformSaddle().locator().equals(locator)) return ItemStack.EMPTY;
+        ItemStack platform = new ItemStack(RiftItems.CREATURE_PLATFORM);
+        platform.setTagCompound(new NBTTagCompound());
+        platform.getTagCompound().setBoolean("PlatformAttachment", true);
+        return platform;
+    }
+
+    @Override
+    @NotNull
+    public ItemCameraTransforms.TransformType getItemTransformTypeForLocator(
+            @NotNull RiftCreature creature, @NotNull String locator, @NotNull ItemStack stack, float partialTicks
+    ) {
+        return ItemCameraTransforms.TransformType.NONE;
+    }
+
+    @Override
+    @Nullable
+    public Matrix4f getItemRenderTransformForLocator(
+            @NotNull RiftCreature creature, @NotNull String locator, @NotNull ItemStack stack, float partialTicks
+    ) {
+        if (!creature.supportsPlatformSaddle()) return null;
+        PlatformSaddle platform = creature.getCreatureType().getDomestication().getPlatformSaddle();
+        Matrix4f transform = new Matrix4f();
+        transform.setIdentity();
+        // Keep the deck aligned with the block-sized floor as the creature grows.
+        transform.m00 = platform.initialX() * 16f / (28f * creature.scale());
+        transform.m11 = 2.25f / creature.scale();
+        transform.m22 = platform.initialZ() / (2f * creature.scale());
+        return transform;
     }
 
     @Override

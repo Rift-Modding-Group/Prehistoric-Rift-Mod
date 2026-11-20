@@ -17,6 +17,8 @@ public class CreatureDomesticationBuilder {
     private float tameFactor = 1f;
     private int inventorySize = 27;
     private String controllerRideLocator;
+    @Nullable
+    private PlatformSaddle platformSaddle;
 
     /**
      * set le taming method
@@ -87,6 +89,30 @@ public class CreatureDomesticationBuilder {
     @Nullable
     public String getControllerRideLocator() {
         return this.controllerRideLocator;
+    }
+
+
+    public CreatureDomesticationBuilder setPlatformSaddle(@NotNull String locator, int maxX, int maxY, int maxZ, int initialX, int initialY, int initialZ) {
+        this.checkIfLocked();
+        this.platformSaddle = new PlatformSaddle(locator, maxX, maxY, maxZ, initialX, initialY, initialZ);
+        return this;
+    }
+
+    @Nullable
+    public PlatformSaddle getPlatformSaddle() {
+        return this.platformSaddle;
+    }
+
+    public record PlatformSaddle(@NotNull String locator, int maxX, int maxY, int maxZ, int initialX, int initialY, int initialZ) {
+        public PlatformSaddle {
+            if (locator.isBlank()) throw new IllegalArgumentException("A platform saddle needs a locator");
+            if (maxX <= 0 || maxY <= 0 || maxY > 256 || maxZ <= 0
+                    || initialX <= 0 || initialY <= 0 || initialZ <= 0
+                    || initialX > maxX || initialY > maxY || initialZ > maxZ
+            ) {
+                throw new IllegalArgumentException("Platform dimensions must be positive and fit inside the maximum bounds");
+            }
+        }
     }
 
     /**

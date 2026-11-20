@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.Ridden
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenCrosshairType;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.RiddenAimArea;
+import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.RiddenAimTrace;
 import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.RiddenAimTarget;
 import anightdazingzoroark.prift.client.CameraHandler.CameraFrame;
 import anightdazingzoroark.prift.client.CameraHandler.RidingAimSettings;
@@ -40,7 +41,7 @@ public class RidingAimTargeting {
         if (settings.leap() || move != null && move.getRiddenAimingType() == RiddenAimingType.CHARGE) {
             aimEnd = frame.focusPosition();
         }
-        RayTraceResult blockHit = minecraft.world.rayTraceBlocks(aimStart, aimEnd, false, true, false);
+        RayTraceResult blockHit = RiddenAimTrace.trace(riddenCreature, aimStart, aimEnd);
         Vec3d aimPosition = blockHit == null ? aimEnd : blockHit.hitVec;
         double closestDistanceSquared = aimStart.squareDistanceTo(aimPosition);
         Entity aimedEntity = null;
@@ -87,9 +88,7 @@ public class RidingAimTargeting {
         //--block hit to break blocks--
         if (!settings.leap() && (move == null || move.getRiddenAimingType() != RiddenAimingType.CHARGE)
                 && (!settings.melee() || hasCrosshairTarget)) {
-            RayTraceResult creatureBlockHit = minecraft.world.rayTraceBlocks(
-                    creatureAimOrigin, aimPosition, false, true, false
-            );
+            RayTraceResult creatureBlockHit = RiddenAimTrace.trace(riddenCreature, creatureAimOrigin, aimPosition);
             if (creatureBlockHit != null
                     && creatureAimOrigin.squareDistanceTo(creatureBlockHit.hitVec) + 1E-6D < creatureAimOrigin.squareDistanceTo(aimPosition)
             ) {

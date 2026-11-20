@@ -5,6 +5,7 @@ import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.server.entity.creature.RiftCreatureRegistry;
 import anightdazingzoroark.prift.server.block.RiftBlocks;
 import anightdazingzoroark.prift.server.block.CreatureBoxBlock;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.block.Block;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -48,6 +49,7 @@ public class RiftItems {
     public static Item SMOKE_BOMB; //creates smoke in where it was created to make enemies forget you, allows for quick escape, requires gunpowder
     public static Item BLAZE_BOMB; //throw to make a small explosion, requires gunpowder + blaze powder
     public static Item RIFT_SHARD;
+    public static Item CREATURE_PLATFORM;
 
     public static Item getTributeItem(@NotNull String creatureName) {
         return TRIBUTE_ITEMS.get(creatureName);
@@ -88,6 +90,11 @@ public class RiftItems {
         STINK_BOMB = registerItem(new RiftStinkBomb(), "stink_bomb", true);
         POISON_BOMB = registerItem(new RiftPoisonBomb(), "poison_bomb", true);
         RIFT_SHARD = registerItem(new Item(), "rift_shard", true);
+        CREATURE_PLATFORM = registerItem(new Item().setMaxStackSize(1), "creature_platform", true);
+        CREATURE_PLATFORM.addPropertyOverride(
+                new ResourceLocation("prift", "platform_attachment"),
+                (stack, world, entity) -> stack.hasTagCompound() && stack.getTagCompound().getBoolean("PlatformAttachment") ? 1f : 0f
+        );
 
         for (Map.Entry<String, RiftCreatureBuilder> creatureEntry : RiftCreatureRegistry.getCreatureBuilders().entrySet()) {
             String creatureName = creatureEntry.getKey();

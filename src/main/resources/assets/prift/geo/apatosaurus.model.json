@@ -55,6 +55,9 @@
 					"name": "body",
 					"parent": "apatosaurus",
 					"pivot": [0, 15.5, 13.5],
+					"locators": {
+						"platformCenter": [0, 25, 4.5]
+					},
 					"cubes": [
 						{"origin": [-7, 10, -8], "size": [14, 14, 16], "uv": [0, 0]},
 						{"origin": [-7, 11, 8], "size": [14, 13, 11], "uv": [49, 25]}

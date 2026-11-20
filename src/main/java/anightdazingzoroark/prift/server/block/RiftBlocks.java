@@ -32,6 +32,7 @@ public class RiftBlocks {
     public static Block RIFT_SHARD_ORE;
     public static Block RIFT_SHARD_BLOCK;
     public static Block CREATURE_BOX;
+    public static Block PLATFORM_FLOOR;
 
     //-----registry stuff-----
     public static void registerBlocks() {
@@ -87,6 +88,7 @@ public class RiftBlocks {
 
         CREATURE_BOX = registerBlock(new CreatureBoxBlock(), "creature_box", true, true);
         CREATURE_BOX.setHarvestLevel("pickaxe", 1);
+        PLATFORM_FLOOR = registerBlock(new PlatformFloorBlock(), "platform_floor", false, false);
 
         blocksRegistered = true;
     }

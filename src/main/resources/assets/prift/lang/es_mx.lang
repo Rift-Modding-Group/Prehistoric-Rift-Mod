@@ -139,6 +139,7 @@ gui.prift.yes=Sí
 gui.prift.no=No
 gui.prift.creature_inventory=Inventario de criatura
 gui.prift.creature_gear=Equipo de criatura
+item.creature_platform.name=Plataforma de criatura
 gui.prift.creature_settings=Ajustes de criatura
 gui.prift.player_inventory=Inventario del jugador
 gui.prift.tame_targeting=Modo de ataque

@@ -139,6 +139,7 @@ gui.prift.yes=§2Yes
 gui.prift.no=§4No
 gui.prift.creature_inventory=Creature Inventory
 gui.prift.creature_gear=Creature Gear
+item.creature_platform.name=Creature Platform
 gui.prift.creature_settings=Creature Settings
 gui.prift.player_inventory=Player Inventory
 gui.prift.tame_targeting=Tame Targeting

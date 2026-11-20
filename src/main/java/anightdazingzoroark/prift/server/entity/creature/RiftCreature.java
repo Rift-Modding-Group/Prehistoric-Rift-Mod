@@ -72,12 +72,12 @@ import anightdazingzoroark.prift.api.creature.builder.RiftCreatureBuilder;
 import anightdazingzoroark.prift.api.util.MathUtil;
 import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.ProjectileAimUtil;
 import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.RiddenAimArea;
+import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.RiddenAimTrace;
 import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.RiddenAimTarget;
 import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.api.creature.builder.MoveRuleBuilder;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.DetectionRule;
 import anightdazingzoroark.prift.api.creature.builder.detectionRule.AnimatedHitboxDetectionRule;
-import anightdazingzoroark.prift.api.util.TriConsumer;
 import anightdazingzoroark.prift.util.RiftUtil;
 import anightdazingzoroark.riftlib.core.AnimatableRunValue;
 import anightdazingzoroark.riftlib.core.IAnimatable;
@@ -181,7 +181,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private static final DataParameter<Boolean> LEAPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> USE_BLOCK_BREAK = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> SLEEPING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
-    private static DataParameter<Boolean> TEMPORARY_ALLY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> TEMPORARY_ALLY = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Float> TAMING_PROGRESS = EntityDataManager.createKey(RiftCreature.class, DataSerializers.FLOAT);
     private static final DataParameter<Byte> TAME_TARGETING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
     private static final DataParameter<Byte> DEPLOYMENT_TYPE = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BYTE);
@@ -343,6 +343,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.creatureType = builder;
         CreatureDomesticationBuilder domestication = this.creatureType.getDomestication();
         this.creatureInventory.setSize(domestication == null ? 1 : domestication.getInventorySize());
+        this.creatureGear.setSize(this.supportsPlatformSaddle() ? 2 : 1);
         this.applyCreatureTypeSettings();
         this.animData = new CreatureAnimationData(this);
         this.dynamicRidePosList = new DynamicRidePosList(this, this.animData);
@@ -368,6 +369,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.dataManager.register(STAMINA_CURRENT, 0f);
         this.dataManager.register(STAGGERED, false);
         this.dataManager.register(CreatureGearInventoryHandler.SADDLED, false);
+        this.dataManager.register(CreatureGearInventoryHandler.PLATFORM_EQUIPPED, false);
         this.dataManager.register(CREATURE_MOVES, new CreatureMoveStorage());
         this.dataManager.register(CREATURE_STATS, new CreatureStatsStorage());
         this.dataManager.register(CREATURE_PHASE, "");
@@ -568,13 +570,15 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                 public boolean shouldExecute() {
                     return RiftCreature.this.getAttackTarget() == null && !RiftCreature.this.getIsSleeping()
                             && !RiftCreature.this.isBeingRidden() && !RiftCreature.this.isStaggered()
-                            && RiftCreature.this.getRNG().nextFloat() < 0.15f;
+                            && RiftCreature.this.getRNG().nextFloat() < 0.15f
+                            && !RiftCreature.this.isPlatformEquipped();
                 }
 
                 @Override
                 public boolean shouldContinueExecuting() {
                     return RiftCreature.this.getAttackTarget() == null && !RiftCreature.this.getIsSleeping()
                             && !RiftCreature.this.isBeingRidden() && !RiftCreature.this.isStaggered()
+                            && !RiftCreature.this.isPlatformEquipped()
                             && super.shouldContinueExecuting();
                 }
 
@@ -910,6 +914,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
             //tick the creature on tick lambda
             if (this.creatureType.getUpdateEffect() != null) this.creatureType.getUpdateEffect().accept(this);
+            if (net.minecraftforge.fml.common.Loader.isModLoaded("valkyrienskies")) CreaturePlatformUtils.tick(this);
         }
     }
 
@@ -2244,7 +2249,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             Vec3d eyes = this.getPositionEyes(1f);
             if (hitPosition == null || hitPosition.squareDistanceTo(eyes) > this.riddenMeleeAimReach * this.riddenMeleeAimReach) return false;
             for (Vec3d origin : List.of(eyes, this.riddenAimArea.origin())) {
-                RayTraceResult wall = this.world.rayTraceBlocks(origin, hitPosition, false, true, false);
+                RayTraceResult wall = RiddenAimTrace.trace(this, origin, hitPosition);
                 if (wall != null && origin.squareDistanceTo(wall.hitVec) + 1E-6D < origin.squareDistanceTo(hitPosition)) return false;
             }
             this.riddenAreaHitEntities.add(hitEntity.getEntityId());
@@ -2397,9 +2402,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         }
         RayTraceResult creatureBlockHit = null;
         if (!targetlessRanged && aimingType != RiddenAimingType.CHARGE) {
-            creatureBlockHit = this.world.rayTraceBlocks(
-                    creatureAimOrigin, aimTarget.position(), false, true, false
-            );
+            creatureBlockHit = RiddenAimTrace.trace(this, creatureAimOrigin, aimTarget.position());
         }
         if (creatureBlockHit != null
                 && creatureAimOrigin.squareDistanceTo(creatureBlockHit.hitVec) + 1E-6D < creatureAimOrigin.squareDistanceTo(aimTarget.position())
@@ -2998,6 +3001,14 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     public void setSaddled(boolean value) {
         this.dataManager.set(CreatureGearInventoryHandler.SADDLED, value);
+    }
+
+    public boolean isPlatformEquipped() {
+        return this.dataManager.get(CreatureGearInventoryHandler.PLATFORM_EQUIPPED);
+    }
+
+    public void setPlatformEquipped(boolean value) {
+        this.dataManager.set(CreatureGearInventoryHandler.PLATFORM_EQUIPPED, value);
     }
 
     @Override

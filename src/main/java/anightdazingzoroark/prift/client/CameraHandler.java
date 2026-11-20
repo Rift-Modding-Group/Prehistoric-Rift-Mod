@@ -2,6 +2,7 @@ package anightdazingzoroark.prift.client;
 
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenAimingType;
+import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.RiddenAimTrace;
 import anightdazingzoroark.prift.api.creature.builder.CreatureNavigationBuilder;
 import anightdazingzoroark.prift.api.creature.builder.CreatureMoveBuilder.RiddenCrosshairType;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
@@ -20,6 +21,8 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.fml.common.Loader;
+import valkyrienwarfare.api.RiftedValkyriumAPI;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.jetbrains.annotations.NotNull;
@@ -197,7 +200,12 @@ public class CameraHandler {
                     playerAnchor.y - offsetY + sampleY,
                     playerAnchor.z - offsetZ + sampleZ
             );
-            RayTraceResult collision = minecraft.world.rayTraceBlocks(sampleStart, sampleEnd);
+            RayTraceResult collision;
+            if (Loader.isModLoaded("valkyrienskies")) {
+                collision = RiftedValkyriumAPI.rayTraceBlocksIgnoringCarrierShip(minecraft.world, riddenCreature,
+                        sampleStart, sampleEnd, false, false, false);
+            }
+            else collision = minecraft.world.rayTraceBlocks(sampleStart, sampleEnd);
             if (collision != null) cameraDistance = Math.min(cameraDistance, playerAnchor.distanceTo(collision.hitVec));
         }
         Vec3d vanillaCameraPosition = playerAnchor.subtract(cameraLookVector.scale(cameraDistance));
@@ -304,7 +312,7 @@ public class CameraHandler {
                         ((sample >> 2 & 1) * 2 - 1) * 0.1D
                 );
                 Vec3d sampleStart = cameraAnchor.add(sampleOffset);
-                RayTraceResult collision = minecraft.world.rayTraceBlocks(sampleStart, cameraPosition.add(sampleOffset), false, true, false);
+                RayTraceResult collision = RiddenAimTrace.trace(riddenCreature, sampleStart, cameraPosition.add(sampleOffset));
                 if (collision != null) unobstructedDistance = Math.min(unobstructedDistance, sampleStart.distanceTo(collision.hitVec));
             }
             cameraPosition = cameraAnchor.add(cameraPath.scale(unobstructedDistance / desiredDistance));

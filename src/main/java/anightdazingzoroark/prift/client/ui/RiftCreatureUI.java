@@ -1,6 +1,9 @@
 package anightdazingzoroark.prift.client.ui;
 
 import anightdazingzoroark.prift.api.creature.RiftCreatureEnums;
+import anightdazingzoroark.prift.server.item.RiftItems;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.common.Loader;
 import anightdazingzoroark.prift.api.creature.builder.AbstractCreatureBuilder;
 import anightdazingzoroark.prift.client.ui.widgets.DynamicPageButton;
 import anightdazingzoroark.prift.client.ui.widgets.DynamicPagedWidget;
@@ -70,6 +73,12 @@ public class RiftCreatureUI {
         int inventoryColumns = Math.min(9, inventorySize);
         int inventoryRows = (inventorySize + inventoryColumns - 1) / inventoryColumns;
         boolean canBeRidden = creature.canBeRidden();
+        boolean supportsPlatform = creature.supportsPlatformSaddle() && Loader.isModLoaded("valkyrienskies");
+        if (supportsPlatform && creatureGear.getSlots() < 2) {
+            NBTTagCompound gear = creatureGear.serializeNBT();
+            gear.setInteger("Size", 2);
+            creatureGear.deserializeNBT(gear);
+        }
         syncManager.registerSlotGroup("creature_inventory", inventoryColumns);
         IntStream.range(0, inventorySize).forEach(index ->
                 syncManager.itemSlot(
@@ -96,6 +105,17 @@ public class RiftCreatureUI {
                             })
                             .slotGroup("creature_gear")
             );
+        }
+        if (supportsPlatform) {
+            syncManager.registerSlotGroup("creature_platform", 1);
+            syncManager.itemSlot("creature_platform", 0,
+                    new ModularSlot(creatureGear, 1)
+                            .accessibility(!data.isBoxed(), !data.isBoxed()).canDragInto(!data.isBoxed())
+                            .filter(stack -> stack.getItem() == RiftItems.CREATURE_PLATFORM)
+                            .changeListener((stack, onlyAmountChanged, client, init) -> {
+                                if (!client && !init) data.saveGear(creatureGear);
+                            })
+                            .slotGroup("creature_platform"));
         }
         syncManager.bindPlayerInventory(data.getPlayer());
 
@@ -194,12 +214,15 @@ public class RiftCreatureUI {
                                 .padding(7, 8)
                                 .crossAxisAlignment(Alignment.CrossAxis.START)
                                 .childPadding(2)
-                                .childIf(canBeRidden, () -> Flow.column()
+                                .childIf(canBeRidden || supportsPlatform, () -> Flow.column()
                                         .widthRel(1f)
                                         .coverChildrenHeight()
                                         .crossAxisAlignment(Alignment.CrossAxis.START)
                                         .child(IKey.lang("gui.prift.creature_gear").asWidget())
-                                        .child(new ItemSlot().syncHandler("creature_gear", 0))
+                                        .child(Flow.row().coverChildren()
+                                                .childIf(canBeRidden, () -> new ItemSlot().syncHandler("creature_gear", 0))
+                                                .childIf(supportsPlatform, () -> new ItemSlot().syncHandler("creature_platform", 0))
+                                        )
                                 )
                                 .child(IKey.lang("gui.prift.creature_inventory").asWidget())
                                 .child(SlotGroupWidget.builder()

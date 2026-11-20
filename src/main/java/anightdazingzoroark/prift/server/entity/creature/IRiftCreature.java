@@ -90,6 +90,11 @@ public interface IRiftCreature {
     }
 
     //-----boilerplate code incomin... omaga...-----
+    default boolean supportsPlatformSaddle() {
+        return this.getCreatureType() != null && this.getCreatureType().getDomestication() != null
+                && this.getCreatureType().getDomestication().getPlatformSaddle() != null;
+    }
+
     String getName();
     String getName(boolean showLevel);
     RiftCreatureBuilder getCreatureType();
