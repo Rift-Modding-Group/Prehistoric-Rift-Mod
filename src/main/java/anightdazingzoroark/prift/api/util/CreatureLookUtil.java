@@ -184,10 +184,8 @@ public class CreatureLookUtil {
         data.setVariable("ray_world_aim_yaw", MathHelper.wrapDegrees(worldYaw));
         data.setVariable("ray_aim_yaw", yaw);
         data.setVariable("ray_release_pitch", pitch);
-        double windupPitch;
-        if (pitch < 0D) windupPitch = Math.max(10D, pitch + 30D);
-        // Keep a visible upward windup even when a steep downward aim exceeds the recoil offset.
-        else windupPitch = Math.min(-10D, pitch - 30D);
+        // Keep the windup upward without reversing its pitch when aim crosses the horizon.
+        double windupPitch = Math.clamp(pitch - 30D, -90D, -10D);
         data.setVariable("ray_windup_pitch", windupPitch);
     }
 
