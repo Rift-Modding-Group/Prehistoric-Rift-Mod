@@ -10,6 +10,7 @@ import anightdazingzoroark.prift.client.rendering.block.CreatureBoxRangeRenderer
 import anightdazingzoroark.prift.server.entity.creatureMoves.aiming.RiddenAimArea;
 import anightdazingzoroark.riftlib.geo.GeoBone;
 import anightdazingzoroark.riftlib.geo.GeoCube;
+import anightdazingzoroark.riftlib.geo.GeoLocator;
 import anightdazingzoroark.riftlib.geo.GeoQuad;
 import anightdazingzoroark.riftlib.geo.GeoVertex;
 import anightdazingzoroark.riftlib.util.MatrixStack;
@@ -18,6 +19,7 @@ import anightdazingzoroark.prift.client.CameraHandler;
 import anightdazingzoroark.prift.server.entity.model.CreatureModel;
 import anightdazingzoroark.riftlib.geo.GeoModel;
 import anightdazingzoroark.riftlib.renderers.geo.GeoEntityLivingRenderer;
+import anightdazingzoroark.riftlib.renderers.geo.GeoLocatorItemRenderHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -35,6 +37,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.vecmath.Matrix4f;
+import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
 import java.nio.FloatBuffer;
 import java.nio.ByteBuffer;
@@ -48,6 +51,9 @@ import java.util.List;
  * */
 public class RiftCreatureRenderer extends GeoEntityLivingRenderer<RiftCreature> {
     public static float AIM_TRANSLUCENT_OPACITY = 0.5f;
+    private static boolean renderingAimAttachment;
+    @NotNull
+    private static final FloatBuffer transparentClearColor = BufferUtils.createFloatBuffer(4);
 
     @NotNull
     private FadeState aimVisibility = new FadeState(false, 1f);
@@ -87,9 +93,19 @@ public class RiftCreatureRenderer extends GeoEntityLivingRenderer<RiftCreature> 
     ) {
         if (!creature.supportsPlatformSaddle()) return null;
         PlatformSaddle platform = creature.getCreatureType().getDomestication().getPlatformSaddle();
+        GeoLocator modelLocator = this.modelProvider.getModel(creature).getAllLocators().stream()
+                .filter(candidate -> candidate.name.equals(locator)).findFirst().orElse(null);
+        if (modelLocator == null) return null;
+        Matrix4f inverseLocator = GeoLocatorItemRenderHelper.getLocatorTransform(modelLocator);
+        if (inverseLocator == null) return null;
+        inverseLocator.invert();
+
+        Vector3f renderOffset = new Vector3f(0f, -0.01f, 0f);
+        inverseLocator.transform(renderOffset);
         Matrix4f transform = new Matrix4f();
         transform.setIdentity();
-        // Keep the deck aligned with the block-sized floor as the creature grows.
+        transform.setTranslation(renderOffset);
+
         transform.m00 = platform.initialX() * 16f / (28f * creature.scale());
         transform.m11 = 2.25f / creature.scale();
         transform.m22 = platform.initialZ() / (2f * creature.scale());
@@ -98,7 +114,6 @@ public class RiftCreatureRenderer extends GeoEntityLivingRenderer<RiftCreature> 
 
     @Override
     public void doRender(@NotNull RiftCreature creature, double x, double y, double z, float entityYaw, float partialTicks) {
-        // RiftLibrary draws the model itself, so enable vanilla's solid outline color around that draw.
         boolean outlines = this.renderOutlines;
         if (outlines) {
             int color = this.getTeamColor(creature);
@@ -267,6 +282,44 @@ public class RiftCreatureRenderer extends GeoEntityLivingRenderer<RiftCreature> 
         return new FadeState(false, 1f);
     }
 
+    @NotNull
+    public static FadeState getPlatformAimVisibility(@NotNull EntityPlayer player) {
+        if (player == Minecraft.getMinecraft().player && player.getRidingEntity() instanceof RiftCreature creature
+                && creature.getControllingPassenger() == player && creature.isPlatformEquipped() && creature.isRiddenAiming()
+        ) {
+            return new FadeState(true, Math.clamp(AIM_TRANSLUCENT_OPACITY, 0f, 1f));
+        }
+        return new FadeState(false, 1f);
+    }
+
+    @Nullable
+    public static RiderPass renderAimAttachment(@Nullable RiderPass previous, @NotNull FadeState visibility, @NotNull Runnable draw) {
+        if (visibility.opacity() >= 1f) {
+            draw.run();
+            return previous;
+        }
+        RiderPass pass = RiderPass.capture(previous, false);
+        if (pass == null || pass.depth().samples() > 0) {
+            draw.run();
+            if (pass != null) pass.composite(visibility.opacity(), visibility.fading());
+            return pass;
+        }
+        // Draw against a private depth buffer so neither background color nor depth needs restoring.
+        int framebuffer = GL11.glGetInteger(GL30.GL_DRAW_FRAMEBUFFER_BINDING);
+        GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, pass.framebuffer());
+        boolean previousRendering = renderingAimAttachment;
+        renderingAimAttachment = true;
+        draw.run();
+        renderingAimAttachment = previousRendering;
+        GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, framebuffer);
+        pass.composite(visibility.opacity(), false, true);
+        return pass;
+    }
+
+    public static boolean isRenderingAimAttachment() {
+        return renderingAimAttachment;
+    }
+
     public record DepthPass(int framebuffer, int depthBuffer, int width, int height, int format, int samples) {
         @NotNull
         public static DepthPass capture(@Nullable DepthPass previous) {
@@ -358,6 +411,11 @@ public class RiftCreatureRenderer extends GeoEntityLivingRenderer<RiftCreature> 
     public record RiderPass(int framebuffer, int texture, int width, int height, @NotNull DepthPass depth) {
         @Nullable
         public static RiderPass capture(@Nullable RiderPass previous) {
+            return capture(previous, true);
+        }
+
+        @Nullable
+        public static RiderPass capture(@Nullable RiderPass previous, boolean captureBackground) {
             if (!(GL.getCapabilities().OpenGL30 || GL.getCapabilities().GL_ARB_framebuffer_object)
                     || GL11.glGetInteger(GL30.GL_DRAW_FRAMEBUFFER_BINDING) == 0
                     || GL30.glGetFramebufferAttachmentParameteri(GL30.GL_DRAW_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT,
@@ -395,10 +453,18 @@ public class RiftCreatureRenderer extends GeoEntityLivingRenderer<RiftCreature> 
             else pass = new RiderPass(pass.framebuffer(), pass.texture(), pass.width(), pass.height(), depth);
             GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, drawFramebuffer);
             GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, pass.framebuffer());
-            GL30.glBlitFramebuffer(
-                    0, 0, pass.width(), pass.height(), 0, 0, pass.width(), pass.height(),
-                    GL11.GL_COLOR_BUFFER_BIT, GL11.GL_NEAREST
-            );
+            // Multisampled depth needs the existing resolve path; normal attachments draw directly here.
+            if (captureBackground || depth.samples() > 0) {
+                GL30.glFramebufferRenderbuffer(GL30.GL_DRAW_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, GL30.GL_RENDERBUFFER, 0);
+                GL30.glBlitFramebuffer(
+                        0, 0, pass.width(), pass.height(), 0, 0, pass.width(), pass.height(),
+                        GL11.GL_COLOR_BUFFER_BIT, GL11.GL_NEAREST
+                );
+            }
+            else {
+                GL30.glFramebufferRenderbuffer(GL30.GL_DRAW_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, GL30.GL_RENDERBUFFER, depth.depthBuffer());
+                GL30.glClearBufferfv(GL11.GL_COLOR, 0, transparentClearColor);
+            }
             GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, drawFramebuffer);
             GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, readFramebuffer);
             GlStateManager.bindTexture(boundTexture);
@@ -406,6 +472,10 @@ public class RiftCreatureRenderer extends GeoEntityLivingRenderer<RiftCreature> 
         }
 
         public void composite(float opacity, boolean revealEntitiesBehind) {
+            this.composite(opacity, revealEntitiesBehind, false);
+        }
+
+        public void composite(float opacity, boolean revealEntitiesBehind, boolean foreground) {
             //fade the completed player draw, including armor, skin overlays and held items.
             //their renderers may change blending and color independently of the body.
             boolean blending = GL11.glIsEnabled(GL11.GL_BLEND);
@@ -441,7 +511,7 @@ public class RiftCreatureRenderer extends GeoEntityLivingRenderer<RiftCreature> 
             GL11C.glGetFloatv(GL11.GL_CURRENT_TEXTURE_COORDS, textureCoordinates);
             GlStateManager.enableTexture2D();
             GlStateManager.bindTexture(this.texture());
-            GlStateManager.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_REPLACE);
+            GlStateManager.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, foreground ? GL11.GL_MODULATE : GL11.GL_REPLACE);
             GlStateManager.disableDepth();
             GlStateManager.depthMask(false);
             GlStateManager.disableAlpha();
@@ -449,12 +519,22 @@ public class RiftCreatureRenderer extends GeoEntityLivingRenderer<RiftCreature> 
             GlStateManager.disableFog();
             GlStateManager.disableCull();
             GlStateManager.enableBlend();
-            GL14.glBlendColor(0f, 0f, 0f, 1f - Math.clamp(opacity, 0f, 1f));
-            GlStateManager.tryBlendFuncSeparate(
-                    GlStateManager.SourceFactor.CONSTANT_ALPHA,
-                    GlStateManager.DestFactor.ONE_MINUS_CONSTANT_ALPHA,
-                    GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE
-            );
+            if (foreground) {
+                float alpha = Math.clamp(opacity, 0f, 1f);
+                GlStateManager.color(alpha, alpha, alpha, alpha);
+                GlStateManager.tryBlendFuncSeparate(
+                        GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                        GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE
+                );
+            }
+            else {
+                GL14.glBlendColor(0f, 0f, 0f, 1f - Math.clamp(opacity, 0f, 1f));
+                GlStateManager.tryBlendFuncSeparate(
+                        GlStateManager.SourceFactor.CONSTANT_ALPHA,
+                        GlStateManager.DestFactor.ONE_MINUS_CONSTANT_ALPHA,
+                        GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE
+                );
+            }
             GlStateManager.viewport(0, 0, this.width(), this.height());
             GlStateManager.matrixMode(GL11.GL_TEXTURE);
             GlStateManager.pushMatrix();

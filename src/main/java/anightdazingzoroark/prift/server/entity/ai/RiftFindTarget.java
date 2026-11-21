@@ -104,7 +104,7 @@ public class RiftFindTarget extends EntityAITarget {
     @Override
     protected boolean isSuitableTarget(@Nullable EntityLivingBase target, boolean includeInvincibles) {
         if (target == null) return false;
-        if (this.creature.shouldFleeFrom(target)) return false;
+        if (this.creature.shouldFleeFrom(target) || this.creature.isEntityOnPlatform(target)) return false;
 
         if (this.creature.isRelatedToEntity(target)) return false;
 

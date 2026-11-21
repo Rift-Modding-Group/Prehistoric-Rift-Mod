@@ -81,6 +81,7 @@ public class RiftHurtByTarget extends EntityAIHurtByTarget {
     @Override
     protected boolean isSuitableTarget(@Nullable EntityLivingBase target, boolean includeInvincibles) {
         if (target == null) return false;
+        if (this.creature.isEntityOnPlatform(target)) return false;
         return EntityAITarget.isSuitableTarget(this.taskOwner, target, includeInvincibles, !this.creature.isInHerd())
                 && this.taskOwner.isWithinHomeDistanceFromPosition(new BlockPos(target));
     }

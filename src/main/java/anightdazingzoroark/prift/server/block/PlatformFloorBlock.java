@@ -12,7 +12,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
-/** A solid building surface; the creature's platform supplies its appearance. */
 public class PlatformFloorBlock extends Block {
     public PlatformFloorBlock() {
         super(Material.BARRIER);
@@ -34,14 +33,14 @@ public class PlatformFloorBlock extends Block {
     }
 
     @Override
-    public boolean removedByPlayer(@NotNull IBlockState state, @NotNull World world, @NotNull BlockPos pos,
-                                   @NotNull EntityPlayer player, boolean willHarvest) {
+    public boolean removedByPlayer(
+            @NotNull IBlockState state, @NotNull World world, @NotNull BlockPos pos, @NotNull EntityPlayer player, boolean willHarvest
+    ) {
         return false;
     }
 
     @Override
-    public boolean canEntityDestroy(@NotNull IBlockState state, @NotNull IBlockAccess world,
-                                    @NotNull BlockPos pos, @NotNull Entity entity) {
+    public boolean canEntityDestroy(@NotNull IBlockState state, @NotNull IBlockAccess world, @NotNull BlockPos pos, @NotNull Entity entity) {
         return false;
     }
 

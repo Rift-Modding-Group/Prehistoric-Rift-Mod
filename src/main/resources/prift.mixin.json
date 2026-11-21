@@ -5,7 +5,11 @@
   "refmap": "prift.refmap.json",
   "target": "@env(DEFAULT)",
   "client": [
-    "RiftMixinEntityRenderer"
+    "RiftMixinEntityRenderer",
+    "RiftMixinPlatformItemFade",
+    "RiftMixinPlatformBlend",
+    "RiftMixinPlatformShipFade",
+    "RiftMixinPlatformTileFade"
   ],
   "mixins": [
     "RiftMixinAllowRiddenCreatureDamageToDummy",

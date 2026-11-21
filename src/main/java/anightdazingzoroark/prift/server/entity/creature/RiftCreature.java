@@ -6,6 +6,7 @@ import anightdazingzoroark.prift.api.creature.AttackGeometry.LocatorAttackGeomet
 import anightdazingzoroark.prift.api.creature.CreatureMoveRegistry.MoveDefinition;
 import anightdazingzoroark.prift.server.message.RiftCreateMoveGraphicMessage;
 import anightdazingzoroark.prift.server.message.RiftMessages;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import anightdazingzoroark.prift.api.util.CreatureLookUtil;
 
@@ -141,6 +142,7 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Quaternionf;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import valkyrienwarfare.api.RiftedValkyriumAPI;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -191,6 +193,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
     private static final DataParameter<Integer> SPRINT_COOLDOWN = EntityDataManager.createKey(RiftCreature.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> RIDDEN_AIMING = EntityDataManager.createKey(RiftCreature.class, DataSerializers.BOOLEAN);
     private static final DataParameter<RushState> RUSH_STATE = EntityDataManager.createKey(RiftCreature.class, RiftDataSerializers.RUSH_STATE);
+    private static final DataParameter<com.google.common.base.Optional<UUID>> PLATFORM_SHIP_ID = EntityDataManager.createKey(RiftCreature.class, DataSerializers.OPTIONAL_UNIQUE_ID);
 
     //--custom property values, which can be called and manipulated from a creature builder--
     @NotNull
@@ -370,6 +373,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         this.dataManager.register(STAGGERED, false);
         this.dataManager.register(CreatureGearInventoryHandler.SADDLED, false);
         this.dataManager.register(CreatureGearInventoryHandler.PLATFORM_EQUIPPED, false);
+        this.dataManager.register(PLATFORM_SHIP_ID, com.google.common.base.Optional.absent());
         this.dataManager.register(CREATURE_MOVES, new CreatureMoveStorage());
         this.dataManager.register(CREATURE_STATS, new CreatureStatsStorage());
         this.dataManager.register(CREATURE_PHASE, "");
@@ -529,6 +533,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                     return !RiftCreature.this.getIsSleeping() && !RiftCreature.this.isBeingRidden()
                             && RiftCreature.this.getDeploymentType() != RiftCreatureEnums.CreatureDeployment.BASE
                             && RiftCreature.this.getAttackTarget() == null && !RiftCreature.this.isStaggered()
+                            && !RiftCreature.this.isEntityOnPlatform(RiftCreature.this.getOwner())
                             && super.shouldExecute();
                 }
 
@@ -537,6 +542,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
                     return !RiftCreature.this.getIsSleeping() && !RiftCreature.this.isBeingRidden()
                             && RiftCreature.this.getDeploymentType() != RiftCreatureEnums.CreatureDeployment.BASE
                             && RiftCreature.this.getAttackTarget() == null && !RiftCreature.this.isStaggered()
+                            && !RiftCreature.this.isEntityOnPlatform(RiftCreature.this.getOwner())
                             && super.shouldContinueExecuting();
                 }
             });
@@ -673,8 +679,8 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
             //tick recently hit timer
             if (this.recentlyHitTimer >= 0) this.recentlyHitTimer--;
 
-            //creatures must drop threats that they are configured to flee
-            if (this.shouldFleeFrom(this.getAttackTarget())) this.setAttackTarget(null);
+            //drop threats configured for fleeing and entities aboard this creature's platform
+            if (this.shouldFleeFrom(this.getAttackTarget()) || this.isEntityOnPlatform(this.getAttackTarget())) this.setAttackTarget(null);
 
             //tick fall impacts
             if (this.getIsSleeping() || !this.creatureType.getFallCreatesImpact() || this.bodyTouchingLiquid()) {
@@ -1270,7 +1276,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public boolean shouldAttackEntity(EntityLivingBase target, EntityLivingBase owner) {
-        return target != null && !this.isRelatedToEntity(target);
+        return target != null && !this.isRelatedToEntity(target) && !this.isEntityOnPlatform(target);
     }
 
     public boolean shouldFleeFrom(@Nullable EntityLivingBase entity) {
@@ -1280,7 +1286,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     @Override
     public void setAttackTarget(@Nullable EntityLivingBase target) {
-        if (target != null && (this.getIsSleeping() || this.isBeingRidden() || this.shouldFleeFrom(target))) return;
+        if (target != null && (this.getIsSleeping() || this.isBeingRidden() || this.shouldFleeFrom(target) || this.isEntityOnPlatform(target))) return;
         boolean targetChanged = target != this.getAttackTarget();
         if (targetChanged) this.unableToPathToTarget = false;
         super.setAttackTarget(target);
@@ -2491,7 +2497,7 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
         }
     }
 
-    private boolean isRiddenAiming() {
+    public boolean isRiddenAiming() {
         return this.dataManager.get(RIDDEN_AIMING);
     }
 
@@ -3009,6 +3015,25 @@ public class RiftCreature extends EntityTameable implements IAnimatable<Animatio
 
     public void setPlatformEquipped(boolean value) {
         this.dataManager.set(CreatureGearInventoryHandler.PLATFORM_EQUIPPED, value);
+    }
+
+    @Nullable
+    public UUID getPlatformShipId() {
+        return this.dataManager.get(PLATFORM_SHIP_ID).orNull();
+    }
+
+    public void setPlatformShipId(@Nullable UUID shipId) {
+        this.dataManager.set(PLATFORM_SHIP_ID, com.google.common.base.Optional.fromNullable(shipId));
+    }
+
+    public boolean isEntityOnPlatform(@Nullable Entity entity) {
+        if (entity == null || entity.world != this.world || !this.supportsPlatformSaddle() || !this.isPlatformEquipped() || !Loader.isModLoaded("valkyrienskies")) {
+            return false;
+        }
+
+        UUID shipId = this.getPlatformShipId();
+        return shipId != null && RiftedValkyriumAPI.getActiveShipOfEntity(entity)
+                .filter(ship -> shipId.equals(ship.getUuid())).isPresent();
     }
 
     @Override

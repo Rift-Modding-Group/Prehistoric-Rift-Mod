@@ -31,7 +31,7 @@ public class ApatosaurusBuilder extends RiftCreatureBuilder {
                         .setTamingMethod(RiftCreatureEnums.TamingMethod.TRANQ_THEN_FEED)
                         .setLevelupRate(RiftCreatureEnums.LevelupRate.VERY_SLOW)
                         .setControllerRideLocator("controllerPos")
-                        .setPlatformSaddle("platformCenter", 9, 7, 11, 4, 1, 5)
+                        .setPlatformSaddle("platformCenter", 10, 7, 11, 4, 1, 5)
                 )
                 .setRetaliateWhenAttacked()
                 .setFleeBehavior(

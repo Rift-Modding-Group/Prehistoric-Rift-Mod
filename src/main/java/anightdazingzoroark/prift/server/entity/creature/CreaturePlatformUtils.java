@@ -41,6 +41,7 @@ public class CreaturePlatformUtils {
         NBTTagCompound state = creature.getEntityData().getCompoundTag("PlatformSaddle");
         creature.getEntityData().setTag("PlatformSaddle", state);
         UUID shipId = state.hasUniqueId("Ship") ? state.getUniqueId("Ship") : null;
+        creature.setPlatformShipId(shipId);
         if (shipId != null && state.getInteger("Dimension") != creature.dimension) return;
 
         IShipData ship = null;
@@ -51,8 +52,8 @@ public class CreaturePlatformUtils {
             if (state.hasKey("Assembly")) {
                 BlockPos seed = BlockPos.fromLong(state.getLong("Assembly"));
                 Iterable<BlockPos> blockRange = BlockPos.getAllInBox(
-                        seed.add(-platform.initialX() / 2, -platform.initialY() / 2, -platform.initialZ() / 2),
-                        seed.add((platform.initialX() - 1) / 2, (platform.initialY() - 1) / 2, (platform.initialZ() - 1) / 2)
+                        seed.add(-platform.initialX() / 2, 0, -platform.initialZ() / 2),
+                        seed.add((platform.initialX() - 1) / 2, platform.initialY() - 1, (platform.initialZ() - 1) / 2)
                 );
 
                 for (BlockPos pos : blockRange) {
@@ -62,6 +63,7 @@ public class CreaturePlatformUtils {
             state.removeTag("ShipMost");
             state.removeTag("ShipLeast");
             state.removeTag("Assembly");
+            creature.setPlatformShipId(null);
         }
 
         if (ship != null && !creature.isPlatformEquipped()) {
@@ -77,16 +79,18 @@ public class CreaturePlatformUtils {
             state.removeTag("ShipMost");
             state.removeTag("ShipLeast");
             state.removeTag("Assembly");
+            creature.setPlatformShipId(null);
             return;
         }
 
         if (!creature.isPlatformEquipped() || !creature.isTamed()) return;
         Vec3d center = CreatureLookUtil.getSourceLocatorPosition(creature, platform.locator(), 1f);
         if (center == null) return;
+        // Align the floor's top center with the locator using the bottom-anchored build bounds.
         Vec3d offset = new Vec3d(
-                -(platform.initialX() % 2) / 2D,
-                -platform.maxY() / 2D - (platform.initialY() + 1) / 2D,
-                -(platform.initialZ() % 2) / 2D
+                (platform.maxX() % 2 - platform.initialX() % 2) / 2D,
+                -platform.initialY(),
+                (platform.maxZ() % 2 - platform.initialZ() % 2) / 2D
         );
         if (ship != null) {
             RiftedValkyriumAPI.linkShipToEntity(world, ship, creature, offset, ShipEntityDeathBehavior.UNLOAD, platform.locator());
@@ -94,9 +98,8 @@ public class CreaturePlatformUtils {
             return;
         }
 
-        // A clear staging floor prevents assembly from taking or replacing terrain or another ship's blocks.
-        BlockPos seed = new BlockPos(center.subtract(0D, (platform.initialY() + 1) / 2D, 0D));
-        BlockPos min = seed.add(-platform.initialX() / 2, -platform.initialY() / 2, -platform.initialZ() / 2);
+        BlockPos seed = new BlockPos(center.subtract(0D, platform.initialY(), 0D));
+        BlockPos min = seed.add(-platform.initialX() / 2, 0, -platform.initialZ() / 2);
         BlockPos max = min.add(platform.initialX() - 1, platform.initialY() - 1, platform.initialZ() - 1);
         AxisAlignedBB floorBounds = new AxisAlignedBB(min, max.add(1, 1, 1));
         if (min.getY() < 0 || max.getY() >= world.getHeight() || !world.isAreaLoaded(min, max)) return;
@@ -115,9 +118,12 @@ public class CreaturePlatformUtils {
                             .setShipBlockBlacklist((candidateWorld, pos, block) -> !floorBounds.contains(
                                     new Vec3d(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D))
                                     || block.getBlock() != RiftBlocks.PLATFORM_FLOOR)
+                            .setShipBlockAssembledBlacklist((candidateWorld, pos, block) -> block.getBlock() == RiftBlocks.CREATURE_BOX)
                             .setEntityPeggedTo(creature, offset, ShipEntityDeathBehavior.UNLOAD, platform.locator())
+                            .setDontSetSpawn()
             );
             state.setUniqueId("Ship", ship.getUuid());
+            creature.setPlatformShipId(ship.getUuid());
             state.setInteger("Dimension", creature.dimension);
             state.setLong("Assembly", seed.toLong());
             state.setLong("Requested", world.getTotalWorldTime());
@@ -235,5 +241,4 @@ public class CreaturePlatformUtils {
         }
         return localBounds;
     }
-
 }
